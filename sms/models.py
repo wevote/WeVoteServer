@@ -195,7 +195,8 @@ class SMSManager(models.Manager):
     def __unicode__(self):
         return "SMSManager"
 
-    def clear_secret_key_from_sms_phone_number(self, sms_secret_key):
+    @staticmethod
+    def clear_secret_key_from_sms_phone_number(sms_secret_key):
         """
 
         :param sms_secret_key:
@@ -240,8 +241,11 @@ class SMSManager(models.Manager):
     def create_sms_phone_number_for_voter(self, normalized_sms_phone_number, voter, sms_ownership_is_verified=False):
         return self.create_sms_phone_number(normalized_sms_phone_number, voter.we_vote_id, sms_ownership_is_verified)
 
+    @staticmethod
     def create_sms_phone_number(
-            self, normalized_sms_phone_number, voter_we_vote_id='', sms_ownership_is_verified=False):
+            normalized_sms_phone_number,
+            voter_we_vote_id='',
+            sms_ownership_is_verified=False):
         secret_key = generate_random_string(SMS_SECRET_KEY_LENGTH)
         normalized_sms_phone_number = str(normalized_sms_phone_number)
         normalized_sms_phone_number = normalized_sms_phone_number.strip()
@@ -282,10 +286,14 @@ class SMSManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_sms_description(
-            self, sender_voter_we_vote_id, sender_voter_sms,
+            sender_voter_we_vote_id,
+            sender_voter_sms,
             recipient_voter_we_vote_id='',
-            recipient_sms_we_vote_id='', recipient_voter_sms='', template_variables_in_json='',
+            recipient_sms_we_vote_id='',
+            recipient_voter_sms='',
+            template_variables_in_json='',
             kind_of_sms_template=''):
         status = ""
         if not positive_value_exists(kind_of_sms_template):
@@ -318,8 +326,11 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_sms_phone_number(self, normalized_sms_phone_number, sms_phone_number_we_vote_id='',
-                                  voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_sms_phone_number(
+            normalized_sms_phone_number,
+            sms_phone_number_we_vote_id='',
+            voter_we_vote_id=''):
         """
         There are cases where we store multiple entries for the same normalized_sms_phone_number (prior to an sms
         address being verified)
@@ -416,7 +427,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_we_vote_id_from_normalized_sms_phone_number(self, normalized_sms_phone_number):
+    @staticmethod
+    def retrieve_voter_we_vote_id_from_normalized_sms_phone_number(normalized_sms_phone_number):
         success = True
         status = ''
         voter_we_vote_id_found = False
@@ -446,7 +458,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_sms_phone_number_from_secret_key(self, sms_secret_key):
+    @staticmethod
+    def retrieve_sms_phone_number_from_secret_key(sms_secret_key):
         """
         :param sms_secret_key:
         :return:
@@ -492,7 +505,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def verify_sms_phone_number_from_secret_key(self, sms_secret_key):
+    @staticmethod
+    def verify_sms_phone_number_from_secret_key(sms_secret_key):
         """
 
         :param sms_secret_key:
@@ -549,7 +563,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_sms_phone_number_list(self, voter_we_vote_id):
+    @staticmethod
+    def retrieve_voter_sms_phone_number_list(voter_we_vote_id):
         """
 
         :param voter_we_vote_id:
@@ -606,8 +621,11 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_primary_sms_with_ownership_verified(self, voter_we_vote_id='', normalized_sms_phone_number='',
-                                                     sms_we_vote_id=''):
+    @staticmethod
+    def retrieve_primary_sms_with_ownership_verified(
+            voter_we_vote_id='',
+            normalized_sms_phone_number='',
+            sms_we_vote_id=''):
         sms_phone_number_list = []
         sms_phone_number_list_found = False
         sms_phone_number = SMSPhoneNumber()
@@ -758,7 +776,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def merge_two_duplicate_sms(self, sms_phone_number_object1, sms_phone_number_object2):
+    @staticmethod
+    def merge_two_duplicate_sms(sms_phone_number_object1, sms_phone_number_object2):
         """
         We assume that the checking to see if these are duplicates has been done outside of this function.
         We will keep sms_phone_number_object1 and eliminate sms_phone_number_object2.
@@ -828,7 +847,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def retrieve_scheduled_sms_list_from_send_status(self, sender_voter_we_vote_id, send_status):
+    @staticmethod
+    def retrieve_scheduled_sms_list_from_send_status(sender_voter_we_vote_id, send_status):
         scheduled_sms_list = []
         status = ""
         try:
@@ -866,7 +886,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def update_scheduled_sms_with_new_send_status(self, sms_scheduled_object, send_status):
+    @staticmethod
+    def update_scheduled_sms_with_new_send_status(sms_scheduled_object, send_status):
         try:
             sms_scheduled_object.send_status = send_status
             sms_scheduled_object.save()
@@ -874,7 +895,8 @@ class SMSManager(models.Manager):
         except Exception as e:
             return sms_scheduled_object
 
-    def schedule_sms(self, sms_description, message_text, send_status=TO_BE_PROCESSED):
+    @staticmethod
+    def schedule_sms(sms_description, message_text, send_status=TO_BE_PROCESSED):
         status = ''
         try:
             sms_scheduled = SMSScheduled.objects.create(
@@ -907,7 +929,8 @@ class SMSManager(models.Manager):
         }
         return results
 
-    def send_scheduled_sms(self, sms_scheduled):
+    @staticmethod
+    def send_scheduled_sms(sms_scheduled):
         success = True
         status = ""
 
@@ -945,7 +968,8 @@ class SMSManager(models.Manager):
         else:
             return ""
 
-    def update_sms_phone_number_as_verified(self, sms_phone_number):
+    @staticmethod
+    def update_sms_phone_number_as_verified(sms_phone_number):
         try:
             sms_phone_number.sms_ownership_is_verified = True
             sms_phone_number.save()
