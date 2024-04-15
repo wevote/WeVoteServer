@@ -7,7 +7,7 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from retrieve_tables.controllers import retrieve_sql_tables_as_csv, fast_load_status_retrieve
+from retrieve_tables.controllers import retrieve_sql_tables_as_csv, fast_load_status_retrieve, get_total_row_count
 from wevote_functions.functions import get_voter_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -28,6 +28,14 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
 
     json_data = retrieve_sql_tables_as_csv(voter_device_id, table, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_sql_tables_row_count(request):  # retrieveSQLTablesRowCount
+    json_data = {
+        'rowCount': str(get_total_row_count())
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 def fast_load_status_retrieve_view(request):   # fastLoadStatusRetrieve
     return fast_load_status_retrieve(request)
