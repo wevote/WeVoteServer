@@ -35,7 +35,7 @@ from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
 from representative.models import Representative, RepresentativeManager
 from twitter.functions import convert_twitter_user_object_data_to_we_vote_dict, expand_twitter_public_metrics, \
-    expand_twitter_entities, retrieve_twitter_user_info
+    expand_twitter_entities, is_valid_twitter_handle_format, retrieve_twitter_user_info
 from twitter.models import TwitterApiCounterManager, TwitterLinkPossibility, TwitterUserManager, \
     create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import VoterManager
@@ -2425,9 +2425,18 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         use_cached_data_if_within_x_days=30,
     )
     status += results['status']
+    twitter_handles_not_valid_list = []
     twitter_handles_to_retrieve_list = results['twitter_handles_to_retrieve_list']
     if len(twitter_handles_to_retrieve_list) > 0:
         status += "TWITTER_HANDLES_TO_REQUEST: " + str(len(twitter_handles_to_retrieve_list)) + " "
+        # Check to make sure these handles all have a valid format
+        twitter_handles_to_retrieve_list_modified = []
+        for one_twitter_handle in twitter_handles_to_retrieve_list:
+            if is_valid_twitter_handle_format(one_twitter_handle):
+                twitter_handles_to_retrieve_list_modified.append(one_twitter_handle)
+            else:
+                twitter_handles_not_valid_list.append(one_twitter_handle)
+        twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list_modified
         if len(twitter_handles_to_retrieve_list) > 100:
             twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list[:100]
             status += "(REQUEST_LIMITED_TO_100) "
@@ -2456,10 +2465,11 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
     if success:
         status += "TWITTER_HANDLES_RETRIEVED "
     results = {
+        'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
         'success':                              success,
         'status':                               status,
         'twitter_handles_added':                twitter_user_created_count,
-        'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
+        'twitter_handles_not_valid_list':       twitter_handles_not_valid_list,
     }
     return results
 
