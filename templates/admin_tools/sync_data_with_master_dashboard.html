@@ -293,15 +293,16 @@
         if (current_record === 0) {
             return 'Save off estimated duration is 40 seconds';
         }
-        const currentDate = new Date();
-        const t1 = currentDate.getTime();
+        const t1 = new Date().getTime();
         const dt = t1 - t0;
         const percentComplete = current_record / total_records;
+        console.log('percent complete: ', percentComplete);
         const totalEstimate = dt / percentComplete;
-        const timeLeftMs = Math.trunc(totalEstimate - dt);
-        const timeLeftSec = Math.trunc(timeLeftMs /1000);
+        console.log('totalEstimate: ', totalEstimate);
+        const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
         const secRemainder = timeLeftSec - (60 * timeLeftMin)
+        console.log(`Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`);
         return `Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`;
 
     }
