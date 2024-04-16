@@ -238,7 +238,7 @@ def save_off_database():
 
 def update_fast_load_db(host, voter_device_id, table_name, additional_records):
     try:
-        response = requests.get(host + 'apis/v1/fastLoadStatusUpdate/',
+        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
                                 verify=False,
                                 params={'voter_device_id': voter_device_id,
                                         'table': table_name,
