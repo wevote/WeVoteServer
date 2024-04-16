@@ -126,6 +126,8 @@ urlpatterns = [
               name='facebookFriendsActionView'),
       re_path(r'^fastLoadStatusRetrieve/', views_retrieve_tables.fast_load_status_retrieve_view,
               name='fastLoadStatusRetrieve'),
+      re_path(r'^fastLoadStatusUpdate/', views_retrieve_tables.fast_load_status_update_view,
+              name='fastLoadStatusUpdate'),
       re_path(r'retrieveSQLTables/', views_retrieve_tables.retrieve_sql_tables, name='retrieveSQLTables'),
       re_path(r'retrieveSQLTablesRowCount/', views_retrieve_tables.retrieve_sql_tables_row_count,
               name='retrieveSQLTablesRowCount'),

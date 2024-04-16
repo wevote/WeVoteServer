@@ -104,7 +104,7 @@ def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
     limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
     offset is used to specify the first row to return (this is the SQL OFFSET clause), non-zero or ignored
     Note July 2022, re Joe:  This call to `https://api.wevoteusa.org/apis/v1/retrieveSQLTables/` has been moved from a
-    "normal" API server (which was timing out) to a "process" API server with an 1800 second timeout.
+    "normal" API server (which was timing out) to a "process" API server with an 1800-second timeout.
     """
     t0 = time.time()
 
@@ -236,6 +236,20 @@ def save_off_database():
     time.sleep(20)
 
 
+def update_fast_load_db(host, voter_device_id, table_name, additional_records):
+    try:
+        response = requests.get(host + 'apis/v1/fastLoadStatusUpdate/',
+                                verify=False,
+                                params={'voter_device_id': voter_device_id,
+                                        'table': table_name,
+                                        'additional_records': additional_records,
+                                        'is_running': True,
+                                        })
+        print('update_fast_load_db ', response.status_code, response.url)
+    except Exception as e:
+        logger.error('update_fast_load_db caught: ', str(e))
+
+
 def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
@@ -251,15 +265,12 @@ def retrieve_sql_files_from_master_server(request):
     print('Saved off local database in ' + str(int(dt)) + ' seconds')
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
-    # host = 'https://wevotedeveloper.com:8000/'
-    host = 'https://api.wevoteusa.org/'
+    # host = 'https://wevotedeveloper.com:8000'
+    host = 'https://api.wevoteusa.org'
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    # verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
-    response = requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
-                            params={ "initialize": True, "voter_device_id": voter_device_id }, verify=False)
-    # print("fastLoadStatusRetrieve request to master server ", host + '/apis/v1/fastLoadStatusRetrieve')
-    # print("fastLoadStatusRetrieve response from master server ", str(response))
+    requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
+                 params={"initialize": True, "voter_device_id": voter_device_id}, verify=False)
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
@@ -278,24 +289,25 @@ def retrieve_sql_files_from_master_server(request):
                 load_successful = False
                 retry = 1
                 while not load_successful:
-                    url = (host + 'apis/v1/retrieveSQLTables/?table:' + table_name + '&start:' + str(start) + '&end:' +
-                           str(end))
+                    base_url = (host + 'apis/v1/retrieveSQLTables/?table=' + table_name + '&start=' + str(start) +
+                                '&end=' + str(end))
                     try:
-                        base_url = (host + 'apis/v1/retrieveSQLTables/&table=' + table_name + '&start=' + str(start) +
-                                    '&end=' + str(end) + '&voter_device_id=' + voter_device_id)
-                        print('Attempting: ' + base_url)
-                        response = requests.get(base_url, verify=False)
+                        response = requests.get(host + '/apis/v1/retrieveSQLTables/',
+                                                verify=False,
+                                                params={'table': table_name, 'start': start, 'end': end,
+                                                        'voter_device_id': voter_device_id })
+                        print('retrieveSQLTables url: ' + response.url)
                         request_count += 1
                         load_successful = True
                         if response.status_code == 200:
                             wait_for_a_http_200 = False
                         else:
-                            print(host + 'apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
+                            print(host + '/apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
                                   str(response.status_code) + '  RETRY ---- ' + base_url)
                             continue
                     except Exception as getErr:
                         print(host +
-                              'apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
+                              '/apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
                               str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + base_url)
                         retry += 1
                         if retry < 10:
@@ -316,7 +328,8 @@ def retrieve_sql_files_from_master_server(request):
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
                   " rows, cumulative is " + "{:,}".format(final_lines_count))
-            fast_load_status_update(voter_device_id, table_name, None, len(lines), None, True)
+            update_fast_load_db(host, voter_device_id, table_name, len(lines))   # Write to master db
+            # fast_load_status_update(voter_device_id, table_name, None, len(lines), None, True) Wrote to local db
 
             if len(lines) > 0:
                 try:
@@ -686,6 +699,9 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
 
 
 def fast_load_status_update(voter_device_id, table_name, chunk, additional_records, total_records, is_running):
+    """
+    Runs on Master Server
+    """
     success = True
     try:
         row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)

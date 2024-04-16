@@ -301,9 +301,11 @@
         console.log('totalEstimate: ', totalEstimate);
         const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
+        const timeElapsedMin = Math.trunc(dt/60000)
         const secRemainder = timeLeftSec - (60 * timeLeftMin)
-        console.log(`Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`);
-        return `Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`;
+        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minutes`
+        console.log(stat);
+        return stat;
 
     }
 
@@ -337,7 +339,8 @@
     let saveOffDBComplete = false;
 
     setInterval(function () {
-      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
+      let origin = 'https://api.wevoteusa.org'
       let apiURL = origin + '/pl/import_status/';
       let startedOriginalElement = document.getElementById('started_original_update');
       let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
@@ -363,7 +366,7 @@
           $.ajax({
               type: "GET",
               url: apiUrlFastLoadStatus,
-              headers: {'voter_device_id': voterDeviceId},
+              params: {'voter_device_id': voterDeviceId},
               success: function (data) {
                   // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
                   if (fastLoadButton.html().startsWith('...')) {
