@@ -2288,6 +2288,13 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 'value':     state_code if state_code else candidate_on_stage.state_code
             },
             'twitter_link_possibility_list':    twitter_link_possibility_list,
+            'twitter_url_dict':
+            {
+                'label':    'Twitter URL from Google',
+                'id':       'twitter_url_id',
+                'name':     'twitter_url',
+                'value':     candidate_on_stage.twitter_url
+            },
             'vote_smart_id':                    vote_smart_id,
             'vote_usa_office_id_dict':              
             {

@@ -476,6 +476,10 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
     results = refresh_twitter_candidate_details_for_election(google_civic_election_id=google_civic_election_id,
                                                              state_code=state_code)
 
+    if len(results['twitter_handles_not_valid_list']) > 0:
+        not_valid_list_status = \
+            "TWITTER_HANDLES_NOT_VALID_LIST: " + str(results['twitter_handles_not_valid_list']) + " "
+        messages.add_message(request, messages.ERROR, not_valid_list_status)
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:

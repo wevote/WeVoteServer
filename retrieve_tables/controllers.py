@@ -62,6 +62,11 @@ LOCAL_TMP_PATH = '/tmp/'
 
 
 def get_total_row_count():
+    """
+    Returns the total row count of tables to be fetched from the MASTER server
+    Runs on the Master server
+    :return: the number of rows
+    """
     conn = psycopg2.connect(
         database=get_environment_variable('DATABASE_NAME'),
         user=get_environment_variable('DATABASE_USER'),
@@ -93,6 +98,7 @@ def get_total_row_count():
 
 def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
     """
+    Runs on the Master server
     Extract one of the approximately 21 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
     limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
@@ -116,6 +122,8 @@ def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
 
+        print('retrieve_sql_tables_as_csv "', table_name + '"')
+        print('retrieve_sql_tables_as_csv if table_name in allowable_tables ' + str(table_name in allowable_tables))
         if table_name in allowable_tables:
             try:
                 cur = conn.cursor()
@@ -231,6 +239,7 @@ def save_off_database():
 def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
+    Runs on the Local server (developer's Mac)
     :return:
     """
     status = ''
@@ -249,7 +258,8 @@ def retrieve_sql_files_from_master_server(request):
     # verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
     response = requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
                             params={ "initialize": True, "voter_device_id": voter_device_id }, verify=False)
-    # print("response from master server ", str(response))
+    # print("fastLoadStatusRetrieve request to master server ", host + '/apis/v1/fastLoadStatusRetrieve')
+    # print("fastLoadStatusRetrieve response from master server ", str(response))
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
@@ -268,25 +278,25 @@ def retrieve_sql_files_from_master_server(request):
                 load_successful = False
                 retry = 1
                 while not load_successful:
-                    url = (host + '/apis/v1/retrieveSQLTables/&table:' + table_name + '&start:' + str(start) + '&end:' +
+                    url = (host + 'apis/v1/retrieveSQLTables/?table:' + table_name + '&start:' + str(start) + '&end:' +
                            str(end))
                     try:
-                        response = requests.get(host + 'apis/v1/retrieveSQLTables/',
-                                                verify=False,
-                                                params={'table': table_name, 'start': start, 'end': end,
-                                                        'voter_device_id': voter_device_id })
+                        base_url = (host + 'apis/v1/retrieveSQLTables/&table=' + table_name + '&start=' + str(start) +
+                                    '&end=' + str(end) + '&voter_device_id=' + voter_device_id)
+                        print('Attempting: ' + base_url)
+                        response = requests.get(base_url, verify=False)
                         request_count += 1
                         load_successful = True
                         if response.status_code == 200:
                             wait_for_a_http_200 = False
                         else:
                             print(host + 'apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
-                                  str(response.status_code) + '  RETRY ---- ' + url)
+                                  str(response.status_code) + '  RETRY ---- ' + base_url)
                             continue
                     except Exception as getErr:
                         print(host +
                               'apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
-                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + url)
+                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + base_url)
                         retry += 1
                         if retry < 10:
                             continue
@@ -406,7 +416,7 @@ def retrieve_sql_files_from_master_server(request):
 # We don't check every field for garbage, although maybe we should...
 # Since the error reporting in the python console is pretty good, you should be able to figure out what field has
 # garbage in it.
-# Because we export to csv (comma separated values) files, that end up the the WeVoterServer root dir, you can stop
+# Because we export to csv (comma separated values) files, that end up the WeVoterServer root dir, you can stop
 # processing with the debugger, open the csv files in Excel, and get a decent view of what is happening.  The diagnostic
 # function dump_row_col_labels_and_errors(table_name, header, row, '2000060') also is really good at figuring out what
 # field has problems, and it dumps the field numbers and names which helps determine what row processing functions need
@@ -416,6 +426,9 @@ def retrieve_sql_files_from_master_server(request):
 # hint: temporarily comment out some lines in allowable_tables, so you can get to the problem table quicker
 # hint: Access https://pg.admin.wevote.us/  (view access to the production server Postgres) can really help, ask Dale
 def csv_file_to_clean_csv_file2(table_name):
+    """
+    Runs on the Master server
+    """
     csv_rows = []
     with open(os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp'), 'r') as csv_file2:
         line_reader = csv.reader(csv_file2, delimiter='|')
@@ -599,6 +612,19 @@ def csv_file_to_clean_csv_file2(table_name):
     csv_file.close()
     return header
 
+def get_row_count_from_master_server():
+    try:
+        host = 'https://api.wevoteusa.org'
+        response = requests.get(host + '/apis/v1/retrieveSQLTablesRowCount')
+        if response.status_code == 200:
+            count = int(response.json()['rowCount'])
+            return count
+        logger.error("retrieveSQLTablesRowCount received HTTP response " + str(response.status_code))
+        return -1
+    except Exception as e:
+        logger.error("retrieveSQLTablesRowCount row count error ", str(e))
+        return -1
+
 
 def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
     initialize = positive_value_exists(request.GET.get('initialize', False))
@@ -614,7 +640,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
 
     try:
         if initialize:
-            total = get_total_row_count()
+            total = get_row_count_from_master_server()
             started = datetime.now(tz=timezone.utc)
             RetrieveTableState.objects.update_or_create(
                 voter_device_id=voter_device_id,

@@ -94,15 +94,14 @@ SECRET_KEY = get_environment_variable("SECRET_KEY")
 
 # Comment out when running Heroku
 ALLOWED_HOSTS = [
+    'api.wevoteusa.org',
     'localhost',
     'wevotedeveloper.com',
     '127.0.0.1'
 ]
 
 # Application definition
-
 INSTALLED_APPS = (
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.humanize',
@@ -345,16 +344,17 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_REPLACE_HTTPS_REFERER = True
 CSRF_TRUSTED_ORIGINS = [
     'https://api.wevoteusa.org',
-    'http://localhost', 'https://localhost',
+    'http://localhost:8000', 'https://localhost:8000',
     'http://wevotedeveloper.com', 'https://wevotedeveloper.com',
 ]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 
-# CORS_ORIGIN_WHITELIST = (
-#     'google.com',
-#     'hostname.example.com'
-# )
+CORS_ORIGIN_WHITELIST = (
+    'https://api.wevoteusa.org',
+    'http://localhost:8000', 'https://localhost:8000',
+    'http://wevotedeveloper.com', 'https://wevotedeveloper.com',
+)
 # CORS_ALLOW_HEADERS = (
 #     'access-control-allow-headers',
 #     'access-control-allow-methods',
