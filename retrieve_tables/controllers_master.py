@@ -265,11 +265,12 @@ def fast_load_status_update(request):
     Save updated fast load status
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    table_name = request.GET.get('table_name', '')
+    table_name = request.GET.get('table', '')
     additional_records = convert_to_int(request.GET.get('additional_records', 0))
     chunk = convert_to_int(request.GET.get('chunk', None))
     total_records = convert_to_int(request.GET.get('total_records', None))
     is_running = positive_value_exists(request.GET.get('is_running', True))
+    print('fast_load_status_update ENTRY table_name', table_name, chunk, 'no row yet', additional_records)
 
     success = True
 
@@ -287,7 +288,7 @@ def fast_load_status_update(request):
         row.save()
         status = 'ROW_SAVED'
         id = row.id
-        # print('fast_load_status_update table_name', table_name, chunk, current_record, additional_records)
+        print('fast_load_status_update AFTER SAVE table_name', table_name, chunk, row.current_record, additional_records)
 
     except Exception as e:
         logger.error("fast_load_status_update caught exception: " + str(e))
