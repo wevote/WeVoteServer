@@ -35,6 +35,106 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
+
+@login_required
+def bulk_retrieve_ballotpedia_photos_view(request):
+    number_of_candidates_to_search = 75
+    status = ""
+    remote_request_history_manager = RemoteRequestHistoryManager()
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
+    page = request.GET.get('page', 0)
+    state_code = request.GET.get('state_code', '')
+    limit = convert_to_int(request.GET.get('show_all', 0))
+
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
+            and not positive_value_exists(limit):
+        messages.add_message(request, messages.ERROR,
+                             'bulk_retrieve_ballotpedia_photos_view, LIMITING_VARIABLE_REQUIRED')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&page=' + str(page)
+                                    )
+    candidate_list_manager = CandidateListManager()
+    already_retrieved = 0
+    already_stored = 0
+    try:
+        candidate_list = CandidateCampaign.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=[google_civic_election_id])
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+            candidate_list = candidate_list.filter(we_vote_id__in=candidate_we_vote_id_list)
+        if positive_value_exists(state_code):
+            candidate_list = candidate_list.filter(state_code__iexact=state_code)
+        candidate_list = candidate_list.filter(facebook_url_is_broken=False)
+        candidate_list = candidate_list.order_by('candidate_name')
+        if positive_value_exists(limit):
+            candidate_list = candidate_list[:limit]
+        candidate_list_count = candidate_list.count()
+
+        # Run Facebook account search and analysis on candidates with a linked or possible Facebook account
+        current_candidate_index = 0
+        while positive_value_exists(number_of_candidates_to_search) \
+                and (current_candidate_index < candidate_list_count):
+            if current_candidate_index in candidate_list:
+                one_candidate = candidate_list[current_candidate_index]
+                # If the candidate has a facebook_url, but no facebook_profile_image_url_https,
+                # see if we already tried to scrape them
+                if positive_value_exists(one_candidate.facebook_url) \
+                        and not positive_value_exists(one_candidate.facebook_profile_image_url_https):
+                    # Check to see if we have already tried to find their photo link from Facebook. We don't want to
+                    #  search Facebook more than once.
+                    request_history_query = RemoteRequestHistory.objects.filter(
+                        candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+                        kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS)
+                    request_history_list = list(request_history_query)
+
+                    if not positive_value_exists(request_history_list):
+                        add_messages = False
+                        get_results = get_one_picture_from_facebook_graphapi(
+                            one_candidate, request, remote_request_history_manager, add_messages)
+                        status += get_results['status']
+                        number_of_candidates_to_search -= 1
+                    else:
+                        logger.info("Skipped URL: " + one_candidate.facebook_url)
+                        already_stored += 1
+                else:
+                    already_stored += 1
+            current_candidate_index += 1
+    except CandidateCampaign.DoesNotExist:
+        # This is fine, do nothing
+        pass
+
+    if positive_value_exists(already_stored):
+        status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
+    if positive_value_exists(already_retrieved):
+        status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+
+    messages.add_message(request, messages.INFO, status)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code) +
+                                '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                '&page=' + str(page)
+                                )
+
+
+
+
+
+
+
+
 @login_required
 def attach_ballotpedia_election_view(request, election_local_id=0):
     """
