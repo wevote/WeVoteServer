@@ -77,18 +77,18 @@ def get_total_row_count():
     )
 
     rows = 0
-    for table in allowable_tables:
+    for table_name in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM \"public\".\"{table}\";".format(table=table)
+            sql = "SELECT MAX(id) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
             cursor.execute(sql)
             row = cursor.fetchone()
             if row[0] is not None:
-                sql = "SELECT COUNT(*) FROM \"public\".\"{table}\";".format(table=table)
+                sql = "SELECT COUNT(*) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
                 cursor.execute(sql)
                 row = cursor.fetchone()
                 if row[0] is not None:
                     cnt = int(row[0])
-            print('get_total_row_count of table ', table, ' is ', cnt)
+            print('get_total_row_count of table ', table_name, ' is ', cnt)
             rows += cnt
 
     print('get_total_row_count is ', rows)
@@ -265,7 +265,7 @@ def fast_load_status_update(request):
     Save updated fast load status
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    table_name = request.GET.get('table', '')
+    table_name = request.GET.get('table_name', '')
     additional_records = convert_to_int(request.GET.get('additional_records', 0))
     chunk = convert_to_int(request.GET.get('chunk', None))
     total_records = convert_to_int(request.GET.get('total_records', None))
