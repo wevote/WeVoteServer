@@ -41,7 +41,7 @@ def update_fast_load_db(host, voter_device_id, table_name, additional_records):
         response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
                                 verify=False,
                                 params={'voter_device_id': voter_device_id,
-                                        'table': table_name,
+                                        'table_name': table_name,
                                         'additional_records': additional_records,
                                         'is_running': True,
                                         })
@@ -62,7 +62,9 @@ def retrieve_sql_files_from_master_server(request):
         'Saving off a copy of your local db in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
     save_off_database()
     dt = time.time() - t0
+    stats = {}
     print('Saved off local database in ' + str(int(dt)) + ' seconds')
+    stats = stats | {"SaveOffDb": str(int(dt))}
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
     # host = 'https://wevotedeveloper.com:8000'
@@ -89,12 +91,12 @@ def retrieve_sql_files_from_master_server(request):
                 load_successful = False
                 retry = 1
                 while not load_successful:
-                    base_url = (host + 'apis/v1/retrieveSQLTables/?table=' + table_name + '&start=' + str(start) +
+                    base_url = (host + 'apis/v1/retrieveSQLTables/?table_name=' + table_name + '&start=' + str(start) +
                                 '&end=' + str(end))
                     try:
                         response = requests.get(host + '/apis/v1/retrieveSQLTables/',
                                                 verify=False,
-                                                params={'table': table_name, 'start': start, 'end': end,
+                                                params={'table_name': table_name, 'start': start, 'end': end,
                                                         'voter_device_id': voter_device_id})
                         print('retrieveSQLTables url: ' + response.url)
                         request_count += 1
@@ -128,8 +130,7 @@ def retrieve_sql_files_from_master_server(request):
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
                   " rows, cumulative is " + "{:,}".format(final_lines_count))
-            update_fast_load_db(host, voter_device_id, table_name, len(lines))   # Write to master db
-            # fast_load_status_update(voter_device_id, table_name, None, len(lines), None, True) Wrote to local db
+            update_fast_load_db(host, voter_device_id, table_name, len(lines))
 
             if len(lines) > 0:
                 try:
@@ -170,6 +171,7 @@ def retrieve_sql_files_from_master_server(request):
                     dtc = time.time() - t0
                     print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
                           str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
+                    stats = stats | {table_name: str(int(dtc))}
 
                 except Exception as e:
                     status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
@@ -215,7 +217,13 @@ def retrieve_sql_files_from_master_server(request):
         status += stat
 
     minutes = (time.time() - t0)/60
-    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
+
+    for table in stats:
+        secs = int(stats[table])
+        min1 = int(secs / 60)
+        secs1 = int(secs % 60)
+        print("Processing and loading table " + table + "ended at " + str(min1) + ":" + str(secs1) + "  cumulative")
+    print("Processing and loading grand total " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
     os.system('rm ' + os.path.join(LOCAL_TMP_PATH, '*.csvTemp'))    # Clean up all the temp files
 

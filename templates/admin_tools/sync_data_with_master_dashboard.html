@@ -340,6 +340,7 @@
     const t0 = currentDate.getTime();
     let saveOffDBComplete = false;
 
+    let counter = 0;
     setInterval(function () {
       {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
       let origin = 'https://api.wevoteusa.org'
@@ -352,6 +353,7 @@
         $.ajax({
           type: "GET",
           url: apiURL,
+          params: {'counter': counter++},
           success: function (data) {
             let status = data.text;
             // console.log('realTimeStatusPollingLocations', status);
@@ -359,7 +361,7 @@
           },
         });
       }
-      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?&initialize=' + fastInit.val();
+      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?&initialize=' + fastInit.val() + '&counter=' + counter++;
       if (fastInit.val() === 'true') {
         fastInit.val("false")
       }
@@ -375,7 +377,7 @@
                       let newHtml = '';
                       if (data.current_record === 0) {
                           newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
-                          countCopy += 2.5;
+                          countCopy += 2;
                           prog = Math.trunc(countCopy);
                       } else {
                           if (!saveOffDBComplete) {
