@@ -10,8 +10,10 @@
     <div style="padding: 25px 25px 75px 25px; font-size: 18px">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within about
         twenty-five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
-        <br><span style="font-weight: bold;"> Note April 1, 2024: a temporary bug has created 10k+ duplicated ballot_ballotitem entries,
-            so this fast load will take about 45 minutes to complete until the records are deduped.</span>
+        <br>
+        <span style="font-weight: bold;"> Note April 1, 2024: a temporary bug has created 10k+ duplicated ballot_ballotitem entries,
+            so this fast load will take about twice as long (approximately 45 minutes) to complete on a fast setup. (At least until the records are deduped.)
+        </span>
 
         <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
         <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
@@ -301,9 +303,11 @@
         console.log('totalEstimate: ', totalEstimate);
         const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
+        const timeElapsedMin = Math.trunc(dt/60000)
         const secRemainder = timeLeftSec - (60 * timeLeftMin)
-        console.log(`Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`);
-        return `Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`;
+        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minutes`
+        console.log(stat);
+        return stat;
 
     }
 
@@ -337,7 +341,8 @@
     let saveOffDBComplete = false;
 
     setInterval(function () {
-      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
+      let origin = 'https://api.wevoteusa.org'
       let apiURL = origin + '/pl/import_status/';
       let startedOriginalElement = document.getElementById('started_original_update');
       let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
@@ -363,7 +368,7 @@
           $.ajax({
               type: "GET",
               url: apiUrlFastLoadStatus,
-              headers: {'voter_device_id': voterDeviceId},
+              params: {'voter_device_id': voterDeviceId},
               success: function (data) {
                   // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
                   if (fastLoadButton.html().startsWith('...')) {
