@@ -268,6 +268,9 @@ AUTH_USER_MODEL = 'voter.Voter'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_PATH, "static", "static") if DEBUG else \
     os.path.join(PROJECT_PATH, "apis_v1", "static")  # Django Cookbook
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 MEDIA_URL = '/media/'  # Django Cookbook
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'        # Added for Django 3.2, June 2021
