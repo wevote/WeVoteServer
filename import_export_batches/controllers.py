@@ -2863,11 +2863,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         # Note organization_name becomes speaker_display_name below
         variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
             and positive_value_exists(candidate_found) \
-            and positive_value_exists(contest_office_name) \
-            and positive_value_exists(contest_office_we_vote_id) \
             and positive_value_exists(organization_name) \
             and positive_value_exists(organization_we_vote_id) \
             and positive_value_exists(stance)
+        # and positive_value_exists(contest_office_name) \
+        # and positive_value_exists(contest_office_we_vote_id) \
         if not variables_found_to_create_position:
             status += "CANDIDATE-MISSING_VARIABLES_REQUIRED_TO_CREATE "
             if not positive_value_exists(ballot_item_display_name):

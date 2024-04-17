@@ -1446,7 +1446,7 @@ def voter_follow_all_organizations_followed_by_organization_view(request):
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_follow = get_maximum_number_to_retrieve_from_request(request)
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     return voter_follow_all_organizations_followed_by_organization_for_api(
         voter_device_id,
@@ -1460,7 +1460,7 @@ def voter_issue_follow_view(request):  # issueFollow
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     follow_value = positive_value_exists(request.GET.get('follow', False))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     ignore_value = positive_value_exists(request.GET.get('ignore', False))
 
@@ -1903,7 +1903,7 @@ def voter_opposing_save_view(request):  # voterOpposingSave
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     candidate_id = 0
     candidate_we_vote_id = None
@@ -1997,7 +1997,7 @@ def voter_retrieve_view(request):  # voterRetrieve
             status += results['status']
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
 
     # Figure out the city & state from IP address
@@ -2129,7 +2129,7 @@ def voter_stop_opposing_save_view(request):  # voterStopOpposingSave
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     candidate_id = 0
     candidate_we_vote_id = None
@@ -2169,7 +2169,7 @@ def voter_stop_supporting_save_view(request):  # voterStopSupportingSave
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     candidate_id = 0
     candidate_we_vote_id = None
@@ -2209,7 +2209,7 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     candidate_id = 0
     candidate_we_vote_id = None

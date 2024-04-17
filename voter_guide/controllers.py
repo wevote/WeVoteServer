@@ -138,6 +138,12 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                     position_count = position_exists_query.count()
                     if positive_value_exists(position_count):
                         one_voter_guide_possibility.number_of_endorsements_with_position += 1
+        try:
+            one_voter_guide_possibility.number_of_endorsements_not_visible = \
+                one_voter_guide_possibility.number_of_ballot_items - \
+                one_voter_guide_possibility.number_of_endorsements_with_position
+        except Exception as e:
+            one_voter_guide_possibility.number_of_endorsements_not_visible = 0
         voter_guide_possibility_list_modified.append(one_voter_guide_possibility)
     return voter_guide_possibility_list_modified
 

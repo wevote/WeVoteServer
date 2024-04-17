@@ -61,59 +61,9 @@
     </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name_id" class="pl-4 control-label">Alternate Name (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name" id="google_civic_office_held_name_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name|default_if_none:"" }}{% else %}{{ google_civic_office_held_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
 
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name2_id" class="pl-4 control-label">Alternate Name 2</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name2" id="google_civic_office_held_name2_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name2|default_if_none:"" }}{% else %}{{ google_civic_office_held_name2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name3_id" class="pl-4 control-label">Alternate Name 3</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name3" id="google_civic_office_held_name3_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name3|default_if_none:"" }}{% else %}{{ google_civic_office_held_name3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="district_name_id" class="pl-4 control-label">District Name</label>
-    <div class="col">
-        <input type="text" name="district_name" id="district_name_id" class="form-control"
-               value="{% if office_held %}{{ office_held.district_name|default_if_none:"" }}{% else %}{{ district_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ocd_division_id_id" class="control-label">Ocd Division ID</label>
-    <div class="col">
-        <input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
-               value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=district_name_dict field_dict_2=ocd_division_id_dict %}
 
 {% if office_held.primary_party %}
 <div class="row form-group">
@@ -125,57 +75,11 @@
 </div>
 {% endif %}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="state_code_id" class="pl-4 control-label">State Code</label>
-    <div class="col">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{% if office_held %}{{ office_held.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=state_code_dict field_dict_2=district_id_dict %}
 
-<div class="col">
-<div class="row form-group">
-    <label for="district_id_id" class="control-label">District ID (Numerical)</label>
-    <div class="col">
-        <input type="text" name="district_id" id="district_id_id" class="form-control"
-               value="{% if office_held %}{{ office_held.district_id|default_if_none:"" }}{% else %}{{ district_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=office_held_facebook_url_dict field_dict_2=office_held_twitter_handle_dict %}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="office_held_facebook_url_id" class="pl-4 control-label">Office Held Facebook</label>
-    <div class="col">
-        <input type="text" name="office_held_facebook_url" id="office_held_facebook_url_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_facebook_url|default_if_none:"" }}{% else %}{{ office_held_facebook_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="office_held_twitter_handle_id" class="control-label">Office Held Twitter Handle</label>
-    <div class="col">
-        <input type="text" name="office_held_twitter_handle" id="office_held_twitter_handle_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_twitter_handle|default_if_none:"" }}{% else %}{{ office_held_twitter_handle|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row form-group">
-    <label for="office_held_url_id" class="pl-4 control-label">Office Held Website</label>
-    <div class="col">
-        <input type="text" name="office_held_url" id="office_held_url_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_url|default_if_none:"" }}{% else %}{{ office_held_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/one_form_group.html" with field_dict_1=office_held_url_dict %}
 
 <div class="row form-group">
     <label for="office_held_description_id" class="pl-4 control-label">Office Held Description</label>

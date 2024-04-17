@@ -19,6 +19,7 @@ from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from representative.models import RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
+from volunteer_task.models import VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE, VolunteerTaskManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import delete_possible_twitter_handles, make_item_in_list_primary, \
@@ -452,6 +453,7 @@ def scrape_social_media_for_candidates_in_one_election_view(request):
 
 @login_required
 def refresh_twitter_candidate_details_for_election_view(request, election_id):
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -460,9 +462,24 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
     google_civic_election_id = convert_to_int(election_id)
     state_code = request.GET.get('state_code', '')
 
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
     results = refresh_twitter_candidate_details_for_election(google_civic_election_id=google_civic_election_id,
                                                              state_code=state_code)
 
+    if len(results['twitter_handles_not_valid_list']) > 0:
+        not_valid_list_status = \
+            "TWITTER_HANDLES_NOT_VALID_LIST: " + str(results['twitter_handles_not_valid_list']) + " "
+        messages.add_message(request, messages.ERROR, not_valid_list_status)
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:

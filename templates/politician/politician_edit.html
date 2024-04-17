@@ -1245,6 +1245,12 @@
 
 </form>
 
+{% if change_log_list %}
+    <br />
+<div class="form-group">
+    {% include "candidate/change_log_list.html" with change_log_list=change_log_list %}
+</div>
+{% endif %}
 
 
 {% if duplicate_politician_list %}
