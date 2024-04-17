@@ -17,16 +17,27 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
 2. Set environment variables in `.env`
 
     ```
-    # api
+    # read/write database settings
     DATABASE_PASSWORD="secret"
+    DATABASE_HOST="host.docker.internal"   
+
+    # read-only database settings
+    DATABASE_PASSWORD_READONLY="secret"
+    DATABASE_HOST_READONLY="host.docker.internal"   
+
+    # analytics database settings
+    DATABASE_PASSWORD_ANALYTICS="secret"
+    DATABASE_HOST_ANALYTICS="host.docker.internal"   
+
+    # api
     DJANGO_SUPERUSER_EMAIL="dev@test.com"
     DJANGO_SUPERUSER_PASSWORD="secret"
 
     # db
-    POSTGRES_PASSWORD="secret"
+    POSTGRES_PASSWORD="secret" 
     ```
 
-3. Configure PostgreSQL in `config.sql`
+3. Configure PostgreSQL in `config.sql` by creating a config file in the root directory (WeVoteServer)
 
     ```sql
     ALTER SYSTEM SET listen_addresses = '*';
@@ -50,14 +61,21 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
     ```
     docker compose --profile optional up --detach
     ```
-    Access the API at [http://localhost:8000/](http://localhost:8000/)
 
-6. Stop and remove containers
+6. Create a local account to access the local WeVoteServer by running:
+   - ```docker ps ``` and identify the container ID of the wevote-api
+   - ```docker exec -it {container id} /bin/bash ``` to access the container's terminal
+   - ```python manage.py create_dev_user first_name last_name email password ``` with appropriate replacements
+
+7. Access the API at [http://localhost:8000/](http://localhost:8000/) and login to the WeVoteServer using credentials from step 6.
+
+
+8. To stop and remove containers run:
 
     ```
     docker compose down
     ```
-    Use the `--volumes` flag to remove volumes
+    Or use the `--volumes` flag to remove volumes
     ```
     docker compose down --volumes
     ```
