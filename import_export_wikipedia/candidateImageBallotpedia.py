@@ -2,16 +2,16 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-
+IMG_CLASS_NAME_WE_ARE_SEEKING = "widget-img"
 # Retrieves the parsed HTML content from the given URL.
 def get_parsed_html(url):
     try:
         page = requests.get(url)
-        return BeautifulSoup(page.content, 'html.parser')
+        return BeautifulSoup(page.content, "lxml")
 
     except requests.exceptions.RequestException:
         print('Unable to connect to {}'.format(url))
-        return BeautifulSoup('', 'html.parser')
+        return BeautifulSoup('', "lxml")
 
     # Parses the Ballotpedia page for all state legislature elections to get pages for individual states
     # Outputs list of ordered pairs:(url, state)
@@ -67,10 +67,10 @@ def get_candidate_urls_table(url):
 
 
 # This will extract candidate image from list of candidate urls
-def get_candidate_img(candidate_urls):
+def get_ballotpedia_candidate_img_from_list(candidate_urls):
     for url in candidate_urls:
         soup = get_parsed_html(url)
-        for img in soup.find_all(class_='widget-img'):
+        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
             img_url = img.get('src')  # Use get() method to safely retrieve attributes
             if img_url:
                 print(img['alt'], img_url)
@@ -90,25 +90,25 @@ def test_get_all_candidate_img_from_state_elections(url):
     for state in state_elections_info:
         print(state)
         candidate_urls = get_candidate_urls_page(state[0])
-        get_candidate_img(candidate_urls)
+        get_ballotpedia_candidate_img_from_list(candidate_urls)
 
 
 # Function to retrieve all candidate images from state elections information.
 def test_get_all_candidate_img_from_presidential_election(url):
     print(get_page_name(url))
     candidate_urls = get_candidate_urls_table(url)
-    get_candidate_img(candidate_urls)
+    get_ballotpedia_candidate_img_from_list(candidate_urls)
 
 
 # Function to retrieve candidate image from candidate page
 def test_get_candidate_img_from_single_candidate_page(url):
     print(get_page_name(url))
     candidate_url = [url]
-    get_candidate_img(candidate_url)
+    get_ballotpedia_candidate_img_from_list(candidate_url)
 
 
 def main():
-    # test_get_all_candidate_img_from_state_elections("https://ballotpedia.org/State_legislative_elections,_2022")
+    #test_get_all_candidate_img_from_state_elections("https://ballotpedia.org/State_legislative_elections,_2022")
     #test_get_all_candidate_img_from_presidential_election("https://ballotpedia.org/Presidential_election,_2024")
 
     test_get_candidate_img_from_single_candidate_page("https://ballotpedia.org/Joe_Biden")
