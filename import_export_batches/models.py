@@ -4,26 +4,29 @@
 
 import codecs
 import csv
+import json
+import urllib
+import xml.etree.ElementTree as ElementTree
 from datetime import date, timedelta
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+import magic
 from django.db import models
 from django.db.models import Q
-from django.utils.http import urlquote
-from django.utils.timezone import localtime, now
+from django.utils.timezone import now
+
+import wevote_functions.admin
 from election.models import Election, ElectionManager
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception
-import json
-import magic
-from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
+from organization.models import ORGANIZATION_TYPE_CHOICES, alphanumeric
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
 from politician.models import GENDER_CHOICES, UNKNOWN
-import urllib
-from urllib.request import Request, urlopen
 from voter_guide.models import ORGANIZATION_WORD
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, \
     LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
-import xml.etree.ElementTree as ElementTree
+from wevote_functions.utils import staticUserAgent
 
 POSITION = 'POSITION'
 ANY_STANCE = 'ANY_STANCE'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
@@ -3958,14 +3961,14 @@ class BatchManager(models.Manager):
         import_date = date.today()
         try:
             endorsement_req = urllib.request.Request(organization_endorsements_api_url,
-                                                     headers={'User-Agent': 'Mozilla/5.0'})
+                                                     headers=staticUserAgent())
             endorsement_url = urlopen(endorsement_req)
             # endorsement_url.close()
             # structured_organization_endorsement_json = json.loads(endorsement_url)
             organization_endorsement_url = endorsement_url.read()
             organization_endorsement_json = organization_endorsement_url.decode('utf-8')
             structured_organization_endorsement_json = json.loads(organization_endorsement_json)
-            batch_set_name_url = urlquote(organization_endorsements_api_url)
+            batch_set_name_url = quote(organization_endorsements_api_url)
         except Exception as e:
             batch_set_id = 0
             status += " EXCEPTION_BATCH_SET: " + str(e) + " "

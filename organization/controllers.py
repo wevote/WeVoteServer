@@ -605,9 +605,9 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
 
     # December 2021: Using the Twitter 1.1 API for user_timeline, since it is not yet available in 2.0
     # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
-    print("tweepy OAuthHandler (Old API, probably in deprecated code) in organization_retrieve_tweets_from_twitter"
+    print("tweepy OAuth1UserHandler (Old API, probably in deprecated code) in organization_retrieve_tweets_from_twitter"
           " -- organization_we_vote_id: ", organization_we_vote_id)
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth = tweepy.OAuth1UserHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 

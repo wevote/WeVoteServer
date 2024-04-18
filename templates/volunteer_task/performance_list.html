@@ -10,7 +10,6 @@
 <h1>Scoreboard</h1>
 {# Dropdown to choose which team scores to display #}
 <form name="team_name" method="get" action="{% url 'volunteer_task:performance_list' %}">
-  {% csrf_token %}
   {# Filter by VolunteerTeam: Only show members of the chosen team #}
   <div class="form-group pull-left">
       <label for="team_name_id" class="control-label">
@@ -75,13 +74,13 @@
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Augmented<br />
             {% endif %}
             {% if team_performance_dict.duplicate_politician_analysis %}
-            &nbsp;&nbsp;&nbsp;Candidates / Politicians Analyzed for Duplicates (Started)<br />
+                <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Duplicate Analysis</span><br />
             {% endif %}
             {% if team_performance_dict.politicians_deduplicated %}
-            &nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated<br />
+                <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated</span><br />
             {% endif %}
             {% if team_performance_dict.match_candidates_to_politicians %}
-            &nbsp;&nbsp;&nbsp;Candidates Matched to Politicians (Started)<br />
+                <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Matched to Politicians</span><br />
             {% endif %}
             {% if team_performance_dict.politicians_photo_added %}
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />
@@ -237,13 +236,13 @@
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Augmented<br />
             {% endif %}
             {% if voter_dict.duplicate_politician_analysis %}
-            &nbsp;&nbsp;&nbsp;Candidates / Politicians Analyzed for Duplicates (Started)<br />
+                <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Duplicate Analysis</span><br />
             {% endif %}
             {% if voter_dict.politicians_deduplicated %}
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated<br />
             {% endif %}
             {% if voter_dict.match_candidates_to_politicians %}
-            &nbsp;&nbsp;&nbsp;Candidates Matched to Politicians (Started)<br />
+                <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Matched to Politicians</span><br />
             {% endif %}
             {% if voter_dict.politicians_photo_added %}
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />

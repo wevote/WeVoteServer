@@ -415,7 +415,7 @@ th, td {
 
 {% include "../form_inputs/three_form_groups.html" with field_dict_1=ballotpedia_candidate_name_dict field_dict_2=state_code_dict field_dict_3=party_dict %}
 
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_dict field_dict_2=vote_usa_office_dict %}
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_id_dict field_dict_2=vote_usa_office_id_dict %}
 
 <a name="twitter_link_possibility_list" />
 
@@ -444,12 +444,22 @@ th, td {
         Twitter Location: {{ candidate.twitter_location }}<br />
         Twitter Followers: {{ candidate.twitter_followers_count|intcomma }}<br />
     {% endif %}
-    {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
+    </div>
+</div>
 {# Dale 2024-02-03 Turned off because Twitter Search API is too expensive #}
 {#    {% if candidate %}#}
 {#    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)#}
 {#    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)#}
 {#    {% endif %}#}
+{% if candidate.twitter_url %}
+{#<div class="row">#}
+{#<div class="col">#}
+    {% include "../form_inputs/one_form_group.html" with field_dict_1=twitter_url_dict %}
+{#</div>#}
+{#</div>#}
+{% endif %}
+<div class="row">
+<div class="col">
     {% if twitter_link_possibility_list %}
     <div class="form-group pull-right">
         <label for="which_marking_id" class="control-label">

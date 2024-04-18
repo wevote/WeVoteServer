@@ -62,7 +62,6 @@
                    target="_blank"
                    class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
-                <br />
             {% if organization.organization_twitter_handle %}
                 <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
                    target="_blank"
@@ -74,11 +73,20 @@
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
-            {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
             {% if organization.organization_website %}
                 <a href="{{ organization.organization_website }}"
                    target="_blank"
                    class="u-no-break">{{ organization.organization_website }}
+                &nbsp;
+                <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+            {% if organization.organization_twitter_handle or organization.organization_website %}
+                {% if voter_guide_possibility_url %}<br /><br />{% endif %}
+            {% endif %}
+            {% if voter_guide_possibility_url %}
+                <a href="{{ voter_guide_possibility_url }}"
+                   target="_blank">
+                    <span style="font-size: 1.2em;"><strong>{{ voter_guide_possibility_url }}</strong></span>
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
@@ -115,11 +123,17 @@
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
-            {% if candidate.fetch_twitter_handle and candidate.candidate_url %}<br />{% endif %}
             {% if candidate.candidate_url %}
                 <a href="{{ candidate.candidate_url }}"
                    target="_blank"
                    class="u-no-break">{{ candidate.candidate_url }}
+                &nbsp;
+                <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+            {% if candidate.fetch_twitter_handle or candidate.candidate_url %}{% if voter_guide_possibility_url %}<br />{% endif %}{% endif %}
+            {% if voter_guide_possibility_url %}
+                <a href="{{ voter_guide_possibility_url }}"
+                   target="_blank">{{ voter_guide_possibility_url }}
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
@@ -201,7 +215,7 @@
                     <td>{{ possible_organization.organization_name }}</td>
                     <td><button type="submit"
                                 name="organization_we_vote_id"
-                                class="btn btn-success btn-sm" value="{{ possible_organization.organization_we_vote_id }}">Choose</button></td>
+                                class="btn btn-primary btn-sm" value="{{ possible_organization.organization_we_vote_id }}">Choose</button></td>
                     <td>{% if possible_organization.organization_twitter_handle %}
                         <a href="https://twitter.com/{{ possible_organization.organization_twitter_handle }}"
                            target="_blank"
@@ -250,7 +264,7 @@
                     <td>{{ possible_candidate.display_candidate_name }}</td>
                     <td><button type="submit"
                                 name="candidate_we_vote_id"
-                                class="btn btn-success btn-sm" value="{{ possible_candidate.we_vote_id }}">Choose</button></td>
+                                class="btn btn-primary btn-sm" value="{{ possible_candidate.we_vote_id }}">Choose</button></td>
                     <td>{% if possible_candidate.fetch_twitter_handle %}
                         <a href="https://twitter.com/{{ possible_candidate.fetch_twitter_handle }}"
                            target="_blank"
@@ -258,7 +272,8 @@
                         <span class="glyphicon glyphicon-new-window"></span></a>
                     {% endif %}
                     {% if possible_candidate.fetch_twitter_handle and possible_candidate.candidate_url %}<br />{% endif %}
-                    {% if possible_candidate.candidate_url %}
+                    HI TOO
+                        {% if possible_candidate.candidate_url %}
                         <a href="{{ possible_candidate.candidate_url }}"
                            target="_blank"
                            class="u-no-break">{{ possible_candidate.candidate_url }}
@@ -366,15 +381,22 @@
 
 {% if possible_endorsement_list_found and not hide_possible_endorsement_list %}
     <div class="form-group">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-primary" name="save_endorsements" value="1">Analyze & Save</button>
+        </div>
+    </div>
+
+    <div class="form-group">
     {% if possible_endorsement_list %}
         <label for="ballot_items_raw_id" class="col-sm-3 control-label">
             <span class="hidden-xs">
-                Positions
+                <span style="font-size: 1.4em">STATISTICS</span>
                 <br />
                 <span style="font-weight: normal !important;">
-                    # of Positions: {{ number_of_ballot_items }}<br />
-                    Identified &amp; Stored: {{ positions_stored_count }}<br />
-                    Identified &amp; Not Stored: {{ positions_not_stored_count }}
+                    Total # of Endorsements: {{ number_of_ballot_items }}<br />
+                    Visible to Voters: {{ positions_stored_count }}<br />
+                    <strong>Not Visible to Voters Yet: {{ positions_not_stored_count }}</strong>
                 </span>
             </span>
         </label>
@@ -392,7 +414,6 @@
             </table>
         </div>
     {% endif %}
-
     {% if voter_guide_possibility_url %}
         {% if type_of_website != "CandidateWebsite" %}
             <label for="ballot_items_raw_id" class="col-sm-3 control-label">
@@ -515,10 +536,11 @@
     <div class="form-group">
         <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
         <div class="col-sm-8">
+            <button type="submit" class="btn btn-primary" name="save_endorsements" value="1">Analyze & Save</button>
         {% if voter_guide_possibility_url %}
-            <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a> &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;
+            <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
         {% endif %}
-            <button type="submit" class="btn btn-success" name="save_endorsements" value="1">Analyze & Save</button>
         {% if has_suggested_voter_guide_rights and voter_guide_possibility_id %}
             <br />
             <br />
@@ -531,7 +553,7 @@
 
             {% if positions_ready_to_save_as_batch %}
             <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility_id }}"
-               class="btn btn-success btn-sm"
+               class="btn btn-primary btn-sm"
                role="button"
                target="_blank">Import Positions</a>
             {% else %}

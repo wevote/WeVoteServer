@@ -2,10 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import re_path
+from django.urls import re_path
 
 from . import views_admin, views_representatives
-
 
 urlpatterns = [
     re_path(r'^$', views_admin.batches_home_view, name='batches_home',),

@@ -1,16 +1,16 @@
 {# templates/voter_guide/voter_guide_possibility_table.html #}
 {% load humanize %}
+{% load mathfilters %}
 {% if voter_guide_possibility_list %}
     <table class="table table-condensed">
         <thead>
         <tr>
             <th></th>
-            <th>Assigned to</th>
-            <th>Endorser/Candidate</th>
-            <th>Source</th>
-            <th>Ballot Items</th>
             <th>View</th>
-            <th>Import</th>
+            <th>Source</th>
+            <th>Endorser/Candidate</th>
+            <th>Status</th>
+            <th>Assigned to</th>
             <th>Date Submitted (PT)</th>
             <th>Select</th>
         </tr>
@@ -19,9 +19,36 @@
         <tr>
             <td>{{ forloop.counter|add:starting_counter_number }}</td>
             <td>
-              {% if voter_guide_possibility.assigned_to_name %}
-                {{ voter_guide_possibility.assigned_to_name }}
-              {% endif %}
+                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                   class="btn btn-primary btn-sm"
+                   role="button"
+                   target="_blank">VIEW DETAILS <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>
+                {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 count=forloop.counter only %}
+                {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
+                  <br />
+                {% endif %}
+                {% if voter_guide_possibility.contributor_comments %}
+                  From contributor: <span style="color: darkgray">{{ voter_guide_possibility.contributor_comments }} </span>
+                {% endif %}
+                {% if voter_guide_possibility.contributor_email %}
+                  <a href="mailto:{{ voter_guide_possibility.contributor_email }}"
+                     target="_blank">
+                    ({{ voter_guide_possibility.contributor_email|default_if_none:"" }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>)</a>
+                {% endif %}
+                {% if voter_guide_possibility.ballot_items_raw %}
+                  <br />
+                  {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
+                {% endif %}
+                {% if voter_guide_possibility.organization.organization_email %}
+                  <br />
+                <a href="mailto:{{ voter_guide_possibility.organization.organization_email }}"
+                   class="u-no-break">
+                    {{ voter_guide_possibility.organization.organization_email }}
+                  <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                {% endif %}
             </td>
             <td>
             {% if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE %}
@@ -88,71 +115,48 @@
             {% endif %}
             </td>
             <td>
-                {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 count=forloop.counter only %}
-                {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
+                {% if voter_guide_possibility.number_of_ballot_items %}
+                  <span class="u-no-break">{{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} endorsements found</span>
                   <br />
                 {% endif %}
-                {% if voter_guide_possibility.contributor_comments %}
-                  From contributor: <span style="color: darkgray">{{ voter_guide_possibility.contributor_comments }} </span>
-                {% endif %}
-                {% if voter_guide_possibility.contributor_email %}
-                  <a href="mailto:{{ voter_guide_possibility.contributor_email }}"
-                     target="_blank">
-                    ({{ voter_guide_possibility.contributor_email|default_if_none:"" }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>)</a>
-                {% endif %}
-                {% if voter_guide_possibility.ballot_items_raw %}
+                {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
+                  <span class="u-no-break" style="color: red">({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
                   <br />
-                  {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
                 {% endif %}
-                {% if voter_guide_possibility.organization.organization_email %}
+                {% if voter_guide_possibility.number_of_endorsements_with_position %}
+                  <span class="u-no-break" style="color: green">{{ voter_guide_possibility.number_of_endorsements_with_position }} visible to voters</span>
                   <br />
-                <a href="mailto:{{ voter_guide_possibility.organization.organization_email }}"
-                   class="u-no-break">
-                    {{ voter_guide_possibility.organization.organization_email }}
-                  <span class="glyphicon glyphicon-new-window"></span>
-                </a>
                 {% endif %}
-            </td>
-            <td>
-              {% if voter_guide_possibility.number_of_ballot_items %}
-                  {{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} total<br />
-              {% endif %}
-              {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
-                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
-              {% endif %}
-              {% if voter_guide_possibility.number_of_endorsements_with_position %}
-                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_endorsements_with_position }} stored)</span>
-              {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   class="btn btn-success btn-sm"
-                   role="button"
-                   target="_blank">VIEW DETAILS <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td>
+{#                {% with voter_guide_possibility.number_of_ballot_items|sub:voter_guide_possibility.number_of_endorsements_with_position as number_of_endorsements_not_visible %}#}
+{#                  {% if number_of_endorsements_not_visible %}#}
+{#                      <span class="u-no-break"><strong>{{ number_of_endorsements_not_visible }} NOT visible to voters</strong></span>#}
+{#                  {% endif %}#}
+{#                {% endwith %}#}
+                {% if voter_guide_possibility.number_of_endorsements_not_visible %}
+                  <span class="u-no-break"><strong>{{ voter_guide_possibility.number_of_endorsements_not_visible }} NOT visible to voters</strong></span>
+                {% endif %}
                 {% if voter_guide_possibility.ignore_this_source %}
-                <strong>Ignore this Source</strong>
                 <br />
+                <strong>Ignore this Source</strong>
                 {% endif %}
                 {% if voter_guide_possibility.cannot_find_endorsements %}
-                <strong>Endorsements Not Available Yet</strong>
                 <br />
+                <strong>Endorsements Not Available Yet</strong>
                 {% endif %}
                 {% if voter_guide_possibility.candidates_missing_from_we_vote %}
-                <strong>Candidates/Measures Missing</strong>
                 <br />
+                <strong>Candidates/Measures Missing</strong>
                 {% endif %}
                 {% if voter_guide_possibility.capture_detailed_comments %}
-                <strong>Capture Detailed Comments</strong>
                 <br />
+                <strong>Capture Detailed Comments</strong>
                 {% endif %}
-                {% if voter_guide_possibility.positions_ready_to_save_as_batch %}
-                <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   class="btn btn-success btn-sm"
-                   role="button"
-                   target="_blank">IMPORT POSITIONS <span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}
+{#                {% if voter_guide_possibility.positions_ready_to_save_as_batch %}#}
+{#                <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"#}
+{#                   class="btn btn-primary btn-sm"#}
+{#                   role="button"#}
+{#                   target="_blank">IMPORT POSITIONS <span class="glyphicon glyphicon-new-window"></span></a>#}
+{#                {% endif %}#}
                 {% if voter_guide_possibility.batch_header_id %}
                 <br />
                 <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ voter_guide_possibility.batch_header_id }}&kind_of_batch=POSITION"
@@ -169,6 +173,11 @@
                     <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
                        target="_blank"> (edit)</a>
                 {% endif %}
+            </td>
+            <td>
+              {% if voter_guide_possibility.assigned_to_name %}
+                {{ voter_guide_possibility.assigned_to_name }}
+              {% endif %}
             </td>
             <td>
               <span class="u-no-break">{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</span>

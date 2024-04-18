@@ -13,7 +13,6 @@ import requests
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-from django.utils.timezone import localtime, now
 from nameparser import HumanName
 from nameparser.config import CONSTANTS
 import wevote_functions.admin
@@ -1076,6 +1075,7 @@ def convert_level_to_race_office_level(level):
     else:
         return ''
 
+
 def extract_email_addresses_from_string(incoming_string):
     """
     Thanks to https://gist.github.com/dideler/5219706
@@ -1345,9 +1345,9 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     twitter_text_string = str(twitter_text_string)
     twitter_text_string.strip()
     strings_to_be_removed_from_url = [
-        "http://twitter.com","http://www.twitter.com", "http://m.twitter.com", "https://twitter.com",
+        "http://twitter.com", "http://www.twitter.com", "http://m.twitter.com", "https://twitter.com",
         "https://m.twitter.com", "https://www.twitter.com", "/www.twitter.com", "www.twitter.com",
-        "twitter.com", "@"
+        "twitter.com", "@",
     ]
     for string_to_be_removed in strings_to_be_removed_from_url:
         twitter_text_string = re.compile(re.escape(string_to_be_removed), re.IGNORECASE).sub("", twitter_text_string)
@@ -1401,7 +1401,7 @@ def is_valid_state_code(possible_state_code):
 
 def get_ip_from_headers(request):
     x_forwarded_for = request.META.get('X-Forwarded-For')
-    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    http_x_forwarded_for = request.headers.get('x-forwarded-for')
     if x_forwarded_for:
         return x_forwarded_for.split(',')[-1].strip()
     elif http_x_forwarded_for:
@@ -1447,7 +1447,7 @@ def get_voter_api_device_id(request, generate_if_no_cookie=False):
     """
     voter_api_device_id = ''
     # First check the headers
-    voter_device_id = request.META.get('HTTP_X_HEADER_DEVICEID', '')
+    voter_device_id = request.headers.get('x-header-deviceid', '')
     if positive_value_exists(voter_device_id):
         return voter_device_id
 
@@ -1483,7 +1483,7 @@ def get_voter_device_id(request, generate_if_no_value=False):
     :return:
     """
     # First check the headers
-    voter_device_id = request.META.get('HTTP_X_HEADER_DEVICEID', '')
+    voter_device_id = request.headers.get('x-header-deviceid', '')
     if positive_value_exists(voter_device_id):
         return voter_device_id
 

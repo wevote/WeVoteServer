@@ -335,7 +335,7 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_id = convert_to_int(request.GET.get('organization_id', 0))
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
 
     # robot-detection is used for detecting web bots only and django-user-agents is used for device detection
     user_agent_object = get_user_agent(request)

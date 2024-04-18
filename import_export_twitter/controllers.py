@@ -35,7 +35,7 @@ from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
 from representative.models import Representative, RepresentativeManager
 from twitter.functions import convert_twitter_user_object_data_to_we_vote_dict, expand_twitter_public_metrics, \
-    expand_twitter_entities, retrieve_twitter_user_info
+    expand_twitter_entities, is_valid_twitter_handle_format, retrieve_twitter_user_info
 from twitter.models import TwitterApiCounterManager, TwitterLinkPossibility, TwitterUserManager, \
     create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import VoterManager
@@ -44,6 +44,7 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
     is_voter_device_id_valid, positive_value_exists, convert_state_code_to_state_text, \
     POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, \
     POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS, NEGATIVE_TWITTER_HANDLE_SEARCH_KEYWORDS
+from wevote_functions.utils import staticUserAgent
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, \
     RETRIEVE_POSSIBLE_TWITTER_HANDLES, RETRIEVE_UPDATE_DATA_FROM_TWITTER
 
@@ -77,11 +78,6 @@ TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 TWITTER_NATIVE_INDICATOR = 'native'
-
-
-class FakeFirefoxURLopener(urllib.request.FancyURLopener):
-    version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0)' \
-            + ' Gecko/20100101 Firefox/25.0'
 
 
 class GetOutOfLoop(Exception):
@@ -1471,11 +1467,6 @@ def retrieve_possible_twitter_handles(candidate):
         'nickname': sub(name_handling_regex, "", candidate.extract_nickname()),
     }
 
-    # December 2021: Using the Twitter 1.1 API for search_users, since it is not yet available in 2.0
-    # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
-    # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    # api = tweepy.API(auth, timeout=20)
     print("tweepy client init. (WeVote) in retrieve_possible_twitter_handles")
     client = tweepy.Client(
         bearer_token=TWITTER_BEARER_TOKEN,
@@ -2076,21 +2067,11 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
         }
         return results
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
-    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    # 'Accept-Encoding': 'none',
-    # 'Accept-Language': 'en-US,en;q=0.8',
-    # 'Connection': 'keep-alive'
-    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
 
     # ##########
     # Twitter
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         for line in page.readlines():
             try:
@@ -2144,7 +2125,7 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
     # #########
     # Facebook
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         for line in page.readlines():
             try:
@@ -2444,9 +2425,18 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         use_cached_data_if_within_x_days=30,
     )
     status += results['status']
+    twitter_handles_not_valid_list = []
     twitter_handles_to_retrieve_list = results['twitter_handles_to_retrieve_list']
     if len(twitter_handles_to_retrieve_list) > 0:
         status += "TWITTER_HANDLES_TO_REQUEST: " + str(len(twitter_handles_to_retrieve_list)) + " "
+        # Check to make sure these handles all have a valid format
+        twitter_handles_to_retrieve_list_modified = []
+        for one_twitter_handle in twitter_handles_to_retrieve_list:
+            if is_valid_twitter_handle_format(one_twitter_handle):
+                twitter_handles_to_retrieve_list_modified.append(one_twitter_handle)
+            else:
+                twitter_handles_not_valid_list.append(one_twitter_handle)
+        twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list_modified
         if len(twitter_handles_to_retrieve_list) > 100:
             twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list[:100]
             status += "(REQUEST_LIMITED_TO_100) "
@@ -2475,10 +2465,11 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
     if success:
         status += "TWITTER_HANDLES_RETRIEVED "
     results = {
+        'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
         'success':                              success,
         'status':                               status,
         'twitter_handles_added':                twitter_user_created_count,
-        'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
+        'twitter_handles_not_valid_list':       twitter_handles_not_valid_list,
     }
     return results
 
@@ -2695,9 +2686,9 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
 
         print("tweepy OAuth1UserHandler (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
         voters_oauth1_user_handler = tweepy.OAuth1UserHandler(
-            request_token, request_secret,
-            callback=None
-        )
+            consumer_key=TWITTER_CONSUMER_KEY,
+            consumer_secret=TWITTER_CONSUMER_SECRET,
+            callback=None)
         print('oauth_token, oauth_token_secret: ', oauth_token, request_secret)
         voters_oauth1_user_handler.request_token = {
             "oauth_token": oauth_token,
@@ -2850,8 +2841,12 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
 
     try:
         # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
-        print("tweepy OAuthHandler (WeVote) in twitter_sign_in_start_for_api -- voter.we_vote_id:", voter.we_vote_id)
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, callback_url)
+        print("tweepy OAuth1UserHandler (WeVote) in twitter_sign_in_start_for_api -- voter.we_vote_id:", voter.we_vote_id)
+        auth = tweepy.OAuth1UserHandler(
+            consumer_key=TWITTER_CONSUMER_KEY,
+            consumer_secret=TWITTER_CONSUMER_SECRET,
+            callback=callback_url)
+
         twitter_authorization_url = auth.get_authorization_url()
         request_token_dict = auth.request_token
         twitter_request_token = ''
@@ -3001,9 +2996,9 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
     twitter_voters_access_token_secret_secret = ''
     try:
         # We take the Request Token, Request Secret, and OAuth Verifier and request an access_token
-        print("tweepy OAuthHandler (WeVote) in twitter_sign_in_request_access_token_for_api -- incoming_request_token:",
+        print("tweepy OAuth1UserHandler (WeVote) in twitter_sign_in_request_access_token_for_api -- incoming_request_token:",
               incoming_request_token)
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth = tweepy.OAuth1UserHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.request_token = {'oauth_token': twitter_auth_response.twitter_request_token,
                               'oauth_token_secret': twitter_auth_response.twitter_request_secret}
         auth.get_access_token(incoming_oauth_verifier)
@@ -3168,10 +3163,9 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         mark_detailed_counter_entry(counter, success, status)
     except tweepy.TweepyException as error_instance:
         success = False
-        err_string = 'GENERAL_TWEEPY_EXCEPTION'
+        err_string = 'GENERAL_TWEEPY_EXCEPTION ' + str(error_instance) + ' '
         try:
-            # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
-            err_string = error_instance.args[0].args[0].args[0]
+            err_string = str(error_instance)
             mark_detailed_counter_entry(counter, success, status)
         except Exception:
             pass
