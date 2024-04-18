@@ -10,7 +10,7 @@ from config.base import get_environment_variable
 from retrieve_tables.controllers_master import fast_load_status_retrieve, retrieve_sql_tables_as_csv, \
     get_total_row_count
 from retrieve_tables.controllers_master import fast_load_status_update
-from wevote_functions.functions import get_voter_device_id
+from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -26,9 +26,9 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     table_name = request.GET.get('table_name', 'bad_table_param_error')
     start = request.GET.get('start', '')
     end = request.GET.get('end', '')
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_api_device_id = get_voter_api_device_id(request)
 
-    json_data = retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end)
+    json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
