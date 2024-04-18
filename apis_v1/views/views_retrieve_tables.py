@@ -23,12 +23,12 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     :param request:
     :return:
     """
-    table = request.GET.get('table', 'bad_table_param')
+    table_name = request.GET.get('table_name', 'bad_table_param_error')
     start = request.GET.get('start', '')
     end = request.GET.get('end', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
-    json_data = retrieve_sql_tables_as_csv(voter_device_id, table, start, end)
+    json_data = retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
