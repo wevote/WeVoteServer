@@ -195,8 +195,8 @@ class WeVoteImageManager(models.Manager):
     def __unicode__(self):
         return "WeVoteImageManager"
 
+    @staticmethod
     def create_we_vote_image(
-            self,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
             facebook_background_image_offset_x=False,
@@ -231,8 +231,7 @@ class WeVoteImageManager(models.Manager):
             organization_we_vote_id=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
-            voter_we_vote_id=None,
-            ):
+            voter_we_vote_id=None):
         """
         Creates a we_vote_image object, which contains all the metadata, but not the image or a link to the image
         :param campaignx_we_vote_id:
@@ -329,7 +328,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def delete_we_vote_image(self, we_vote_image):
+    @staticmethod
+    def delete_we_vote_image(we_vote_image):
         """
         Delete we vote image entry from WeVoteImage table.
         :param we_vote_image:
@@ -350,7 +350,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def delete_image_from_aws(self, we_vote_image_file_location):
+    @staticmethod
+    def delete_image_from_aws(we_vote_image_file_location):
         """
         Delete image from aws
         :param we_vote_image_file_location:
@@ -370,10 +371,17 @@ class WeVoteImageManager(models.Manager):
 
         return image_deleted_from_aws
 
-    def save_we_vote_image_facebook_info(self, we_vote_image, facebook_user_id, image_width, image_height,
-                                         facebook_image_url_https, same_day_image_version,
-                                         kind_of_image_facebook_profile,
-                                         kind_of_image_facebook_background, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_facebook_info(
+            we_vote_image,
+            facebook_user_id,
+            image_width,
+            image_height,
+            facebook_image_url_https,
+            same_day_image_version,
+            kind_of_image_facebook_profile,
+            kind_of_image_facebook_background,
+            image_url_valid=False):
         """
         Save facebook information to WeVoteImage
         :param we_vote_image:
@@ -412,8 +420,14 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_issue_info(self, we_vote_image, image_width, image_height,
-                                      issue_image_url_https, same_day_image_version, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_issue_info(
+            we_vote_image,
+            image_width,
+            image_height,
+            issue_image_url_https,
+            same_day_image_version,
+            image_url_valid=False):
         """
         Save Issue information to WeVoteImage
         :param we_vote_image:
@@ -445,9 +459,16 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_maplight_info(self, we_vote_image, maplight_id, image_width, image_height,
-                                         maplight_image_url_https, same_day_image_version, kind_of_image_maplight,
-                                         image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_maplight_info(
+            we_vote_image,
+            maplight_id,
+            image_width,
+            image_height,
+            maplight_image_url_https,
+            same_day_image_version,
+            kind_of_image_maplight,
+            image_url_valid=False):
         """
         Save maplight information to WeVoteImage
         :param we_vote_image:
@@ -483,10 +504,16 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_organization_share_info(
-            self, we_vote_image, image_width, image_height,
-            image_url_https, same_day_image_version, image_url_valid=False,
-            kind_of_image_chosen_favicon=False, kind_of_image_chosen_logo=False,
+            we_vote_image,
+            image_width,
+            image_height,
+            image_url_https,
+            same_day_image_version,
+            image_url_valid=False,
+            kind_of_image_chosen_favicon=False,
+            kind_of_image_chosen_logo=False,
             kind_of_image_chosen_social_share_master=False):
         """
 
@@ -528,9 +555,16 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_vote_smart_info(self, we_vote_image, vote_smart_id, image_width, image_height,
-                                           vote_smart_image_url_https, same_day_image_version, kind_of_image_vote_smart,
-                                           image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_vote_smart_info(
+            we_vote_image,
+            vote_smart_id,
+            image_width,
+            image_height,
+            vote_smart_image_url_https,
+            same_day_image_version,
+            kind_of_image_vote_smart,
+            image_url_valid=False):
         """
         Save vote smart information to WeVoteImage
         :param we_vote_image:
@@ -566,8 +600,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_vote_usa_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -605,8 +639,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_voter_uploaded_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -644,9 +678,15 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_ballotpedia_info(self, we_vote_image, image_width, image_height,
-                                            ballotpedia_profile_image_url, same_day_image_version,
-                                            kind_of_image_ballotpedia_profile, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_ballotpedia_info(
+            we_vote_image,
+            image_width,
+            image_height,
+            ballotpedia_profile_image_url,
+            same_day_image_version,
+            kind_of_image_ballotpedia_profile,
+            image_url_valid=False):
         """
         Save Ballotpedia information to WeVoteImage
         :param we_vote_image:
@@ -680,8 +720,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_campaignx_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -719,8 +759,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_ctcl_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -758,9 +798,15 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_linkedin_info(self, we_vote_image, image_width, image_height,
-                                         linkedin_profile_image_url, same_day_image_version,
-                                         kind_of_image_linkedin_profile, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_linkedin_info(
+            we_vote_image,
+            image_width,
+            image_height,
+            linkedin_profile_image_url,
+            same_day_image_version,
+            kind_of_image_linkedin_profile,
+            image_url_valid=False):
         """
         Save LinkedIn information to WeVoteImage
         :param we_vote_image:
@@ -794,9 +840,15 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_wikipedia_info(self, we_vote_image, image_width, image_height,
-                                          wikipedia_profile_image_url, same_day_image_version,
-                                          kind_of_image_wikipedia_profile, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_wikipedia_info(
+            we_vote_image,
+            image_width,
+            image_height,
+            wikipedia_profile_image_url,
+            same_day_image_version,
+            kind_of_image_wikipedia_profile,
+            image_url_valid=False):
         """
         Save vote smart information to WeVoteImage
         :param we_vote_image:
@@ -830,8 +882,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_organization_uploaded_profile_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -869,9 +921,16 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_other_source_info(self, we_vote_image, image_width, image_height,
-                                             other_source, other_source_image_url, same_day_image_version,
-                                             kind_of_image_other_source, image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_other_source_info(
+            we_vote_image,
+            image_width,
+            image_height,
+            other_source,
+            other_source_image_url,
+            same_day_image_version,
+            kind_of_image_other_source,
+            image_url_valid=False):
         """
         Save other source information to WeVoteImage
         :param we_vote_image:
@@ -907,8 +966,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_politician_uploaded_profile_info(
-            self,
             we_vote_image=None,
             image_width='',
             image_height='',
@@ -946,10 +1005,18 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def save_we_vote_image_twitter_info(self, we_vote_image, twitter_id, image_width, image_height,
-                                        twitter_image_url_https, same_day_image_version, kind_of_image_twitter_profile,
-                                        kind_of_image_twitter_background, kind_of_image_twitter_banner,
-                                        image_url_valid=False):
+    @staticmethod
+    def save_we_vote_image_twitter_info(
+            we_vote_image,
+            twitter_id,
+            image_width,
+            image_height,
+            twitter_image_url_https,
+            same_day_image_version,
+            kind_of_image_twitter_profile,
+            kind_of_image_twitter_background,
+            kind_of_image_twitter_banner,
+            image_url_valid=False):
         """
         Save twitter information to WeVoteImage
         :param we_vote_image:
@@ -991,8 +1058,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_we_vote_image_aws_info(
-            self,
             we_vote_image,
             we_vote_image_url='',
             we_vote_image_file_location='',
@@ -1028,8 +1095,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def set_active_version_false_for_other_images(
-            self,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
             image_url_https=None,
@@ -1058,8 +1125,7 @@ class WeVoteImageManager(models.Manager):
             organization_we_vote_id=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
-            voter_we_vote_id=None,
-    ):
+            voter_we_vote_id=None):
         """
         Set active version false for all other images except for current latest image of a candidate/organization
         :param campaignx_we_vote_id:
@@ -1192,7 +1258,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def retrieve_we_vote_image_from_id(self, we_vote_image_id):
+    @staticmethod
+    def retrieve_we_vote_image_from_id(we_vote_image_id):
         """
         :param we_vote_image_id:
         :return:
@@ -1242,7 +1309,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def retrieve_latest_facebook_images_for_voter(self, voter_we_vote_id, facebook_profile_image_url_https):
+    @staticmethod
+    def retrieve_latest_facebook_images_for_voter(voter_we_vote_id, facebook_profile_image_url_https):
         status = ''
         success = False
         we_vote_image_list_found = False
@@ -1298,8 +1366,8 @@ class WeVoteImageManager(models.Manager):
         return results
 
 
+    @staticmethod
     def retrieve_we_vote_image_list_from_we_vote_id(
-            self,
             voter_we_vote_id=None,
             candidate_we_vote_id=None,
             issue_we_vote_id=None,
@@ -1347,7 +1415,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def retrieve_we_vote_image_list_from_google_civic_election_id(self, google_civic_election_id):
+    @staticmethod
+    def retrieve_we_vote_image_list_from_google_civic_election_id(google_civic_election_id):
         """
         Retrieve a voter's, candidate's, organization's or issue's we vote image list from the we_vote_id
         :param google_civic_election_id:
@@ -1387,7 +1456,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def twitter_profile_image_url_https_original(self, twitter_profile_image_url_https):
+    @staticmethod
+    def twitter_profile_image_url_https_original(twitter_profile_image_url_https):
         if twitter_profile_image_url_https:
             # check if original url is valid after stripping _normal from the url
             image_url_https_original = twitter_profile_image_url_https.replace("_normal", "")
@@ -1547,7 +1617,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
-    def retrieve_we_vote_image_from_facebook_url( self, we_vote_image_url):
+    @staticmethod
+    def retrieve_we_vote_image_from_facebook_url(we_vote_image_url):
         """
 
         :param we_vote_image_url:           The image that will end up in the voter.we_vote_image_url field,
@@ -1586,8 +1657,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_we_vote_image_list_from_url(
-            self,
             ballotpedia_profile_image_url=None,
             campaignx_photo_url_https=None,
             campaignx_we_vote_id=None,
@@ -1612,8 +1683,7 @@ class WeVoteImageManager(models.Manager):
             vote_smart_image_url_https=None,
             voter_uploaded_profile_image_url_https=None,
             voter_we_vote_id=None,
-            wikipedia_profile_image_url=None,
-    ):
+            wikipedia_profile_image_url=None):
         """
         Retrieve voter's we vote image list as per image url
         :param ballotpedia_profile_image_url:
@@ -1703,8 +1773,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_recent_cached_we_vote_image(
-            self,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
             issue_we_vote_id=None,
@@ -1734,8 +1804,7 @@ class WeVoteImageManager(models.Manager):
             organization_we_vote_id=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
-            voter_we_vote_id=None,
-    ):
+            voter_we_vote_id=None):
         """
         Retrieve cached we vote image list as per kind of image
         :param campaignx_we_vote_id:
@@ -1847,8 +1916,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_todays_cached_we_vote_image_list(
-            self,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
             issue_we_vote_id=None,
@@ -1880,8 +1949,7 @@ class WeVoteImageManager(models.Manager):
             organization_we_vote_id=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
-            voter_we_vote_id=None,
-    ):
+            voter_we_vote_id=None):
         """
         Retrieve today's cached images according to the kind of image
         :param campaignx_we_vote_id:
@@ -1987,8 +2055,8 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def resize_we_vote_master_image(
-            self,
             image_local_path='',
             image_width=0,
             image_height=0,
@@ -2035,7 +2103,8 @@ class WeVoteImageManager(models.Manager):
 
         return resized_image_created
 
-    def store_image_locally(self, image_url_https, image_local_path):
+    @staticmethod
+    def store_image_locally(image_url_https, image_local_path):
         """
         Save image locally at /tmp/ folder
         :param image_url_https:
@@ -2057,7 +2126,9 @@ class WeVoteImageManager(models.Manager):
 
         return image_stored
 
-    def store_python_image_locally(self, python_image_library_image, image_local_path):
+
+    @staticmethod
+    def store_python_image_locally(python_image_library_image, image_local_path):
         """
         Save image locally at /tmp/ folder
         :param python_image_library_image:
@@ -2079,7 +2150,8 @@ class WeVoteImageManager(models.Manager):
 
         return image_stored
 
-    def store_image_to_aws(self, we_vote_image_file_name='', we_vote_image_file_location='', image_format=''):
+    @staticmethod
+    def store_image_to_aws(we_vote_image_file_name='', we_vote_image_file_location='', image_format=''):
         """
         Upload image to aws
         :param we_vote_image_file_name:
@@ -2104,7 +2176,8 @@ class WeVoteImageManager(models.Manager):
 
         return image_stored_to_aws
 
-    def store_image_file_to_aws(self, image_file, we_vote_image_file_location):
+    @staticmethod
+    def store_image_file_to_aws(image_file, we_vote_image_file_location):
         """
         Upload image_file(inMemoryUploadedFile) directly to AWS
         :param image_file:
@@ -2126,7 +2199,8 @@ class WeVoteImageManager(models.Manager):
 
         return image_stored_to_aws
 
-    def retrieve_image_from_aws(self, we_vote_image_file_location):
+    @staticmethod
+    def retrieve_image_from_aws(we_vote_image_file_location):
         """
         Download image from aws
         :param we_vote_image_file_location:
