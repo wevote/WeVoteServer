@@ -13,5 +13,5 @@ class RetrieveTableState(models.Model):
     chunk = models.PositiveIntegerField(verbose_name="Current chunk number", default=0)
     current_record = models.PositiveIntegerField(verbose_name="Current record counter", default=0)
     total_records = models.PositiveIntegerField(verbose_name="Total records to be exported", default=0)
-    voter_device_id = models.CharField(verbose_name='voter device id', max_length=255, null=True, unique=True,
-                                       db_index=True)
+    voter_api_device_id = models.CharField(verbose_name='voter_api_device_id', max_length=255, null=True, unique=True,
+                                           db_index=True)

@@ -14,7 +14,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.models import RetrieveTableState
-from wevote_functions.functions import positive_value_exists, get_voter_device_id, convert_to_int
+from wevote_functions.functions import positive_value_exists, convert_to_int, get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -97,7 +97,7 @@ def get_total_row_count():
     return rows
 
 
-def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
+def retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end):
     """
     Extract one of the approximately 21 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
@@ -203,7 +203,7 @@ def check_for_non_ascii(table_name, row):
 
 def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
     initialize = positive_value_exists(request.GET.get('initialize', False))
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_api_device_id = get_voter_api_device_id(request)
     is_running = positive_value_exists(request.GET.get('is_running', True))
     table_name = ''
     chunk = 0
@@ -217,8 +217,8 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         if initialize:
             total = get_total_row_count()
             started = datetime.now(tz=timezone.utc)
-            RetrieveTableState.objects.update_or_create(
-                voter_device_id=voter_device_id,
+            row, success = RetrieveTableState.objects.update_or_create(
+                voter_api_device_id=voter_api_device_id,
                 defaults={
                     'is_running':       is_running,
                     'started_date':     started,
@@ -227,21 +227,24 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
                     'current_record':   0,
                     'total_records':    total,
                 })
+            row_id = row.id
             status += "ROW_INITIALIZED "
         else:
-            row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
+            row = RetrieveTableState.objects.get(voter_api_device_id=voter_api_device_id)
             is_running = row.is_running
             table_name = row.table_name
             chunk = row.chunk
             records = row.current_record
             total = row.total_records
             started = row.started_date
+            row_id = row.id
             status += "ROW_RETRIEVED "
 
     except Exception as e:
         status += "fast_load_status_retrieve caught exception: " + str(e)
         logger.error("fast_load_status_retrieve caught exception: " + str(e))
         success = False
+        row_id = ''
 
     started_txt = started.strftime('%Y-%m-%d %H:%M:%S') if started else ""
     results = {
@@ -249,12 +252,13 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         'success': success,
         'initialize': initialize,
         'is_running': is_running,
-        'voter_device_id': voter_device_id,
+        'voter_api_device_id': voter_api_device_id,
         'started_date': started_txt,
         'table_name': table_name,
         'chunk': chunk,
         'current_record': records,
         'total_records': total,
+        'row_id': row_id,
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')
@@ -264,7 +268,7 @@ def fast_load_status_update(request):
     """
     Save updated fast load status
     """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_api_device_id = get_voter_api_device_id(request)
     table_name = request.GET.get('table_name', '')
     additional_records = convert_to_int(request.GET.get('additional_records', 0))
     chunk = convert_to_int(request.GET.get('chunk', None))
@@ -275,7 +279,7 @@ def fast_load_status_update(request):
     success = True
 
     try:
-        row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
+        row = RetrieveTableState.objects.get(voter_api_device_id=voter_api_device_id)
         row.is_running = is_running
         if positive_value_exists(table_name):
             row.table_name = table_name

@@ -14,7 +14,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.controllers_master import allowable_tables
-from wevote_functions.functions import get_voter_device_id
+from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -36,16 +36,16 @@ def save_off_database():
     time.sleep(20)
 
 
-def update_fast_load_db(host, voter_device_id, table_name, additional_records):
+def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
     try:
         response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
                                 verify=False,
-                                params={'voter_device_id': voter_device_id,
-                                        'table_name': table_name,
+                                params={'table_name': table_name,
                                         'additional_records': additional_records,
                                         'is_running': True,
+                                        'voter_api_device_id': voter_api_device_id,
                                         })
-        print('update_fast_load_db ', response.status_code, response.url)
+        print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
 
@@ -64,15 +64,15 @@ def retrieve_sql_files_from_master_server(request):
     dt = time.time() - t0
     stats = {}
     print('Saved off local database in ' + str(int(dt)) + ' seconds')
-    stats = stats | {"SaveOffDb": str(int(dt))}
+    stats |= {'save_off': str(int(dt))}
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
     # host = 'https://wevotedeveloper.com:8000'
     host = 'https://api.wevoteusa.org'
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_api_device_id = get_voter_api_device_id(request)
     requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
-                 params={"initialize": True, "voter_device_id": voter_device_id}, verify=False)
+                 params={"initialize": True, "voter_api_device_id": voter_api_device_id}, verify=True)
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
@@ -95,9 +95,9 @@ def retrieve_sql_files_from_master_server(request):
                                 '&end=' + str(end))
                     try:
                         response = requests.get(host + '/apis/v1/retrieveSQLTables/',
-                                                verify=False,
+                                                verify=True,
                                                 params={'table_name': table_name, 'start': start, 'end': end,
-                                                        'voter_device_id': voter_device_id})
+                                                        'voter_api_device_id': voter_api_device_id})
                         print('retrieveSQLTables url: ' + response.url)
                         request_count += 1
                         load_successful = True
@@ -130,7 +130,7 @@ def retrieve_sql_files_from_master_server(request):
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
                   " rows, cumulative is " + "{:,}".format(final_lines_count))
-            update_fast_load_db(host, voter_device_id, table_name, len(lines))
+            update_fast_load_db(host, voter_api_device_id, table_name, len(lines))
 
             if len(lines) > 0:
                 try:
@@ -171,7 +171,7 @@ def retrieve_sql_files_from_master_server(request):
                     dtc = time.time() - t0
                     print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
                           str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
-                    stats = stats | {table_name: str(int(dtc))}
+                    stats |= {table_name: str(int(dtc))}
 
                 except Exception as e:
                     status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
@@ -222,7 +222,7 @@ def retrieve_sql_files_from_master_server(request):
         secs = int(stats[table])
         min1 = int(secs / 60)
         secs1 = int(secs % 60)
-        print("Processing and loading table " + table + "ended at " + str(min1) + ":" + str(secs1) + "  cumulative")
+        print("Processing and loading table " + table + " ended at " + str(min1) + ":" + str(secs1) + "  cumulative")
     print("Processing and loading grand total " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
     os.system('rm ' + os.path.join(LOCAL_TMP_PATH, '*.csvTemp'))    # Clean up all the temp files
