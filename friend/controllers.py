@@ -3159,10 +3159,13 @@ def generate_mutual_friends_for_two_voters(
     mutual_friend_entry_voter_we_vote_id_list_to_delete = \
         list(set(existing_mutual_friend_voter_we_vote_id_list) -
              set(mutual_friends_voter_we_vote_id_list_from_current_friends))
+
     for one_mutual_friend_voter_we_vote_id in mutual_friend_entry_voter_we_vote_id_list_to_delete:
         mutual_friend = existing_mutual_friend_dict[one_mutual_friend_voter_we_vote_id]
         if hasattr(mutual_friend, 'mutual_friend_voter_we_vote_id'):
             mutual_friend.delete()
+
+
 
     # if positive_value_exists(mutual_friends_created_count):
     #     status += "created: " + str(mutual_friends_created_count) + " "
@@ -4202,25 +4205,16 @@ def move_friends_to_another_voter(
                 status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
                 success = False
 
-    # delete -> this part ???
-    from_friend_list_remaining_results = friend_manager.retrieve_current_friend_list(
-        from_voter_we_vote_id,
-        read_only=False)
-    if not from_friend_list_remaining_results['success']:
-        status += from_friend_list_remaining_results['status']
-        success = False
-    from_friend_list_remaining = from_friend_list_remaining_results['current_friend_list']
-    for from_friend_entry in from_friend_list_remaining:
-        # Delete the remaining friendship values
-        try:
-            from_friend_entry.delete()
-        except Exception as e:
+    try:
+        number_deleted, details = CurrentFriend.objects\
+            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .delete()
+        from_voter_we_vote_id += number_deleted
+    except Exception as e:
             status += "PROBLEM_DELETING_FRIEND: " + str(e) + ' '
             success = False
     
-    
-    # Refactor???
-    
+
 
     results = {
         'status': status,
@@ -4302,19 +4296,13 @@ def move_suggested_friends_to_another_voter(
                 suggested_friend_entries_not_moved += 1
                 status += "PROBLEM_UPDATING_SUGGESTED_FRIEND: " + str(e) + ' '
                 success = False
-    # Refactor???
-    from_friend_list_remaining_results = friend_manager.retrieve_suggested_friend_list(
-        from_voter_we_vote_id, hide_deleted=False, read_only=False)
-    if not from_friend_list_remaining_results['success']:
-        status += from_friend_list_remaining_results['status']
-        success = False
-    from_friend_list_remaining = from_friend_list_remaining_results['suggested_friend_list']
-    for from_friend_entry in from_friend_list_remaining:
-        # Delete the remaining friendship values
-        try:
-            # Leave this turned off until testing is finished
-            from_friend_entry.delete()
-        except Exception as e:
+    
+    try:
+        number_deleted, details = SuggestedFriend.objects\
+            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .delete()
+        from_voter_we_vote_id += number_deleted
+    except Exception as e:
             status += "PROBLEM_DELETING_FRIEND: " + str(e) + ' '
             success = False
 
