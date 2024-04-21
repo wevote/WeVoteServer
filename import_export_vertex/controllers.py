@@ -33,7 +33,7 @@ def ask_google_vertex_a_question(question, text_to_search):
             project=GOOGLE_PROJECT_ID,
             location=VERTEX_SERVICE_ENDPOINT)
         t1 = time()
-        print('---- vertexai.init took {:.6f} seconds'.format(t1-t0))
+        # print('---- vertexai.init took {:.6f} seconds'.format(t1-t0))
 
         temperature = 0.2
         parameters = {
@@ -45,9 +45,9 @@ def ask_google_vertex_a_question(question, text_to_search):
         }
         model = TextGenerationModel.from_pretrained("text-bison")
         t2 = time()
-        print('---- TextGenerationModel took {:.6f} seconds'.format(t2-t1))
-
-        print(f'---- Question ==> \'{question}\' <==')
+        # print('---- TextGenerationModel took {:.6f} seconds'.format(t2-t1))
+        #
+        # print(f'---- Question ==> \'{question}\' <==')
         # text_to_search = "One name is George Washington and another name is Thomas Jefferson."
         # WITH PARAMETERS
         # response = model.predict(
@@ -66,17 +66,17 @@ def ask_google_vertex_a_question(question, text_to_search):
         if positive_value_exists(response_text):
             response_text_found = True
         t3 = time()
-        print('---- model.predict took {:.6f} seconds'.format(t3-t2))
-        print('---- total took {:.6f} seconds'.format(t3-t0))
-        print(f'---- Question query from Vertex Model: {response_text}')
-
-        #  Feel free to remove logging and print lines in this file
-        performance = "(Ok) ask_google_vertex_a_question Vertex init took {:.6f} seconds, ".format(t1-t0)
-        performance += "load model (text-bison) took {:.6f} seconds, ".format(t2-t1)
-        performance += "Question query took {:.6f} seconds, ".format(t3-t2)
-        performance += "total took {:.6f} seconds ".format(t3-t0)
-        print(performance)
-        status += performance
+        # print('---- model.predict took {:.6f} seconds'.format(t3-t2))
+        # print('---- total took {:.6f} seconds'.format(t3-t0))
+        # print(f'---- Question query from Vertex Model: {response_text}')
+        #
+        # #  Feel free to remove logging and print lines in this file
+        # performance = "(Ok) ask_google_vertex_a_question Vertex init took {:.6f} seconds, ".format(t1-t0)
+        # performance += "load model (text-bison) took {:.6f} seconds, ".format(t2-t1)
+        # performance += "Question query took {:.6f} seconds, ".format(t3-t2)
+        # performance += "total took {:.6f} seconds ".format(t3-t0)
+        # print(performance)
+        # status += performance
     except Exception as error_message:
         print(f"Error response from Vertex Model: {error_message}")
         status += "VERTEX_ERROR: {error_message} ".format(error_message=error_message)

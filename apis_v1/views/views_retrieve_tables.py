@@ -28,6 +28,7 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     end = request.GET.get('end', '')
     voter_api_device_id = get_voter_api_device_id(request)
 
+    # print("retrieveSQLTables voter_api_device_id: ", voter_api_device_id)
     json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
