@@ -284,11 +284,16 @@
 <p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
 
 <script>
-    function getDeviceId () {
-        let cookie =  document.cookie
-        const regex = /voter_device_id=(.*?);/gm;
-        const voterDeviceId = cookie.search(regex)
-        return voterDeviceId;
+    function getApiDeviceId () {
+        const regex = /voter_api_device_id=(.*?);/g;
+        const res = regex.exec(document.cookie);
+        if (res && res.length > 1) {
+            const voterApiDeviceId = res && res[1];
+            console.log('getDeviceId voter_api_device_id: ',voterApiDeviceId);
+            return voterApiDeviceId;
+        }
+        console.log('ERROR: getApiDeviceId called with out a voter_api_device_id cookie');
+        return ''
     }
 
     function getEstimatedCompletionTime (t0, current_record, total_records) {
@@ -305,10 +310,10 @@
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
         const timeElapsedMin = Math.trunc(dt/60000)
         const secRemainder = timeLeftSec - (60 * timeLeftMin)
-        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minutes`
+        const sStr = timeElapsedMin !== 1 ? 's' : ''
+        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minute${sStr}`
         console.log(stat);
         return stat;
-
     }
 
     $(function() {
@@ -340,6 +345,7 @@
     const t0 = currentDate.getTime();
     let saveOffDBComplete = false;
 
+    let counter = 0;
     setInterval(function () {
       {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
       let origin = 'https://api.wevoteusa.org'
@@ -352,6 +358,7 @@
         $.ajax({
           type: "GET",
           url: apiURL,
+          params: {'counter': counter++},
           success: function (data) {
             let status = data.text;
             // console.log('realTimeStatusPollingLocations', status);
@@ -359,23 +366,24 @@
           },
         });
       }
-      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?&initialize=' + fastInit.val();
+      const voterApiDeviceId = getApiDeviceId();
+      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?initialize=' + fastInit.val() +
+          '&counter=' + (counter++) + '&voter_api_device_id=' + voterApiDeviceId;
       if (fastInit.val() === 'true') {
         fastInit.val("false")
       }
       if (startedFastUpdate.val() === 'true') {
-          let voterDeviceId = getDeviceId();
+
           $.ajax({
               type: "GET",
               url: apiUrlFastLoadStatus,
-              params: {'voter_device_id': voterDeviceId},
               success: function (data) {
                   // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
                   if (fastLoadButton.html().startsWith('...')) {
                       let newHtml = '';
                       if (data.current_record === 0) {
                           newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
-                          countCopy += 2.5;
+                          countCopy += 1.5;
                           prog = Math.trunc(countCopy);
                       } else {
                           if (!saveOffDBComplete) {
@@ -415,7 +423,7 @@
         $.ajax({
           type: "GET",
           url: apiURL,
-          headers: { 'voter_device_id': getDeviceId() },
+          headers: { 'voterApiDeviceId': getApiDeviceId() },
           success: function (data) {
             let status = data.text;
             // console.log(status);

@@ -19,5 +19,8 @@
     "redux-devtools": "^2.1.5",
     "snyk": "^1.251.0"
   },
-  "snyk": true
+  "snyk": true,
+  "dependencies": {
+    "matplotlib": "^1.0.0"
+  }
 }
