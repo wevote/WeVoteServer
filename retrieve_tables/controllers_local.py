@@ -39,13 +39,13 @@ def save_off_database():
 def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
     try:
         response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
-                                verify=False,
+                                verify=True,
                                 params={'table_name': table_name,
                                         'additional_records': additional_records,
                                         'is_running': True,
                                         'voter_api_device_id': voter_api_device_id,
                                         })
-        print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
 
@@ -78,8 +78,11 @@ def retrieve_sql_files_from_master_server(request):
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
         t1 = time.time()
         dt = 0
+        tables_with_too_many_columns = {'candidate_candidatecampaign'}
+        gulp_size = 500000 if table_name not in tables_with_too_many_columns else 100000
         start = 0
-        end = 499999
+        end = gulp_size - 1
+
         final_lines_count = 0
         while end < 20000000:
             t2 = time.time()
@@ -128,8 +131,8 @@ def retrieve_sql_files_from_master_server(request):
                       ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
-            print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
-                  " rows, cumulative is " + "{:,}".format(final_lines_count))
+            print('... Intermediate line count from this request of ' + '{:,}'.format(gulp_size) + 'k, returned ' +
+                  '{:,}'.format(len(lines)) + ' rows, cumulative is ' + '{:,}'.format(final_lines_count))
             update_fast_load_db(host, voter_api_device_id, table_name, len(lines))
 
             if len(lines) > 0:
@@ -178,8 +181,12 @@ def retrieve_sql_files_from_master_server(request):
                     logger.error(status)
 
                 finally:
-                    start += 500000
-                    end += 500000
+                    if table_name not in tables_with_too_many_columns:
+                        start += 500000
+                        end += 500000
+                    else:
+                        start += 100000
+                        end += 100000
 
         # Update the last_value for this table so creating new entries doesn't
         #  throw "django Key (id)= already exists" error

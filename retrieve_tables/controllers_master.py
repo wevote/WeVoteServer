@@ -142,6 +142,10 @@ def retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end):
                 # logger.error("experiment: retrieve_tables file contents: " + file.readline().strip())
                 file.seek(0)
                 csv_files[table_name] = file.read()
+                # table_st = csv_files[table_name]
+                # for i in range(0, 100000, 150):    # c type for loop for(i=0; i < 10000; i+= 150)
+                #     print(table_str[i:i+150])
+
                 file.close()
                 # logger.error("experiment: after file close, status " + status)
                 if "exported" not in status:
