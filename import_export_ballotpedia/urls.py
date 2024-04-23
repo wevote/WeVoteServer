@@ -19,5 +19,5 @@ urlpatterns = [
         views_admin.retrieve_ballotpedia_data_for_polling_locations_view,
         name='retrieve_ballotpedia_data_for_polling_locations'),
     re_path(r'^bulk_retrieve_ballotpedia_photos/$',
-            views_admin.bulk_retrieve_ballotpedia_photos_view, name='bulk_retrieve_facebook_photos', ),
+            views_admin.bulk_retrieve_ballotpedia_photos_view, name='bulk_retrieve_ballotpedia_photos', ),
 ]

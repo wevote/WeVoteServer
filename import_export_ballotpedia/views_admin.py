@@ -1,6 +1,8 @@
 # import_export_ballotpedia/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import requests
+from bs4 import BeautifulSoup
 
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
@@ -36,11 +38,36 @@ POLITICIAN = 'POLITICIAN'
 
 
 
+
+
+
+IMG_CLASS_NAME_WE_ARE_SEEKING = "widget-img"
+# Retrieves the parsed HTML content from the given URL.
+def get_parsed_html(url):
+    try:
+        page = requests.get(url)
+        return BeautifulSoup(page.content, "lxml")
+
+    except requests.exceptions.RequestException:
+        print('Unable to connect to {}'.format(url))
+        return BeautifulSoup('', "lxml")
+def get_ballotpedia_candidate_img_from_list(candidate_urls):
+    for url in candidate_urls:
+        soup = get_parsed_html(url)
+        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
+            img_url = img.get('src')  # Use get() method to safely retrieve attributes
+            if img_url:
+                print(img['alt'], img_url)
+            else:
+                print("Image URL not found for:", img['alt'])
+
+
+
 @login_required
 def bulk_retrieve_ballotpedia_photos_view(request):
     number_of_candidates_to_search = 75
     status = ""
-    remote_request_history_manager = RemoteRequestHistoryManager()
+    # remote_request_history_manager = RemoteRequestHistoryManager()
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
@@ -95,12 +122,14 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                     #  search Facebook more than once.
                     request_history_query = RemoteRequestHistory.objects.filter(
                         candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-                        kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS)
+                        kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
                     request_history_list = list(request_history_query)
 
                     if not positive_value_exists(request_history_list):
                         add_messages = False
-                        get_results = get_one_picture_from_facebook_graphapi(
+                        # get_results = get_one_picture_from_facebook_graphapi(
+                        #     one_candidate, request, remote_request_history_manager, add_messages)
+                        get_results = get_ballotpedia_candidate_img_from_list(
                             one_candidate, request, remote_request_history_manager, add_messages)
                         status += get_results['status']
                         number_of_candidates_to_search -= 1
