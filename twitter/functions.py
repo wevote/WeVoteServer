@@ -409,23 +409,26 @@ def retrieve_twitter_user_info_from_handles_list(
                     'withheld',
                 ])
             if hasattr(twitter_response, 'data'):
-                status += "TWITTER_RESPONSE_HAS_DATA "
-                twitter_response_object_list = twitter_response.data
-                for twitter_user in twitter_response_object_list:
-                    try:
-                        if twitter_user is None:
-                            status += "TWITTER_USER_EQUALS_NONE "
-                        elif hasattr(twitter_user, 'data'):
-                            twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
-                            twitter_dict = expand_twitter_entities(twitter_dict)
-                            twitter_dict = expand_twitter_public_metrics(twitter_dict)
-                            twitter_response_dict_list.append(twitter_dict)
-                        else:
-                            status += "HAS_NO_DATA: " + str(twitter_user) + " "
-                    except Exception as e:
-                        status += "PROBLEM_LOOPING_THROUGH_TWITTER_RESPONSE: " + str(e) + " "
+                if twitter_response.data is None:
+                    status += "TWITTER_RESPONSE_HAS_NO_DATA: " + str(twitter_response) + " "
+                else:
+                    status += "TWITTER_RESPONSE_HAS_DATA "
+                    twitter_response_object_list = twitter_response.data
+                    for twitter_user in twitter_response_object_list:
+                        try:
+                            if twitter_user is None:
+                                status += "TWITTER_USER_EQUALS_NONE "
+                            elif hasattr(twitter_user, 'data'):
+                                twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
+                                twitter_dict = expand_twitter_entities(twitter_dict)
+                                twitter_dict = expand_twitter_public_metrics(twitter_dict)
+                                twitter_response_dict_list.append(twitter_dict)
+                            else:
+                                status += "HAS_NO_DATA: " + str(twitter_user) + " "
+                        except Exception as e:
+                            status += "PROBLEM_LOOPING_THROUGH_TWITTER_RESPONSE: " + str(e) + " "
             else:
-                status += "TWITTER_RESPONSE_HAS_NO_DATA "
+                status += "TWITTER_RESPONSE_HAS_NO_DATA_FIELD "
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
