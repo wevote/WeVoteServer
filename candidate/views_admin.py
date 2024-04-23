@@ -38,6 +38,7 @@ from measure.models import ContestMeasure
 from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
 from office_held.models import OfficeHeld
+from politician.controllers_generate_color import generate_background, validate_hex
 from politician.models import Politician, PoliticianManager
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
@@ -2495,9 +2496,11 @@ def candidate_edit_process_view(request):
     party = request.POST.get('party', False)
     photo_url_from_vote_usa = request.POST.get('photo_url_from_vote_usa', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    profile_image_background_color = request.POST.get('profile_image_background_color', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
+    regenerate_color = request.POST.get('regenerate_color', False)
     reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -3105,6 +3108,19 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
             if politician_we_vote_id is not False:
                 candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+            if regenerate_color is not False:
+                candidate_on_stage.profile_image_background_color = generate_background(candidate_on_stage)
+                candidate_on_stage.profile_image_background_color_needed = False
+            elif profile_image_background_color is not False:
+                if profile_image_background_color == '':
+                    candidate_on_stage.profile_image_background_color = None
+                    candidate_on_stage.profile_image_background_color_needed = False
+                elif validate_hex(profile_image_background_color):
+                    candidate_on_stage.profile_image_background_color = profile_image_background_color
+                    candidate_on_stage.profile_image_background_color_needed = False
+                else:
+                    messages.add_message(request, messages.ERROR,
+                                         'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if state_code is not False:
                 candidate_on_stage.state_code = state_code
             if twitter_url is not False:
@@ -5173,3 +5189,53 @@ def update_ocd_id_state_mismatch_view(request):
     messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+
+def update_profile_image_background_color_view_for_candidates(request):
+    number_to_update = 5000
+    candidate_query = CandidateCampaign.objects.all()
+    state_code = request.GET.get('state_code', '')
+    candidate_year = convert_to_int(request.GET.get('candidate_year', 0))
+    if positive_value_exists(candidate_year):
+        candidate_query = candidate_query.filter(candidate_year=candidate_year)
+    if positive_value_exists(state_code):
+        candidate_query = candidate_query.filter(state_code__iexact=state_code)
+    candidate_query = candidate_query.exclude(profile_image_background_color_needed=False)
+    candidate_list_count = candidate_query.count()
+    candidate_list = list(candidate_query[:number_to_update])
+    message = ''
+    if candidate_list_count == 0:
+        message += "All candidates have been updated with a background color for profile photo."
+        messages.add_message(request, messages.INFO, message)
+    else:
+        message += "{count:,} candidates need a background color for profile photo. ".format(count=candidate_list_count)
+
+    bulk_update_list = []
+    candidates_updated = 0
+    candidates_not_updated = 0
+    for candidate in candidate_list:
+        candidate.profile_image_background_color_needed = False
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large):
+            hex = generate_background(candidate)
+            candidate.profile_image_background_color = hex
+            candidates_updated += 1
+        else:
+            candidates_not_updated += 1
+        bulk_update_list.append(candidate)
+    try:
+        CandidateCampaign.objects.bulk_update(
+            bulk_update_list,
+            ['profile_image_background_color', 'profile_image_background_color_needed'])
+        message += \
+            "Candidates updated: {candidates_updated:,}. " \
+            "Candidates without picture URL:  {candidates_not_updated:,}. " \
+            "".format(candidates_updated=candidates_updated, candidates_not_updated=candidates_not_updated)
+        messages.add_message(request, messages.INFO, message)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR,
+                             "ERROR with update_profile_image_background_color_view: {e}"
+                             "".format(e=e))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=())
+                                + "?show_this_year_of_candidates=" + str(candidate_year)
+                                + "&state_code=" + str(state_code))

@@ -223,8 +223,9 @@
 
         <li>
             Prepare: <a href="{% url 'candidate:update_candidates_from_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
-            Update Candidates from Politician Data
+            Update Candidates from Politician Data</a>
         </li>
+        <li>Prepare: <a href="{% url 'candidate:update_profile_image_background_color' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}" >Update 5,000 Candidates' background colors &#40;may take 10 minutes&#41;</a></li>
     </ul>
 
     <ol>
@@ -272,6 +273,8 @@
             Prepare: <a href="{% url 'candidate:update_candidates_from_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
             Update Candidates from Politician Data</a>
         </li>
+        <li>Prepare: <a href="{% url 'candidate:update_profile_image_background_color' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}" >
+            Update 5,000 Candidates' background colors &#40;may take 10 minutes&#41;</a></li>
     </ul>
 {% endif %}
 
@@ -412,11 +415,20 @@
         {% endif %}
             <tr>
                 <td>{{ forloop.counter|add:candidate_count_start }}</td>
-                <td>
+                <td{% if candidate.profile_image_background_color %}
+                    style="padding-left: 0; padding-right: 0;"
+                {% endif %}>
                     {% if candidate.candidate_photo_url %}
                     <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                        target="_blank">
-                        <img src='{{ candidate.candidate_photo_url }}' height="48px" />
+                        <img
+                          {% if candidate.profile_image_background_color %}
+                              style="
+                                  border-left: 10px solid {{ candidate.profile_image_background_color }};
+                                  border-right: 10px solid {{ candidate.profile_image_background_color }};"
+                          {% endif %}
+                          src='{{ candidate.candidate_photo_url }}'
+                          height="48px" />
                     </a>
                     {% endif %}
                 </td>

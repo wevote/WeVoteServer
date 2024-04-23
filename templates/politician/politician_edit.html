@@ -12,12 +12,10 @@
 <h1>
     {% if politician %}Edit Politician:
         {% if politician.we_vote_hosted_profile_image_url_medium %}
-            
             <div style='display: inline-block; height: 48px; width: 96px; background:{{ politician.profile_image_background_color }}'> 
                 <img src='{{ politician.we_vote_hosted_profile_image_url_medium }}' style='margin-left: 25%;'/>
             </div> 
-         
-            {% endif %}
+        {% endif %}
         {{ politician.politician_name }}
     {% else %}New Politician{% endif %}
 </h1>
