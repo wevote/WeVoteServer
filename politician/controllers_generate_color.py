@@ -3,8 +3,9 @@ from io import BytesIO
 from urllib import request
 import math, re
 
+
 def generate_background(politician, base=None):
-    # specifiy how many bins will be generated for color sorting, the number of bins is base**3
+    # specify how many bins will be generated for color sorting, the number of bins is base**3
     base = base or 3
  
     # this is the speed bottleneck, not sure if this can be sped up

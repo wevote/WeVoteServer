@@ -22,7 +22,9 @@ th, td {
 <h1>
     {% if candidate %}Edit Candidate:
         {% if candidate.we_vote_hosted_profile_image_url_medium %}
-            <img src='{{ candidate.we_vote_hosted_profile_image_url_medium }}' />
+            <div style='display: inline-block; height: 48px; width: 96px; background:{{ candidate.profile_image_background_color }}'> 
+                <img src='{{ candidate.we_vote_hosted_profile_image_url_medium }}' style='margin-left: 25%;'/>
+            </div> 
         {% endif %}
         {{ candidate.candidate_name }}
     {% else %}New Candidate{% endif %}
@@ -220,6 +222,21 @@ th, td {
         </span>
     </div>
 </div>
+{% if candidate.we_vote_hosted_profile_image_url_large %}
+<div class="col">
+<div class="row form-group">
+    
+    <label for="profile_image_background_color_id" class="pl-3 control-label">Background Color</label>
+    <div class="col">
+        
+        <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
+               value="{% if candidate %}{{ candidate.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
+        <input name="regenerate_color" id="regenerate_color_id" type="checkbox"/>
+        <label for="regenerate_color_id">&nbsp;Regenerate default color</label>
+    </div>
+</div>
+</div>
+{% endif %}
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="row form-group">

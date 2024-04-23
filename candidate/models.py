@@ -2608,6 +2608,7 @@ class CandidateCampaign(models.Model):
     profile_image_type_currently_active = models.CharField(
         max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
+    profile_image_background_color_needed = models.BooleanField(null=True)
     # Image for candidate from Ballotpedia, cached on We Vote's servers. See also ballotpedia_profile_image_url_https.
     we_vote_hosted_profile_ballotpedia_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_ballotpedia_image_url_medium = models.TextField(blank=True, null=True)
