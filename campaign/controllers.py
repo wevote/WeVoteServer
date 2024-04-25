@@ -2875,7 +2875,7 @@ def delete_campaign_supporter(voter_to_delete=None):
     success = True
     campaign_supporter_deleted = 0
     campaign_supporter_not_deleted = 0
-    voter_to_delete_id = voter_to_delete.id
+    voter_to_delete_id = voter_to_delete.we_vote_id
 
     if not positive_value_exists(voter_to_delete_id):
         status += "DELETE_CAMPAIGN_SUPPORTER-MISSING_VOTER_ID"
