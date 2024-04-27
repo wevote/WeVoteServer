@@ -141,6 +141,8 @@ def find_and_merge_duplicate_politicians_view(request):
     queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
     if positive_value_exists(state_code):
         queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(politician1_we_vote_id=None)
+    queryset = queryset.exclude(politician2_we_vote_id=None)
     queryset_politician1 = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
     exclude_politician1_we_vote_id_list = list(queryset_politician1)
     queryset_politician2 = queryset.values_list('politician2_we_vote_id', flat=True).distinct()
