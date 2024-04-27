@@ -106,35 +106,26 @@
       <thead>
         <tr>
             <th></th>
-            <th>Live?</th>
-            <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
         {% if not is_national_election %}
             <th>Date</th>
         {% endif %}
+            <th>Live?</th>
+            <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
             <th>State(s)</th>
-        {% if not is_national_election %}
-            <th>Election ID</th>
-        {% endif %}
-            <th align="middle">
-                Offices
-              {% if show_election_statistics %}
-              <br />
-              (w/o Candidates)
-              {% endif %}
-            </th>
         {% if is_national_election or show_election_statistics %}
             <th>Last Refresh</th>
             <th>Refresh Added to Queue</th>
 {#            <th>Last Election</th>#}
 {#            <th>Next Election</th>#}
         {% endif %}
+            <th align="middle">
+                Offices
+            </th>
         {% if show_election_statistics %}
-            <th align="middle">Candidates<br />
-              (Missing Photos)</th>
+            <th align="middle">Candidates</th>
             <th>Measures</th>
+            <th align="middle">Opinions / Positions</th>
             <th>Ballot Locations<br />(To Process)</th>
-            <th align="middle">Voter Guides<br />
-              (Public Positions)</th>
         {% endif %}
         {% if not is_national_election %}
             <td>&nbsp;</td>
@@ -144,34 +135,40 @@
     {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td align="middle">
-              {% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}{% if election.include_in_list_for_voters and election.election_preparation_finished %}, {% endif %}
-              {% if election.election_preparation_finished %}<span class="font-weight-bold text-success">DATA</span>{% endif %}{% if election.include_in_list_for_voters or election.election_preparation_finished and election.candidate_photos_finished %}, {% endif %}
-              {% if election.candidate_photos_finished %}<span class="font-weight-bold text-success">PHOTOS</span>{% endif %}
-            </td>
-            <td>
-                {% if not is_national_election %}
-                <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
-                  <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">
-                      {{ election.election_name }}
-                      {% if election.vote_usa_same_day_election_suffix_list %}
-                          ({{ election.vote_usa_same_day_election_suffix_list }})
-                      {% endif %}
-                      <span class="glyphicon glyphicon-new-window"></span></span></a>
-                {% endif %}
-                {% if election.internal_notes %}
-                <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
-                {% endif %}
-            </td>
         {% if not is_national_election %}
             <td>
-                <span class="u-no-break">{{ election.election_day_text }}</span>
+                <span class="u-no-break" style="font-size: 1.2em; font-weight: 600;">{{ election.election_day_text }}</span>
                 {% if election.days_until_election > 0 %} <span class="u-no-break {% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
                 <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
                    target="_blank">
                     <span class="glyphicon glyphicon-new-window"></span></a>
             </td>
         {% endif %}
+            <td align="middle">
+              {% if election.include_in_list_for_voters %}<span class="font-weight-bold">Visible</span>{% endif %}
+              {% if election.election_preparation_finished %}<span class="font-weight-bold text-success">DATA</span>{% endif %}
+              {% if election.candidate_photos_finished %}<span class="font-weight-bold text-success">PHOTOS</span>{% endif %}
+            </td>
+            <td>
+                {% if not is_national_election %}
+                <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
+                  <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">
+                      {{ election.election_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                      {% if election.vote_usa_same_day_election_suffix_list %}
+                          ({{ election.vote_usa_same_day_election_suffix_list }})
+                      {% endif %}
+                      </span></a>
+                {% endif %}
+                {% if not is_national_election %}
+                    <br />
+                    Election ID: 
+                    {{ election.google_civic_election_id }}
+                    {% if election.vote_usa_election_id %} / {{ election.vote_usa_election_id }}{% endif %}
+                {% endif %}
+                {% if election.internal_notes %}
+                <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
+                {% endif %}
+            </td>
             <td align="middle">
               {% if election.is_national_election and not is_national_election %}
                 <div style="overflow-wrap: anywhere;">
@@ -188,29 +185,9 @@
               {% else %}
                   <a href="{% url 'election:election_summary' election.id %}?state_code={{ election.state_code }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                      target="_blank">
-                      {{ election.state_code }}&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                      {{ election.state_code|default_if_none:"" }}&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-new-window"></span>
                   </a>
               {% endif %}
-            </td>
-        {% if not is_national_election %}
-            <td align="middle">
-                {{ election.google_civic_election_id }}
-                {% if election.vote_usa_election_id %} / {{ election.vote_usa_election_id }}{% endif %}
-            </td>
-        {% endif %}
-            <td align="middle">
-            {% if not show_election_statistics and election.office_count %}
-                {{ election.office_count|default_if_none:"" }}
-            {% endif %}
-
-            {% if election.offices_with_candidates_count %}
-                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
-                   target="_blank">
-                {{ election.offices_with_candidates_count|default_if_none:"" }}</a>
-            {% endif %}
-            {% if election.offices_without_candidates_count %}
-                <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
-            {% endif %}
             </td>
         {% if is_national_election or show_election_statistics %} {# Last Retrieve / Refresh #}
             <td>
@@ -267,18 +244,44 @@
 {#            {% endif %}#}
 {#            </td>#}
         {% endif %}
+        {# ############### OFFICES ############### #}
+            <td align="middle">
+            {% if not show_election_statistics and election.office_count %}
+                {{ election.office_count|default_if_none:"" }}
+            {% endif %}
+
+            {% if election.offices_with_candidates_count %}
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
+                   target="_blank">
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.offices_with_candidates_count|default_if_none:"" }}</span>
+                    offices with candidates</a>
+            {% endif %}
+            {% if election.offices_without_candidates_count %}
+                <br />
+                <span style="color: darkgray">{{ election.offices_without_candidates_count|default_if_none:"" }} w/o candidate</span>
+            {% endif %}
+            </td>
         {% if show_election_statistics %}
+        {# ############### CANDIDATES ############### #}
             <td align="middle">
             {% if election.candidate_count %}
                 <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
-                {{ election.candidate_count|default_if_none:"" }}</a>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.candidate_count|default_if_none:"" }}</span>
+                    candidates</a>
             {% endif %}
             {% if election.candidates_without_photo_count %}
-                ({{ election.candidates_without_photo_count|default_if_none:"" }}
-                  {% if election.candidates_without_photo_percentage %}
-                    <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}">
-                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>{% endif %})
+                <br />
+                <span class="u-no-break">
+                <span style="color: darkgray;">
+                {{ election.candidates_without_photo_count|default_if_none:"" }} w/o photo
+                </span>
+                {% if election.candidates_without_photo_percentage %}
+                <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}"
+                      style="{% if election.candidates_without_photo_percentage < 33 %}color: darkgray;{% endif %}"
+                    >({{ election.candidates_without_photo_percentage|floatformat:"0" }}%)</span>
+                {% endif %}
+                </span>
             {% endif %}
             {% if election.candidate_count %}
                 <br />
@@ -289,12 +292,32 @@
 
             </td>
             <td align="middle">
+        {# ############### MEASURES ############### #}
             {% if election.measure_count %}
                 <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
                 {{ election.measure_count|default_if_none:"" }}</a>
             {% endif %}
             </td>
+        {# ############### POSITIONS & VOTER GUIDES ############### #}
+            <td align="middle">
+            {% if election.public_positions_count %}
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                <span class="u-no-break">
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.public_positions_count|default_if_none:"" }}</span>
+                    endorsements
+                </span>
+                </a>
+            {% endif %}
+            {% if election.voter_guides_count %}
+                <br />
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.voter_guides_count|default_if_none:"" }} endorsers</a>
+            {% endif %}
+            </td>
+        {# ############### BALLOTS RETURNED ############### #}
             <td align="middle">
                 {% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
                     {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
@@ -307,18 +330,6 @@
                       (<span class="font-weight-bold text-danger">{{ election.batches_not_processed|default_if_none:"" }}</span>)
                     {% endif %}
                 {% endif %}
-            </td>
-            <td align="middle">
-            {% if election.voter_guides_count %}
-                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
-                   target="_blank">
-                {{ election.voter_guides_count|default_if_none:"" }}</a>
-            {% endif %}
-            {% if election.public_positions_count %}
-                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
-                   target="_blank">
-                ({{ election.public_positions_count|default_if_none:"" }})</a>
-            {% endif %}
             </td>
         {% endif %}
         {% if not is_national_election %}

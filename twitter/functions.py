@@ -374,6 +374,8 @@ def retrieve_twitter_user_info_from_handles_list(
     counter = None
     twitter_response_dict_list = []
     retrieve_from_twitter = len(twitter_handles_list) > 0
+    twitter_handles_not_found_list = []
+    twitter_handles_suspended_list = []
 
     if retrieve_from_twitter:
         try:
@@ -411,6 +413,29 @@ def retrieve_twitter_user_info_from_handles_list(
             if hasattr(twitter_response, 'data'):
                 if twitter_response.data is None:
                     status += "TWITTER_RESPONSE_HAS_NO_DATA: " + str(twitter_response) + " "
+                    success = False
+                    if hasattr(twitter_response, 'errors'):
+                        # TODO: return these handles as having problems so we can stop trying to retrieve them
+                        # errors = [{'value': 'conklinforpa',
+                        #            'detail': 'Could not find user with usernames: [conklinforpa].',
+                        #            'title': 'Not Found Error', 'resource_type': 'user', 'parameter': 'usernames',
+                        #            'resource_id': 'conklinforpa',
+                        #            'type': 'https://api.twitter.com/2/problems/resource-not-found'},
+                        #           {'value': 'ronigreenfor190',
+                        #            'detail': 'Could not find user with usernames: [ronigreenfor190].',
+                        #            'title': 'Not Found Error', 'resource_type': 'user', 'parameter': 'usernames',
+                        #            'resource_id': 'ronigreenfor190',
+                        #            'type': 'https://api.twitter.com/2/problems/resource-not-found'}]
+                        for error_result in twitter_response.errors:
+                            if error_result['resource_type'] == 'user':
+                                if positive_value_exists(error_result['value']) \
+                                        and error_result['title'] in ['Forbidden']:
+                                    if error_result['value'] not in twitter_handles_suspended_list:
+                                        twitter_handles_suspended_list.append(error_result['value'])
+                                if positive_value_exists(error_result['value']) \
+                                        and error_result['title'] in ['Not Found Error']:
+                                    if error_result['value'] not in twitter_handles_not_found_list:
+                                        twitter_handles_not_found_list.append(error_result['value'])
                 else:
                     status += "TWITTER_RESPONSE_HAS_DATA "
                     twitter_response_object_list = twitter_response.data
@@ -442,6 +467,8 @@ def retrieve_twitter_user_info_from_handles_list(
     results = {
         'success':                          success,
         'status':                           status,
+        'twitter_handles_not_found_list':   twitter_handles_not_found_list,
+        'twitter_handles_suspended_list':   twitter_handles_suspended_list,
         'twitter_response_list':            twitter_response_dict_list,
         'twitter_response_list_retrieved':  twitter_response_list_retrieved,
     }
