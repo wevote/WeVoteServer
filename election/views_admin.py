@@ -61,6 +61,8 @@ ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # elections
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
+POSITIONS_GOAL_CANDIDATE_MULTIPLIER = .9
+
 def test_view(request):
     success = True
     status = ""
@@ -1007,6 +1009,23 @@ def election_list_view(request):
                 election.candidates_without_photo_percentage = \
                     100 * (election.candidates_without_photo_count / election.candidate_count)
 
+            # How many without links?
+            # If you make changes here, please also search for 'hide_candidates_with_links' in candidate/views_admin.py
+            candidate_list_query = CandidateCampaign.objects.all()
+            candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_list_query = candidate_list_query.filter(
+                (Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url=""))
+                & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="")
+                   | Q(twitter_handle_updates_failing=True))
+                & (Q(candidate_url__isnull=True) | Q(candidate_url=""))
+                & (Q(facebook_url__isnull=True) | Q(facebook_url="") | Q(facebook_url_is_broken=True))
+                & (Q(instagram_handle__isnull=True) | Q(instagram_handle=""))
+            )
+            election.candidates_without_links_count = candidate_list_query.count()
+            if positive_value_exists(election.candidate_count):
+                election.candidates_without_links_percentage = \
+                    100 * (election.candidates_without_links_count / election.candidate_count)
+
             # How many measures?
             measure_list_query = ContestMeasure.objects.all()
             measure_list_query = measure_list_query.filter(
@@ -1027,6 +1046,14 @@ def election_list_view(request):
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
             election.public_positions_count = position_query.count()
+
+            election.positions_goal_count = \
+                convert_to_int(POSITIONS_GOAL_CANDIDATE_MULTIPLIER * election.candidate_count)
+            if positive_value_exists(election.positions_goal_count):
+                election.positions_goal_percentage = \
+                    100 * (election.positions_goal_count / election.candidate_count)
+                election.positions_needed_to_reach_goal = \
+                    election.positions_goal_count - election.public_positions_count
 
             # ############################
             # Figure out the last dates we retrieved data

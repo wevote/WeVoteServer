@@ -1045,6 +1045,7 @@ def candidate_list_view(request):
                     candidate_query = candidate_query.filter(final_filters)
         if positive_value_exists(hide_candidates_with_links):
             # Show candidates that do NOT have links: Twitter, Instagram, Facebook, Web, Ballotpedia
+            # If you make changes here, please also search for 'hide_candidates_with_links' in election/views_admin.py
             candidate_query = candidate_query.filter(
                 (Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url=""))
                 & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="")
