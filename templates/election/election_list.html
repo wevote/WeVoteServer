@@ -347,7 +347,7 @@
                 <br />
                 <span class="u-no-break">
                 GOAL:
-                <span {% if election.positions_goal_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
+                <span {% if election.positions_goal_percentage > 33 %}class="text-danger"{% else %}style="color: darkgray;"{% endif %}>
                     find
                     {{ election.positions_goal_count|default_if_none:"" }}
                     opinions
@@ -382,6 +382,159 @@
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         {% endif %}
         </tr>
+{% for one_state_code, one_state_dict in election.state_statistics_dict.items %}
+    {% if one_state_dict.values_exist %}
+{# ################ ONE STATE ############## #}
+        <tr>
+            <td></td>
+        {% if not is_national_election %}
+            <td>
+            </td>
+        {% endif %}
+            <td align="middle">
+            </td>
+            <td>
+                {{ one_state_dict.state_name }}
+                ({{ one_state_code }})
+            </td>
+            <td align="middle">
+            </td>
+        {% if is_national_election or show_election_statistics %} {# Last Retrieve / Refresh #}
+            <td>
+            </td>
+            <td>
+            </td>
+        {% endif %}
+        {# ############### OFFICES ############### #}
+            <td align="middle">
+            {% if not show_election_statistics and one_state_dict.office_count %}
+                {{ one_state_dict.office_count|default_if_none:"" }}
+            {% endif %}
+
+            {% if one_state_dict.offices_with_candidates_count %}
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
+                   target="_blank">
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.offices_with_candidates_count|default_if_none:"" }}</span>
+                    offices with candidates</a>
+            {% endif %}
+            {% if one_state_dict.offices_without_candidates_count %}
+                <br />
+                <span style="color: darkgray">{{ one_state_dict.offices_without_candidates_count|default_if_none:"" }} w/o candidate</span>
+            {% endif %}
+            </td>
+        {% if show_election_statistics %}
+        {# ############### CANDIDATES ############### #}
+            <td align="middle">
+            {% if one_state_dict.candidate_count %}
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
+                   target="_blank">
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.candidate_count|default_if_none:"" }}</span>
+                    candidates</a>
+            {% endif %}
+            {% if one_state_dict.candidates_without_photo_count %}
+                <br />
+                <span class="u-no-break">
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}&hide_candidates_with_photos=1"
+                   target="_blank">
+                <span {% if one_state_dict.candidates_without_photo_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
+                {{ one_state_dict.candidates_without_photo_count|default_if_none:"" }} w/o photo
+                </span>
+                </a>
+                {% if one_state_dict.candidates_without_photo_percentage %}
+                <span class="{% if one_state_dict.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}"
+                      style="{% if one_state_dict.candidates_without_photo_percentage < 33 %}color: darkgray;{% endif %}"
+                    >({{ one_state_dict.candidates_without_photo_percentage|floatformat:"0" }}%)</span>
+                {% endif %}
+                </span>
+            {% endif %}
+            {% if one_state_dict.candidates_without_links_count %}
+                <br />
+                <span class="u-no-break">
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}&hide_candidates_with_links=1"
+                   target="_blank">
+                <span {% if one_state_dict.candidates_without_links_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
+                {{ one_state_dict.candidates_without_links_count|default_if_none:"" }} w/o links
+                </span>
+                </a>
+                {% if one_state_dict.candidates_without_links_percentage %}
+                <span class="{% if one_state_dict.candidates_without_links_percentage > 33 %}font-weight-bold text-danger{% endif %}"
+                      style="{% if one_state_dict.candidates_without_links_percentage < 33 %}color: darkgray;{% endif %}"
+                    >({{ one_state_dict.candidates_without_links_percentage|floatformat:"0" }}%)</span>
+                {% endif %}
+                </span>
+            {% endif %}
+            {% if one_state_dict.candidate_count %}
+                <br />
+                <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ one_state_code }}"
+                   target="_blank">
+                open&nbsp;json</a>
+            {% endif %}
+
+            </td>
+            <td align="middle">
+        {# ############### MEASURES ############### #}
+            {% if one_state_dict.measure_count %}
+                <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
+                   target="_blank">
+                {{ one_state_dict.measure_count|default_if_none:"" }}</a>
+            {% endif %}
+            </td>
+        {# ############### POSITIONS & VOTER GUIDES ############### #}
+            <td align="middle">
+            {% if one_state_dict.public_positions_count %}
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
+                   target="_blank">
+                <span class="u-no-break">
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.public_positions_count|default_if_none:"" }}</span>
+                    opinions
+                </span>
+                </a>
+            {% endif %}
+            
+            {% if one_state_dict.positions_needed_to_reach_goal %}
+            {% if one_state_dict.positions_needed_to_reach_goal > 0 %}
+                <br />
+                <span class="u-no-break">
+                <span {% if one_state_dict.positions_goal_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
+                    {{ one_state_dict.positions_needed_to_reach_goal|default_if_none:"" }}
+                    more needed
+                </span>
+                </span>
+            {% endif %}
+            {% endif %}
+
+            {% if one_state_dict.positions_goal_count %}
+            {% if one_state_dict.positions_needed_to_reach_goal > 0 %}
+                <br />
+                <span class="u-no-break">
+                GOAL:
+                <span {% if one_state_dict.positions_goal_percentage > 33 %}class="text-danger"{% else %}style="color: darkgray;"{% endif %}>
+                    find
+                    {{ one_state_dict.positions_goal_count|default_if_none:"" }}
+                    opinions
+                </span>
+                </span>
+            {% endif %}
+            {% endif %}
+
+            {% if one_state_dict.voter_guides_count %}
+                <br />
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ one_state_dict.voter_guides_count|default_if_none:"" }} endorsers</a>
+            {% endif %}
+            </td>
+        {# ############### BALLOTS RETURNED ############### #}
+            <td align="middle">
+            </td>
+        {% endif %}
+        {% if not is_national_election %}
+            <td></td>
+        {% endif %}
+        </tr>
+    {% endif %}
+{% endfor %}
+    
     {% endfor %}
     </table>
     <p></p>
