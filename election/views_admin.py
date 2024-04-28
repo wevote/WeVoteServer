@@ -1127,9 +1127,10 @@ def election_list_view(request):
                         election.state_statistics_dict[state_code_lower]['public_positions_count'] += 1
                         election.state_statistics_dict[state_code_lower]['values_exist'] = True
             for state_code_lower in state_code_list:
+                positions_goal_count = POSITIONS_GOAL_CANDIDATE_MULTIPLIER * \
+                                       election.state_statistics_dict[state_code_lower]['candidate_count']
                 election.state_statistics_dict[state_code_lower]['positions_goal_count'] = \
-                    convert_to_int(POSITIONS_GOAL_CANDIDATE_MULTIPLIER *
-                                   election.state_statistics_dict[state_code_lower]['candidate_count'])
+                    convert_to_int(positions_goal_count)
                 if positive_value_exists(election.state_statistics_dict[state_code_lower]['positions_goal_count']):
                     if positive_value_exists(election.state_statistics_dict[state_code_lower]['public_positions_count']):
                         election.state_statistics_dict[state_code_lower]['positions_goal_percentage'] = \

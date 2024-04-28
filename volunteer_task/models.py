@@ -145,6 +145,7 @@ class VolunteerTeam(models.Model):
     we_vote_id = models.CharField(
         max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False)  # Monday is 0 and Sunday is 6
 
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -214,6 +215,8 @@ class VolunteerWeeklyMetrics(models.Model):
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
     voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
     voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    # For teams that meet on Friday, we want Thursday to be the end-of-week. Note Monday is 0 and Sunday is 6
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False, db_index=True)
 
 
 def display_action_constant_human_readable(action_constant):
