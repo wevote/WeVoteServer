@@ -133,7 +133,7 @@
         </tr>
       </thead>
     {% endif %}
-        <tr>
+        <tr> {# Start of one election #}
             <td>{{ forloop.counter }}</td>
         {% if not is_national_election %}
             <td>
@@ -247,18 +247,18 @@
         {# ############### OFFICES ############### #}
             <td align="middle">
             {% if not show_election_statistics and election.office_count %}
-                {{ election.office_count|default_if_none:"" }}
+                {{ election.office_count|intcomma }} offices
             {% endif %}
 
             {% if election.offices_with_candidates_count %}
                 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
-                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.offices_with_candidates_count|default_if_none:"" }}</span>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.offices_with_candidates_count|intcomma }}</span>
                     offices with candidates</a>
             {% endif %}
             {% if election.offices_without_candidates_count %}
                 <br />
-                <span style="color: darkgray">{{ election.offices_without_candidates_count|default_if_none:"" }} w/o candidate</span>
+                <span style="color: darkgray">{{ election.offices_without_candidates_count|intcomma }} w/o candidate</span>
             {% endif %}
             </td>
         {% if show_election_statistics %}
@@ -365,7 +365,7 @@
             </td>
         {# ############### BALLOTS RETURNED ############### #}
             <td align="middle">
-                {% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
+                {% if election.ballot_returned_count %}{{ election.ballot_returned_count|intcomma }} ballot locations
                     {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
                 {% endif %}
                 {% if election.batches_not_processed %}
@@ -373,7 +373,7 @@
                       (<span class="font-weight-bold text-danger"><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ election.batches_not_processed_batch_set_id }}"
                                                                      target="_blank">{{ election.batches_not_processed|default_if_none:"" }}</a></span>)
                     {% else %}
-                      (<span class="font-weight-bold text-danger">{{ election.batches_not_processed|default_if_none:"" }}</span>)
+                      (<span class="font-weight-bold text-danger">{{ election.batches_not_processed|intcomma }} not processed</span>)
                     {% endif %}
                 {% endif %}
             </td>
@@ -385,7 +385,7 @@
 {% for one_state_code, one_state_dict in election.state_statistics_dict.items %}
     {% if one_state_dict.values_exist %}
 {# ################ ONE STATE ############## #}
-        <tr>
+        <tr> {# Start of one State #}
             <td></td>
         {% if not is_national_election %}
             <td>
@@ -504,13 +504,13 @@
             {% endif %}
 
             {% if one_state_dict.positions_goal_count %}
-            {% if one_state_dict.positions_needed_to_reach_goal > 0 %}
+            {% if one_state_dict.positions_goal_count > 0 %}
                 <br />
                 <span class="u-no-break">
                 GOAL:
                 <span {% if one_state_dict.positions_goal_percentage > 33 %}class="text-danger"{% else %}style="color: darkgray;"{% endif %}>
                     find
-                    {{ one_state_dict.positions_goal_count|default_if_none:"" }}
+                    {{ one_state_dict.positions_goal_count|intcomma }}
                     opinions
                 </span>
                 </span>
