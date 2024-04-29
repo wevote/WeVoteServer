@@ -118,6 +118,7 @@ def retrieve_sql_files_from_master_server(request):
                         if retry < 10:
                             continue
 
+            bytes_transferred = len(response.text)
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:
                 print("FAILED:  Did not receive '" + table_name + " from server")
@@ -131,8 +132,8 @@ def retrieve_sql_files_from_master_server(request):
                       ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
-            print('... Intermediate line count from this request of ' + '{:,}'.format(gulp_size) + 'k, returned ' +
-                  '{:,}'.format(len(lines)) + ' rows, cumulative is ' + '{:,}'.format(final_lines_count))
+            print(f'... Intermediate line count from this request of {gulp_size:,} rows, returned {len(lines):,} '
+                  f'rows ({bytes_transferred:,} bytes), cumulative lines is {final_lines_count:,}')
             update_fast_load_db(host, voter_api_device_id, table_name, len(lines))
 
             if len(lines) > 0:
