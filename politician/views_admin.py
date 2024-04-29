@@ -141,6 +141,8 @@ def find_and_merge_duplicate_politicians_view(request):
     queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
     if positive_value_exists(state_code):
         queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(politician1_we_vote_id=None)
+    queryset = queryset.exclude(politician2_we_vote_id=None)
     queryset_politician1 = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
     exclude_politician1_we_vote_id_list = list(queryset_politician1)
     queryset_politician2 = queryset.values_list('politician2_we_vote_id', flat=True).distinct()
@@ -517,7 +519,7 @@ def politician_list_view(request):
                 messages.add_message(request, messages.INFO, message)
             except Exception as e:
                 messages.add_message(request, messages.ERROR,
-                                "ERROR with update_politicians_profile_image_background_color_view: {e}"
+                                "ERROR with update_profile_image_background_color_view: {e}"
                                 "".format(e=e))
     
     # Create seo_friendly_path for all politicians who currently don't have one
@@ -2214,9 +2216,14 @@ def politician_edit_process_view(request):
                 politician_on_stage.last_name = last_name
             if regenerate_color is not False:
                 politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
+                politician_on_stage.profile_image_background_color_needed = False
             elif profile_image_background_color is not False:
-                if validate_hex(profile_image_background_color):
+                if profile_image_background_color == '':
+                    politician_on_stage.profile_image_background_color = None
+                    politician_on_stage.profile_image_background_color_needed = False
+                elif validate_hex(profile_image_background_color):
                     politician_on_stage.profile_image_background_color = profile_image_background_color
+                    politician_on_stage.profile_image_background_color_needed = False
                 else:
                     messages.add_message(request, messages.ERROR, 'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if gender is not False:
@@ -3446,16 +3453,21 @@ def update_politicians_from_candidates_view(request):
                                     state_code=state_code))
 
 
-def update_politicians_profile_image_background_color_view(request):
-
-    number_to_update = 1000
+def update_profile_image_background_color_view_for_politicians(request):
+    number_to_update = 5000
     politician_query = Politician.objects.all()
     state_code = request.GET.get('state_code', '')
     if positive_value_exists(state_code):
         politician_query = politician_query.filter(state_code__iexact=state_code)
     politician_query = politician_query.exclude(profile_image_background_color_needed=False)
-    
+    politician_list_count = politician_query.count()
     politician_list = list(politician_query[:number_to_update])
+    message = ''
+    if politician_list_count == 0:
+        message += "All politicians have been updated with a background color for profile photo."
+        messages.add_message(request, messages.INFO, message)
+    else:
+        message += "{count:,} politicians need a background color for profile photo. ".format(count=politician_list_count)
 
     bulk_update_list = []
     politicians_updated = 0
@@ -3473,14 +3485,14 @@ def update_politicians_profile_image_background_color_view(request):
         Politician.objects.bulk_update(
             bulk_update_list,
             ['profile_image_background_color', 'profile_image_background_color_needed'])
-        message = \
+        message += \
             "Politicians updated: {politicians_updated:,}. " \
             "Politicians without picture URL:  {politicians_not_updated:,}. " \
             "".format(politicians_updated=politicians_updated, politicians_not_updated=politicians_not_updated)
         messages.add_message(request, messages.INFO, message)
     except Exception as e:
         messages.add_message(request, messages.ERROR,
-                             "ERROR with update_politicians_profile_image_background_color_view: {e}"
+                             "ERROR with update_profile_image_background_color_view: {e}"
                              "".format(e=e))
 
     return HttpResponseRedirect(reverse('politician:politician_list', args=()))

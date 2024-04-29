@@ -38,6 +38,7 @@ from measure.models import ContestMeasure
 from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
 from office_held.models import OfficeHeld
+from politician.controllers_generate_color import generate_background, validate_hex
 from politician.models import Politician, PoliticianManager
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
@@ -138,104 +139,111 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                     final_filters |= item
 
                 candidate_list = candidate_list.filter(final_filters)
+        candidate_list_dict = {}
+        try:
+            for one_candidate in candidate_list:
+                candidate_dict = vars(one_candidate)
+                # To be explored for this issue: https://wevoteusa.atlassian.net/browse/WV-366
+            candidate_list_dict = candidate_list.values(
+                'ballot_guide_official_statement',
+                'ballotpedia_candidate_id',
+                'ballotpedia_candidate_name',
+                'ballotpedia_candidate_url',
+                'ballotpedia_candidate_summary',
+                'ballotpedia_election_id',
+                'ballotpedia_image_id',
+                'ballotpedia_office_id',
+                'ballotpedia_page_title',
+                'ballotpedia_person_id',
+                'ballotpedia_photo_url',
+                'ballotpedia_profile_image_url_https',
+                'ballotpedia_race_id',
+                'birth_day_text',
+                'candidate_contact_form_url',
+                'candidate_email',
+                'candidate_gender',
+                'candidate_is_incumbent',
+                'candidate_is_top_ticket',
+                'candidate_name',
+                'candidate_participation_status',
+                'candidate_phone',
+                'candidate_twitter_handle',
+                'candidate_twitter_handle2',
+                'candidate_twitter_handle3',
+                'candidate_ultimate_election_date',
+                'candidate_url',
+                'candidate_year',
+                'contest_office_name',
+                'contest_office_we_vote_id',
+                'crowdpac_candidate_id',
+                'ctcl_uuid',
+                'do_not_display_on_ballot',
+                'facebook_profile_image_url_https',
+                'facebook_url',
+                'facebook_url_is_broken',
+                'google_civic_candidate_name',
+                'google_civic_candidate_name2',
+                'google_civic_candidate_name3',
+                'google_civic_election_id',
+                'google_plus_url',
+                'instagram_followers_count',
+                'instagram_handle',
+                'is_battleground_race',
+                'linkedin_url',
+                'linkedin_photo_url',
+                'maplight_id',
+                'ocd_division_id',
+                'order_on_ballot',
+                'other_source_url',
+                'other_source_photo_url',
+                'party',
+                'photo_url',
+                'photo_url_from_ctcl',
+                'photo_url_from_maplight',
+                'photo_url_from_vote_smart',
+                'photo_url_from_vote_usa',
+                'politician_we_vote_id',
+                'profile_image_type_currently_active',
+                'state_code',
+                'twitter_description',
+                'twitter_followers_count',
+                'twitter_location',
+                'twitter_name',
+                'twitter_profile_background_image_url_https',
+                'twitter_profile_banner_url_https',
+                'twitter_profile_image_url_https',
+                'twitter_url',
+                'twitter_user_id',
+                'vote_smart_id',
+                'vote_usa_office_id',
+                'vote_usa_politician_id',
+                'vote_usa_profile_image_url_https',
+                'we_vote_hosted_profile_facebook_image_url_large',
+                'we_vote_hosted_profile_facebook_image_url_medium',
+                'we_vote_hosted_profile_facebook_image_url_tiny',
+                'we_vote_hosted_profile_image_url_large',
+                'we_vote_hosted_profile_image_url_medium',
+                'we_vote_hosted_profile_image_url_tiny',
+                'we_vote_hosted_profile_twitter_image_url_large',
+                'we_vote_hosted_profile_twitter_image_url_medium',
+                'we_vote_hosted_profile_twitter_image_url_tiny',
+                'we_vote_hosted_profile_uploaded_image_url_large',
+                'we_vote_hosted_profile_uploaded_image_url_medium',
+                'we_vote_hosted_profile_uploaded_image_url_tiny',
+                'we_vote_hosted_profile_vote_usa_image_url_large',
+                'we_vote_hosted_profile_vote_usa_image_url_medium',
+                'we_vote_hosted_profile_vote_usa_image_url_tiny',
+                'we_vote_id',
+                'wikipedia_page_id',
+                'wikipedia_page_title',
+                'wikipedia_photo_url',
+                'withdrawal_date',
+                'withdrawn_from_election',
+                'youtube_url',
+                )
+        except Exception as e:
+            status += "ERROR_CONVERTING_TO_DICT: " + str(e) + " "
 
-        candidate_list_dict = candidate_list.values(
-            'ballot_guide_official_statement',
-            'ballotpedia_candidate_id',
-            'ballotpedia_candidate_name',
-            'ballotpedia_candidate_url',
-            'ballotpedia_candidate_summary',
-            'ballotpedia_election_id',
-            'ballotpedia_image_id',
-            'ballotpedia_office_id',
-            'ballotpedia_page_title',
-            'ballotpedia_person_id',
-            'ballotpedia_photo_url',
-            'ballotpedia_profile_image_url_https',
-            'ballotpedia_race_id',
-            'birth_day_text',
-            'candidate_contact_form_url',
-            'candidate_email',
-            'candidate_gender',
-            'candidate_is_incumbent',
-            'candidate_is_top_ticket',
-            'candidate_name',
-            'candidate_participation_status',
-            'candidate_phone',
-            'candidate_twitter_handle',
-            'candidate_twitter_handle2',
-            'candidate_twitter_handle3',
-            'candidate_ultimate_election_date',
-            'candidate_url',
-            'candidate_year',
-            'contest_office_name',
-            'contest_office_we_vote_id',
-            'crowdpac_candidate_id',
-            'ctcl_uuid',
-            'do_not_display_on_ballot',
-            'facebook_profile_image_url_https',
-            'facebook_url',
-            'facebook_url_is_broken',
-            'google_civic_candidate_name',
-            'google_civic_candidate_name2',
-            'google_civic_candidate_name3',
-            'google_civic_election_id',
-            'google_plus_url',
-            'instagram_followers_count',
-            'instagram_handle',
-            'is_battleground_race',
-            'linkedin_url',
-            'linkedin_photo_url',
-            'maplight_id',
-            'ocd_division_id',
-            'order_on_ballot',
-            'other_source_url',
-            'other_source_photo_url',
-            'party',
-            'photo_url',
-            'photo_url_from_ctcl',
-            'photo_url_from_maplight',
-            'photo_url_from_vote_smart',
-            'photo_url_from_vote_usa',
-            'politician_we_vote_id',
-            'profile_image_type_currently_active',
-            'state_code',
-            'twitter_description',
-            'twitter_followers_count',
-            'twitter_location',
-            'twitter_name',
-            'twitter_profile_background_image_url_https',
-            'twitter_profile_banner_url_https',
-            'twitter_profile_image_url_https',
-            'twitter_url',
-            'twitter_user_id',
-            'vote_smart_id',
-            'vote_usa_office_id',
-            'vote_usa_politician_id',
-            'vote_usa_profile_image_url_https',
-            'we_vote_hosted_profile_facebook_image_url_large',
-            'we_vote_hosted_profile_facebook_image_url_medium',
-            'we_vote_hosted_profile_facebook_image_url_tiny',
-            'we_vote_hosted_profile_image_url_large',
-            'we_vote_hosted_profile_image_url_medium',
-            'we_vote_hosted_profile_image_url_tiny',
-            'we_vote_hosted_profile_twitter_image_url_large',
-            'we_vote_hosted_profile_twitter_image_url_medium',
-            'we_vote_hosted_profile_twitter_image_url_tiny',
-            'we_vote_hosted_profile_uploaded_image_url_large',
-            'we_vote_hosted_profile_uploaded_image_url_medium',
-            'we_vote_hosted_profile_uploaded_image_url_tiny',
-            'we_vote_hosted_profile_vote_usa_image_url_large',
-            'we_vote_hosted_profile_vote_usa_image_url_medium',
-            'we_vote_hosted_profile_vote_usa_image_url_tiny',
-            'we_vote_id',
-            'wikipedia_page_id',
-            'wikipedia_page_title',
-            'wikipedia_photo_url',
-            'withdrawal_date',
-            'withdrawn_from_election',
-            'youtube_url',
-            )
         if candidate_list_dict:
             candidate_list_json = list(candidate_list_dict)
             return HttpResponse(json.dumps(candidate_list_json), content_type='application/json')
@@ -354,6 +362,7 @@ def candidate_list_view(request):
     hide_candidates_with_photos = \
         positive_value_exists(request.GET.get('hide_candidates_with_photos', False))
     migrate_to_candidate_link = positive_value_exists(request.GET.get('migrate_to_candidate_link', False))
+    no_supporters = request.GET.get('no_supporters', False)
     page = convert_to_int(request.GET.get('page', 0))
     page = page if positive_value_exists(page) else 0  # Prevent negative pages
     # run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
@@ -938,6 +947,8 @@ def candidate_list_view(request):
                 candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
         if positive_value_exists(exclude_candidate_analysis_done):
             candidate_query = candidate_query.exclude(candidate_analysis_done=True)
+        if positive_value_exists(no_supporters):
+            candidate_query = candidate_query.exclude(supporters_count__gt=0)
         if positive_value_exists(state_code):
             candidate_query = candidate_query.filter(state_code__iexact=state_code)
         if positive_value_exists(candidate_search):
@@ -1034,6 +1045,7 @@ def candidate_list_view(request):
                     candidate_query = candidate_query.filter(final_filters)
         if positive_value_exists(hide_candidates_with_links):
             # Show candidates that do NOT have links: Twitter, Instagram, Facebook, Web, Ballotpedia
+            # If you make changes here, please also search for 'hide_candidates_with_links' in election/views_admin.py
             candidate_query = candidate_query.filter(
                 (Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url=""))
                 & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="")
@@ -1370,6 +1382,7 @@ def candidate_list_view(request):
         'hide_pagination':                          hide_pagination,
         'messages_on_stage':                        messages_on_stage,
         'next_page_url':                            next_page_url,
+        'no_supporters':                            no_supporters,
         'previous_page_url':                        previous_page_url,
         'review_mode':                              review_mode,
         'show_all_elections':                       show_all_elections,
@@ -2496,9 +2509,11 @@ def candidate_edit_process_view(request):
     party = request.POST.get('party', False)
     photo_url_from_vote_usa = request.POST.get('photo_url_from_vote_usa', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    profile_image_background_color = request.POST.get('profile_image_background_color', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
+    regenerate_color = request.POST.get('regenerate_color', False)
     reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -3106,6 +3121,19 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
             if politician_we_vote_id is not False:
                 candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+            if regenerate_color is not False:
+                candidate_on_stage.profile_image_background_color = generate_background(candidate_on_stage)
+                candidate_on_stage.profile_image_background_color_needed = False
+            elif profile_image_background_color is not False:
+                if profile_image_background_color == '':
+                    candidate_on_stage.profile_image_background_color = None
+                    candidate_on_stage.profile_image_background_color_needed = False
+                elif validate_hex(profile_image_background_color):
+                    candidate_on_stage.profile_image_background_color = profile_image_background_color
+                    candidate_on_stage.profile_image_background_color_needed = False
+                else:
+                    messages.add_message(request, messages.ERROR,
+                                         'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if state_code is not False:
                 candidate_on_stage.state_code = state_code
             if twitter_url is not False:
@@ -5174,3 +5202,53 @@ def update_ocd_id_state_mismatch_view(request):
     messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+
+def update_profile_image_background_color_view_for_candidates(request):
+    number_to_update = 5000
+    candidate_query = CandidateCampaign.objects.all()
+    state_code = request.GET.get('state_code', '')
+    candidate_year = convert_to_int(request.GET.get('candidate_year', 0))
+    if positive_value_exists(candidate_year):
+        candidate_query = candidate_query.filter(candidate_year=candidate_year)
+    if positive_value_exists(state_code):
+        candidate_query = candidate_query.filter(state_code__iexact=state_code)
+    candidate_query = candidate_query.exclude(profile_image_background_color_needed=False)
+    candidate_list_count = candidate_query.count()
+    candidate_list = list(candidate_query[:number_to_update])
+    message = ''
+    if candidate_list_count == 0:
+        message += "All candidates have been updated with a background color for profile photo."
+        messages.add_message(request, messages.INFO, message)
+    else:
+        message += "{count:,} candidates need a background color for profile photo. ".format(count=candidate_list_count)
+
+    bulk_update_list = []
+    candidates_updated = 0
+    candidates_not_updated = 0
+    for candidate in candidate_list:
+        candidate.profile_image_background_color_needed = False
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large):
+            hex = generate_background(candidate)
+            candidate.profile_image_background_color = hex
+            candidates_updated += 1
+        else:
+            candidates_not_updated += 1
+        bulk_update_list.append(candidate)
+    try:
+        CandidateCampaign.objects.bulk_update(
+            bulk_update_list,
+            ['profile_image_background_color', 'profile_image_background_color_needed'])
+        message += \
+            "Candidates updated: {candidates_updated:,}. " \
+            "Candidates without picture URL:  {candidates_not_updated:,}. " \
+            "".format(candidates_updated=candidates_updated, candidates_not_updated=candidates_not_updated)
+        messages.add_message(request, messages.INFO, message)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR,
+                             "ERROR with update_profile_image_background_color_view: {e}"
+                             "".format(e=e))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=())
+                                + "?show_this_year_of_candidates=" + str(candidate_year)
+                                + "&state_code=" + str(state_code))
