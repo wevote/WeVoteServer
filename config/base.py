@@ -261,7 +261,10 @@ USE_TZ = True
 AUTH_USER_MODEL = 'voter.Voter'
 
 # Static files (CSS, JavaScript, Images) Django 5+
-STATIC_URL = 'static/'
+STATIC_URL = 'static/'      # April 2024, don't think this is correct, but can't run without it
+ALT_STATIC_URL = BASE_DIR + "/apis_v1/static"
+STATICFILES_DIRS = [ALT_STATIC_URL]
+
 
 # # Static files (CSS, JavaScript, Images)  Django 1.11 - 3.nn
 # # https://docs.djangoproject.com/en/1.11/howto/static-files/ calls loading static files from the project
