@@ -141,6 +141,8 @@ def find_and_merge_duplicate_politicians_view(request):
     queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
     if positive_value_exists(state_code):
         queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(politician1_we_vote_id=None)
+    queryset = queryset.exclude(politician2_we_vote_id=None)
     queryset_politician1 = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
     exclude_politician1_we_vote_id_list = list(queryset_politician1)
     queryset_politician2 = queryset.values_list('politician2_we_vote_id', flat=True).distinct()
@@ -959,8 +961,8 @@ def politician_merge_process_view(request):
     politician1_we_vote_id = request.POST.get('politician1_we_vote_id', 0)
     politician2_we_vote_id = request.POST.get('politician2_we_vote_id', 0)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    redirect_to_politician_list = request.POST.get('redirect_to_politician_list', False)
-    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    # redirect_to_politician_list = request.POST.get('redirect_to_politician_list', False)
+    # remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     state_code = request.POST.get('state_code', '')
     volunteer_task_manager = VolunteerTaskManager()
     voter_device_id = get_voter_api_device_id(request)
@@ -1067,26 +1069,25 @@ def politician_merge_process_view(request):
             except Exception as e:
                 status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
                           '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician1_on_stage.id,)))
+
     else:
-        # NOTE: We could also redirect to a page to look specifically at these two politicians, but this should
-        # also get you back to looking at the two politicians
         messages.add_message(request, messages.ERROR, merge_results['status'])
-        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&auto_merge_off=1" +
-                                    "&state_code=" + str(state_code))
-
-    if redirect_to_politician_list:
-        return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
-                                    '?google_civic_election_id=' + str(google_civic_election_id) +
-                                    '&state_code=' + str(state_code))
-
-    if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+        return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician1_on_stage.id,)))
+    # if redirect_to_politician_list:
+    #     return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+    #                                 '?google_civic_election_id=' + str(google_civic_election_id) +
+    #                                 '&state_code=' + str(state_code))
+    #
+    # if remove_duplicate_process:
+    #     return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+    #                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+    #                                 "&state_code=" + str(state_code))
+    #
+    # return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician1_on_stage.id,)))
 
 
 @login_required
