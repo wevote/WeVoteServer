@@ -2006,7 +2006,7 @@ class VoterGuidePossibilityManager(models.Manager):
             updated_values={}):
         exception_multiple_object_returned = False
         success = False
-        new_voter_guide_possibility_created = False
+        voter_guide_possibility_created = False
         voter_guide_possibility = VoterGuidePossibility()
         voter_guide_possibility_found = False
         status = ""
@@ -2049,7 +2049,7 @@ class VoterGuidePossibilityManager(models.Manager):
         if voter_guide_possibility_found:
             # Update record
             try:
-                new_voter_guide_possibility_created = False
+                voter_guide_possibility_created = False
                 voter_guide_possibility_updated = False
                 voter_guide_possibility_has_changes = False
                 for key, value in updated_values.items():
@@ -2073,7 +2073,7 @@ class VoterGuidePossibilityManager(models.Manager):
         else:
             # Create record
             try:
-                new_voter_guide_possibility_created = False
+                voter_guide_possibility_created = False
                 voter_guide_possibility = VoterGuidePossibility.objects.create(
                     voter_guide_possibility_url=voter_guide_possibility_url,
                     target_google_civic_election_id=target_google_civic_election_id,
@@ -2084,8 +2084,8 @@ class VoterGuidePossibilityManager(models.Manager):
                             setattr(voter_guide_possibility, key, value)
                     voter_guide_possibility.save()
                     voter_guide_possibility_id = voter_guide_possibility.id
-                    new_voter_guide_possibility_created = True
-                if new_voter_guide_possibility_created:
+                    voter_guide_possibility_created = True
+                if voter_guide_possibility_created:
                     success = True
                     status += "VOTER_GUIDE_POSSIBILITY_CREATED "
                 else:
@@ -2100,8 +2100,8 @@ class VoterGuidePossibilityManager(models.Manager):
             'success':                              success,
             'status':                               status,
             'MultipleObjectsReturned':              exception_multiple_object_returned,
+            'voter_guide_possibility_created':      voter_guide_possibility_created,
             'voter_guide_possibility_saved':        success,
-            'new_voter_guide_possibility_created':  new_voter_guide_possibility_created,
             'voter_guide_possibility':              voter_guide_possibility,
             'voter_guide_possibility_id':           voter_guide_possibility_id,
         }
