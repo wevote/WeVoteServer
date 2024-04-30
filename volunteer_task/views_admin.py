@@ -64,7 +64,7 @@ def performance_list_view(request):
 
     # earliest_for_display_date_integer = 20240410
     today = date.today()
-    earliest_for_display_date = today - timedelta(days=35)
+    earliest_for_display_date = today - timedelta(days=30)
     earliest_for_display_date_integer = convert_date_to_date_as_integer(earliest_for_display_date)
 
     performance_list = []
