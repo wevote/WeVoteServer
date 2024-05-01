@@ -20,7 +20,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
         self.organization_stop_following_url = reverse("apis_v1:organizationStopFollowingView")
         self.voter_count_url = reverse("apis_v1:voterCountView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
-        self.client2 = Client(HTTP_USER_AGENT='Mozilla/5.0')
+        self.client2 = Client(headers={"user-agent": 'Mozilla/5.0'})
 
 
     def test_follow_with_no_voter_device_id(self):

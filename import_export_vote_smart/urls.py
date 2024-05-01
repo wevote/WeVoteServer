@@ -2,10 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import re_path
+from django.urls import re_path
 
-from . import views, views_admin
-
+from . import views_admin
 
 urlpatterns = [
     re_path(r'^candidate_list/$', views_admin.vote_smart_candidate_list_view, name='vote_smart_candidate_list'),

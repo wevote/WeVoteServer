@@ -18,11 +18,6 @@ GOOGLE_PROJECT_ID = 'we-vote-ballot'
 VERTEX_SERVICE_ENDPOINT = 'us-west1'
 
 
-class FakeFirefoxURLopener(urllib.request.FancyURLopener):
-    version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0)' \
-            + ' Gecko/20100101 Firefox/25.0'
-
-
 def ask_google_vertex_a_question(question, text_to_search):
     response_text = None
     response_text_found = False

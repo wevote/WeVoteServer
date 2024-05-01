@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import re_path
+from django.urls import re_path
+
 from support_oppose_deciding import views
 
 urlpatterns = [

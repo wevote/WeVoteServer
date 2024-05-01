@@ -1,7 +1,7 @@
 {# templates/admin_tools/index.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Admin Menu{% if WE_VOTE_SERVER_ROOT_URL %} :: {{ WE_VOTE_SERVER_ROOT_URL }}{% endif %}{% endblock %}
+{% block title %}Admin Menu{% endblock %}
 
 {% block content %}
 {% load humanize %}
@@ -13,8 +13,8 @@
 <h1>We Vote Admin Menu</h1>
     {% if user and not user.is_anonymous %}
     <p>
-        <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
-        <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
+            <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
+            <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
     </p>
     {% endif %}
 
@@ -171,7 +171,7 @@
         >Import Data in Batches</a></p>
     <p><a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a></p>
     <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Endorsers</a></p>
-    <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>
+{#    <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>#}
     <p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a></p>
 
 <br>
