@@ -25,9 +25,10 @@
                    target="_blank">VIEW DETAILS <span class="glyphicon glyphicon-new-window"></span></a>
             </td>
             <td>
-                {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 count=forloop.counter only %}
+                <div style="max-width: 500px;">
+                    {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url count=forloop.counter only %}
+                </div>
                 {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
-                  <br />
                 {% endif %}
                 {% if voter_guide_possibility.contributor_comments %}
                   From contributor: <span style="color: darkgray">{{ voter_guide_possibility.contributor_comments }} </span>

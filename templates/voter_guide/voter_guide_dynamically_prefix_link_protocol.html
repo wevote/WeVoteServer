@@ -2,7 +2,7 @@
 {# include parameters are: link, text, count (only) #}
 {# if count==1 include the <script> section #}
 
-<a onclick="prefix_protocol_link('{{ link }}')" class="u-no-break">
+<a onclick="prefix_protocol_link('{{ link }}')" style="word-break: break-all;">
 {% if text %}
 {{ text }}
 {% endif %}
