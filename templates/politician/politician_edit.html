@@ -154,9 +154,10 @@
 {% endif %}
 </div>
 
+<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="politician_name_id" class="control-label">
+    <label for="politician_name_id" class="pl-4 control-label">
         Politician Name
         {% if politician.supporters_count %}
             <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ politician.supporters_count }}</div>
@@ -201,7 +202,7 @@
 <div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="gender_id" class="pl-5 control-label">Gender</label>
+    <label for="gender_id" class="pl-4 control-label">Gender</label>
     <div class="col u-no-break">
         <div>
         <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
@@ -426,7 +427,7 @@
 <div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="ballot_guide_official_statement_id" class="pl-5 control-label">Official Candidate Statement</label>
+    <label for="ballot_guide_official_statement_id" class="pl-4 control-label">Official Candidate Statement</label>
     <div class="col">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
@@ -500,7 +501,7 @@
 </div>
 
 <div class="row form-group">
-    <label for="instagram_handle_id" class="pl-5 control-label">
+    <label for="instagram_handle_id" class="pl-4 control-label">
         Instagram Handle
         {% if politician.instagram_handle %}
         <a href="https://www.instagram.com/{{ politician.instagram_handle }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
@@ -519,7 +520,7 @@
 <div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="ballotpedia_politician_url_id" class="pl-5 control-label">
+    <label for="ballotpedia_politician_url_id" class="pl-4 control-label">
         Ballotpedia Politician Page
         {% if politician and politician.ballotpedia_politician_url %}(<a href="{{ politician.ballotpedia_politician_url }}" target="_blank">Go</a>){% endif %}
     </label>
