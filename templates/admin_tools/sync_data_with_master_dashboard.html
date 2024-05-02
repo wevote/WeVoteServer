@@ -10,8 +10,11 @@
     <div style="padding: 25px 25px 75px 25px; font-size: 18px">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within about
         twenty-five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
-        <br><span style="font-weight: bold;"> Note April 1, 2024: a temporary bug has created 10k+ duplicated ballot_ballotitem entries,
-            so this fast load will take about 45 minutes to complete until the records are deduped.</span>
+        <br>
+        <span style="font-weight: bold;"> Note April 1, 2024: a temporary bug has created a million duplicated ballotitem entries,
+            so this fast load will take about two or three times as long to complete on a fast setup.
+            (Until the ballotitem records are deduped, plan on this taking about 60 minutes to complete.)
+        </span>
 
         <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
         <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
@@ -282,28 +285,36 @@
 <p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
 
 <script>
-    function getDeviceId () {
-        let cookie =  document.cookie
-        const regex = /voter_device_id=(.*?);/gm;
-        const voterDeviceId = cookie.search(regex)
-        return voterDeviceId;
+    function getApiDeviceId () {
+        const regex = /voter_api_device_id=(.*?);/g;
+        const res = regex.exec(document.cookie);
+        if (res && res.length > 1) {
+            const voterApiDeviceId = res && res[1];
+            {#console.log('getDeviceId voter_api_device_id: ',voterApiDeviceId);#}
+            return voterApiDeviceId;
+        }
+        console.log('ERROR: getApiDeviceId called with out a voter_api_device_id cookie');
+        return ''
     }
 
     function getEstimatedCompletionTime (t0, current_record, total_records) {
         if (current_record === 0) {
             return 'Save off estimated duration is 40 seconds';
         }
-        const currentDate = new Date();
-        const t1 = currentDate.getTime();
+        const t1 = new Date().getTime();
         const dt = t1 - t0;
         const percentComplete = current_record / total_records;
+        console.log('percent complete: ', percentComplete);
         const totalEstimate = dt / percentComplete;
-        const timeLeftMs = Math.trunc(totalEstimate - dt);
-        const timeLeftSec = Math.trunc(timeLeftMs /1000);
+        console.log('totalEstimate: ', totalEstimate);
+        const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
+        const timeElapsedMin = Math.trunc(dt/60000)
         const secRemainder = timeLeftSec - (60 * timeLeftMin)
-        return `Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`;
-
+        const sStr = timeElapsedMin !== 1 ? 's' : ''
+        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minute${sStr}`
+        console.log(stat);
+        return stat;
     }
 
     $(function() {
@@ -335,17 +346,20 @@
     const t0 = currentDate.getTime();
     let saveOffDBComplete = false;
 
+    let counter = 0;
     setInterval(function () {
-      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
+      let origin = 'https://api.wevoteusa.org'
       let apiURL = origin + '/pl/import_status/';
       let startedOriginalElement = document.getElementById('started_original_update');
       let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
 
-      console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());
+      {#console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());#}
       if (startedOriginal === 'start') {
         $.ajax({
           type: "GET",
           url: apiURL,
+          params: {'counter': counter++},
           success: function (data) {
             let status = data.text;
             // console.log('realTimeStatusPollingLocations', status);
@@ -353,23 +367,24 @@
           },
         });
       }
-      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?&initialize=' + fastInit.val();
+      const voterApiDeviceId = getApiDeviceId();
+      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?initialize=' + fastInit.val() +
+          '&counter=' + (counter++) + '&voter_api_device_id=' + voterApiDeviceId;
       if (fastInit.val() === 'true') {
         fastInit.val("false")
       }
       if (startedFastUpdate.val() === 'true') {
-          let voterDeviceId = getDeviceId();
+
           $.ajax({
               type: "GET",
               url: apiUrlFastLoadStatus,
-              headers: {'voter_device_id': voterDeviceId},
               success: function (data) {
                   // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
                   if (fastLoadButton.html().startsWith('...')) {
                       let newHtml = '';
                       if (data.current_record === 0) {
                           newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
-                          countCopy += 2.5;
+                          countCopy += 1.5;
                           prog = Math.trunc(countCopy);
                       } else {
                           if (!saveOffDBComplete) {
@@ -409,14 +424,17 @@
         $.ajax({
           type: "GET",
           url: apiURL,
-          headers: { 'voter_device_id': getDeviceId() },
+          headers: { 'voterApiDeviceId': getApiDeviceId() },
           success: function (data) {
             let status = data.text;
             // console.log(status);
             fastLoadButton.html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
             startedFastUpdate.val("false");
             progress.val(100);
-            completion.text('Complete')
+            const t1 = new Date().getTime();
+            const dt = t1 - t0;
+            const minutes = Math.trunc(dt/60000);
+            completion.text('Completed in ' + minutes + ' minutes');
             },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
             fastLoadButton.html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');

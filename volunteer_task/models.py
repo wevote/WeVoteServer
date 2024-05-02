@@ -3,8 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from django.utils.timezone import localtime, now
 
+import wevote_functions.functions_date
 from voter.models import fetch_voter_from_voter_device_link, Voter
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_volunteer_team_integer, fetch_site_unique_id_prefix
@@ -47,13 +47,8 @@ class VolunteerTaskCompleted(models.Model):
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
 
@@ -145,6 +140,7 @@ class VolunteerTeam(models.Model):
     we_vote_id = models.CharField(
         max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False)  # Monday is 0 and Sunday is 6
 
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -214,6 +210,8 @@ class VolunteerWeeklyMetrics(models.Model):
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
     voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
     voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    # For teams that meet on Friday, we want Thursday to be the end-of-week. Note Monday is 0 and Sunday is 6
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False, db_index=True)
 
 
 def display_action_constant_human_readable(action_constant):

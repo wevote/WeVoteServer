@@ -169,13 +169,8 @@ class AnalyticsAction(models.Model):
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
     def election(self):
@@ -1725,13 +1720,8 @@ class OrganizationDailyMetrics(models.Model):
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
 
@@ -1876,13 +1866,8 @@ class SitewideDailyMetrics(models.Model):
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
 
@@ -1947,13 +1932,8 @@ class SitewideElectionMetrics(models.Model):
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
 
@@ -1989,13 +1969,8 @@ class SitewideVoterMetrics(models.Model):
 
     def generate_last_calculated_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        self.last_calculated_date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        self.last_calculated_date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         return
 
 

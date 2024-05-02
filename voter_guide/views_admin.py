@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateManager, CandidateListManager
@@ -224,6 +225,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
 
 
 # We do not require login for this page
+@csrf_exempt
 def voter_guide_create_view(request):
     """
     Allow anyone on the internet to submit a possible voter guide for including with We Vote
@@ -852,7 +854,7 @@ def voter_guide_create_process_view(request):
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if positive_value_exists(results['success']):
-            if results['new_voter_guide_possibility_created'] and positive_value_exists(voter_we_vote_id):
+            if results['voter_guide_possibility_created'] and positive_value_exists(voter_we_vote_id):
                 try:
                     # Give the volunteer who entered this credit
                     task_results = volunteer_task_manager.create_volunteer_task_completed(
@@ -1995,14 +1997,13 @@ def voter_guide_possibility_list_process_view(request):
     if positive_value_exists(which_marking) \
             and which_marking not in ("add_to_active_review", "candidates_missing_from_we_vote",
                                       "cannot_find_endorsements", "capture_detailed_comments",
-                                      "hide_from_active_review", "ignore_this_source"):
+                                      "hide_from_active_review", "ignore_this_source", "delete_this_source"):
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
                              ''.format(which_marking=which_marking))
         return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
                                     url_variables)
 
-    # print(f"voter_guide_possibility_list_process_view {which_marking}")
     # print(f"marked:{select_for_marking_voter_guide_possibility_ids}")
 
     # Make sure we have selected items for the modes that require them
@@ -2072,6 +2073,9 @@ def voter_guide_possibility_list_process_view(request):
                             'from_prior_election': False,
                             'hide_from_active_review': False,
                         })
+                elif which_marking == "delete_this_source":
+                    results = voter_guide_possibility_manager.delete_voter_guide_possibility(
+                        voter_guide_possibility_id=voter_guide_possibility_id)
                 else:
                     results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
                         voter_guide_possibility_id=voter_guide_possibility_id,

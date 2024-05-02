@@ -10,7 +10,6 @@
 <h1>Scoreboard</h1>
 {# Dropdown to choose which team scores to display #}
 <form name="team_name" method="get" action="{% url 'volunteer_task:performance_list' %}">
-  {% csrf_token %}
   {# Filter by VolunteerTeam: Only show members of the chosen team #}
   <div class="form-group pull-left">
       <label for="team_name_id" class="control-label">
@@ -29,6 +28,10 @@
 
 {% if team_we_vote_id %}
     <div>
+        {% if team_performance_dict.which_day_is_end_of_week_display %}
+            End of Week: 
+            {{ team_performance_dict.which_day_is_end_of_week_display }}&nbsp;&nbsp;|&nbsp;
+        {% endif %}
         {% for volunteer_team_member in volunteer_team_member_list %}
             {% if forloop.counter > 1 %}&nbsp;|&nbsp;{% endif %}
             <a href="{% url 'voter:voter_summary_we_vote_id' volunteer_team_member.voter.we_vote_id %}"
@@ -84,7 +87,7 @@
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Matched to Politicians</span><br />
             {% endif %}
             {% if team_performance_dict.politicians_photo_added %}
-            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos<br />
             {% endif %}
             {% if team_performance_dict.election_retrieve_started %}
             &nbsp;&nbsp;&nbsp;Election Data Retrieved<br />
@@ -246,7 +249,7 @@
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Matched to Politicians</span><br />
             {% endif %}
             {% if voter_dict.politicians_photo_added %}
-            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos<br />
             {% endif %}
             {% if voter_dict.election_retrieve_started %}
             &nbsp;&nbsp;&nbsp;Election Data Retrieved<br />

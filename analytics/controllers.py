@@ -1639,13 +1639,8 @@ def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer, thr
 
     if positive_value_exists(voter_we_vote_id_list_found):
         # Remove the voter_we_vote_id's that have been updated already today
-        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-        day_as_string = "{:d}{:02d}{:02d}".format(
-            datetime_now.year,
-            datetime_now.month,
-            datetime_now.day,
-        )
-        last_calculated_date_as_integer = convert_to_int(day_as_string)
+        # We Vote uses Pacific Time for TIME_ZONE
+        last_calculated_date_as_integer = wevote_functions.functions_date.generate_date_as_integer()
         updated_voter_we_vote_id_list = []
         for voter_we_vote_id in voter_we_vote_id_list:
             if analytics_manager.sitewide_voter_metrics_for_this_voter_updated_this_date(

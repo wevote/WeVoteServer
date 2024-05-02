@@ -1,10 +1,11 @@
+# retrieve_tables/controllers_local.py
+# Brought to you by We Vote. Be good.
+# -*- coding: UTF-8 -*-
+
 import csv
 import json
 import os
-import re
 import time
-from datetime import datetime, timezone
-from io import StringIO
 
 import psycopg2
 import requests
@@ -12,8 +13,8 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from retrieve_tables.models import RetrieveTableState
-from wevote_functions.functions import positive_value_exists, get_voter_device_id
+from retrieve_tables.controllers_master import allowable_tables
+from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -24,202 +25,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 # 'campaign_campaignxnewsitem',
 # 'campaign_campaignx_politician',
 # 'campaign_campaignxseofriendlypath',
-allowable_tables = [
-    'ballot_ballotitem',
-    'position_positionentered',
-    'candidate_candidatesarenotduplicates',
-    'candidate_candidatetoofficelink',
-    'election_ballotpediaelection',
-    'election_election',
-    'electoral_district_electoraldistrict',
-    'issue_issue',
-    'issue_organizationlinktoissue',
-    'measure_contestmeasure',
-    'measure_contestmeasuresarenotduplicates',
-    'office_contestoffice',
-    'office_contestofficesarenotduplicates',
-    'office_contestofficevisitingotherelection',
-    'office_held_officeheld',
-    'organization_organizationreserveddomain',
-    'party_party',
-    'politician_politician',
-    'politician_politiciansarenotduplicates',
-    'representative_representative',
-    'representative_representativesarenotduplicates',
-    'twitter_twitterlinktoorganization',
-    'voter_guide_voterguidepossibility',
-    'voter_guide_voterguidepossibilityposition',
-    'voter_guide_voterguide',
-    'wevote_settings_wevotesetting',
-    'ballot_ballotreturned',
-    'polling_location_pollinglocation',
-    'organization_organization',
-    'candidate_candidatecampaign',
-]
 
 dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'
-
-
-def get_total_row_count():
-    conn = psycopg2.connect(
-        database=get_environment_variable('DATABASE_NAME'),
-        user=get_environment_variable('DATABASE_USER'),
-        password=get_environment_variable('DATABASE_PASSWORD'),
-        host=get_environment_variable('DATABASE_HOST'),
-        port=get_environment_variable('DATABASE_PORT')
-    )
-
-    rows = 0
-    for table in allowable_tables:
-        with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM \"public\".\"{table}\";".format(table=table)
-            cursor.execute(sql)
-            row = cursor.fetchone()
-            if row[0] is not None:
-                sql = "SELECT COUNT(*) FROM \"public\".\"{table}\";".format(table=table)
-                cursor.execute(sql)
-                row = cursor.fetchone()
-                if row[0] is not None:
-                    cnt = int(row[0])
-            print('get_total_row_count of table ', table, ' is ', cnt)
-            rows += cnt
-
-    print('get_total_row_count is ', rows)
-
-    conn.close()
-    return rows
-
-
-def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
-    """
-    Extract one of the approximately 21 allowable database tables to CSV (pipe delimited) and send it to the
-    developer's local WeVoteServer instance
-    limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
-    offset is used to specify the first row to return (this is the SQL OFFSET clause), non-zero or ignored
-    Note July 2022, re Joe:  This call to `https://api.wevoteusa.org/apis/v1/retrieveSQLTables/` has been moved from a
-    "normal" API server (which was timing out) to a "process" API server with an 1800 second timeout.
-    """
-    t0 = time.time()
-
-    status = ''
-
-    csv_files = {}
-    try:
-        conn = psycopg2.connect(
-            database=get_environment_variable('DATABASE_NAME'),
-            user=get_environment_variable('DATABASE_USER'),
-            password=get_environment_variable('DATABASE_PASSWORD'),
-            host=get_environment_variable('DATABASE_HOST'),
-            port=get_environment_variable('DATABASE_PORT')
-        )
-
-        # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
-
-        if table_name in allowable_tables:
-            try:
-                cur = conn.cursor()
-                file = StringIO()  # Empty file
-
-                # logger.error("experiment: REAL FILE ALLOWED FOR file: " + table_name)
-                if positive_value_exists(end):
-                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
-                          end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                else:
-                    sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                # logger.error("experiment: retrieve_tables sql: " + sql)
-                cur.copy_expert(sql, file, size=8192)
-                # logger.error("experiment: after cur.copy_expert ")
-                file.seek(0)
-                # logger.error("experiment: retrieve_tables file contents: " + file.readline().strip())
-                file.seek(0)
-                csv_files[table_name] = file.read()
-                file.close()
-                # logger.error("experiment: after file close, status " + status)
-                if "exported" not in status:
-                    status += "exported "
-                status += table_name + "(" + start + "," + end + "), "
-                # logger.error("experiment: after status +=, " + status)
-                # logger.error("experiment: before conn.commit")
-                conn.commit()
-                # logger.error("experiment: after conn.commit ")
-                conn.close()
-                # logger.error("experiment: after conn.close ")
-                dt = time.time() - t0
-                logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
-                             ' seconds.  start = ' + start + ', end = ' + end)
-            except Exception as e:
-                logger.error("Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
-        else:
-            status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
-            logger.error(status)
-
-        # logger.error("experiment: before results")
-        results = {
-            'success': True,
-            'status': status,
-            'files': csv_files,
-        }
-
-        # logger.error("experiment: results returned")
-        return results
-
-    # run `pg_dump -f /dev/null wevotedev` on the server to evaluate for a corrupted file
-    except Exception as e:
-        status += "retrieve_tables export_sync_files_to_csv caught " + str(e)
-        logger.error(status)
-        logger.error("retrieve_tables export_sync_files_to_csv caught " + str(e))
-        results = {
-            'success': False,
-            'status': status,
-        }
-        return results
-
-
-def clean_row(row, index):
-    newstring = row[index].replace('\n', ' ').replace(',', ' ')
-    newstring = ''.join(ch for ch in newstring if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
-    row[index] = newstring.strip()
-
-
-def clean_bigint_row(row, index):
-    if not row[index].isnumeric() and row[index] != '\\N':
-        row[index] = 0
-
-
-def clean_url(row, index):
-    if "," in row[index]:
-        # ','' is technically valid in a URL, but is a reserved char, can mess up some ".xml" urls, but "ok" for
-        # developer data
-        row[index] = row[index].replace(",", "")
-
-
-def substitute_null(row, index, sub):
-    if row[index] == '\\N' or row[index] == '':
-        row[index] = sub
-
-
-def dump_row_col_labels_and_errors(table_name, header, row, index):
-    if row[0] == index:
-        cnt = 0
-        for element in header:
-            print(table_name + "." + element + " [" + str(cnt) + "]: " + row[cnt])
-            cnt += 1
-
-
-def check_for_non_ascii(table_name, row):
-    field_no = 0
-    for field in row:
-        if (re.sub('[ -~]', '', field)) != "":
-            print("check_for_non_ascii - table: " + table_name + ", row id:  " + str(row[0]) + ", field no: " +
-                  str(field_no))
-        field_no += 1
-
-
-def get_dummy_unique_id():
-    global dummy_unique_id
-    dummy_unique_id += 1
-    return str(dummy_unique_id)
 
 
 def save_off_database():
@@ -228,35 +36,53 @@ def save_off_database():
     time.sleep(20)
 
 
+def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
+    try:
+        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
+                                verify=True,
+                                params={'table_name': table_name,
+                                        'additional_records': additional_records,
+                                        'is_running': True,
+                                        'voter_api_device_id': voter_api_device_id,
+                                        })
+        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+    except Exception as e:
+        logger.error('update_fast_load_db caught: ', str(e))
+
+
 def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
+    Runs on the Local server (developer's Mac)
     :return:
     """
     status = ''
     t0 = time.time()
     print(
-        'Saving off a copy of your local database in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
+        'Saving off a copy of your local db in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
     save_off_database()
     dt = time.time() - t0
+    stats = {}
     print('Saved off local database in ' + str(int(dt)) + ' seconds')
+    stats |= {'save_off': str(int(dt))}
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
-    # host = 'https://wevotedeveloper.com:8000/'
-    host = 'https://api.wevoteusa.org/'
+    # host = 'https://wevotedeveloper.com:8000'
+    host = 'https://api.wevoteusa.org'
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    # verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
-    response = requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
-                            params={ "initialize": True, "voter_device_id": voter_device_id }, verify=False)
-    # print("response from master server ", str(response))
+    voter_api_device_id = get_voter_api_device_id(request)
+    requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
+                 params={"initialize": True, "voter_api_device_id": voter_api_device_id}, verify=True)
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
         t1 = time.time()
         dt = 0
+        tables_with_too_many_columns = {'candidate_candidatecampaign'}
+        gulp_size = 500000 if table_name not in tables_with_too_many_columns else 100000
         start = 0
-        end = 499999
+        end = gulp_size - 1
+
         final_lines_count = 0
         while end < 20000000:
             t2 = time.time()
@@ -268,29 +94,31 @@ def retrieve_sql_files_from_master_server(request):
                 load_successful = False
                 retry = 1
                 while not load_successful:
-                    url = (host + '/apis/v1/retrieveSQLTables/&table:' + table_name + '&start:' + str(start) + '&end:' +
-                           str(end))
+                    base_url = (host + 'apis/v1/retrieveSQLTables/?table_name=' + table_name + '&start=' + str(start) +
+                                '&end=' + str(end))
                     try:
-                        response = requests.get(host + 'apis/v1/retrieveSQLTables/',
-                                                verify=False,
-                                                params={'table': table_name, 'start': start, 'end': end,
-                                                        'voter_device_id': voter_device_id })
+                        response = requests.get(host + '/apis/v1/retrieveSQLTables/',
+                                                verify=True,
+                                                params={'table_name': table_name, 'start': start, 'end': end,
+                                                        'voter_api_device_id': voter_api_device_id})
+                        print('retrieveSQLTables url: ' + response.url)
                         request_count += 1
                         load_successful = True
                         if response.status_code == 200:
                             wait_for_a_http_200 = False
                         else:
-                            print(host + 'apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
-                                  str(response.status_code) + '  RETRY ---- ' + url)
+                            print(host + '/apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
+                                  str(response.status_code) + '  RETRY ---- ' + base_url)
                             continue
                     except Exception as getErr:
                         print(host +
-                              'apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
-                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + url)
+                              '/apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
+                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + base_url)
                         retry += 1
                         if retry < 10:
                             continue
 
+            bytes_transferred = len(response.text)
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:
                 print("FAILED:  Did not receive '" + table_name + " from server")
@@ -304,9 +132,9 @@ def retrieve_sql_files_from_master_server(request):
                       ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
-            print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
-                  " rows, cumulative is " + "{:,}".format(final_lines_count))
-            fast_load_status_update(voter_device_id, table_name, None, len(lines), None, True)
+            print(f'... Intermediate line count from this request of {gulp_size:,} rows, returned {len(lines):,} '
+                  f'rows ({bytes_transferred:,} bytes), cumulative lines is {final_lines_count:,}')
+            update_fast_load_db(host, voter_api_device_id, table_name, len(lines))
 
             if len(lines) > 0:
                 try:
@@ -320,8 +148,8 @@ def retrieve_sql_files_from_master_server(request):
 
                     cur = conn.cursor()
 
-                    print("... Processing rows " + "{:,}".format(start) + " through " + "{:,}".format(end) + " of table " + table_name +
-                          " data received from master server.")
+                    print("... Processing rows " + "{:,}".format(start) + " through " + "{:,}".format(end) +
+                          " of table " + table_name + " data received from master server.")
                     if start == 0:
                         cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this table
                         conn.commit()
@@ -347,14 +175,19 @@ def retrieve_sql_files_from_master_server(request):
                     dtc = time.time() - t0
                     print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
                           str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
+                    stats |= {table_name: str(int(dtc))}
 
                 except Exception as e:
                     status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
                     logger.error(status)
 
                 finally:
-                    start += 500000
-                    end += 500000
+                    if table_name not in tables_with_too_many_columns:
+                        start += 500000
+                        end += 500000
+                    else:
+                        start += 100000
+                        end += 100000
 
         # Update the last_value for this table so creating new entries doesn't
         #  throw "django Key (id)= already exists" error
@@ -392,7 +225,13 @@ def retrieve_sql_files_from_master_server(request):
         status += stat
 
     minutes = (time.time() - t0)/60
-    print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
+
+    for table in stats:
+        secs = int(stats[table])
+        min1 = int(secs / 60)
+        secs1 = int(secs % 60)
+        print("Processing and loading table " + table + " ended at " + str(min1) + ":" + str(secs1) + "  cumulative")
+    print("Processing and loading grand total " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
     os.system('rm ' + os.path.join(LOCAL_TMP_PATH, '*.csvTemp'))    # Clean up all the temp files
 
@@ -406,7 +245,7 @@ def retrieve_sql_files_from_master_server(request):
 # We don't check every field for garbage, although maybe we should...
 # Since the error reporting in the python console is pretty good, you should be able to figure out what field has
 # garbage in it.
-# Because we export to csv (comma separated values) files, that end up the the WeVoterServer root dir, you can stop
+# Because we export to csv (comma separated values) files, that end up the WeVoterServer root dir, you can stop
 # processing with the debugger, open the csv files in Excel, and get a decent view of what is happening.  The diagnostic
 # function dump_row_col_labels_and_errors(table_name, header, row, '2000060') also is really good at figuring out what
 # field has problems, and it dumps the field numbers and names which helps determine what row processing functions need
@@ -416,6 +255,9 @@ def retrieve_sql_files_from_master_server(request):
 # hint: temporarily comment out some lines in allowable_tables, so you can get to the problem table quicker
 # hint: Access https://pg.admin.wevote.us/  (view access to the production server Postgres) can really help, ask Dale
 def csv_file_to_clean_csv_file2(table_name):
+    """
+    Runs on the Master server
+    """
     csv_rows = []
     with open(os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp'), 'r') as csv_file2:
         line_reader = csv.reader(csv_file2, delimiter='|')
@@ -600,84 +442,44 @@ def csv_file_to_clean_csv_file2(table_name):
     return header
 
 
-def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
-    initialize = positive_value_exists(request.GET.get('initialize', False))
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    is_running = positive_value_exists(request.GET.get('is_running', True))
-    table_name = ''
-    chunk = 0
-    records = 0
-    total = 0
-    status = ""
-    success = True
-    started = None
-
+def get_row_count_from_master_server():
     try:
-        if initialize:
-            total = get_total_row_count()
-            started = datetime.now(tz=timezone.utc)
-            RetrieveTableState.objects.update_or_create(
-                voter_device_id=voter_device_id,
-                defaults={
-                    'is_running':       is_running,
-                    'started_date':     started,
-                    'table_name':       '',
-                    'chunk':            0,
-                    'current_record':   0,
-                    'total_records':    total,
-                })
-            status += "ROW_INITIALIZED "
-        else:
-            row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
-            is_running = row.is_running
-            table_name = row.table_name
-            chunk = row.chunk
-            records = row.current_record
-            total = row.total_records
-            started = row.started_date
-            status += "ROW_RETRIEVED "
-
+        host = 'https://api.wevoteusa.org'
+        response = requests.get(host + '/apis/v1/retrieveSQLTablesRowCount')
+        if response.status_code == 200:
+            count = int(response.json()['rowCount'])
+            return count
+        logger.error("retrieveSQLTablesRowCount received HTTP response " + str(response.status_code))
+        return -1
     except Exception as e:
-        status += "fast_load_status_retrieve caught exception: " + str(e)
-        logger.error("fast_load_status_retrieve caught exception: " + str(e))
-        success = False
-
-    started_txt = started.strftime('%Y-%m-%d %H:%M:%S') if started else ""
-    results = {
-        'status': status,
-        'success': success,
-        'initialize': initialize,
-        'is_running': is_running,
-        'voter_device_id': voter_device_id,
-        'started_date': started_txt,
-        'table_name': table_name,
-        'chunk': chunk,
-        'current_record': records,
-        'total_records': total,
-    }
-
-    return HttpResponse(json.dumps(results), content_type='application/json')
+        logger.error("retrieveSQLTablesRowCount row count error ", str(e))
+        return -1
 
 
-def fast_load_status_update(voter_device_id, table_name, chunk, additional_records, total_records, is_running):
-    success = True
-    try:
-        row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
-        current_record = row.current_record
-        row.is_running = is_running
-        if positive_value_exists(table_name):
-            row.table_name = table_name
-        if positive_value_exists(chunk):
-            row.chunk = chunk
-        if positive_value_exists(additional_records):
-            row.current_record += additional_records
-        if positive_value_exists(total_records):
-            row.total_records = total_records
-        row.save()
-        # print('fast_load_status_update table_name', table_name, chunk, current_record, additional_records)
+def clean_row(row, index):
+    newstring = row[index].replace('\n', ' ').replace(',', ' ')
+    newstring = ''.join(ch for ch in newstring if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
+    row[index] = newstring.strip()
 
-    except Exception as e:
-        logger.error("fast_load_status_update caught exception: " + str(e))
-        success = False
 
-    return success
+def clean_bigint_row(row, index):
+    if not row[index].isnumeric() and row[index] != '\\N':
+        row[index] = 0
+
+
+def clean_url(row, index):
+    if "," in row[index]:
+        # ','' is technically valid in a URL, but is a reserved char, can mess up some ".xml" urls, but "ok" for
+        # developer data
+        row[index] = row[index].replace(",", "")
+
+
+def substitute_null(row, index, sub):
+    if row[index] == '\\N' or row[index] == '':
+        row[index] = sub
+
+
+def get_dummy_unique_id():
+    global dummy_unique_id
+    dummy_unique_id += 1
+    return str(dummy_unique_id)

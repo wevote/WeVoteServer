@@ -25,27 +25,27 @@ If you installed the Python 3 version of pip, you should type this instead:
 
 Now, whenever you start a new project, you can create a virtual environment for it. Start by creating and moving into a new project directory:
 
-    $ mkdir ~/WeVoteServer3.5
+    $ mkdir ~/VirtualEnvironments
     
-    $ cd ~/WeVoteServer3.5
+    $ cd ~/VirtualEnvironments
 
 Now, create a virtual environment within the project directory by typing:
 
-    $ virtualenv --python=/usr/bin/python3 WeVoteServer
+    $ virtualenv --python=/usr/bin/python3.11 WeVoteServer3.11
     
 Now activate this new virtual environment for WeVoteServer:
 
     $ cd ~/PythonProjects/WeVoteServer/
-    $ source ~/WeVoteServer3.5/WeVoteServer/bin/activate
+    $ source ~/VirtualEnvironments/WeVoteServer3.11/bin/activate
     (WeVoteServer) $ export PATH="TBD/Postgres.app/Contents/Versions/latest/bin:$PATH"
 
 
 ## Installing Python 3 on Linux
 
-    (WeVoteServer) $ pip3 install django
-    (WeVoteServer) $ pip3 install --upgrade pip
-    (WeVoteServer) $ pip3 install -r requirements.txt
-    (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
+    (WeVoteServer3.11) $ pip3 install django
+    (WeVoteServer3.11) $ pip3 install --upgrade pip
+    (WeVoteServer3.11) $ pip3 install -r requirements.txt
+    (WeVoteServer3.11) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
 
 If installing requirements.txt does not work because of different dependencies, attempt install -r requirements.txt several times.
 Also,relying on IDEs like PyCharm may help installing the packages.

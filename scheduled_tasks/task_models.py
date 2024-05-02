@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 
 class WeTask(Task):
 
-    def raw_list(self):
+    @staticmethod
+    def raw_list():
         now = timezone.now()
-
         return list(Task.objects.unlocked(now).order_by('id'))
 
-    def delete_task(self, id):
+    @staticmethod
+    def delete_task(id):
         try:
             if positive_value_exists(id):
                 Task.objects.filter(id=id).delete()

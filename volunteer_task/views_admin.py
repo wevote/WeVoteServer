@@ -2,23 +2,25 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import json
-from datetime import datetime, timedelta
-
-import pytz
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 from admin_tools.views import redirect_to_sign_in_page
+from datetime import date, timedelta
 from volunteer_task.models import VolunteerWeeklyMetrics
-from voter.models import voter_has_authority, VoterManager
+from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 from .controllers import update_weekly_volunteer_metrics
 from .models import VolunteerTeam, VolunteerTeamMember
 
+WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+
+@csrf_exempt
 @login_required
 def performance_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -29,16 +31,19 @@ def performance_list_view(request):
     status = ""
     success = True
     team_we_vote_id = request.GET.get('team_we_vote_id', False)
-
-    results = update_weekly_volunteer_metrics()
+    recalculate_all = request.GET.get('recalculate_all', False)
 
     volunteer_team_member_list = []
     voter_we_vote_id_list = []
     volunteer_team_name = ''
+    which_day_is_end_of_week = 6  # Monday is 0 and Sunday is 6
+    which_day_is_end_of_week_display = WEEKDAYS[which_day_is_end_of_week]
     if positive_value_exists(team_we_vote_id):
         try:
             volunteer_team = VolunteerTeam.objects.get(we_vote_id=team_we_vote_id)
             volunteer_team_name = volunteer_team.team_name
+            which_day_is_end_of_week = volunteer_team.which_day_is_end_of_week
+            which_day_is_end_of_week_display = WEEKDAYS[which_day_is_end_of_week]
         except Exception as e:
             status += "ERROR_FIND_VOLUNTEER_TEAM: " + str(e) + " "
 
@@ -53,9 +58,22 @@ def performance_list_view(request):
         except Exception as e:
             status += "ERROR_FIND_VOLUNTEER_TEAM_MEMBERS: " + str(e) + " "
 
+    results = update_weekly_volunteer_metrics(
+        which_day_is_end_of_week=which_day_is_end_of_week,
+        recalculate_all=recalculate_all)
+
+    # earliest_for_display_date_integer = 20240410
+    today = date.today()
+    earliest_for_display_date = today - timedelta(days=30)
+    earliest_for_display_date_integer = convert_date_to_date_as_integer(earliest_for_display_date)
+
     performance_list = []
     try:
         queryset = VolunteerWeeklyMetrics.objects.using('readonly').all()  # 'analytics'
+        # We store summaries for the last 7 days, so we can have the deadline be different team-by-team
+        queryset = queryset.filter(which_day_is_end_of_week=which_day_is_end_of_week)
+        if positive_value_exists(earliest_for_display_date_integer):
+            queryset = queryset.filter(end_of_week_date_integer__gte=earliest_for_display_date_integer)
         if positive_value_exists(team_we_vote_id):
             queryset = queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list)
         performance_list = list(queryset)
@@ -179,7 +197,8 @@ def performance_list_view(request):
                 election_retrieve_started = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['election_retrieve_started']
                 match_candidates_to_politicians = \
-                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['match_candidates_to_politicians']
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer][
+                        'match_candidates_to_politicians']
                 politicians_augmented = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['politicians_augmented']
                 politicians_deduplicated = \
@@ -285,6 +304,8 @@ def performance_list_view(request):
     # ############################
     # Now work on Team statistics
     team_performance_dict['team_name'] = volunteer_team_name
+    team_performance_dict['which_day_is_end_of_week_display'] = which_day_is_end_of_week_display
+
     # Below, set these values to true if we have any tasks completed in any of the weeks we are displaying
     for weekly_metric_key in weekly_metrics_fields:
         team_performance_dict[weekly_metric_key] = 0

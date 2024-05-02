@@ -374,6 +374,8 @@ def retrieve_twitter_user_info_from_handles_list(
     counter = None
     twitter_response_dict_list = []
     retrieve_from_twitter = len(twitter_handles_list) > 0
+    twitter_handles_not_found_list = []
+    twitter_handles_suspended_list = []
 
     if retrieve_from_twitter:
         try:
@@ -409,12 +411,49 @@ def retrieve_twitter_user_info_from_handles_list(
                     'withheld',
                 ])
             if hasattr(twitter_response, 'data'):
-                twitter_response_object_list = twitter_response.data
-                for twitter_user in twitter_response_object_list:
-                    twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
-                    twitter_dict = expand_twitter_entities(twitter_dict)
-                    twitter_dict = expand_twitter_public_metrics(twitter_dict)
-                    twitter_response_dict_list.append(twitter_dict)
+                if twitter_response.data is None:
+                    status += "TWITTER_RESPONSE_HAS_NO_DATA: " + str(twitter_response) + " "
+                    success = False
+                    if hasattr(twitter_response, 'errors'):
+                        # TODO: return these handles as having problems so we can stop trying to retrieve them
+                        # errors = [{'value': 'conklinforpa',
+                        #            'detail': 'Could not find user with usernames: [conklinforpa].',
+                        #            'title': 'Not Found Error', 'resource_type': 'user', 'parameter': 'usernames',
+                        #            'resource_id': 'conklinforpa',
+                        #            'type': 'https://api.twitter.com/2/problems/resource-not-found'},
+                        #           {'value': 'ronigreenfor190',
+                        #            'detail': 'Could not find user with usernames: [ronigreenfor190].',
+                        #            'title': 'Not Found Error', 'resource_type': 'user', 'parameter': 'usernames',
+                        #            'resource_id': 'ronigreenfor190',
+                        #            'type': 'https://api.twitter.com/2/problems/resource-not-found'}]
+                        for error_result in twitter_response.errors:
+                            if error_result['resource_type'] == 'user':
+                                if positive_value_exists(error_result['value']) \
+                                        and error_result['title'] in ['Forbidden']:
+                                    if error_result['value'] not in twitter_handles_suspended_list:
+                                        twitter_handles_suspended_list.append(error_result['value'])
+                                if positive_value_exists(error_result['value']) \
+                                        and error_result['title'] in ['Not Found Error']:
+                                    if error_result['value'] not in twitter_handles_not_found_list:
+                                        twitter_handles_not_found_list.append(error_result['value'])
+                else:
+                    status += "TWITTER_RESPONSE_HAS_DATA "
+                    twitter_response_object_list = twitter_response.data
+                    for twitter_user in twitter_response_object_list:
+                        try:
+                            if twitter_user is None:
+                                status += "TWITTER_USER_EQUALS_NONE "
+                            elif hasattr(twitter_user, 'data'):
+                                twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
+                                twitter_dict = expand_twitter_entities(twitter_dict)
+                                twitter_dict = expand_twitter_public_metrics(twitter_dict)
+                                twitter_response_dict_list.append(twitter_dict)
+                            else:
+                                status += "HAS_NO_DATA: " + str(twitter_user) + " "
+                        except Exception as e:
+                            status += "PROBLEM_LOOPING_THROUGH_TWITTER_RESPONSE: " + str(e) + " "
+            else:
+                status += "TWITTER_RESPONSE_HAS_NO_DATA_FIELD "
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
@@ -428,6 +467,8 @@ def retrieve_twitter_user_info_from_handles_list(
     results = {
         'success':                          success,
         'status':                           status,
+        'twitter_handles_not_found_list':   twitter_handles_not_found_list,
+        'twitter_handles_suspended_list':   twitter_handles_suspended_list,
         'twitter_response_list':            twitter_response_dict_list,
         'twitter_response_list_retrieved':  twitter_response_list_retrieved,
     }

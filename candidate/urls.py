@@ -50,4 +50,7 @@ urlpatterns = [
             name='update_candidate_from_politician'),
     re_path(r'^update_candidates_from_politicians/', views_admin.update_candidates_from_politicians_view,
             name='update_candidates_from_politicians'),
+    re_path(r'^update_profile_image_background_color/',
+            views_admin.update_profile_image_background_color_view_for_candidates,
+            name='update_profile_image_background_color')
 ]

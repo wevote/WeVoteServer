@@ -1,7 +1,7 @@
 {# templates/admin_tools/index.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Admin Menu{% endblock %}
+{% block title %}Admin Menu{% if WE_VOTE_SERVER_ROOT_URL %} :: {{ WE_VOTE_SERVER_ROOT_URL }}{% endif %}{% endblock %}
 
 {% block content %}
 {% load humanize %}

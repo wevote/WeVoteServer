@@ -4,8 +4,9 @@
     {% load static %}
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet" />
-    <link href="{% static "apis_v1/apis_v1.css" %}" rel="stylesheet" />
+    {# <base href="/" /> #}
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'apis_v1/apis_v1.css' %}" rel="stylesheet" type="text/css" />
     <meta content="We Vote API Server" property="og:site_name" />
     <meta content="website" property="og:type" />
     <meta content="en" property="og:locale" />
@@ -14,210 +15,206 @@
     <link rel="shortcut icon" type="image/x-icon" href="https://wevote.us/img/global/icons/favicon-32x32.png" />
 </head>
 <body class="devsite-doc-page devsite-header-no-upper-tabs" id="top_of_page">
-<div class="devsite-wrapper">
-    <header class="devsite-top-section nocontent">
-        <div class="devsite-top-logo-row-wrapper-wrapper">
-            <div class="devsite-top-logo-row-wrapper">
-                <div class="devsite-top-logo-row devsite-full-site-width">
-                    <div class="devsite-product-name-wrapper">
-                        <span class="devsite-product-name">
-                {{ api_name }}
-                        </span>
+    <div class="devsite-wrapper">
+        <header class="devsite-top-section nocontent">
+            <div class="devsite-top-logo-row-wrapper-wrapper">
+                <div class="devsite-top-logo-row-wrapper">
+                    <div class="devsite-top-logo-row devsite-full-site-width">
+                        <div class="devsite-product-name-wrapper">
+                            <span class="devsite-product-name">
+                                {{ api_name }}
+                            </span>
+                        </div>
                     </div>
                 </div>
-             </div>
-          </div>
-      </div>
-  </header>
+            </div>
+        </header>
+
+        <div class="devsite-site-mask"></div>
+    </div>
+
+    <div class="devsite-main-content clearfix">
+        <a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
+        {#<h1 class="devsite-page-title" itemprop="name"></h1>#}
+        <br>
+        <h2>HTTP request</h2>
+        <p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }} (<a href="#tryitnow">Jump to "Try It Now"</a>)</p>
 
 
-<div class="devsite-site-mask">
-</div>
+        {% if required_query_parameter_list %}
+            <h3>Required Parameters</h3>
 
-<div class="devsite-main-content clearfix">
-<a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
-{#<h1 class="devsite-page-title" itemprop="name"></h1>#}
-
-<br>
-<h2>HTTP request</h2>
-<p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }} (<a href="#tryitnow">Jump to "Try It Now"</a>)</p>
-
-
-{% if required_query_parameter_list %}
-<h3>Required Parameters</h3>
-
-    <table border="0" cellpadding="5" cellspacing="1">
-        <tr>
-            <td>Parameter name</td>
-            <td>Value</td>
-            <td>Description</td>
-        </tr>
-        {% for query_parameter in required_query_parameter_list %}
-        <tr>
-            <td>{{ query_parameter.name }}</td>
-            <td>{{ query_parameter.value }}</td>
-            <td>{{ query_parameter.description }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% endif %}
-{% if optional_query_parameter_list %}
-<h3>Optional Parameters</h3>
-
-    <table border="0" cellpadding="5" cellspacing="1">
-        <tr>
-            <td>Parameter name</td>
-            <td>Value</td>
-            <td>Description</td>
-        </tr>
-        {% for query_parameter in optional_query_parameter_list %}
-        <tr>
-            <td>{{ query_parameter.name }}</td>
-            <td>{{ query_parameter.value }}</td>
-            <td>{{ query_parameter.description }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% endif %}
-
-
-
-{% if request_body %}
-<h3>Request body</h3>
-
-    {{ request_body }}
-{% endif %}
-
-
-<h2>Response</h2>
-<p>{{ api_response_notes }}</p>
-<pre>{{ api_response }}</pre>
-
-
-{% if potential_status_codes_list %}
-<h3>Response Status Codes</h3>
-
-    <table border="0" cellpadding="5" cellspacing="1">
-        <tr>
-            <td>Code</td>
-            <td>Description</td>
-        </tr>
-        {% for status_code in potential_status_codes_list %}
-        <tr>
-            <td>{{ status_code.code }}</td>
-            <td>{{ status_code.description }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% endif %}
-<a name="tryitnow"></a>
-<br />
-
-<h3>Try It Now: API Variables</h3>
-<p>
-    {{ api_introduction|safe }}
-    {% if get_or_post == "GET or POST" or get_or_post_selected == "GET" or get_or_post_selected == "POST" %}
-        <br />
-        <a href="{{ url_root }}/apis/v1/docs/{{ api_slug }}?get_or_post_selected={% if get_or_post_selected == "POST" %}GET{% else %}POST{% endif %}">
-            <strong>{% if get_or_post_selected == "POST" %}POST{% else %}GET{% endif %}</strong>:
-            Switch from {% if get_or_post_selected == "POST" %}POST TO GET{% else %}GET to POST{% endif %}</a>
-    {% endif %}
-    {% load template_filters %}
-
-        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% elif get_or_post == "GET or POST" %}get{% else %}post{% endif %}" action="{% url try_now_link %}{{ try_now_link_additional_path }}" target="_blank">
-        {% csrf_token %}
-            <table>
+            <table border="0" cellpadding="5" cellspacing="1">
                 <tr>
                     <td>Parameter name</td>
                     <td>Value</td>
-                    <td>&nbsp;</td>
+                    <td>Description</td>
                 </tr>
-            {% for query_parameter in required_query_parameter_list %}
-                {% if query_parameter.name != 'api_key' %}
-                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
-                                {% if query_parameter.name in try_now_link_variables_dict %}
-                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                                {% elif query_parameter.name == 'voter_device_id' %}
-                                      value="{{ voter_api_device_id }}"
-                                {% endif %}>
-                            </td>
-                        </tr>
-                    {% elif query_parameter.value == 'integerlist' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
-                                {% if query_parameter.name in try_now_link_variables_dict %}
-                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                                {% endif %}>
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
-                            </td>
-                        </tr>
-                    {% elif query_parameter.value == 'boolean' %}
-                        <tr>
-                           <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'true' %}checked{% endif %} value="true" > True<br />
-                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'false' %}checked{% endif %} value="false" > False
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-            {% for query_parameter in optional_query_parameter_list %}
-                {% if query_parameter.name != 'api_key' %}
-                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input  type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
-                                {% if query_parameter.name in try_now_link_variables_dict %}
-                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                                {% elif query_parameter.name == 'voter_device_id' %}
-                                      value="{{ voter_api_device_id }}"
-                                {% endif %}>
-                            </td>
-                        </tr>
-                    {% elif query_parameter.value == 'integerlist' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
-                                {% if query_parameter.name in try_now_link_variables_dict %}
-                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                                {% endif %}>
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
-                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
-                            </td>
-                        </tr>
-                    {% elif query_parameter.value == 'boolean' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'true' %}checked{% endif %} value="true" > True<br />
-                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'false' %}checked{% endif %} value="false" > False
-                            </td>
-                        </tr>
-                    {% elif query_parameter.value == 'text' %}
-                        <tr>
-                            <td>{{ query_parameter.name }}: </td>
-                            <td colspan="2">
-                                <textarea name="{{ query_parameter.name }}" rows="4" cols="50"></textarea>
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
+                {% for query_parameter in required_query_parameter_list %}
+                <tr>
+                    <td>{{ query_parameter.name }}</td>
+                    <td>{{ query_parameter.value }}</td>
+                    <td>{{ query_parameter.description }}</td>
+                </tr>
+                {% endfor %}
             </table>
-    <br>
-            <input type="submit" value="Try it now"> (opens in new window)
-        </form>
-    </p>
+        {% endif %}
+        {% if optional_query_parameter_list %}
+            <h3>Optional Parameters</h3>
 
+            <table border="0" cellpadding="5" cellspacing="1">
+                <tr>
+                    <td>Parameter name</td>
+                    <td>Value</td>
+                    <td>Description</td>
+                </tr>
+                {% for query_parameter in optional_query_parameter_list %}
+                <tr>
+                    <td>{{ query_parameter.name }}</td>
+                    <td>{{ query_parameter.value }}</td>
+                    <td>{{ query_parameter.description }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if request_body %}
+            <h3>Request body</h3>
+            {{ request_body }}
+        {% endif %}
+
+
+        <h2>Response</h2>
+        <p>{{ api_response_notes }}</p>
+        <pre>{{ api_response }}</pre>
+
+
+        {% if potential_status_codes_list %}
+            <h3>Response Status Codes</h3>
+
+            <table border="0" cellpadding="5" cellspacing="1">
+                <tr>
+                    <td>Code</td>
+                    <td>Description</td>
+                </tr>
+                {% for status_code in potential_status_codes_list %}
+                <tr>
+                    <td>{{ status_code.code }}</td>
+                    <td>{{ status_code.description }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <a name="tryitnow"></a>
+        <br />
+
+        <h3>Try It Now: API Variables</h3>
+        <p>
+            {{ api_introduction|safe }}
+            {% if get_or_post == "GET or POST" or get_or_post_selected == "GET" or get_or_post_selected == "POST" %}
+                <br />
+                <a href="{{ url_root }}/apis/v1/docs/{{ api_slug }}?get_or_post_selected={% if get_or_post_selected == "POST" %}GET{% else %}POST{% endif %}">
+                    <strong>{% if get_or_post_selected == "POST" %}POST{% else %}GET{% endif %}</strong>:
+                    Switch from {% if get_or_post_selected == "POST" %}POST TO GET{% else %}GET to POST{% endif %}
+                </a>
+            {% endif %}
+            {% load template_filters %}
+
+            <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% elif get_or_post == "GET or POST" %}get{% else %}post{% endif %}" action="{% url try_now_link %}{{ try_now_link_additional_path }}" target="_blank">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td>Parameter name</td>
+                        <td>Value</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                {% for query_parameter in required_query_parameter_list %}
+                    {% if query_parameter.name != 'api_key' %}
+                        {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
+                                    {% if query_parameter.name in try_now_link_variables_dict %}
+                                          value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                    {% elif query_parameter.name == 'voter_device_id' %}
+                                          value="{{ voter_api_device_id }}"
+                                    {% endif %}>
+                                </td>
+                            </tr>
+                        {% elif query_parameter.value == 'integerlist' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
+                                    {% if query_parameter.name in try_now_link_variables_dict %}
+                                          value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                    {% endif %}>
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                </td>
+                            </tr>
+                        {% elif query_parameter.value == 'boolean' %}
+                            <tr>
+                               <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'true' %}checked{% endif %} value="true" > True<br />
+                                    <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'false' %}checked{% endif %} value="false" > False
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% for query_parameter in optional_query_parameter_list %}
+                    {% if query_parameter.name != 'api_key' %}
+                        {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input  type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
+                                    {% if query_parameter.name in try_now_link_variables_dict %}
+                                          value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                    {% elif query_parameter.name == 'voter_device_id' %}
+                                          value="{{ voter_api_device_id }}"
+                                    {% endif %}>
+                                </td>
+                            </tr>
+                        {% elif query_parameter.value == 'integerlist' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
+                                    {% if query_parameter.name in try_now_link_variables_dict %}
+                                          value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                    {% endif %}>
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                    <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                </td>
+                            </tr>
+                        {% elif query_parameter.value == 'boolean' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'true' %}checked{% endif %} value="true" > True<br />
+                                    <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'false' %}checked{% endif %} value="false" > False
+                                </td>
+                            </tr>
+                        {% elif query_parameter.value == 'text' %}
+                            <tr>
+                                <td>{{ query_parameter.name }}: </td>
+                                <td colspan="2">
+                                    <textarea name="{{ query_parameter.name }}" rows="4" cols="50"></textarea>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                </table>
+                <br>
+                <input type="submit" value="Try it now"> (opens in new window)
+            </form>
+        </p>
+    </div>
 </body>
 </html>
