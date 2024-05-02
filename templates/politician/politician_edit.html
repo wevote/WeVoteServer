@@ -36,8 +36,7 @@
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
 
-<div class="row">
-<div class="col">
+
 <div class="row form-group">
     <label for="profile_image_type_currently_active_id" class="pl-3 control-label">
         Politician Photo Choice<br />
@@ -56,7 +55,7 @@
         {% endif %}
         </span>
     {# Uploaded photo #}
-        <span style="float: left; padding: 8px 20px 0 0;">
+        <span style="float: left; padding: 8px 0 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if politician.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
                 />
