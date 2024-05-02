@@ -1,0 +1,44 @@
+<!-- A row of five form groups -->
+<!-- Label stacked on top of input -->
+
+<div class="row">
+	<div class="col">
+		<div class="form-group">
+			<label for="{{field_dict_1.id}}" class="pl-4 control-label">{{field_dict_1.label}}</label>
+			<div class="col">
+				<input type="text" name="{{field_dict_1.name}}" id="{{field_dict_1.id}}" class="form-control"
+					value='{{ field_dict_1.value|default_if_none:"" }}' />
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="form-group">
+			<label for="{{field_dict_2.id}}" class="pl-4 control-label">{{field_dict_2.label}}</label>
+			<div class="col">
+				<input type="text" name="{{field_dict_2.name}}" id="{{field_dict_2.id}}" class="form-control"
+					value='{{ field_dict_2.value|default_if_none:"" }}' />
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="form-group">
+			<label for="{{field_dict_3.id}}" class="pl-4 control-label">{{field_dict_3.label}}</label>
+			<div class="col">
+				<input type="text" name="{{field_dict_3.name}}" id="{{field_dict_3.id}}" class="form-control"
+					value='{{ field_dict_3.value|default_if_none:"" }}' />
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="form-group">
+			<label for="{{field_dict_4.id}}" class="pl-4 control-label">{{field_dict_4.label}}</label>
+			<div class="col">
+				<input type="text" name="{{field_dict_4.name}}" id="{{field_dict_4.id}}" class="form-control"
+					value='{{ field_dict_4.value|default_if_none:"" }}' />
+			</div>
+		</div>
+	</div>
+</div>
