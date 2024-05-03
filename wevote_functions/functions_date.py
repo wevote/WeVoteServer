@@ -94,5 +94,14 @@ def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
 
 
 #adjust base date to another date
+    #search for timedelta
+    #usage:
+        # Subtracting days to find a date 182 days ago
+            # past_date = adjust_date(today, days=-182)
+
+        # Adding days to find a date 50 days in the future
+            # future_date = adjust_date(today, days=50)
+
 def adjust_date(base_date, days=0, seconds=0, minutes=0, hours=0, weeks=0, months=0, years=0):
-    delta = timedelta()
+    delta = timedelta(days=days, seconds=seconds, minutes=minutes, hours=hours, weeks=weeks, months=months, years=years)
+    return base_date + delta
