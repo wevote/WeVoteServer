@@ -4,6 +4,7 @@
 
 import pytz
 import datetime
+from datetime import timedelta
 from wevote_functions.functions import positive_value_exists, convert_to_int, convert_to_str
 from math import log10
 from django.utils.timezone import localtime, now
@@ -89,3 +90,9 @@ def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
     timezone = pytz.timezone(timezone_name)
     datetime_now = timezone.localize(datetime.now())
     return convert_date_to_date_as_integer(datetime_now)
+
+
+
+#adjust base date to another date
+def adjust_date(base_date, days=0, seconds=0, minutes=0, hours=0, weeks=0, months=0, years=0):
+    delta = timedelta()
