@@ -1,6 +1,7 @@
 # admin_tools/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import os
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -11,19 +12,19 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+import wevote_functions
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.controllers import candidates_import_from_sample_file
 from candidate.models import CandidateCampaign, CandidateManager
-from config.base import get_environment_variable, LOGIN_URL
+from config.base import get_environment_variable, LOGIN_URL, BASE_DIR, PROJECT_PATH
 from election.controllers import elections_import_from_sample_file
 from election.models import Election
-from email_outbound.models import EmailAddress, SendGridApiCounterManager
+from email_outbound.models import EmailAddress
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
 from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
-from import_export_targetsmart.models import TargetSmartApiCounterManager
 from import_export_vote_usa.models import VoteUSAApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
@@ -62,6 +63,8 @@ VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # vot
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+logger = wevote_functions.admin.get_logger(__name__)
+
 @login_required
 def admin_home_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -69,6 +72,12 @@ def admin_home_view(request):
                           'verified_volunteer', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    logger.info("AdminHome BASE_DIR: %s", BASE_DIR)
+    logger.info("AdminHome PROJECT_PATH: %s", PROJECT_PATH)
+    pth_root_static_css = os.path.join(BASE_DIR, 'static/v1/apis_v1.css')
+    logger.info("AdminHome os.path.isfile BASE_DIR, static/v1/apis_v1.css : %s", os.path.isfile(pth_root_static_css))
+    #  May 1, 2024 --  Nginix error:  Not Found: /apis/v1/static/apis_v1.css
 
     # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
