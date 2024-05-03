@@ -69,11 +69,11 @@ def get_total_row_count():
     :return: the number of rows
     """
     conn = psycopg2.connect(
-        database=get_environment_variable('DATABASE_NAME'),
-        user=get_environment_variable('DATABASE_USER'),
-        password=get_environment_variable('DATABASE_PASSWORD'),
-        host=get_environment_variable('DATABASE_HOST'),
-        port=get_environment_variable('DATABASE_PORT')
+        database=get_environment_variable('DATABASE_NAME_READONLY'),
+        user=get_environment_variable('DATABASE_USER_READONLY'),
+        password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+        host=get_environment_variable('DATABASE_HOST_READONLY'),
+        port=get_environment_variable('DATABASE_PORT_READONLY')
     )
 
     rows = 0
@@ -113,11 +113,11 @@ def retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end):
     csv_files = {}
     try:
         conn = psycopg2.connect(
-            database=get_environment_variable('DATABASE_NAME'),
-            user=get_environment_variable('DATABASE_USER'),
-            password=get_environment_variable('DATABASE_PASSWORD'),
-            host=get_environment_variable('DATABASE_HOST'),
-            port=get_environment_variable('DATABASE_PORT')
+            database=get_environment_variable('DATABASE_NAME_READONLY'),
+            user=get_environment_variable('DATABASE_USER_READONLY'),
+            password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+            host=get_environment_variable('DATABASE_HOST_READONLY'),
+            port=get_environment_variable('DATABASE_PORT_READONLY')
         )
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")

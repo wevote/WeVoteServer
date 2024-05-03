@@ -156,13 +156,15 @@
         {% if show_election_statistics %}
             <td align="middle">
             {% if election.candidate_count %}
-                {{ election.candidate_count|default_if_none:"" }}
+                {{ election.candidate_count|default_if_none:"" }} candidates
             {% endif %}
             {% if election.candidates_without_photo_count %}
-                ({{ election.candidates_without_photo_count|default_if_none:"" }}
-                  {% if election.candidates_without_photo_percentage %}
-                    <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}">
-                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>{% endif %})
+                <br />
+                {{ election.candidates_without_photo_count|default_if_none:"" }} w/o photo
+                {% if election.candidates_without_photo_percentage %}
+                (<span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}"
+                  >{{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>)
+                {% endif %}
             {% endif %}
             {% if election.candidate_count %}
                 <br />
@@ -383,6 +385,11 @@
     <label for="exclude_candidate_analysis_done_id">
       <input type="checkbox" name="exclude_candidate_analysis_done" id="exclude_candidate_analysis_done_id" value="1"
              {% if exclude_candidate_analysis_done %}checked{% endif %} /> Exclude Analyzed
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="no_supporters_id">
+      <input type="checkbox" name="no_supporters" id="no_supporters_id" value="1"
+             {% if no_supporters %}checked{% endif %} /> No Supporters
     </label>
 
     <input type="hidden" name="page" value="{{ current_page_number }}" />
@@ -790,6 +797,11 @@
     $(function() {
         $('#hide_candidates_with_photos_id').change(function() {
             this.form.hide_candidates_with_links_id.value = '0';
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#no_supporters_id').change(function() {
             this.form.submit();
         });
     });

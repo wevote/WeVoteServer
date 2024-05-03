@@ -854,7 +854,7 @@ def voter_guide_create_process_view(request):
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if positive_value_exists(results['success']):
-            if results['new_voter_guide_possibility_created'] and positive_value_exists(voter_we_vote_id):
+            if results['voter_guide_possibility_created'] and positive_value_exists(voter_we_vote_id):
                 try:
                     # Give the volunteer who entered this credit
                     task_results = volunteer_task_manager.create_volunteer_task_completed(

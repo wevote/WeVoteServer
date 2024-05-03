@@ -1,14 +1,8 @@
 <div class="sidebar">
   {% load static %}
-{#  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">#}
-{#    <div class="sidebar-item">#}
-{#      <img src="{% static "apis_v1/Home.svg" %}" alt="">#}
-{#      Home#}
-{#    </div>#}
-{#  </a>#}
   <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     <div class="sidebar-item">
-      <img src="{% static "apis_v1/Elections.svg" %}" alt="">
+      <img src="{% static 'apis_v1/Elections.svg' %}" alt="">
       Elections
     </div>
   </a>

@@ -28,6 +28,10 @@
 
 {% if team_we_vote_id %}
     <div>
+        {% if team_performance_dict.which_day_is_end_of_week_display %}
+            End of Week: 
+            {{ team_performance_dict.which_day_is_end_of_week_display }}&nbsp;&nbsp;|&nbsp;
+        {% endif %}
         {% for volunteer_team_member in volunteer_team_member_list %}
             {% if forloop.counter > 1 %}&nbsp;|&nbsp;{% endif %}
             <a href="{% url 'voter:voter_summary_we_vote_id' volunteer_team_member.voter.we_vote_id %}"
