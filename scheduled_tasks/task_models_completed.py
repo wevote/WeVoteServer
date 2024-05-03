@@ -11,10 +11,12 @@ logger = logging.getLogger(__name__)
 
 class WeTaskCompleted(CompletedTask):
 
-    def raw_list(self, limit=25):
+    @staticmethod
+    def raw_list(limit=25):
         return list(CompletedTask.objects.order_by('-id')[:limit])
 
-    def delete_older_tasks(self, limit_dt):
+    @staticmethod
+    def delete_older_tasks(limit_dt):
         success = False
         try:
             CompletedTask.objects.filter(run_at__lte=limit_dt).delete()

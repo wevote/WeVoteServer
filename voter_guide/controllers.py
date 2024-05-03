@@ -1021,7 +1021,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                 voter_guide_possibility_id = create_results['voter_guide_possibility_id']
                 organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
                 candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
-                if create_results['new_voter_guide_possibility_created'] and \
+                if create_results['voter_guide_possibility_created'] and \
                         positive_value_exists(voter_who_submitted_we_vote_id):
                     try:
                         # Give the volunteer who entered this credit

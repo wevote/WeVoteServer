@@ -17,6 +17,39 @@ from wevote_functions.functions_date import convert_date_as_integer_to_date, con
 from wevote_settings.models import fetch_volunteer_task_weekly_metrics_last_updated, WeVoteSetting, \
     WeVoteSettingsManager
 
+START_AND_END_OF_WEEK_BY_WEEKDAY = {
+    0: 6,
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4,
+    6: 5,
+}
+WEEKDAY_WRAPAROUND_DICT = {
+    -7: 0,
+    -6: 1,
+    -5: 2,
+    -4: 3,
+    -3: 4,
+    -2: 5,
+    -1: 6,
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 0,
+    8: 1,
+    9: 2,
+    10: 3,
+    11: 4,
+    12: 5,
+    13: 6,
+}
+
 
 def augmentation_change_found(changes_found_dict={}):  # politician_requested_change_found
     status = ""
@@ -103,7 +136,10 @@ def is_key_in_dict_and_true(dict_to_search={}, key_to_search=''):
     return False
 
 
-def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, latest_date_integer=None):
+def generate_start_and_end_of_week_date_integer(
+        earliest_date_integer=None,
+        latest_date_integer=None,
+        which_day_is_start_of_week=0):
     status = ""
     success = True
     start_and_end_of_week_date_integer_list = []
@@ -113,13 +149,24 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
         earliest_date_integer = 99990101
         earliest_date = convert_date_as_integer_to_date(earliest_date_integer)
         status += "FAILED_TO_CREATE_EARLIEST_DATE-FALLING_BACK_ON_99991231: " + str(e) + " "
-    # Roll back to the Monday, of the week containing the earliest_date
+    # Roll back to the start of the team's week, of the week containing the earliest_date
     weekday_of_earliest_date = earliest_date.weekday()
-    if weekday_of_earliest_date == 0:
-        earliest_monday_date = earliest_date
+    which_day_is_end_of_week = get_end_of_week_weekday_from_start_of_week_weekday(which_day_is_start_of_week)
+
+    offset_to_go_back_to_start_of_week = calculate_distance_back_to_start_of_week_from_weekday(
+        weekday_of_earliest_date, end_of_week_weekday=which_day_is_end_of_week)
+    if offset_to_go_back_to_start_of_week is False:
+        earliest_start_of_week_date = earliest_date
+        earliest_start_of_week_integer = 0
+        status += "GENERATE_ERROR_RETRIEVING_EARLIEST_START_OF_WEEK_DATE1 "
     else:
-        earliest_monday_date = earliest_date - timedelta(days=weekday_of_earliest_date)
-    earliest_monday_integer = convert_date_to_date_as_integer(earliest_monday_date)
+        # Roll back to the start of the week, of the week containing the earliest_date
+        if offset_to_go_back_to_start_of_week == 0:
+            earliest_start_of_week_date = earliest_date
+        else:
+            earliest_start_of_week_date = \
+                earliest_date - timedelta(days=offset_to_go_back_to_start_of_week)
+        earliest_start_of_week_integer = convert_date_to_date_as_integer(earliest_start_of_week_date)
 
     try:
         latest_date = convert_date_as_integer_to_date(latest_date_integer)
@@ -127,35 +174,41 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
         latest_date_integer = 19700201
         latest_date = convert_date_as_integer_to_date(latest_date_integer)
         status += "FAILED_TO_CREATE_LATEST_DATE-FALLING_BACK_ON_19700101: " + str(e) + " "
-    # Figure out the Sunday of the week containing the latest_date
+    # Figure out the last day of the week containing the latest_date
     weekday_of_latest_date = latest_date.weekday()
-    if weekday_of_latest_date == 6:
-        latest_sunday_date = latest_date
+    which_day_is_end_of_week = get_end_of_week_weekday_from_start_of_week_weekday(which_day_is_start_of_week)
+    offset_to_go_forward_to_end_of_week = calculate_distance_forward_to_end_of_week_from_weekday(
+        weekday_of_latest_date, end_of_week_weekday=which_day_is_end_of_week)
+    if offset_to_go_forward_to_end_of_week is False:
+        latest_end_of_week_integer = 0
+        status += "GENERATE_ERROR_RETRIEVING_LATEST_END_OF_WEEK_DATE1 "
     else:
-        days_to_add = 6 - weekday_of_latest_date
-        latest_sunday_date = latest_date + timedelta(days=days_to_add)
-    latest_sunday_integer = convert_date_to_date_as_integer(latest_sunday_date)
+        if offset_to_go_forward_to_end_of_week == 0:
+            latest_end_of_week_date = latest_date
+        else:
+            latest_end_of_week_date = latest_date + timedelta(days=offset_to_go_forward_to_end_of_week)
+        latest_end_of_week_integer = convert_date_to_date_as_integer(latest_end_of_week_date)
 
-    more_weeks_to_process = earliest_monday_integer < latest_sunday_integer
-    monday_date_on_stage = earliest_monday_date
-    monday_integer_on_stage = earliest_monday_integer
-    sunday_date_on_stage = monday_date_on_stage + timedelta(days=6)
-    sunday_integer_on_stage = convert_date_to_date_as_integer(sunday_date_on_stage)
+    more_weeks_to_process = earliest_start_of_week_integer < latest_end_of_week_integer
+    start_of_week_date_on_stage = earliest_start_of_week_date
+    start_of_week_integer_on_stage = earliest_start_of_week_integer
+    end_of_week_date_on_stage = start_of_week_date_on_stage + timedelta(days=6)
+    end_of_week_integer_on_stage = convert_date_to_date_as_integer(end_of_week_date_on_stage)
     while more_weeks_to_process:
         start_and_end_of_week_dict = {
-            'start_of_week_date_integer': monday_integer_on_stage,
-            'end_of_week_date_integer': sunday_integer_on_stage,
+            'start_of_week_date_integer': start_of_week_integer_on_stage,
+            'end_of_week_date_integer': end_of_week_integer_on_stage,
         }
         start_and_end_of_week_date_integer_list.append(start_and_end_of_week_dict)
-        monday_date_on_stage = sunday_date_on_stage + timedelta(days=1)
-        monday_integer_on_stage = convert_date_to_date_as_integer(monday_date_on_stage)
-        sunday_date_on_stage = monday_date_on_stage + timedelta(days=6)
-        sunday_integer_on_stage = convert_date_to_date_as_integer(sunday_date_on_stage)
-        more_weeks_to_process = sunday_integer_on_stage <= latest_sunday_integer
+        start_of_week_date_on_stage = end_of_week_date_on_stage + timedelta(days=1)
+        start_of_week_integer_on_stage = convert_date_to_date_as_integer(start_of_week_date_on_stage)
+        end_of_week_date_on_stage = start_of_week_date_on_stage + timedelta(days=6)
+        end_of_week_integer_on_stage = convert_date_to_date_as_integer(end_of_week_date_on_stage)
+        more_weeks_to_process = end_of_week_integer_on_stage <= latest_end_of_week_integer
 
     results = {
-        'earliest_monday_integer':                  earliest_monday_integer,
-        'latest_sunday_integer':                    latest_sunday_integer,
+        'earliest_start_of_week_integer':           earliest_start_of_week_integer,
+        'latest_end_of_week_integer':               latest_end_of_week_integer,
         'success':                                  success,
         'status':                                   status,
         'start_and_end_of_week_date_integer_list':  start_and_end_of_week_date_integer_list,
@@ -198,7 +251,8 @@ def update_or_create_weekly_metrics_one_volunteer(
         volunteer_task_completed_list=None,
         voter=None,
         voter_display_name=None,
-        voter_we_vote_id=None):
+        voter_we_vote_id=None,
+        which_day_is_end_of_week=6):
 
     candidates_created = 0                  # VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
     duplicate_politician_analysis = 0       # VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS = 10
@@ -234,6 +288,9 @@ def update_or_create_weekly_metrics_one_volunteer(
         missing_required_variable = True
     if not positive_value_exists(voter_we_vote_id):
         status += 'MISSING_VOTER_WE_VOTE_ID '
+        missing_required_variable = True
+    if not which_day_is_end_of_week:
+        status += 'MISSING_WEEKDAY '
         missing_required_variable = True
 
     if missing_required_variable:
@@ -277,7 +334,8 @@ def update_or_create_weekly_metrics_one_volunteer(
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
                     voter_guide_possibilities_created += 1
 
-    voter_date_unique_string = str(voter_we_vote_id) + "-" + str(end_of_week_date_integer)
+    voter_date_unique_string = \
+        str(voter_we_vote_id) + "-" + str(end_of_week_date_integer) + "-" + str(which_day_is_end_of_week)
     updates = {
         'candidates_created':                   candidates_created,
         'duplicate_politician_analysis':        duplicate_politician_analysis,
@@ -295,6 +353,7 @@ def update_or_create_weekly_metrics_one_volunteer(
         'voter_display_name':                   voter_display_name,
         'voter_guide_possibilities_created':    voter_guide_possibilities_created,
         'voter_we_vote_id':                     voter_we_vote_id,
+        'which_day_is_end_of_week':             which_day_is_end_of_week,
     }
     try:
         volunteer_weekly_metrics = VolunteerWeeklyMetrics.objects.using('analytics').update_or_create(
@@ -316,35 +375,83 @@ def update_or_create_weekly_metrics_one_volunteer(
     return results
 
 
-def update_weekly_volunteer_metrics():
-    end_date_integer = 0
+def get_key_from_value(val, my_dict):
+    for key, value in my_dict.items():
+        if val == value:
+            return key
+    return 0
+
+
+def get_start_of_week_weekday_from_end_of_week_weekday(end_of_week_weekday=6):
+    return get_key_from_value(end_of_week_weekday, START_AND_END_OF_WEEK_BY_WEEKDAY)
+
+
+def get_end_of_week_weekday_from_start_of_week_weekday(start_of_week_weekday=0):
+    return START_AND_END_OF_WEEK_BY_WEEKDAY[start_of_week_weekday]
+
+
+def calculate_distance_back_to_start_of_week_from_weekday(weekday_value, end_of_week_weekday=6):
+    days_offset = 0
+    which_day_is_start_of_week = get_start_of_week_weekday_from_end_of_week_weekday(end_of_week_weekday)
+    while days_offset <= 7:
+        weekday_to_compare_raw = weekday_value - days_offset
+        weekday_to_compare = WEEKDAY_WRAPAROUND_DICT[weekday_to_compare_raw]
+        if weekday_to_compare == which_day_is_start_of_week:
+            return days_offset
+        days_offset += 1
+    return False
+
+
+def calculate_distance_forward_to_end_of_week_from_weekday(weekday_value, end_of_week_weekday=0):
+    days_offset = 0
+    while days_offset <= 7:
+        weekday_to_compare_raw = weekday_value + days_offset
+        weekday_to_compare = WEEKDAY_WRAPAROUND_DICT[weekday_to_compare_raw]
+        if weekday_to_compare == end_of_week_weekday:
+            return days_offset
+        days_offset += 1
+    return False
+
+
+def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=False):
+    which_day_is_start_of_week = get_start_of_week_weekday_from_end_of_week_weekday(which_day_is_end_of_week)
     status = ""
     success = True
     task_list = []
 
-    # Retrieve the last complete day we processed
-    # If we run updates Wed March 13th, 2024, then the date stored is yesterday: 20240312
-    day_before_last_update_date_integer = fetch_volunteer_task_weekly_metrics_last_updated()
+    if positive_value_exists(recalculate_all):
+        day_before_last_update_date_integer = 20240312  # Hard coded for resetting all statistics for this team
+    else:
+        # Retrieve the last complete day we processed
+        # If we run updates Wed March 13th, 2024, then the date stored is the day before: 20240312 (vs. 20240313)
+        day_before_last_update_date_integer = fetch_volunteer_task_weekly_metrics_last_updated()
 
     try:
         day_before_last_update_date = convert_date_as_integer_to_date(day_before_last_update_date_integer)
-        # Roll back to the Monday, of the week containing the earliest_date
         weekday_of_last_update_date = day_before_last_update_date.weekday()
-        if weekday_of_last_update_date == 0:
-            earliest_monday_date = day_before_last_update_date
+        offset_to_go_back_to_start_of_week = calculate_distance_back_to_start_of_week_from_weekday(
+            weekday_of_last_update_date, end_of_week_weekday=which_day_is_end_of_week)
+        if offset_to_go_back_to_start_of_week is False:
+            earliest_start_of_week_integer = 0
+            status += "ERROR_RETRIEVING_EARLIEST_START_OF_WEEK_DATE1 "
         else:
-            earliest_monday_date = day_before_last_update_date - timedelta(days=weekday_of_last_update_date)
-        earliest_monday_integer = convert_date_to_date_as_integer(earliest_monday_date)
+            # Roll back to the start of the week, of the week containing the earliest_date
+            if offset_to_go_back_to_start_of_week == which_day_is_end_of_week:
+                earliest_start_of_week_date = day_before_last_update_date
+            else:
+                earliest_start_of_week_date = \
+                    day_before_last_update_date - timedelta(days=offset_to_go_back_to_start_of_week)
+            earliest_start_of_week_integer = convert_date_to_date_as_integer(earliest_start_of_week_date)
     except Exception as e:
-        earliest_monday_integer = 0
-        status += "ERROR_RETRIEVING_EARLIEST_MONDAY_DATE: " + str(e) + ' '
+        earliest_start_of_week_integer = 0
+        status += "ERROR_RETRIEVING_EARLIEST_START_OF_WEEK_DATE2: " + str(e) + ' '
 
     try:
         queryset = VolunteerTaskCompleted.objects.using('readonly').all()  # 'analytics'
         # We have to process an entire week of task metrics if we last processed within the week.
         #  Once past the Sunday of a week, we can stop fresh calculations and move onto weeks we haven't processed
         #  completely yet.
-        queryset = queryset.filter(date_as_integer__gte=earliest_monday_integer)
+        queryset = queryset.filter(date_as_integer__gte=earliest_start_of_week_integer)
         task_list = list(queryset)
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
@@ -366,7 +473,10 @@ def update_weekly_volunteer_metrics():
             voter_we_vote_id_list.append(volunteer_task_completed.voter_we_vote_id)
         tasks_by_voter_we_vote_id[volunteer_task_completed.voter_we_vote_id].append(volunteer_task_completed)
 
-    results = generate_start_and_end_of_week_date_integer(earliest_date_integer, latest_date_integer)
+    results = generate_start_and_end_of_week_date_integer(
+        earliest_date_integer,
+        latest_date_integer,
+        which_day_is_start_of_week=which_day_is_start_of_week)
     start_and_end_of_week_date_integer_list = results['start_and_end_of_week_date_integer_list']
 
     voter_list = []
@@ -391,20 +501,22 @@ def update_weekly_volunteer_metrics():
                 start_of_week_date_integer=start_and_end_of_week_dict['start_of_week_date_integer'],
                 volunteer_task_completed_list=tasks_by_voter_we_vote_id[voter_we_vote_id],
                 voter=voter,
+                which_day_is_end_of_week=which_day_is_end_of_week,
             )
             if not results['success']:
                 all_voters_updated_successfully = False
 
-    yesterday_integer = 0
+    # We keep calculating the last week to deal with teams with different end_of_week days
+    week_ago_integer = 0
     if all_voters_updated_successfully:
         today = date.today()
-        yesterday = today - timedelta(days=1)
-        yesterday_integer = convert_date_to_date_as_integer(yesterday)
-    if all_voters_updated_successfully and positive_value_exists(yesterday_integer):
+        week_ago = today - timedelta(days=7)
+        week_ago_integer = convert_date_to_date_as_integer(week_ago)
+    if all_voters_updated_successfully and positive_value_exists(week_ago_integer):
         we_vote_settings_manager = WeVoteSettingsManager()
         results = we_vote_settings_manager.save_setting(
             setting_name="volunteer_task_weekly_metrics_last_updated",
-            setting_value=yesterday_integer,
+            setting_value=week_ago_integer,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
             status += results['status']

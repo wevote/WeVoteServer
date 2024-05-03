@@ -72,6 +72,8 @@ from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManag
 from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
     move_voter_guides_to_another_voter
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from campaign.controllers import delete_campaign_supporter
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -307,6 +309,10 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
     # Delete the voter-table data
     delete_voter_accounts_results = delete_voter_table_information(voter_to_delete)
     status += " " + delete_voter_accounts_results['status']
+
+    # Delete Campaign Supporter
+    delete_campaign_supporter_results = delete_campaign_supporter(voter_to_delete)
+    status += " " + delete_campaign_supporter_results['status']
 
     # And finally, delete all voter_device_links for this voter
     update_link_results = voter_device_link_manager.delete_all_voter_device_links_by_voter_id(voter_to_delete_id)

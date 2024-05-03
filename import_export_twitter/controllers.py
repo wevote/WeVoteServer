@@ -2451,6 +2451,10 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         if not results['success']:
             success = False
             status += "HANDLES_REQUESTED: " + str(twitter_handles_to_retrieve_list) + " "
+        else:
+            twitter_handles_not_found_list = results['twitter_handles_not_found_list']
+            twitter_handles_suspended_list = results['twitter_handles_suspended_list']
+            # TODO Mark these as failing
         if results['twitter_response_list_retrieved']:
             twitter_dict_list = results['twitter_response_list']
             results = update_twitter_user_list_from_twitter_response_list(twitter_dict_list=twitter_dict_list)

@@ -2870,3 +2870,43 @@ def update_campaignx_from_politician(campaignx, politician):
         'save_changes': save_changes,
     }
     return results
+
+
+def delete_campaign_supporter(voter_to_delete=None):
+    
+    status = ""
+    success = True
+    campaign_supporter_deleted = 0
+    campaign_supporter_not_deleted = 0
+    voter_to_delete_id = voter_to_delete.we_vote_id
+
+    if not positive_value_exists(voter_to_delete_id):
+        status += "DELETE_CAMPAIGN_SUPPORTER-MISSING_VOTER_ID"
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'voter_to_delete_we_vote_id':       voter_to_delete_id,
+            'campaign_supporter_deleted':       campaign_supporter_deleted,
+            'campaign_supporter_not_deleted':   campaign_supporter_not_deleted,
+        }
+        return results
+    
+    try:
+        number_deleted, details = CampaignXSupporter.objects\
+            .filter(voter_we_vote_id__iexact=voter_to_delete_id, )\
+            .delete()
+        campaign_supporter_deleted += number_deleted
+    except Exception as e:
+        status += "CampaignXSupporter CAMPAIGN SUPPORTER NOT DELETED: " + str(e) + " "
+        campaign_supporter_not_deleted += 1
+
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'campaign_supporter_deleted':       campaign_supporter_deleted,
+        'campaign_supporter_not_deleted':   campaign_supporter_not_deleted,
+    }
+    
+    return results
