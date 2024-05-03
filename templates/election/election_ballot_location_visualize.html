@@ -6,9 +6,8 @@
   <base href="/">
   <script async src="{% static "js/test.js" %}" type="javascript"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap"></script>
-  <script async defer src="{% static "js/PollingLocationVisualization.js" %}" type="javascript"></script>
-{#  <script>window.initMap()</script>#}
-{#  <script>function initMap() {alert("ok 2");}</script>#}
+{#  <script async defer src="{% static "js/PollingLocationVisualization.js" %}" type="javascript"></script>#}
+  <script async defer src="https://www.podell.com/wevote/PollingLocationVisualization.js" type="javascript"></script>
   <script>
     function setCheckBoxes (showRedPinSelector, showGreenPinSelector) {
        const newHref = window.location.origin + window.location.pathname +
