@@ -42,12 +42,9 @@ IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
-
-
-
-
-
 IMG_CLASS_NAME_WE_ARE_SEEKING = "widget-img"
+
+
 # Retrieves the parsed HTML content from the given URL.
 def get_parsed_html(url):
     try:
@@ -57,6 +54,8 @@ def get_parsed_html(url):
     except requests.exceptions.RequestException:
         print('Unable to connect to {}'.format(url))
         return BeautifulSoup('', "lxml")
+
+
 def get_ballotpedia_candidate_img_from_list(candidate_urls):
     clean_message = ''
     fb_id_or_login_name = ''
@@ -76,7 +75,7 @@ def get_ballotpedia_candidate_img_from_list(candidate_urls):
                 except Exception as e:
                     status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
                     success = False
-                    status+=("Image URL not found for:", img['alt'])
+                    status += ("Image URL not found for:", img['alt'])
 
     results = {
         'clean_message': clean_message,
@@ -87,9 +86,6 @@ def get_ballotpedia_candidate_img_from_list(candidate_urls):
         'success': success,
     }
     return results
-
-
-
 
 
 @login_required
@@ -191,7 +187,6 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                 )
 
 
-
 def get_one_picture_from_ballotpedia_(one_entity, request, remote_request_history_manager, add_messages):
     status = ""
     success = True
@@ -289,8 +284,6 @@ def get_one_picture_from_ballotpedia_(one_entity, request, remote_request_histor
         'status': status,
     }
     return results
-
-
 
 
 @login_required
@@ -916,7 +909,6 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                     '?kind_of_batch=IMPORT_BALLOTPEDIA_BALLOT_ITEMS' +
                                     '&google_civic_election_id=' + str(google_civic_election_id))
-
 
 # @login_required
 # def retrieve_ballotpedia_offices_by_election_from_api_view(request):
