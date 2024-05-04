@@ -662,6 +662,7 @@ def politician_list_view(request):
             if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
                 campaignx_with_linked_politician_we_vote_id_count += 1
 
+        updates_error = False
         if updates_needed:
             try:
                 CampaignX.objects.bulk_update(
@@ -673,6 +674,7 @@ def politician_list_view(request):
                         total_to_convert_after=total_to_convert_after,
                         updates_made=updates_made)
             except Exception as e:
+                updates_error = True
                 update_campaignx_with_linked_politician_we_vote_id_status += \
                     "ERROR with update_campaignx_with_linked_politician_we_vote_id: {e} " \
                     "".format(e=e)
@@ -687,7 +689,8 @@ def politician_list_view(request):
                 update_campaignx_with_linked_politician_we_vote_id_status + \
                 " (SCRIPT update_campaignx_with_linked_politician_we_vote_id) "
 
-            messages.add_message(request, messages.INFO, update_campaignx_with_linked_politician_we_vote_id_status)
+            message_type = messages.ERROR if updates_error else messages.INFO
+            messages.add_message(request, message_type, update_campaignx_with_linked_politician_we_vote_id_status)
 
     politician_list = []
     politician_list_count = 0
@@ -998,7 +1001,7 @@ def politician_merge_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +
                                  results['status'])
         messages.add_message(request, messages.INFO, 'Prior politicians skipped, and not merged.')
-        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+        return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -1801,21 +1804,21 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             },
             'google_civic_candidate_name_dict':              
             {
-                'label':    'Politician Name (for Google Civic matching)',
+                'label':    'Politician Alt Name (for Google Civic matching)',
                 'id':       'google_civic_candidate_name_id',
                 'name':     'google_civic_candidate_name',
                 'value':     google_civic_candidate_name if google_civic_candidate_name else politician_on_stage.google_civic_candidate_name
             },
             'google_civic_candidate_name2_dict':              
             {
-                'label':    'Politician Name 2',
+                'label':    'Politician Alt Name 2',
                 'id':       'google_civic_candidate_name2_id',
                 'name':     'google_civic_candidate_name2',
                 'value':     google_civic_candidate_name2 if google_civic_candidate_name2 else politician_on_stage.google_civic_candidate_name2
             },
             'google_civic_candidate_name3_dict':              
             {
-                'label':    'Politician Name 3',
+                'label':    'Politician Alt Name 3',
                 'id':       'google_civic_candidate_name3_id',
                 'name':     'google_civic_candidate_name3',
                 'value':     google_civic_candidate_name3 if google_civic_candidate_name3 else politician_on_stage.google_civic_candidate_name3

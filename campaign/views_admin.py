@@ -716,6 +716,8 @@ def campaign_list_view(request):
                 else:
                     politician = None
                     campaignx.date_last_updated_from_politician = localtime(now()).date()
+                    campaignx.linked_politician_we_vote_id = None
+                    campaignx.seo_friendly_path = None
                     campaignx.save()
                 if not politician or not hasattr(politician, 'we_vote_id'):
                     continue
