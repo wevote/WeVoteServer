@@ -3473,3 +3473,5 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
         'google_civic_election_id': google_civic_election_id,
     }
     return results
+
+

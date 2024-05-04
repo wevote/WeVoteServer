@@ -21,6 +21,7 @@ STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSI
 
 KIND_OF_ACTION_CHOICES = (
     (RETRIEVE_UPDATE_DATA_FROM_TWITTER, 'Retrieve updated data from Twitter'),
+    (RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS, 'Retrieve possible Ballotpedia photos'),
     (RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, 'Retrieve possible Facebook photos'),
     (RETRIEVE_POSSIBLE_GOOGLE_LINKS, 'Retrieve possible google links'),
     (RETRIEVE_POSSIBLE_TWITTER_HANDLES, 'Retrieve possible twitter handles'),
