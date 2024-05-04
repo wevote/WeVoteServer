@@ -1337,60 +1337,60 @@ def organization_edit_process_view(request):
     # We can use the same url_variables with any processing failures below
 
     url_variables = "?n=1"
-    
+
     if issue_analysis_admin_notes is not False:
-        url_variables += "&issue_analysis_admin_notes"
+        url_variables += "&issue_analysis_admin_notes=" + str(issue_analysis_admin_notes)
 
     if issue_analysis_done is not False:
-        url_variables += "&issue_analysis_done"
+        url_variables += "&issue_analysis_done=" + str(issue_analysis_done)
 
     if organization_contact_form_url is not False:
-        url_variables += "&organization_contact_form_url"
+        url_variables += "&organization_contact_form_url=" + str(organization_contact_form_url)
     
     if organization_email is not False:
-        url_variables += "&organization_email"
+        url_variables += "&organization_email=" + str(organization_email)
 
     if organization_endorsements_api_url is not False:
-        url_variables += "&organization_endorsements_api_url"
+        url_variables += "&organization_endorsements_api_url=" + str(organization_endorsements_api_url)
 
     if organization_facebook is not False:
-        url_variables += "&organization_facebook"
+        url_variables += "&organization_facebook=" + str(organization_facebook)
 
     if  organization_id is not False:
-        url_variables += "&organization_id"
+        url_variables += "&organization_id=" + str(organization_id)
 
     if organization_instagram_handle is not False:
-        url_variables += "&organization_instagram_handle"
+        url_variables += "&organization_instagram_handle=" + str(organization_instagram_handle)
 
     if organization_name is not False:
-        url_variables += "&organization_name"
+        url_variables += "&organization_name=" + str(organization_name)
 
     if organization_twitter_handle is not False:
-        url_variables += "&organization_twitter_handle"
+        url_variables += "&organization_twitter_handle=" + str(organization_twitter_handle)
 
     if organization_twitter_updates_failing is not False:
-        url_variables += "&organization_twitter_updates_failing"
+        url_variables += "&organization_twitter_updates_failing=" + str(organization_twitter_updates_failing)
 
     if organization_type is not False:
-        url_variables += "&organization_type"
+        url_variables += "&organization_type=" + str(organization_type)
 
     if organization_website is not False:
-        url_variables += "&organization_website"
+        url_variables += "&organization_website=" + str(organization_website)
 
     if profile_image_type_currently_active is not False:
-        url_variables += "&profile_image_type_currently_active"
+        url_variables += "&profile_image_type_currently_active=" + str(profile_image_type_currently_active)
 
     if state_served_code is not False:
-        url_variables += "&state_served_code"
+        url_variables += "&state_served_code=" + str(state_served_code)
 
     if wikipedia_page_title is not False:
-        url_variables += "&wikipedia_page_title"
+        url_variables += "&wikipedia_page_title=" + str(wikipedia_page_title)
 
     if wikipedia_photo_url is not False:
-        url_variables += "&wikipedia_photo_url"
+        url_variables += "&wikipedia_photo_url=" + str(wikipedia_photo_url)
 
     if google_civic_election_id is not False:
-        url_variables += "&google_civic_election_id"
+        url_variables += "&google_civic_election_id=" + str(google_civic_election_id)
     
 
     if not success:
