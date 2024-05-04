@@ -704,6 +704,7 @@ def campaign_list_view(request):
                     politician_list_by_campaignx_we_vote_id[one_politician.linked_campaignx_we_vote_id] = one_politician
 
         # Loop through all the campaigns, and update them with some politician data
+        politician_we_vote_id_remaining_list = politician_we_vote_id_list.copy()
         if len(campaignx_list) > 0:
             campaignx_update_errors = 0
             campaigns_updated = 0
@@ -713,6 +714,7 @@ def campaign_list_view(request):
             for campaignx in campaignx_list:
                 if campaignx.we_vote_id in politician_list_by_campaignx_we_vote_id:
                     politician = politician_list_by_campaignx_we_vote_id[campaignx.we_vote_id]
+                    politician_we_vote_id_remaining_list.remove(politician.we_vote_id)
                 else:
                     politician = None
                     campaignx.date_last_updated_from_politician = localtime(now()).date()
@@ -753,9 +755,12 @@ def campaign_list_view(request):
                                          "".format(total_to_update_after=total_to_update_after,
                                                    updates_made=campaigns_updated))
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR,
-                                         "ERROR with update_campaignx_list_from_politicians_script: {e} "
-                                         "".format(e=e))
+                    messages.add_message(
+                        request, messages.ERROR,
+                        "ERROR with update_campaignx_list_from_politicians_script: {e} "
+                        "politician_we_vote_id_remaining_list: {politician_we_vote_id_remaining_list}"
+                        "".format(e=e,
+                                  politician_we_vote_id_remaining_list=politician_we_vote_id_remaining_list))
 
     campaignx_we_vote_ids_in_order = []
     if campaignx_owner_organization_we_vote_id:
