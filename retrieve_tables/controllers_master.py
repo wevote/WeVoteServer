@@ -79,14 +79,16 @@ def get_total_row_count():
     rows = 0
     for table_name in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
+            sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
             cursor.execute(sql)
             row = cursor.fetchone()
-            if row[0] is not None:
-                sql = "SELECT COUNT(*) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
+            if positive_value_exists(row[0]):
+                cnt = int(row[0])
+            else:
+                sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
                 cursor.execute(sql)
                 row = cursor.fetchone()
-                if row[0] is not None:
+                if positive_value_exists(row[0]):
                     cnt = int(row[0])
             print('get_total_row_count of table ', table_name, ' is ', cnt)
             rows += cnt
