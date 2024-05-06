@@ -90,7 +90,8 @@ function addMarkers (resultsMap) {
 // See https://developers.google.com/maps/solutions/store-locator/clothing-store-locator
 // for a nicer way to do this, call it on initialization of page, instead of from
 // google.maps.api inclusion.  Low priority.
-window.initMap = () => {
+window.initMap = async function () {
+  alert('OK, From inside my js')
   const geoCenterLatSelector = $('#geo_center_lat');
   const geoCenterLngSelector = $('#geo_center_lng');
   const geoCenterZoomSelector = $('#geo_center_zoom');

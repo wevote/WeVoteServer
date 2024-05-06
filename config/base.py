@@ -86,6 +86,8 @@ def get_environment_variable_default(var_name, default_value):
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_STATIC_DIR = BASE_DIR + '/static'
+
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # Consider switching to the way that Two Scoops of Django 1.8 suggests file path handling, section 5.6
 
@@ -262,9 +264,9 @@ AUTH_USER_MODEL = 'voter.Voter'
 
 # Static files (CSS, JavaScript, Images) Django 5+
 STATIC_URL = 'static/'      # April 2024, don't think this is correct, but can't run without it
-ALT_STATIC_URL = BASE_DIR + "/apis_v1/static"
-STATICFILES_DIRS = [ALT_STATIC_URL]
-
+STATICFILES_DIRS = (
+    BASE_STATIC_DIR,
+)
 
 # # Static files (CSS, JavaScript, Images)  Django 1.11 - 3.nn
 # # https://docs.djangoproject.com/en/1.11/howto/static-files/ calls loading static files from the project
