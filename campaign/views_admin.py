@@ -17,7 +17,7 @@ from config.base import get_environment_variable
 from datetime import datetime, timedelta
 from election.models import ElectionManager
 from organization.models import Organization, OrganizationManager
-from politician.models import PoliticianManager
+from politician.models import Politician, PoliticianManager
 from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, \
@@ -591,7 +591,6 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     related_campaignx_list = []
     if campaignx and positive_value_exists(campaignx.linked_politician_we_vote_id):
         try:
-            from politician.models import Politician
             politician_queryset = Politician.objects.using('readonly').all()
             politician = politician_queryset.get(we_vote_id=campaignx.linked_politician_we_vote_id)
             if positive_value_exists(politician.last_name):
@@ -662,6 +661,67 @@ def campaign_list_view(request):
 
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
+    campaignx_list_to_update = []
+    clean_campaigns_with_dead_politician_we_vote_id = True
+    # If a CampaignX entry has a linked_politician_we_vote_id which no longer exists, remove the seo_friendly_path
+    #  so that entry doesn't block the use of that seo_friendly_path
+    if clean_campaigns_with_dead_politician_we_vote_id:
+        number_to_update = 5000  # Set to 5,000 at a time
+        politician_we_vote_id_list = []
+        total_to_update_after = 0
+        try:
+            queryset = CampaignX.objects.using('readonly').all()
+            queryset = queryset.exclude(
+                Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
+            queryset = queryset.exclude(linked_politician_we_vote_id_verified=True)
+            total_to_update = queryset.count()
+            total_to_update_after = total_to_update - number_to_update if total_to_update > number_to_update else 0
+            campaignx_list_to_update = list(queryset[:number_to_update])
+            for one_campaignx in campaignx_list_to_update:
+                if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                    if one_campaignx.linked_politician_we_vote_id not in politician_we_vote_id_list:
+                        politician_we_vote_id_list.append(one_campaignx.linked_politician_we_vote_id)
+        except Exception as e:
+            status += "CAMPAIGNX_CLEAN_QUERY_FAILED: " + str(e) + " "
+
+        politician_we_vote_ids_not_found_list = []
+        if len(politician_we_vote_id_list) > 0:
+            queryset = Politician.objects.using('readonly').all()
+            queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
+            queryset = queryset.values_list('we_vote_id', flat=True).distinct()
+            politician_we_vote_ids_found_list = list(queryset)
+            politician_we_vote_ids_not_found_list = politician_we_vote_id_list.copy()
+            for one_politician_we_vote_id in politician_we_vote_ids_found_list:
+                politician_we_vote_ids_not_found_list.remove(one_politician_we_vote_id)
+        update_list = []
+        for one_campaignx in campaignx_list_to_update:
+            one_campaignx.linked_politician_we_vote_id_verified = True
+            if one_campaignx.linked_politician_we_vote_id in politician_we_vote_ids_not_found_list:
+                one_campaignx.date_last_updated_from_politician = localtime(now()).date()
+                one_campaignx.linked_politician_we_vote_id = None
+                one_campaignx.seo_friendly_path = None
+            update_list.append(one_campaignx)
+
+        if len(update_list) > 0:
+            try:
+                CampaignX.objects.bulk_update(
+                    update_list,
+                    ['date_last_updated_from_politician',
+                     'linked_politician_we_vote_id',
+                     'linked_politician_we_vote_id_verified',
+                     'seo_friendly_path'])
+                messages.add_message(request, messages.INFO,
+                                     "{updates_made:,} campaignx entries cleaned from missing politicians. "
+                                     "{total_to_update_after:,} remaining."
+                                     "".format(total_to_update_after=total_to_update_after,
+                                               updates_made=len(campaignx_list_to_update)))
+            except Exception as e:
+                messages.add_message(
+                    request, messages.ERROR,
+                    "ERROR with clean_campaigns_with_dead_politician_we_vote_id: {e} "
+                    "politician_we_vote_ids_not_found_list: {politician_we_vote_ids_not_found_list}"
+                    "".format(e=e,
+                              politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))
 
     update_campaigns_from_politicians_script = True
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
@@ -694,7 +754,6 @@ def campaign_list_view(request):
 
         politician_list_by_campaignx_we_vote_id = {}
         if len(politician_we_vote_id_list) > 0:
-            from politician.models import Politician
             queryset = Politician.objects.all()
             queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
             politician_list = list(queryset)
@@ -704,6 +763,7 @@ def campaign_list_view(request):
                     politician_list_by_campaignx_we_vote_id[one_politician.linked_campaignx_we_vote_id] = one_politician
 
         # Loop through all the campaigns, and update them with some politician data
+        politician_we_vote_id_remaining_list = politician_we_vote_id_list.copy()
         if len(campaignx_list) > 0:
             campaignx_update_errors = 0
             campaigns_updated = 0
@@ -713,9 +773,12 @@ def campaign_list_view(request):
             for campaignx in campaignx_list:
                 if campaignx.we_vote_id in politician_list_by_campaignx_we_vote_id:
                     politician = politician_list_by_campaignx_we_vote_id[campaignx.we_vote_id]
+                    politician_we_vote_id_remaining_list.remove(politician.we_vote_id)
                 else:
                     politician = None
                     campaignx.date_last_updated_from_politician = localtime(now()).date()
+                    campaignx.linked_politician_we_vote_id = None
+                    campaignx.seo_friendly_path = None
                     campaignx.save()
                 if not politician or not hasattr(politician, 'we_vote_id'):
                     continue
@@ -751,9 +814,12 @@ def campaign_list_view(request):
                                          "".format(total_to_update_after=total_to_update_after,
                                                    updates_made=campaigns_updated))
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR,
-                                         "ERROR with update_campaignx_list_from_politicians_script: {e} "
-                                         "".format(e=e))
+                    messages.add_message(
+                        request, messages.ERROR,
+                        "ERROR with update_campaignx_list_from_politicians_script: {e} "
+                        "politician_we_vote_id_remaining_list: {politician_we_vote_id_remaining_list}"
+                        "".format(e=e,
+                                  politician_we_vote_id_remaining_list=politician_we_vote_id_remaining_list))
 
     campaignx_we_vote_ids_in_order = []
     if campaignx_owner_organization_we_vote_id:
@@ -793,7 +859,7 @@ def campaign_list_view(request):
                                 campaignx_owner.save()
 
         if len(campaignx_we_vote_ids_in_order) > 0:
-            # Re-save the order of all of the campaigns
+            # Re-save the order of all campaigns
             campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id_list=campaignx_we_vote_ids_in_order,
                 organization_we_vote_id=campaignx_owner_organization_we_vote_id,
@@ -942,7 +1008,6 @@ def campaign_list_view(request):
 
     if len(politician_we_vote_id_list) > 0:
         modified_campaignx_list2 = []
-        from politician.models import Politician
         queryset = Politician.objects.all()
         queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
         politician_list = list(queryset)
@@ -1510,8 +1575,6 @@ def render_campaignx_merge_form(
         campaignx_merge_conflict_values,
         campaignx_year=0,
         remove_duplicate_process=True):
-    from politician.models import Politician
-
     politician1_full_name = ''
     politician1_state_code = ''
     if campaignx_option1_for_template and \
@@ -1803,7 +1866,6 @@ def repair_ocd_id_mismatch_damage_view(request):
         campaignx_list_count = len(campaignx_list)
         campaignx_list_remaining_count = queryset.count() - campaignx_list_count
         from campaign.controllers import update_campaignx_from_politician
-        from politician.models import Politician, PoliticianManager
         politician_manager = PoliticianManager()
         for one_campaignx in campaignx_list:
             save_campaignx_changes = True  # Default to saving

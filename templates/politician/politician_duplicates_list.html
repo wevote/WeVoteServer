@@ -71,10 +71,13 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}" class="u-no-break">compare for merge</a>
+                <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}"
+                   class="u-no-break"
+                   target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
                 <br />
                 <br />
-                <a href="{% url 'politician:not_duplicates' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}" class="u-no-break">not duplicates</a>
+                <a href="{% url 'politician:not_duplicates' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}"
+                   class="u-no-break">not duplicates</a>
             </td>
         {% if possible_duplicate.politician1 %}
             <td style="border-left: 1px solid #cdd0d4;">
