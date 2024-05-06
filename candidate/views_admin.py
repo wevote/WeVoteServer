@@ -1967,6 +1967,17 @@ def candidate_new_view(request):
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
 
+def update_candidate_wikipedia_image(candidate_on_stage, request, messages):
+    print("made it here")
+    response = retrieve_images_from_wikipedia(candidate_on_stage.wikipedia_page_title)
+    if response["success"]==True:
+        print("made it here!!!!")
+        candidate_on_stage.wikipedia_photo_url = response["result"]
+        candidate_on_stage.save()
+        messages.add_message(request, messages.INFO, "Retrieved the following from wikipedia: {result}".format(result=response["result"]))
+    else:
+        messages.add_message(request, messages.ERROR, response["result"])    
+
 
 @login_required
 def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
@@ -2045,14 +2056,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
     if not positive_value_exists(candidate_on_stage.wikipedia_photo_url):
         if positive_value_exists(candidate_on_stage.wikipedia_page_title):
-            response = retrieve_images_from_wikipedia(candidate_on_stage.wikipedia_page_title)
-            if response["success"]==True:
-                candidate_on_stage.wikipedia_photo_url = response["result"]
-                candidate_on_stage.save()
-                messages.add_message(request, messages.INFO, response["result"])
-            else:
-                messages.add_message(request, messages.ERROR, response["result"])
-
+            update_candidate_wikipedia_image(candidate_on_stage, request, messages)
+                
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
     else:
@@ -3184,10 +3189,10 @@ def candidate_edit_process_view(request):
                 if change_results['change_description_changed']:
                     change_description += change_results['change_description']
                     change_description_changed = True
-                candidate_on_stage.wikipedia_url = wikipedia_url
-                print("this is wikipedia url:", wikipedia_url)
-                print("this is the modified url:", wikipedia_url.rsplit('/', 1)[-1].replace("_", " "))
-                candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ")
+                if(candidate_on_stage.wikipedia_url != wikipedia_url):
+                    candidate_on_stage.wikipedia_url = wikipedia_url
+                    candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ")
+                    update_candidate_wikipedia_image(candidate_on_stage, request, messages)
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
