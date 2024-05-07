@@ -366,6 +366,18 @@ class Politician(models.Model):
     def __unicode__(self):
         return self.last_name
 
+    def get_recommendation(self) -> list[str]:
+
+        """
+            Get a list of recommended politicians for the current politician.
+            Returns:
+                list[str]: A list of We Vote IDs of recommended politicians.
+                If no recommendations are found, the list will be empty.
+        """
+        politician_manager = PoliticianManager()
+        results = politician_manager.fetch_recommend_list_by_we_vote_id(self.we_vote_id)
+        return results
+
     class Meta:
         ordering = ('last_name',)
 
@@ -407,6 +419,36 @@ class Politician(models.Model):
 
     def is_gender_specified(self):
         return self.gender in [FEMALE, GENDER_NEUTRAL, MALE]
+
+
+class RecommendedPoliticianLinkByPolitician(models.Model):
+    """
+       Model to store links between a politician and recommended politicians.
+       Attributes:
+           from_politician_we_vote_id (str): We Vote ID of the politician accessed by User.
+           recommended_politician_we_vote_id (str):  We Vote ID of the recommended politician.
+       Note:
+           This model is configured to store up to five associated recommended politicians per one politician.
+           For instance,
+           from_politician_we_vote_id,   recommended_politician_we_vote_id
+           ww1,                          ww2
+           ww1,                          ww5
+           ww1,                          ww6
+           ww1,                          ww4
+           ww1,                          ww9
+           ww2,                          ww4
+              ,
+              ,
+              ,
+       Example:
+           A record in this model signifies that 'from_politician_we_vote_id' recommends 'recommended_politician_we_vote_id'.
+       """
+
+    from_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    recommended_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    def __str__(self):
+        return f"RecommendedPoliticianLinkByPolitician(id={self.from_politician_we_vote_id}, from_politician_we_vote_id={self.from_politician_we_vote_id}, recommended_politician_we_vote_id={self.recommended_politician_we_vote_id})"
 
 
 class PoliticiansAreNotDuplicates(models.Model):
@@ -496,6 +538,52 @@ class PoliticianManager(models.Manager):
 
     def __init__(self):
         pass
+
+    @staticmethod
+    def retrieve_recommend_list_by_we_vote_id(we_vote_id: str) -> list[RecommendedPoliticianLinkByPolitician]:
+
+        """
+        retrieve a list of recommended politicians for a given politician's we vote ID.
+        Args:
+            we_vote_id (str): We Vote ID of the politician.
+        Returns:
+            list[RecommendedPoliticianLinkByPolitician]: A list of recommended politicians linked to the given We Vote ID.
+            either empty_list if it does not find anyone associated with we_vote_id
+        """
+
+        recommend_found = False
+        empty_list = []
+        try:
+            suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.filter(
+                from_politician_we_vote_id__iexact=we_vote_id)
+            suggested_politicians = list(suggested_politicians)
+            if len(suggested_politicians):
+                recommend_found = True
+
+        except Exception as e:
+            pass
+
+        if recommend_found:
+            return suggested_politicians
+
+        else:
+            return empty_list
+
+    def fetch_recommend_list_by_we_vote_id(self, we_vote_id: str) -> list[str]:
+
+        """
+        Fetch a list of We Vote IDs of recommended politicians for a given politician's We Vote ID.
+        Args:
+            we_vote_id (str): We Vote ID of the politician.
+        Returns:
+            list[str]: A list of We Vote IDs of recommended politicians.
+        """
+
+        suggestion_list = []
+        retrieved_recommend_list = self.retrieve_recommend_list_by_we_vote_id(we_vote_id)
+        for recommended_politician in retrieved_recommend_list:
+            suggestion_list.append(recommended_politician.recommended_politician_we_vote_id)
+        return suggestion_list
 
     @staticmethod
     def add_politician_position_sorting_dates_if_needed(position_object=None, politician_we_vote_id=''):
@@ -2264,7 +2352,7 @@ class PoliticianManager(models.Manager):
         politician_query = politician_query.filter(gender=UNKNOWN)
         number_of_rows = politician_query.count()
         politician_query = politician_query.order_by('politician_name')
-        politician_query = politician_query[start:(start+count)]
+        politician_query = politician_query[start:(start + count)]
         politician_list_objects = list(politician_query)
         results_list = []
         for pol in politician_list_objects:
@@ -2311,7 +2399,7 @@ class PoliticianManager(models.Manager):
         politician_query = politician_query.filter(politician_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
             order_by('politician_name')
         number_of_rows = politician_query.count()
-        politician_query = politician_query[start:(start+count)]
+        politician_query = politician_query[start:(start + count)]
         politician_list_objects = list(politician_query)
         results_list = []
         # out = ''
