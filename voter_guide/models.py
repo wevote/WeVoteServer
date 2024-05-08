@@ -1262,7 +1262,7 @@ class VoterGuide(models.Model):
 
     def organization(self):
         try:
-            organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+            organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("voter_guide.organization Found multiple")
@@ -3041,7 +3041,7 @@ class VoterGuidePossibility(models.Model):
             return
 
         try:
-            organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+            organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("voter_guide_possibility.organization Found multiple")

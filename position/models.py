@@ -414,7 +414,7 @@ class PositionEntered(models.Model):
         if not self.candidate_campaign_id:
             return
         try:
-            candidate = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
+            candidate = CandidateCampaign.objects.using('readonly').get(id=self.candidate_campaign_id)
         except CandidateCampaign.MultipleObjectsReturned as e:
             logger.error("position.candidate_campaign Found multiple")
             return
@@ -426,7 +426,7 @@ class PositionEntered(models.Model):
         if not self.contest_measure_id:
             return
         try:
-            contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
+            contest_measure = ContestMeasure.objects.using('readonly').get(id=self.contest_measure_id)
         except ContestMeasure.MultipleObjectsReturned as e:
             logger.error("position.contest_measure Found multiple")
             return
@@ -438,7 +438,7 @@ class PositionEntered(models.Model):
         if not self.contest_office_id:
             return
         try:
-            contest_office = ContestOffice.objects.get(id=self.contest_office_id)
+            contest_office = ContestOffice.objects.using('readonly').get(id=self.contest_office_id)
         except ContestOffice.MultipleObjectsReturned as e:
             logger.error("position.contest_office Found multiple")
             return
@@ -450,7 +450,7 @@ class PositionEntered(models.Model):
         if not self.google_civic_election_id:
             return
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("PositionEntered.election Found multiple")
@@ -465,7 +465,7 @@ class PositionEntered(models.Model):
         if not self.organization_id:
             return
         try:
-            organization = Organization.objects.get(id=self.organization_id)
+            organization = Organization.objects.using('readonly').get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("position.organization Found multiple")
@@ -478,7 +478,7 @@ class PositionEntered(models.Model):
         if not self.voter_we_vote_id:
             return
         try:
-            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+            voter = Voter.objects.using('readonly').get(we_vote_id=self.voter_we_vote_id)
         except Voter.MultipleObjectsReturned as e:
             return
         except Voter.DoesNotExist:
@@ -832,7 +832,7 @@ class PositionForFriends(models.Model):
         if not self.candidate_campaign_id:
             return
         try:
-            candidate = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
+            candidate = CandidateCampaign.objects.using('readonly').get(id=self.candidate_campaign_id)
         except CandidateCampaign.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("position.candidate_campaign Found multiple")
@@ -845,7 +845,7 @@ class PositionForFriends(models.Model):
         if not self.contest_measure_id:
             return
         try:
-            contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
+            contest_measure = ContestMeasure.objects.using('readonly').get(id=self.contest_measure_id)
         except ContestMeasure.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("position.contest_measure Found multiple")
@@ -858,7 +858,7 @@ class PositionForFriends(models.Model):
         if not self.contest_office_id:
             return
         try:
-            contest_office = ContestOffice.objects.get(id=self.contest_office_id)
+            contest_office = ContestOffice.objects.using('readonly').get(id=self.contest_office_id)
         except ContestOffice.MultipleObjectsReturned as e:
             logger.error("position.contest_office Found multiple")
             return
@@ -870,7 +870,7 @@ class PositionForFriends(models.Model):
         if not self.google_civic_election_id:
             return
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("PositionForFriends.election Found multiple")
@@ -885,7 +885,7 @@ class PositionForFriends(models.Model):
         if not self.organization_id:
             return
         try:
-            organization = Organization.objects.get(id=self.organization_id)
+            organization = Organization.objects.using('readonly').get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("position.organization Found multiple")
@@ -898,7 +898,7 @@ class PositionForFriends(models.Model):
         if not self.voter_we_vote_id:
             return
         try:
-            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+            voter = Voter.objects.using('readonly').get(we_vote_id=self.voter_we_vote_id)
         except Voter.MultipleObjectsReturned as e:
             return
         except Voter.DoesNotExist:
