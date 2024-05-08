@@ -1846,8 +1846,8 @@ def find_and_merge_duplicate_campaignx_entries_view(request):
                     campaignx2_we_vote_id=None,
                     # state_code=state_code,
                 )
-                messages.add_message(request, messages.INFO, "CampaignX {campaignx_name} automatically merged."
-                                                             "".format(campaignx_name=campaignx.campaignx_name))
+                messages.add_message(request, messages.INFO, "CampaignX {campaignx_title} automatically merged."
+                                                             "".format(campaignx_title=campaignx.campaign_title))
                 # No need to start over
                 # return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
                 #                             "?state_code=" + str(state_code))

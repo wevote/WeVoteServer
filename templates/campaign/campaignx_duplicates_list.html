@@ -16,8 +16,8 @@
         </li>
     {% if state_code %}
         <li>
-            <a href="{% url 'campaign:delete_all_duplicates' %}?state_code={{ state_code }}">
-            Delete all duplicate campaignx data for this state</a>
+{#            <a href="{% url 'campaign:delete_all_duplicates' %}?state_code={{ state_code }}">#}
+{#            Delete all duplicate campaignx data for this state</a>#}
         </li>
     {% endif %}
     </ul>
@@ -110,6 +110,7 @@
                 {% endif %}
             </td>
             <td>
+            {% if possible_duplicate.campaignx1.politician %}
                 {% if possible_duplicate.campaignx1.politician.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.campaignx1.politician.politician_twitter_handle }}"
                     target="_blank">{{ possible_duplicate.campaignx1.politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                 ({{ possible_duplicate.campaignx1.politician.twitter_followers_count|intcomma }} followers){% endif %}
@@ -121,6 +122,7 @@
                     target="_blank">{{ possible_duplicate.campaignx1.politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
                 {% if possible_duplicate.campaignx1.politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.campaignx1.politician.politician_twitter_handle5 }}"
                     target="_blank">{{ possible_duplicate.campaignx1.politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            {% endif %}
             </td>
         {% endif %}
         {% if possible_duplicate.campaignx2 %}
@@ -160,6 +162,7 @@
                 {% endif %}
             </td>
             <td>
+            {% if possible_duplicate.campaignx2.politician %}
                 {% if possible_duplicate.campaignx2.politician.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.campaignx2.politician.politician_twitter_handle }}"
                     target="_blank">{{ possible_duplicate.campaignx2.politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                 ({{ possible_duplicate.campaignx2.politician.twitter_followers_count|intcomma }} followers){% endif %}
@@ -171,6 +174,7 @@
                     target="_blank">{{ possible_duplicate.campaignx2.politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
                 {% if possible_duplicate.campaignx2.politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.campaignx2.politician.politician_twitter_handle5 }}"
                     target="_blank">{{ possible_duplicate.campaignx2.politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            {% endif %}
             </td>
         {% endif %}
         </tr>
