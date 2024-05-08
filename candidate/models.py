@@ -2724,7 +2724,7 @@ class CandidateCampaign(models.Model):
 
     def election(self):
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("candidate.election Found multiple")
@@ -2742,7 +2742,7 @@ class CandidateCampaign(models.Model):
         :return:
         """
         try:
-            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
+            office = ContestOffice.objects.using('readonly').get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("candidate.office Found multiple")
@@ -5031,7 +5031,7 @@ class CandidateToOfficeLink(models.Model):
 
     def election(self):
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("CandidateToOfficeLink.election Found multiple")
@@ -5046,7 +5046,7 @@ class CandidateToOfficeLink(models.Model):
 
     def office(self):
         try:
-            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
+            office = ContestOffice.objects.using('readonly').get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("CandidateToOfficeLink.office Found multiple")
