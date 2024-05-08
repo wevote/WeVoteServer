@@ -939,20 +939,8 @@ class ShareManager(models.Manager):
             date_as_integer=date_as_integer,
             field_for_distinct_filter='viewed_by_voter_we_vote_id')
 
-    def fetch_shared_link_clicked_unique_viewers_one_day(
-            self,
-            date_as_integer=0):
-        """
-        Used for SitewideDailyMetrics
-        :param date_as_integer:
-        :return:
-        """
-        return self.fetch_shared_link_clicked_count(
-            date_as_integer=date_as_integer,
-            field_for_distinct_filter='viewed_by_voter_we_vote_id')
-
+    @staticmethod
     def fetch_shared_link_clicked_count(
-            self,
             date_as_integer=0,
             shared_by_state_code_list=[],
             shared_by_voter_we_vote_id_list=[],
@@ -993,8 +981,9 @@ class ShareManager(models.Manager):
 
         return shared_link_clicked_count
 
+    @staticmethod
     def fetch_shared_link_clicked_shared_links_click_without_reclick_count(
-            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+            shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
         if 'test' in sys.argv:
             # If coming from a test, we cannot use readonly
             queryset = SharedLinkClicked.objects.all()
@@ -1003,7 +992,7 @@ class ShareManager(models.Manager):
 
         if positive_value_exists(len(shared_by_state_code_list)):
             queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
-        if positive_value_exists(len(viewed_by_state_code_list)):
+        if positive_value_exists(len(viewed_by+_state_code_list)):
             queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
         if positive_value_exists(len(year_as_integer_list)):
             queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
@@ -1018,7 +1007,8 @@ class ShareManager(models.Manager):
 
         return shared_link_clicked_count
 
-    def generate_year_as_integer(self):
+    @staticmethod
+    def generate_year_as_integer():
         # We want to store the day as an integer for extremely quick database indexing and lookup
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
         year_as_string = "{:d}".format(
@@ -1026,8 +1016,9 @@ class ShareManager(models.Manager):
         )
         return convert_to_int(year_as_string)
 
+    @staticmethod
     def retrieve_shared_item(
-            self, shared_item_id=0,
+            shared_item_id=0,
             shared_item_code='',
             destination_full_url='',
             shared_by_voter_we_vote_id='',
@@ -1334,8 +1325,8 @@ class ShareManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_super_share_email_recipient_list(
-            self,
             email_address_text='',
             read_only=True,
             retrieve_count_limit=0,
@@ -1388,8 +1379,8 @@ class ShareManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_super_share_item(
-            self,
             campaignx_we_vote_id='',
             super_share_item_id=0,
             super_share_item_code='',
