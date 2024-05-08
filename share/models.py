@@ -992,7 +992,7 @@ class ShareManager(models.Manager):
 
         if positive_value_exists(len(shared_by_state_code_list)):
             queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
-        if positive_value_exists(len(viewed_by+_state_code_list)):
+        if positive_value_exists(len(viewed_by_state_code_list)):
             queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
         if positive_value_exists(len(year_as_integer_list)):
             queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
