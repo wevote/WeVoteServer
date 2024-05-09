@@ -1362,6 +1362,7 @@ def candidate_list_view(request):
         web_app_root_url = 'https://quality.WeVote.US'
 
     template_values = {
+        'ballotpedia_urls_without_picture_urls': candidate_list,
         'candidate_count_start':                    candidate_count_start,
         'candidate_list':                           candidate_list,
         'candidate_search':                         candidate_search,
