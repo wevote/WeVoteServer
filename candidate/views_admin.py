@@ -1127,6 +1127,27 @@ def candidate_list_view(request):
             candidate_list = modified_candidate_list
         candidates_linked_to_multiple_offices = len(candidate_list)
 
+    # How many candidates with ballotpedia_candidate_url's don't have ballotpedia_photo_url?
+    ballotpedia_urls_without_picture_urls = 0
+    if positive_value_exists(google_civic_election_id) or positive_value_exists(state_code):
+        try:
+            count_queryset = CandidateCampaign.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+            # Only include candidates with ballotpedia_candidate_url
+            count_queryset = count_queryset. \
+                filter(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+
+            # exclude candidates that already have photo that are null or ''
+            count_queryset = count_queryset.exclude(
+                Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+
+            ballotpedia_urls_without_picture_urls = count_queryset.count()
+
+        except Exception as e:
+            logger.error("ERROR Finding Ballotpedia Photo URLs: ", e)
+
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
@@ -1362,7 +1383,7 @@ def candidate_list_view(request):
         web_app_root_url = 'https://quality.WeVote.US'
 
     template_values = {
-        'ballotpedia_urls_without_picture_urls': candidate_list,
+        'ballotpedia_urls_without_picture_urls':    ballotpedia_urls_without_picture_urls,
         'candidate_count_start':                    candidate_count_start,
         'candidate_list':                           candidate_list,
         'candidate_search':                         candidate_search,
