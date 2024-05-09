@@ -554,7 +554,7 @@ class PoliticianManager(models.Manager):
         recommend_found = False
         empty_list = []
         try:
-            suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.filter(
+            suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.using('readonly').filter(
                 from_politician_we_vote_id__iexact=we_vote_id)
             suggested_politicians = list(suggested_politicians)
             if len(suggested_politicians):
