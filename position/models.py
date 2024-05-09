@@ -815,10 +815,12 @@ class PositionForFriends(models.Model):
             return True
         return False
 
-    def is_friends_only_position(self):
+    @staticmethod
+    def is_friends_only_position():
         return True
 
-    def is_public_position(self):
+    @staticmethod
+    def is_public_position():
         return False
 
     def last_updated(self):
@@ -962,8 +964,12 @@ class PositionListManager(models.Manager):
     #
     #     return outgoing_position_list
 
+    @staticmethod
     def calculate_positions_followed_by_voter(
-            self, voter_id, all_positions_list, organizations_followed_by_voter_by_id, voter_friend_list=[]):
+            voter_id,
+            all_positions_list,
+            organizations_followed_by_voter_by_id,
+            voter_friend_list=[]):
         """
         We need a list of positions that were made by an organization, public figure or friend that this voter follows
         :param voter_id:
@@ -985,8 +991,11 @@ class PositionListManager(models.Manager):
 
         return positions_followed_by_voter
 
+    @staticmethod
     def calculate_positions_not_followed_by_voter(
-            self, all_positions_list, organizations_followed_by_voter, voter_friend_list=[]):
+            all_positions_list,
+            organizations_followed_by_voter,
+            voter_friend_list=[]):
         """
         We need a list of positions that were NOT made by an organization, public figure or friend
         that this voter follows
@@ -1012,8 +1021,11 @@ class PositionListManager(models.Manager):
 
         return positions_not_followed_by_voter
 
+    @staticmethod
     def fetch_voter_positions_count_for_candidate(
-            self, candidate_id, candidate_we_vote_id='', stance_we_are_looking_for=ANY_STANCE):
+            candidate_id,
+            candidate_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE):
         """
         We are only retrieving voter positions, not positions of organizations.
         :param candidate_id:
@@ -1127,8 +1139,11 @@ class PositionListManager(models.Manager):
 
         return total_count
 
+    @staticmethod
     def fetch_voter_positions_count_for_contest_measure(
-            self, contest_measure_id, contest_measure_we_vote_id='', stance_we_are_looking_for=ANY_STANCE):
+            contest_measure_id,
+            contest_measure_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE):
         """
         We are only retrieving voter positions, not positions of organizations.
         :param contest_measure_id:
@@ -1242,13 +1257,14 @@ class PositionListManager(models.Manager):
 
         return total_count
 
-    def fetch_positions_count_for_voter_guide(self,
-                                              organization_we_vote_id_list,
-                                              google_civic_election_id_list,
-                                              state_code,
-                                              retrieve_public_positions=True,
-                                              stance_we_are_looking_for=ANY_STANCE,
-                                              require_commentary=False):
+    @staticmethod
+    def fetch_positions_count_for_voter_guide(
+            organization_we_vote_id_list,
+            google_civic_election_id_list,
+            state_code,
+            retrieve_public_positions=True,
+            stance_we_are_looking_for=ANY_STANCE,
+            require_commentary=False):
         status = ''
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
@@ -1319,7 +1335,8 @@ class PositionListManager(models.Manager):
 
         return position_count
 
-    def positions_exist_for_voter(self, voter_we_vote_id):
+    @staticmethod
+    def positions_exist_for_voter(voter_we_vote_id):
         # Don't proceed unless we have voter identifier
         if not positive_value_exists(voter_we_vote_id):
             return 0
@@ -1351,8 +1368,10 @@ class PositionListManager(models.Manager):
 
         return False
 
+    @staticmethod
     def remove_positions_ignored_by_voter(
-            self, positions_list, organizations_ignored_by_voter):
+            positions_list,
+            organizations_ignored_by_voter):
         """
         We need a list of positions that were NOT made by an organization, public figure or friend
         that this voter follows
@@ -1370,7 +1389,8 @@ class PositionListManager(models.Manager):
 
         return positions_ignored_by_voter
 
-    def remove_positions_unrelated_to_issues(self, positions_list, organizations_related_to_issue):
+    @staticmethod
+    def remove_positions_unrelated_to_issues(positions_list, organizations_related_to_issue):
         """
         We filter the list of organizations whose we_vote_id is present in organizations_related_to_issue
         :param positions_list: 
@@ -1384,7 +1404,8 @@ class PositionListManager(models.Manager):
 
         return positions_related_to_organization
 
-    def repair_all_positions_for_voter(self, incoming_voter_id=0, incoming_voter_we_vote_id=''):
+    @staticmethod
+    def repair_all_positions_for_voter(incoming_voter_id=0, incoming_voter_we_vote_id=''):
         """
         Make sure that every position owned by the voter has matching identifiers (voter_id, voter_we_vote_id,
         organization_we_vote_id, organization_id).
@@ -1891,8 +1912,8 @@ class PositionListManager(models.Manager):
             position_list_filtered = []
             return position_list_filtered
 
+    @staticmethod
     def retrieve_shared_item_positions_for_candidate(
-            self,
             retrieve_public_positions=True,
             candidate_id=0,
             candidate_we_vote_id='',
@@ -2001,13 +2022,16 @@ class PositionListManager(models.Manager):
             position_list_filtered = []
             return position_list_filtered
 
-    def retrieve_all_positions_for_contest_measure(self, retrieve_public_positions,
-                                                   contest_measure_id, contest_measure_we_vote_id,
-                                                   stance_we_are_looking_for,
-                                                   most_recent_only=True,
-                                                   friends_we_vote_id_list=False,
-                                                   organizations_followed_we_vote_id_list=False,
-                                                   read_only=False):
+    def retrieve_all_positions_for_contest_measure(
+            self,
+            retrieve_public_positions,
+            contest_measure_id,
+            contest_measure_we_vote_id,
+            stance_we_are_looking_for,
+            most_recent_only=True,
+            friends_we_vote_id_list=False,
+            organizations_followed_we_vote_id_list=False,
+            read_only=False):
         """
 
         :param retrieve_public_positions:
@@ -2129,8 +2153,8 @@ class PositionListManager(models.Manager):
             position_list_filtered = []
             return position_list_filtered
 
+    @staticmethod
     def retrieve_shared_item_positions_for_contest_measure(
-            self,
             retrieve_public_positions=True,
             contest_measure_id=0,
             contest_measure_we_vote_id='',
@@ -2221,13 +2245,15 @@ class PositionListManager(models.Manager):
             position_list_filtered = []
             return position_list_filtered
 
-    def retrieve_all_positions_for_contest_office(self, retrieve_public_positions=True,
-                                                  contest_office_id=0,
-                                                  contest_office_we_vote_id='',
-                                                  stance_we_are_looking_for=ANY_STANCE,
-                                                  most_recent_only=True,
-                                                  friends_we_vote_id_list=False,
-                                                  read_only=False):
+    def retrieve_all_positions_for_contest_office(
+            self,
+            retrieve_public_positions=True,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            most_recent_only=True,
+            friends_we_vote_id_list=False,
+            read_only=False):
         status = ""
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
@@ -2326,8 +2352,8 @@ class PositionListManager(models.Manager):
             position_list_filtered = []
             return position_list_filtered
 
+    @staticmethod
     def retrieve_shared_item_positions_for_contest_office(
-            self,
             retrieve_public_positions=True,
             contest_office_id=0,
             contest_office_we_vote_id='',
@@ -2420,7 +2446,8 @@ class PositionListManager(models.Manager):
             return position_list_filtered
 
     # TODO Upgrade to not count on position.google_civic_election_id for candidates
-    def refresh_cached_position_info_for_election(self, google_civic_election_id, state_code=''):
+    @staticmethod
+    def refresh_cached_position_info_for_election(google_civic_election_id, state_code=''):
         position_manager = PositionManager()
         success = True
         status = ""
@@ -2485,7 +2512,8 @@ class PositionListManager(models.Manager):
         }
         return results
 
-    def refresh_cached_position_info_for_organization(self, organization_we_vote_id):
+    @staticmethod
+    def refresh_cached_position_info_for_organization(organization_we_vote_id):
         position_manager = PositionManager()
         force_update = True
         offices_dict = {}
@@ -2536,15 +2564,19 @@ class PositionListManager(models.Manager):
 
         return True
 
+    @staticmethod
     def retrieve_all_positions_for_organization(
-            self, organization_id, organization_we_vote_id,
-            stance_we_are_looking_for, friends_vs_public,
+            organization_id,
+            organization_we_vote_id,
+            stance_we_are_looking_for,
+            friends_vs_public,
             show_positions_current_voter_election=False,
             exclude_positions_current_voter_election=False,
             voter_device_id='',
             voter_we_vote_id='',
             google_civic_election_id='',
-            state_code='', read_only=False):
+            state_code='',
+            read_only=False):
         """
         Return a position list with all of the organization's positions.
         Incoming filters include: stance_we_are_looking_for, friends_vs_public, show_positions_current_voter_election,
@@ -2996,17 +3028,22 @@ class PositionListManager(models.Manager):
             position_list = []
             return position_list
 
-    def retrieve_all_positions_for_public_figure(self, public_figure_id, public_figure_we_vote_id,
-                                                 stance_we_are_looking_for,
-                                                 filter_for_voter, voter_device_id,
-                                                 google_civic_election_id, state_code):
+    @staticmethod
+    def retrieve_all_positions_for_public_figure(
+            public_figure_id,
+            public_figure_we_vote_id,
+            stance_we_are_looking_for,
+            filter_for_voter,
+            voter_device_id,
+            google_civic_election_id,
+            state_code):
         # TODO DALE Implement this: retrieve_all_positions_for_public_figure,
         # model after retrieve_all_positions_for_organization
         position_list = []
         return position_list
 
+    @staticmethod
     def retrieve_all_positions_for_voter(
-            self,
             voter_id=0,
             voter_we_vote_id='',
             stance_we_are_looking_for=ANY_STANCE,
@@ -3271,8 +3308,8 @@ class PositionListManager(models.Manager):
             }
             return results
 
+    @staticmethod
     def retrieve_all_positions_for_voter_simple(
-            self,
             voter_id=0,
             voter_we_vote_id='',
             google_civic_election_id=0,
@@ -3521,8 +3558,12 @@ class PositionListManager(models.Manager):
             }
             return results
 
-    def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE,
-                                            public_only=False, limit_to_organization_we_vote_ids=[]):
+    @staticmethod
+    def retrieve_all_positions_for_election(
+            google_civic_election_id,
+            stance_we_are_looking_for=ANY_STANCE,
+            public_only=False,
+            limit_to_organization_we_vote_ids=[]):
         """
         Since we don't have a single way to ask the positions tables for only the positions related to a single
         election, we need to look up the data in a round-about way. We get all candidates and measures in the election,
@@ -3587,7 +3628,8 @@ class PositionListManager(models.Manager):
             position_list = []
             return position_list
 
-    def remove_older_positions_for_each_org(self, position_list):
+    @staticmethod
+    def remove_older_positions_for_each_org(position_list):
         # If we have multiple positions for one org, we only want to show the most recent
         organization_already_reviewed = []
         organization_with_multiple_positions = []
@@ -3628,11 +3670,10 @@ class PositionListManager(models.Manager):
 
         return position_list_filtered
 
+    @staticmethod
     def retrieve_organization_we_vote_id_list_for_election_and_state(
-            self,
             google_civic_election_id_list=[],
-            state_code=''
-            ):
+            state_code=''):
         candidate_list_manager = CandidateListManager()
         organization_we_vote_id_list = []
         status = ''
@@ -3694,7 +3735,8 @@ class PositionListManager(models.Manager):
         }
         return results
 
-    def retrieve_position_counts_for_election_and_state(self, google_civic_election_id_list=[], state_code=''):
+    @staticmethod
+    def retrieve_position_counts_for_election_and_state(google_civic_election_id_list=[], state_code=''):
         friends_only_count = 0
         candidate_list_manager = CandidateListManager()
         public_count = 0
@@ -4209,9 +4251,13 @@ class PositionListManager(models.Manager):
 
         return position_count
 
-    def retrieve_possible_duplicate_positions(self, google_civic_election_id, organization_we_vote_id,
-                                              candidate_we_vote_id, measure_we_vote_id,
-                                              we_vote_id_from_master=''):
+    @staticmethod
+    def retrieve_possible_duplicate_positions(
+            google_civic_election_id,
+            organization_we_vote_id,
+            candidate_we_vote_id,
+            measure_we_vote_id,
+            we_vote_id_from_master=''):
         position_list_objects = []
         filters = []
         position_list_found = False
@@ -4283,8 +4329,8 @@ class PositionListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_politician_we_vote_id_in_all_positions(
-            self,
             candidate_we_vote_id='',
             politician_id=0,
             politician_we_vote_id='',
@@ -4557,8 +4603,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_candidate_position(self, organization_id, candidate_id,
-                                                 google_civic_election_id=False):
+    @staticmethod
+    def retrieve_organization_candidate_position(organization_id, candidate_id, google_civic_election_id=False):
         """
         Find a position based on the organization_id & candidate_id
         :param organization_id:
@@ -4572,9 +4618,11 @@ class PositionManager(models.Manager):
             candidate_id=candidate_id,
             google_civic_election_id=google_civic_election_id)
 
-    def retrieve_organization_candidate_position_with_we_vote_id(self, organization_id,
-                                                                 candidate_we_vote_id,
-                                                                 google_civic_election_id=False):
+    @staticmethod
+    def retrieve_organization_candidate_position_with_we_vote_id(
+            organization_id,
+            candidate_we_vote_id,
+            google_civic_election_id=False):
         """
         Find a position based on the organization_id & candidate_we_vote_id
         :param organization_id:
@@ -4588,8 +4636,11 @@ class PositionManager(models.Manager):
             candidate_we_vote_id=candidate_we_vote_id,
             google_civic_election_id=google_civic_election_id)
 
-    def retrieve_organization_contest_measure_position(self, organization_id, contest_measure_id,
-                                                       google_civic_election_id=False):
+    @staticmethod
+    def retrieve_organization_contest_measure_position(
+            organization_id,
+            contest_measure_id,
+            google_civic_election_id=False):
         """
         Find a position based on the organization_id & contest_measure_id
         :param organization_id:
@@ -4603,9 +4654,11 @@ class PositionManager(models.Manager):
             contest_measure_id=contest_measure_id,
             google_civic_election_id=google_civic_election_id)
 
-    def retrieve_organization_contest_measure_position_with_we_vote_id(self, organization_id,
-                                                                       contest_measure_we_vote_id,
-                                                                       google_civic_election_id=False):
+    @staticmethod
+    def retrieve_organization_contest_measure_position_with_we_vote_id(
+            organization_id,
+            contest_measure_we_vote_id,
+            google_civic_election_id=False):
         """
         Find a position based on the organization_id & contest_measure_we_vote_id
         :param organization_id:
@@ -4619,43 +4672,50 @@ class PositionManager(models.Manager):
             contest_measure_we_vote_id=contest_measure_we_vote_id,
             google_civic_election_id=google_civic_election_id)
 
-    def retrieve_voter_contest_office_position(self, voter_id, office_id):
+    @staticmethod
+    def retrieve_voter_contest_office_position(voter_id, office_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             contest_office_id=office_id)
 
-    def retrieve_voter_contest_office_position_with_we_vote_id(self, voter_id, contest_office_we_vote_id):
+    @staticmethod
+    def retrieve_voter_contest_office_position_with_we_vote_id(voter_id, contest_office_we_vote_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             contest_office_we_vote_id=contest_office_we_vote_id)
 
-    def retrieve_voter_candidate_position(self, voter_id, candidate_id):
+    @staticmethod
+    def retrieve_voter_candidate_position(voter_id, candidate_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             candidate_id=candidate_id)
 
-    def retrieve_voter_candidate_position_with_we_vote_id(self, voter_id, candidate_we_vote_id):
+    @staticmethod
+    def retrieve_voter_candidate_position_with_we_vote_id(voter_id, candidate_we_vote_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             candidate_we_vote_id=candidate_we_vote_id)
 
-    def retrieve_voter_contest_measure_position(self, voter_id, contest_measure_id):
+    @staticmethod
+    def retrieve_voter_contest_measure_position(voter_id, contest_measure_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             contest_measure_id=contest_measure_id)
 
-    def retrieve_voter_contest_measure_position_with_we_vote_id(self, voter_id, contest_measure_we_vote_id):
+    @staticmethod
+    def retrieve_voter_contest_measure_position_with_we_vote_id(voter_id, contest_measure_we_vote_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             voter_id=voter_id,
             contest_measure_we_vote_id=contest_measure_we_vote_id)
 
-    def retrieve_position_from_we_vote_id(self, position_we_vote_id):
+    @staticmethod
+    def retrieve_position_from_we_vote_id(position_we_vote_id):
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
             position_we_vote_id=position_we_vote_id)
@@ -4719,8 +4779,8 @@ class PositionManager(models.Manager):
             politician_we_vote_id=politician_we_vote_id,
             vote_smart_time_span=vote_smart_time_span)
 
+    @staticmethod
     def merge_position_duplicates_voter_candidate_position(
-            self,
             voter_id,
             candidate_id,
             retrieve_position_for_friends):
@@ -4730,16 +4790,19 @@ class PositionManager(models.Manager):
             candidate_id=candidate_id,
             retrieve_position_for_friends=retrieve_position_for_friends)
 
+    @staticmethod
     def merge_position_duplicates_voter_candidate_position_with_we_vote_id(
-            self, voter_id, candidate_we_vote_id, retrieve_position_for_friends):
+            voter_id,
+            candidate_we_vote_id,
+            retrieve_position_for_friends):
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
             voter_id=voter_id,
             retrieve_position_for_friends=retrieve_position_for_friends,
             candidate_we_vote_id=candidate_we_vote_id)
 
+    @staticmethod
     def merge_position_duplicates_voter_contest_measure_position(
-            self,
             voter_id,
             contest_measure_id,
             retrieve_position_for_friends):
@@ -4749,8 +4812,11 @@ class PositionManager(models.Manager):
             contest_measure_id=contest_measure_id,
             retrieve_position_for_friends=retrieve_position_for_friends)
 
+    @staticmethod
     def merge_position_duplicates_voter_contest_measure_position_with_we_vote_id(
-            self, voter_id, contest_measure_we_vote_id, retrieve_position_for_friends):
+            voter_id,
+            contest_measure_we_vote_id,
+            retrieve_position_for_friends):
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
             voter_id=voter_id,
@@ -4758,8 +4824,8 @@ class PositionManager(models.Manager):
             contest_measure_we_vote_id=contest_measure_we_vote_id
         )
 
+    @staticmethod
     def merge_position_duplicates_voter_politician_position(
-            self,
             voter_id,
             politician_id,
             retrieve_position_for_friends):
@@ -4769,8 +4835,11 @@ class PositionManager(models.Manager):
             politician_id=politician_id,
             retrieve_position_for_friends=retrieve_position_for_friends)
 
+    @staticmethod
     def merge_position_duplicates_voter_politician_position_with_we_vote_id(
-            self, voter_id, politician_we_vote_id, retrieve_position_for_friends):
+            voter_id,
+            politician_we_vote_id,
+            retrieve_position_for_friends):
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
             voter_id=voter_id,
@@ -5124,8 +5193,8 @@ class PositionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_position(
-            self,
             position_we_vote_id='',
             organization_id=0,
             organization_we_vote_id='',
@@ -5569,7 +5638,8 @@ class PositionManager(models.Manager):
         switch_to_public_position = False
         return self.switch_position_visibility(existing_position, switch_to_public_position)
 
-    def switch_position_visibility(self, existing_position, switch_to_public_position):
+    @staticmethod
+    def switch_position_visibility(existing_position, switch_to_public_position):
         status = ""
         # We assume one does NOT exist in the other table
         position_deleted = False
@@ -5826,7 +5896,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def merge_position_visibility(self, position_to_keep, dead_position):
+    @staticmethod
+    def merge_position_visibility(position_to_keep, dead_position):
         # We want to see if dead_position has any values to save before we delete it.
         status = ""
         data_transferred = False
@@ -5878,7 +5949,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def position_speaker_name_needs_repair(self, position, speaker_display_name):
+    @staticmethod
+    def position_speaker_name_needs_repair(position, speaker_display_name):
         """
         See also organization_name_needs_repair
         :param position:
@@ -5901,50 +5973,57 @@ class PositionManager(models.Manager):
             return True
         return False
 
-    def toggle_on_voter_support_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_support_for_candidate(voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = SUPPORT
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_support_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_support_for_candidate(voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_support_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_support_for_politician(voter_id, politician_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_politician(
             voter_id, politician_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_oppose_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_oppose_for_candidate(voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_oppose_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_oppose_for_politician(voter_id, politician_id, user_agent_string, user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_politician(
             voter_id, politician_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_oppose_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_oppose_for_candidate(voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_oppose_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_oppose_for_politician(voter_id, politician_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_politician(
             voter_id, politician_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_position_for_candidate(
-            self, voter_id, candidate_id, stance, user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_position_for_candidate(voter_id, candidate_id, stance, user_agent_string, user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
         contest_measure_id = 0
@@ -6040,8 +6119,8 @@ class PositionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def toggle_on_voter_position_for_politician(
-            self,
             voter_id=0,
             politician_id=0,
             stance='',
@@ -6141,8 +6220,8 @@ class PositionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def toggle_voter_position(
-            self,
             voter_id=0,
             voter_position_found=False,
             voter_position_on_stage=None,
@@ -6577,36 +6656,44 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def toggle_on_voter_support_for_contest_measure(self, voter_id, contest_measure_id,
-                                                    user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_support_for_contest_measure(voter_id, contest_measure_id, user_agent_string, user_agent_object):
         stance = SUPPORT
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
             voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_support_for_contest_measure(self, voter_id, contest_measure_id,
-                                                     user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_support_for_contest_measure(
+            voter_id,
+            contest_measure_id,
+            user_agent_string,
+            user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
             voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id,
-                                                   user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_oppose_for_contest_measure(voter_id, contest_measure_id, user_agent_string, user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
             voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id,
-                                                    user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_off_voter_oppose_for_contest_measure(voter_id, contest_measure_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
             voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_position_for_contest_measure(self, voter_id, contest_measure_id, stance,
-                                                     user_agent_string, user_agent_object):
+    @staticmethod
+    def toggle_on_voter_position_for_contest_measure(
+            voter_id,
+            contest_measure_id,
+            stance,user_agent_string,
+            user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
         duplicates_found = False
@@ -7083,7 +7170,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_image_urls_from_candidate(self, position_object, candidate):
+    @staticmethod
+    def update_position_image_urls_from_candidate(position_object, candidate):
         """
         Update position_object with candidate image urls
         :param position_object:
@@ -7132,7 +7220,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_image_urls_from_organization(self, position_object, organization):
+    @staticmethod
+    def update_position_image_urls_from_organization(position_object, organization):
         """
         Update position_object with organization image urls
         :param position_object:
@@ -7175,7 +7264,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_image_urls_from_voter(self, position_object, voter):
+    @staticmethod
+    def update_position_image_urls_from_voter(position_object, voter):
         """
         Update position_object with voter image urls
         :param position_object:
@@ -7218,8 +7308,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def reset_position_image_details(self, position_object, ballot_item_image_url_https=None,
-                                     speaker_image_url_https=None):
+    @staticmethod
+    def reset_position_image_details(position_object, ballot_item_image_url_https=None, speaker_image_url_https=None):
         """
         Reset Position image details as per we vote image details
         :param position_object:
@@ -7256,7 +7346,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_ballot_data_from_candidate(self, position_object, candidate):
+    @staticmethod
+    def update_position_ballot_data_from_candidate(position_object, candidate):
         """
         Update position_object with candidate data.
         :param position_object:
@@ -7290,7 +7381,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_measure_data_from_contest_measure(self, position_object, contest_measure):
+    @staticmethod
+    def update_position_measure_data_from_contest_measure(position_object, contest_measure):
         """
         Update position_object with measure data.
         :param position_object:
@@ -7333,7 +7425,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_office_data_from_contest_office(self, position_object, contest_office):
+    @staticmethod
+    def update_position_office_data_from_contest_office(position_object, contest_office):
         """
         Update position_object with office data.
         :param position_object:
@@ -7374,7 +7467,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_position_row_entry(self, position_we_vote_id, update_values):
+    @staticmethod
+    def update_position_row_entry(position_we_vote_id, update_values):
         """
         Update PositionEntered table entry with matching we_vote_id
         :param position_we_vote_id:
@@ -7421,7 +7515,8 @@ class PositionManager(models.Manager):
             }
         return results
 
-    def update_position_speaker_data_from_organization(self, position_object, organization):
+    @staticmethod
+    def update_position_speaker_data_from_organization(position_object, organization):
         """
         Update position_object with organization data.
         :param position_object:
@@ -7466,8 +7561,8 @@ class PositionManager(models.Manager):
 
     # We rely on this unique identifier: position_we_vote_id
     # Pass in a value if we want it saved. Pass in "False" if we want to leave it the same.
+    @staticmethod
     def update_or_create_position(
-            self,
             position_we_vote_id='',
             organization_we_vote_id=False,
             public_figure_we_vote_id=False,
@@ -8248,8 +8343,9 @@ class PositionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def refresh_cached_position_info(
-            self, position_object,
+            position_object,
             force_update=False,
             offices_dict={},
             candidates_dict={},
@@ -8733,7 +8829,8 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def count_positions_for_election(self, google_civic_election_id, retrieve_public_positions=True):
+    @staticmethod
+    def count_positions_for_election(google_civic_election_id, retrieve_public_positions=True):
         """
         Return count of positions for a given election
         :param google_civic_election_id: 
@@ -8793,7 +8890,8 @@ class PositionMetricsManager(models.Manager):
     def __unicode__(self):
         return "PositionMetricsManager"
 
-    def fetch_positions_public(self, google_civic_election_id=0, positions_taken_by_these_voter_we_vote_ids=False):
+    @staticmethod
+    def fetch_positions_public(google_civic_election_id=0, positions_taken_by_these_voter_we_vote_ids=False):
         candidate_we_vote_id_list = []
         if positive_value_exists(google_civic_election_id):
             candidate_list_manager = CandidateListManager()
@@ -8820,8 +8918,10 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_positions_public_with_comments(self, google_civic_election_id=0,
-                                             positions_taken_by_these_voter_we_vote_ids=False):
+    @staticmethod
+    def fetch_positions_public_with_comments(
+            google_civic_election_id=0,
+            positions_taken_by_these_voter_we_vote_ids=False):
         candidate_we_vote_id_list = []
         if positive_value_exists(google_civic_election_id):
             candidate_list_manager = CandidateListManager()
@@ -8854,8 +8954,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_positions_friends_only(self, google_civic_election_id=0,
-                                     positions_taken_by_these_voter_we_vote_ids=False):
+    @staticmethod
+    def fetch_positions_friends_only(google_civic_election_id=0, positions_taken_by_these_voter_we_vote_ids=False):
         candidate_we_vote_id_list = []
         if positive_value_exists(google_civic_election_id):
             candidate_list_manager = CandidateListManager()
@@ -8880,8 +8980,10 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0,
-                                                   positions_taken_by_these_voter_we_vote_ids=False):
+    @staticmethod
+    def fetch_positions_friends_only_with_comments(
+            google_civic_election_id=0,
+            positions_taken_by_these_voter_we_vote_ids=False):
         candidate_we_vote_id_list = []
         if positive_value_exists(google_civic_election_id):
             candidate_list_manager = CandidateListManager()
@@ -8912,7 +9014,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_comments_entered_friends_only(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_comments_entered_friends_only(voter_we_vote_id):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
@@ -8930,7 +9033,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_comments_entered_public(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_comments_entered_public(voter_we_vote_id):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
@@ -8950,7 +9054,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_positions_entered_friends_only(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_positions_entered_friends_only(voter_we_vote_id):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
@@ -8962,7 +9067,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_positions_entered_public(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_positions_entered_public(voter_we_vote_id):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
@@ -8976,7 +9082,8 @@ class PositionMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_positions_count_for_this_voter(self, voter):
+    @staticmethod
+    def fetch_positions_count_for_this_voter(voter):
 
         position_filters = []
         final_position_filters = []
