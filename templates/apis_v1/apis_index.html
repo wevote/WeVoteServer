@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html class="chekov" lang="en">
 <head>
-  {% load static %}
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet"/>
-  {#  <link href="{% static 'v1/apis_v1.css' %}" rel="stylesheet" type="text/css">#}
-  <link href="https://www.podell.com/wevote/apis_v1.css" rel="stylesheet" type="text/css" />
+  <link href="https://quality.wevote.us/css/api-server/apis_v1.css" rel="stylesheet" type="text/css" />
 
   <link rel="shortcut icon" type="image/x-icon " href="https://wevote.us/img/global/icons/favicon-32x32.png"/>
   <meta content="We Vote API Server" property="og:site_name"/>
@@ -1171,6 +1169,12 @@
           <td><a href="{% url 'apis_v1:fastLoadStatusRetrieve' %}">fastLoadStatusRetrieve</a></td>
           <td></td>
           <td>Get the status of an ongoing fast load of certain tables to a developers Mac
+          </td>
+        </tr>
+         <tr>
+          <td><a href="{% url 'apis_v1:retrieveSQLTablesRowCount' %}">retrieveSQLTablesRowCount</a></td>
+          <td></td>
+          <td>Return the row count (the sum of the maximum id numbers) for the tables that will be returned by a "Fast Load Data From We Vote Master Servers" to a developers Mac.
           </td>
         </tr>
 

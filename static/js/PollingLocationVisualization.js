@@ -59,11 +59,12 @@ function setStateVariable () {
 
 function createMarker (latlng, name, address, icon, showPin) {
   const html = `<b>${name}</b> <br/>${address}`;
-  const marker = new google.maps.Marker({
+  const marker = new google.maps.google.maps.marker.AdvancedMarkerElement({
     position: latlng,
     icon: icon,
     map,
     visible: showPin,
+    mapId: "WEVOTE_MAP_ID",
   });
 
   marker.addListener("click", () => {
@@ -91,7 +92,6 @@ function addMarkers (resultsMap) {
 // for a nicer way to do this, call it on initialization of page, instead of from
 // google.maps.api inclusion.  Low priority.
 window.initMap = async function () {
-  alert('OK, From inside my js')
   const geoCenterLatSelector = $('#geo_center_lat');
   const geoCenterLngSelector = $('#geo_center_lng');
   const geoCenterZoomSelector = $('#geo_center_zoom');
@@ -125,6 +125,7 @@ window.initMap = async function () {
   map = new google.maps.Map(document.getElementById('map'), {
     center: myLatLng,
     zoom: geoZoom,
+    mapId: "WEVOTE_MAP_ID", // Map ID is required for advanced markers.
   });
   const mapdiv = $('#map');
   mapdiv.css('width', '100%');

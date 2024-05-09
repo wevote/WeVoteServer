@@ -14,9 +14,14 @@ Make sure you have given yourself admin privileges. When you run the following c
     
 Find the "Sync Data with Master We Vote Servers" link, and click it: http://localhost:8000/admin/sync_dashboard/
 
-Start by clicking the `Retrieve All Elections` link.
+Start by clicking the `Fast Load Data From We Vote Master Servers` button.
 
-Choose 1) an election from the drop down (we recommend `2020-11-03: General Election - 1000112`, and 2) your local state, and then run all scripts from top to bottom. Please make sure to let each step finish running before moving on to the next step.
+The fast loading will take somewhere in the range of 40 to 80 minutes to complete.  It will copy 
+about 30 tables from the Master database in AWS, to your local database, which will allow you to 
+run the api server software locally.
+
+There is an alternate way to transfer the tables "Sync Data With Master We Vote Servers" lower down on the page
+this is the original method which is rarely needed, and can take many hours to transfer the data.
  
 ### Google Civic - Advanced (Please skip unless you are working on Google Civic integration code)
 In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:

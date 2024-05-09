@@ -1,14 +1,12 @@
 {# templates/election/election_ballot_location_visualize.html #}
 {% extends "template_base.html" %}
-{% load static %}
 
 {% block js %}
-  <base href="/">
-  <script async src="{% static "js/test.js" %}" type="javascript"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap"></script>
-{#  <script async defer src="{% static "js/PollingLocationVisualization.js" %}" type="javascript"></script>#}
-  <script async defer src="https://www.podell.com/wevote/PollingLocationVisualization.js" type="javascript"></script>
   <script>
+    $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
+      $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
+    });
+
     function setCheckBoxes (showRedPinSelector, showGreenPinSelector) {
        const newHref = window.location.origin + window.location.pathname +
             '?google_civic_election_id={{ google_civic_election_id }}' +
