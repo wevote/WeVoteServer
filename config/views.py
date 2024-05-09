@@ -18,7 +18,7 @@ def favicon_view(request):
     :param request:
     :return:
     """
-    img = open('static/v1/favicon.ico', 'rb')
+    img = open('https://quality.wevote.us/img/api-server/favicon.ico', 'rb')
     response = FileResponse(img)
     return response
 
