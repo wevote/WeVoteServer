@@ -65,7 +65,8 @@ def augment_candidate_possible_position_data(
             positive_value_exists(possible_endorsement['ballot_item_name']):
         possible_endorsement_matched = True
         if not positive_value_exists(limit_to_this_state_code):
-            if positive_value_exists(possible_endorsement['ballot_item_state_code']):
+            if 'ballot_item_state_code' in possible_endorsement and \
+                    positive_value_exists(possible_endorsement['ballot_item_state_code']):
                 limit_to_this_state_code = possible_endorsement['ballot_item_state_code']
         # If here search for possible candidate matches
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
