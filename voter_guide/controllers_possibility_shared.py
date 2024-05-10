@@ -64,7 +64,9 @@ def augment_candidate_possible_position_data(
     elif 'ballot_item_name' in possible_endorsement and \
             positive_value_exists(possible_endorsement['ballot_item_name']):
         possible_endorsement_matched = True
-
+        if not positive_value_exists(limit_to_this_state_code):
+            if positive_value_exists(possible_endorsement['ballot_item_state_code']):
+                limit_to_this_state_code = possible_endorsement['ballot_item_state_code']
         # If here search for possible candidate matches
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list=google_civic_election_id_list,
@@ -239,6 +241,11 @@ def augment_candidate_possible_position_data(
             # If an entry based on a synonym wasn't found, then store the original possibility
             possible_endorsement_count += 1
             possible_endorsement_return_list.append(possible_endorsement)
+
+    # Finally, if the possible_endorsement wasn't matched to any existing records, we still want to use it
+    if possible_endorsement_matched and not positive_value_exists(possible_endorsement_count):
+        possible_endorsement_count += 1
+        possible_endorsement_return_list.append(possible_endorsement)
 
     results = {
         'status':                           status,
