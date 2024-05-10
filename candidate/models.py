@@ -36,9 +36,8 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_page_title',
     'ballotpedia_person_id',
     'ballotpedia_photo_url',
+    'ballotpedia_photo_url_is_broken',
     'ballotpedia_race_id',
-    'ballotpedia_url',
-    'ballotpedia_url_is_broken',
     'birth_day_text',
     'candidate_contact_form_url',
     'candidate_email',
@@ -2268,8 +2267,9 @@ class CandidateListManager(models.Manager):
                     'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
                     'ballotpedia_office_id':        candidate.ballotpedia_office_id,
                     'ballotpedia_person_id':        candidate.ballotpedia_person_id,
+                    'ballotpedia_photo_url':        candidate.ballotpedia_photo_url,
+                    'ballotpedia_photo_url_is_broken': candidate.ballotpedia_photo_url_is_broken,
                     'ballotpedia_race_id':          candidate.ballotpedia_race_id,
-                    'ballotpedia_url':              candidate.ballotpedia_url,
                     'candidate_contact_form_url':   candidate.candidate_contact_form_url,
                     'candidate_email':              candidate.candidate_email,
                     'candidate_name':               candidate.candidate_name,  # For Voter Guide Possibility System
@@ -2695,12 +2695,11 @@ class CandidateCampaign(models.Model):
     ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     ballotpedia_photo_url = models.TextField(
         verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
+    ballotpedia_photo_url_is_broken = models.BooleanField(default=False)
     ballotpedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Contest Office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
-    ballotpedia_url = models.TextField(blank=True, null=True)
-    ballotpedia_url_is_broken = models.BooleanField(default=False)
 
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
@@ -2729,7 +2728,7 @@ class CandidateCampaign(models.Model):
 
     def election(self):
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("candidate.election Found multiple")
@@ -2747,7 +2746,7 @@ class CandidateCampaign(models.Model):
         :return:
         """
         try:
-            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
+            office = ContestOffice.objects.using('readonly').get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("candidate.office Found multiple")
@@ -4566,10 +4565,12 @@ class CandidateManager(models.Manager):
             if 'ballotpedia_office_id' in update_values else 0
         ballotpedia_person_id = update_values['ballotpedia_person_id'] \
             if 'ballotpedia_person_id' in update_values else 0
+        ballotpedia_photo_url = update_values['ballotpedia_photo_url'] \
+            if 'ballotpedia_photo_url' in update_values else ''
+        ballotpedia_photo_url_is_broken = update_values['ballotpedia_photo_url_is_broken'] \
+            if 'ballotpedia_photo_url_is_broken' in update_values else ''
         ballotpedia_race_id = update_values['ballotpedia_race_id'] \
             if 'ballotpedia_race_id' in update_values else 0
-        ballotpedia_url = update_values['ballotpedia_url'] \
-            if 'ballotpedia_url' in update_values else ''
         birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
         candidate_email = update_values['candidate_email'] if 'candidate_email' in update_values else ''
         candidate_gender = update_values['candidate_gender'] if 'candidate_gender' in update_values else ''
@@ -4667,8 +4668,9 @@ class CandidateManager(models.Manager):
                 new_candidate.ballotpedia_image_id = convert_to_int(ballotpedia_image_id)
                 new_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
                 new_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+                new_candidate.ballotpedia_photo_url = ballotpedia_photo_url
+                new_candidate.ballotpedia_photo_url_is_broken = ballotpedia_photo_url_is_broken
                 new_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-                new_candidate.ballotpedia_url = ballotpedia_url
                 new_candidate.birth_day_text = birth_day_text
                 new_candidate.candidate_email = candidate_email
                 new_candidate.candidate_gender = candidate_gender
@@ -4761,12 +4763,16 @@ class CandidateManager(models.Manager):
                     existing_candidate_entry.ballotpedia_person_id = \
                         convert_to_int(update_values['ballotpedia_person_id'])
                     values_changed = True
+                if 'ballotpedia_photo_url' in update_values:
+                    existing_candidate_entry.ballotpedia_photo_url = update_values['ballotpedia_photo_url']
+                    values_changed = True
+                if 'ballotpedia_photo_url_is_broken' in update_values:
+                    existing_candidate_entry.ballotpedia_photo_url_is_broken = \
+                        update_values['ballotpedia_photo_url_is_broken']
+                    values_changed = True
                 if 'ballotpedia_race_id' in update_values:
                     existing_candidate_entry.ballotpedia_race_id = \
                         convert_to_int(update_values['ballotpedia_race_id'])
-                    values_changed = True
-                if 'ballotpedia_url' in update_values:
-                    existing_candidate_entry.ballotpedia_url = update_values['ballotpedia_url']
                     values_changed = True
                 if 'birth_day_text' in update_values:
                     existing_candidate_entry.birth_day_text = update_values['birth_day_text']
@@ -5042,7 +5048,7 @@ class CandidateToOfficeLink(models.Model):
 
     def election(self):
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("CandidateToOfficeLink.election Found multiple")
@@ -5057,7 +5063,7 @@ class CandidateToOfficeLink(models.Model):
 
     def office(self):
         try:
-            office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
+            office = ContestOffice.objects.using('readonly').get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("CandidateToOfficeLink.office Found multiple")

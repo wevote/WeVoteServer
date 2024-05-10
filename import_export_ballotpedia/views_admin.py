@@ -42,59 +42,53 @@ IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
-
-
-
-
-
 IMG_CLASS_NAME_WE_ARE_SEEKING = "widget-img"
+
+
 # Retrieves the parsed HTML content from the given URL.
 def get_parsed_html(url):
     try:
         page = requests.get(url)
-        return BeautifulSoup(page.content, "lxml")
+        return BeautifulSoup(page.content, "html.parser")
 
     except requests.exceptions.RequestException:
         print('Unable to connect to {}'.format(url))
         return BeautifulSoup('', "lxml")
-def get_ballotpedia_candidate_img_from_list(candidate_urls):
-    clean_message = ''
-    fb_id_or_login_name = ''
+
+
+def get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_candidate_url):
     is_silhouette = False
     photo_url = ""
     photo_url_found = False
     status = ""
     success = True
-    for url in candidate_urls:
-        soup = get_parsed_html(url)
-        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
-            img_url = img.get('src')  # Use get() method to safely retrieve attributes
-            if img_url:
-                try:
-                    print(img['alt'], img_url)
-
-                except Exception as e:
-                    status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
-                    success = False
-                    status+=("Image URL not found for:", img['alt'])
+    soup = get_parsed_html(ballotpedia_candidate_url)
+    for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
+        if photo_url_found:
+            continue
+        photo_url = img.get('src')  # Use get() method to safely retrieve attributes
+        if photo_url:
+            try:
+                print(img['alt'], photo_url)  # Assumes all Ballotpedia photos have alt tags, which they may not
+                photo_url_found = True
+            except Exception as e:
+                status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
+                success = False
+                status += ("Image URL not found for:", img['alt'])
 
     results = {
-        'clean_message': clean_message,
-        'is_silhouette': is_silhouette,
-        'photo_url': img_url,
-        'photo_url_found': photo_url_found,
-        'status': status,
-        'success': success,
+        'is_silhouette':    is_silhouette,
+        'photo_url':        photo_url,
+        'photo_url_found':  photo_url_found,
+        'status':           status,
+        'success':          success,
     }
     return results
 
 
-
-
-
 @login_required
 def bulk_retrieve_ballotpedia_photos_view(request):
-    number_of_candidates_to_search = 75
+    number_of_candidates_to_search = 5
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -107,7 +101,7 @@ def bulk_retrieve_ballotpedia_photos_view(request):
     hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
     page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', '')
-    limit = convert_to_int(request.GET.get('show_all', 0))
+    limit = convert_to_int(request.GET.get('limit', 0))
     print(google_civic_election_id, hide_candidate_tools, state_code, limit)
     if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
             and not positive_value_exists(limit):
@@ -119,33 +113,41 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
+    candidate_list = []
     candidate_list_manager = CandidateListManager()
     already_retrieved = 0
     already_stored = 0
     try:
-        candidate_list = CandidateCampaign.objects.all()
+        queryset = CandidateCampaign.objects.all()
+        # Only include candidates with ballotpedia_candidate_url
+        queryset = queryset. \
+            filter(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        # exclude candidates that already have photo that are null or '' (COMMENT OUT WHEN TESTING)
+        queryset = queryset.exclude(
+            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
         if positive_value_exists(google_civic_election_id):
             results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
                 google_civic_election_id_list=[google_civic_election_id])
             candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-            candidate_list = candidate_list.filter(we_vote_id__in=candidate_we_vote_id_list)
+            queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         if positive_value_exists(state_code):
-            candidate_list = candidate_list.filter(state_code__iexact=state_code)
-        # candidate_list = candidate_list.filter(ballotpedia_url_is_broken=False)
-        candidate_list = candidate_list.order_by('candidate_name')
+            queryset = queryset.filter(state_code__iexact=state_code)
+        # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
+        queryset = queryset.order_by('candidate_name')
         if positive_value_exists(limit):
-            candidate_list = candidate_list[:limit]
-        candidate_list_count = candidate_list.count()
+            candidate_list = queryset[:limit]
+        else:
+            candidate_list = list(queryset)
         print(candidate_list)
         # Run search in ballotpedia candidates
         current_candidate_index = 0
-        while positive_value_exists(number_of_candidates_to_search) \
-                and (current_candidate_index < candidate_list_count):
-            if current_candidate_index in candidate_list:
-                one_candidate = candidate_list[current_candidate_index]
-                # If the candidate has a ballotpedia_url, but no ballotpedia_photo_url,
+        always_true = True
+        for one_candidate in candidate_list:
+            if always_true or current_candidate_index in candidate_list:  # REMOVE: This can be removed
+                # one_candidate = candidate_list[current_candidate_index]
+                # If the candidate has a ballotpedia_candidate_url, but no ballotpedia_photo_url,
                 # see if we already tried to scrape them
-                if positive_value_exists(one_candidate.ballotpedia_candidate_url):
+                if positive_value_exists(one_candidate.ballotpedia_candidate_url):  # REMOVE: Should not be necessary
                     # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
                     #  search Ballotpedia more than once.
                     # request_history_query = RemoteRequestHistory.objects.filter(
@@ -154,11 +156,13 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                     # request_history_list = list(request_history_query)
                     request_history_list = []
                     if not positive_value_exists(len(request_history_list)):
-                        add_messages = False
-                        # get_results = get_one_picture_from_facebook_graphapi(
-                        #     one_candidate, request, remote_request_history_manager, add_messages)
-                        get_results = get_one_picture_from_ballotpedia_(
-                            one_candidate, request, remote_request_history_manager, add_messages)
+                        add_messages = True
+                        get_results = get_photo_url_from_ballotpedia(
+                            incoming_object=one_candidate,
+                            request=request,
+                            remote_request_history_manager=remote_request_history_manager,
+                            save_to_database=True,
+                            add_messages=add_messages)
                         status += get_results['status']
                         number_of_candidates_to_search -= 1
                     else:
@@ -167,7 +171,7 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                 else:
                     already_stored += 1
                     add_messages = False
-                    # get_results = get_one_picture_from_ballotpedia_(
+                    # get_results = get_photo_url_from_ballotpedia(
                     #     one_candidate, request, remote_request_history_manager, add_messages)
                     # status += get_results['status']
                     number_of_candidates_to_search -= 1
@@ -191,33 +195,40 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                 )
 
 
-
-def get_one_picture_from_ballotpedia_(one_entity, request, remote_request_history_manager, add_messages):
+def get_photo_url_from_ballotpedia(
+        incoming_object=None,
+        request={},
+        remote_request_history_manager=None,
+        save_to_database=False,
+        add_messages=False):
     status = ""
     success = True
+    ballotpedia_photo_saved = False
 
-    we_vote_id = one_entity.we_vote_id
-    if hasattr(one_entity, 'ballotpedia_candidate_url'):
-        ballotpedia_url = one_entity.ballotpedia_candidate_url
-        google_civic_election_id = one_entity.google_civic_election_id
+    if hasattr(incoming_object, 'ballotpedia_candidate_url'):
+        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
+        google_civic_election_id = incoming_object.google_civic_election_id
         is_candidate = True
     else:
-        ballotpedia_url = one_entity.organization_ballotpedia
+        ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
         is_candidate = False
-    candidate_url = [ballotpedia_url]
-    print(candidate_url)
-    results = get_ballotpedia_candidate_img_from_list(candidate_url)
-    # results = get_facebook_photo_url_from_graphapi(facebook_url)
+    print(ballotpedia_page_url)
+    results = get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
-        if results['photo_url_found']:
-            if hasattr(one_entity, 'ballotpedia_url_is_broken') and one_entity.ballotpedia_url_is_broken:
-                one_entity.ballotpedia_url_is_broken = False
-                one_entity.save()
-        elif hasattr(one_entity, 'ballotpedia_url_is_broken') and not one_entity.ballotpedia_url_is_broken:
-            one_entity.ballotpedia_url_is_broken = True
-            one_entity.save()
+        if save_to_database:
+            # To explore, when photo_url is found, but not valid... (low priority)
+            # ballotpedia_photo_url_is_broken = results.get('http_response_code') == 404
+            if results['photo_url_found']:
+                if is_candidate:
+                    incoming_object.ballotpedia_photo = photo_url
+                    incoming_object.ballotpedia_photo_url_is_broken = False
+                    incoming_object.save()
+            # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
+            #         and not incoming_object.ballotpedia_photo_url_is_broken:
+            #     incoming_object.ballotpedia_photo_url_is_broken = True
+            #     incoming_object.save()
 
         # link_is_broken = results.get('http_response_code') == 404
         is_placeholder_photo = results.get('is_silhouette')
@@ -235,43 +246,47 @@ def get_one_picture_from_ballotpedia_(one_entity, request, remote_request_histor
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
                     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
                     google_civic_election_id=google_civic_election_id,
-                    candidate_campaign_we_vote_id=we_vote_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
                     number_of_results=1,
                     status="CANDIDATE_BALLOTPEDIA_URL_IS_PLACEHOLDER_SILHOUETTE:" + str(photo_url))
         elif results['photo_url_found']:
             # Success!
-            logger.info("Queried URL: " + ballotpedia_url + " ==> " + photo_url)
+            logger.info("Queried URL: " + ballotpedia_page_url + " ==> " + photo_url)
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Ballotpedia photo retrieved.')
-            if is_candidate:
-                results = save_image_to_candidate_table(
-                    candidate=one_entity,
-                    image_url=photo_url,
-                    source_link=ballotpedia_url,
-                    url_is_broken=False,
-                    kind_of_source_website=IMAGE_SOURCE_BALLOTPEDIA)
-
-                # When saving to candidate object, update:
-                # we_vote_hosted_profile_facebook_image_url_tiny
-            else:
-                results = save_image_to_organization_table(
-                    one_entity, photo_url, ballotpedia_url, False, IMAGE_SOURCE_BALLOTPEDIA)
-
-            if not positive_value_exists(results['success']):
-                success = False
-                status += results['status']
-                status += "SAVE_IMAGE_TO_CANDIDATE_TABLE_FAILED "
-            else:
-                status += "SAVED_BA_IMAGE "
-                # Create a record denoting that we have retrieved from Ballotpedia for this candidate
-
+            if save_to_database:
                 if is_candidate:
-                    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                        kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
-                        google_civic_election_id=google_civic_election_id,
-                        candidate_campaign_we_vote_id=we_vote_id,
-                        number_of_results=1,
-                        status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_url)
+                    results = save_image_to_candidate_table(
+                        candidate=incoming_object,
+                        image_url=photo_url,
+                        source_link=ballotpedia_page_url,
+                        url_is_broken=False,
+                        kind_of_source_website=IMAGE_SOURCE_BALLOTPEDIA)
+                    if results['success']:
+                        ballotpedia_photo_saved = True
+                    # When saving to candidate object, update:
+                    # we_vote_hosted_profile_facebook_image_url_tiny
+                else:
+                    results = save_image_to_organization_table(
+                        incoming_object, photo_url, ballotpedia_page_url, False, IMAGE_SOURCE_BALLOTPEDIA)
+                    if results['success']:
+                        ballotpedia_photo_saved = True
+
+        if not ballotpedia_photo_saved:
+            success = False
+            status += results['status']
+            status += "SAVE_IMAGE_TO_CANDIDATE_TABLE_FAILED "
+        else:
+            status += "SAVED_BALLOTPEDIA_IMAGE "
+            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
+
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
     else:
         success = False
         status += results['status']
@@ -289,8 +304,6 @@ def get_one_picture_from_ballotpedia_(one_entity, request, remote_request_histor
         'status': status,
     }
     return results
-
-
 
 
 @login_required
@@ -916,7 +929,6 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                     '?kind_of_batch=IMPORT_BALLOTPEDIA_BALLOT_ITEMS' +
                                     '&google_civic_election_id=' + str(google_civic_election_id))
-
 
 # @login_required
 # def retrieve_ballotpedia_offices_by_election_from_api_view(request):

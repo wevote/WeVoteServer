@@ -1051,6 +1051,15 @@ def retrieve_issues_to_follow_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def retrieve_sql_tables_row_count_doc_view(request):
+    """
+    Show documentation about retrieveSQLTablesRowCount
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = retrieve_issues_to_follow_doc. \
+        retrieve_issues_to_follow_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
 def save_analytics_action_doc_view(request):
     """
     Show documentation about saveAnalyticsAction

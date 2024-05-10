@@ -13,7 +13,10 @@ import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception
 from organization.models import OrganizationManager, OrganizationTeamMember
-from wevote_functions.functions import convert_to_int, generate_random_string, \
+from politician.models import Politician
+from wevote_functions.functions import convert_to_int, \
+    extract_first_name_from_full_name, extract_middle_name_from_full_name, \
+    extract_last_name_from_full_name, \
     positive_value_exists
 from wevote_functions.functions_date import generate_date_as_integer
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, \
@@ -26,6 +29,7 @@ CAMPAIGNX_UNIQUE_IDENTIFIERS = [
     'campaign_description',
     'campaign_description_linked_to_twitter',
     'campaign_title',
+    'date_campaign_started',
     'final_election_date_as_integer',
     'in_draft_mode',
     'is_blocked_by_we_vote',
@@ -40,6 +44,7 @@ CAMPAIGNX_UNIQUE_IDENTIFIERS = [
     'ocd_id_state_mismatch_found',
     'politician_starter_list_serialized',
     'seo_friendly_path',
+    'state_code',
     'started_by_voter_we_vote_id',
     'supporters_count',
     'supporters_count_minimum_ignored',
@@ -110,6 +115,7 @@ class CampaignX(models.Model):
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
     supporters_count = models.PositiveIntegerField(default=0)
     # How many supporters are required before showing in We Vote lists
     supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
@@ -132,6 +138,20 @@ class CampaignX(models.Model):
                 self.supporters_count >= SUPPORTERS_COUNT_MINIMUM_FOR_LISTING:
             return True
         return False
+
+    def politician(self):
+        try:
+            politician = Politician.objects.using('readonly').get(we_vote_id=self.linked_politician_we_vote_id)
+        except Politician.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("CampaignX.politician Found multiple")
+            return
+        except Politician.DoesNotExist:
+            logger.error("CampaignX.politician not attached to object, id: " + str(self.linked_politician_we_vote_id))
+            return
+        except Exception as e:
+            return
+        return politician
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -172,6 +192,24 @@ class CampaignXEntriesAreNotDuplicates(models.Model):
             return ""
 
 
+class CampaignXEntriesArePossibleDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two entries as possible duplicates
+    """
+    campaignx1_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    campaignx2_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    state_code = models.CharField(max_length=2, null=True)
+
+    def fetch_other_campaignx_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.campaignx1_we_vote_id:
+            return self.campaignx2_we_vote_id
+        elif one_we_vote_id == self.campaignx2_we_vote_id:
+            return self.campaignx1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+
+
 class CampaignXListedByOrganization(models.Model):
     """
     An individual or organization can specify a campaign as one they want to list on their private-labeled site.
@@ -197,7 +235,77 @@ class CampaignXManager(models.Manager):
     def __unicode__(self):
         return "CampaignXManager"
 
-    def fetch_campaignx_supporter_count(self, campaignx_we_vote_id=None):
+    def fetch_campaignx_entries_are_not_duplicates_list_we_vote_ids(self, campaignx_we_vote_id):
+        results = self.retrieve_campaignx_entries_are_not_duplicates_list(campaignx_we_vote_id)
+        return results['campaignx_entries_are_not_duplicates_list_we_vote_ids']
+
+    @staticmethod
+    def fetch_campaignx_entries_from_non_unique_identifiers_count(
+            campaignx_title='',
+            ignore_campaignx_we_vote_id_list=[],
+            politician_name='',
+            state_code=''):
+        keep_looking_for_duplicates = True
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(campaignx_title):
+            try:
+                queryset = CampaignX.objects.using('readonly').all()
+                queryset = queryset.filter(campaign_title__iexact=campaignx_title)
+
+                if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                    queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+
+                campaignx_count = queryset.count()
+                if positive_value_exists(campaignx_count):
+                    return campaignx_count
+            except CampaignX.DoesNotExist:
+                status += "FETCH_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT1 "
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search by Candidate name exact match
+            try:
+                queryset = CampaignX.objects.using('readonly').all()
+                queryset = queryset.filter(
+                    Q(campaign_title__icontains=politician_name) |
+                    Q(campaign_description__icontains=politician_name)
+                )
+                if positive_value_exists(state_code):
+                    queryset = queryset.filter(state_code__iexact=state_code)
+                if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                    queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+                campaignx_count = queryset.count()
+                if positive_value_exists(campaignx_count):
+                    return campaignx_count
+            except CampaignX.DoesNotExist:
+                status += "FETCH_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT2 "
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search for Candidate(s) that contains the same first and last names
+            first_name = extract_first_name_from_full_name(politician_name)
+            last_name = extract_last_name_from_full_name(politician_name)
+            if positive_value_exists(first_name) and positive_value_exists(last_name):
+                try:
+                    queryset = CampaignX.objects.using('readonly').all()
+                    queryset = queryset.filter(
+                        (Q(campaign_title__icontains=first_name) & Q(campaign_title__icontains=last_name)) |
+                        (Q(campaign_description__icontains=first_name) &
+                         Q(campaign_description__icontains=last_name))
+                    )
+                    if positive_value_exists(state_code):
+                        queryset = queryset.filter(state_code__iexact=state_code)
+                    if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                        queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+                    campaignx_count = queryset.count()
+                    if positive_value_exists(campaignx_count):
+                        return campaignx_count
+                except CampaignX.DoesNotExist:
+                    status += "FETCH_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT3 "
+
+        return 0
+
+    @staticmethod
+    def fetch_campaignx_supporter_count(campaignx_we_vote_id=None):
         status = ""
 
         try:
@@ -725,6 +833,243 @@ class CampaignXManager(models.Manager):
 
         simple_list = list(set(simple_list))
         return simple_list
+
+    @staticmethod
+    def retrieve_campaignx_entries_are_not_duplicates_list(campaignx_we_vote_id, read_only=True):
+        """
+        Get a list of other campaignx_we_vote_id's that are not duplicates
+        :param campaignx_we_vote_id:
+        :param read_only:
+        :return:
+        """
+        # Note that the direction of the linkage does not matter
+        campaignx_entries_are_not_duplicates_list1 = []
+        campaignx_entries_are_not_duplicates_list2 = []
+        status = ""
+        try:
+            if positive_value_exists(read_only):
+                campaignx_entries_are_not_duplicates_list_query = \
+                    CampaignXEntriesAreNotDuplicates.objects.using('readonly').filter(
+                        campaignx1_we_vote_id__iexact=campaignx_we_vote_id,
+                    )
+            else:
+                campaignx_entries_are_not_duplicates_list_query = CampaignXEntriesAreNotDuplicates.objects.filter(
+                    campaignx1_we_vote_id__iexact=campaignx_we_vote_id,
+                )
+            campaignx_entries_are_not_duplicates_list1 = list(campaignx_entries_are_not_duplicates_list_query)
+            success = True
+            status += "CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+        except CampaignXEntriesAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status += 'NO_CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            success = False
+            status += "CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1: " + str(e) + ' '
+
+        if success:
+            try:
+                if positive_value_exists(read_only):
+                    campaignx_entries_are_not_duplicates_list_query = \
+                        CampaignXEntriesAreNotDuplicates.objects.using('readonly').filter(
+                            campaignx2_we_vote_id__iexact=campaignx_we_vote_id,
+                        )
+                else:
+                    campaignx_entries_are_not_duplicates_list_query = \
+                        CampaignXEntriesAreNotDuplicates.objects.filter(
+                            campaignx2_we_vote_id__iexact=campaignx_we_vote_id,
+                        )
+                campaignx_entries_are_not_duplicates_list2 = list(campaignx_entries_are_not_duplicates_list_query)
+                success = True
+                status += "CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+            except CampaignXEntriesAreNotDuplicates.DoesNotExist:
+                success = True
+                status += 'NO_CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                success = False
+                status += "CAMPAIGNX_ENTRIES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2: " + str(e) + ' '
+
+        campaignx_entries_are_not_duplicates_list = \
+            campaignx_entries_are_not_duplicates_list1 + campaignx_entries_are_not_duplicates_list2
+        campaignx_entries_are_not_duplicates_list_found = \
+            positive_value_exists(len(campaignx_entries_are_not_duplicates_list))
+        campaignx_entries_are_not_duplicates_list_we_vote_ids = []
+        for one_entry in campaignx_entries_are_not_duplicates_list:
+            if one_entry.campaignx1_we_vote_id != campaignx_we_vote_id:
+                campaignx_entries_are_not_duplicates_list_we_vote_ids.append(one_entry.campaignx1_we_vote_id)
+            elif one_entry.campaignx2_we_vote_id != campaignx_we_vote_id:
+                campaignx_entries_are_not_duplicates_list_we_vote_ids.append(one_entry.campaignx2_we_vote_id)
+        results = {
+            'success':                                          success,
+            'status':                                           status,
+            'campaignx_entries_are_not_duplicates_list_found':  campaignx_entries_are_not_duplicates_list_found,
+            'campaignx_entries_are_not_duplicates_list':        campaignx_entries_are_not_duplicates_list,
+            'campaignx_entries_are_not_duplicates_list_we_vote_ids':
+                campaignx_entries_are_not_duplicates_list_we_vote_ids,
+        }
+        return results
+
+    @staticmethod
+    def retrieve_campaignx_entries_from_non_unique_identifiers(
+            campaignx_title='',
+            ignore_campaignx_we_vote_id_list=[],
+            politician_name='',
+            state_code='',
+            read_only=False):
+        """
+
+        :param campaignx_title:
+        :param ignore_campaignx_we_vote_id_list:
+        :param politician_name:
+        :param state_code:
+        :param read_only:
+        :return:
+        """
+        keep_looking_for_duplicates = True
+        campaignx = None
+        campaignx_found = False
+        campaignx_list = []
+        campaignx_list_found = False
+        multiple_entries_found = False
+        success = True
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(campaignx_title):
+            try:
+                if positive_value_exists(read_only):
+                    queryset = CampaignX.objects.using('readonly').all()
+                else:
+                    queryset = CampaignX.objects.all()
+                queryset = queryset.filter(campaign_title__iexact=campaignx_title)
+
+                if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                    queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+
+                campaignx_list = list(queryset)
+                if len(campaignx_list):
+                    # At least one entry exists
+                    status += 'RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_LIST_RETRIEVED '
+                    # if a single entry matches, update that entry
+                    if len(campaignx_list) == 1:
+                        multiple_entries_found = False
+                        campaignx = campaignx_list[0]
+                        campaignx_found = True
+                        keep_looking_for_duplicates = False
+                        success = True
+                        status += "CAMPAIGNX_FOUND_BY_TITLE "
+                    else:
+                        # more than one entry found
+                        campaignx_list_found = True
+                        multiple_entries_found = True
+                        keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
+                        status += "MULTIPLE_TITLE_MATCHES "
+            except CampaignX.DoesNotExist:
+                success = True
+                status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_NOT_FOUND "
+            except Exception as e:
+                status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_QUERY_FAILED1 " + str(e) + " "
+                success = False
+                keep_looking_for_duplicates = False
+
+        # twitter handle does not exist, next look up against other data that might match
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search by Candidate name exact match
+            try:
+                if positive_value_exists(read_only):
+                    queryset = CampaignX.objects.using('readonly').all()
+                else:
+                    queryset = CampaignX.objects.all()
+                queryset = queryset.filter(
+                    Q(campaign_title__icontains=politician_name) |
+                    Q(campaign_description__icontains=politician_name)
+                )
+                if positive_value_exists(state_code):
+                    queryset = queryset.filter(state_code__iexact=state_code)
+                if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                    queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+                campaignx_list = list(queryset)
+                if len(campaignx_list):
+                    # entry exists
+                    status += 'CAMPAIGNX_ENTRY_EXISTS1 '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(campaignx_list) == 1:
+                        campaignx = campaignx_list[0]
+                        campaignx_found = True
+                        status += campaignx.we_vote_id + " "
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found with a match
+                        campaignx_list_found = True
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+                else:
+                    success = True
+                    status += 'CAMPAIGNX_ENTRY_NOT_FOUND-EXACT '
+
+            except CampaignX.DoesNotExist:
+                success = True
+                status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_NOT_FOUND-EXACT_MATCH "
+            except Exception as e:
+                status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_QUERY_FAILED2: " + str(e) + " "
+                success = False
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search for Candidate(s) that contains the same first and last names
+            first_name = extract_first_name_from_full_name(politician_name)
+            last_name = extract_last_name_from_full_name(politician_name)
+            if positive_value_exists(first_name) and positive_value_exists(last_name):
+                try:
+                    if positive_value_exists(read_only):
+                        queryset = CampaignX.objects.using('readonly').all()
+                    else:
+                        queryset = CampaignX.objects.all()
+
+                    queryset = queryset.filter(
+                        (Q(campaign_title__icontains=first_name) & Q(campaign_title__icontains=last_name)) |
+                        (Q(campaign_description__icontains=first_name) &
+                         Q(campaign_description__icontains=last_name))
+                    )
+                    if positive_value_exists(state_code):
+                        queryset = queryset.filter(state_code__iexact=state_code)
+                    if positive_value_exists(ignore_campaignx_we_vote_id_list):
+                        queryset = queryset.exclude(we_vote_id__in=ignore_campaignx_we_vote_id_list)
+                    campaignx_list = list(queryset)
+                    if len(campaignx_list):
+                        # entry exists
+                        status += 'CAMPAIGNX_ENTRY_EXISTS2 '
+                        success = True
+                        # if a single entry matches, update that entry
+                        if len(campaignx_list) == 1:
+                            campaignx = campaignx_list[0]
+                            campaignx_found = True
+                            status += campaignx.we_vote_id + " "
+                            keep_looking_for_duplicates = False
+                        else:
+                            # more than one entry found with a match
+                            campaignx_list_found = True
+                            keep_looking_for_duplicates = False
+                            multiple_entries_found = True
+                    else:
+                        status += 'CAMPAIGNX_ENTRY_NOT_FOUND-FIRST_OR_LAST '
+                        success = True
+                except CampaignX.DoesNotExist:
+                    status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_NOT_FOUND-FIRST_OR_LAST_NAME "
+                    success = True
+                except Exception as e:
+                    status += "RETRIEVE_CAMPAIGNX_ENTRIES_FROM_NON_UNIQUE-CAMPAIGNX_QUERY_FAILED3: " + str(e) + " "
+                    success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'campaignx_found':          campaignx_found,
+            'campaignx':                campaignx,
+            'campaignx_list_found':     campaignx_list_found,
+            'campaignx_list':           campaignx_list,
+            'multiple_entries_found':   multiple_entries_found,
+        }
+        return results
 
     @staticmethod
     def retrieve_campaignx_list(
