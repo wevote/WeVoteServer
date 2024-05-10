@@ -8,14 +8,21 @@
 {% load humanize %}
 
 <h1>Campaigns</h1>
-{% if show_ocd_id_state_mismatch %}
 <ul>
+    <li><a href="{% url 'campaign:find_and_merge_duplicate_campaignx_entries' %}?state_code={{ state_code }}"
+                    target="_blank" >
+        Find and Merge Duplicate CampaignX Entries <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+        <a href="{% url 'campaign:duplicates_list' %}?state_code={{ state_code }}"
+                    target="_blank" >
+        Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+    </li>
+{% if show_ocd_id_state_mismatch %}
     <li>
         <a href="{% url 'campaign:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
             Repair OCD ID Mismatches</a>
     </li>
-</ul>
 {% endif %}
+</ul>
 <form name="state_code_form" method="get" action="{% url 'campaign:campaignx_list' %}">
     {% csrf_token %}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">

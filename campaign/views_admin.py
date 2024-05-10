@@ -5,6 +5,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -17,15 +18,20 @@ from config.base import get_environment_variable
 from datetime import datetime, timedelta
 from election.models import ElectionManager
 from organization.models import Organization, OrganizationManager
-from politician.models import PoliticianManager
+from politician.models import Politician, PoliticianManager
 from stripe_donations.models import StripeManager
-from voter.models import voter_has_authority, VoterManager
+from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
+    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, \
-    positive_value_exists, STATE_CODE_MAP
+    get_voter_api_device_id, positive_value_exists, STATE_CODE_MAP
 from wevote_functions.functions_date import generate_date_as_integer
-from .controllers import create_campaignx_supporters_from_positions, figure_out_campaignx_conflict_values, \
+from .controllers import create_campaignx_supporters_from_positions, fetch_duplicate_campaignx_count, \
+    figure_out_campaignx_conflict_values, find_duplicate_campaignx, merge_if_duplicate_campaignx_entries, \
     refresh_campaignx_supporters_count_in_all_children, merge_these_two_campaignx_entries
-from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
+from .models import CampaignX, CampaignXEntriesAreNotDuplicates, CampaignXEntriesArePossibleDuplicates, \
+    CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSEOFriendlyPath, CampaignXSupporter, \
+    CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     CAMPAIGNX_UNIQUE_IDENTIFIERS, FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -73,6 +79,121 @@ def campaign_delete_process_view(request):
         messages.add_message(request, messages.ERROR, 'CampaignX not found.')
 
     return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()))
+
+
+@login_required
+def campaignx_duplicates_list_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    state_code = request.GET.get('state_code', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
+    show_campaignx_entries_with_email = request.GET.get('show_campaignx_entries_with_email', False)
+
+    duplicates_list = []
+    duplicates_list_count = 0
+    possible_duplicates_count = 0
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    try:
+        queryset = CampaignXEntriesArePossibleDuplicates.objects.using('readonly').all()
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        duplicates_list_count = queryset.count()
+        queryset = queryset.exclude(
+            Q(campaignx2_we_vote_id__isnull=True) | Q(campaignx2_we_vote_id=''))
+        possible_duplicates_count = queryset.count()
+        if not positive_value_exists(show_all):
+            duplicates_list = list(queryset[:200])
+        else:
+            duplicates_list = list(queryset[:1000])
+    except ObjectDoesNotExist:
+        # This is fine
+        pass
+
+    # Collect the campaignx_we_vote_id of all possible duplicates so we can retrieve the objects in a single db call
+    campaignx_entries_to_display_we_vote_id_list = []
+    for one_duplicate in duplicates_list:
+        if positive_value_exists(one_duplicate.campaignx1_we_vote_id):
+            campaignx_entries_to_display_we_vote_id_list.append(one_duplicate.campaignx1_we_vote_id)
+        if positive_value_exists(one_duplicate.campaignx2_we_vote_id):
+            campaignx_entries_to_display_we_vote_id_list.append(one_duplicate.campaignx2_we_vote_id)
+
+    campaignx_entries_dict = {}
+    try:
+        queryset = CampaignX.objects.using('readonly').all()
+        queryset = queryset.filter(we_vote_id__in=campaignx_entries_to_display_we_vote_id_list)
+        campaignx_data_list = list(queryset)
+        for one_campaignx in campaignx_data_list:
+            campaignx_entries_dict[one_campaignx.we_vote_id] = one_campaignx
+    except Exception as e:
+        pass
+
+    # Now retrieve all seo_friendly_path entries associated with each Campaign, so we can attach below
+    campaignx_seo_friendly_path_dict = {}
+    try:
+        queryset = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+        queryset = queryset.filter(campaignx_we_vote_id__in=campaignx_entries_to_display_we_vote_id_list)
+        campaignx_seo_friendly_path_list = list(queryset)
+        for one_seo_friendly_path in campaignx_seo_friendly_path_list:
+            campaignx_entry = campaignx_entries_dict[one_seo_friendly_path.campaignx_we_vote_id]
+            if campaignx_entry.seo_friendly_path == one_seo_friendly_path.final_pathname_string:
+                # Do not add to the list if already attached directly to campaignx
+                continue
+            if one_seo_friendly_path.campaignx_we_vote_id not in campaignx_seo_friendly_path_dict:
+                campaignx_seo_friendly_path_dict[one_seo_friendly_path.campaignx_we_vote_id] = []
+            campaignx_seo_friendly_path_dict[one_seo_friendly_path.campaignx_we_vote_id]\
+                .append(one_seo_friendly_path.final_pathname_string)
+    except Exception as e:
+        pass
+
+    # Retrieve linked politician, so we can include the Twitter handles for the Politician
+
+    # Attached seo_friendly_path_list
+    for one_campaignx in campaignx_data_list:
+        if one_campaignx.we_vote_id in campaignx_seo_friendly_path_dict:
+            one_campaignx.seo_friendly_path_list = campaignx_seo_friendly_path_dict[one_campaignx.we_vote_id]
+
+    duplicates_list_modified = []
+    for one_duplicate in duplicates_list:
+        if positive_value_exists(one_duplicate.campaignx1_we_vote_id) \
+                and one_duplicate.campaignx1_we_vote_id in campaignx_entries_dict \
+                and positive_value_exists(one_duplicate.campaignx2_we_vote_id) \
+                and one_duplicate.campaignx2_we_vote_id in campaignx_entries_dict:
+            one_duplicate.campaignx1 = campaignx_entries_dict[one_duplicate.campaignx1_we_vote_id]
+            one_duplicate.campaignx2 = campaignx_entries_dict[one_duplicate.campaignx2_we_vote_id]
+            duplicates_list_modified.append(one_duplicate)
+        else:
+            possible_duplicates_count -= 1
+
+    messages.add_message(request, messages.INFO,
+                         "CampaignXs analyzed: {duplicates_list_count:,}. "
+                         "Possible duplicate campaignx_entries found: {possible_duplicates_count:,}. "
+                         "State: {state_code}"
+                         "".format(
+                             duplicates_list_count=duplicates_list_count,
+                             possible_duplicates_count=possible_duplicates_count,
+                             state_code=state_code))
+
+    template_values = {
+        'messages_on_stage':            messages_on_stage,
+        'google_civic_election_id':     google_civic_election_id,
+        'duplicates_list':              duplicates_list_modified,
+        'campaignx_search':            campaignx_search,
+        'show_all':                     show_all,
+        'show_campaignx_entries_with_email':  show_campaignx_entries_with_email,
+        'show_related_candidates':      show_related_candidates,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
+    }
+    return render(request, 'campaign/campaignx_duplicates_list.html', template_values)
 
 
 @login_required
@@ -591,7 +712,6 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     related_campaignx_list = []
     if campaignx and positive_value_exists(campaignx.linked_politician_we_vote_id):
         try:
-            from politician.models import Politician
             politician_queryset = Politician.objects.using('readonly').all()
             politician = politician_queryset.get(we_vote_id=campaignx.linked_politician_we_vote_id)
             if positive_value_exists(politician.last_name):
@@ -662,6 +782,67 @@ def campaign_list_view(request):
 
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
+    campaignx_list_to_update = []
+    clean_campaigns_with_dead_politician_we_vote_id = True
+    # If a CampaignX entry has a linked_politician_we_vote_id which no longer exists, remove the seo_friendly_path
+    #  so that entry doesn't block the use of that seo_friendly_path
+    if clean_campaigns_with_dead_politician_we_vote_id:
+        number_to_update = 5000  # Set to 5,000 at a time
+        politician_we_vote_id_list = []
+        total_to_update_after = 0
+        try:
+            queryset = CampaignX.objects.using('readonly').all()
+            queryset = queryset.exclude(
+                Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
+            queryset = queryset.exclude(linked_politician_we_vote_id_verified=True)
+            total_to_update = queryset.count()
+            total_to_update_after = total_to_update - number_to_update if total_to_update > number_to_update else 0
+            campaignx_list_to_update = list(queryset[:number_to_update])
+            for one_campaignx in campaignx_list_to_update:
+                if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                    if one_campaignx.linked_politician_we_vote_id not in politician_we_vote_id_list:
+                        politician_we_vote_id_list.append(one_campaignx.linked_politician_we_vote_id)
+        except Exception as e:
+            status += "CAMPAIGNX_CLEAN_QUERY_FAILED: " + str(e) + " "
+
+        politician_we_vote_ids_not_found_list = []
+        if len(politician_we_vote_id_list) > 0:
+            queryset = Politician.objects.using('readonly').all()
+            queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
+            queryset = queryset.values_list('we_vote_id', flat=True).distinct()
+            politician_we_vote_ids_found_list = list(queryset)
+            politician_we_vote_ids_not_found_list = politician_we_vote_id_list.copy()
+            for one_politician_we_vote_id in politician_we_vote_ids_found_list:
+                politician_we_vote_ids_not_found_list.remove(one_politician_we_vote_id)
+        update_list = []
+        for one_campaignx in campaignx_list_to_update:
+            one_campaignx.linked_politician_we_vote_id_verified = True
+            if one_campaignx.linked_politician_we_vote_id in politician_we_vote_ids_not_found_list:
+                one_campaignx.date_last_updated_from_politician = localtime(now()).date()
+                one_campaignx.linked_politician_we_vote_id = None
+                one_campaignx.seo_friendly_path = None
+            update_list.append(one_campaignx)
+
+        if len(update_list) > 0:
+            try:
+                CampaignX.objects.bulk_update(
+                    update_list,
+                    ['date_last_updated_from_politician',
+                     'linked_politician_we_vote_id',
+                     'linked_politician_we_vote_id_verified',
+                     'seo_friendly_path'])
+                messages.add_message(request, messages.INFO,
+                                     "{updates_made:,} campaignx entries cleaned from missing politicians. "
+                                     "{total_to_update_after:,} remaining."
+                                     "".format(total_to_update_after=total_to_update_after,
+                                               updates_made=len(campaignx_list_to_update)))
+            except Exception as e:
+                messages.add_message(
+                    request, messages.ERROR,
+                    "ERROR with clean_campaigns_with_dead_politician_we_vote_id: {e} "
+                    "politician_we_vote_ids_not_found_list: {politician_we_vote_ids_not_found_list}"
+                    "".format(e=e,
+                              politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))
 
     update_campaigns_from_politicians_script = True
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
@@ -694,7 +875,6 @@ def campaign_list_view(request):
 
         politician_list_by_campaignx_we_vote_id = {}
         if len(politician_we_vote_id_list) > 0:
-            from politician.models import Politician
             queryset = Politician.objects.all()
             queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
             politician_list = list(queryset)
@@ -704,6 +884,7 @@ def campaign_list_view(request):
                     politician_list_by_campaignx_we_vote_id[one_politician.linked_campaignx_we_vote_id] = one_politician
 
         # Loop through all the campaigns, and update them with some politician data
+        politician_we_vote_id_remaining_list = politician_we_vote_id_list.copy()
         if len(campaignx_list) > 0:
             campaignx_update_errors = 0
             campaigns_updated = 0
@@ -713,9 +894,12 @@ def campaign_list_view(request):
             for campaignx in campaignx_list:
                 if campaignx.we_vote_id in politician_list_by_campaignx_we_vote_id:
                     politician = politician_list_by_campaignx_we_vote_id[campaignx.we_vote_id]
+                    politician_we_vote_id_remaining_list.remove(politician.we_vote_id)
                 else:
                     politician = None
                     campaignx.date_last_updated_from_politician = localtime(now()).date()
+                    campaignx.linked_politician_we_vote_id = None
+                    campaignx.seo_friendly_path = None
                     campaignx.save()
                 if not politician or not hasattr(politician, 'we_vote_id'):
                     continue
@@ -751,9 +935,12 @@ def campaign_list_view(request):
                                          "".format(total_to_update_after=total_to_update_after,
                                                    updates_made=campaigns_updated))
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR,
-                                         "ERROR with update_campaignx_list_from_politicians_script: {e} "
-                                         "".format(e=e))
+                    messages.add_message(
+                        request, messages.ERROR,
+                        "ERROR with update_campaignx_list_from_politicians_script: {e} "
+                        "politician_we_vote_id_remaining_list: {politician_we_vote_id_remaining_list}"
+                        "".format(e=e,
+                                  politician_we_vote_id_remaining_list=politician_we_vote_id_remaining_list))
 
     campaignx_we_vote_ids_in_order = []
     if campaignx_owner_organization_we_vote_id:
@@ -793,7 +980,7 @@ def campaign_list_view(request):
                                 campaignx_owner.save()
 
         if len(campaignx_we_vote_ids_in_order) > 0:
-            # Re-save the order of all of the campaigns
+            # Re-save the order of all campaigns
             campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id_list=campaignx_we_vote_ids_in_order,
                 organization_we_vote_id=campaignx_owner_organization_we_vote_id,
@@ -942,7 +1129,6 @@ def campaign_list_view(request):
 
     if len(politician_we_vote_id_list) > 0:
         modified_campaignx_list2 = []
-        from politician.models import Politician
         queryset = Politician.objects.all()
         queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
         politician_list = list(queryset)
@@ -1447,7 +1633,8 @@ def campaign_supporters_list_process_view(request):
                                 str(campaignx_owner_organization_we_vote_id) +
                                 "&campaignx_search=" + str(campaignx_search) +
                                 "&state_code=" + str(state_code) +
-                                "&only_show_supporters_with_endorsements=" + str(only_show_supporters_with_endorsements) +
+                                "&only_show_supporters_with_endorsements=" +
+                                str(only_show_supporters_with_endorsements) +
                                 "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)
                                 )
 
@@ -1464,6 +1651,7 @@ def compare_two_campaigns_for_merge_view(request):
     campaignx2_we_vote_id = request.GET.get('campaignx2_we_vote_id', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    status = ''
 
     if campaignx1_we_vote_id == campaignx2_we_vote_id:
         messages.add_message(request, messages.ERROR,
@@ -1489,8 +1677,14 @@ def compare_two_campaigns_for_merge_view(request):
 
     campaignx_option2_for_template = campaignx_results['campaignx']
 
-    campaignx_merge_conflict_values = figure_out_campaignx_conflict_values(
+    conflict_results = figure_out_campaignx_conflict_values(
         campaignx_option1_for_template, campaignx_option2_for_template)
+    campaignx_merge_conflict_values = conflict_results['conflict_values']
+    if not conflict_results['success']:
+        status += conflict_results['status']
+        success = conflict_results['success']
+    else:
+        status += "COMPARE_TWO_CAMPAIGNS_DUPLICATE_FOUND "
 
     # This view function takes us to displaying a template
     remove_duplicate_process = False  # Do not try to find another office to merge after finishing
@@ -1503,6 +1697,182 @@ def compare_two_campaigns_for_merge_view(request):
         remove_duplicate_process=remove_duplicate_process)
 
 
+@login_required
+def find_and_merge_duplicate_campaignx_entries_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
+    state_code = request.GET.get('state_code', "")
+    status = ""
+    campaignx_manager = CampaignXManager()
+    ignore_campaignx_we_vote_id_list = []
+
+    queryset = CampaignXEntriesAreNotDuplicates.objects.using('readonly').all()
+    # if positive_value_exists(state_code):
+    #     queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(campaignx1_we_vote_id=None)
+    queryset = queryset.exclude(campaignx2_we_vote_id=None)
+    queryset_campaignx1 = queryset.values_list('campaignx1_we_vote_id', flat=True).distinct()
+    exclude_campaignx1_we_vote_id_list = list(queryset_campaignx1)
+    # We also want to exclude the second campaigns, so we aren't creating
+    #   duplicate CampaignXEntriesArePossibleDuplicates entries
+    queryset_campaignx2 = queryset.values_list('campaignx2_we_vote_id', flat=True).distinct()
+    exclude_campaignx2_we_vote_id_list = list(queryset_campaignx2)
+    exclude_campaignx_we_vote_id_list = \
+        list(set(exclude_campaignx1_we_vote_id_list + exclude_campaignx2_we_vote_id_list))
+
+    queryset = CampaignXEntriesArePossibleDuplicates.objects.using('readonly').all()
+    # if positive_value_exists(state_code):
+    #     queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(campaignx1_we_vote_id=None)
+    queryset = queryset.exclude(campaignx2_we_vote_id=None)
+    queryset_campaignx1 = queryset.values_list('campaignx1_we_vote_id', flat=True).distinct()
+    exclude_campaignx1_we_vote_id_list = list(queryset_campaignx1)
+    # We also want to exclude the second campaigns, so we aren't creating
+    #   duplicate CampaignXEntriesArePossibleDuplicates entries
+    queryset_campaignx2 = queryset.values_list('campaignx2_we_vote_id', flat=True).distinct()
+    exclude_campaignx2_we_vote_id_list = list(queryset_campaignx2)
+    exclude_campaignx_we_vote_id_list2 = \
+        list(set(exclude_campaignx1_we_vote_id_list + exclude_campaignx2_we_vote_id_list))
+
+    # Now combine the CampaignXEntriesAreNotDuplicates and CampaignXEntriesArePossibleDuplicates lists
+    exclude_campaignx_we_vote_id_list = \
+        list(set(exclude_campaignx_we_vote_id_list + exclude_campaignx_we_vote_id_list2))
+
+    campaignx_query = CampaignX.objects.using('readonly').all()
+    # We only want to check campaigns hard linked to politicians for duplicates
+    campaignx_query = campaignx_query.exclude(
+        Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
+    campaignx_query = campaignx_query.exclude(we_vote_id__in=exclude_campaignx_we_vote_id_list)
+    if positive_value_exists(state_code):
+        campaignx_query = campaignx_query.filter(state_code__iexact=state_code)
+    campaignx_list = list(campaignx_query[:1000])
+
+    # Loop through all the campaignx_entries to see how many have possible duplicates
+    if positive_value_exists(find_number_of_duplicates):
+        duplicate_campaignx_count = 0
+        for one_campaignx in campaignx_list:
+            # Note that we don't reset the ignore_campaignx_list, so we don't search for a duplicate both directions
+            ignore_campaignx_we_vote_id_list.append(one_campaignx.we_vote_id)
+            duplicate_campaignx_count_temp = fetch_duplicate_campaignx_count(
+                campaignx=one_campaignx,
+                ignore_campaignx_we_vote_id_list=ignore_campaignx_we_vote_id_list)
+            duplicate_campaignx_count += duplicate_campaignx_count_temp
+
+        if positive_value_exists(duplicate_campaignx_count):
+            messages.add_message(request, messages.INFO,
+                                 "There are approximately {duplicate_campaignx_count} "
+                                 "possible duplicates."
+                                 "".format(duplicate_campaignx_count=duplicate_campaignx_count))
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+    # Loop through all the campaignx_entries to find linked_politician_we_vote_id
+    linked_politician_we_vote_id_list = []
+    for one_campaignx in campaignx_list:
+        if one_campaignx.we_vote_id in exclude_campaignx_we_vote_id_list:
+            continue
+        if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+            linked_politician_we_vote_id_list.append(one_campaignx.linked_politician_we_vote_id)
+
+    # Fill a dict with politician names, which we need so we can search for possible duplicates by name
+    politician_name_dict_by_we_vote_id = {}
+    if positive_value_exists(len(linked_politician_we_vote_id_list)):
+        queryset = Politician.objects.using('readonly').filter(we_vote_id__in=linked_politician_we_vote_id_list)
+        politician_list = list(queryset)
+        for one_politician in politician_list:
+            politician_name_dict_by_we_vote_id[one_politician.we_vote_id] = one_politician.politician_name
+
+    # Loop through all the campaignx_entries
+    for one_campaignx in campaignx_list:
+        if one_campaignx.we_vote_id in exclude_campaignx_we_vote_id_list:
+            continue
+        # Add current campaignx entry to ignore list
+        ignore_campaignx_we_vote_id_list.append(one_campaignx.we_vote_id)
+        # Now check to for other campaignx_entries we have labeled as "not a duplicate"
+        not_a_duplicate_list = campaignx_manager.fetch_campaignx_entries_are_not_duplicates_list_we_vote_ids(
+            one_campaignx.we_vote_id)
+
+        ignore_campaignx_we_vote_id_list += not_a_duplicate_list
+        politician_name = None
+        state_code = ''
+        try:
+            if one_campaignx.linked_politician_we_vote_id in politician_name_dict_by_we_vote_id:
+                politician_name = politician_name_dict_by_we_vote_id[one_campaignx.linked_politician_we_vote_id]
+            # We might also want to get state_code from politicians
+        except Exception as e:
+            pass
+        results = find_duplicate_campaignx(
+            campaignx=one_campaignx,
+            ignore_campaignx_we_vote_id_list=ignore_campaignx_we_vote_id_list,
+            politician_name=politician_name,
+            state_code=state_code,
+        )
+
+        # If we find campaignx_entries to merge, stop and ask for confirmation
+        if results['campaignx_merge_possibility_found']:
+            campaignx_option1_for_template = one_campaignx
+            campaignx_option2_for_template = results['campaignx_merge_possibility']
+
+            # Can we automatically merge these campaignx_entries?
+            merge_results = merge_if_duplicate_campaignx_entries(
+                campaignx_option1_for_template,
+                campaignx_option2_for_template,
+                results['campaignx_merge_conflict_values'])
+
+            if merge_results['campaignx_entries_merged']:
+                campaignx = merge_results['campaignx']
+                if campaignx.we_vote_id not in exclude_campaignx_we_vote_id_list:
+                    exclude_campaignx_we_vote_id_list.append(campaignx.we_vote_id)
+                if one_campaignx.we_vote_id not in exclude_campaignx_we_vote_id_list:
+                    exclude_campaignx_we_vote_id_list.append(one_campaignx.we_vote_id)
+                CampaignXEntriesAreNotDuplicates.objects.create(
+                    campaignx1_we_vote_id=campaignx.we_vote_id,
+                    campaignx2_we_vote_id=None,
+                    # state_code=state_code,
+                )
+                CampaignXEntriesAreNotDuplicates.objects.create(
+                    campaignx1_we_vote_id=one_campaignx.we_vote_id,
+                    campaignx2_we_vote_id=None,
+                    # state_code=state_code,
+                )
+                messages.add_message(request, messages.INFO, "CampaignX {campaignx_title} automatically merged."
+                                                             "".format(campaignx_title=campaignx.campaign_title))
+                # No need to start over
+                # return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
+                #                             "?state_code=" + str(state_code))
+            else:
+                # Add an entry showing that this is a possible match
+                CampaignXEntriesArePossibleDuplicates.objects.create(
+                    campaignx1_we_vote_id=one_campaignx.we_vote_id,
+                    campaignx2_we_vote_id=campaignx_option2_for_template.we_vote_id,
+                    state_code=state_code,
+                )
+                if campaignx_option2_for_template.we_vote_id not in exclude_campaignx_we_vote_id_list:
+                    exclude_campaignx_we_vote_id_list.append(campaignx_option2_for_template.we_vote_id)
+        else:
+            # No matches found
+            CampaignXEntriesAreNotDuplicates.objects.create(
+                campaignx1_we_vote_id=one_campaignx.we_vote_id,
+                campaignx2_we_vote_id=None,
+                # state_code=state_code,
+            )
+
+    return HttpResponseRedirect(reverse('campaign:duplicates_list', args=()) +
+                                "?state_code={state_code}"
+                                "".format(state_code=state_code))
+
+
 def render_campaignx_merge_form(
         request,
         campaignx_option1_for_template,
@@ -1510,8 +1880,6 @@ def render_campaignx_merge_form(
         campaignx_merge_conflict_values,
         campaignx_year=0,
         remove_duplicate_process=True):
-    from politician.models import Politician
-
     politician1_full_name = ''
     politician1_state_code = ''
     if campaignx_option1_for_template and \
@@ -1603,8 +1971,9 @@ def campaignx_merge_process_view(request):
         results = campaignx_manager.update_or_create_campaignx_entries_are_not_duplicates(
             campaignx1_we_vote_id, campaignx2_we_vote_id)
         if not results['new_campaignx_entries_are_not_duplicates_created']:
-            messages.add_message(request, messages.ERROR, 'Could not save campaignx_entries_are_not_duplicates entry: ' +
-                                 results['status'])
+            messages.add_message(
+                request, messages.ERROR, 'Merge: Could not save campaignx_entries_are_not_duplicates entry: '
+                                         '' + results['status'])
         messages.add_message(request, messages.INFO, 'Prior campaignx entries skipped, and not merged.')
         # When implemented, consider directing here: find_and_merge_duplicate_campaignx_entries
         return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
@@ -1635,6 +2004,7 @@ def campaignx_merge_process_view(request):
     # Gather choices made from merge form
     conflict_values = figure_out_campaignx_conflict_values(campaignx1_on_stage, campaignx2_on_stage)
     admin_merge_choices = {}
+    clear_these_attributes_from_campaignx2 = []
     for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
@@ -1644,13 +2014,18 @@ def campaignx_merge_process_view(request):
                 choice = request.GET.get(attribute + '_choice', '')
             if campaignx2_we_vote_id == choice:
                 admin_merge_choices[attribute] = getattr(campaignx2_on_stage, attribute)
-        elif conflict_value == "CANDIDATE2":
+                if attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_campaignx2.append(attribute)
+        elif conflict_value == "CAMPAIGNX2":
             admin_merge_choices[attribute] = getattr(campaignx2_on_stage, attribute)
+            if attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                clear_these_attributes_from_campaignx2.append(attribute)
 
     merge_results = merge_these_two_campaignx_entries(
         campaignx1_we_vote_id,
         campaignx2_we_vote_id,
-        admin_merge_choices,
+        admin_merge_choices=admin_merge_choices,
+        clear_these_attributes_from_campaignx2=clear_these_attributes_from_campaignx2,
         regenerate_campaign_title=regenerate_campaign_title)
 
     if positive_value_exists(merge_results['campaignx_entries_merged']):
@@ -1683,10 +2058,59 @@ def campaignx_merge_process_view(request):
     return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx.we_vote_id,)))
 
 
+@login_required
+def campaignx_not_duplicates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    campaignx1_we_vote_id = request.GET.get('campaignx1_we_vote_id', '')
+    campaignx2_we_vote_id = request.GET.get('campaignx2_we_vote_id', '')
+    state_code = request.GET.get('state_code', '')
+    status = ""
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_id = 0
+    voter_we_vote_id = ""
+    voter_device_id = get_voter_api_device_id(request)
+    if positive_value_exists(voter_device_id):
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'we_vote_id'):
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
+
+    campaignx_manager = CampaignXManager()
+    results = campaignx_manager.update_or_create_campaignx_entries_are_not_duplicates(
+        campaignx1_we_vote_id, campaignx2_we_vote_id)
+    if results['success']:
+        queryset = CampaignXEntriesArePossibleDuplicates.objects.filter(
+            campaignx1_we_vote_id__iexact=campaignx1_we_vote_id,
+            campaignx2_we_vote_id__iexact=campaignx2_we_vote_id,
+        )
+        queryset.delete()
+        if positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+    if not results['new_campaignx_entries_are_not_duplicates_created']:
+        messages.add_message(request, messages.ERROR, 'Could not save campaignx_entries_are_not_duplicates entry: ' +
+                             results['status'])
+    messages.add_message(request, messages.INFO, 'Two campaignx_entries marked as not duplicates.')
+    return HttpResponseRedirect(reverse('campaign:duplicates_list', args=()) +
+                                "?state_code=" + str(state_code))
+
+
 def deleting_or_editing_campaignx_supporter_list(
         request=None,
-        supporters_list=[],
-):
+        supporters_list=[]):
     organization_dict_by_we_vote_id = {}
     organization_manager = OrganizationManager()
     update_campaignx_supporter_count = False
@@ -1803,7 +2227,6 @@ def repair_ocd_id_mismatch_damage_view(request):
         campaignx_list_count = len(campaignx_list)
         campaignx_list_remaining_count = queryset.count() - campaignx_list_count
         from campaign.controllers import update_campaignx_from_politician
-        from politician.models import Politician, PoliticianManager
         politician_manager = PoliticianManager()
         for one_campaignx in campaignx_list:
             save_campaignx_changes = True  # Default to saving
@@ -1882,9 +2305,6 @@ def repair_ocd_id_mismatch_damage_view(request):
                  # 'we_vote_hosted_profile_image_url_medium',
                  # 'we_vote_hosted_profile_image_url_tiny'
                  ])
-            # messages.add_message(request, messages.INFO,
-            #                      "{updates_made:,} campaignx entries updated from politicians. "
-            #                      "".format(updates_made=len(bulk_update_campaignx_list)))
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  "ERROR with campaigns repair_ocd_id_mismatch_damage: {e} "

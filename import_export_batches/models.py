@@ -412,6 +412,7 @@ BATCH_HEADER_MAP_MEASURES_TO_VOTE_USA_MEASURES = {
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_address': 'organization_address',
+    'organization_ballotpedia': 'organization_ballotpedia',
     'organization_city': 'organization_city',
     'organization_contact_form_url': 'organization_contact_form_url',
     'organization_contact_name': 'organization_contact_name',
@@ -6278,6 +6279,7 @@ class BatchRowActionOrganization(models.Model):
         verbose_name='url of the organization contact form', max_length=255, blank=True, null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
+    organization_ballotpedia = models.URLField(verbose_name='url of ballotpedia page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,
                                          null=True, blank=True)

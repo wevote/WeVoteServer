@@ -195,6 +195,8 @@
 </div>
 </div>
 
+{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
+
 {% include "../form_inputs/three_form_groups.html" with field_dict_1=first_name_dict field_dict_2=middle_name_dict field_dict_3=last_name_dict %}
 
 <div class="row">
@@ -225,10 +227,12 @@
     </div>
 </div>
 </div>
+</div>
 
+<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="seo_friendly_path_id" class="control-label">
+    <label for="seo_friendly_path_id" class="pl-4 control-label">
         SEO Friendly Path
         {% if politician.seo_friendly_path %}
             <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-/" target="_blank">
@@ -251,8 +255,6 @@
 </div>
 </div>
 
-
-{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
 
 {% include "../form_inputs/four_form_groups_stacked.html" with field_dict_1=ballotpedia_politician_name_dict field_dict_2=state_code_dict field_dict_3=political_party_dict field_dict_4=vote_usa_politician_id_dict %}
 

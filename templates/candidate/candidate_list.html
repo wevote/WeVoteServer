@@ -249,6 +249,10 @@
                target="_blank" >
             Retrieve Facebook Photos for up to <strong>{{facebook_urls_without_picture_urls}}</strong> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (If the count does not decrease with each click, you are done for this election)</li>
 
+        <li><a href="{% url 'ballotpedia:bulk_retrieve_ballotpedia_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
+               target="_blank" >
+            Retrieve Ballotpedia Photos for up to <strong>{{ballotpedia_urls_without_picture_urls}}</strong> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (If the count does not decrease with each click, you are done for this election)</li>
+
         <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                target="_blank" >
         Retrieve Possible Candidates from Google <span class="glyphicon glyphicon-new-window"></span></a> (20 at a time &ndash; 1-2 minutes)</li>

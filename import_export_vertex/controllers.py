@@ -170,8 +170,15 @@ def find_names_of_people_on_one_web_page(site_url=''):
 
     try:
         scrape_res = scrape_url(site_url)
-        status += scrape_res.status
-        all_text_without_head = scrape_res.all_html
+        try:
+            status += scrape_res.status
+        except Exception as e:
+            status += "ERROR: scrape_res doesn't have status attribute: " + str(e) + " "
+        try:
+            all_text_without_head = scrape_res.all_html
+        except Exception as e:
+            all_text_without_head = ""
+            status += "ERROR: scrape_res doesn't have all_html attribute: " + str(e) + " "
 
         success = True
         status += "FINISHED_SCRAPING_PAGE "

@@ -66,14 +66,14 @@ a copy of your copy to your Mac.  At this instant, the 'develop' branch of wevot
 
     <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharmDracula.png"> 
 
-12. If you like 'Dracula' mode, you can skip this step.  Open PyCharm/Preferences and press the
+12. If you like 'Dracula' mode, you can skip this step.  Open PyCharm/Settings and press the
 'Sync with OS' button to match the display mode of your Mac.  
    
     <img src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/transparent8x8.png"> 
     <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharm2021OutOfDracula.png"> 
 
 
-13. In PyCharm/Preferences/Plugins enable the IdeaVim tool (this takes a while).  
+13. In PyCharm/Settings/Plugins enable the IdeaVim tool (this takes a while).  
 Feel free to add any other PyCharm tools that you would like!  When done press 'Ok', and the IDE will reboot.
 
     <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CustomizePyCharm2021.png"> 
@@ -147,39 +147,30 @@ the following command:
      ```
      $ brew install python
      ```
+    (As of May 2024)  This should have installed Python 3.11
      If an older version of Python has been installed, and the installation fails, you will see the following error:
      ```
      Error: python@3.9 3.9.1_1 is already installed
-     To upgrade to 3.9.5, run:
-       brew upgrade python@3.9
+     To upgrade to 3.11.4, run:
+       brew upgrade python@3.11
      Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
      ```
-     In which case you run the suggested upgrade command, in this example it would be `brew upgrade python@3.9`, then finally export the path as shown below.
+     In which case you run the suggested upgrade command, in this example it would be `brew upgrade python@3.11`, then finally export the path as shown below.
      ```
      $ export PATH="/usr/local/opt/python/libexec/bin:$PATH"
      ```
 23. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
 if the reported version is 2, then add the newly loaded python to the path with the export command. 
-Then confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
+Then confirm that the default python is now version 3.11 or later.
 
-     ```
-     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % python --version
-     Python 2.7.16
-     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % python --version                                     
-     Python 3.9.5
-     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
-     ```   
-     2021: For an 'Apple M1 Max' ARM-64 Processor...
      ```
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version
      Python 2.7.18
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % export PATH="/opt/homebrew/opt/python@3.9/libexec/bin:$PATH"
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version                                            
-     Python 3.9.9
+     Python 3.11.4
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
      ```
-     Note July 2022:  n the homebrew directory (not in the venv), had to make a symlink between python3 and python so that psycopg2-binary could find python.  (To be verified)      
 
 24. If python --version fails,
     try 
@@ -189,14 +180,14 @@ Then confirm that the default python is now version 3.9 or later.  (Version 3.6 
 needed to install postgres before the requirements because psyco3-3 binary requires pg_config which is not installed yet.
 
 25. Set up a Virtual Environment with the new Python Interpreter.  
-Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
+Navigate to: PyCharm/Settings/Project: WeVoteServer/Python Interpreter.
 
     <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/NoVENV.png"> 
 
-26. Click the Gear icon, then select "Add".  PyCharm will detect the latest interpreter from the PATH environment variable, 
+26. Click the Gear icon, then select "Add", then choose "Add Local Interpreter".  PyCharm will detect the latest interpreter from the PATH environment variable, 
     and pre-populate the dialog.  Check the two checkboxes `Inherit global site-packages` and `make available to all projects`.
    
-    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Py3-9Selected.png"> 
+    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Py3-11Selected.png"> 
 
     Confirm that the 'Base interpreter' field shows us using the Python version that you just downloaded, and it knows the location for pip, setuptools, and wheel (3 python utilities).
     Then press Ok.
@@ -212,7 +203,7 @@ PyCharm and opening a new one.
    
 28. Install OpenSSL, the pyopenssl and https clients:
  
-     `(WeVoteServerPy3.7) $ brew install openssl`
+     `(3.11.8) $ brew install openssl`
      If it is already installed, no worries!
 
 29. Link libssl and libcrypto so that pip can find them:
@@ -222,11 +213,11 @@ PyCharm and opening a new one.
      ```
 30. Install libmagic
 
-     `(WeVoteServerPy3.7) $ brew install libmagic`
+     `(3.11.8) $ brew install libmagic`
 
 31. Install all the other Python packages required by the WeVoteServer project (there are a lot of them!)
 
-     `(WeVoteServer3.7) $ pip3 install -r requirements.txt`
+     `(3.11.8) $ pip3 install -r requirements.txt`
 
      This is a big operation that loads a number of wheels definitions and then compiles them.   Wheels are
      linux/macOS binary libraries based on c language packages and compiled with gcc. 
@@ -468,26 +459,39 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    The usage is:  `python manage.py create_dev_user first_name last_name email password`
 
     ```
-    (WeVoteServer3.7) admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
+    (3.11.8) admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
     Creating developer first name=Samuel, last name=Adams, email=samuel@adams.com
     End of create_dev_user
-    (WeVoteServer3.7) admin$ 
+    (3.11.8) admin$ 
     ```
     
 1.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password  (for example mine is stevepodell/stevePG.).    
 
-1.  Your local instance of the WeVoteServer is now setup and running (although there is no election 
+1.  **Your local instance of the WeVoteServer is now setup and running** (although there is no election 
     data stored in your Postgres instance, for it to serve to clients at this point).
 
 ## Import some ballot data from the live production API Server
 
-   
-**This page of instructions has covered steps 1 through 5 of the multi-page instructions, so now you can skip to step 6 to 
-load some ballot data.**
 
-Step 6:  [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
+Make sure you have given yourself admin privileges. When you run the following command, enter your email address and a simple password. This admin account is only used in development.
 
-## Optional:  Running in SSL/https mode
+    python manage.py createsuperuser
+    
+Find the "Sync Data with Master We Vote Servers" link, and click it: [http://localhost:8000/admin/sync_dashboard/](http://localhost:8000/admin/sync_dashboard/)
+
+Start by clicking the `Fast Load Data From We Vote Master Servers` button.
+
+The fast loading will take somewhere in the range of 40 to 80 minutes to complete.  It will copy 
+about 30 tables from the Master database in AWS, to your local database, which will allow you to 
+run the api server software locally.
+
+**You are now done installing your local server**
+
+The following step is optional, most developers will not need it.
+
+[Back to root README](../README.md)
+
+## Optional Step:  Running in SSL/https mode
 
 You only need to do this if you are going to be working on Login with Facebook or Stripe Donations
 
@@ -578,90 +582,152 @@ viewing the page anyways.  Once you have done that the problem will go away.
 
 -----------
      
-## June 14, 2021, Changes that were necessary for macOS Big Sur
+[//]: # (## June 14, 2021, Changes that were necessary for macOS Big Sur)
 
-**This is not list of sequential steps to complete a re-installation.  This list describes a few problems
-that occurred, what was done to work around them.**
+[//]: # ()
+[//]: # (**This is not list of sequential steps to complete a re-installation.  This list describes a few problems)
 
-*  macOS BigSur (11.3.1) was complaining about Python 3.6.1, and the app would not work, so
-   I upgraded Python to the latest 3.9.1
-   
-   <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonErrorOnBigSur.png"> 
+[//]: # (that occurred, what was done to work around them.**)
 
-*  Uninstall Python (which was previously installed with Homebrew)
-   ```
-   (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 pkgconfig % brew uninstall --ignore-dependencies python3
-   ```
-   
-*  Install the latest Python
-    ```
-    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 pkgconfig % brew install python3
-   ```
-   
-*  Brew (re)link the python
-    ```
-    stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link python@3.9
-    ```
+[//]: # ()
+[//]: # (*  macOS BigSur &#40;11.3.1&#41; was complaining about Python 3.6.1, and the app would not work, so)
 
-*  Needed link it again to clear warnings about overwriting other links
-    ```
-    stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link --overwrite python@3.9
-   ```
-*  In the PyCharm IDE UI
-    1)  Navigate to PyCharm/Preferences/'Project: WeVoteServer'/'Python Interpreter' and press the gear icon and set up
-    a path to 3.9
-    1) On the 'Python Interpreter' summary pop-up select 'WeVoteServer 3.9' (or the latest version you installed).
-       
-       <img width="600" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonInterpretersList2021.png"> 
+[//]: # (   I upgraded Python to the latest 3.9.1)
 
-    1) Open a **new** terminal window in the IDE, and run `python --version` to double-check that it is using Python 3.9
+[//]: # (   )
+[//]: # (   <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonErrorOnBigSur.png"> )
 
-    1) Close the older terminal windows, that will have confused paths to the older python versions.
+[//]: # ()
+[//]: # (*  Uninstall Python &#40;which was previously installed with Homebrew&#41;)
 
-*  Get the latest requirements.txt from git.
+[//]: # (   ```)
 
-*  Install the latest setuptools
-   ```
-   (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install --upgrade setuptools   
-   ```
-   
-*  Try to install requirements.txt in the Pycharm terminal window
-    ```
-    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
-   ```
-   
-*  If the installation fails, run brew's doctor
-    ```
-    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew doctor
-   ```
-   
-*  brew cleanup
-    ```
-    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew cleanup
-   ```
-   
-*  I had an old String.h first in the path, and causing a `fatal error: 'cstddef' file not found` error in String.h
-   ```
-    (venv) mv /usr/local/include/String.h /usr/local/include/String.h.saveoff
-   ```
-   
-*  This final installation of requirements.txt worked
-    ```
-    (venv) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt
-   ```
-   
-*  If problems appear with the openid package...
+[//]: # (   &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 pkgconfig % brew uninstall --ignore-dependencies python3)
 
-    Look in External Libraries/site-packages and use 'pip uninstall' to remove any libraries with 'openid' in their
-    name, and then try 'pip3 install -r requirements.txt' to reload openid.
+[//]: # (   ```)
 
-*  'pip3 install -r requirements.txt' does not reload openid, try from the command line
+[//]: # (   )
+[//]: # (*  Install the latest Python)
 
-    Try these commands, one at a time, in this order:
-    ```
-    pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=openid
-    pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=python3-openid
-    ```
+[//]: # (    ```)
+
+[//]: # (    &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 pkgconfig % brew install python3)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  Brew &#40;re&#41;link the python)
+
+[//]: # (    ```)
+
+[//]: # (    stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link python@3.9)
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (*  Needed link it again to clear warnings about overwriting other links)
+
+[//]: # (    ```)
+
+[//]: # (    stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % brew link --overwrite python@3.9)
+
+[//]: # (   ```)
+
+[//]: # (*  In the PyCharm IDE UI)
+
+[//]: # (    1&#41;  Navigate to PyCharm/Settings/'Project: WeVoteServer'/'Python Interpreter' and press the gear icon and set up)
+
+[//]: # (    a path to 3.9)
+
+[//]: # (    1&#41; On the 'Python Interpreter' summary pop-up select 'WeVoteServer 3.9' &#40;or the latest version you installed&#41;.)
+
+[//]: # (       )
+[//]: # (       <img width="600" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PythonInterpretersList2021.png"> )
+
+[//]: # ()
+[//]: # (    1&#41; Open a **new** terminal window in the IDE, and run `python --version` to double-check that it is using Python 3.9)
+
+[//]: # ()
+[//]: # (    1&#41; Close the older terminal windows, that will have confused paths to the older python versions.)
+
+[//]: # ()
+[//]: # (*  Get the latest requirements.txt from git.)
+
+[//]: # ()
+[//]: # (*  Install the latest setuptools)
+
+[//]: # (   ```)
+
+[//]: # (   &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install --upgrade setuptools   )
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  Try to install requirements.txt in the Pycharm terminal window)
+
+[//]: # (    ```)
+
+[//]: # (    &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  If the installation fails, run brew's doctor)
+
+[//]: # (    ```)
+
+[//]: # (    &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew doctor)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  brew cleanup)
+
+[//]: # (    ```)
+
+[//]: # (    &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % brew cleanup)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  I had an old String.h first in the path, and causing a `fatal error: 'cstddef' file not found` error in String.h)
+
+[//]: # (   ```)
+
+[//]: # (    &#40;venv&#41; mv /usr/local/include/String.h /usr/local/include/String.h.saveoff)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  This final installation of requirements.txt worked)
+
+[//]: # (    ```)
+
+[//]: # (    &#40;venv&#41; stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % pip3 install -r requirements.txt)
+
+[//]: # (   ```)
+
+[//]: # (   )
+[//]: # (*  If problems appear with the openid package...)
+
+[//]: # ()
+[//]: # (    Look in External Libraries/site-packages and use 'pip uninstall' to remove any libraries with 'openid' in their)
+
+[//]: # (    name, and then try 'pip3 install -r requirements.txt' to reload openid.)
+
+[//]: # ()
+[//]: # (*  'pip3 install -r requirements.txt' does not reload openid, try from the command line)
+
+[//]: # ()
+[//]: # (    Try these commands, one at a time, in this order:)
+
+[//]: # (    ```)
+
+[//]: # (    pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=openid)
+
+[//]: # (    pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=python3-openid)
+
+[//]: # (    ```)
    
 -----------
      

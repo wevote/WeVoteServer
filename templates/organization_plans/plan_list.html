@@ -1,10 +1,9 @@
 {# templates/organization_plans/plan_list.html #}
 {% extends "template_base.html" %}
-{% load static %}
 
 {% block js %}
   {# planDialog is in WeVoteServer/apis_v1/static/js/planDialog.js #}
-  <script src="{% static "js/PlanDialog.js" %}" type="text/javascript"></script>
+  <script src="https://quality.wevote.us/javascript/api-server/PlanDialog.js" type="text/javascript"></script>
 {% endblock %}
 {% block title %}Coupons{% endblock %}
 

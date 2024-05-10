@@ -1,12 +1,14 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
-{% load static %}
 
 {% block title %}{% if state_name %}{{ state_name }} {% endif %}Map Points{% endblock %}
 
 {% block js %}
-    <script src="{% static "js/PollingLocationVisualization.js" %}" type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+    <script>
+        $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
+            $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
+        });
+    </script>
 {% endblock %}
 
 {%  block content %}
