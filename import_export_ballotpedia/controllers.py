@@ -596,6 +596,8 @@ def get_photo_url_from_ballotpedia(
                         object_with_photo_fields=incoming_object)
                     if results['success']:
                         incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
             # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
             #         and not incoming_object.ballotpedia_photo_url_is_broken:
             #     incoming_object.ballotpedia_photo_url_is_broken = True
@@ -615,6 +617,11 @@ def get_photo_url_from_ballotpedia(
                         object_with_photo_fields=incoming_object)
                     if results['success']:
                         incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+        else:
+            status += "BALLOTPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + ballotpedia_page_url + " "
+            status += results['status']
 
         if save_to_database and incoming_object_changes:
             incoming_object.save()
@@ -680,8 +687,8 @@ def get_photo_url_from_ballotpedia(
             status += "SAVE_BALLOTPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
     else:
         success = False
+        status += "NOT_SUCCESSFUL_get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page: "
         status += results['status']
-        status += "GET_BALLOTPEDIA_FAILED "
 
         if add_messages:
             if len(results.get('clean_message')) > 0:
