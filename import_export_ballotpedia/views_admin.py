@@ -85,6 +85,8 @@ def bulk_retrieve_ballotpedia_photos_view(request):
     try:
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
+        queryset = queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
+        # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
@@ -93,8 +95,6 @@ def bulk_retrieve_ballotpedia_photos_view(request):
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
-        # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
-        queryset = queryset.order_by('candidate_name')
         if positive_value_exists(limit):
             candidate_list = queryset[:limit]
         else:

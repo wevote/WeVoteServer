@@ -661,11 +661,7 @@ def get_photo_url_from_ballotpedia(
                     if results['success']:
                         ballotpedia_photo_saved = True
 
-        if not ballotpedia_photo_saved:
-            success = False
-            status += results['status']
-            status += "SAVE_BALLOTPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
-        else:
+        if ballotpedia_photo_saved:
             status += "SAVED_BALLOTPEDIA_IMAGE "
             # Create a record denoting that we have retrieved from Ballotpedia for this candidate
 
@@ -676,6 +672,12 @@ def get_photo_url_from_ballotpedia(
                     candidate_campaign_we_vote_id=incoming_object.we_vote_id,
                     number_of_results=1,
                     status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
+        elif is_placeholder_photo:
+            pass
+        else:
+            success = False
+            status += results['status']
+            status += "SAVE_BALLOTPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
     else:
         success = False
         status += results['status']

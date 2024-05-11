@@ -1146,13 +1146,13 @@ def candidate_list_view(request):
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
         # Exclude candidates without ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-        count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
 
         # Find candidates that don't have a photo (i.e. that are null or '')
         count_queryset = count_queryset.filter(
