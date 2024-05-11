@@ -197,6 +197,7 @@ class Politician(models.Model):
         verbose_name='locally cached candidate profile image from wikipedia', blank=True, null=True)
     ballotpedia_photo_url = models.TextField(
         verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
+    ballotpedia_photo_url_is_broken = models.BooleanField(default=False)
     ballotpedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
     # The candidate's name as passed over by Ballotpedia

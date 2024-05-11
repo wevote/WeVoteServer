@@ -30,6 +30,8 @@ from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
+from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_batches.models import BatchManager
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
@@ -1129,24 +1131,25 @@ def candidate_list_view(request):
 
     # How many candidates with ballotpedia_candidate_url's don't have ballotpedia_photo_url?
     ballotpedia_urls_without_picture_urls = 0
-    if positive_value_exists(google_civic_election_id) or positive_value_exists(state_code):
-        try:
-            count_queryset = CandidateCampaign.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+    try:
+        count_queryset = CandidateCampaign.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
-            # Only include candidates with ballotpedia_candidate_url
-            count_queryset = count_queryset. \
-                filter(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        # Exclude candidates without ballotpedia_candidate_url
+        count_queryset = count_queryset. \
+            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
 
-            # exclude candidates that already have photo that are null or ''
-            count_queryset = count_queryset.exclude(
-                Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+        # Exclude candidates that already have photo that are null or ''
+        count_queryset = count_queryset.exclude(
+            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
 
-            ballotpedia_urls_without_picture_urls = count_queryset.count()
+        ballotpedia_urls_without_picture_urls = count_queryset.count()
 
-        except Exception as e:
-            logger.error("ERROR Finding Ballotpedia Photo URLs: ", e)
+    except Exception as e:
+        logger.error("ERROR Finding Ballotpedia Photo URLs: ", e)
 
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
@@ -2983,6 +2986,7 @@ def candidate_edit_process_view(request):
             #                                     url_variables)
 
         if positive_value_exists(candidate_on_stage_found):
+            ballotpedia_candidate_url_changed = False
             if ballot_guide_official_statement is not False:
                 change_results = change_tracking(
                     existing_value=candidate_on_stage.ballot_guide_official_statement,
@@ -3012,7 +3016,25 @@ def candidate_edit_process_view(request):
                 if change_results['change_description_changed']:
                     change_description += change_results['change_description']
                     change_description_changed = True
+                    ballotpedia_candidate_url_changed = True
                 candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+                if not positive_value_exists(ballotpedia_candidate_url):
+                    candidate_on_stage.ballotpedia_photo_url = None
+                    candidate_on_stage.ballotpedia_photo_url_is_broken = False
+                    candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_large = None
+                    candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_medium = None
+                    candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_tiny = None
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                        profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                        candidate_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = None
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
+                        results = organize_object_photo_fields_based_on_image_type_currently_active(
+                            object_with_photo_fields=candidate_on_stage)
+                        if results['success']:
+                            candidate_on_stage = results['object_with_photo_fields']
+
             if ballotpedia_candidate_summary is not False:
                 candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
             if ballotpedia_office_id is not False:
@@ -3254,7 +3276,6 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
                     candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
             if profile_image_type_currently_active is not False:
-                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
                 results = organize_object_photo_fields_based_on_image_type_currently_active(
                     object_with_photo_fields=candidate_on_stage,
                     profile_image_type_currently_active=profile_image_type_currently_active,
@@ -3271,6 +3292,12 @@ def candidate_edit_process_view(request):
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
 
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
+
+            if ballotpedia_candidate_url_changed and positive_value_exists(ballotpedia_candidate_url):
+                results = get_photo_url_from_ballotpedia(
+                    incoming_object=candidate_on_stage,
+                    save_to_database=True,
+                )
 
             # # Now add Candidate to Office Link
             # if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) and \
