@@ -1142,8 +1142,8 @@ def candidate_list_view(request):
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
 
-        # Exclude candidates that already have photo that are null or ''
-        count_queryset = count_queryset.exclude(
+        # Find candidates that don't have a photo (i.e. that are null or '')
+        count_queryset = count_queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
 
         ballotpedia_urls_without_picture_urls = count_queryset.count()
@@ -3293,7 +3293,9 @@ def candidate_edit_process_view(request):
 
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
 
-            if ballotpedia_candidate_url_changed and positive_value_exists(ballotpedia_candidate_url):
+            if (ballotpedia_candidate_url_changed \
+                or not positive_value_exists(candidate_on_stage.ballotpedia_photo_url)) \
+                    and positive_value_exists(ballotpedia_candidate_url):
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=candidate_on_stage,
                     save_to_database=True,

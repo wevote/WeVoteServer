@@ -2847,7 +2847,9 @@ def politician_edit_process_view(request):
             vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
             politician_id = politician_on_stage.id
 
-            if ballotpedia_politician_url_changed and positive_value_exists(ballotpedia_politician_url):
+            if (ballotpedia_politician_url_changed \
+                or not positive_value_exists(politician_on_stage.ballotpedia_photo_url)) \
+                    and positive_value_exists(ballotpedia_politician_url):
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=politician_on_stage,
                     save_to_database=True,

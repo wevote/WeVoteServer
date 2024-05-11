@@ -1,9 +1,6 @@
 # import_export_ballotpedia/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-import requests
-from bs4 import BeautifulSoup
-
 from candidate.models import CandidateCampaign, CandidateListManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
@@ -26,6 +23,7 @@ from polling_location.models import PollingLocation
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
+from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -97,11 +95,11 @@ def bulk_retrieve_ballotpedia_photos_view(request):
         for one_candidate in candidate_list:
             # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
             #  search Ballotpedia more than once.
-            # request_history_query = RemoteRequestHistory.objects.filter(
-            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-            #     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
-            # request_history_list = list(request_history_query)
-            request_history_list = []
+            request_history_query = RemoteRequestHistory.objects.filter(
+                candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+                kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
+            request_history_list = list(request_history_query)
+            # request_history_list = []
             if not positive_value_exists(len(request_history_list)):
                 add_messages = True
                 get_results = get_photo_url_from_ballotpedia(
