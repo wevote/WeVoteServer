@@ -73,11 +73,11 @@ def bulk_retrieve_ballotpedia_photos_view(request):
     already_stored = 0
     try:
         queryset = CandidateCampaign.objects.all()
-        # Exclude candidates that don't have ballotpedia_candidate_url
+        # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-        # exclude candidates that already have photo that are null or '' (COMMENT OUT WHEN TESTING)
-        queryset = queryset.exclude(
+        # Only include candidates that don't have a photo
+        queryset = queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
         if positive_value_exists(google_civic_election_id):
             results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(

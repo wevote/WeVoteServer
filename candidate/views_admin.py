@@ -1138,11 +1138,11 @@ def candidate_list_view(request):
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
-        # Only include candidates with ballotpedia_candidate_url
+        # Exclude candidates without ballotpedia_candidate_url
         count_queryset = count_queryset. \
-            filter(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
 
-        # exclude candidates that already have photo that are null or ''
+        # Exclude candidates that already have photo that are null or ''
         count_queryset = count_queryset.exclude(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
 
