@@ -879,7 +879,7 @@ def candidate_list_view(request):
         # If we are trying to highlight all the candidates that are in battleground races,
         # collect the office_we_vote_id's
         try:
-            office_queryset = ContestOffice.objects.all()
+            office_queryset = ContestOffice.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
                 office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             elif positive_value_exists(show_all_elections):
@@ -1129,18 +1129,30 @@ def candidate_list_view(request):
             candidate_list = modified_candidate_list
         candidates_linked_to_multiple_offices = len(candidate_list)
 
+    # #############################################################
+    # Get candidates in the elections we care about - used below
+    if positive_value_exists(google_civic_election_id):
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=[google_civic_election_id])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    else:
+        # Only look at candidates for this year
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
+            year_list=[2024])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     # How many candidates with ballotpedia_candidate_url's don't have ballotpedia_photo_url?
     ballotpedia_urls_without_picture_urls = 0
     try:
-        count_queryset = CandidateCampaign.objects.all()
-        if positive_value_exists(google_civic_election_id):
-            count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = CandidateCampaign.objects.using('readonly').all()
+        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
         # Exclude candidates without ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
 
         # Find candidates that don't have a photo (i.e. that are null or '')
         count_queryset = count_queryset.filter(
@@ -1158,17 +1170,17 @@ def candidate_list_view(request):
     if positive_value_exists(google_civic_election_id):
         try:
             candidate_facebook_missing_query = CandidateCampaign.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                candidate_facebook_missing_query = \
-                    candidate_facebook_missing_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_facebook_missing_query = \
+                candidate_facebook_missing_query.filter(we_vote_id__in=candidate_we_vote_id_list)
 
             # include profile images that are null or ''
             candidate_facebook_missing_query = candidate_facebook_missing_query. \
                 filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
             # exclude facebook_urls that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True). \
-                exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
+            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
+                Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
+            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url_is_broken=True)
 
             facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
@@ -1203,7 +1215,7 @@ def candidate_list_view(request):
                     election.days_until_election = convert_to_int("%d" % time_until_election.days)
 
             # How many offices?
-            office_list_query = ContestOffice.objects.all()
+            office_list_query = ContestOffice.objects.using('readonly').all()
             office_list_query = office_list_query.filter(google_civic_election_id=election.google_civic_election_id)
             election.office_count = office_list_query.count()
 
@@ -1228,7 +1240,7 @@ def candidate_list_view(request):
                 offices_with_candidates_count = 0
                 offices_without_candidates_count = 0
                 for one_office in office_list:
-                    candidate_list_query = CandidateCampaign.objects.all()
+                    candidate_list_query = CandidateCampaign.objects.using('readonly').all()
                     candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
                     candidate_count = candidate_list_query.count()
                     if positive_value_exists(candidate_count):
@@ -1242,13 +1254,13 @@ def candidate_list_view(request):
                 #         or positive_value_exists(show_marquee_or_battleground):
                 #     candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
                 # How many candidates?
-                candidate_list_query = CandidateCampaign.objects.all()
+                candidate_list_query = CandidateCampaign.objects.using('readonly').all()
                 candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 election.candidate_count = candidate_list_query.count()
 
                 # How many without photos?
-                candidate_list_query = CandidateCampaign.objects.all()
-                candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+                # candidate_list_query = CandidateCampaign.objects.using('readonly').all()
+                # candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
                 candidate_list_query = candidate_list_query.filter(
                     Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
                 )
@@ -1258,19 +1270,19 @@ def candidate_list_view(request):
                         100 * (election.candidates_without_photo_count / election.candidate_count)
 
                 # How many measures?
-                measure_list_query = ContestMeasure.objects.all()
+                measure_list_query = ContestMeasure.objects.using('readonly').all()
                 measure_list_query = measure_list_query.filter(
                     google_civic_election_id=election.google_civic_election_id)
                 election.measure_count = measure_list_query.count()
 
                 # Number of Voter Guides
-                voter_guide_query = VoterGuide.objects.filter(
+                voter_guide_query = VoterGuide.objects.using('readonly').filter(
                     google_civic_election_id=election.google_civic_election_id)
                 voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
                 election.voter_guides_count = voter_guide_query.count()
 
                 # Number of Public Positions
-                position_query = PositionEntered.objects.all()
+                position_query = PositionEntered.objects.using('readonly').all()
                 # Catch both candidates and measures (which have google_civic_election_id in the Positions table)
                 position_query = position_query.filter(
                     Q(google_civic_election_id=election.google_civic_election_id) |
@@ -1329,7 +1341,7 @@ def candidate_list_view(request):
         # Attach the best guess Twitter account, if any, to each candidate in list
         for candidate in candidate_list:
             try:
-                twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
+                twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly').order_by('-likelihood_score')
                 twitter_possibility_query = twitter_possibility_query.filter(
                     candidate_campaign_we_vote_id=candidate.we_vote_id,
                     not_a_match=False)
@@ -1338,7 +1350,7 @@ def candidate_list_view(request):
                 if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
                     candidate.candidate_merge_possibility = twitter_possibility_list[0]
                 else:
-                    request_history_query = RemoteRequestHistory.objects.filter(
+                    request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
                         candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
                         kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
                     request_history_list = list(request_history_query)
@@ -1350,7 +1362,7 @@ def candidate_list_view(request):
         # Attach the best guess google search, if any, to each candidate in list
         for candidate in candidate_list:
             try:
-                google_search_possibility_query = GoogleSearchUser.objects.filter(
+                google_search_possibility_query = GoogleSearchUser.objects.using('readonly').filter(
                     candidate_campaign_we_vote_id=candidate.we_vote_id). \
                     exclude(item_image__isnull=True).exclude(item_image__exact='')
                 google_search_possibility_query = google_search_possibility_query.order_by(
@@ -1359,7 +1371,7 @@ def candidate_list_view(request):
                 if google_search_merge_possibility and positive_value_exists(len(google_search_merge_possibility)):
                     candidate.google_search_merge_possibility = google_search_possibility_query[0]
                 else:
-                    request_history_query = RemoteRequestHistory.objects.filter(
+                    request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
                         candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
                         kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
                     request_history_list = list(request_history_query)
@@ -3021,6 +3033,7 @@ def candidate_edit_process_view(request):
                 if not positive_value_exists(ballotpedia_candidate_url):
                     candidate_on_stage.ballotpedia_photo_url = None
                     candidate_on_stage.ballotpedia_photo_url_is_broken = False
+                    candidate_on_stage.ballotpedia_photo_url_is_placeholder = False
                     candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_large = None
                     candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_medium = None
                     candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_tiny = None
@@ -3293,7 +3306,7 @@ def candidate_edit_process_view(request):
 
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
 
-            if (ballotpedia_candidate_url_changed \
+            if (ballotpedia_candidate_url_changed
                 or not positive_value_exists(candidate_on_stage.ballotpedia_photo_url)) \
                     and positive_value_exists(ballotpedia_candidate_url):
                 results = get_photo_url_from_ballotpedia(

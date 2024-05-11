@@ -37,6 +37,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_person_id',
     'ballotpedia_photo_url',
     'ballotpedia_photo_url_is_broken',
+    'ballotpedia_photo_url_is_placeholder',
     'ballotpedia_race_id',
     'birth_day_text',
     'candidate_contact_form_url',
@@ -2269,6 +2270,7 @@ class CandidateListManager(models.Manager):
                     'ballotpedia_person_id':        candidate.ballotpedia_person_id,
                     'ballotpedia_photo_url':        candidate.ballotpedia_photo_url,
                     'ballotpedia_photo_url_is_broken': candidate.ballotpedia_photo_url_is_broken,
+                    'ballotpedia_photo_url_is_placeholder': candidate.ballotpedia_photo_url_is_placeholder,
                     'ballotpedia_race_id':          candidate.ballotpedia_race_id,
                     'candidate_contact_form_url':   candidate.candidate_contact_form_url,
                     'candidate_email':              candidate.candidate_email,
@@ -2696,6 +2698,7 @@ class CandidateCampaign(models.Model):
     ballotpedia_photo_url = models.TextField(
         verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
     ballotpedia_photo_url_is_broken = models.BooleanField(default=False)
+    ballotpedia_photo_url_is_placeholder = models.BooleanField(default=False)
     ballotpedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Contest Office
@@ -4569,6 +4572,8 @@ class CandidateManager(models.Manager):
             if 'ballotpedia_photo_url' in update_values else ''
         ballotpedia_photo_url_is_broken = update_values['ballotpedia_photo_url_is_broken'] \
             if 'ballotpedia_photo_url_is_broken' in update_values else ''
+        ballotpedia_photo_url_is_placeholder = update_values['ballotpedia_photo_url_is_placeholder'] \
+            if 'ballotpedia_photo_url_is_placeholder' in update_values else ''
         ballotpedia_race_id = update_values['ballotpedia_race_id'] \
             if 'ballotpedia_race_id' in update_values else 0
         birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
@@ -4670,6 +4675,7 @@ class CandidateManager(models.Manager):
                 new_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
                 new_candidate.ballotpedia_photo_url = ballotpedia_photo_url
                 new_candidate.ballotpedia_photo_url_is_broken = ballotpedia_photo_url_is_broken
+                new_candidate.ballotpedia_photo_url_is_placeholder = ballotpedia_photo_url_is_placeholder
                 new_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
                 new_candidate.birth_day_text = birth_day_text
                 new_candidate.candidate_email = candidate_email
@@ -4769,6 +4775,10 @@ class CandidateManager(models.Manager):
                 if 'ballotpedia_photo_url_is_broken' in update_values:
                     existing_candidate_entry.ballotpedia_photo_url_is_broken = \
                         update_values['ballotpedia_photo_url_is_broken']
+                    values_changed = True
+                if 'ballotpedia_photo_url_is_placeholder' in update_values:
+                    existing_candidate_entry.ballotpedia_photo_url_is_placeholder = \
+                        update_values['ballotpedia_photo_url_is_placeholder']
                     values_changed = True
                 if 'ballotpedia_race_id' in update_values:
                     existing_candidate_entry.ballotpedia_race_id = \

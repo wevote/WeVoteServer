@@ -2464,6 +2464,7 @@ def politician_edit_process_view(request):
                 if not positive_value_exists(ballotpedia_politician_url):
                     politician_on_stage.ballotpedia_photo_url = None
                     politician_on_stage.ballotpedia_photo_url_is_broken = False
+                    politician_on_stage.ballotpedia_photo_url_is_placeholder = False
                     politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_large = None
                     politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_medium = None
                     politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_tiny = None
