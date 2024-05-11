@@ -65,23 +65,32 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
-    candidate_list = []
+
+    # #############################################################
+    # Get candidates in the elections we care about - used below
     candidate_list_manager = CandidateListManager()
+    if positive_value_exists(google_civic_election_id):
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=[google_civic_election_id])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    else:
+        # Only look at candidates for this year
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
+            year_list=[2024])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+    candidate_list = []
     already_retrieved = 0
     already_stored = 0
     try:
         queryset = CandidateCampaign.objects.all()
+        queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
         # Only include candidates that don't have a photo
         queryset = queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-        if positive_value_exists(google_civic_election_id):
-            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-                google_civic_election_id_list=[google_civic_election_id])
-            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-            queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
         # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
@@ -95,13 +104,13 @@ def bulk_retrieve_ballotpedia_photos_view(request):
         for one_candidate in candidate_list:
             # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
             #  search Ballotpedia more than once.
-            request_history_query = RemoteRequestHistory.objects.filter(
-                candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-                kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
-            request_history_list = list(request_history_query)
-            # request_history_list = []
+            # request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
+            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+            #     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
+            # request_history_list = list(request_history_query)
+            request_history_list = []
             if not positive_value_exists(len(request_history_list)):
-                add_messages = True
+                add_messages = False
                 get_results = get_photo_url_from_ballotpedia(
                     incoming_object=one_candidate,
                     request=request,
