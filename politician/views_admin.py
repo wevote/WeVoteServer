@@ -23,14 +23,15 @@ from admin_tools.views import redirect_to_sign_in_page
 from campaign.models import CampaignXManager
 from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
-    KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, \
+    KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, PROFILE_IMAGE_TYPE_BALLOTPEDIA, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
 from config.base import get_environment_variable
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
-from image.controllers import create_resized_images
+from image.controllers import create_resized_images, organize_object_photo_fields_based_on_image_type_currently_active
+from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
@@ -2421,7 +2422,6 @@ def politician_edit_process_view(request):
                     politician_on_stage.we_vote_hosted_profile_image_url_medium = None
                     politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
             if profile_image_type_currently_active is not False:
-                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
                 results = organize_object_photo_fields_based_on_image_type_currently_active(
                     object_with_photo_fields=politician_on_stage,
                     profile_image_type_currently_active=profile_image_type_currently_active,
@@ -2446,6 +2446,7 @@ def politician_edit_process_view(request):
                 politician_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
+            ballotpedia_politician_url_changed = False
             if ballotpedia_politician_url is not False:
                 change_results = change_tracking(
                     existing_value=politician_on_stage.ballotpedia_politician_url,
@@ -2458,7 +2459,23 @@ def politician_edit_process_view(request):
                 if change_results['change_description_changed']:
                     change_description += change_results['change_description']
                     change_description_changed = True
+                    ballotpedia_politician_url_changed = True
                 politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
+                if not positive_value_exists(ballotpedia_politician_url):
+                    politician_on_stage.ballotpedia_photo_url = None
+                    politician_on_stage.ballotpedia_photo_url_is_broken = False
+                    politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_large = None
+                    politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_medium = None
+                    politician_on_stage.we_vote_hosted_profile_ballotpedia_image_url_tiny = None
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                        politician_on_stage.we_vote_hosted_profile_image_url_large = None
+                        politician_on_stage.we_vote_hosted_profile_image_url_medium = None
+                        politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
+                        results = organize_object_photo_fields_based_on_image_type_currently_active(
+                            object_with_photo_fields=politician_on_stage)
+                        if results['success']:
+                            politician_on_stage = results['object_with_photo_fields']
             try:
                 if birth_date is not False:
                     if birth_date == '':
@@ -2829,6 +2846,12 @@ def politician_edit_process_view(request):
             politician_we_vote_id = politician_on_stage.we_vote_id
             vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
             politician_id = politician_on_stage.id
+
+            if ballotpedia_politician_url_changed and positive_value_exists(ballotpedia_politician_url):
+                results = get_photo_url_from_ballotpedia(
+                    incoming_object=politician_on_stage,
+                    save_to_database=True,
+                )
 
             # Now generate_seo_friendly_path if there isn't one
             seo_results = politician_manager.generate_seo_friendly_path(
