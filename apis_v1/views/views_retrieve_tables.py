@@ -11,6 +11,7 @@ from retrieve_tables.controllers_master import fast_load_status_retrieve, retrie
     get_total_row_count
 from retrieve_tables.controllers_master import fast_load_status_update
 from wevote_functions.functions import get_voter_api_device_id
+from twitter.models import TwitterUser, TwitterUserManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
