@@ -264,22 +264,11 @@ AUTH_USER_MODEL = 'voter.Voter'
 
 # Static files (CSS, JavaScript, Images) Django 5+
 STATIC_URL = 'static/'      # April 2024, don't think this is correct, but can't run without it
-STATICFILES_DIRS = (
-    BASE_STATIC_DIR,
-)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'apis_v1', 'static'),
+]
 
-# # Static files (CSS, JavaScript, Images)  Django 1.11 - 3.nn
-# # https://docs.djangoproject.com/en/1.11/howto/static-files/ calls loading static files from the project
-# # "grossly inefficient and probably insecure, so it is unsuitable for production", but we only use it (August 2017) to
-# # serve apis_v1.css for the admin console.
-# # If we ever care, there is a better way: https://docs.djangoproject.com/en/1.11/howto/static-files/deployment/
-# STATIC_URL = '/static/'
-# # STATIC_ROOT = os.path.join(PROJECT_PATH, "static", "static") if DEBUG else \
-# #     os.path.join(PROJECT_PATH, "apis_v1", "static")  # Django Cookbook
-# STATIC_ROOT = os.path.join(PROJECT_PATH, "static")
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'apis_v1', 'static'),
-# ]
 MEDIA_URL = '/media/'  # Django Cookbook
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'        # Added for Django 3.2, June 2021

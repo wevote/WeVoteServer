@@ -18,7 +18,7 @@ def favicon_view(request):
     :param request:
     :return:
     """
-    img = open('static/v1/favicon.ico', 'rb')
+    img = open('apis_v1/static/v1/favicon.ico', 'rb')
     response = FileResponse(img)
     return response
 
