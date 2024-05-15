@@ -2017,11 +2017,18 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                     try:
                         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
                         current_year = convert_to_int(datetime_now.year)
+                        update_values = {
+                            'candidate_name': ballot_item_name,
+                            'candidate_year': current_year,
+                            'google_civic_candidate_name': ballot_item_name,
+                            'state_code': ballot_item_state_code,
+                        }
                         candidate_on_stage, new_candidate_created = CandidateCampaign.objects.update_or_create(
                             candidate_name=ballot_item_name,
                             candidate_year=current_year,
-                            google_civic_candidate_name=ballot_item_name,
+                            # google_civic_candidate_name=ballot_item_name,
                             state_code=ballot_item_state_code,
+                            defaults=update_values,
                         )
                         if new_candidate_created:
                             status += "NEW_CANDIDATE_CAMPAIGN_CREATED "

@@ -179,7 +179,7 @@ class VolunteerTeamMember(models.Model):
         if not self.voter_we_vote_id:
             return
         try:
-            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+            voter = Voter.objects.using('readonly').get(we_vote_id=self.voter_we_vote_id)
         except Voter.MultipleObjectsReturned as e:
             return
         except Voter.DoesNotExist:

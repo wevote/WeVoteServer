@@ -666,11 +666,12 @@ th, td {
 <div class="row form-group">
     <label for="ballotpedia_candidate_url_id" class="pl-4 control-label">
         Ballotpedia Candidate Page
-        {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
+        {% if candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
     </label>
     <div class="col">
         <input type="text" name="ballotpedia_candidate_url" id="ballotpedia_candidate_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
+               value="{% if candidate %}{{ candidate.ballotpedia_candidate_url }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
+        {% if candidate.ballotpedia_photo_url_is_placeholder %}Image is Placeholder{% endif %}
     </div>
 </div>
 </div>

@@ -18,4 +18,6 @@ urlpatterns = [
     re_path(r'^(?P<election_local_id>[0-9]+)/retrieve_ballotpedia_data_for_polling_locations/$',
         views_admin.retrieve_ballotpedia_data_for_polling_locations_view,
         name='retrieve_ballotpedia_data_for_polling_locations'),
+    re_path(r'^bulk_retrieve_ballotpedia_photos/$',
+            views_admin.bulk_retrieve_ballotpedia_photos_view, name='bulk_retrieve_ballotpedia_photos', ),
 ]

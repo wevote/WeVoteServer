@@ -514,6 +514,17 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN2'
                 else:
                     politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            elif attribute.startswith("linked_campaignx_we_vote_id"):
+                # 2024-May We are defaulting to choosing the lowest campaignx_we_vote_id
+                if politician1_attribute_value == politician2_attribute_value:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                else:
+                    politician1_campaignx_integer_part = convert_to_int(politician1_attribute_value[8:])
+                    politician2_campaignx_integer_part = convert_to_int(politician2_attribute_value[8:])
+                    if politician1_campaignx_integer_part > politician2_campaignx_integer_part:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                    else:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
             elif attribute == "ocd_id_state_mismatch_found":
                 if positive_value_exists(politician1_attribute_value):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN1'

@@ -1,12 +1,14 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
-{% load static %}
 
 {% block title %}{% if state_name %}{{ state_name }} {% endif %}Map Points{% endblock %}
 
 {% block js %}
-    <script src="{% static "js/PollingLocationVisualization.js" %}" type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+    <script>
+        $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
+            $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
+        });
+    </script>
 {% endblock %}
 
 {%  block content %}
@@ -214,6 +216,7 @@
 <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&recalculate_log_entry_counts=1"
     >Recalculate Log Entry count statistics for this state ({{ state_code }})</a>
 <br />
+<input type="hidden" id="state_list" value="{{ state_list }}">
     <script>
         $(function() {
             $('#state_code').change(function() {

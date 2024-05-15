@@ -1622,6 +1622,23 @@ def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_w
     return results
 
 
+def fetch_duplicate_campaignx_count(
+        campaignx=None,
+        ignore_campaignx_we_vote_id_list=[],
+        politician_name='',
+        state_code=''):
+    if not hasattr(campaignx, 'campaign_title'):
+        return 0
+
+    campaignx_manager = CampaignXManager()
+    return campaignx_manager.fetch_campaignx_entries_from_non_unique_identifiers_count(
+        campaignx_title=campaignx.campaign_title,
+        ignore_campaignx_we_vote_id_list=ignore_campaignx_we_vote_id_list,
+        politician_name=politician_name,
+        state_code=state_code,
+    )
+
+
 def fetch_sentence_string_from_politician_list(politician_list, max_number_of_list_items=200):
     """
     Parallel to politicianListToSentenceString in Campaigns site
@@ -1658,6 +1675,8 @@ def fetch_sentence_string_from_politician_list(politician_list, max_number_of_li
 
 
 def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
+    status = ''
+    success = True
     campaignx_merge_conflict_values = {}
 
     for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
@@ -1665,6 +1684,12 @@ def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
             campaignx1_attribute_value = getattr(campaignx1, attribute)
             campaignx2_attribute_value = getattr(campaignx2, attribute)
             if campaignx1_attribute_value is None and campaignx2_attribute_value is None:
+                campaignx_merge_conflict_values[attribute] = 'MATCHING'
+            elif campaignx1_attribute_value is True and campaignx2_attribute_value is True:
+                campaignx_merge_conflict_values[attribute] = 'MATCHING'
+            elif campaignx1_attribute_value is False and campaignx2_attribute_value is False:
+                campaignx_merge_conflict_values[attribute] = 'MATCHING'
+            elif campaignx1_attribute_value == "" and campaignx2_attribute_value == "":
                 campaignx_merge_conflict_values[attribute] = 'MATCHING'
             elif campaignx1_attribute_value is None or campaignx1_attribute_value == "":
                 campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX2'
@@ -1676,6 +1701,12 @@ def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
                         campaignx_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         campaignx_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "date_campaign_started":
+                    # Choose the earlier date
+                    if campaignx2_attribute_value < campaignx1_attribute_value:
+                        campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX2'
+                    else:
+                        campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX1'
                 elif attribute == "ocd_id_state_mismatch_found":
                     if positive_value_exists(campaignx1_attribute_value):
                         campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX1'
@@ -1691,7 +1722,94 @@ def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
         except AttributeError:
             pass
 
-    return campaignx_merge_conflict_values
+    results = {
+        'status':           status,
+        'success':          success,
+        'conflict_values':  campaignx_merge_conflict_values,
+    }
+    return results
+
+
+def find_duplicate_campaignx(
+        campaignx=None,
+        ignore_campaignx_we_vote_id_list=[],
+        politician_name='',
+        state_code=''):
+    status = ''
+    success = True
+    error_results = {
+        'success': success,
+        'status': status,
+        'campaignx_merge_possibility_found': False,
+        'campaignx_merge_possibility': None,
+        'campaignx_merge_conflict_values': {},
+        'campaignx_list': [],
+    }
+    if not hasattr(campaignx, 'campaign_title'):
+        status += "FIND_DUPLICATE_CAMPAIGNX_MISSING_CAMPAIGNX_OBJECT "
+        error_results['success'] = False
+        error_results['status'] = status
+        return error_results
+
+    campaignx_manager = CampaignXManager()
+
+    # Search for other campaignx_entries that share the same elections that match name and election
+    try:
+        results = campaignx_manager.retrieve_campaignx_entries_from_non_unique_identifiers(
+            campaignx_title=campaignx.campaign_title,
+            state_code=state_code,
+            politician_name=politician_name,
+            ignore_campaignx_we_vote_id_list=ignore_campaignx_we_vote_id_list)
+
+        if results['campaignx_found']:
+            conflict_results = figure_out_campaignx_conflict_values(campaignx, results['campaignx'])
+            campaignx_merge_conflict_values = conflict_results['conflict_values']
+            if not conflict_results['success']:
+                status += conflict_results['status']
+                success = conflict_results['success']
+            else:
+                status += "FIND_DUPLICATE_CAMPAIGNX_DUPLICATE_FOUND "
+            results = {
+                'success':                              success,
+                'status':                               status,
+                'campaignx_merge_possibility_found':    True,
+                'campaignx_merge_possibility':          results['campaignx'],
+                'campaignx_merge_conflict_values':      campaignx_merge_conflict_values,
+                'campaignx_list':                       results['campaignx_list'],
+            }
+            return results
+        elif results['campaignx_list_found']:
+            # Only deal with merging the incoming campaignx and the first on found
+            conflict_results = figure_out_campaignx_conflict_values(campaignx, results['campaignx_list'][0])
+            campaignx_merge_conflict_values = conflict_results['conflict_values']
+            if not conflict_results['success']:
+                status += conflict_results['status']
+                success = conflict_results['success']
+            else:
+                status += "FIND_DUPLICATE_CAMPAIGNX_DUPLICATES_FOUND_FROM_LIST "
+            results = {
+                'success':                              success,
+                'status':                               status,
+                'campaignx_merge_possibility_found':    True,
+                'campaignx_merge_possibility':          results['campaignx_list'][0],
+                'campaignx_merge_conflict_values':      campaignx_merge_conflict_values,
+                'campaignx_list':                       results['campaignx_list'],
+            }
+            return results
+        else:
+            status += "FIND_DUPLICATE_CAMPAIGNX_NO_DUPLICATES_FOUND "
+            error_results['success'] = success
+            error_results['status'] = status
+            error_results['campaignx_list'] = results['campaignx_list']
+            return error_results
+
+    except Exception as e:
+        status += "FIND_DUPLICATE_CAMPAIGNX_ERROR: " + str(e) + ' '
+        success = False
+
+    error_results['success'] = success
+    error_results['status'] = status
+    return error_results
 
 
 def generate_campaignx_dict_list_from_campaignx_object_list(
@@ -2073,16 +2191,117 @@ def generate_campaignx_dict_from_campaignx_object(
     return results
 
 
+def merge_if_duplicate_campaignx_entries(campaignx1, campaignx2, conflict_values):
+    """
+    See also figure_out_campaignx_conflict_values
+    :param campaignx1:
+    :param campaignx2:
+    :param conflict_values:
+    :return:
+    """
+    success = True
+    status = "MERGE_IF_DUPLICATE_CAMPAIGNX_ENTRIES "
+    campaignx_entries_merged = False
+    decisions_required = False
+    campaignx1_we_vote_id = campaignx1.we_vote_id
+    campaignx2_we_vote_id = campaignx2.we_vote_id
+
+    # Are there any comparisons that require admin intervention?
+    merge_choices = {}
+    clear_these_attributes_from_campaignx2 = []
+    for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
+        if \
+                attribute == "seo_friendly_path" \
+                or attribute == "we_vote_hosted_campaign_photo_original_url" \
+                or attribute == "we_vote_hosted_campaign_photo_large_url" \
+                or attribute == "we_vote_hosted_campaign_photo_medium_url" \
+                or attribute == "we_vote_hosted_campaign_photo_small_url" \
+                or attribute == "we_vote_hosted_profile_image_url_large" \
+                or attribute == "we_vote_hosted_profile_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_image_url_tiny":
+            if positive_value_exists(getattr(campaignx1, attribute)):
+                # We can proceed because campaignx1 has a valid attribute, so we can default to choosing that one
+                if attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_campaignx2.append(attribute)
+            elif positive_value_exists(getattr(campaignx2, attribute)):
+                # If we are here, campaignx1 does NOT have a valid attribute, but campaignx2 does
+                merge_choices[attribute] = getattr(campaignx2, attribute)
+                if attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_campaignx2.append(attribute)
+        else:
+            conflict_value = conflict_values.get(attribute, None)
+            if conflict_value == "CONFLICT":
+                if attribute == "campaign_title":
+                    # If the lower case versions of the name attribute are identical, choose the name
+                    #  that has upper and lower case letters, and do not require a decision
+                    campaignx1_attribute_value = getattr(campaignx1, attribute)
+                    try:
+                        campaignx1_attribute_value_lower_case = campaignx1_attribute_value.lower()
+                    except Exception:
+                        campaignx1_attribute_value_lower_case = None
+                    campaignx2_attribute_value = getattr(campaignx2, attribute)
+                    try:
+                        campaignx2_attribute_value_lower_case = campaignx2_attribute_value.lower()
+                    except Exception:
+                        campaignx2_attribute_value_lower_case = None
+                    if positive_value_exists(campaignx1_attribute_value_lower_case) \
+                            and campaignx1_attribute_value_lower_case == campaignx2_attribute_value_lower_case:
+                        # Give preference to value with both upper and lower case letters (as opposed to all uppercase)
+                        if any(char.isupper() for char in campaignx1_attribute_value) \
+                                and any(char.islower() for char in campaignx1_attribute_value):
+                            merge_choices[attribute] = getattr(campaignx1, attribute)
+                        else:
+                            merge_choices[attribute] = getattr(campaignx2, attribute)
+                    else:
+                        decisions_required = True
+                        break
+                else:
+                    decisions_required = True
+                    break
+            elif conflict_value == "CAMPAIGNX2":
+                merge_choices[attribute] = getattr(campaignx2, attribute)
+                if attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_campaignx2.append(attribute)
+
+    if not decisions_required:
+        status += "NO_DECISIONS_REQUIRED "
+        merge_results = merge_these_two_campaignx_entries(
+            campaignx1_we_vote_id,
+            campaignx2_we_vote_id,
+            admin_merge_choices=merge_choices,
+            clear_these_attributes_from_campaignx2=clear_these_attributes_from_campaignx2,
+        )
+
+        if not merge_results['success']:
+            success = False
+            status += merge_results['status']
+        elif merge_results['campaignx_entries_merged']:
+            campaignx_entries_merged = True
+        else:
+            status += "NOT_MERGED "
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'campaignx_entries_merged': campaignx_entries_merged,
+        'decisions_required':       decisions_required,
+        'campaignx':                campaignx1,
+    }
+    return results
+
+
 def merge_these_two_campaignx_entries(
         campaignx1_we_vote_id,
         campaignx2_we_vote_id,
         admin_merge_choices={},
+        clear_these_attributes_from_campaignx2=[],
         regenerate_campaign_title=False):
     """
     Process the merging of two campaignx entries
     :param campaignx1_we_vote_id:
     :param campaignx2_we_vote_id:
     :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
+    :param clear_these_attributes_from_campaignx2:
     :param regenerate_campaign_title:
     :return:
     """
@@ -2306,7 +2525,7 @@ def merge_these_two_campaignx_entries(
     # Clear 'unique=True' fields in campaignx2_on_stage, which need to be Null before campaignx1_on_stage can be saved
     #  with updated values
     campaignx2_updated = False
-    for attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+    for attribute in clear_these_attributes_from_campaignx2:  # CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
         setattr(campaignx2_on_stage, attribute, None)
         campaignx2_updated = True
     if campaignx2_updated:

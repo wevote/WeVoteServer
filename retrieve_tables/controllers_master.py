@@ -69,24 +69,26 @@ def get_total_row_count():
     :return: the number of rows
     """
     conn = psycopg2.connect(
-        database=get_environment_variable('DATABASE_NAME'),
-        user=get_environment_variable('DATABASE_USER'),
-        password=get_environment_variable('DATABASE_PASSWORD'),
-        host=get_environment_variable('DATABASE_HOST'),
-        port=get_environment_variable('DATABASE_PORT')
+        database=get_environment_variable('DATABASE_NAME_READONLY'),
+        user=get_environment_variable('DATABASE_USER_READONLY'),
+        password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+        host=get_environment_variable('DATABASE_HOST_READONLY'),
+        port=get_environment_variable('DATABASE_PORT_READONLY')
     )
 
     rows = 0
     for table_name in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
+            sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
             cursor.execute(sql)
             row = cursor.fetchone()
-            if row[0] is not None:
-                sql = "SELECT COUNT(*) FROM \"public\".\"{table_name}\";".format(table_name=table_name)
+            if positive_value_exists(row[0]):
+                cnt = int(row[0])
+            else:
+                sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
                 cursor.execute(sql)
                 row = cursor.fetchone()
-                if row[0] is not None:
+                if positive_value_exists(row[0]):
                     cnt = int(row[0])
             print('get_total_row_count of table ', table_name, ' is ', cnt)
             rows += cnt
@@ -113,11 +115,11 @@ def retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end):
     csv_files = {}
     try:
         conn = psycopg2.connect(
-            database=get_environment_variable('DATABASE_NAME'),
-            user=get_environment_variable('DATABASE_USER'),
-            password=get_environment_variable('DATABASE_PASSWORD'),
-            host=get_environment_variable('DATABASE_HOST'),
-            port=get_environment_variable('DATABASE_PORT')
+            database=get_environment_variable('DATABASE_NAME_READONLY'),
+            user=get_environment_variable('DATABASE_USER_READONLY'),
+            password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+            host=get_environment_variable('DATABASE_HOST_READONLY'),
+            port=get_environment_variable('DATABASE_PORT_READONLY')
         )
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")

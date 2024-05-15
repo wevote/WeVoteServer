@@ -665,6 +665,8 @@ urlpatterns = [
               name='representativesQueryDocs'),
       re_path(r'^docs/retrieveIssuesToFollow/', views_docs.retrieve_issues_to_follow_doc_view,
               name='retrieveIssuesToFollowDocs'),
+      re_path(r'^docs/retrieveSQLTablesRowCount/', views_docs.retrieve_sql_tables_row_count_doc_view,
+              name='retrieveSQLTablesRowCountDocs'),
       path('docs/saveAnalyticsAction/',
               views_docs.save_analytics_action_doc_view, name='saveAnalyticsActionDocs'),
       path('docs/sharedItemListSave/',

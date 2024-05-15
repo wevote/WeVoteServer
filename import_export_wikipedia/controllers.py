@@ -784,7 +784,7 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 
 
 def retrieve_images_from_wikipedia(page_title):
-    response = {"success": True, "status": "", "result": ""}
+    response = {"success": True, "status": "", "result": None}
     try:
         page = wikipedia.page(title=page_title, pageid=None, auto_suggest=False)
         page_html = page.html()
@@ -792,9 +792,9 @@ def retrieve_images_from_wikipedia(page_title):
         page_dom = BeautifulSoup(page_html, 'html.parser')
         img_link = page_dom.find('img').get('src')
         response["status"] += "SUCCESS "
-        response["result"] = "retrieved the following picture from Wikipedia: {}".format(img_link)
+        response["result"] = img_link
     except Exception as retrievePageError:
         response["success"] = False
         response["status"] += "RETRIEVE_IMAGES_FROM_WIKIPEDIA_ERROR "
-        response["result"] = "retrieve_images_from_wikipedia error: {}".format(retrievePageError)
+        response["result"] = None
     return response

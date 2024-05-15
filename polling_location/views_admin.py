@@ -498,6 +498,7 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
         #  Predefined Google Maps marker icons are listed at https://kml4earth.appspot.com/icons.html
         'icon_url_base': 'https://maps.google.com/mapfiles/kml/shapes/placemark_circle_highlight.png',
         'icon_scale_base': 25,                # 25 percent of full size
+        'google_maps_api_key': GOOGLE_MAPS_API_KEY,
     }
 
     return render(request, 'polling_location/polling_location_visualize.html', template_values)
