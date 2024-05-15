@@ -609,7 +609,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
           " -- organization_we_vote_id: ", organization_we_vote_id)
     auth = tweepy.OAuth1UserHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
+    api = tweepy.API(auth)   # This uses the Twitter apiv1, not the apiv2
 
     organization_manager = OrganizationManager()
     new_tweets = []

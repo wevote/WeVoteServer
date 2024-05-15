@@ -117,7 +117,7 @@ def retrieve_twitter_rate_limit_info():
         # See "This limit is considered completely separate from per-application Bearer Token limits."  At https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits
         auth = tweepy.OAuth2AppHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 
-        api = tweepy.API(auth)
+        api = tweepy.API(auth)   # This uses the Twitter apiv1, not the apiv2
         limits_json = api.rate_limit_status()   # March 2023, this api is not yet available in Twitter API V2
         # print(json.dumps(limits_json))
         output = []
