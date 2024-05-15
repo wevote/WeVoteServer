@@ -37,6 +37,7 @@ urlpatterns = [
     re_path(r'^update_profile_image_background_color/',
             views_admin.update_profile_image_background_color_view_for_politicians,
             name='update_profile_image_background_color'),
-    re_path(r'^update_recommended_politicians/', views_admin.update_recommended_politicians_view,
-            name='update_recommended_politicians')
+    # 2024-05-15: Causing problems on live servers
+    # re_path(r'^update_recommended_politicians/', views_admin.update_recommended_politicians_view,
+    #         name='update_recommended_politicians')
 ]

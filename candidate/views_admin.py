@@ -1170,6 +1170,9 @@ def candidate_list_view(request):
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_broken=True)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_placeholder=True)
+        count_queryset = count_queryset.exclude(facebook_url_is_broken=True)
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
@@ -1180,7 +1183,6 @@ def candidate_list_view(request):
         # Find candidates that don't have a photo (i.e. that are null or '')
         count_queryset = count_queryset. \
             filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
-        count_queryset = count_queryset.exclude(facebook_url_is_broken=True)
 
         facebook_urls_without_picture_urls = count_queryset.count()
     except Exception as e:

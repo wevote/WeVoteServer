@@ -38,7 +38,7 @@ from office.models import ContestOffice
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from volunteer_task.controllers import change_tracking, change_tracking_boolean
-from politician.controllers_recommendation import update_recommend
+# from politician.controllers_recommendation import update_recommend  # 2024-05-15: Causing problems on live servers
 from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
     VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager

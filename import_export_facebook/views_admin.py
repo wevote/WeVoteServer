@@ -37,6 +37,7 @@ def get_photo_url_from_facebook_graphapi(
     success = True
     facebook_photo_saved = False
     is_candidate = False
+    is_organization = False
     is_politician = False
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
@@ -48,14 +49,14 @@ def get_photo_url_from_facebook_graphapi(
     else:
         facebook_url = incoming_object.organization_facebook
         google_civic_election_id = ''
-        is_candidate = False
+        is_organization = True
 
     results = get_facebook_photo_url_from_facebook_url(facebook_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
         incoming_object_changes = False
         if results['photo_url_found']:
-            if is_candidate:
+            if is_candidate or is_organization:
                 incoming_object_changes = True
                 incoming_object.facebook_photo_url = photo_url
                 incoming_object.facebook_photo_url_is_placeholder = False
@@ -71,11 +72,8 @@ def get_photo_url_from_facebook_graphapi(
                         incoming_object = results['object_with_photo_fields']
                     else:
                         status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
-            # elif hasattr(incoming_object, 'facebook_url_is_broken') and not incoming_object.facebook_url_is_broken:
-            #     incoming_object_changes = True
-            #     incoming_object.facebook_url_is_broken = True
         elif results.get('is_silhouette'):
-            if is_candidate or is_politician:
+            if is_candidate or is_organization or is_politician:
                 incoming_object_changes = True
                 incoming_object.facebook_photo_url = None
                 incoming_object.facebook_photo_url_is_broken = False
@@ -91,6 +89,23 @@ def get_photo_url_from_facebook_graphapi(
                         incoming_object = results['object_with_photo_fields']
                     else:
                         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+        elif not results.get('photo_url_found'):
+            if is_candidate or is_organization or is_politician:
+                incoming_object_changes = True
+                incoming_object.facebook_photo_url = None
+                incoming_object.facebook_photo_url_is_broken = True
+                # If we have an earlier photo, we don't want to remove it
+                # if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                #     incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                #     incoming_object.we_vote_hosted_profile_image_url_large = None
+                #     incoming_object.we_vote_hosted_profile_image_url_medium = None
+                #     incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                #     results = organize_object_photo_fields_based_on_image_type_currently_active(
+                #         object_with_photo_fields=incoming_object)
+                #     if results['success']:
+                #         incoming_object = results['object_with_photo_fields']
+                #     else:
+                #         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
         else:
             status += "FACEBOOK_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + facebook_url + " "
             status += results['status']
@@ -133,9 +148,13 @@ def get_photo_url_from_facebook_graphapi(
                     facebook_photo_saved = True
                 # When saving to candidate object, update:
                 # we_vote_hosted_profile_facebook_image_url_tiny
-            else:
+            elif is_organization:
                 results = save_image_to_organization_table(
-                    incoming_object, photo_url, facebook_url, False, FACEBOOK)
+                    incoming_object,
+                    photo_url,
+                    facebook_url,
+                    False,
+                    FACEBOOK)
                 if results['success']:
                     facebook_photo_saved = True
 
@@ -255,7 +274,9 @@ def bulk_retrieve_facebook_photos_view(request):
     try:
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        queryset = queryset.exclude(facebook_photo_url_is_broken=True)
         queryset = queryset.exclude(facebook_photo_url_is_placeholder=True)
+        queryset = queryset.exclude(facebook_url_is_broken=True)
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
         # queryset = queryset.filter(facebook_url_is_broken=False)
@@ -264,10 +285,11 @@ def bulk_retrieve_facebook_photos_view(request):
         # Exclude candidates without facebook_url
         queryset = queryset.exclude(Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
 
+        # facebook_photo_url_is_broken
+
         # Find candidates that don't have a photo (i.e. that are null or '')
         queryset = queryset. \
             filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
-        queryset = queryset.exclude(facebook_url_is_broken=True)
         candidate_list_count = queryset.count()
         if positive_value_exists(limit):
             candidate_list = list(queryset[:limit])
