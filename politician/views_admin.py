@@ -38,6 +38,7 @@ from office.models import ContestOffice
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from volunteer_task.controllers import change_tracking, change_tracking_boolean
+from politician.controllers_recommendation import update_recommend
 from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
     VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager
@@ -55,7 +56,8 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     update_politician_details_from_candidate, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianChangeLog, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
+    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN, \
+    RecommendedPoliticianLinkByPolitician
 from politician.controllers_generate_color import generate_background, validate_hex
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -512,7 +514,7 @@ def politician_list_view(request):
 
         if len(update_list) > 0:
             try:
-                Politician.objects.bulk_update( update_list, ['profile_image_background_color', 'profile_image_background_color_needed'])
+                Politician.objects.bulk_update(update_list, ['profile_image_background_color', 'profile_image_background_color_needed'])
                 message = \
                     "Politicians updated: {politicians_updated:,}. " \
                     "Politicians without picture URL:  {politicians_not_updated:,}. " \
@@ -3820,3 +3822,48 @@ def update_profile_image_background_color_view_for_politicians(request):
                              "".format(e=e))
 
     return HttpResponseRedirect(reverse('politician:politician_list', args=()))
+
+
+def update_recommended_politicians_view(request):
+    """
+       Update recommended politicians based on certain criteria.
+       This view function updates the recommended politicians by performing several operations such as clustering,
+       one-hot encoding, TF-IDF, and adding clusters. It then selects politicians from the same cluster and a few from
+       outside the cluster as recommendations.
+       Parameters:
+       - request: Django HttpRequest object
+       Returns:
+       - HttpResponseRedirect: Redirects to the politician list page with a specified state code.
+       """
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status = ""
+    success = True
+    state_code = request.GET.get('state_code', "")
+
+    try:
+        RecommendedPoliticianLinkByPolitician.objects.all().delete()
+        update_recommend()
+    except Exception as e:
+        status += "Could not update: " + str(e) + " "
+
+    validation_list = []
+    sample_num = 100
+    for _ in range(sample_num):
+        random_politician = Politician.objects.order_by('?').first()
+        record = Politician.get_recommendation(random_politician)
+        validation_list.extend(record)
+
+    message = \
+        "avg recommended number : {politicians_avgs:,}. " \
+        "".format(
+            politicians_avgs=len(validation_list) / sample_num)
+    messages.add_message(request, messages.INFO, message)
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?state_code={state_code}"
+                                "".format(
+                                    state_code=state_code))
