@@ -20,7 +20,7 @@ VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8  # Politician sends in personal statemen
 VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED = 9
 VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS = 10  # Candidate or Politician
 VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS = 11
-VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE = 12
+VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE = 12
 
 
 class VolunteerTaskCompleted(models.Model):
@@ -235,8 +235,8 @@ def display_action_constant_human_readable(action_constant):
         return "POSITION_COMMENT_SAVED"
     if action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
         return "POSITION_SAVED"
-    if action_constant == VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE:
-        return "TWITTER_BULK_RETRIEVE"
+    if action_constant == VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE:
+        return "PHOTO_BULK_RETRIEVE"
     if action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
         return "VOTER_GUIDE_POSSIBILITY_CREATED"
 

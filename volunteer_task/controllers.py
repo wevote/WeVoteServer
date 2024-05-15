@@ -8,7 +8,7 @@ from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, \
     VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
     VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, \
     VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, VOLUNTEER_ACTION_POSITION_SAVED, \
-    VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE, \
+    VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE, \
     VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
     VolunteerWeeklyMetrics
 from voter.models import Voter
@@ -264,7 +264,7 @@ def update_or_create_weekly_metrics_one_volunteer(
     politicians_requested_changes = 0       # VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8
     position_comments_saved = 0             # VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
     positions_saved = 0                     # VOLUNTEER_ACTION_POSITION_SAVED = 1
-    twitter_bulk_retrieve = 0               # VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE = 12
+    twitter_bulk_retrieve = 0               # VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE = 12
     voter_guide_possibilities_created = 0   # VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
 
     volunteer_weekly_metrics = None
@@ -329,7 +329,7 @@ def update_or_create_weekly_metrics_one_volunteer(
                     position_comments_saved += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
                     positions_saved += 1
-                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE:
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE:
                     twitter_bulk_retrieve += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
                     voter_guide_possibilities_created += 1

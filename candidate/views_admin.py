@@ -1167,25 +1167,26 @@ def candidate_list_view(request):
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
     facebook_urls_without_picture_urls = 0
-    if positive_value_exists(google_civic_election_id):
-        try:
-            candidate_facebook_missing_query = CandidateCampaign.objects.all()
-            candidate_facebook_missing_query = \
-                candidate_facebook_missing_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+    try:
+        count_queryset = CandidateCampaign.objects.using('readonly').all()
+        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_broken=True)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_placeholder=True)
+        count_queryset = count_queryset.exclude(facebook_url_is_broken=True)
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
-            # include profile images that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query. \
-                filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
+        # Exclude candidates without facebook_url
+        count_queryset = count_queryset.exclude(
+            Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
 
-            # exclude facebook_urls that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
-                Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
-            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url_is_broken=True)
+        # Find candidates that don't have a photo (i.e. that are null or '')
+        count_queryset = count_queryset. \
+            filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
-            facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
-
-        except Exception as e:
-            logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
+        facebook_urls_without_picture_urls = count_queryset.count()
+    except Exception as e:
+        logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     status_print_list = ""
     status_print_list += "{candidate_list_count:,} candidates found." \

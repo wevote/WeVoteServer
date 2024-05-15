@@ -61,13 +61,10 @@
                 <span class="h3">Endorser Name Missing</span>
             {% endif %}
             {% if has_suggested_voter_guide_rights and organization.we_vote_id %}
-                {% if not organization.organization_name %}
-                    (please add name)
-                {% endif %}
                 &nbsp;
                 <a href="{% url "organization:organization_position_list" organization.id %}"
                    target="_blank"
-                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                   class="u-no-break">{% if organization.organization_name %}(edit){% else %}(please add name){% endif %}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if organization.organization_twitter_handle %}
                 <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"

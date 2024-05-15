@@ -19,7 +19,7 @@ from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from representative.models import RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
-from volunteer_task.models import VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE, VolunteerTaskManager
+from volunteer_task.models import VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE, VolunteerTaskManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import delete_possible_twitter_handles, make_item_in_list_primary, \
@@ -466,7 +466,7 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
         # Give the volunteer who entered this credit
         volunteer_task_manager = VolunteerTaskManager()
         task_results = volunteer_task_manager.create_volunteer_task_completed(
-            action_constant=VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE,
+            action_constant=VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE,
             request=request,
         )
     except Exception as e:

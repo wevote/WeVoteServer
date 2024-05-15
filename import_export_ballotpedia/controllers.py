@@ -18,7 +18,8 @@ from electoral_district.models import ElectoralDistrict, ElectoralDistrictManage
 from election.models import BallotpediaElection, ElectionManager, Election
 from exception.models import handle_exception
 from geopy.geocoders import get_geocoder_for_service
-from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, organize_object_photo_fields_based_on_image_type_currently_active
+from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, \
+    organize_object_photo_fields_based_on_image_type_currently_active
 from organization.controllers import save_image_to_organization_table
 from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager

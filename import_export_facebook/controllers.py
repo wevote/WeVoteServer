@@ -85,7 +85,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
     if not positive_value_exists(facebook_auth_response.facebook_profile_image_url_https):
-        results = get_facebook_photo_url_from_graphapi('', facebook_auth_response.facebook_user_id)
+        results = get_facebook_photo_url_from_facebook_url('', facebook_auth_response.facebook_user_id)
         if results['photo_url_found']:
             photo_url = results['photo_url']
             if positive_value_exists(photo_url):
@@ -851,7 +851,9 @@ def voter_facebook_sign_in_save_auth_for_api(
     return json_data
 
 
-def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=False):
+def get_facebook_photo_url_from_facebook_url(
+        facebook_candidate_url,
+        facebook_id=False):
     clean_message = ''
     fb_id_or_login_name = ''
     is_silhouette = False
