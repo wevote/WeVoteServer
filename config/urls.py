@@ -37,8 +37,8 @@ urlpatterns = [
 
     re_path(r'^a/', include(('analytics.urls','analytics'), namespace="analytics")),
     re_path(r'^b/', include(('ballot.urls','ballot'), namespace="ballot")),
-    re_path(r'^ballotpedia/', include(('import_export_ballotpedia.urls','ballotpedia'), namespace="ballotpedia")),
-    re_path(r'^bookmark/', include(('bookmark.urls','bookmark'), namespace="bookmark")),
+    re_path(r'^ballotpedia/', include(('import_export_ballotpedia.urls', 'ballotpedia'), namespace="ballotpedia")),
+    re_path(r'^bookmark/', include(('bookmark.urls', 'bookmark'), namespace="bookmark")),
     re_path(r'^c/', include(('candidate.urls', 'candidate'), namespace="candidate")),
     re_path(r'^campaign/', include(('campaign.urls', 'campaign'), namespace="campaign")),
     re_path(r'^e/', include(('election.urls', 'election'), namespace="election")),

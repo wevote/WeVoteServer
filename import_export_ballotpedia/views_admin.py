@@ -20,6 +20,7 @@ from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 
 from polling_location.models import PollingLocation
+from volunteer_task.models import VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE, VolunteerTaskManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
@@ -65,6 +66,17 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # #############################################################
     # Get candidates in the elections we care about - used below
