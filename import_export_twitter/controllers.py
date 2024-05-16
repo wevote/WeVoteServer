@@ -2855,6 +2855,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
         request_token_dict = auth.request_token
         twitter_request_token = ''
         twitter_request_token_secret = ''
+        logger.error("tweepy OAuth1UserHandler (WeVote) request_token_dict = %s", str(request_token_dict))
 
         if 'oauth_token' in request_token_dict:
             twitter_request_token = request_token_dict['oauth_token']
