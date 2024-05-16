@@ -575,13 +575,17 @@ def get_photo_url_from_ballotpedia(
         }
         return results
 
+    incoming_object_changes = False
+    if positive_value_exists(ballotpedia_page_url) and not ballotpedia_page_url.startswith('http'):
+        ballotpedia_page_url = 'https://' + ballotpedia_page_url
+        incoming_object.ballotpedia_page_url = ballotpedia_page_url
+        incoming_object_changes = True
     print(ballotpedia_page_url)
     results = get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
         # To explore, when photo_url is found, but not valid... (low priority)
         # ballotpedia_photo_url_is_broken = results.get('http_response_code') == 404
-        incoming_object_changes = False
         if results['photo_url_found']:
             if is_candidate or is_politician:
                 incoming_object_changes = True
