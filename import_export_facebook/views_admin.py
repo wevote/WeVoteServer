@@ -55,24 +55,7 @@ def get_photo_url_from_facebook_graphapi(
     if results.get('success'):
         photo_url = results.get('photo_url')
         incoming_object_changes = False
-        if results['photo_url_found']:
-            if is_candidate or is_organization:
-                incoming_object_changes = True
-                incoming_object.facebook_photo_url = photo_url
-                incoming_object.facebook_photo_url_is_placeholder = False
-                incoming_object.facebook_url_is_broken = False
-                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
-                    incoming_object.we_vote_hosted_profile_image_url_large = None
-                    incoming_object.we_vote_hosted_profile_image_url_medium = None
-                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
-                        object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
-                    else:
-                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
-        elif results.get('is_silhouette'):
+        if results.get('is_silhouette'):
             if is_candidate or is_organization or is_politician:
                 incoming_object_changes = True
                 incoming_object.facebook_photo_url = None
@@ -89,6 +72,23 @@ def get_photo_url_from_facebook_graphapi(
                         incoming_object = results['object_with_photo_fields']
                     else:
                         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+        elif results['photo_url_found']:
+            if is_candidate or is_organization:
+                incoming_object_changes = True
+                incoming_object.facebook_photo_url = photo_url
+                incoming_object.facebook_photo_url_is_placeholder = False
+                incoming_object.facebook_url_is_broken = False
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if results['success']:
+                        incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
         elif not results.get('photo_url_found'):
             if is_candidate or is_organization or is_politician:
                 incoming_object_changes = True
@@ -116,7 +116,6 @@ def get_photo_url_from_facebook_graphapi(
         # link_is_broken = results.get('http_response_code') == 404
         is_placeholder_photo = results.get('is_silhouette')
         if is_placeholder_photo:
-            success = False
             # status += results['status']
             status += "IS_PLACEHOLDER_PHOTO "
             logger.info("Placeholder/Silhouette: " + photo_url)
@@ -219,7 +218,6 @@ def get_photo_url_from_facebook_graphapi(
 
 @login_required
 def bulk_retrieve_facebook_photos_view(request):
-    number_of_candidates_to_search = 75
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -297,7 +295,6 @@ def bulk_retrieve_facebook_photos_view(request):
             candidate_list = list(queryset)
 
         # Run Facebook account search and analysis on candidates with a linked or possible Facebook account
-        current_candidate_index = 0
         for one_candidate in candidate_list:
             # Check to see if we have already tried to find their photo link from Facebook. We don't want to
             #  search Facebook more than once.
@@ -317,8 +314,6 @@ def bulk_retrieve_facebook_photos_view(request):
             else:
                 logger.info("Skipped URL: " + one_candidate.facebook_url)
                 already_stored += 1
-
-            current_candidate_index += 1
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing
         pass
