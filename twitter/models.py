@@ -805,7 +805,8 @@ class TwitterUserManager(models.Manager):
     def retrieve_twitter_user(twitter_user_id=0, twitter_handle='', read_only=False):
         twitter_user_on_stage = None
         twitter_user_found = False
-        success = False
+        twitter_user_retrieve = False
+        success = True
         status = ""
         queryset = None
 
@@ -822,7 +823,7 @@ class TwitterUserManager(models.Manager):
                     queryset = TwitterUser.objects.using('readonly').filter(twitter_id=twitter_user_id).order_by('-id')
                 else:
                     queryset = TwitterUser.objects.filter(twitter_id=twitter_user_id).order_by('-id')
-                twitter_user_found = True
+                twitter_user_retrieve = True
             elif positive_value_exists(twitter_handle):
                 status += "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE "
                 if read_only:
@@ -830,13 +831,15 @@ class TwitterUserManager(models.Manager):
                         twitter_handle__iexact=twitter_handle).order_by('-id')
                 else:
                     queryset = TwitterUser.objects.filter(twitter_handle__iexact=twitter_handle).order_by('-id')
-                twitter_user_found = True
+                twitter_user_retrieve = True
             else:
                 status += "RETRIEVE_TWITTER_USER_INSUFFICIENT_VARIABLES "
-            if twitter_user_found:
+            if twitter_user_retrieve:
                 success = True
                 twitter_user_list = list(queryset)
-                twitter_user_on_stage = twitter_user_list[0]
+                twitter_user_found = len(twitter_user_list) > 0
+                if twitter_user_found:
+                    twitter_user_on_stage = twitter_user_list[0]
                 if len(twitter_user_list) > 1:
                     status += "RETRIEVE_TWITTER_USER_FOUND_" + str(len(twitter_user_list)) + "_MATCHING_USERS "
                     log_line = ("TwitterUser.MultipleObjectsReturned for twitter_user_id={0}, twitter_handle={1}, ids=".

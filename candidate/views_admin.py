@@ -1184,6 +1184,7 @@ def candidate_list_view(request):
         count_queryset = count_queryset. \
             filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
+        # candidates_to_review = list(count_queryset)
         facebook_urls_without_picture_urls = count_queryset.count()
     except Exception as e:
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
@@ -2604,17 +2605,13 @@ def candidate_edit_process_view(request):
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
-        # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
-        res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
-        if res is None:
-            print('withdrawal_date is invalid: ' + withdrawal_date)
-            messages.add_message(request, messages.ERROR, 'Could not save candidate. If the "Candidate Has Withdrawn '
-                                                          'From Election" is True, then the date in the field must be '
-                                                          'in the YYYY-MM-DD format')
-            if positive_value_exists(candidate_id):
-                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
-            else:
-                return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
+        try:
+            res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
+            if res is None:
+                status += "withdrawal_date is invalid: " + withdrawal_date + " "
+        except Exception as e:
+            status += "withdrawal_date_PROCESSING_FAILED: " + withdrawal_date + ": " + str(e) + " "
+            withdrawal_date = None
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
