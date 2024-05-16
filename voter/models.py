@@ -3988,7 +3988,9 @@ class VoterDeviceLinkManager(models.Manager):
                         and voter_device_link.secret_code_number_of_failed_tries_for_this_code > \
                         NUMBER_OF_FAILED_TRIES_ALLOWED_PER_SECRET_CODE:
                     # If voter has used up the number of attempts to enter the secret code, create new secret code
-                    results = self.update_voter_device_link_with_new_secret_code(voter_device_link)
+                    results = self.update_voter_device_link_with_new_secret_code(
+                        voter_device_link,
+                        cordova_review_bypass)
                     status += results['status']
                     if results['voter_device_link_updated']:
                         voter_device_link = results['voter_device_link']
@@ -4064,7 +4066,7 @@ class VoterDeviceLinkManager(models.Manager):
         google_civic_election_id = 0
         return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id, state_code)
 
-    def update_voter_device_link_with_new_secret_code(self, voter_device_link, cordova_review_bypass):
+    def update_voter_device_link_with_new_secret_code(self, voter_device_link, cordova_review_bypass=False):
         return self.update_voter_device_link(voter_device_link, generate_new_secret_code=True,
                                              cordova_review_bypass=cordova_review_bypass)
 

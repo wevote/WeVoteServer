@@ -8,6 +8,7 @@ from candidate.models import CandidateListManager, CandidateManager
 from office.models import ContestOfficeManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -32,6 +33,7 @@ def augment_candidate_possible_position_data(
     possible_endorsement_count = 0
     possible_endorsement['withdrawn_from_election'] = False
     possible_endorsement['withdrawal_date'] = ''
+    withdrawal_date_as_string = ''
 
     if 'candidate_we_vote_id' in possible_endorsement \
             and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
@@ -57,7 +59,11 @@ def augment_candidate_possible_position_data(
                     contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                         candidate.contest_office_we_vote_id)
             possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
-            possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
+            try:
+                withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
+            except Exception as e:
+                status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+            possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
 
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
@@ -97,7 +103,11 @@ def augment_candidate_possible_position_data(
                     contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                         candidate.contest_office_we_vote_id)
             possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
-            possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
+            try:
+                withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
+            except Exception as e:
+                status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+            possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
             possible_endorsement_count += 1
             possible_endorsement_return_list.append(possible_endorsement)
         elif matching_results['candidate_list_found']:
@@ -131,7 +141,11 @@ def augment_candidate_possible_position_data(
                         contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                             candidate.contest_office_we_vote_id)
                 possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
-                possible_endorsement_copy['withdrawal_date'] = candidate.withdrawal_date
+                try:
+                    withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
+                except Exception as e:
+                    status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+                possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
                 possible_endorsement_count += 1
                 possible_endorsement_return_list.append(possible_endorsement_copy)
         elif not positive_value_exists(matching_results['success']):
@@ -179,7 +193,11 @@ def augment_candidate_possible_position_data(
                                 contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                                     candidate.contest_office_we_vote_id)
                         possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
-                        possible_endorsement['withdrawal_date'] = candidate.withdrawal_date
+                        try:
+                            withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
+                        except Exception as e:
+                            status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+                        possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
                     possible_endorsement_matched = True
                     possible_endorsement_count += 1
                     possible_endorsement_return_list.append(possible_endorsement)
@@ -231,7 +249,12 @@ def augment_candidate_possible_position_data(
                             possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
                                 candidate.we_vote_hosted_profile_image_url_medium
                             possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
-                            possible_endorsement_copy['withdrawal_date'] = candidate.withdrawal_date
+                            try:
+                                withdrawal_date_as_string = convert_date_to_we_vote_date_string(
+                                    candidate.withdrawal_date)
+                            except Exception as e:
+                                status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+                            possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
 
                         synonym_found = True
                         possible_endorsement_count += 1
