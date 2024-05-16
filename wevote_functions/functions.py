@@ -1366,15 +1366,28 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
 def is_candidate_we_vote_id(candidate_we_vote_id):
     if not positive_value_exists(candidate_we_vote_id):
         return False
-    pattern = re.compile(r'^(wv[\w]{2}cand[\w]+)$')
-    return pattern.match(candidate_we_vote_id)
+    pattern = re.compile(r'^(wv[\w]{2}cand\d+)$')
+
+    # match variable stores either a match object or None
+    match = pattern.match(candidate_we_vote_id)
+
+    # If a match is found, we additionally check if the string ends with the pattern.
+    # This ensures that the match covers the entire string from start to finish.
+    if match and match.end() == len(candidate_we_vote_id):
+        return True
+    else:
+        return False
 
 
 def is_politician_we_vote_id(politician_we_vote_id):
     if not positive_value_exists(politician_we_vote_id):
         return False
-    pattern = re.compile(r'^(wv[\w]{2}pol[\w]+)$')
-    return pattern.match(politician_we_vote_id)
+    pattern = re.compile(r'^(wv[\w]{2}pol\d+)$')
+    match = pattern.match(politician_we_vote_id)
+    if match and match.end() == len(politician_we_vote_id):
+        return True
+    else:
+        return False
 
 
 def is_url_valid(url_to_test):
