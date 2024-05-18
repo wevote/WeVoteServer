@@ -57,7 +57,7 @@ from wevote_functions.functions import convert_to_int, \
     get_voter_api_device_id, get_voter_device_id, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
