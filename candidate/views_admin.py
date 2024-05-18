@@ -1210,7 +1210,6 @@ def candidate_list_view(request):
             batch_manager = BatchManager()
             timezone = pytz.timezone("America/Los_Angeles")
             datetime_now = timezone.localize(datetime.now())
-            timezone, datetime_now = get_timezone_and_datetime_now()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                 if date_of_election > datetime_now:
