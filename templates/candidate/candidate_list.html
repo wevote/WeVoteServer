@@ -16,7 +16,7 @@
 
 {% csrf_token %}
 
-<form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
+<form name="candidate_choose_election" id="candidate_choose_election_id" method="get" action="{% url 'candidate:candidate_list' %}">
     {# These are input checkboxes from a form further down this page #}
 
 {#    <input type="hidden" name="exclude_candidate_analysis_done" value="{{ exclude_candidate_analysis_done }}" />#}
@@ -90,8 +90,8 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
-            show all states</a>
+{#        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">#}
+            <span class="u-link-color u-link-underline-on-hover" onClick={showAllStates("candidate_choose_election_id")}>show all states</span>
         {% endif %}
     {% endif %}{# End of if state_list #}
 </form>
@@ -777,6 +777,11 @@
     function showElement(elementId) {
       var x = document.getElementById(elementId);
       x.style.display = "block";
+    }
+    function showAllStates(currentFormId) {
+        const currentForm = document.getElementById(currentFormId);
+        currentForm.state_code.value = '';
+        currentForm.submit();
     }
     $(function() {
         $('#exclude_candidate_analysis_done_id').change(function() {

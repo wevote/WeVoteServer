@@ -1933,6 +1933,19 @@ def return_first_x_words(original_string, number_of_words_to_return, include_ell
     return x_words
 
 
+def return_value_from_request(
+        request={},
+        variable_name='',
+        is_post=False,
+        alternate_value='',
+        ):
+    if is_post:
+        value = request.POST.get(variable_name, alternate_value)
+    else:
+        value = request.GET.get(variable_name, alternate_value)
+    return value
+
+
 def strip_html_tags(value):
     """
     Creating a separate strip tag function instead of using  django.utils.html.strip_tags directly where required to
