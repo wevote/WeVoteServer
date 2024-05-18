@@ -3,12 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 import pytz
-import datetime
-from datetime import timedelta
+from datetime import datetime
 from wevote_functions.functions import positive_value_exists, convert_to_int, convert_to_str
-from math import log10
+# from math import log10
 from django.utils.timezone import localtime, now
 from nameparser.config import CONSTANTS
+
 CONSTANTS.string_format = "{title} {first} {middle} \"{nickname}\" {last} {suffix}"
 
 
@@ -34,7 +34,7 @@ def convert_date_to_date_as_integer(date):
 
 def convert_date_as_integer_to_date(date_as_integer):
     date_as_string = convert_to_str(date_as_integer)
-    date = datetime.datetime.strptime(date_as_string, '%Y%m%d')
+    date = datetime.strptime(date_as_string, '%Y%m%d')
     return date
 
 
@@ -49,7 +49,7 @@ def convert_date_to_we_vote_date_string(date):
 
 def convert_we_vote_date_string_to_date(we_vote_date_string):
     date_as_string = convert_to_str(we_vote_date_string)
-    date = datetime.datetime.strptime(date_as_string, '%Y-%m-%d')
+    date = datetime.strptime(date_as_string, '%Y-%m-%d')
     return date
 
 
@@ -78,14 +78,16 @@ DATE_FORMAT_YMDTHMSZ = "%Y-%m-%dT%H:%M:%S%z"                # 2024-03-04T21:58:4
 DATE_FORMAT_A_D_B_Y_HMS_GMT = "%a, %d-%b-%Y %H:%M:%S GMT"   # Wed, 04-Mar-2024 21:58:40 GMT  
 DATE_FORMAT_MDY_IMS_P_SLASH = "%m/%d/%Y %I:%M:%S %p"        # 03/04/2024 09:58:40 PM
 DATE_FORMAT_MDY_IMS_P = "%m/%d/%Y %H:%M"                    # 03/04/2024 21:58
-DATE_FORMAT_BD_Y_AT_HM ="%B %d, %Y at %H:%M"                # March 04, 2024 at 21:58
+DATE_FORMAT_BD_Y_AT_HM = "%B %d, %Y at %H:%M"                # March 04, 2024 at 21:58
 DATE_FORMAT_D = "%d"                                        # 04
+
 
 # parse string into localized date time object
 def parse_date_string(date_string, date_format, timezone_name="America/Los_Angeles"):
     timezone = pytz.timezone(timezone_name)
     date_time = datetime.strptime(date_string, date_format)
     return timezone.localize(date_time)
+
 
 # retrieve the current datetime and timezone in the specified timezone
 def get_timezone_and_datetime_now(timezone_name="America/Los_Angeles", datetime_obj=None, datetime_format=None):
@@ -100,12 +102,9 @@ def get_timezone_and_datetime_now(timezone_name="America/Los_Angeles", datetime_
     return timezone, localized_datetime
 
 
-
 # convert current date to a date as integer. replaces all instances when searching for "pytz.timezone"
 #     -import function into file
 #     -replace all instances when searching "pytz.timezone" with "date_today_as_integer = get_current_date_as_integer()"
 def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
     _, datetime_now = get_timezone_and_datetime_now(timezone_name)
     return convert_date_to_date_as_integer(datetime_now)
-
-
