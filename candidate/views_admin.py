@@ -57,7 +57,8 @@ from wevote_functions.functions import convert_to_int, \
     get_voter_api_device_id, get_voter_device_id, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, \
+    get_timezone_and_datetime_now
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -248,8 +249,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
 
         if candidate_list_dict:
             candidate_list_json = list(candidate_list_dict)
-            return HttpResponse(json.dumps(candidate_list_json, default=str),
-                                content_type='application/json')
+            return HttpResponse(json.dumps(candidate_list_json, default=str), content_type='application/json')
     except Exception as e:
         status += "CANDIDATE_LIST_MISSING: " + str(e) + " "
 
@@ -258,6 +258,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         'status': status
     }
     return HttpResponse(json.dumps(json_data, default=str), content_type='application/json')
+
 
 # This page does not need to be protected.
 def candidate_to_office_link_sync_out_view(request):  # candidateToOfficeLinkSyncOut
@@ -681,8 +682,9 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         seo_friendly_path_missing = 0
         update_list = []
         updates_needed = False
@@ -753,8 +755,9 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False
@@ -1209,8 +1212,9 @@ def candidate_list_view(request):
             election = results['election']
             ballot_returned_list_manager = BallotReturnedListManager()
             batch_manager = BatchManager()
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            timezone, datetime_now = get_timezone_and_datetime_now()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                 if date_of_election > datetime_now:
@@ -2466,8 +2470,9 @@ def candidate_change_names(changes):
             candidate_list = list(candidate_query)
             candidate = candidate_list[0]
             setattr(candidate, 'candidate_name', change['name_after'])
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            datetime_now = get_timezone_and_datetime_now()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
             count += 1
