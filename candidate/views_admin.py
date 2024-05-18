@@ -248,7 +248,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
 
         if candidate_list_dict:
             candidate_list_json = list(candidate_list_dict)
-            return HttpResponse(json.dumps(candidate_list_json), content_type='application/json')
+            return HttpResponse(json.dumps(candidate_list_json, default=str), content_type='application/json')
     except Exception as e:
         status += "CANDIDATE_LIST_MISSING: " + str(e) + " "
 
@@ -256,7 +256,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         'success': False,
         'status': status
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return HttpResponse(json.dumps(json_data, default=str), content_type='application/json')
 
 
 # This page does not need to be protected.
@@ -276,7 +276,7 @@ def candidate_to_office_link_sync_out_view(request):  # candidateToOfficeLinkSyn
             'google_civic_election_id', 'state_code')
         if candidate_to_office_link_dict:
             candidate_to_office_link_json = list(candidate_to_office_link_dict)
-            return HttpResponse(json.dumps(candidate_to_office_link_json), content_type='application/json')
+            return HttpResponse(json.dumps(candidate_to_office_link_json, default=str), content_type='application/json')
     except CandidateToOfficeLink.DoesNotExist:
         pass
 
@@ -284,7 +284,7 @@ def candidate_to_office_link_sync_out_view(request):  # candidateToOfficeLinkSyn
         'success': False,
         'status': 'CANDIDATE_TO_OFFICES_LINK_SYNC_OUT_VIEW-LIST_MISSING '
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return HttpResponse(json.dumps(json_data, default=str), content_type='application/json')
 
 
 @login_required

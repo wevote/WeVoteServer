@@ -39,6 +39,7 @@ from wevote_functions.functions import convert_to_int, generate_random_string, g
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from voter.controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
     voter_merge_two_accounts_action, voter_save_photo_from_file_reader
+from .controllers_voter_create import create_dev_user
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, \
@@ -2031,3 +2032,8 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'voter/voter_summary.html', template_values)
+
+
+def create_dev_user_view(request):
+    create_dev_user()
+    return None
