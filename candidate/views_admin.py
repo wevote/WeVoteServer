@@ -682,8 +682,8 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        # timezone = pytz.timezone("America/Los_Angeles")
-        # datetime_now = timezone.localize(datetime.now())
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
         datetime_now = get_timezone_and_datetime_now()[1]
         seo_friendly_path_missing = 0
         update_list = []
@@ -755,8 +755,8 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        # timezone = pytz.timezone("America/Los_Angeles")
-        # datetime_now = timezone.localize(datetime.now())
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
         datetime_now = get_timezone_and_datetime_now()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
@@ -1212,8 +1212,8 @@ def candidate_list_view(request):
             election = results['election']
             ballot_returned_list_manager = BallotReturnedListManager()
             batch_manager = BatchManager()
-            # timezone = pytz.timezone("America/Los_Angeles")
-            # datetime_now = timezone.localize(datetime.now())
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
             timezone, datetime_now = get_timezone_and_datetime_now()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
@@ -2470,8 +2470,8 @@ def candidate_change_names(changes):
             candidate_list = list(candidate_query)
             candidate = candidate_list[0]
             setattr(candidate, 'candidate_name', change['name_after'])
-            # timezone = pytz.timezone("America/Los_Angeles")
-            # datetime_now = timezone.localize(datetime.now())
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
             datetime_now = get_timezone_and_datetime_now()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
