@@ -22,7 +22,7 @@ import pytz
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer, get_current_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1294,9 +1294,10 @@ def create_campaignx_supporters_from_positions(
     position_we_vote_id_list_to_create = []
     status = ''
     success = True
-    timezone = pytz.timezone("America/Los_Angeles")
-    datetime_now = timezone.localize(datetime.now())
-    date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+    # timezone = pytz.timezone("America/Los_Angeles")
+    # datetime_now = timezone.localize(datetime.now())
+    # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+    date_today_as_integer = get_current_date_as_integer()
     voter_we_vote_id_list = []  # Must be signed in to create a campaignx_supporter entry from friends_only_positions
 
     if positive_value_exists(friends_only_positions):
@@ -1510,9 +1511,10 @@ def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_w
         from politician.models import Politician
         from representative.controllers import update_representative_details_from_campaignx
         from representative.models import Representative
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
-        date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+        date_today_as_integer = get_current_date_as_integer()
 
         queryset = CampaignX.objects.using('readonly').all()
         queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
@@ -2847,9 +2849,10 @@ def delete_campaignx_supporters_after_positions_removed(
     campaignx_supporter_id_list_to_delete = []
     status = ''
     success = True
-    timezone = pytz.timezone("America/Los_Angeles")
-    datetime_now = timezone.localize(datetime.now())
-    date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+    # timezone = pytz.timezone("America/Los_Angeles")
+    # datetime_now = timezone.localize(datetime.now())
+    # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+    date_today_as_integer = get_current_date_as_integer()
     update_message = ''
 
     try:
