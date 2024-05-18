@@ -683,7 +683,6 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
         seo_friendly_path_missing = 0
         update_list = []
         updates_needed = False
@@ -756,7 +755,6 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False
@@ -2468,7 +2466,6 @@ def candidate_change_names(changes):
             setattr(candidate, 'candidate_name', change['name_after'])
             timezone = pytz.timezone("America/Los_Angeles")
             datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
             count += 1
