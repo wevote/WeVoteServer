@@ -969,6 +969,9 @@ def candidate_list_view(request):
                 new_filter = Q(ballotpedia_candidate_summary__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ballotpedia_candidate_url__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(ballotpedia_office_id__icontains=one_word)
                 filters.append(new_filter)
 
@@ -1945,21 +1948,21 @@ def candidate_new_view(request):
             },
             'google_civic_candidate_name_dict':              
             {
-                'label':    'Candidate Name1 (for Google Civic matching)',
+                'label':    'Candidate Alt Name1',
                 'id':       'google_civic_candidate_name_id',
                 'name':     'google_civic_candidate_name',
                 'value':     google_civic_candidate_name
             },
             'google_civic_candidate_name2_dict':              
             {
-                'label':    'Candidate Name2 (for Google Civic matching)',
+                'label':    'Candidate Alt Name2',
                 'id':       'google_civic_candidate_name2_id',
                 'name':     'google_civic_candidate_name2',
                 'value':     google_civic_candidate_name2
             },
             'google_civic_candidate_name3_dict':              
             {
-                'label':    'Candidate Name3 (for Google Civic matching)',
+                'label':    'Candidate Alt Name3',
                 'id':       'google_civic_candidate_name3_id',
                 'name':     'google_civic_candidate_name3',
                 'value':     google_civic_candidate_name3
@@ -2298,21 +2301,21 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'google_search_possibility_total_count':    google_search_possibility_total_count,
             'google_civic_candidate_name_dict':              
             {
-                'label':    'Candidate Name1 (for Google Civic matching)',
+                'label':    'Candidate Alt Name1',
                 'id':       'google_civic_candidate_name_id',
                 'name':     'google_civic_candidate_name',
                 'value':     google_civic_candidate_name if google_civic_candidate_name else candidate_on_stage.google_civic_candidate_name
             },
             'google_civic_candidate_name2_dict':              
             {
-                'label':    'Candidate Name2 (for Google Civic matching)',
+                'label':    'Candidate Alt Name2',
                 'id':       'google_civic_candidate_name2_id',
                 'name':     'google_civic_candidate_name2',
                 'value':     google_civic_candidate_name2 if google_civic_candidate_name2 else candidate_on_stage.google_civic_candidate_name2
             },
             'google_civic_candidate_name3_dict':              
             {
-                'label':    'Candidate Name3 (for Google Civic matching)',
+                'label':    'Candidate Alt Name3',
                 'id':       'google_civic_candidate_name3_id',
                 'name':     'google_civic_candidate_name3',
                 'value':     google_civic_candidate_name3 if google_civic_candidate_name3 else candidate_on_stage.google_civic_candidate_name3

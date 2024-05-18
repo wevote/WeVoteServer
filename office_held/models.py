@@ -389,7 +389,8 @@ class OfficeHeldManager(models.Manager):
                 city = address.split(', ')[-2]
                 city = city.lower()
                 if positive_value_exists(state_code):
-                    queryset = queryset.filter(normalized_state__iexact=state_code)
+                    if positive_value_exists(state_code) and len(state_code) == 2:
+                        queryset = queryset.filter(normalized_state__iexact=state_code)
                 # Searching by city is not critical for internal testing, and can cause problems
                 # if positive_value_exists(city):
                 #     queryset = queryset.filter(normalized_city__iexact=city)
