@@ -805,8 +805,10 @@ class TwitterUserManager(models.Manager):
     def retrieve_twitter_user(twitter_user_id=0, twitter_handle='', read_only=False):
         twitter_user_on_stage = None
         twitter_user_found = False
-        success = False
+        twitter_user_retrieve = False
+        success = True
         status = ""
+        queryset = None
 
         # Strip out the twitter handles "False" or "None"
         if twitter_handle:
@@ -818,26 +820,40 @@ class TwitterUserManager(models.Manager):
             if positive_value_exists(twitter_user_id):
                 status += "RETRIEVE_TWITTER_USER_FOUND_WITH_TWITTER_USER_ID "
                 if read_only:
-                    twitter_user_on_stage = TwitterUser.objects.using('readonly').get(twitter_id=twitter_user_id)
+                    queryset = TwitterUser.objects.using('readonly').filter(twitter_id=twitter_user_id).order_by('-id')
                 else:
-                    twitter_user_on_stage = TwitterUser.objects.get(twitter_id=twitter_user_id)
-                twitter_user_found = True
-                success = True
+                    queryset = TwitterUser.objects.filter(twitter_id=twitter_user_id).order_by('-id')
+                twitter_user_retrieve = True
             elif positive_value_exists(twitter_handle):
                 status += "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE "
                 if read_only:
-                    twitter_user_on_stage = TwitterUser.objects.using('readonly').get(
-                        twitter_handle__iexact=twitter_handle)
+                    queryset = TwitterUser.objects.using('readonly').filter(
+                        twitter_handle__iexact=twitter_handle).order_by('-id')
                 else:
-                    twitter_user_on_stage = TwitterUser.objects.get(twitter_handle__iexact=twitter_handle)
-                twitter_user_found = True
-                success = True
+                    queryset = TwitterUser.objects.filter(twitter_handle__iexact=twitter_handle).order_by('-id')
+                twitter_user_retrieve = True
             else:
                 status += "RETRIEVE_TWITTER_USER_INSUFFICIENT_VARIABLES "
-        except TwitterUser.MultipleObjectsReturned as e:
-            success = False
-            status += "RETRIEVE_TWITTER_USER_MULTIPLE_FOUND "
-            handle_record_found_more_than_one_exception(e, logger=logger, exception_message_optional=status)
+            if twitter_user_retrieve:
+                success = True
+                twitter_user_list = list(queryset)
+                twitter_user_found = len(twitter_user_list) > 0
+                if twitter_user_found:
+                    twitter_user_on_stage = twitter_user_list[0]
+                if len(twitter_user_list) > 1:
+                    status += "RETRIEVE_TWITTER_USER_FOUND_" + str(len(twitter_user_list)) + "_MATCHING_USERS "
+                    log_line = ("TwitterUser.MultipleObjectsReturned for twitter_user_id={0}, twitter_handle={1}, ids=".
+                                format(twitter_user_id, twitter_handle))
+                    for twitter_user in twitter_user_list:
+                        pgid = str(twitter_user.twitter_handle.lower())
+                        log_line += pgid + ", "
+                    logger.warn(log_line)
+                    status += "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE_MULTIPLE_RECORDS_RETURNED_USING"
+                    if positive_value_exists(twitter_user_id):
+                        status += "_ID_" + str(twitter_user_on_stage.id) + " "
+                    else:
+                        status += "_HANDLE_" + str(twitter_user_on_stage.twitter_handle) + " "
+
         except TwitterUser.DoesNotExist:
             success = True
             status += "RETRIEVE_TWITTER_USER_NONE_FOUND "
@@ -1154,7 +1170,7 @@ class TwitterUserManager(models.Manager):
             twitter_profile_background_image_url_https,
             twitter_profile_banner_url_https):
         """
-        Reset an twitter user entry with original image details from we vote image.
+        Reset a Twitter user entry with original image details from we vote image.
         """
         status = ""
         if positive_value_exists(twitter_id):

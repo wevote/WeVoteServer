@@ -53,6 +53,7 @@ from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSIN
     WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS, WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
+from wevote_functions.functions_date import get_timezone_and_datetime_now
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -4200,8 +4201,9 @@ def retrieve_voter_guides_from_friends(
         if not positive_value_exists(len(google_civic_election_id_list)):
             # We also want to exclude voter guides with election_day_text smaller than today's date
             status += "EXCLUDE_PAST_ELECTION_DAYS "
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            datetime_now = get_timezone_and_datetime_now()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
             earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
@@ -4337,8 +4339,9 @@ def retrieve_voter_guides_from_shared_items(
         if not positive_value_exists(len(google_civic_election_id_list)):
             # We also want to exclude voter guides with election_day_text smaller than today's date
             status += "EXCLUDE_PAST_ELECTION_DAYS "
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            datetime_now = get_timezone_and_datetime_now()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
             earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")

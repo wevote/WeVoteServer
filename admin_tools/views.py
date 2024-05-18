@@ -73,10 +73,10 @@ def admin_home_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    logger.info("AdminHome BASE_DIR: %s", BASE_DIR)
-    logger.info("AdminHome PROJECT_PATH: %s", PROJECT_PATH)
-    pth_root_static_css = os.path.join(BASE_DIR, 'static/v1/apis_v1.css')
-    logger.info("AdminHome os.path.isfile BASE_DIR, static/v1/apis_v1.css : %s", os.path.isfile(pth_root_static_css))
+    # logger.info("AdminHome BASE_DIR: %s", BASE_DIR)
+    # logger.info("AdminHome PROJECT_PATH: %s", PROJECT_PATH)
+    # pth_root_static_css = os.path.join(BASE_DIR, 'static/v1/apis_v1.css')
+    # logger.info("AdminHome os.path.isfile BASE_DIR, static/v1/apis_v1.css : %s", os.path.isfile(pth_root_static_css))
     #  May 1, 2024 --  Nginix error:  Not Found: /apis/v1/static/apis_v1.css
 
     # Create a voter_device_id and voter in the database if one doesn't exist yet

@@ -3149,6 +3149,8 @@ class Organization(models.Model):
         verbose_name='url of image from facebook', blank=True, null=True)
     facebook_background_image_url_https = models.TextField(
         verbose_name='url of cover image from facebook', blank=True, null=True)
+    facebook_photo_url = models.TextField(blank=True, null=True)
+    facebook_photo_url_is_placeholder = models.BooleanField(default=False)
     facebook_url_is_broken = models.BooleanField(default=False)
 
     # Twitter information

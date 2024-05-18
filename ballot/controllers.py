@@ -23,6 +23,7 @@ from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, Vote
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
     process_request_from_master, strip_html_tags
+from wevote_functions.functions_date import get_timezone_and_datetime_now
 from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -2136,8 +2137,9 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
         # If the voter_device_link was updated within the last day, use that election_id.
         # We do this check because we don't want a voter to return to an election they are just investigating which
         # may not be related to their address.
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         election_choice_is_stale_boolean = False
         election_choice_is_stale_duration = timedelta(days=1)
         election_choice_is_stale_date = datetime_now
@@ -2203,8 +2205,9 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
         # If the voter_address was updated more than 7 days ago, check for a more current ballot.
         # We do this check because we don't want a voter to return 1 year later and be returned to the old election,
         # nor do we want to assume the ballot from a week ago is the most current for their location/address.
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         election_choice_is_stale_boolean = False
         election_choice_is_stale_duration = timedelta(days=7)
         election_choice_is_stale_date = datetime_now

@@ -2565,8 +2565,13 @@ class CandidateCampaign(models.Model):
         verbose_name='website url of candidate', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
+    # This is the URL for the candidate's photo on Facebook's servers
+    facebook_photo_url = models.TextField(blank=True, null=True)
+    facebook_photo_url_is_broken = models.BooleanField(default=False)
+    facebook_photo_url_is_placeholder = models.BooleanField(default=False)
     facebook_url = models.TextField(blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(default=False)
+    # facebook_url_could_not_be_retrieved = models.BooleanField(default=False)
     # Some ambiguity to be resolved. In some places this variable is used for photo url on Facebook servers.
     # Should be the master image url cached on We Vote servers.
     facebook_profile_image_url_https = models.TextField(

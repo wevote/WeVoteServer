@@ -21,6 +21,11 @@
         <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
                         target="_blank" >
             Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+
+{# # 2024-05-15: Causing problems on live servers #}
+{#        <li><a href="{% url 'politician:update_recommended_politicians' %}?state_code={{ state_code }}"#}
+{#                        target="_blank" >#}
+{#            Update recommended politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
         <li>
             <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >
                 Repair Politician Names</a>,

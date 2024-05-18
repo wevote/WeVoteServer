@@ -57,7 +57,7 @@ from wevote_functions.functions import convert_to_int, \
     get_voter_api_device_id, get_voter_device_id, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -681,8 +681,9 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         seo_friendly_path_missing = 0
         update_list = []
         updates_needed = False
@@ -753,8 +754,9 @@ def candidate_list_view(request):
         politician_dict_list = {}
         for one_politician in politician_list:
             politician_dict_list[one_politician.we_vote_id] = one_politician
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
+        # timezone = pytz.timezone("America/Los_Angeles")
+        # datetime_now = timezone.localize(datetime.now())
+        datetime_now = get_timezone_and_datetime_now()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False
@@ -1167,25 +1169,27 @@ def candidate_list_view(request):
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
     facebook_urls_without_picture_urls = 0
-    if positive_value_exists(google_civic_election_id):
-        try:
-            candidate_facebook_missing_query = CandidateCampaign.objects.all()
-            candidate_facebook_missing_query = \
-                candidate_facebook_missing_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+    try:
+        count_queryset = CandidateCampaign.objects.using('readonly').all()
+        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_broken=True)
+        count_queryset = count_queryset.exclude(facebook_photo_url_is_placeholder=True)
+        count_queryset = count_queryset.exclude(facebook_url_is_broken=True)
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
-            # include profile images that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query. \
-                filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
+        # Exclude candidates without facebook_url
+        count_queryset = count_queryset.exclude(
+            Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
 
-            # exclude facebook_urls that are null or ''
-            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(
-                Q(facebook_url__isnull=True) | Q(facebook_url__iexact=''))
-            candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url_is_broken=True)
+        # Find candidates that don't have a photo (i.e. that are null or '')
+        count_queryset = count_queryset. \
+            filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
-            facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
-
-        except Exception as e:
-            logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
+        # candidates_to_review = list(count_queryset)
+        facebook_urls_without_picture_urls = count_queryset.count()
+    except Exception as e:
+        logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     status_print_list = ""
     status_print_list += "{candidate_list_count:,} candidates found." \
@@ -1206,8 +1210,9 @@ def candidate_list_view(request):
             election = results['election']
             ballot_returned_list_manager = BallotReturnedListManager()
             batch_manager = BatchManager()
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            timezone, datetime_now = get_timezone_and_datetime_now()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                 if date_of_election > datetime_now:
@@ -2461,8 +2466,9 @@ def candidate_change_names(changes):
             candidate_list = list(candidate_query)
             candidate = candidate_list[0]
             setattr(candidate, 'candidate_name', change['name_after'])
-            timezone = pytz.timezone("America/Los_Angeles")
-            datetime_now = timezone.localize(datetime.now())
+            # timezone = pytz.timezone("America/Los_Angeles")
+            # datetime_now = timezone.localize(datetime.now())
+            datetime_now = get_timezone_and_datetime_now()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
             count += 1
@@ -2603,17 +2609,13 @@ def candidate_edit_process_view(request):
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
-        # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
-        res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
-        if res is None:
-            print('withdrawal_date is invalid: ' + withdrawal_date)
-            messages.add_message(request, messages.ERROR, 'Could not save candidate. If the "Candidate Has Withdrawn '
-                                                          'From Election" is True, then the date in the field must be '
-                                                          'in the YYYY-MM-DD format')
-            if positive_value_exists(candidate_id):
-                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
-            else:
-                return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
+        try:
+            res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
+            if res is None:
+                status += "withdrawal_date is invalid: " + withdrawal_date + " "
+        except Exception as e:
+            status += "withdrawal_date_PROCESSING_FAILED: " + withdrawal_date + ": " + str(e) + " "
+            withdrawal_date = None
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False

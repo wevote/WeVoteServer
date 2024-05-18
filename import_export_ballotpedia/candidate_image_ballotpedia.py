@@ -69,7 +69,7 @@ def get_candidate_urls_table(url):
 
 
 # This will extract candidate image from list of candidate urls
-def get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(candidate_urls):
+def print_ballotpedia_photo_url_from_ballotpedia_candidate_urls(candidate_urls):
     for url in candidate_urls:
         soup = get_parsed_html(url)
         for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
@@ -92,21 +92,21 @@ def test_get_all_candidate_img_from_state_elections(url):
     for state in state_elections_info:
         print(state)
         candidate_urls = get_candidate_urls_page(state[0])
-        get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(candidate_urls)
+        print_ballotpedia_photo_url_from_ballotpedia_candidate_urls(candidate_urls)
 
 
 # Function to retrieve all candidate images from state elections information.
 def test_get_all_candidate_img_from_presidential_election(url):
     print(get_page_name(url))
     candidate_urls = get_candidate_urls_table(url)
-    get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(candidate_urls)
+    print_ballotpedia_photo_url_from_ballotpedia_candidate_urls(candidate_urls)
 
 
 # Function to retrieve candidate image from candidate page
 def test_get_candidate_img_from_single_candidate_page(url):
     print(get_page_name(url))
     candidate_url = [url]
-    get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(candidate_url)
+    print_ballotpedia_photo_url_from_ballotpedia_candidate_urls(candidate_url)
 
 
 def main():

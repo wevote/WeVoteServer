@@ -55,12 +55,16 @@
             {% if organization.we_vote_hosted_profile_image_url_tiny %}
                 <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
             {% endif %}
+            {% if organization.organization_name %}
                 <span class="h3">{{ organization.organization_name }}</span>
+            {% else %}
+                <span class="h3">Endorser Name Missing</span>
+            {% endif %}
             {% if has_suggested_voter_guide_rights and organization.we_vote_id %}
                 &nbsp;
                 <a href="{% url "organization:organization_position_list" organization.id %}"
                    target="_blank"
-                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                   class="u-no-break">{% if organization.organization_name %}(edit){% else %}(please add name){% endif %}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if organization.organization_twitter_handle %}
                 <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"

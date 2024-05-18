@@ -1604,7 +1604,7 @@ def voter_plan_list_retrieve_view(request):  # voterPlanListRetrieve
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),  # what the format constant used to be
             'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,

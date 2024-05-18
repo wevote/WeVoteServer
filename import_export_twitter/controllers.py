@@ -2855,6 +2855,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
         request_token_dict = auth.request_token
         twitter_request_token = ''
         twitter_request_token_secret = ''
+        logger.error("tweepy OAuth1UserHandler (WeVote) request_token_dict = %s", str(request_token_dict))
 
         if 'oauth_token' in request_token_dict:
             twitter_request_token = request_token_dict['oauth_token']
@@ -2882,6 +2883,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR '
+        logger.error('twitter_sign_in_start_for_api %s', status)
     except tweepy.TweepyException as error_instance:
         success = False
         err_string = 'GENERAL_TWEEPY_EXCEPTION '
@@ -2892,9 +2894,11 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
             pass
         print(err_string)
         status = 'TWITTER_SIGN_IN_START: {}'.format(err_string)
+        logger.error('twitter_sign_in_start_for_api %s', status)
     except Exception as e1:
         success = False
         status = 'TWITTER_SIGN_IN_START: {}'.format(e1)
+        logger.error('twitter_sign_in_start_for_api %s', status)
 
     if success:
         results = {
@@ -3173,8 +3177,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
             mark_detailed_counter_entry(counter, success, status)
         except Exception:
             pass
-        print(err_string)
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(err_string)
+        logger.error('%s', status)
     except Exception as e:
         success = False
         status += "TWEEPY_EXCEPTION: " + str(e) + " "
