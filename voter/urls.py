@@ -11,6 +11,7 @@ urlpatterns = [
     re_path(r'^authenticate_manually/$', views_admin.voter_authenticate_manually_view, name='authenticate_manually'),
     re_path(r'^authenticate_manually_process/$',
         views_admin.voter_authenticate_manually_process_view, name='authenticate_manually_process'),
+    re_path(r'^create_dev_user/$', views_admin.create_dev_user_view, name='create_dev_user'),
     re_path(r'^delete_process/$', views_admin.voter_delete_process_view, name='voter_delete_process'),
     re_path(r'^edit_process/$', views_admin.voter_edit_process_view, name='voter_edit_process'),
     re_path(r'^edit/(?P<voter_we_vote_id>wv[\w]{2}voter[\w]+)$',

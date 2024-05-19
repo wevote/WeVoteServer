@@ -289,7 +289,7 @@ def update_or_create_weekly_metrics_one_volunteer(
     if not positive_value_exists(voter_we_vote_id):
         status += 'MISSING_VOTER_WE_VOTE_ID '
         missing_required_variable = True
-    if not which_day_is_end_of_week:
+    if which_day_is_end_of_week not in [0, 1, 2, 3, 4, 5, 6]:
         status += 'MISSING_WEEKDAY '
         missing_required_variable = True
 
