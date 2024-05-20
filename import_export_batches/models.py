@@ -425,6 +425,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_twitter_handle': 'organization_twitter_handle',
     'organization_website': 'organization_website',
     'organization_we_vote_id': 'organization_we_vote_id',
+    'organization_wikipedia': 'organization_wikipedia',
     'organization_zip': 'organization_zip',
     'organization_type': 'organization_type',
     'state_served_code': 'state_served_code',
@@ -6278,6 +6279,7 @@ class BatchRowActionOrganization(models.Model):
     organization_contact_form_url = models.URLField(
         verbose_name='url of the organization contact form', max_length=255, blank=True, null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
+    organization_wikipedia = models.URLField(verbose_name='url of wikipedia page', blank=True, null=True)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_ballotpedia = models.URLField(verbose_name='url of ballotpedia page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
