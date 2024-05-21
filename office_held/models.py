@@ -390,12 +390,7 @@ class OfficeHeldManager(models.Manager):
                 city = city.lower()
                 if positive_value_exists(state_code):
                     if positive_value_exists(state_code) and len(state_code) == 2:
-                        queryset = queryset.filter(normalized_state__iexact=state_code)
-                # Searching by city is not critical for internal testing, and can cause problems
-                # if positive_value_exists(city):
-                #     queryset = queryset.filter(normalized_city__iexact=city)
-            else:
-                queryset = queryset.filter(text_for_map_search__icontains=text_for_map_search)
+                        queryset = queryset.filter(state_code__iexact=state_code)
 
             # if positive_value_exists(google_civic_election_id):
             #     queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -478,90 +473,6 @@ class OfficeHeldManager(models.Manager):
             except Exception as e:
                 offices_held_for_location = None
                 status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
-
-            # if positive_value_exists(google_civic_election_id):
-            #     status += "SEARCHING_BY_GOOGLE_CIVIC_ID "
-            #     queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
-            #     try:
-            #         offices_held_for_location = queryset.first()
-            #         if offices_held_for_location == None:
-            #             status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID__BALLOT_NONE "
-            #         else:
-            #             status += "SUBSTITUTED_BALLOT_DISTANCE1: " + str(offices_held_for_location.distance) + " "
-            #             # print('===== 1 ===== offices_held_for_location.distance', offices_held_for_location.distance, offices_held_for_location.latitude, offices_held_for_location.longitude,
-            #             #       text_for_map_search)
-            #     except Exception as e:
-            #         offices_held_for_location = None
-            #         status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
-            #     # offices_held_for_location_list = list(queryset)
-            #     # if len(offices_held_for_location_list):
-            #     #     offices_held_for_location = offices_held_for_location_list[0]
-            # else:
-            #     # If we have an active election coming up, including today
-            #     # fetch_next_upcoming_election_in_this_state returns next election with offices_held_for_location items
-            #     status += "FETCH_NEXT_UPCOMING_ELECTION_IN_THIS_STATE "
-            #     upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(state_code)
-            #     if positive_value_exists(upcoming_google_civic_election_id):
-            #         queryset_without_election_id = queryset
-            #         queryset = queryset.filter(
-            #             google_civic_election_id=upcoming_google_civic_election_id)
-            #         try:
-            #             offices_held_for_location = queryset.first()
-            #             if offices_held_for_location == None:
-            #                 status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED-" \
-            #                           "HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
-            #             else:
-            #                 status += "SUBSTITUTED_BALLOT_DISTANCE2: " + str(offices_held_for_location.distance) + " "
-            #                 # print('===== 2 ===== offices_held_for_location.distance', offices_held_for_location.distance, offices_held_for_location.latitude, offices_held_for_location.longitude,
-            #                 #       text_for_map_search)
-            #         except Exception as e:
-            #             offices_held_for_location = None
-            #             status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED-" \
-            #                       "HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
-            #         # offices_held_for_location_list = list(queryset)
-            #         # if len(offices_held_for_location_list):
-            #         #     offices_held_for_location = offices_held_for_location_list[0]
-            #         # What if this is a National election, but there aren't any races in the state the voter is in?
-            #         # We want to find the *next* upcoming election
-            #         if offices_held_for_location is None:
-            #             offices_held_for_location_not_found = True
-            #             more_elections_exist = True
-            #             skip_these_elections = []
-            #             safety_valve_count = 0
-            #             while offices_held_for_location_not_found and more_elections_exist and safety_valve_count < 20:
-            #                 safety_valve_count += 1
-            #                 # Reset queryset
-            #                 queryset = queryset_without_election_id
-            #                 skip_these_elections.append(upcoming_google_civic_election_id)
-            #                 upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(
-            #                     state_code, skip_these_elections)
-            #                 if positive_value_exists(upcoming_google_civic_election_id):
-            #                     queryset = queryset.filter(
-            #                         google_civic_election_id=upcoming_google_civic_election_id)
-            #                     try:
-            #                         offices_held_for_location = queryset.first()
-            #                         if offices_held_for_location == None:
-            #                             status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED-" \
-            #                                       "BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
-            #                         else:
-            #                             status += "SUBSTITUTED_BALLOT_DISTANCE3: " + str(offices_held_for_location.distance) + " "
-            #                             # print('===== 3 ===== offices_held_for_location.distance', offices_held_for_location.distance, offices_held_for_location.latitude,
-            #                             #       offices_held_for_location.longitude, text_for_map_search)
-            #                     except Exception as e:
-            #                         offices_held_for_location = None
-            #                         status += "OFFICES_HELD_FOR_LOCATION_QUERY_FIRST_FAILED-" \
-            #                                   "BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
-            #                     # offices_held_for_location_list = list(queryset)
-            #                     # if len(offices_held_for_location_list):
-            #                     #     offices_held_for_location = offices_held_for_location_list[0]
-            #                     if offices_held_for_location is not None:
-            #                         offices_held_for_location_not_found = False
-            #                 else:
-            #                     more_elections_exist = False
-            #     else:
-            #         offices_held_for_location = None
-            #         status += "NOT_LOOKING_FOR_PREVIOUS_ELECTION "
-            #         # We no longer want to automatically return the previous election for this voter
 
         if offices_held_for_location is not None:
             offices_held_for_location_found = True
