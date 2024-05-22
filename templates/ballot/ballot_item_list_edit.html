@@ -236,7 +236,7 @@
     </label>
     <div class="col-sm-8">
         <input type="submit" id="update_ballot_id"
-               value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" />
+               value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" class="btn btn-primary" />
         {% if ballot_returned and ballot_returned.polling_location_we_vote_id %}
           &nbsp;&nbsp;&nbsp;&nbsp;
           <a href="{% url 'polling_location:polling_location_we_vote_id_edit' ballot_returned.polling_location_we_vote_id %}" target="_blank">
@@ -342,7 +342,7 @@
     <p>
     {% if election and election.id %}
         <a href="{% url 'election:election_summary' election.id %}">cancel</a>
-        <input type="submit" value="{% if ballot_returned %}Add Office or Measure{% else %}Save New Ballot{% endif %}" />
+        <input type="submit" value="{% if ballot_returned %}Add Office or Measure{% else %}Save New Ballot{% endif %}" class="btn btn-primary" />
     {% endif %}
     </p>
 </form>

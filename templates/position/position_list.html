@@ -177,6 +177,9 @@
                 {% else %}
                     (name unknown)
                 {% endif %}
+                {% if position.state_code %}
+                <span style="color: slategray; font-weight: 400;">({{ position.state_code|upper }}) </span>
+                {% endif %}
                 <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:""|truncatechars:250 }}</span>
             </td>
         </tr>
