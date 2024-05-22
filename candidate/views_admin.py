@@ -1205,7 +1205,7 @@ def candidate_list_view(request):
 
         # Exclude candidates without wikipedia_candidate_url
         count_queryset = count_queryset. \
-            exclude(Q(wikipedia_page_title__isnull=True) | Q(wikipedia_page_titlel__exact=''))
+            exclude(Q(wikipedia_url__isnull=True) | Q(wikipedia_url__exact=''))
 
         # Find candidates that don't have a photo (i.e. that are null or '')
         count_queryset = count_queryset.filter(

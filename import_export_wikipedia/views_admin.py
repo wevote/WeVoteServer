@@ -94,7 +94,7 @@ def bulk_retrieve_wikipedia_photos_view(request):
         # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset. \
-            exclude(Q(wikipedia_page_title__isnull=True) | Q(wikipedia_page_title__exact=''))
+            exclude(Q(wikipedia_url__isnull=True) | Q(wikipedia_url__exact=''))
         # Only include candidates that don't have a photo
         queryset = queryset.filter(
             Q(wikipedia_photo_url__isnull=True) | Q(wikipedia_photo_url__iexact=''))
@@ -124,7 +124,7 @@ def bulk_retrieve_wikipedia_photos_view(request):
                     add_messages=add_messages)
                 status += get_results['status']
             else:
-                logger.info("Skipped Page Title: " + one_candidate.wikipedia_page_title)
+                logger.info("Skipped URL: " + one_candidate.wikipedia_url)
                 already_stored += 1
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing

@@ -19,7 +19,7 @@ from election.models import BallotpediaElection, ElectionManager, Election
 from exception.models import handle_exception
 from geopy.geocoders import get_geocoder_for_service
 from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, \
-    organize_object_photo_fields_based_on_image_type_currently_active
+    organize_object_photo_fields_based_on_image_type_currently_active, IMAGE_SOURCE_WIKIPEDIA
 from organization.controllers import save_image_to_organization_table
 from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager
@@ -33,7 +33,7 @@ import re
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, \
-    RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS
+    RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS, RETRIEVE_POSSIBLE_WIKIPEDIA_PHOTOS
 
 import wikipedia  # https://pypi.python.org/pypi/wikipedia
 
@@ -57,22 +57,25 @@ def get_photo_url_from_wikipedia(
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
 
-    if hasattr(incoming_object, 'wikipedia_page_title'):
-        wikipedia_page_title = incoming_object.wikipedia_page_title
-        wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')')
-        google_civic_election_id = incoming_object.google_civic_election_id
-        is_candidate = True
-    elif hasattr(incoming_object, 'wikipedia_politician_url'):
-        wikipedia_page_url = incoming_object.wikipedia_politician_url
+    # if hasattr(incoming_object, 'wikipedia_page_title'):
+    #     wikipedia_page_title = incoming_object.wikipedia_page_title
+    #     wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+    #     google_civic_election_id = incoming_object.google_civic_election_id
+    #     is_candidate = True
+    elif hasattr(incoming_object, 'wikipedia_url'):
+        wikipedia_page_url = incoming_object.wikipedia_url
+
         google_civic_election_id = ''
         is_politician = True
     else:
         wikipedia_page_url = incoming_object.organization_wikipedia
         google_civic_election_id = ''
         is_candidate = False
+    wikipedia_page_title = wikipedia_page_url.split('/')[-1]
+    wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')').replace('_', ' ')
 
-    if not positive_value_exists(wikipedia_page_title):
-        status += "MISSING_WIKIPEDIA_PAGE_TITLE "
+    if not positive_value_exists(wikipedia_page_url):
+        status += "MISSING_WIKIPEDIA_PAGE_URL "
         results = {
             'success': success,
             'status': status,
@@ -80,10 +83,10 @@ def get_photo_url_from_wikipedia(
         return results
 
     incoming_object_changes = False
-    # if positive_value_exists(wikipedia_page_url) and not wikipedia_page_url.startswith('http'):
-    #     wikipedia_page_url = 'https://' + wikipedia_page_url
-    #     incoming_object.wikipedia_page_url = wikipedia_page_url
-    #     incoming_object_changes = True
+    if positive_value_exists(wikipedia_page_url) and not wikipedia_page_url.startswith('http'):
+        wikipedia_page_url = 'https://' + wikipedia_page_url
+        incoming_object.wikipedia_page_url = wikipedia_page_url
+        incoming_object_changes = True
     print(wikipedia_page_title)
     results = retrieve_images_from_wikipedia(wikipedia_page_title)
     if results.get('success'):
@@ -114,9 +117,9 @@ def get_photo_url_from_wikipedia(
         elif results.get('is_silhouette'):
             if is_candidate or is_politician:
                 incoming_object_changes = True
-                incoming_object.ballotpedia_photo_url = None
-                incoming_object.ballotpedia_photo_url_is_broken = False
-                incoming_object.ballotpedia_photo_url_is_placeholder = True
+                incoming_object.wikipedia_photo_url = None
+                incoming_object.wikipedia_photo_url_is_broken = False
+                incoming_object.wikipedia_photo_url_is_placeholder = True
                 if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
                     incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     incoming_object.we_vote_hosted_profile_image_url_large = None
@@ -129,7 +132,7 @@ def get_photo_url_from_wikipedia(
                     else:
                         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
         else:
-            status += "BALLOTPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + wikipedia_page_url + " "
+            status += "WIKIPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + wikipedia_page_url + " "
             status += results['status']
 
         if save_to_database and incoming_object_changes:
@@ -156,7 +159,7 @@ def get_photo_url_from_wikipedia(
                     status="CANDIDATE_WIKIPEDIA_URL_IS_PLACEHOLDER_SILHOUETTE:" + str(photo_url))
         elif results['photo_url_found']:
             # Success!
-            logger.info("Queried URL: " + wikipedia_page_url + " ==> " + photo_url)
+            # logger.info("Queried URL: " + wikipedia_page_url + " ==> " + photo_url)
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Wikipedia photo retrieved.')
             if save_to_database:
@@ -165,6 +168,7 @@ def get_photo_url_from_wikipedia(
                         candidate=incoming_object,
                         image_url=photo_url,
                         source_link=wikipedia_page_url,
+                        # source_link="",
                         url_is_broken=False,
                         kind_of_source_website=IMAGE_SOURCE_WIKIPEDIA)
                     if results['success']:
@@ -983,17 +987,34 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 
 
 def retrieve_images_from_wikipedia(page_title):
-    response = {"success": True, "status": "", "result": None}
+    clean_message = ''
+    is_silhouette = False
+    photo_url = ''
+    photo_url_found = True
+
+    response = {
+        "success": True,
+        "status": "", "result": None,
+        'clean_message': clean_message,
+        'is_silhouette': is_silhouette,
+        'photo_url': photo_url,
+        'photo_url_found': photo_url_found,
+    }
     try:
         page = wikipedia.page(title=page_title, pageid=None, auto_suggest=False)
         page_html = page.html()
         # TODO what if wikipedia layout changes?
         page_dom = BeautifulSoup(page_html, 'html.parser')
         img_link = page_dom.find('img').get('src')
+        img_link = img_link.replace('//', 'https://')
         response["status"] += "SUCCESS "
         response["result"] = img_link
+        response["photo_url"] = img_link
+        print(img_link)
     except Exception as retrievePageError:
         response["success"] = False
         response["status"] += "RETRIEVE_IMAGES_FROM_WIKIPEDIA_ERROR "
         response["result"] = None
+        response["clean_message"] = str(retrievePageError)
+        response["page_title_found"] = False
     return response

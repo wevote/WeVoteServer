@@ -115,6 +115,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'wikipedia_photo_url',
     'wikipedia_photo_url_is_broken',
     'wikipedia_photo_url_is_placeholder',
+    'wikipedia_url',
     'withdrawal_date',
     'withdrawn_from_election',
     'youtube_url',
@@ -2314,6 +2315,7 @@ class CandidateListManager(models.Manager):
                     'wikipedia_photo_url': candidate.wikipedia_photo_url,
                     'wikipedia_photo_url_is_broken': candidate.wikipedia_photo_url_is_broken,
                     'wikipedia_photo_url_is_placeholder': candidate.wikipedia_photo_url_is_placeholder,
+                    'wikipedia_url': candidate.wikipedia_url,
 
                 }
                 candidate_list_json.append(one_candidate.copy())

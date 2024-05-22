@@ -2383,6 +2383,8 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 if positive_value_exists(candidate.is_battleground_race) else False,
                                 'withdrawn_from_election':      candidate.withdrawn_from_election,
                                 'withdrawal_date':              withdrawal_date,
+                                'wikipedia_url': candidate.wikipedia_url,
+
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
