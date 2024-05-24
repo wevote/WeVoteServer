@@ -45,8 +45,10 @@ class TwitterAuthResponse(models.Model):
     twitter_profile_banner_url_https = models.URLField(verbose_name='url of banner from twitter', blank=True, null=True)
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
-    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token', null=True, blank=True)
-    twitter_voters_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_voters_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
+    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token secret', null=True, blank=True)
+    twitter_voters_oauth_token = models.TextField(verbose_name='twitter voter client oauth_token', null=True, blank=True)
+    twitter_voters_oauth_verifier = models.TextField(verbose_name='twitter voter client oauth_verifier', null=True, blank=True)
     twitter_description = models.TextField(verbose_name='twitter description', null=True, blank=True)
     twitter_location = models.TextField(verbose_name='twitter location', null=True, blank=True)
     twitter_verified= models.BooleanField(verbose_name='twitter verified', default=False)
@@ -68,8 +70,8 @@ class TwitterAuthManager(models.Manager):
             profile_image_url='',
             twitter_request_token='',
             twitter_request_secret='',
-            voters_access_token='',
-            voters_access_token_secret='',
+            twitter_voters_access_token='',
+            twitter_voters_access_token_secret='',
             description='',
             location='',
             verified='',
@@ -91,10 +93,10 @@ class TwitterAuthManager(models.Manager):
             defaults["twitter_request_token"] = twitter_request_token
         if positive_value_exists(twitter_request_secret):
             defaults["twitter_request_secret"] = twitter_request_secret
-        if positive_value_exists(voters_access_token):
-            defaults["twitter_voters_access_token_secret"] = voters_access_token
-        if positive_value_exists(voters_access_token_secret):
-            defaults["twitter_voters_access_secret"] = voters_access_token_secret
+        if positive_value_exists(twitter_voters_access_token):
+            defaults["twitter_voters_access_token"] = twitter_voters_access_token
+        if positive_value_exists(twitter_voters_access_token_secret):
+            defaults["twitter_voters_access_token_secret"] = twitter_voters_access_token_secret
         if positive_value_exists(description):
             defaults["twitter_description"] = description
         if positive_value_exists(location):
@@ -170,6 +172,10 @@ class TwitterAuthManager(models.Manager):
             'twitter_auth_response_found': twitter_auth_response_found,
             'twitter_auth_response_id': twitter_auth_response_id,
             'twitter_auth_response': twitter_auth_response,
+            'twitter_voters_oauth_token': twitter_auth_response.twitter_voters_oauth_token,
+            'twitter_voters_oauth_verifier': twitter_auth_response.twitter_voters_oauth_verifier,
+            'twitter_voters_access_token': twitter_auth_response.twitter_voters_access_token,
+            'twitter_voters_access_token_secret': twitter_auth_response.twitter_voters_access_token_secret,
         }
         return results
 

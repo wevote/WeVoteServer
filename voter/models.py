@@ -894,7 +894,7 @@ class VoterManager(BaseUserManager):
             voter.facebook_email = None
             voter.fb_username = None
             voter.linked_organization_we_vote_id = None
-            voter.twitter_voters_access_secret = None
+            voter.twitter_voters_access_token = None
             voter.twitter_voters_access_token_secret = None
             voter.twitter_connection_active = False
             voter.twitter_id = None
@@ -3243,8 +3243,8 @@ class Voter(AbstractBaseUser):
 
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
-    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token', null=True, blank=True)
-    twitter_voters_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_voters_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
+    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token secret', null=True, blank=True)
     twitter_connection_active = models.BooleanField(default=False)
 
     # What notification settings has the voter chosen? This is using a series of bits.

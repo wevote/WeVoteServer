@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 import tweepy
@@ -12,7 +12,6 @@ from django.utils.timezone import localtime, now
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from exception.models import handle_record_found_more_than_one_exception
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 TWITTER_BEARER_TOKEN = get_environment_variable("TWITTER_BEARER_TOKEN")
@@ -947,8 +946,9 @@ class TwitterUserManager(models.Manager):
     @staticmethod
     def retrieve_twitter_ids_i_follow_from_twitter(
             twitter_id_of_me,
+            twitter_voters_access_token,
             twitter_voters_access_token_secret,
-            twitter_voters_access_secret):
+            ):
         """
         We use this routine to retrieve twitter ids who i (the voter) follow
         3/1/22: TwitterCursorState and Cursor is not currently used, we load the first 5000 "follows" in line
@@ -1266,7 +1266,8 @@ class TwitterUserManager(models.Manager):
             else:
                 twitter_profile_image_url_https = ""
             twitter_url = twitter_dict['expanded_url'] if 'expanded_url' in twitter_dict else ""
-            date_last_updated_from_twitter = localtime(now()).date()
+            date_last_updated_from_twitter = datetime.now(timezone.utc)
+            # date_last_updated_from_twitter = localtime(now()).date()
 
             twitter_user_on_stage = TwitterUser(
                 date_last_updated_from_twitter=date_last_updated_from_twitter,
@@ -1437,7 +1438,8 @@ class TwitterUserManager(models.Manager):
                     values_changed = True
             if values_changed:
                 try:
-                    twitter_user.date_last_updated_from_twitter = localtime(now()).date()
+                    # twitter_user.date_last_updated_from_twitter = localtime(now()).date()
+                    twitter_user.date_last_updated_from_twitter = datetime.now(timezone.utc)
                     twitter_user.save()
                     success = True
                     status += "SAVED_TWITTER_USER_DETAILS "
