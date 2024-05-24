@@ -21,7 +21,7 @@ https://developer.x.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-
 ## Tweepy OAuth 1.0a User Context
 https://docs.tweepy.org/en/stable/authentication.html
 
-## Steps
+## Steps (May 24, 2024)
 1) WebApp sends twitterSignInStart
 * Handled by twitter_sign_in_start_view, which calls
   * twitter_sign_in_start_for_api
