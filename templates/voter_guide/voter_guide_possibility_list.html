@@ -6,6 +6,10 @@
 {% block content %}
 {% load template_filters %}
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
 <h1>Voter Guide Possibilities</h1>
 
 <ul>
@@ -76,64 +80,79 @@
     Filters:&nbsp;
 
     {# Return to see voter guides to review #}
-    <span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source and not from_prior_election %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}">
-          To Review
-          ({{ to_review_count }})
-        </a>
+    <span class="mdl-chip" {% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source and not from_prior_election %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}">
+              To Review
+              ({{ to_review_count }})
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Show voter guides suggested from prior elections #}
-    <span{% if from_prior_election %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&from_prior_election=1">
-          From Prior Elections
-          ({{ from_prior_election_count }})
-        </a>
+    <span class="mdl-chip"  {% if from_prior_election %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&from_prior_election=1">
+                  From Prior Elections
+                  ({{ from_prior_election_count }})
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we previously couldn't find endorsements #}
-    <span{% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_cannot_find_endorsements=1">
-          Endorsements Not Available Yet
-          ({{ cannot_find_endorsements_count }})
-        </a>
+    <span class="mdl-chip" {% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_cannot_find_endorsements=1">
+              Endorsements Not Available Yet
+              ({{ cannot_find_endorsements_count }})
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we don't have the matching candidates or measures in our database #}
-    <span{% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_candidates_missing_from_we_vote=1">
-          Candidates/Measures Missing
-          ({{ candidates_missing_count }})
-        </a>
+    <span class="mdl-chip" {% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_candidates_missing_from_we_vote=1">
+                  Candidates/Measures Missing
+                  ({{ candidates_missing_count }})
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
-    <span{% if show_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_capture_detailed_comments=1">
-          Capture Detailed Comments
-          ({{ capture_detailed_comments_count }})
-        </a>
+    <span class="mdl-chip" {% if show_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_capture_detailed_comments=1">
+              Capture Detailed Comments
+              ({{ capture_detailed_comments_count }})
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Return to see voter guides to review #}
-    <span{% if show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_only_hide_from_active_review=1">
-          Stop Reviewing
-        </a>
+    <span class="mdl-chip" {% if show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
+       <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_only_hide_from_active_review=1">
+              Stop Reviewing
+            </a>
+        </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we ignore the source #}
-    <span{% if show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
-        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_ignore_this_source=1">
-            Ignore this Website
-        </a>
+    <span class="mdl-chip" {% if show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_ignore_this_source=1">
+                Ignore this Website
+            </a>
+        </span>
     </span>
+
 </div>
 <form name="voter_guide_possibility_markings" method="post" action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
   {% csrf_token %}
