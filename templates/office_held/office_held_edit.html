@@ -35,7 +35,7 @@
 <p><a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
 {% endif %}
 &nbsp;
-<input type="submit" value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" /></p>
+<input type="submit" value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" class="btn btn-primary" /></p>
 
 <div class="row form-group">
     <label for="office_held_name_id" class="pl-4 control-label">Office Held Name</label>

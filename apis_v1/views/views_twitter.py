@@ -74,6 +74,8 @@ def twitter_oauth1_user_handler_view(request):  # twitterOauth1UserHandler March
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     oauth_token = request.GET.get('oauth_token', '')
     oauth_verifier = request.GET.get('oauth_verifier', '')
+    logger.error('(Ok) twitter_oauth1_user_handler_view oauth_token: %s   oauth_verifier %s', oauth_token,
+                 oauth_verifier)
 
     results = twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_verifier)
 
@@ -90,6 +92,7 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return_url = request.GET.get('return_url', '')
     cordova = request.GET.get('cordova', False)
+    # logger.error('(Ok) twitter_sign_in_start_view twitterSignInStart (Step 1) entry point: %s', str(request.GET))
 
     results = twitter_sign_in_start_for_api(voter_device_id, return_url, cordova)
 
@@ -118,6 +121,7 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
 
 
 def twitter_sign_in_request_view(request):  # twitterSignInRequest (Switch for Step 1 & Step 2)
+    # logger.error('(Ok) twitter_sign_in_request_view entry point: %s', str(request.GET))
     voter_info_mode = request.GET.get('voter_info_mode', 0)
     if positive_value_exists(voter_info_mode):
         return twitter_sign_in_request_voter_info_view(request)
@@ -138,6 +142,7 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
     incoming_oauth_verifier = request.GET.get('oauth_verifier', '')
     return_url = request.GET.get('return_url', '')
     cordova = request.GET.get('cordova', False)
+    # logger.error('(Ok) twitter_sign_in_request_access_token_view entry point: %s', str(request.GET))
 
     results = twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                            incoming_request_token, incoming_oauth_verifier,
@@ -177,6 +182,7 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
     return_url = request.GET.get('return_url', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_info_mode = request.GET.get('voter_info_mode', 0)
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_view: %s', str(request.GET))
 
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 

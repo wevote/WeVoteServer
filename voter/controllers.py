@@ -4801,7 +4801,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         current_voter = repair_results['voter']
 
     # Temporarily store Twitter values from current_voter
-    split_off_twitter_voters_access_secret = current_voter.twitter_voters_access_secret
+    split_off_twitter_voters_access_token = current_voter.twitter_voters_access_token
     split_off_twitter_voters_access_token_secret = current_voter.twitter_voters_access_token_secret
     split_off_twitter_connection_active = current_voter.twitter_connection_active
     split_off_twitter_id = current_voter.twitter_id
@@ -4820,7 +4820,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
         # Make sure we remove any legacy of Twitter
         try:
-            current_voter.twitter_voters_access_secret = None
+            current_voter.twitter_voters_access_token = None
             current_voter.twitter_voters_access_token_secret = None
             current_voter.twitter_connection_active = False
             current_voter.twitter_id = None
@@ -4833,7 +4833,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
         # And now update split_off_voter with the twitter values originally in current_voter
         try:
-            split_off_voter.twitter_voters_access_secret = split_off_twitter_voters_access_secret
+            split_off_voter.twitter_voters_access_token = split_off_twitter_voters_access_token
             split_off_voter.twitter_voters_access_token_secret = split_off_twitter_voters_access_token_secret
             split_off_voter.twitter_connection_active = split_off_twitter_connection_active
             split_off_voter.twitter_id = split_off_twitter_id

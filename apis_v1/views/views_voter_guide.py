@@ -20,7 +20,7 @@ from voter_guide.controllers import voter_guide_possibility_highlights_retrieve_
     voter_guides_to_follow_retrieve_for_api, voter_guides_upcoming_retrieve_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
-    get_voter_device_id, positive_value_exists
+    get_voter_device_id, positive_value_exists, return_value_from_request
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -42,6 +42,7 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
                                                     limit_to_this_year=limit_to_this_year)
 
 
+@csrf_exempt
 def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilityPositionSave
     """
     Update one possible position from one organization on one page.
@@ -49,24 +50,27 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
-    voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
-    ballot_item_name = request.GET.get('ballot_item_name', None)
-    ballot_item_state_code = request.GET.get('ballot_item_state_code', None)
-    candidate_twitter_handle = request.GET.get('candidate_twitter_handle', None)
-    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
-    measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
-    more_info_url = request.GET.get('more_info_url', None)
-    organization_name = request.GET.get('organization_name', None)
-    organization_twitter_handle = request.GET.get('organization_twitter_handle', None)
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
-    position_should_be_removed = request.GET.get('position_should_be_removed', None)
-    position_stance = request.GET.get('position_stance', None)
-    possibility_should_be_deleted = request.GET.get('possibility_should_be_deleted', None)
-    possibility_should_be_ignored = request.GET.get('possibility_should_be_ignored', None)
-    statement_text = request.GET.get('statement_text', None)
+    is_post = True if request.method == 'POST' else False
 
-    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
+    voter_guide_possibility_id = return_value_from_request(request, 'voter_guide_possibility_id', is_post, 0)
+    voter_guide_possibility_position_id = return_value_from_request(request, 'voter_guide_possibility_position_id', is_post, 0)
+    ballot_item_name = return_value_from_request(request, 'ballot_item_name', is_post, None)
+    ballot_item_state_code = return_value_from_request(request, 'ballot_item_state_code', is_post, None)
+    candidate_twitter_handle = return_value_from_request(request, 'candidate_twitter_handle', is_post, None)
+    candidate_we_vote_id = return_value_from_request(request, 'candidate_we_vote_id', is_post, None)
+    measure_we_vote_id = return_value_from_request(request, 'measure_we_vote_id', is_post, None)
+    more_info_url = return_value_from_request(request, 'more_info_url', is_post, None)
+    organization_name = return_value_from_request(request, 'organization_name', is_post, None)
+    organization_twitter_handle = return_value_from_request(request, 'organization_twitter_handle', is_post, None)
+    organization_we_vote_id = return_value_from_request(request, 'organization_we_vote_id', is_post, None)
+    position_should_be_removed = return_value_from_request(request, 'position_should_be_removed', is_post, None)
+    position_stance = return_value_from_request(request, 'position_stance', is_post, None)
+    possibility_should_be_deleted = return_value_from_request(request, 'possibility_should_be_deleted', is_post, None)
+    possibility_should_be_ignored = return_value_from_request(request, 'possibility_should_be_ignored', is_post, None)
+    statement_text = return_value_from_request(request, 'statement_text', is_post, None)
+
+    google_civic_election_id_list = return_value_from_request(request, 'google_civic_election_id_list[]', is_post, None)
+
     try:
         if positive_value_exists(google_civic_election_id_list):
             if not positive_value_exists(len(google_civic_election_id_list)):
