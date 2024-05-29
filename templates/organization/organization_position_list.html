@@ -513,6 +513,9 @@
                 (missing ballot_item_display_name)
             {% endif %}
             </a>
+            {% if organization_position.state_code %}
+            <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>
+            {% endif %}
         <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
         </td>
         <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>

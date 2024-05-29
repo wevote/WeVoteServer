@@ -342,7 +342,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" style="padding-top: 4px;">Submit</label>
     <div class="col-sm-9">
-        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}"/>
+        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" class="btn btn-primary" />
         {% if voter %}
         <a href="{% url 'voter:voter_summary' voter.id %}" style="padding-left: 30px">cancel</a>
         {% else %}
@@ -803,7 +803,7 @@
 {% include "campaign/campaignx_supporters_list_table.html" with hide_supporter_column=True show_campaignx_column=True supporters_list=supporters_list %}
 
 <div>
-    <input type="submit" value="{% if voter %}Update Campaign Supporter Settings{% endif %}" />
+    <input type="submit" value="{% if voter %}Update Campaign Supporter Settings{% endif %}" class="btn btn-primary" />
 </div>
 {% endif %}
 

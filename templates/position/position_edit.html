@@ -27,7 +27,7 @@
 {#    <input type="text" name="position_website" id="position_website_id" value="{% if position %}{{ position.position_website }}{% endif %}" /><br />#}
 {% endif %}
 <p><a href="{% url 'position:position_list' %}">cancel</a>
-<input type="submit" value="{% if position %}Update Position{% else %}Save New Position{% endif %}" /></p>
+<input type="submit" value="{% if position %}Update Position{% else %}Save New Position{% endif %}" class="btn btn-primary" /></p>
 </form>
 
 {% endblock %}

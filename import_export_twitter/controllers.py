@@ -2676,44 +2676,20 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
     # This is part of leg 3 of 3-legged OAuth flow
 
     try:
-        print("tweepy OAuth1UserHandler (WeVote) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
-        oauth1_user_handler = tweepy.OAuth1UserHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        oauth1_user_handler.request_token = {
-            "oauth_token": TWITTER_ACCESS_TOKEN,
-            "oauth_token_secret": TWITTER_ACCESS_TOKEN_SECRET,
-        }
-        # print('oauth1_user_handler.get_authorization_url(): ', oauth1_user_handler.get_authorization_url())
+        twitter_auth_manager = TwitterAuthManager()
+        auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
 
-        request_token = oauth1_user_handler.request_token["oauth_token"]
-        request_secret = oauth1_user_handler.request_token["oauth_token_secret"]
-        # print('request_token, request_secret: ', request_token, request_secret)
-
-        print("tweepy OAuth1UserHandler (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
-        voters_oauth1_user_handler = tweepy.OAuth1UserHandler(
-            consumer_key=TWITTER_CONSUMER_KEY,
-            consumer_secret=TWITTER_CONSUMER_SECRET,
-            callback=None)
-        print('oauth_token, oauth_token_secret: ', oauth_token, request_secret)
-        voters_oauth1_user_handler.request_token = {
-            "oauth_token": oauth_token,
-            "oauth_token_secret": request_secret
-        }
-        voters_access_token, voters_access_token_secret = (
-            voters_oauth1_user_handler.get_access_token(
-                oauth_verifier
-            )
-        )
-        # print('voters_access_token, voters_access_token_secret: ', voters_access_token, voters_access_token_secret)
 
         print("tweepy client init. (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
+        twitter_voters_access_token = auth_response_results['twitter_voters_access_token']
+        twitter_voters_access_token_secret = auth_response_results['twitter_voters_access_token_secret']
         client = tweepy.Client(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
-            access_token=voters_access_token,
-            access_token_secret=voters_access_token_secret
+            access_token=twitter_voters_access_token,
+            access_token_secret=twitter_voters_access_token_secret
         )
 
-        print("tweepy client get_me (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
         counter = create_detailed_counter_entry('get_me', 'twitter_oauth1_user_handler_for_api', True,
                                                 {'text': oauth_token})
         me = client.get_me(user_fields=['id', 'username', 'created_at', 'location', 'description', 'verified',
@@ -2729,8 +2705,8 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
             id=idt,
             username=username,
             name=name,
-            voters_access_token=voters_access_token,
-            voters_access_token_secret=voters_access_token_secret,
+            twitter_voters_access_token=twitter_voters_access_token,
+            twitter_voters_access_token_secret=twitter_voters_access_token_secret,
             description=me.data.description,
             location=me.data.location,
             profile_image_url=me.data.profile_image_url,
@@ -2745,7 +2721,7 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
         mark_detailed_counter_entry(counter, success, status)
     except Exception as ex:
-        logger.error("twitter_oauth1_user_handler_for_api caught exception: " + str(ex))
+        logger.error("twitter_oauth1_user_handler_for_api caught exception: %s", str(ex))
         status = "twitter_oauth1_user_handler_for_api caught exception: " + str(ex)
 
     results = {
@@ -2761,7 +2737,11 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
 
 def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twitterSignInStart
     """
-
+    May 2024: For dev testing, the following urls must be on the Twitter "App info Callback URI / Redirect URL" auth
+    settings list
+        https://wevotedeveloper.com:8000/apis/v1/twitterSignInRequest/      (For backend authentication)
+        https://wevotedeveloper.com:3000/twitter_sign_in                    (For frontend redirect authentication)
+        https://wevotedeveloper.com:8000/apis/v1/twitterSignInStart/        (???)
     :param voter_device_id:
     :param return_url: Where to direct the browser at the very end of the process
     :param cordova:
@@ -2799,6 +2779,8 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
 
     voter = results['voter']
 
+    # First, before trying to sign in, see if we have an existing signin record in the database, and use it if we do
+    # Get a twitter_link_to_voter as a first step in the lookup
     twitter_user_manager = TwitterUserManager()
     twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id, read_only=True)
     if twitter_user_results['twitter_link_to_voter_found']:
@@ -2837,15 +2819,19 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
 
         twitter_auth_response = auth_create_results['twitter_auth_response']
 
+    # This is the "secure back-channel" auth request with a redirect back to this same API Server
     callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequest/"  # twitterSignInRequestAccessToken
     callback_url += "?voter_info_mode=0"
     callback_url += "&voter_device_id=" + voter_device_id
-    callback_url += "&return_url=" + return_url
+    callback_url += "&return_url=" + urllib.parse.quote_plus(return_url, safe='', encoding=None, errors=None)
     callback_url += "&cordova=" + str(cordova)
+
+    # logger.error('(Ok) twitter_sign_in_start_for_api create the callback_url for the backend auth: %s', callback_url)
 
     try:
         # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
-        print("tweepy OAuth1UserHandler (WeVote) in twitter_sign_in_start_for_api -- voter.we_vote_id:", voter.we_vote_id)
+        logger.error('(Ok) twitter_sign_in_start_for_api tweepy OAuth1UserHandler (WeVote) voter.we_vote_id: %s',
+                     voter.we_vote_id)
         auth = tweepy.OAuth1UserHandler(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
@@ -2855,7 +2841,8 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
         request_token_dict = auth.request_token
         twitter_request_token = ''
         twitter_request_token_secret = ''
-        logger.error("tweepy OAuth1UserHandler (WeVote) request_token_dict = %s", str(request_token_dict))
+        logger.error("(Ok) twitter_sign_in_start_for_api tweepy OAuth1UserHandler (WeVote) request_token_dict = %s",
+                     str(request_token_dict))
 
         if 'oauth_token' in request_token_dict:
             twitter_request_token = request_token_dict['oauth_token']
@@ -2883,7 +2870,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR '
-        logger.error('twitter_sign_in_start_for_api %s', status)
+        logger.error('twitter_sign_in_start_for_api TooManyRequests status = %s', status)
     except tweepy.TweepyException as error_instance:
         success = False
         err_string = 'GENERAL_TWEEPY_EXCEPTION '
@@ -2894,11 +2881,11 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
             pass
         print(err_string)
         status = 'TWITTER_SIGN_IN_START: {}'.format(err_string)
-        logger.error('twitter_sign_in_start_for_api %s', status)
+        logger.error('twitter_sign_in_start_for_api TweepyException status = %s', status)
     except Exception as e1:
         success = False
         status = 'TWITTER_SIGN_IN_START: {}'.format(e1)
-        logger.error('twitter_sign_in_start_for_api %s', status)
+        logger.error('twitter_sign_in_start_for_api Exception status = %s', status)
 
     if success:
         results = {
@@ -2925,7 +2912,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     return results
 
 
-# 2024-02-23 This might be deprecated   # twitterSignInRequestAccessToken (Step 2)
+# twitterSignInRequestAccessToken (Step 2)
 def twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                  incoming_request_token, incoming_oauth_verifier,
                                                  return_url, cordova):
@@ -3000,19 +2987,20 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
         }
         return results
 
+    twitter_voters_access_token = ''
     twitter_voters_access_token_secret = ''
-    twitter_voters_access_token_secret_secret = ''
     try:
         # We take the Request Token, Request Secret, and OAuth Verifier and request an access_token
-        print("tweepy OAuth1UserHandler (WeVote) in twitter_sign_in_request_access_token_for_api -- incoming_request_token:",
-              incoming_request_token)
         auth = tweepy.OAuth1UserHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.request_token = {'oauth_token': twitter_auth_response.twitter_request_token,
                               'oauth_token_secret': twitter_auth_response.twitter_request_secret}
         auth.get_access_token(incoming_oauth_verifier)
+        # logger.error("(Ok) twitter_sign_in_request_access_token_for_api tweepy OAuth1UserHandler (WeVote) -- "
+        #              "incoming_request_token: %s incoming_oauth_verifier: %s", incoming_request_token,
+        #              incoming_oauth_verifier)
         if positive_value_exists(auth.access_token) and positive_value_exists(auth.access_token_secret):
-            twitter_voters_access_token_secret = auth.access_token
-            twitter_voters_access_token_secret_secret = auth.access_token_secret
+            twitter_voters_access_token = auth.access_token
+            twitter_voters_access_token_secret = auth.access_token_secret
 
     except tweepy.TooManyRequests:
         success = False
@@ -3033,11 +3021,15 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
 
     try:
         # We save these values in the TwitterAuthResponse table
-        if positive_value_exists(twitter_voters_access_token_secret) and \
-                positive_value_exists(twitter_voters_access_token_secret_secret):
+        if positive_value_exists(twitter_voters_access_token) and \
+                positive_value_exists(twitter_voters_access_token_secret):
+            twitter_auth_response.twitter_voters_access_token = twitter_voters_access_token
             twitter_auth_response.twitter_voters_access_token_secret = twitter_voters_access_token_secret
-            twitter_auth_response.twitter_voters_access_secret = twitter_voters_access_token_secret_secret
+            twitter_auth_response.twitter_voters_oauth_token = incoming_request_token
+            twitter_auth_response.twitter_voters_oauth_verifier = incoming_oauth_verifier
             twitter_auth_response.save()
+            # logger.error("(Ok) twitter_sign_in_request_access_token_for_api twitter_auth_response.save() id: %d",
+            #              twitter_auth_response.id)
 
             success = True
             status += "TWITTER_ACCESS_TOKEN_RETRIEVED_AND_SAVED "
@@ -3066,6 +3058,10 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'return_url':                       return_url,
             'cordova':                          cordova,
         }
+
+    if not success:
+        logger.error("twitter_sign_in_request_access_token_for_api returning with error: %s ", str(results))
+
     return results
 
 
@@ -3088,6 +3084,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     switch_accounts = False
     twitter_secret_key = ""
 
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api entry')
     # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -3122,6 +3119,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
     voter = results['voter']
     voter_we_vote_id = voter.we_vote_id
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api voter_we_vote_id: %s', voter_we_vote_id)
 
     twitter_auth_manager = TwitterAuthManager()
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
@@ -3138,12 +3136,12 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
             'twitter_secret_key':   twitter_secret_key,
         }
         return results
-
     twitter_auth_response = auth_response_results['twitter_auth_response']
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api twitter_auth_response: %s', str(twitter_auth_response))
 
     try:
         # March 2024, now using Twitter V2 API
-        print("tweepy init (WeVote) in twitter_sign_in_request_voter_info_for_api")
+        # print("tweepy init (WeVote) in twitter_sign_in_request_voter_info_for_api")
         client = tweepy.Client(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
@@ -3151,9 +3149,10 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
             access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
         )
 
-        print("tweepy client get_me (WeVote) in twitter_sign_in_request_voter_info_for_api")
         counter = create_detailed_counter_entry('get_me', 'twitter_sign_in_request_voter_info_for_api', success,
                                                 {'text': 'For WeVote'})
+        # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api client get_me (WeVote) counter %s',
+        #              str(counter['id']))
 
         tweepy_user_object = client.get_me()
         twitter_dict = tweepy_user_object.data
@@ -3168,6 +3167,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
+        logger.error('%s', 'twitter_sign_in_request_voter_info_for_api TooManyRequests for WeVote')
         mark_detailed_counter_entry(counter, success, status)
     except tweepy.TweepyException as error_instance:
         success = False
@@ -3178,11 +3178,12 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         except Exception:
             pass
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(err_string)
-        logger.error('%s', status)
+        logger.error('twitter_sign_in_request_voter_info_for_api  TweepyException %s', status)
     except Exception as e:
         success = False
         status += "TWEEPY_EXCEPTION: " + str(e) + " "
         mark_detailed_counter_entry(counter, success, status)
+        logger.error('twitter_sign_in_request_voter_info_for_api  Exception %s', status)
 
     if twitter_user_object_found:
         status += "TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT "
@@ -3201,6 +3202,12 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
         twitter_secret_key = twitter_link_to_voter.secret_key
 
+    # For the third leg of OAuth, we send the tokens to the React client, and the React client sends tokens back to
+    # the server for secure confirmation of sign in, and save off of the Twitter handle's  params like city, photo, etc.
+    return_url += ('/?oauth_verifier=' + auth_response_results['twitter_voters_oauth_verifier'] + '&oauth_token=' +
+                   auth_response_results['twitter_voters_oauth_token'])
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api return_url: %s', return_url)
+
     results = {
         'status':               status,
         'success':              success,
@@ -3211,7 +3218,9 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         'switch_accounts':      switch_accounts,
         'return_url':           return_url,
         'twitter_secret_key':   twitter_secret_key,
+        'voter_we_vote_id':     voter_we_vote_id,
     }
+    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api at end results: %s', str(results))
     return results
 
 
@@ -3250,7 +3259,7 @@ def twitter_process_deferred_images_for_api(
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
-    # Retrieve twitter user details from twitter
+    # Retrieve Twitter user details from twitter
     results = retrieve_twitter_user_info(
         twitter_id,
         twitter_screen_name,
@@ -3300,9 +3309,9 @@ def twitter_process_deferred_images_for_api(
                 we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                 twitter_profile_banner_url_https=twitter_profile_banner_url_https)
         except Exception as e:
-            logger.error('twitter_process_deferred_images caught exception calling '
-                         'update_organization_single_voter_data: '
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+            err_str = ('twitter_process_deferred_images caught exception calling update_organization_single_voter_data:'
+                       ' {error} [type: {error_type}]').format(error=e, error_type=type(e))
+            logger.error('%s', err_str)
 
         if positive_value_exists(voter_we_vote_id_for_cache):
             try:
@@ -3316,9 +3325,9 @@ def twitter_process_deferred_images_for_api(
                     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
             except Exception as e:
-                logger.error('twitter_process_deferred_images caught exception calling '
-                             'save_twitter_user_values: '
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+                err_str = ('twitter_process_deferred_images caught exception calling save_twitter_user_values: '
+                           '{error} [type: {error_type}]').format(error=e, error_type=type(e))
+                logger.error('%s', err_str)
         elif positive_value_exists(organization_we_vote_id):
             # Make sure this Twitter handle is attached to this organization, and if so, update the organization
             results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
@@ -3380,7 +3389,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
             'status':                                   status,
             'existing_twitter_account_found':           False,
             'twitter_voters_access_secret':             "",
-            'twitter_voters_access_token_secret':       "",
+            'twitter_voters_access_token':              "",
             'twitter_id':                               0,
             'twitter_image_load_info':                  "",
             'twitter_name':                             "",
@@ -3414,7 +3423,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
             'success':                                  success,
             'status':                                   status,
             'existing_twitter_account_found':           False,
-            'twitter_voters_access_secret':             "",
+            'twitter_voters_access_token':              "",
             'twitter_voters_access_token_secret':       "",
             'twitter_id':                               0,
             'twitter_image_load_info':                  "",
@@ -3577,7 +3586,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
         'success':                                  success,
         'status':                                   status,
         'existing_twitter_account_found':           existing_twitter_account_found,
-        'twitter_voters_access_secret':             twitter_auth_response.twitter_voters_access_secret,
+        'twitter_voters_access_token':              twitter_auth_response.twitter_voters_access_token,
         'twitter_voters_access_token_secret':       twitter_auth_response.twitter_voters_access_token_secret,
         'twitter_id':                               twitter_id,
         'twitter_image_load_info':                  twitter_image_load_info,
@@ -3642,10 +3651,11 @@ def twitter_retrieve_ids_i_follow_for_api(voter_device_id):     # twitterRetriev
 
     twitter_user_manager = TwitterUserManager()
 
-    # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other twitter users
+    # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other Twitter users
     twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow_from_twitter(
-        twitter_auth_response.twitter_id, twitter_auth_response.twitter_voters_access_token_secret,
-        twitter_auth_response.twitter_voters_access_secret)
+        twitter_auth_response.twitter_id, twitter_auth_response.twitter_voters_access_token,
+        twitter_auth_response.twitter_voters_access_token_secret,
+        )
     status += ' ' + twitter_ids_i_follow_results['status']
     twitter_ids_i_follow = twitter_ids_i_follow_results['twitter_ids_i_follow']
     if twitter_ids_i_follow_results['success']:

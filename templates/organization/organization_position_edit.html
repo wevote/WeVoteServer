@@ -214,7 +214,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
 <div class="form-group">
     <div class="col-sm-9">
-        <button class="btn btn-default" name="save_button" type="submit" value="1">
+        <button class="btn btn-primary" name="save_button" type="submit" value="1">
             {% if organization_position %}Update Position{% else %}Save New Position{% endif %}
         </button>
         or
@@ -263,6 +263,9 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
               {% else %}
                   (missing ballot_item_display_name)
               {% endif %}
+                {% if organization_position.state_code %}
+                <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>
+                {% endif %}
             <span style="color: darkgray">{{ organization_position.statement_text|default_if_none:""|truncatechars:125 }}</span>
           </a></td>
           <td>{{ organization_position.get_stance_display }}

@@ -181,7 +181,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
         }
         return results
 
-    print("tweepy client init. in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
+    # print("tweepy client init. in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
     client = tweepy.Client(
         bearer_token=TWITTER_BEARER_TOKEN,
         consumer_key=TWITTER_CONSUMER_KEY,
@@ -209,7 +209,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             # if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
             #     twitter_api_counter_manager.create_counter_entry('get_user')
 
-            print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
+            # print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             counter = create_detailed_counter_entry(
                 kind_of_action='get_user',
                 function='retrieve_twitter_user_info',
