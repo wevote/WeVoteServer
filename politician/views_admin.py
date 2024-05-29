@@ -25,7 +25,7 @@ from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, PROFILE_IMAGE_TYPE_BALLOTPEDIA, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
-    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_WIKIPEDIA
 from config.base import get_environment_variable
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception, \
@@ -34,6 +34,7 @@ from image.controllers import create_resized_images, organize_object_photo_field
 from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
+from import_export_wikipedia.controllers import get_photo_url_from_wikipedia
 from office.models import ContestOffice
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
@@ -2846,6 +2847,9 @@ def politician_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                 politician_on_stage.wikipedia_url = wikipedia_url
+                politician_on_stage.wikipedia_photo_does_not_exist = False
+
+                # politician_on_stage.wikipedia_photo_url_is_broken = wikipedia_photo_url_is_broken
             if youtube_url is not False:
                 politician_on_stage.youtube_url = youtube_url
 

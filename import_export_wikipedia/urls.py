@@ -7,6 +7,8 @@ from django.urls import re_path
 from . import views_admin
 
 urlpatterns = [
+    re_path(r'^bulk_retrieve_wikipedia_photos/$',
+            views_admin.bulk_retrieve_wikipedia_photos_view, name='bulk_retrieve_wikipedia_photos', ),
     # re_path(r'^$', views_admin.vote_smart_index_view, name='vote_smart_index',),
     re_path(r'^(?P<organization_id>[0-9]+)/import_organization_logo/$',
         views_admin.import_organization_logo_from_wikipedia_view,

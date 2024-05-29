@@ -2,17 +2,233 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from bs4 import BeautifulSoup
+import json
+
+from django.contrib import messages
+
+
+from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
+    VoterBallotSavedManager
+from candidate.controllers import save_image_to_candidate_table
+from candidate.models import CandidateManager, CandidateListManager, fetch_candidate_count_for_office, \
+    PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_WIKIPEDIA
+from config.base import get_environment_variable
+from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
+from election.models import BallotpediaElection, ElectionManager, Election
+from exception.models import handle_exception
+from geopy.geocoders import get_geocoder_for_service
+from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, \
+    organize_object_photo_fields_based_on_image_type_currently_active, IMAGE_SOURCE_WIKIPEDIA
+from organization.controllers import save_image_to_organization_table
+from measure.models import ContestMeasureListManager, ContestMeasureManager
+from office.models import ContestOfficeListManager, ContestOfficeManager
+from polling_location.models import PollingLocationManager
+import requests
+from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
+import wevote_functions.admin
+
 from organization.models import Organization
 import re
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists
+from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, \
+    RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS, RETRIEVE_POSSIBLE_WIKIPEDIA_PHOTOS
+
 import wikipedia  # https://pypi.python.org/pypi/wikipedia
-from bs4 import BeautifulSoup
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
 # NOTE: There are other wrappers to the MediaWiki API that we can use to access Ballotpedia:
 # https://www.mediawiki.org/wiki/API:Client_code#Python
+
+def get_photo_url_from_wikipedia(
+        incoming_object=None,
+        request={},
+        remote_request_history_manager=None,
+        save_to_database=False,
+        add_messages=False):
+    status = ""
+    success = True
+    wikipedia_photo_saved = False
+    is_candidate = False
+    is_politician = False
+    if remote_request_history_manager is None:
+        remote_request_history_manager = RemoteRequestHistoryManager()
+
+    # if hasattr(incoming_object, 'wikipedia_page_title'):
+    #     wikipedia_page_title = incoming_object.wikipedia_page_title
+    #     wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+    #     google_civic_election_id = incoming_object.google_civic_election_id
+    #     is_candidate = True
+    elif hasattr(incoming_object, 'wikipedia_url'):
+        wikipedia_page_url = incoming_object.wikipedia_url
+
+        google_civic_election_id = ''
+        is_politician = True
+    else:
+        wikipedia_page_url = incoming_object.organization_wikipedia
+        google_civic_election_id = ''
+        is_candidate = False
+    wikipedia_page_title = wikipedia_page_url.split('/')[-1]
+    wikipedia_page_title = ((wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+                            .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
+                            .replace('%F3', 'ó').replace('%E1', 'á'))
+    if not positive_value_exists(wikipedia_page_url):
+        status += "MISSING_WIKIPEDIA_PAGE_URL "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    incoming_object_changes = False
+    if positive_value_exists(wikipedia_page_url) and not wikipedia_page_url.startswith('http'):
+        wikipedia_page_url = 'https://' + wikipedia_page_url
+        incoming_object.wikipedia_page_url = wikipedia_page_url
+        incoming_object_changes = True
+    print(wikipedia_page_title)
+    results = retrieve_images_from_wikipedia(wikipedia_page_title)
+    if results.get('success') or results['missing_photo']:
+        photo_url = results.get('photo_url')
+        # To explore, when photo_url is found, but not valid... (low priority)
+        # wikipedia_photo_url_is_broken = results.get('http_response_code') == 404
+        if results['result'] and not results['missing_photo']:
+            if is_candidate or is_politician:
+                incoming_object_changes = True
+                incoming_object.wikipedia_photo_url = photo_url
+                # incoming_object.wikipedia_photo_url_is_broken = False
+                incoming_object.wikipedia_photo_does_not_exist = False
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if results['success']:
+                        incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
+            # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
+            #         and not incoming_object.ballotpedia_photo_url_is_broken:
+            #     incoming_object.ballotpedia_photo_url_is_broken = True
+            #     incoming_object.save()
+        elif results.get('missing_photo'):
+            if is_candidate or is_politician:
+                incoming_object_changes = True
+                incoming_object.wikipedia_photo_url = None
+                # incoming_object.wikipedia_photo_url_is_broken = False
+                incoming_object.wikipedia_photo_does_not_exist = True
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if results['success']:
+                        incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+        else:
+            status += "WIKIPEDIA_PHOTO_URL_NOT_FOUND_ON_PAGE: " + wikipedia_page_url + " "
+            status += results['status']
+
+        if save_to_database and incoming_object_changes:
+            incoming_object.save()
+
+        # link_is_broken = results.get('http_response_code') == 404
+        is_placeholder_photo = results.get('missing_photo')
+        if 'photo_url_found' in results:
+            if not results['photo_url_found']:
+                results['photo_url_found'] = False
+        # Handle the case when 'photo_url_found' is False
+        # ...
+        else:
+            results['photo_url_found'] = False
+        # Handle the case when 'photo_url_found' is not present in the dictionary
+        # ...
+        print(results['photo_url_found'])
+
+        if is_placeholder_photo:
+            success = False
+            # status += results['status']
+            status += "MISSING_PHOTO "
+            logger.info("Missing photo: " + photo_url)
+            if add_messages:
+                messages.add_message(
+                    request, messages.ERROR,
+                    'Failed to retrieve Wikipedia picture:  The Wikipedia photo is missing.')
+            # Create a record denoting that we have retrieved from Wikipedia for this candidate
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    kind_of_action=RETRIEVE_POSSIBLE_WIKIPEDIA_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_WIKIPEDIA_URL_IS_MISSING_PHOTO:" + str(photo_url))
+        elif results['photo_url_found']:
+            # Success!
+            logger.info("Queried URL: " + wikipedia_page_url + " ==> " + photo_url)
+            if add_messages:
+                messages.add_message(request, messages.INFO, 'Wikipedia photo retrieved.')
+            if save_to_database:
+                if is_candidate or is_politician:
+                    results = save_image_to_candidate_table(
+                        candidate=incoming_object,
+                        image_url=photo_url,
+                        source_link=wikipedia_page_url,
+                        # source_link="",
+                        url_is_broken=False,
+                        kind_of_source_website=IMAGE_SOURCE_WIKIPEDIA,
+                        page_title=wikipedia_page_title)
+
+                    if results['success']:
+                        wikipedia_photo_saved = True
+                    # When saving to candidate object, update:
+                    # we_vote_hosted_profile_facebook_image_url_tiny
+                else:
+                    results = save_image_to_organization_table(
+                        incoming_object, photo_url, wikipedia_page_url, False, IMAGE_SOURCE_WIKIPEDIA)
+                    if results['success']:
+                        wikipedia_photo_saved = True
+
+        if wikipedia_photo_saved:
+            status += "SAVED_WIKIPEDIA_IMAGE "
+            # Create a record denoting that we have retrieved from Wikipedia for this candidate
+
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    kind_of_action=RETRIEVE_POSSIBLE_WIKIPEDIA_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_WIKIPEDIA_URL_PARSED_HTTP:" + wikipedia_page_url)
+        elif is_placeholder_photo:
+            pass
+        else:
+            success = False
+            status += results['status']
+            status += "SAVE_WIKIPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
+    else:
+        success = False
+        status += "NOT_SUCCESSFUL_retrieve_image_from_wikipedia: "
+        status += results['status']
+
+        if add_messages:
+            if len(results.get('clean_message')) > 0:
+                messages.add_message(request, messages.ERROR, results.get('clean_message'))
+            else:
+                messages.add_message(
+                    request, messages.ERROR, 'Wikipedia photo NOT retrieved (2). status: ' + results.get('status'))
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
 
 
 def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
@@ -26,20 +242,20 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
     if not organization:
         status += 'WIKIPEDIA_ORGANIZATION_REQUIRED '
         results = {
-            'success':              False,
-            'status':               status,
+            'success': False,
+            'status': status,
             'wikipedia_page_found': False,
-            'wikipedia_page':       wikipedia_page,
+            'wikipedia_page': wikipedia_page,
         }
         return results
 
     if not positive_value_exists(organization.id):
         status += 'WIKIPEDIA_ORGANIZATION_ID_REQUIRED '
         results = {
-            'success':              False,
-            'status':               status,
+            'success': False,
+            'status': status,
             'wikipedia_page_found': False,
-            'wikipedia_page':       wikipedia_page,
+            'wikipedia_page': wikipedia_page,
         }
         return results
 
@@ -66,10 +282,10 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
             status += 'WIKIPEDIA_DISAMBIGUATION_ERROR_FROM_PAGEID '
             page_found = False
         results = {
-            'success':              False,
-            'status':               status,
+            'success': False,
+            'status': status,
             'wikipedia_page_found': page_found,
-            'wikipedia_page':       wikipedia_page,
+            'wikipedia_page': wikipedia_page,
         }
         return results
 
@@ -114,7 +330,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
             parenthesis_end_index = organization.organization_name.find(")")
             if positive_value_exists(parenthesis_end_index):
                 wikipedia_page_title_guess7 = \
-                    organization.organization_name[parenthesis_start_index+2:parenthesis_end_index]
+                    organization.organization_name[parenthesis_start_index + 2:parenthesis_end_index]
                 # Try it without the initials tacked on the end
                 # ex/ American Federation of Labor and Congress of Industrial Organizations (AFL-CIO)
                 wikipedia_page_title_guess8 = organization.organization_name[:parenthesis_start_index]
@@ -145,7 +361,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 2, without "The"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess2) and \
-                            wikipedia_page_title_guess2 != wikipedia_page_title:
+                    wikipedia_page_title_guess2 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess2)
                 status += results['status'] + 'TRY2, '
                 page_found = results['page_found']
@@ -155,7 +371,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 3 - Convert "and" to "&"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess3) and \
-                            wikipedia_page_title_guess3 != wikipedia_page_title:
+                    wikipedia_page_title_guess3 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess3)
                 status += results['status'] + 'TRY3, '
                 page_found = results['page_found']
@@ -165,7 +381,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 4 - Convert "&" to "and"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess4) and \
-                            wikipedia_page_title_guess4 != wikipedia_page_title:
+                    wikipedia_page_title_guess4 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess4)
                 status += results['status'] + 'TRY4, '
                 page_found = results['page_found']
@@ -175,7 +391,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 5 - Remove "Action Fund"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess5) and \
-                            wikipedia_page_title_guess5 != wikipedia_page_title:
+                    wikipedia_page_title_guess5 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess5)
                 status += results['status'] + 'TRY5, '
                 page_found = results['page_found']
@@ -185,7 +401,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 6 - remove any "the" from the name
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess6) and \
-                            wikipedia_page_title_guess6 != wikipedia_page_title:
+                    wikipedia_page_title_guess6 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess6)
                 status += results['status'] + 'TRY6, '
                 page_found = results['page_found']
@@ -195,7 +411,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 7 - search for the organization's initials within "()"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess7) and \
-                            wikipedia_page_title_guess7 != wikipedia_page_title:
+                    wikipedia_page_title_guess7 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess7)
                 status += results['status'] + 'TRY7, '
                 page_found = results['page_found']
@@ -205,7 +421,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 8 - search for the organization's initials within "()", switching "-" for "–"
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess8) and \
-                            wikipedia_page_title_guess8 != wikipedia_page_title:
+                    wikipedia_page_title_guess8 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess8)
                 status += results['status'] + 'TRY8, '
                 page_found = results['page_found']
@@ -215,7 +431,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 9
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess9) and \
-                            wikipedia_page_title_guess8 != wikipedia_page_title:
+                    wikipedia_page_title_guess8 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess9)
                 status += results['status'] + 'TRY9, '
                 page_found = results['page_found']
@@ -225,7 +441,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 10
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess10) and \
-                            wikipedia_page_title_guess10 != wikipedia_page_title:
+                    wikipedia_page_title_guess10 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess10)
                 status += results['status'] + 'TRY10, '
                 page_found = results['page_found']
@@ -235,7 +451,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 11
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess11) and \
-                            wikipedia_page_title_guess11 != wikipedia_page_title:
+                    wikipedia_page_title_guess11 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess11)
                 status += results['status'] + 'TRY11, '
                 page_found = results['page_found']
@@ -245,7 +461,7 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         # Page title Guess 12
         if not page_found:
             if positive_value_exists(wikipedia_page_title_guess12) and \
-                            wikipedia_page_title_guess12 != wikipedia_page_title:
+                    wikipedia_page_title_guess12 != wikipedia_page_title:
                 results = reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess12)
                 status += results['status'] + 'TRY12, '
                 page_found = results['page_found']
@@ -267,10 +483,10 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
         success = True
 
     results = {
-        'success':              success,
-        'status':               status,
+        'success': success,
+        'status': status,
         'wikipedia_page_found': page_found,
-        'wikipedia_page':       wikipedia_page,
+        'wikipedia_page': wikipedia_page,
     }
     return results
 
@@ -303,10 +519,10 @@ def reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess, auto_suggest=F
         page_found = False
 
     results = {
-        'success':          page_found,
-        'status':           status,
-        'page_found':       page_found,
-        'wikipedia_page':   wikipedia_page,
+        'success': page_found,
+        'status': status,
+        'page_found': page_found,
+        'wikipedia_page': wikipedia_page,
     }
     return results
 
@@ -320,16 +536,16 @@ def retrieve_organization_logo_from_wikipedia_page(organization, wikipedia_page,
     if not organization:
         status += 'WIKIPEDIA_ORGANIZATION_REQUIRED_FOR_LOGO '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
     if not positive_value_exists(organization.id):
         status += 'WIKIPEDIA_ORGANIZATION_ID_REQUIRED_FOR_LOGO '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
@@ -337,24 +553,24 @@ def retrieve_organization_logo_from_wikipedia_page(organization, wikipedia_page,
     if positive_value_exists(organization.wikipedia_photo_url) and not force_retrieve:
         status += 'WIKIPEDIA_ORGANIZATION_PHOTO_ALREADY_RETRIEVED-NO_FORCE '
         results = {
-            'success':                      True,
-            'status':                       status,
+            'success': True,
+            'status': status,
         }
         return results
 
     if not wikipedia_page:
         status += 'WIKIPEDIA_OBJECT_REQUIRED_FOR_LOGO '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
     if not positive_value_exists(wikipedia_page.pageid):
         status += 'WIKIPEDIA_PAGE_ID_REQUIRED_FOR_LOGO '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
@@ -458,10 +674,10 @@ def retrieve_organization_logo_from_wikipedia_page(organization, wikipedia_page,
         success = False
 
     results = {
-        'success':          success,
-        'status':           status,
-        'logo_found':       logo_found,
-        'image_options':    image_options,
+        'success': success,
+        'status': status,
+        'logo_found': logo_found,
+        'image_options': image_options,
     }
     return results
 
@@ -485,9 +701,9 @@ def retrieve_all_organizations_logos_from_wikipedia(state_code=''):
                 logos_found += 1
     status = "ORGANIZATION_LOGOS_RETRIEVED"
     results = {
-        'success':      True,
-        'status':       status,
-        'logos_found':  logos_found,
+        'success': True,
+        'status': status,
+        'logos_found': logos_found,
     }
     return results
 
@@ -502,16 +718,16 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
     if not candidate:
         status += 'WIKIPEDIA_CANDIDATE_REQUIRED_FOR_IMAGE '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
     if not positive_value_exists(candidate.id):
         status += 'WIKIPEDIA_CANDIDATE_ID_REQUIRED_FOR_IMAGE '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
@@ -519,24 +735,24 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
     if positive_value_exists(candidate.wikipedia_photo_url) and not force_retrieve:
         status += 'WIKIPEDIA_CANDIDATE_IMAGE_ALREADY_RETRIEVED-NO_FORCE '
         results = {
-            'success':                      True,
-            'status':                       status,
+            'success': True,
+            'status': status,
         }
         return results
 
     if not wikipedia_page:
         status += 'WIKIPEDIA_OBJECT_REQUIRED_FOR_IMAGE '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
     if not positive_value_exists(wikipedia_page.pageid):
         status += 'WIKIPEDIA_PAGE_ID_REQUIRED_FOR_IMAGE '
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success': False,
+            'status': status,
         }
         return results
 
@@ -633,13 +849,14 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
         success = False
 
     results = {
-        'success':          success,
-        'status':           status,
-        'image_found':      image_found,
-        'image_options':    image_options,
-        'image':            wikipedia_photo_url,
+        'success': success,
+        'status': status,
+        'image_found': image_found,
+        'image_options': image_options,
+        'image': wikipedia_photo_url,
     }
     return results
+
 
 # OLDER Method that connects directly with Wikipedia API
 # def retrieve_organization_logos_from_wikipedia(self, force_retrieve=False):
@@ -784,17 +1001,36 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 
 
 def retrieve_images_from_wikipedia(page_title):
-    response = {"success": True, "status": "", "result": None}
+    clean_message = ''
+    missing_photo = False
+    photo_url = ''
+    photo_url_found = True
+
+    response = {
+        "success": True,
+        "status": "", "result": None,
+        'clean_message': clean_message,
+        'missing_photo': missing_photo,
+        'photo_url': photo_url,
+        'photo_url_found': photo_url_found,
+    }
     try:
         page = wikipedia.page(title=page_title, pageid=None, auto_suggest=False)
         page_html = page.html()
         # TODO what if wikipedia layout changes?
         page_dom = BeautifulSoup(page_html, 'html.parser')
         img_link = page_dom.find('img').get('src')
+        img_link = img_link.replace('//', 'https://')
         response["status"] += "SUCCESS "
         response["result"] = img_link
+        response["photo_url"] = img_link
+        print(img_link)
     except Exception as retrievePageError:
         response["success"] = False
         response["status"] += "RETRIEVE_IMAGES_FROM_WIKIPEDIA_ERROR "
         response["result"] = None
+        response["clean_message"] = str(retrievePageError)
+        response["page_title_found"] = False
+        response["missing_photo"] = True
+        response["photo_url_found"] = False
     return response

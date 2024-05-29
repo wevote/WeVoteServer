@@ -3206,6 +3206,7 @@ class Organization(models.Model):
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
+    # organization_wikipedia = models.URLField(blank=True, null=True)  # wikipedia_url
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)

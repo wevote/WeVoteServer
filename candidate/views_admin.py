@@ -1194,6 +1194,29 @@ def candidate_list_view(request):
     except Exception as e:
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
+    # How many candidates with wikipedia_candidate_url's don't have wikipedia_photo_url?
+    wikipedia_urls_without_picture_urls = 0
+    try:
+        count_queryset = CandidateCampaign.objects.using('readonly').all()
+        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(wikipedia_photo_does_not_exist=True)
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
+
+        # Exclude candidates without wikipedia_candidate_url
+        count_queryset = count_queryset. \
+            exclude(Q(wikipedia_url__isnull=True) | Q(wikipedia_url__exact=''))
+
+        # Find candidates that don't have a photo (i.e. that are null or '')
+        count_queryset = count_queryset.filter(
+            Q(wikipedia_photo_url__isnull=True) | Q(wikipedia_photo_url__iexact=''))
+
+        wikipedia_urls_without_picture_urls = count_queryset.count()
+
+    except Exception as e:
+        logger.error("ERROR Finding Wikipedia Photo URLs: ", e)
+
+
     status_print_list = ""
     status_print_list += "{candidate_list_count:,} candidates found." \
                          "".format(candidate_list_count=candidate_list_count)
@@ -1442,6 +1465,8 @@ def candidate_list_view(request):
         'total_twitter_handles':                    total_twitter_handles,
         'vote_usa_candidates_for_this_state':       vote_usa_candidates_for_this_state,
         'web_app_root_url':                         web_app_root_url,
+        'wikipedia_urls_without_picture_urls':      wikipedia_urls_without_picture_urls,
+
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 
@@ -3253,7 +3278,10 @@ def candidate_edit_process_view(request):
                     change_description_changed = True
                 if(candidate_on_stage.wikipedia_url != wikipedia_url):
                     candidate_on_stage.wikipedia_url = wikipedia_url
-                    candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ")
+                    candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ").replace('%28', '(').replace('%29', ')')
+                    candidate_on_stage.wikipedia_photo_url = None
+                    # candidate_on_stage.wikipedia_photo_url_is_broken = False
+                    candidate_on_stage.wikipedia_photo_does_not_exist = False
                     update_candidate_wikipedia_image(candidate_on_stage, request, messages)
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url

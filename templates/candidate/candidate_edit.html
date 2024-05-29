@@ -686,6 +686,11 @@ th, td {
         <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
     </div>
+    <div class="col">
+        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.wikipedia_url }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
+        {% if candidate.wikipedia_photo_does_not_exist %}Image is Missing{% endif %}
+    </div>
 </div>
 </div>
 </div>

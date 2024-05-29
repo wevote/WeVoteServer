@@ -92,6 +92,8 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
                    '      "google_plus_url": string,\n' \
                    '      "youtube_url": string,\n' \
                    '      "we_vote_id": string,\n' \
+                   '      "wikipedia_url": string,\n' \
+ \
                    '   ],\n' \
                    '  "ballot_item_list": measure dict\n' \
                    '   [\n' \

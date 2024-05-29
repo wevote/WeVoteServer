@@ -48,6 +48,7 @@ VOTE_SMART = "vote_smart"
 IMAGE_SOURCE_GOOGLE_CIVIC = "google_civic"
 IMAGE_SOURCE_VOTE_USA = "vote_usa"
 IMAGE_SOURCE_BALLOTPEDIA = "ballotpedia"
+IMAGE_SOURCE_WIKIPEDIA = "wikipedia"
 LINKEDIN = "linkedin"
 WIKIPEDIA = "wikipedia"
 OTHER_SOURCE = "other_source"  # Set "kind_of_image_other_source" to true
