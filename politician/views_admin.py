@@ -2847,6 +2847,9 @@ def politician_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                 politician_on_stage.wikipedia_url = wikipedia_url
+                politician_on_stage.wikipedia_photo_does_not_exist = False
+
+                # politician_on_stage.wikipedia_photo_url_is_broken = wikipedia_photo_url_is_broken
             if youtube_url is not False:
                 politician_on_stage.youtube_url = youtube_url
 

@@ -72,8 +72,9 @@ def get_photo_url_from_wikipedia(
         google_civic_election_id = ''
         is_candidate = False
     wikipedia_page_title = wikipedia_page_url.split('/')[-1]
-    wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')').replace('_', ' ')
-
+    wikipedia_page_title = ((wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+                            .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
+                            .replace('%F3', 'ó').replace('%E1', 'á'))
     if not positive_value_exists(wikipedia_page_url):
         status += "MISSING_WIKIPEDIA_PAGE_URL "
         results = {
@@ -89,16 +90,16 @@ def get_photo_url_from_wikipedia(
         incoming_object_changes = True
     print(wikipedia_page_title)
     results = retrieve_images_from_wikipedia(wikipedia_page_title)
-    if results.get('success'):
+    if results.get('success') or results['missing_photo']:
         photo_url = results.get('photo_url')
         # To explore, when photo_url is found, but not valid... (low priority)
         # wikipedia_photo_url_is_broken = results.get('http_response_code') == 404
-        if results['result']:
+        if results['result'] and not results['missing_photo']:
             if is_candidate or is_politician:
                 incoming_object_changes = True
                 incoming_object.wikipedia_photo_url = photo_url
-                incoming_object.wikipedia_photo_url_is_broken = False
-                incoming_object.wikipedia_photo_url_is_placeholder = False
+                # incoming_object.wikipedia_photo_url_is_broken = False
+                incoming_object.wikipedia_photo_does_not_exist = False
                 if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
                     incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     incoming_object.we_vote_hosted_profile_image_url_large = None
@@ -114,12 +115,12 @@ def get_photo_url_from_wikipedia(
             #         and not incoming_object.ballotpedia_photo_url_is_broken:
             #     incoming_object.ballotpedia_photo_url_is_broken = True
             #     incoming_object.save()
-        elif results.get('is_silhouette'):
+        elif results.get('missing_photo'):
             if is_candidate or is_politician:
                 incoming_object_changes = True
                 incoming_object.wikipedia_photo_url = None
-                incoming_object.wikipedia_photo_url_is_broken = False
-                incoming_object.wikipedia_photo_url_is_placeholder = True
+                # incoming_object.wikipedia_photo_url_is_broken = False
+                incoming_object.wikipedia_photo_does_not_exist = True
                 if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
                     incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     incoming_object.we_vote_hosted_profile_image_url_large = None
@@ -132,23 +133,34 @@ def get_photo_url_from_wikipedia(
                     else:
                         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
         else:
-            status += "WIKIPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + wikipedia_page_url + " "
+            status += "WIKIPEDIA_PHOTO_URL_NOT_FOUND_ON_PAGE: " + wikipedia_page_url + " "
             status += results['status']
 
         if save_to_database and incoming_object_changes:
             incoming_object.save()
 
         # link_is_broken = results.get('http_response_code') == 404
-        is_placeholder_photo = results.get('is_silhouette')
+        is_placeholder_photo = results.get('missing_photo')
+        if 'photo_url_found' in results:
+            if not results['photo_url_found']:
+                results['photo_url_found'] = False
+        # Handle the case when 'photo_url_found' is False
+        # ...
+        else:
+            results['photo_url_found'] = False
+        # Handle the case when 'photo_url_found' is not present in the dictionary
+        # ...
+        print(results['photo_url_found'])
+
         if is_placeholder_photo:
             success = False
             # status += results['status']
-            status += "IS_PLACEHOLDER_PHOTO "
-            logger.info("Placeholder/Silhouette: " + photo_url)
+            status += "MISSING_PHOTO "
+            logger.info("Missing photo: " + photo_url)
             if add_messages:
                 messages.add_message(
                     request, messages.ERROR,
-                    'Failed to retrieve Wikipedia picture:  The Wikipedia URL is for placeholder/Silhouette image.')
+                    'Failed to retrieve Wikipedia picture:  The Wikipedia photo is missing.')
             # Create a record denoting that we have retrieved from Wikipedia for this candidate
             if is_candidate:
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
@@ -156,10 +168,10 @@ def get_photo_url_from_wikipedia(
                     google_civic_election_id=google_civic_election_id,
                     candidate_campaign_we_vote_id=incoming_object.we_vote_id,
                     number_of_results=1,
-                    status="CANDIDATE_WIKIPEDIA_URL_IS_PLACEHOLDER_SILHOUETTE:" + str(photo_url))
+                    status="CANDIDATE_WIKIPEDIA_URL_IS_MISSING_PHOTO:" + str(photo_url))
         elif results['photo_url_found']:
             # Success!
-            # logger.info("Queried URL: " + wikipedia_page_url + " ==> " + photo_url)
+            logger.info("Queried URL: " + wikipedia_page_url + " ==> " + photo_url)
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Wikipedia photo retrieved.')
             if save_to_database:
@@ -170,7 +182,9 @@ def get_photo_url_from_wikipedia(
                         source_link=wikipedia_page_url,
                         # source_link="",
                         url_is_broken=False,
-                        kind_of_source_website=IMAGE_SOURCE_WIKIPEDIA)
+                        kind_of_source_website=IMAGE_SOURCE_WIKIPEDIA,
+                        page_title=wikipedia_page_title)
+
                     if results['success']:
                         wikipedia_photo_saved = True
                     # When saving to candidate object, update:
@@ -988,7 +1002,7 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 
 def retrieve_images_from_wikipedia(page_title):
     clean_message = ''
-    is_silhouette = False
+    missing_photo = False
     photo_url = ''
     photo_url_found = True
 
@@ -996,7 +1010,7 @@ def retrieve_images_from_wikipedia(page_title):
         "success": True,
         "status": "", "result": None,
         'clean_message': clean_message,
-        'is_silhouette': is_silhouette,
+        'missing_photo': missing_photo,
         'photo_url': photo_url,
         'photo_url_found': photo_url_found,
     }
@@ -1017,4 +1031,6 @@ def retrieve_images_from_wikipedia(page_title):
         response["result"] = None
         response["clean_message"] = str(retrievePageError)
         response["page_title_found"] = False
+        response["missing_photo"] = True
+        response["photo_url_found"] = False
     return response

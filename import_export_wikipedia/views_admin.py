@@ -35,6 +35,7 @@ MAXIMUM_WIKIPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 50
 
 
 def bulk_retrieve_wikipedia_photos_view(request):
+    import codecs
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -90,9 +91,10 @@ def bulk_retrieve_wikipedia_photos_view(request):
     try:
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
-        queryset = queryset.exclude(wikipedia_photo_url_is_placeholder=True)
+        # Don't include candidates that have wikipedia photos
+        queryset = queryset.exclude(wikipedia_photo_does_not_exist=True)
         # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
-        # Don't include candidates that do not have ballotpedia_candidate_url
+        # Don't include candidates that do not have wikipedia_url
         queryset = queryset. \
             exclude(Q(wikipedia_url__isnull=True) | Q(wikipedia_url__exact=''))
         # Only include candidates that don't have a photo

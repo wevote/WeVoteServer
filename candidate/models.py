@@ -113,8 +113,8 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'we_vote_hosted_profile_vote_usa_image_url_tiny',
     'wikipedia_page_title',
     'wikipedia_photo_url',
-    'wikipedia_photo_url_is_broken',
-    'wikipedia_photo_url_is_placeholder',
+    # 'wikipedia_photo_url_is_broken',
+    'wikipedia_photo_does_not_exist',
     'wikipedia_url',
     'withdrawal_date',
     'withdrawn_from_election',
@@ -2313,8 +2313,8 @@ class CandidateListManager(models.Manager):
                     'youtube_url':                  candidate.youtube_url,
                     'we_vote_id': candidate.we_vote_id,
                     'wikipedia_photo_url': candidate.wikipedia_photo_url,
-                    'wikipedia_photo_url_is_broken': candidate.wikipedia_photo_url_is_broken,
-                    'wikipedia_photo_url_is_placeholder': candidate.wikipedia_photo_url_is_placeholder,
+                    # 'wikipedia_photo_url_is_broken': candidate.wikipedia_photo_url_is_broken,
+                    'wikipedia_photo_does_not_exist': candidate.wikipedia_photo_does_not_exist,
                     'wikipedia_url': candidate.wikipedia_url,
 
                 }
@@ -2675,8 +2675,8 @@ class CandidateCampaign(models.Model):
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.TextField(
         verbose_name='url of remote wikipedia profile photo', blank=True, null=True)
-    wikipedia_photo_url_is_broken = models.BooleanField(default=False)
-    wikipedia_photo_url_is_placeholder = models.BooleanField(default=False)
+    # wikipedia_photo_url_is_broken = models.BooleanField(default=False)
+    wikipedia_photo_does_not_exist = models.BooleanField(default=False)
 
     wikipedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached candidate profile image from wikipedia', blank=True, null=True)
@@ -4650,10 +4650,10 @@ class CandidateManager(models.Manager):
             if 'wikipedia_page_title' in update_values else '' if 'wikipedia_page_title' in update_values else ''
         wikipedia_photo_url = update_values['wikipedia_photo_url'] \
             if 'wikipedia_photo_url' in update_values else ''
-        wikipedia_photo_url_is_broken = update_values['wikipedia_photo_url_is_broken'] \
-            if 'wikipedia_photo_url_is_broken' in update_values else ''
-        wikipedia_photo_url_is_placeholder = update_values['wikipedia_photo_url_is_placeholder'] \
-            if 'wikipedia_photo_url_is_placeholder' in update_values else ''
+        # wikipedia_photo_url_is_broken = update_values['wikipedia_photo_url_is_broken'] \
+        #     if 'wikipedia_photo_url_is_broken' in update_values else ''
+        wikipedia_photo_does_not_exist = update_values['wikipedia_photo_does_not_exist'] \
+            if 'wikipedia_photo_does_not_exist' in update_values else ''
 
 
 
@@ -4730,8 +4730,8 @@ class CandidateManager(models.Manager):
                 new_candidate.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
                 new_candidate.wikipedia_page_title = wikipedia_page_title
                 new_candidate.wikipedia_photo_url = wikipedia_photo_url
-                new_candidate.wikipedia_photo_url_is_broken = wikipedia_photo_url_is_broken
-                new_candidate.wikipedia_photo_url_is_placeholder = ballotpedia_photo_url_is_placeholder
+                # new_candidate.wikipedia_photo_url_is_broken = wikipedia_photo_url_is_broken
+                new_candidate.wikipedia_photo_does_not_exist = False
 
                 new_candidate.save()
 
@@ -4930,13 +4930,13 @@ class CandidateManager(models.Manager):
                 if 'wikipedia_photo_url' in update_values:
                     existing_candidate_entry.wikipedia_photo_url = update_values['wikipedia_photo_url']
                     values_changed = True
-                if 'wikipedia_photo_url_is_broken' in update_values:
-                    existing_candidate_entry.wikipedia_photo_url_is_broken = \
-                        update_values['wikipedia_photo_url_is_broken']
-                    values_changed = True
-                if 'wikipedia_photo_url_is_placeholder' in update_values:
-                    existing_candidate_entry.wikipedia_photo_url_is_placeholder = \
-                        update_values['wikipedia_photo_url_is_placeholder']
+                # if 'wikipedia_photo_url_is_broken' in update_values:
+                #     existing_candidate_entry.wikipedia_photo_url_is_broken = \
+                #         update_values['wikipedia_photo_url_is_broken']
+                #     values_changed = True
+                if 'wikipedia_photo_does_not_exist' in update_values:
+                    existing_candidate_entry.wikipedia_photo_does_not_exist = \
+                        update_values['wikipedia_photo_does_not_exist']
                     values_changed = True
 
 

@@ -2550,7 +2550,7 @@ def retrieve_next_or_most_recent_office_for_candidate(candidate_we_vote_id=''):
     return results
 
 
-def save_image_to_candidate_table(candidate, image_url, source_link, url_is_broken, kind_of_source_website=None):
+def save_image_to_candidate_table(candidate, image_url, source_link, url_is_broken, kind_of_source_website=None, page_title=None):
     status = ''
     success = True
     cache_results = {
@@ -2627,7 +2627,8 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
         candidate.wikipedia_photo_url = image_url
         candidate.wikipedia_profile_image_url_https = cached_wikipedia_profile_image_url_https
-        candidate.wikipedia_page_title = source_link
+        # candidate.wikipedia_page_title = source_link.rsplit('/', 1)[-1].replace("_", " ")
+        candidate.wikipedia_page_title = page_title
         if positive_value_exists(candidate.wikipedia_profile_image_url_https):
             # Store the We Vote cached URL
             candidate.we_vote_hosted_profile_wikipedia_image_url_large = \
