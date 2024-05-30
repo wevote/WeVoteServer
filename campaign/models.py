@@ -111,6 +111,7 @@ class CampaignX(models.Model):
     ocd_id_state_mismatch_checked_campaign_title = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_resolved = models.BooleanField(default=False, null=False)
+    opposers_count = models.PositiveIntegerField(default=0)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)

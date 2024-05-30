@@ -36,6 +36,7 @@ from import_export_batches.models import BatchManager
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
+from import_export_wikipedia.controllers import get_photo_url_from_wikipedia
 from measure.models import ContestMeasure
 from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
@@ -2037,6 +2038,7 @@ def candidate_new_view(request):
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
 
+
 def update_candidate_wikipedia_image(candidate_on_stage, request, messages):
     print("made it here")
     response = retrieve_images_from_wikipedia(candidate_on_stage.wikipedia_page_title)
@@ -2044,7 +2046,8 @@ def update_candidate_wikipedia_image(candidate_on_stage, request, messages):
         print("made it here!!!!")
         candidate_on_stage.wikipedia_photo_url = response["result"]
         candidate_on_stage.save()
-        messages.add_message(request, messages.INFO, "Retrieved the following from wikipedia: {result}".format(result=response["result"]))
+        messages.add_message(request, messages.INFO,
+                             "Retrieved the following from wikipedia: {result}".format(result=response["result"]))
     else:
         messages.add_message(request, messages.ERROR, response["result"])    
 
@@ -2124,9 +2127,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         # This is fine, create new below
         pass
 
-    if not positive_value_exists(candidate_on_stage.wikipedia_photo_url):
-        if positive_value_exists(candidate_on_stage.wikipedia_page_title):
-            update_candidate_wikipedia_image(candidate_on_stage, request, messages)
+    # if not positive_value_exists(candidate_on_stage.wikipedia_photo_url):
+    #     if positive_value_exists(candidate_on_stage.wikipedia_page_title):
+    #         update_candidate_wikipedia_image(candidate_on_stage, request, messages)
                 
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
@@ -2603,6 +2606,7 @@ def candidate_edit_process_view(request):
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     which_marking = request.POST.get('which_marking')
     wikipedia_url = request.POST.get('wikipedia_url', False)
+    wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
     youtube_url = request.POST.get('youtube_url', False)
@@ -3264,6 +3268,7 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
             if vote_usa_office_id is not False:
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
+            wikipedia_url_changed = False
             if wikipedia_url is not False:
                 change_results = change_tracking(
                     existing_value=candidate_on_stage.wikipedia_url,
@@ -3276,13 +3281,26 @@ def candidate_edit_process_view(request):
                 if change_results['change_description_changed']:
                     change_description += change_results['change_description']
                     change_description_changed = True
-                if(candidate_on_stage.wikipedia_url != wikipedia_url):
-                    candidate_on_stage.wikipedia_url = wikipedia_url
-                    candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ").replace('%28', '(').replace('%29', ')')
+                    wikipedia_url_changed = True
+                candidate_on_stage.wikipedia_url = wikipedia_url
+                candidate_on_stage.wikipedia_photo_url = wikipedia_photo_url
+                if not positive_value_exists(wikipedia_url):
                     candidate_on_stage.wikipedia_photo_url = None
-                    # candidate_on_stage.wikipedia_photo_url_is_broken = False
                     candidate_on_stage.wikipedia_photo_does_not_exist = False
-                    update_candidate_wikipedia_image(candidate_on_stage, request, messages)
+                    candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_large = None
+                    candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_medium = None
+                    candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_tiny = None
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
+                        profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                        candidate_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = None
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
+                        results = organize_object_photo_fields_based_on_image_type_currently_active(
+                            object_with_photo_fields=candidate_on_stage)
+                        if results['success']:
+                            candidate_on_stage = results['object_with_photo_fields']
+
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
@@ -3343,6 +3361,14 @@ def candidate_edit_process_view(request):
                 or not positive_value_exists(candidate_on_stage.ballotpedia_photo_url)) \
                     and positive_value_exists(ballotpedia_candidate_url):
                 results = get_photo_url_from_ballotpedia(
+                    incoming_object=candidate_on_stage,
+                    save_to_database=True,
+                )
+
+            if (wikipedia_url_changed or not positive_value_exists(candidate_on_stage.wikipedia_photo_url)) \
+                    and positive_value_exists(wikipedia_url):
+                # update_candidate_wikipedia_image(candidate_on_stage, request, messages)
+                results = get_photo_url_from_wikipedia(
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
