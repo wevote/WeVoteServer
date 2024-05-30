@@ -74,9 +74,13 @@ def get_photo_url_from_wikipedia(
         wikipedia_page_title = wikipedia_page_url.split('/')[-1]
         # google_civic_election_id = 0
         is_candidate = False
-    wikipedia_page_title = ((wikipedia_page_title.replace('%28', '(').replace('%29', ')')
-                            .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
-                            .replace('%F3', 'ó').replace('%E1', 'á'))
+    if positive_value_exists(wikipedia_page_title):
+        try:
+            wikipedia_page_title = ((wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+                                    .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
+                                    .replace('%F3', 'ó').replace('%E1', 'á'))
+        except Exception as e:
+            status += "COULD_NOT_CLEAN_WIKIPEDIA_PAGE_TITLE: " + str(e) + " "
     if not positive_value_exists(wikipedia_page_url):
         status += "MISSING_WIKIPEDIA_PAGE_URL "
         results = {
