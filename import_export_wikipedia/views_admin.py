@@ -147,7 +147,6 @@ def bulk_retrieve_wikipedia_photos_view(request):
                                 )
 
 
-
 @login_required
 def import_organization_logo_from_wikipedia_view(request, organization_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer

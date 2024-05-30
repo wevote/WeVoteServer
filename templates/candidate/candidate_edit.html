@@ -675,25 +675,8 @@ th, td {
     </div>
 </div>
 </div>
+</div>
 
-<div class="col">
-<div class="row form-group">
-    <label for="wikipedia_url_id" class="control-label">
-        Wikipedia URL
-        {% if candidate and candidate.wikipedia_url %}(<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>){% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
-    </div>
-    <div class="col">
-        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.wikipedia_url }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
-        {% if candidate.wikipedia_photo_does_not_exist %}Image is Missing{% endif %}
-    </div>
-</div>
-</div>
-</div>
 
 <div class="row form-group">
     <label for="ballotpedia_candidate_summary_id" class="pl-4 control-label">Ballotpedia Candidate Summary</label>
@@ -713,6 +696,26 @@ th, td {
                   id="ballot_guide_official_statement_id"
                   placeholder="Enter official candidate statement">{% if candidate %}{{ candidate.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
     </div>
+</div>
+
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="wikipedia_url_id" class="pl-4 control-label">
+        Wikipedia URL
+        {% if candidate and candidate.wikipedia_url %}(<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>){% endif %}
+    </label>
+    <div class="col">
+        <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
+    </div>
+    <div class="col">
+        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url|default_if_none:"" }}{% endif %}" />
+        {% if candidate.wikipedia_photo_does_not_exist %}Image is Missing{% endif %}
+    </div>
+</div>
+</div>
 </div>
 
 {% include "../form_inputs/four_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict field_dict_3=ballotpedia_candidate_id_dict field_dict_4=ballotpedia_person_id_dict %}

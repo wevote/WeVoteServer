@@ -424,7 +424,6 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
 
 
 def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (No CDN)
-        request=None,
         voter_device_id='',
         campaignx_we_vote_id='',
         seo_friendly_path='',

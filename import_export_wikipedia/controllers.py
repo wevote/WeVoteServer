@@ -57,21 +57,23 @@ def get_photo_url_from_wikipedia(
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
 
-    # if hasattr(incoming_object, 'wikipedia_page_title'):
-    #     wikipedia_page_title = incoming_object.wikipedia_page_title
-    #     wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')')
-    #     google_civic_election_id = incoming_object.google_civic_election_id
-    #     is_candidate = True
+    google_civic_election_id = 0
+    if hasattr(incoming_object, 'wikipedia_page_title'):
+        wikipedia_page_url = incoming_object.wikipedia_url
+        wikipedia_page_title = incoming_object.wikipedia_page_title
+        # wikipedia_page_title = wikipedia_page_title.replace('%28', '(').replace('%29', ')')
+        # google_civic_election_id = incoming_object.google_civic_election_id
+        is_candidate = True
     elif hasattr(incoming_object, 'wikipedia_url'):
         wikipedia_page_url = incoming_object.wikipedia_url
-
-        google_civic_election_id = ''
+        wikipedia_page_title = wikipedia_page_url.split('/')[-1]
+        # google_civic_election_id = 0
         is_politician = True
     else:
         wikipedia_page_url = incoming_object.organization_wikipedia
-        google_civic_election_id = ''
+        wikipedia_page_title = wikipedia_page_url.split('/')[-1]
+        # google_civic_election_id = 0
         is_candidate = False
-    wikipedia_page_title = wikipedia_page_url.split('/')[-1]
     wikipedia_page_title = ((wikipedia_page_title.replace('%28', '(').replace('%29', ')')
                             .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
                             .replace('%F3', 'ó').replace('%E1', 'á'))
@@ -1008,7 +1010,8 @@ def retrieve_images_from_wikipedia(page_title):
 
     response = {
         "success": True,
-        "status": "", "result": None,
+        "status": "",
+        "result": None,
         'clean_message': clean_message,
         'missing_photo': missing_photo,
         'photo_url': photo_url,
