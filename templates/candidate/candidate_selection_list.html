@@ -208,7 +208,7 @@
                   {% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a><br />{% endif %}
                 </span>
                   {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
-                  {% if candidate.instagram_url %}<a href="{{ candidate.instagram_url }}" target="_blank">{{ candidate.instagram_url }}</a><br />{% endif %}
+                  {% if candidate.instagram_handle %}<a href="https://instagram.com/{{ candidate.instagram_handle }}" target="_blank">instagram.com/{{ candidate.instagram_handle }}</a><br />{% endif %}
                   {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
                 </td>
                 <td>

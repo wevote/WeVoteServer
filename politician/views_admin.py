@@ -2563,7 +2563,7 @@ def politician_edit_process_view(request):
             if google_civic_candidate_name3 is not False:
                 politician_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
             if instagram_handle is not False:
-                politician_on_stage.instagram_handle = instagram_handle
+                politician_on_stage.instagram_handle = instagram_handle  # handle extracted above (if URL)
             is_battleground_years_list = IS_BATTLEGROUND_YEARS_AVAILABLE
             years_false_list = []
             years_true_list = []

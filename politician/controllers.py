@@ -30,7 +30,8 @@ from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
 from wevote_functions.functions import candidate_party_display, convert_to_int, \
-    convert_to_political_party_constant, generate_random_string, positive_value_exists, \
+    convert_to_political_party_constant, extract_instagram_handle_from_text_string, \
+    generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
 
@@ -1623,10 +1624,12 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         politician_description = politician.twitter_description
     else:
         politician_description = ''
+    instagram_handle = extract_instagram_handle_from_text_string(politician.instagram_handle)
     results = {
         'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
         'candidate_list':                   politician_candidate_dict_list,
         'candidate_list_exists':            politician_candidate_list_exists,
+        'instagram_handle':                 instagram_handle,
         'linked_campaignx_we_vote_id':      politician.linked_campaignx_we_vote_id,
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,

@@ -51,7 +51,14 @@ ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NON
                                               NEWS_ORGANIZATION, ORGANIZATION, POLITICAL_ACTION_COMMITTEE,
                                               PUBLIC_FIGURE, TRADE_ASSOCIATION]
 
-ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = ["DID", "Google", "Twitter", "Ro", "Uber"]
+# These names lead to text matches on Candidate "I am endorsed by this group" pages that are too common
+ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
+    "ACCE", "ADAction", "BLOC", "Check", "Cher", "cia", "CoD", "CS", "CSS",
+    "data", "DID", "donate", "Google",
+    "Ian", "IMG", "Isaac", "JAC", "Location", "Mark", "Module", "More", "NEA", "NEXT",
+    "Pat", "Ping", "plan", "products", "Ray", "RESULTS", "Ro", "Sarah", "SAVE", "Section", "Settings", "spa", "steve",
+    "The Candidate", "The Democrats", "TIME", "Twitter", "Uber", "vote", "Will", "Z",
+]
 
 ORGANIZATION_TYPE_MAP = {
     CORPORATION:                'Corporation',
@@ -199,7 +206,8 @@ class OrganizationManager(models.Manager):
     A class for working with the Organization model
     """
     # DO WE WANT CREATE OR UPDATE AND CREATE # Do we want the organization twitter handle
-    def update_or_create_organization_link_to_hashtag(self, organization_we_vote_id, hashtag_text):
+    @staticmethod
+    def update_or_create_organization_link_to_hashtag(organization_we_vote_id, hashtag_text):
         success = False
         status = ""
         organization_link_to_hashtag_created = False
@@ -223,7 +231,7 @@ class OrganizationManager(models.Manager):
                 hashtag_text__iexact=hashtag_text,
                 defaults=defaults,)
             # NOTE: Hashtags are only significant if there are more than one for a particular issue so I'm not sure
-            #   if it makes sense to have indivitual tweet's id or date.
+            #   if it makes sense to have individual tweet's id or date.
             # tweet_id=hashtag['tweet_id'],
             # published_datetime=tweet_list['date_published'],
             # organization_twitter_handle=tweet_list['author_handle'])
@@ -242,8 +250,11 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_organization_membership_link_to_voter(
-            self, organization_we_vote_id, external_voter_id, voter_we_vote_id):
+            organization_we_vote_id,
+            external_voter_id,
+            voter_we_vote_id):
         success = False
         status = ""
         insufficient_variables = False
@@ -425,7 +436,8 @@ class OrganizationManager(models.Manager):
             return twitter_user_results['twitter_user']
         return None
 
-    def duplicate_organization(self, organization):
+    @staticmethod
+    def duplicate_organization(organization):
         """
         Starting with an existing organization, create a duplicate version with different we_vote_id
         :param organization:
@@ -436,7 +448,7 @@ class OrganizationManager(models.Manager):
         organization_duplicated = False
 
         try:
-            organization.id = None  # Remove the primary key so it is forced to save a new entry
+            organization.id = None  # Remove the primary key, so it is forced to save a new entry
             organization.pk = None
             organization.facebook_email = None
             organization.fb_username = None
@@ -973,7 +985,7 @@ class OrganizationManager(models.Manager):
                             status += "REPAIR_MISSING_LINKED_ORG-COULD_NOT_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID " + \
                                       str(e) + " "
 
-            # If this voter is linked to a Twitter id, see if there is also an org linked to the same Twitter id
+            # If this voter is linked to a Twitter id, see if there is also an org linked to the same Twitter id,
             #  so we can use that information to find an existing organization we should link to this voter
             if twitter_organization_found:
                 # If here, there was a complete chain from TwitterLinkToVoter -> TwitterLinkToOrganization
@@ -2402,7 +2414,7 @@ class OrganizationListManager(models.Manager):
                     new_filter = Q(organization_name__icontains=organization_name)
                 filters.append(new_filter)
 
-            # The master organization twitter_handle data is in TwitterLinkToOrganization but we try to keep
+            # The master organization twitter_handle data is in TwitterLinkToOrganization, but we try to keep
             # organization_twitter_handle up-to-date for rapid searches like this.
             if positive_value_exists(organization_twitter_handle):
                 organization_twitter_handle2 = extract_twitter_handle_from_text_string(organization_twitter_handle)
@@ -2721,9 +2733,13 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_public_organizations_for_upcoming_elections(
-            self, limit_to_this_state_code="", return_list_of_objects=False, super_light_organization_list=False,
-            candidate_we_vote_id_to_include=""):
+            limit_to_this_state_code="",
+            return_list_of_objects=False,
+            super_light_organization_list=False,
+            candidate_we_vote_id_to_include="",
+    ):
         """
         This function is used for our endorsements scraper.
         :param limit_to_this_state_code:
@@ -2832,7 +2848,7 @@ class OrganizationListManager(models.Manager):
                     status += "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION "
                 else:
                     keep_looking_for_duplicates = True
-                    # Heal the data -- the organization is missing so we should delete the Twitter link
+                    # Heal the data -- the organization is missing, so we should delete the Twitter link
                     twitter_id = 0
                     delete_results = twitter_user_manager.delete_twitter_link_to_organization(
                         twitter_id, twitter_link_to_organization.organization_we_vote_id)
@@ -3369,7 +3385,7 @@ class Organization(models.Model):
 
         return organization
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this organization came from another source we still need a unique we_vote_id
         if self.we_vote_id:

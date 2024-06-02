@@ -533,7 +533,6 @@ def groom_and_store_google_civic_candidates_json_2021(
         go_fund_me_url = ''
         google_plus_url = ''
         instagram_handle = ''
-        instagram_url = ''
         linkedin_url = ''
         twitter_url = ''
         vimeo_url = ''
