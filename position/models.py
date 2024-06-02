@@ -242,8 +242,7 @@ class PositionEntered(models.Model):
     statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(verbose_name='url with more info about this position', max_length=255,
-                                    blank=True, null=True)
+    more_info_url = models.TextField(verbose_name='url with more info about this position', null=True)
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)
@@ -660,8 +659,7 @@ class PositionForFriends(models.Model):
     statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
-    more_info_url = models.URLField(verbose_name='url with more info about this position', max_length=255,
-        blank=True, null=True)
+    more_info_url = models.TextField(verbose_name='url with more info about this position', null=True)
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)

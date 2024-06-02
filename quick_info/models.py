@@ -69,7 +69,7 @@ class QuickInfo(models.Model):
                                         null=True, blank=True)
 
     # A link to any location with more information about this quick information
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
+    more_info_url = models.TextField(verbose_name='url with more the full entry for this info', null=True)
 
     last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)  # TODO Convert to date_last_changed
 
@@ -635,7 +635,7 @@ class QuickInfoMaster(models.Model):
                                       null=True, blank=True)
 
     # A link to any location with more information about this quick information
-    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
+    more_info_url = models.TextField(verbose_name='url with more the full entry for this info', null=True)
 
     last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)  # TODO convert to date_last_changed
 

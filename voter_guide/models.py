@@ -3080,8 +3080,7 @@ class VoterGuidePossibilityPosition(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True)
     position_stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     # A link to any location with more information about this position
-    more_info_url = models.TextField(
-        verbose_name='url with more info about this position', blank=True, null=True)
+    more_info_url = models.TextField(verbose_name='url with more info about this position', null=True)
     # We don't want to work with this possibility anymore
     possibility_should_be_ignored = models.BooleanField(default=False,
                                                         verbose_name='Soft delete. Stop analyzing this entry.')
