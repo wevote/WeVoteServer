@@ -3130,12 +3130,10 @@ class Organization(models.Model):
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
     most_recent_name_update_from_voter_first_and_last = models.BooleanField(default=False)
-    organization_website = models.URLField(
-        verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
+    organization_website = models.TextField(verbose_name='url of the endorsing organization', null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
-    organization_contact_form_url = models.URLField(
-        verbose_name='url of the contact us form', max_length=255, blank=True, null=True)
+    organization_contact_form_url = models.TextField(verbose_name='url of the contact us form', null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,
