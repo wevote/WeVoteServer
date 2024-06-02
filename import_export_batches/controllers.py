@@ -257,6 +257,8 @@ def create_batch_row_actions(
                     # batch_row_action_politician = results['batch_row_action_politician']
                     number_of_batch_actions_created += 1
                     success = True
+                elif not results['success']:
+                    status += results['status']
                 status += "CREATE_BATCH_ROW_ACTION_POSITION-START: "
                 status += results['status']
                 print_to_log(logger=logger, exception_message_optional=status)
@@ -2618,6 +2620,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         except Exception as e:
             batch_row_action_created = False
             batch_row_action_position = None
+            batch_row_action_updated = False
             success = False
             status = "BATCH_ROW_ACTION_POSITION_NOT_CREATED: " + str(e) + " "
 
@@ -2961,6 +2964,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     except Exception as e:
         success = False
         status += "BATCH_ROW_ACTION_POSITION_UNABLE_TO_SAVE: " + str(e) + ' '
+        batch_row_action_updated = False
 
     try:
         if batch_row_action_created or batch_row_action_updated:
@@ -2969,6 +2973,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             one_batch_row.save()
     except Exception as e:
         status += "CANNOT_SAVE_ONE_BATCH_ROW: " + str(e) + ' '
+        success = False
 
     results = {
         'success': success,

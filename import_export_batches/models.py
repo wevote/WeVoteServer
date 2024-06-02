@@ -6506,8 +6506,7 @@ class BatchRowActionPosition(models.Model):
     statement_text = models.TextField(null=True, blank=True, )
     statement_html = models.TextField(null=True, blank=True, )
     # A link to any location with more information about this position
-    more_info_url = models.URLField(
-        blank=True, null=True, max_length=255, verbose_name='url with more info about this position')
+    more_info_url = models.TextField(verbose_name='url with more info about this position', null=True)
 
     # Did this position come from a web scraper?
     from_scraper = models.BooleanField(default=False)
