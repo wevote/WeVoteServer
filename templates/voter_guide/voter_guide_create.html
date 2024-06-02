@@ -109,6 +109,7 @@
                   class="btn btn-link btn-sm" value="1">Unlink</button>
        </label>
         <div class="col-sm-8">
+            <span class="h3">Groups &amp; People Endorsing&nbsp;</span>
             {% if candidate.we_vote_hosted_profile_image_url_tiny %}
                 <img src="{{ candidate.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
             {% endif %}
@@ -186,11 +187,12 @@
         <div class="col-sm-8">
             <label for="organization_website_id">
                 <input type="radio" name="type_of_website" value="OrganizationWebsite"{% if type_of_website != "CandidateWebsite" %} checked{% endif %} id="organization_website_id" >
-                Endorsements for one or more Candidate(s)&nbsp;
+                Option 1: Endorser website, listing endorsements for one or more Candidate(s)&nbsp;
             </label>
+            <br />
             <label for="candidate_website_id">
                 <input type="radio" name="type_of_website" value="CandidateWebsite"{% if type_of_website == "CandidateWebsite" %} checked{% endif %} id="candidate_website_id" >
-                Candidate website, showing who is endorsing them
+                Option 2: Candidate website, listing who is endorsing that candidate
             </label>
         </div>
     </div>
@@ -299,6 +301,9 @@
                 <div class="col-sm-8">
                     <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                            value="{{ candidate_name|default_if_none:"" }}" />
+{#                    {% if not candidate_name and not candidate_twitter_handle %}#}
+                        <a href="{% url 'candidate:candidate_list' %}?candidate_search={{ candidate_name|default_if_none:"" }}" target="_blank">search for candidate</a>
+{#                    {% elif %}#}
                 </div>
             </div>
 

@@ -806,10 +806,12 @@ def voter_guide_create_process_view(request):
             candidate_name=candidate_name,
             candidate_twitter_handle=candidate_twitter_handle,
             candidate_we_vote_id=candidate_we_vote_id,
+            possible_endorsement_list=possible_endorsement_list,
+            voter_guide_possibility_url=voter_guide_possibility_url,
         )
         candidate_name = results['candidate_name']
-        # organization_twitter_followers_count = results['organization_twitter_followers_count']
-        # organization_twitter_handle = results['organization_twitter_handle']
+        candidate_twitter_handle = results['candidate_twitter_handle']
+        candidate_we_vote_id = results['candidate_we_vote_id']
         possible_endorsement_list = results['possible_endorsement_list']
 
     # Now save the possibility so far
@@ -822,6 +824,7 @@ def voter_guide_create_process_view(request):
         updated_values = {
             'ballot_items_raw':                 ballot_items_raw,
             'candidate_name':                   candidate_name,
+            'candidate_twitter_handle':         candidate_twitter_handle,
             'candidate_we_vote_id':             candidate_we_vote_id,
             'contributor_comments':             contributor_comments,
             'contributor_email':                contributor_email,

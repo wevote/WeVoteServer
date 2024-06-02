@@ -5,7 +5,7 @@
         <span class="float-right"><span style="color: darkgray;{% if possible_endorsement.possibility_should_be_ignored %} text-decoration: line-through;{% endif %}">(id {{ possible_endorsement.possibility_position_id|default_if_none:""}}) #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
     {% if is_list_of_endorsements_for_candidate %}
         <span>
-          <span class="h4">{{ possible_endorsement.organization_name|default_if_none:"" }}{% if candidate_name %}, about {{ candidate_name }}{% endif %}</span>
+          <span class="h4">{{ possible_endorsement.organization_name|default_if_none:"" }}{% if candidate_name %}, endorsing {{ candidate_name }}{% endif %}</span>
           {% if possible_endorsement.google_civic_election_id %}
           <span>
           (election: {{ possible_endorsement.google_civic_election_id }})

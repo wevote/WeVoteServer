@@ -2835,6 +2835,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'linkedin.com',
                                  'nationbuilder.com',
                                  'secure.actblue.com',
+                                 'secure.ngpvan.com',
                                  'secure.winred.com',
                                  't.co',
                                  'tinyurl.com',
@@ -2936,6 +2937,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                         if organization_website_stripped not in \
                                 ('ballotpedia.org',
                                  'bit.ly',
+                                 'developer.chrome.com',
                                  'en.wikipedia.org',
                                  'facebook.com',
                                  'instagram.com',

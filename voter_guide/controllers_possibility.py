@@ -1103,6 +1103,7 @@ def process_candidate_being_endorsed_input_form(
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
     possible_endorsement_list_found = False
+    possible_endorsement_list = possible_endorsement_list if isinstance(possible_endorsement_list, list) else []
     scan_url_again = request.POST.get('scan_url_again', False)
     state_code = request.POST.get('state_code', '')
     status = ""
@@ -1118,7 +1119,7 @@ def process_candidate_being_endorsed_input_form(
     # Figure out the elections we care about
     google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
     if not positive_value_exists(candidate_found):
-        if positive_value_exists(candidate_twitter_handle):
+        if positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
                 google_civic_election_id_list=google_civic_election_id_list_this_year,
                 state_code=state_code,
@@ -1130,12 +1131,13 @@ def process_candidate_being_endorsed_input_form(
                 candidate_found = True
                 candidate_name = candidate.display_candidate_name()
                 candidate_we_vote_id = candidate.we_vote_id
+            elif results['candidate_list_found']:
+                pass
 
     # #########################################
     # Figure out the Possible Endorsers from one candidate's perspective
     possible_endorsement_list_from_form = []
-    possible_endorsement_list_results = take_in_possible_endorsement_list_from_form(
-        request)
+    possible_endorsement_list_results = take_in_possible_endorsement_list_from_form(request)
     if possible_endorsement_list_results['possible_endorsement_list_found']:
         possible_endorsement_list_from_form = possible_endorsement_list_results['possible_endorsement_list']
         possible_endorsement_list_found = True
@@ -1296,7 +1298,8 @@ def process_candidate_being_endorsed_input_form(
         'status':                               status,
         'success':                              success,
         'candidate_name':                       candidate_name,
-        # 'organization_twitter_handle':          organization_twitter_handle,
+        'candidate_twitter_handle':             candidate_twitter_handle,
+        'candidate_we_vote_id':                 candidate_we_vote_id,
         # 'organization_twitter_followers_count': organization_twitter_followers_count,
         'possible_endorsement_list':            possible_endorsement_list,
     }
