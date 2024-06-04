@@ -1194,140 +1194,140 @@ def politician_new_view(request):
         'vote_smart_id':                    vote_smart_id,
         'maplight_id':                      maplight_id,
         'politician_we_vote_id':            politician_we_vote_id,
-        'ballotpedia_politician_name_dict':              
+        'ballotpedia_politician_name_dict':
         {
             'label':    'Name from Ballotpedia',
             'id':       'ballotpedia_politician_name_id',
             'name':     'ballotpedia_politician_name',
             'value':     ballotpedia_politician_name
         },
-        'birth_date_dict':              
+        'birth_date_dict':
         {
         'label':    'Birthdate (format Feb. 16, 1955)',
         'id':       'birth_date_id',
         'name':     'birth_date',
             'value':     birth_date
         },
-        'first_name_dict':              
+        'first_name_dict':
         {
             'label':    'First Name',
             'id':       'first_name_id',
             'name':     'first_name',
             'value':     first_name
         },
-        'last_name_dict':              
+        'last_name_dict':
         {
             'label':    'Last Name',
             'id':       'last_name_id',
             'name':     'last_name',
             'value':     last_name
         },
-        'middle_name_dict':              
+        'middle_name_dict':
         {
             'label':    'Middle Name',
             'id':       'middle_name_id',
             'name':     'middle_name',
             'value':     middle_name
         },
-        'google_civic_candidate_name_dict':              
+        'google_civic_candidate_name_dict':
         {
             'label':    'Politician Name (for Google Civic matching)',
             'id':       'google_civic_candidate_name_id',
             'name':     'google_civic_candidate_name',
             'value':     google_civic_candidate_name
         },
-        'google_civic_candidate_name2_dict':              
+        'google_civic_candidate_name2_dict':
         {
             'label':    'Politician Name 2',
             'id':       'google_civic_candidate_name2_id',
             'name':     'google_civic_candidate_name2',
             'value':     google_civic_candidate_name2
         },
-        'google_civic_candidate_name3_dict':              
+        'google_civic_candidate_name3_dict':
         {
             'label':    'Politician Name 3',
             'id':       'google_civic_candidate_name3_id',
             'name':     'google_civic_candidate_name3',
             'value':     google_civic_candidate_name3
         },
-        'maplight_id_dict':              
+        'maplight_id_dict':
         {
             'label':    'MapLight Id',
             'id':       'maplight_id_id',
             'name':     'maplight_id',
             'value':     maplight_id
         },
-        'politician_email_dict':              
+        'politician_email_dict':
         {
             'label':    'Politician Email',
             'id':       'politician_email_id',
             'name':     'politician_email',
             'value':     politician_email
         },
-        'politician_email2_dict':              
+        'politician_email2_dict':
         {
             'label':    'Email 2',
             'id':       'politician_email2_id',
             'name':     'politician_email2',
             'value':     politician_email2
         },
-        'politician_email3_dict':              
+        'politician_email3_dict':
         {
             'label':    'Email 3',
             'id':       'politician_email3_id',
             'name':     'politician_email3',
             'value':     politician_email3
         },
-        'politician_phone_number_dict':              
+        'politician_phone_number_dict':
         {
             'label':    'Politician Phone',
             'id':       'politician_phone_number_id',
             'name':     'politician_phone_number',
             'value':     politician_phone_number
         },
-        'politician_phone_number2_dict':              
+        'politician_phone_number2_dict':
         {
             'label':    'Phone 2',
             'id':       'politician_phone_number2_id',
             'name':     'politician_phone_number2',
             'value':     politician_phone_number2
         },
-        'politician_phone_number3_dict':              
+        'politician_phone_number3_dict':
         {
             'label':    'Phone 3',
             'id':       'politician_phone_number3_id',
             'name':     'politician_phone_number3',
             'value':     politician_phone_number3
         },
-        'political_party_dict':              
+        'political_party_dict':
         {
             'label':    'Politician Party',
             'id':       'political_party_id',
             'name':     'political_party',
             'value':     political_party
         },
-        'state_code_dict':              
+        'state_code_dict':
         {
             'label':    'State Code',
             'id':       'state_code_id',
             'name':     'state_code',
             'value':     state_code
         },
-        'vote_smart_id_dict':              
+        'vote_smart_id_dict':
         {
             'label':    'Vote Smart Id',
             'id':       'vote_smart_id_id',
             'name':     'vote_smart_id',
             'value':     vote_smart_id
         },
-        'vote_usa_politician_id_dict':              
+        'vote_usa_politician_id_dict':
         {
             'label':    'Vote USA Politician Id',
             'id':       'vote_usa_politician_id_id',
             'name':     'vote_usa_politician_id',
             'value':     vote_usa_politician_id
         },
-        'youtube_url_dict':              
+        'youtube_url_dict':
         {
             'label':    'YouTube URL',
             'id':       'youtube_url_id',
@@ -1746,6 +1746,19 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         from politician.controllers import find_campaignx_list_to_link_to_this_politician
         related_campaignx_list = find_campaignx_list_to_link_to_this_politician(politician=politician_on_stage)
 
+        # ##################################
+        # Find Recommendations related to this Politician
+        recommended_politicians = []
+        if positive_value_exists(politician_we_vote_id):
+            from politician.models import RecommendedPoliticianLinkByPolitician
+            queryset = RecommendedPoliticianLinkByPolitician.objects.using('readonly').all()
+            queryset = queryset.filter(from_politician_we_vote_id__iexact=politician_we_vote_id)
+            recommended_politicians = list(queryset)
+        recommended_politician_we_vote_ids = [rec.recommended_politician_we_vote_id for rec in recommended_politicians]
+        recommended_politicians_list = []
+        if recommended_politician_we_vote_ids:
+            recommended_politicians_list = Politician.objects.filter(we_vote_id__in=recommended_politician_we_vote_ids)
+
         politician_linked_campaignx_we_vote_id = ''
         if len(linked_campaignx_list) > 0:
             linked_campaignx = linked_campaignx_list[0]
@@ -1764,7 +1777,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         else:
             web_app_root_url = 'https://quality.WeVote.US'
         template_values = {
-            'ballotpedia_politician_name_dict':              
+            'ballotpedia_politician_name_dict':
             {
                 'label':    'Name from Ballotpedia',
                 'id':       'ballotpedia_politician_name_id',
@@ -1772,7 +1785,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'value':     ballotpedia_politician_name if ballotpedia_politician_name else politician_on_stage.ballotpedia_politician_name
             },
             'ballotpedia_politician_url':   ballotpedia_politician_url,
-            'birth_date_dict':              
+            'birth_date_dict':
             {
                 'label':    'Birthdate (format Feb. 16, 1955)',
                 'id':       'birth_date_id',
@@ -1784,42 +1797,42 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'facebook_url':                 facebook_url,
             'facebook_url2':                facebook_url2,
             'facebook_url3':                facebook_url3,
-            'first_name_dict':              
+            'first_name_dict':
             {
                 'label':    'First Name',
                 'id':       'first_name_id',
                 'name':     'first_name',
                 'value':     first_name if first_name else politician_on_stage.first_name
             },
-            'last_name_dict':              
+            'last_name_dict':
             {
                 'label':    'Last Name',
                 'id':       'last_name_id',
                 'name':     'last_name',
                 'value':     last_name if last_name else politician_on_stage.last_name
             },
-            'middle_name_dict':              
+            'middle_name_dict':
             {
                 'label':    'Middle Name',
                 'id':       'middle_name_id',
                 'name':     'middle_name',
                 'value':     middle_name if middle_name else politician_on_stage.middle_name
             },
-            'google_civic_candidate_name_dict':              
+            'google_civic_candidate_name_dict':
             {
                 'label':    'Politician Alt Name (for Google Civic matching)',
                 'id':       'google_civic_candidate_name_id',
                 'name':     'google_civic_candidate_name',
                 'value':     google_civic_candidate_name if google_civic_candidate_name else politician_on_stage.google_civic_candidate_name
             },
-            'google_civic_candidate_name2_dict':              
+            'google_civic_candidate_name2_dict':
             {
                 'label':    'Politician Alt Name 2',
                 'id':       'google_civic_candidate_name2_id',
                 'name':     'google_civic_candidate_name2',
                 'value':     google_civic_candidate_name2 if google_civic_candidate_name2 else politician_on_stage.google_civic_candidate_name2
             },
-            'google_civic_candidate_name3_dict':              
+            'google_civic_candidate_name3_dict':
             {
                 'label':    'Politician Alt Name 3',
                 'id':       'google_civic_candidate_name3_id',
@@ -1830,7 +1843,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'linked_campaignx_list':        linked_campaignx_list,
             'linked_candidate_list':        linked_candidate_list,
             'linked_representative_list':   linked_representative_list,
-            'maplight_id_dict':              
+            'maplight_id_dict':
             {
                 'label':    'MapLight Id',
                 'id':       'maplight_id_id',
@@ -1841,21 +1854,25 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'path_count':                   path_count,
             'path_list':                    path_list,
             'politician':                   politician_on_stage,
-            'politician_email_dict':              
+            'politician_email':             politician_email,
+            'politician_email2':            politician_email2,
+            'politician_email3':            politician_email3,
+            'politician_id':                politician_id,
+            'politician_email_dict':
             {
                 'label':    'Politician Email',
                 'id':       'politician_email_id',
                 'name':     'politician_email',
                 'value':     politician_email if politician_email else politician_on_stage.politician_email
             },
-            'politician_email2_dict':              
+            'politician_email2_dict':
             {
                 'label':    'Email 2',
                 'id':       'politician_email2_id',
                 'name':     'politician_email2',
                 'value':     politician_email2 if politician_email2 else politician_on_stage.politician_email2
             },
-            'politician_email3_dict':              
+            'politician_email3_dict':
             {
                 'label':    'Email 3',
                 'id':       'politician_email3_id',
@@ -1864,21 +1881,21 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             },
             'politician_linked_campaignx_we_vote_id':   politician_linked_campaignx_we_vote_id,
             'politician_name':              politician_name,
-            'politician_phone_number_dict':              
+            'politician_phone_number_dict':
             {
                 'label':    'Politician Phone',
                 'id':       'politician_phone_number_id',
                 'name':     'politician_phone_number',
                 'value':     politician_phone_number if politician_phone_number else politician_on_stage.politician_phone_number
             },
-            'politician_phone_number2_dict':              
+            'politician_phone_number2_dict':
             {
                 'label':    'Phone 2',
                 'id':       'politician_phone_number2_id',
                 'name':     'politician_phone_number2',
                 'value':     politician_phone_number2 if politician_phone_number2 else politician_on_stage.politician_phone_number2
             },
-            'politician_phone_number3_dict':              
+            'politician_phone_number3_dict':
             {
                 'label':    'Phone 3',
                 'id':       'politician_phone_number3_id',
@@ -1897,7 +1914,9 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_url3':              politician_url3,
             'politician_url4':              politician_url4,
             'politician_url5':              politician_url5,
-            'political_party_dict':              
+            'political_party':              political_party,
+            'recommended_politicians_list': recommended_politicians_list,
+            'political_party_dict':
             {
                 'label':    'Politician Party',
                 'id':       'political_party_id',
@@ -1909,7 +1928,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'related_candidate_list':       related_candidate_list,
             'related_representative_list':  related_representative_list,
             'state_code':                   state_code,
-            'state_code_dict':              
+            'state_code_dict':
             {
                 'label':    'State Code',
                 'id':       'state_code_id',
@@ -1917,14 +1936,14 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'value':     state_code if state_code else politician_on_stage.state_code
             },
             'vote_smart_id':                vote_smart_id,
-            'vote_smart_id_dict':              
+            'vote_smart_id_dict':
             {
                 'label':    'Vote Smart Id',
                 'id':       'vote_smart_id_id',
                 'name':     'vote_smart_id',
                 'value':     vote_smart_id if vote_smart_id else politician_on_stage.vote_smart_id
             },
-            'vote_usa_politician_id_dict':              
+            'vote_usa_politician_id_dict':
             {
                 'label':    'Vote USA Politician Id',
                 'id':       'vote_usa_politician_id_id',
@@ -1932,7 +1951,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'value':     vote_usa_politician_id if vote_usa_politician_id else politician_on_stage.vote_usa_politician_id
             },
             'web_app_root_url':             web_app_root_url,
-            'youtube_url_dict':              
+            'youtube_url_dict':
             {
                 'label':    'YouTube URL',
                 'id':       'youtube_url_id',
@@ -2336,7 +2355,7 @@ def politician_edit_process_view(request):
                     "&vote_smart_id=" + str(vote_smart_id) + \
                     "&birth_date=" + str(birth_date) + \
                     "&youtube_url=" + str(youtube_url)
-                    
+
     if not success:
         messages.add_message(request, messages.ERROR,
                              'POLITICIAN_ERROR Please click the back arrow and report URL to the engineering team ')
@@ -3836,7 +3855,6 @@ def update_recommended_politicians_view(request):
        - HttpResponseRedirect: Redirects to the politician list page with a specified state code.
        """
 
-    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -3865,5 +3883,4 @@ def update_recommended_politicians_view(request):
     messages.add_message(request, messages.INFO, message)
     return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
                                 "?state_code={state_code}"
-                                "".format(
-                                    state_code=state_code))
+                                "".format(state_code=state_code))
