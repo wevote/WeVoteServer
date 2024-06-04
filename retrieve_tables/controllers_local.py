@@ -19,12 +19,6 @@ from wevote_functions.functions import get_voter_api_device_id
 logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
-# Creating CampaignX's locally seems to be best testing strategy
-# 'campaign_campaignx',
-# 'campaign_campaignxlistedbyorganization',
-# 'campaign_campaignxnewsitem',
-# 'campaign_campaignx_politician',
-# 'campaign_campaignxseofriendlypath',
 
 dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'

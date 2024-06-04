@@ -21,7 +21,7 @@ https://developer.x.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-
 ## Tweepy OAuth 1.0a User Context
 https://docs.tweepy.org/en/stable/authentication.html
 
-## Steps (May 24, 2024)
+## WebApp Steps (May 24, 2024)
 1) WebApp sends twitterSignInStart
 * Handled by twitter_sign_in_start_view, which calls
   * twitter_sign_in_start_for_api
@@ -61,3 +61,30 @@ https://docs.tweepy.org/en/stable/authentication.html
   * HttpResponseRedirect( to the return_url )
 6) Signed in via Twitter in the WebApp
 
+## Cordova iOS Steps (May 26, 2024)
+1) IOS App dies a voterRetrieve and gets the voter_device_id: lHfoKKvQuulq6oT60VX9lWo64cqCA5sNqlAQ2YbtDt3q19XBsVSRWio47xrQ6k90n258dzZ5p65WhTfrIBB88t6Z
+2) Sends >> oAuth >>  twitterSignIn redirect url = https://wevotedeveloper.com:3000/twitter_sign_in   ** NONSENSE **
+3) Click the Sign in with Twitter button
+4) Calls https://wevotedeveloper.com:8000/apis/v1/twitterSignInStart?cordova=true&voter_device_id=lHfoKKvQuulq6oT60VX9lWo64cqCA5sNqlAQ2YbtDt3q19XBsVSRWio47xrQ6k90n258dzZ5p65WhTfrIBB88t6Z&return_url=http://nonsense.com
+* twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1) 
+  * if cordova: return twitter_cordova_signin_response(request, json_data)
+    * {'status': 'TWITTER_REDIRECT_URL_RETRIEVED ', 'success': True, 
+      'voter_device_id': 'lHfoKKvQuulq6oT60VX9lWo64cqCA5sNqlAQ2YbtDt3q19XBsVSRWio47xrQ6k90n258dzZ5p65WhTfrIBB88t6Z', 
+      'twitter_redirect_url': 'https://api.twitter.com/oauth/authorize?oauth_token=_su7MAAAAAABZ4LOAAABj7HY1Zs', 
+      'voter_info_retrieved': False, 'switch_accounts': False, 'cordova': 'true'}
+    * NOTE: twitter_token is in the DB as twitter_request_token   _su7MAAAAAABZ4LOAAABj7HY1Zs
+    * return render(request, 'cordova/cordova_ios_redirect_to_scheme.html', template_values, content_type='text/html')
+5) Have redirected to api.twitter.com with blue "Authorize app" button showing
+* Press the  "Authorize app" button
+* "Redirecting you back to the application."  is showing on the api.twtter.com page in light green.
+6) twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url) is called with return url 'http://nonsense.com'
+* twitter_handle = 'WeVote'
+* twitter_auth_manager.save_twitter_auth_values()
+  *  <TwitterAuthResponse: TwitterAuthResponse object (130)>
+     twitter_request_secret 'ICZRY9jxxjHgKnX7732W635H8WmqGhhV'
+     twitter_request_token  '_su7MAAAAAABZ4LOAAABj7HY1Zs'   (and also twitter_voters_oauth_token in DB)
+  * return_url = 'http://nonsense.com/?oauth_verifier=EgvsS07cnhuQlA1xhlm5Cc3lrg6oWQSG&oauth_token=_su7MAAAAAABZ4LOAAABj7HY1Zs'      # These are the correct values
+7) twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVoterInfo (Step 3)
+* At exit, {'status': 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_SUCCESSFUL TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT SAVED_TWITTER_AUTH_VALUES ', 'success': True, 'voter_device_id': 'lHfoKKvQuulq6oT60VX9lWo64cqCA5sNqlAQ2YbtDt3q19XBsVSRWio47xrQ6k90n258dzZ5p65WhTfrIBB88t6Z', 'twitter_handle': 'WeVote', 'twitter_handle_found': True, 'voter_info_mode': '1', 'voter_info_retrieved': True, 'switch_accounts': False}
+8)  twitter_cordova_signin_response(request, json_data)
+* json_data = {'status': 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_SUCCESSFUL TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT SAVED_TWITTER_AUTH_VALUES ', 'success': True, 'voter_device_id': 'lHfoKKvQuulq6oT60VX9lWo64cqCA5sNqlAQ2YbtDt3q19XBsVSRWio47xrQ6k90n258dzZ5p65WhTfrIBB88t6Z', 'twitter_handle': 'WeVote', 'twitter_handle_found': True, 'voter_info_mode': '1', 'voter_info_retrieved': True, 'switch_accounts': False}

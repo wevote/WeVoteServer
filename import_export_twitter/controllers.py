@@ -20,7 +20,7 @@ from django.utils.timezone import now
 import wevote_functions.admin
 from candidate.controllers import refresh_candidate_data_from_master_tables
 from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from election.models import ElectionManager
 from image.controllers import TWITTER, cache_master_and_resized_image
 from image.models import WeVoteImageManager
@@ -54,6 +54,7 @@ TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
+LOG_OAUTH = get_environment_variable_default("TWITTER_LOG_OAUTH_STEPS", False)
 
 
 # We added this so that we don't get stopped by SSL certificate complaints
@@ -2679,8 +2680,9 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         twitter_auth_manager = TwitterAuthManager()
         auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
 
-
-        print("tweepy client init. (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
+        if LOG_OAUTH:
+            logger.error('(Ok) tweepy client init. (voter) in twitter_oauth1_user_handler_for_api -- oauth_token: %s',
+                         oauth_token)
         twitter_voters_access_token = auth_response_results['twitter_voters_access_token']
         twitter_voters_access_token_secret = auth_response_results['twitter_voters_access_token_secret']
         client = tweepy.Client(
@@ -2826,12 +2828,14 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     callback_url += "&return_url=" + urllib.parse.quote_plus(return_url, safe='', encoding=None, errors=None)
     callback_url += "&cordova=" + str(cordova)
 
-    # logger.error('(Ok) twitter_sign_in_start_for_api create the callback_url for the backend auth: %s', callback_url)
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_start_for_api create the callback_url for the backend auth: %s', callback_url)
 
     try:
         # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
-        logger.error('(Ok) twitter_sign_in_start_for_api tweepy OAuth1UserHandler (WeVote) voter.we_vote_id: %s',
-                     voter.we_vote_id)
+        if LOG_OAUTH:
+            logger.error('(Ok) twitter_sign_in_start_for_api tweepy OAuth1UserHandler (WeVote) voter.we_vote_id: %s',
+                         voter.we_vote_id)
         auth = tweepy.OAuth1UserHandler(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
@@ -3028,8 +3032,8 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             twitter_auth_response.twitter_voters_oauth_token = incoming_request_token
             twitter_auth_response.twitter_voters_oauth_verifier = incoming_oauth_verifier
             twitter_auth_response.save()
-            # logger.error("(Ok) twitter_sign_in_request_access_token_for_api twitter_auth_response.save() id: %d",
-            #              twitter_auth_response.id)
+            logger.error("(Ok) twitter_sign_in_request_access_token_for_api twitter_auth_response.save() id: %d",
+                         twitter_auth_response.id)
 
             success = True
             status += "TWITTER_ACCESS_TOKEN_RETRIEVED_AND_SAVED "
@@ -3084,7 +3088,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     switch_accounts = False
     twitter_secret_key = ""
 
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api entry')
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_for_api entry')
     # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -3119,7 +3124,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
     voter = results['voter']
     voter_we_vote_id = voter.we_vote_id
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api voter_we_vote_id: %s', voter_we_vote_id)
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_for_api voter_we_vote_id: %s', voter_we_vote_id)
 
     twitter_auth_manager = TwitterAuthManager()
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
@@ -3137,11 +3143,13 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         }
         return results
     twitter_auth_response = auth_response_results['twitter_auth_response']
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api twitter_auth_response: %s', str(twitter_auth_response))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_for_api twitter_auth_response: %s', str(twitter_auth_response))
 
     try:
         # March 2024, now using Twitter V2 API
-        # print("tweepy init (WeVote) in twitter_sign_in_request_voter_info_for_api")
+        if LOG_OAUTH:
+            logger.error('%s', '(Ok) tweepy init (WeVote) in twitter_sign_in_request_voter_info_for_api')
         client = tweepy.Client(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
@@ -3151,8 +3159,9 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
         counter = create_detailed_counter_entry('get_me', 'twitter_sign_in_request_voter_info_for_api', success,
                                                 {'text': 'For WeVote'})
-        # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api client get_me (WeVote) counter %s',
-        #              str(counter['id']))
+        if LOG_OAUTH:
+            logger.error('(Ok) twitter_sign_in_request_voter_info_for_api client get_me (WeVote) counter %s',
+                         str(counter['id']))
 
         tweepy_user_object = client.get_me()
         twitter_dict = tweepy_user_object.data
@@ -3205,8 +3214,9 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     # For the third leg of OAuth, we send the tokens to the React client, and the React client sends tokens back to
     # the server for secure confirmation of sign in, and save off of the Twitter handle's  params like city, photo, etc.
     return_url += ('/?oauth_verifier=' + auth_response_results['twitter_voters_oauth_verifier'] + '&oauth_token=' +
-                   auth_response_results['twitter_voters_oauth_token'])
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api return_url: %s', return_url)
+                   auth_response_results['twitter_voters_oauth_token'] + '&success=True' )
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_for_api return_url: %s', return_url)
 
     results = {
         'status':               status,
@@ -3220,7 +3230,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         'twitter_secret_key':   twitter_secret_key,
         'voter_we_vote_id':     voter_we_vote_id,
     }
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_for_api at end results: %s', str(results))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_for_api at end results: %s', str(results))
     return results
 
 
@@ -3347,7 +3358,9 @@ def twitter_process_deferred_images_for_api(
                             we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
 
     t6 = time()
-    print('twitter_process_deferred_images total time {:.3f}'.format(t6 - t0))
+    if LOG_OAUTH:
+        nice = '{:.3f}'.format(t6 - t0)
+        logger.error('(Ok) twitter_process_deferred_images total time %s', nice)
 
     return {
         'status':                                   status,
@@ -3561,7 +3574,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
             twitter_screen_name=twitter_auth_response.twitter_screen_name,
             voter_we_vote_id_for_cache=voter_we_vote_id_for_cache)
 
-    # Retrieve twitter user details from twitter
+    # Retrieve Twitter user details from Twitter
     results = retrieve_twitter_user_info(
         twitter_id,
         twitter_auth_response.twitter_screen_name,

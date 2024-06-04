@@ -9,7 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
 import wevote_functions.admin
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from import_export_twitter.controllers import twitter_identity_retrieve_for_api, twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
     twitter_process_deferred_images_for_api, twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, \
@@ -19,6 +19,7 @@ from wevote_functions.functions import get_voter_device_id, positive_value_exist
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+LOG_OAUTH = get_environment_variable_default("TWITTER_LOG_OAUTH_STEPS", False)
 
 
 def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
@@ -74,8 +75,10 @@ def twitter_oauth1_user_handler_view(request):  # twitterOauth1UserHandler March
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     oauth_token = request.GET.get('oauth_token', '')
     oauth_verifier = request.GET.get('oauth_verifier', '')
-    logger.error('(Ok) twitter_oauth1_user_handler_view oauth_token: %s   oauth_verifier %s', oauth_token,
-                 oauth_verifier)
+
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_oauth1_user_handler_view oauth_token: %s   oauth_verifier %s', oauth_token,
+                     oauth_verifier)
 
     results = twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_verifier)
 
@@ -92,7 +95,8 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return_url = request.GET.get('return_url', '')
     cordova = request.GET.get('cordova', False)
-    # logger.error('(Ok) twitter_sign_in_start_view twitterSignInStart (Step 1) entry point: %s', str(request.GET))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_start_view twitterSignInStart (Step 1) entry point: %s', str(request.GET))
 
     results = twitter_sign_in_start_for_api(voter_device_id, return_url, cordova)
 
@@ -104,6 +108,16 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
         next_step_url += "&cordova=" + str(cordova)
         return HttpResponseRedirect(next_step_url)
 
+    if cordova:
+        return_url = results['return_url']
+        if return_url == 'http://nonsense.com':
+            return_url = ''
+        elif return_url.startswith('http://nonsense.com/?'):
+            return_url = return_url.replace('http://nonsense.com/?', '')
+    else:
+        return_url = None
+
+
     json_data = {
         'status':               results['status'],
         'success':              results['success'],
@@ -112,6 +126,7 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
         'voter_info_retrieved': results['voter_info_retrieved'],
         'switch_accounts':      results['switch_accounts'],  # If true, new voter_device_id returned
         'cordova':              cordova,
+        'return_url':           return_url,
     }
 
     if cordova:
@@ -121,7 +136,8 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
 
 
 def twitter_sign_in_request_view(request):  # twitterSignInRequest (Switch for Step 1 & Step 2)
-    # logger.error('(Ok) twitter_sign_in_request_view entry point: %s', str(request.GET))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_view entry point: %s', str(request.GET))
     voter_info_mode = request.GET.get('voter_info_mode', 0)
     if positive_value_exists(voter_info_mode):
         return twitter_sign_in_request_voter_info_view(request)
@@ -142,7 +158,8 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
     incoming_oauth_verifier = request.GET.get('oauth_verifier', '')
     return_url = request.GET.get('return_url', '')
     cordova = request.GET.get('cordova', False)
-    # logger.error('(Ok) twitter_sign_in_request_access_token_view entry point: %s', str(request.GET))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_access_token_view entry point: %s', str(request.GET))
 
     results = twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                            incoming_request_token, incoming_oauth_verifier,
@@ -182,12 +199,16 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
     return_url = request.GET.get('return_url', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_info_mode = request.GET.get('voter_info_mode', 0)
-    # logger.error('(Ok) twitter_sign_in_request_voter_info_view: %s', str(request.GET))
+    if LOG_OAUTH:
+        logger.error('(Ok) twitter_sign_in_request_voter_info_view: %s', str(request.GET))
 
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 
     if positive_value_exists(results['return_url']) and not positive_value_exists(cordova):
         return HttpResponseRedirect(results['return_url'])
+
+    if cordova:
+        return_url = results['return_url'].replace('http://nonsense.com/?', '')
 
     json_data = {
         'status':               results['status'],
@@ -198,6 +219,7 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
         'voter_info_mode':      voter_info_mode,
         'voter_info_retrieved': results['voter_info_retrieved'],
         'switch_accounts':      results['switch_accounts'],
+        'return_url':           return_url
     }
 
     if cordova:
@@ -214,9 +236,14 @@ def twitter_cordova_signin_response(request, json_data):
     """
     logger.debug("twitter_cordova_signin_response: " + urlencode(json_data))
 
-    template_values = {
-        'query_string': urlencode(json_data),
-    }
+    if positive_value_exists(json_data['return_url']):
+        template_values = {
+            'query_string': json_data['return_url'],
+        }
+    else:
+        template_values = {
+            'query_string': urlencode(json_data),
+        }
 
     # return render(request, 'cordova/cordova_ios_redirect_to_scheme.html', template_values,
     #               content_type='text/html')
