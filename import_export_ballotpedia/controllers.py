@@ -708,6 +708,209 @@ def get_photo_url_from_ballotpedia(
     }
     return results
 
+
+def get_candidate_links_from_ballotpedia_page(ballotpedia_candidate_url):
+    status = ""
+    success = True
+    candidate_link = ""
+
+    soup = get_parsed_html(ballotpedia_candidate_url)
+    candidate_name = ballotpedia_candidate_url.split(".org/")[-1].replace("_", " ")
+
+    candidate_links_list = []
+    candidate_links_dict = {}
+    for candidate_links in soup.find_all('div', class_='widget-row value-only white'):
+        p_tag = candidate_links.find('p')
+        link_name = p_tag.text.strip()
+        candidate_link = p_tag.find('a').get('href')
+        if candidate_link:
+            try:
+                candidate_links_list.append([candidate_link,link_name])
+                candidate_links_dict[link_name] = candidate_link
+            except Exception as e:
+                status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_CANDIDATE_LINK: " + str(e) + " "
+                success = False
+                status += ("Candidate Link not found for:", candidate_name)
+
+    results = {
+        'candidate_name': candidate_name,
+        'candidate_links_list': candidate_links_list,
+        'candidate_links_dict': candidate_links_dict,
+        'status': status,
+        'success': success,
+    }
+    return results
+
+def get_candidate_links_from_ballotpedia(
+        incoming_object=None,
+        request={},
+        remote_request_history_manager=None,
+        save_to_database=False,
+        add_messages=False):
+    status = ""
+    success = True
+    ballotpedia_photo_saved = False
+    is_candidate = False
+    is_politician = False
+    if remote_request_history_manager is None:
+        remote_request_history_manager = RemoteRequestHistoryManager()
+
+    if hasattr(incoming_object, 'ballotpedia_candidate_url'):
+        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
+        google_civic_election_id = incoming_object.google_civic_election_id
+        is_candidate = True
+    elif hasattr(incoming_object, 'ballotpedia_politician_url'):
+        ballotpedia_page_url = incoming_object.ballotpedia_politician_url
+        google_civic_election_id = ''
+        is_politician = True
+    else:
+        ballotpedia_page_url = incoming_object.organization_ballotpedia
+        google_civic_election_id = ''
+        is_candidate = False
+
+    if not positive_value_exists(ballotpedia_page_url):
+        status += "MISSING_BALLOTPEDIA_PAGE_URL "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    incoming_object_changes = False
+    if positive_value_exists(ballotpedia_page_url) and not ballotpedia_page_url.startswith('http'):
+        ballotpedia_page_url = 'https://' + ballotpedia_page_url
+        incoming_object.ballotpedia_page_url = ballotpedia_page_url
+        incoming_object_changes = True
+    print(ballotpedia_page_url)
+    results = get_candidate_links_from_ballotpedia_page(ballotpedia_page_url)
+    if results.get('success'):
+        candidate_links_list = results.get('candidate_links_list')
+        # To explore, when photo_url is found, but not valid... (low priority)
+        # ballotpedia_photo_url_is_broken = results.get('http_response_code') == 404
+        if results['candidate_links_list']:
+            if is_candidate or is_politician:
+
+                incoming_object_changes = True
+                # incoming_object.ballotpedia_photo_url = photo_url
+                # incoming_object.ballotpedia_photo_url_is_broken = False
+                # incoming_object.ballotpedia_photo_url_is_placeholder = False
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if results['success']:
+                        incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
+            # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
+            #         and not incoming_object.ballotpedia_photo_url_is_broken:
+            #     incoming_object.ballotpedia_photo_url_is_broken = True
+            #     incoming_object.save()
+        elif results.get('is_silhouette'):
+            if is_candidate or is_politician:
+                incoming_object_changes = True
+                incoming_object.ballotpedia_photo_url = None
+                incoming_object.ballotpedia_photo_url_is_broken = False
+                incoming_object.ballotpedia_photo_url_is_placeholder = True
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if results['success']:
+                        incoming_object = results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+        else:
+            status += "BALLOTPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + ballotpedia_page_url + " "
+            status += results['status']
+
+        if save_to_database and incoming_object_changes:
+            incoming_object.save()
+
+        # link_is_broken = results.get('http_response_code') == 404
+        is_placeholder_photo = results.get('is_silhouette')
+        if is_placeholder_photo:
+            success = False
+            # status += results['status']
+            status += "IS_PLACEHOLDER_PHOTO "
+            logger.info("Placeholder/Silhouette: " + photo_url)
+            if add_messages:
+                messages.add_message(
+                    request, messages.ERROR,
+                    'Failed to retrieve Ballotpedia picture:  The Ballotpedia URL is for placeholder/Silhouette image.')
+            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_BALLOTPEDIA_URL_IS_PLACEHOLDER_SILHOUETTE:" + str(photo_url))
+        elif results['photo_url_found']:
+            # Success!
+            logger.info("Queried URL: " + ballotpedia_page_url + " ==> " + photo_url)
+            if add_messages:
+                messages.add_message(request, messages.INFO, 'Ballotpedia photo retrieved.')
+            if save_to_database:
+                if is_candidate or is_politician:
+                    results = save_image_to_candidate_table(
+                        candidate=incoming_object,
+                        image_url=photo_url,
+                        source_link=ballotpedia_page_url,
+                        url_is_broken=False,
+                        kind_of_source_website=IMAGE_SOURCE_BALLOTPEDIA)
+                    if results['success']:
+                        ballotpedia_photo_saved = True
+                    # When saving to candidate object, update:
+                    # we_vote_hosted_profile_facebook_image_url_tiny
+                else:
+                    results = save_image_to_organization_table(
+                        incoming_object, photo_url, ballotpedia_page_url, False, IMAGE_SOURCE_BALLOTPEDIA)
+                    if results['success']:
+                        ballotpedia_photo_saved = True
+
+        if ballotpedia_photo_saved:
+            status += "SAVED_BALLOTPEDIA_IMAGE "
+            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
+
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
+        elif is_placeholder_photo:
+            pass
+        else:
+            success = False
+            status += results['status']
+            status += "SAVE_BALLOTPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
+    else:
+        success = False
+        status += "NOT_SUCCESSFUL_get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page: "
+        status += results['status']
+
+        if add_messages:
+            if len(results.get('clean_message')) > 0:
+                messages.add_message(request, messages.ERROR, results.get('clean_message'))
+            else:
+                messages.add_message(
+                    request, messages.ERROR, 'Ballotpedia photo NOT retrieved (2). status: ' + results.get('status'))
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
 def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id, state_code="",
                                                          only_retrieve_if_zero_candidates=False):
     success = True
