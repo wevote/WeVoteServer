@@ -104,7 +104,7 @@ class BallotItem(models.Model):
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=True, default="")
-    measure_url = models.URLField(verbose_name='url of measure', max_length=255, blank=True, null=True)
+    measure_url = models.TextField(verbose_name='url of measure', null=True)
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 

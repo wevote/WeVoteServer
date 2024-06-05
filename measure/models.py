@@ -229,9 +229,8 @@ class MeasureCampaign(models.Model):
                                                 max_length=255, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google election id", default=0, null=False, blank=False)
-    # The URL for the candidate's campaign web site.
-    url = models.URLField(
-        verbose_name='website url of campaign', max_length=255, blank=True, null=True)
+    # The URL for the campaign website.
+    url = models.TextField(verbose_name='website url of campaign', null=True)
     facebook_url = models.URLField(verbose_name='facebook url of campaign', blank=True, null=True)
     twitter_url = models.URLField(verbose_name='twitter url of campaign', blank=True, null=True)
     google_plus_url = models.URLField(verbose_name='google plus url of campaign', blank=True, null=True)

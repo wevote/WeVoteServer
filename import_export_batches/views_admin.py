@@ -20,8 +20,8 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     update_or_create_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
-from .controllers_batch_process import process_next_activity_notices, process_next_ballot_items, \
-    process_next_general_maintenance
+from .controllers_batch_process import pass_through_batch_list_incoming_variables, process_next_activity_notices, \
+    process_next_ballot_items, process_next_general_maintenance
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager, BallotReturnedManager, MEASURE, CANDIDATE, POLITICIAN
@@ -1513,17 +1513,8 @@ def batch_process_system_toggle_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    batch_process_search = request.GET.get('batch_process_search', '')
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
     # ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
     kind_of_process = request.GET.get('kind_of_process', '')
-    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
-    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', '')
-    show_active_processes_only = request.GET.get('show_active_processes_only', '')
-    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    show_paused_processes_only = request.GET.get('show_paused_processes_only', '')
-    include_frequent_processes = request.GET.get('include_frequent_processes', '')
 
     from wevote_settings.models import WeVoteSettingsManager
     we_vote_settings_manager = WeVoteSettingsManager()
@@ -1553,17 +1544,8 @@ def batch_process_system_toggle_view(request):
     else:
         messages.add_message(request, messages.ERROR, "CANNOT_FIND_WE_VOTE_SETTING-batch_process_system_on")
 
-    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&batch_process_search=" + str(batch_process_search) +
-                                "&kind_of_processes_to_show=" + str(kind_of_processes_to_show) +
-                                "&show_active_processes_only=" + str(show_active_processes_only) +
-                                "&show_all_elections=" + str(show_all_elections) +
-                                "&show_checked_out_processes_only=" + str(show_checked_out_processes_only) +
-                                "&show_paused_processes_only=" + str(show_paused_processes_only) +
-                                "&state_code=" + str(state_code) +
-                                "&include_frequent_processes=" + str(include_frequent_processes)
-                                )
+    url_variables = pass_through_batch_list_incoming_variables(request)
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) + url_variables)
 
 
 @login_required
@@ -2203,8 +2185,6 @@ def batch_process_pause_toggle_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_process_id = request.GET.get('batch_process_id', 0)
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
 
     batch_process_manager = BatchProcessManager()
     results = batch_process_manager.retrieve_batch_process(batch_process_id=batch_process_id)
@@ -2223,9 +2203,8 @@ def batch_process_pause_toggle_view(request):
         message = "BATCH_PROCESS_COULD_NOT_BE_FOUND: " + str(batch_process_id)
         messages.add_message(request, messages.ERROR, message)
 
-    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code))
+    url_variables = pass_through_batch_list_incoming_variables(request)
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) + url_variables)
 
 
 @login_required
@@ -2753,10 +2732,9 @@ def refresh_ballots_for_voters_api_v4_view(request):
             use_ctcl=use_ctcl,
             use_vote_usa=use_vote_usa)
         messages.add_message(request, messages.INFO, results['status'])
+        url_variables = pass_through_batch_list_incoming_variables(request)
         return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
-                                    '?google_civic_election_id=' + str(google_civic_election_id) +
-                                    '&state_code=' + str(state_code)
-                                    )
+                                    url_variables)
     else:
         return refresh_ballots_for_voters_api_v4_internal_view(
             request=request,
@@ -2789,7 +2767,9 @@ def retrieve_ballots_for_entire_election_api_v4_view(request):
     if not positive_value_exists(google_civic_election_id):
         status += "GOOGLE_CIVIC_ELECTION_ID_MISSING "
         messages.add_message(request, messages.INFO, status)
-        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+        url_variables = pass_through_batch_list_incoming_variables(request)
+        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
+                                    url_variables)
 
     # Retrieve list of states in this election, and then loop through each state
     election_manager = ElectionManager()
@@ -2802,7 +2782,9 @@ def retrieve_ballots_for_entire_election_api_v4_view(request):
     if not positive_value_exists(len(state_code_list)):
         status += "STATE_CODE_LIST_MISSING "
         messages.add_message(request, messages.INFO, status)
-        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+        url_variables = pass_through_batch_list_incoming_variables(request)
+        return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
+                                    url_variables)
 
     for state_code in state_code_list:
         # Refresh based on map points
@@ -2862,7 +2844,8 @@ def retrieve_ballots_for_entire_election_api_v4_view(request):
                 status += results['status']
 
     messages.add_message(request, messages.INFO, status)
-    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()))
+    url_variables = pass_through_batch_list_incoming_variables(request)
+    return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) + url_variables)
 
 
 def refresh_ballots_for_voters_api_v4_internal_view(
@@ -3245,10 +3228,9 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
             use_ctcl=use_ctcl,
             use_vote_usa=use_vote_usa)
         messages.add_message(request, messages.INFO, results['status'])
+        url_variables = pass_through_batch_list_incoming_variables(request)
         return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
-                                    '?google_civic_election_id=' + str(google_civic_election_id) +
-                                    '&state_code=' + str(state_code)
-                                    )
+                                    url_variables)
     else:
         return retrieve_ballots_for_polling_locations_api_v4_internal_view(
             request=request,

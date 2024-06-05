@@ -70,6 +70,31 @@ NUMBER_OF_SIMULTANEOUS_GENERAL_MAINTENANCE_BATCH_PROCESSES = 1
 NUMBER_OF_SIMULTANEOUS_REPRESENTATIVE_BATCH_PROCESSES = 1  # One processes at a time because of rate limiting
 
 
+def pass_through_batch_list_incoming_variables(request):
+    batch_process_search = request.GET.get('batch_process_search', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    # ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
+    kind_of_process = request.GET.get('kind_of_process', '')
+    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
+    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', '')
+    show_active_processes_only = request.GET.get('show_active_processes_only', '')
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_paused_processes_only = request.GET.get('show_paused_processes_only', '')
+    include_frequent_processes = request.GET.get('include_frequent_processes', '')
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&batch_process_search=" + str(batch_process_search) + \
+                    "&kind_of_processes_to_show=" + str(kind_of_processes_to_show) + \
+                    "&show_active_processes_only=" + str(show_active_processes_only) + \
+                    "&show_all_elections=" + str(show_all_elections) + \
+                    "&show_checked_out_processes_only=" + str(show_checked_out_processes_only) + \
+                    "&show_paused_processes_only=" + str(show_paused_processes_only) + \
+                    "&state_code=" + str(state_code) + \
+                    "&include_frequent_processes=" + str(include_frequent_processes)
+    return url_variables
+
+
 def process_next_activity_notices():
     success = True
     status = ""
