@@ -186,6 +186,7 @@
   "TWITTER_ACCESS_TOKEN":           "<This is Twitter's Oauth 1.0a `Authentication Token Access Token`>",
   "TWITTER_ACCESS_TOKEN_SECRET":    "<This is Twitter's Oauth 1.0a `Authentication Token Access Secret`>",
   "TWITTER_BEARER_TOKEN":           "<This is Twitter's Oauth 1.0a `Authentication Token Bearer Token`>",
+  "TWITTER_LOG_OAUTH_STEPS":        "False",
 
   "_comment":                       "import_export_vote_smart",
   "VOTE_SMART_API_KEY":             "",
