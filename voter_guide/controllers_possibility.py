@@ -1102,6 +1102,7 @@ def process_candidate_being_endorsed_input_form(
     candidate_found = False
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
+    messages_info_to_display = ""
     possible_endorsement_list_found = False
     possible_endorsement_list = possible_endorsement_list if isinstance(possible_endorsement_list, list) else []
     scan_url_again = request.POST.get('scan_url_again', False)
@@ -1133,6 +1134,16 @@ def process_candidate_being_endorsed_input_form(
                 candidate_we_vote_id = candidate.we_vote_id
             elif results['candidate_list_found']:
                 pass
+            else:
+                messages_info_to_display = "Candidate (owner of this webpage) not found based on "
+                if positive_value_exists(candidate_name):
+                    messages_info_to_display += "candidate_name: " + candidate_name + " "
+                if positive_value_exists(candidate_twitter_handle):
+                    messages_info_to_display += "candidate_twitter_handle: " + candidate_twitter_handle + " "
+                messages_info_to_display += \
+                    ("Please make sure a Candidate entry for this person exists and then try again. "
+                     "NOTE: It could be a first name mismatch--consider added a 'Candidate Alt Name' if Candidate "
+                     "entry already exists. ")
 
     # #########################################
     # Figure out the Possible Endorsers from one candidate's perspective
@@ -1152,6 +1163,8 @@ def process_candidate_being_endorsed_input_form(
     all_possible_organizations_list_light_found = False
     all_possible_organizations_list_light = []
     # We pass in the candidate_we_vote_id so that the possible_position data package includes that from the start
+    # DALE 2024 June 5: explore this candidate_we_vote_id_to_include code -- we may need instead an "exclude"
+    #  to prevent the candidate we are collecting endorsements for, from being shown on their own endorsements page
     results = retrieve_organization_list_for_all_upcoming_elections(
         limit_to_this_state_code=state_code, candidate_we_vote_id_to_include=candidate_we_vote_id)
     if results['organization_list_found']:
@@ -1300,6 +1313,7 @@ def process_candidate_being_endorsed_input_form(
         'candidate_name':                       candidate_name,
         'candidate_twitter_handle':             candidate_twitter_handle,
         'candidate_we_vote_id':                 candidate_we_vote_id,
+        'messages_info_to_display':             messages_info_to_display,
         # 'organization_twitter_followers_count': organization_twitter_followers_count,
         'possible_endorsement_list':            possible_endorsement_list,
     }
