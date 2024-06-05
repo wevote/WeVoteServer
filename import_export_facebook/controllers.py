@@ -6,7 +6,7 @@ from time import time
 
 import wevote_functions.admin
 from aws.controllers import submit_web_function_job
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from email_outbound.models import EmailManager
 from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
@@ -19,6 +19,7 @@ from wevote_functions.functions import is_voter_device_id_valid, \
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+LOG_OAUTH = get_environment_variable_default("TWITTER_LOG_OAUTH_STEPS", False)
 
 
 def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFacebookSaveToCurrentAccount
@@ -365,7 +366,8 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
     voter = Voter.objects.get(we_vote_id=voter_we_vote_id)  # Voter existed immediately before the call, so safe
-    logger.error('(Ok) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
+    if LOG_OAUTH:
+        logger.error('(Ok) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
 
     results = voter_cache_facebook_images_process(voter.id, facebook_auth_response_id, True)
 

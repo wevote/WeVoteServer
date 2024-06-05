@@ -1711,7 +1711,7 @@ def import_sample_data_view(request):
 
 def login_we_vote(request):
     """
-    This method is called when you login from the /login/ form on the API server
+    This method is called when you press a login button on the /login/ form on the API server
     :param request:
     :return:
     """
