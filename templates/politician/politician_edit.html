@@ -1033,6 +1033,57 @@
 </form>
 
 
+{% if recommended_politicians_list %}
+    <h4>Related Politicians</h4>
+
+    <table class="table">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Politician Name</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+        </tr>
+    {% for recommended_politician in recommended_politicians_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if recommended_politician.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'politician:politician_edit' recommended_politician.id %}">
+                    <img src='{{ recommended_politician.we_vote_hosted_profile_image_url_medium }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'politician:politician_edit' politician_id=recommended_politician.id %}">{{ recommended_politician.politician_name }}</a>
+            </td>
+            <td>{{ recommended_politician.state_code|default_if_none:""|upper }}</td>
+            <td>
+                {% if recommended_politician.politician_twitter_handle %}
+                <a href="https://twitter.com/{{ recommended_politician.politician_twitter_handle }}"
+                    target="_blank">{{ recommended_politician.politician_twitter_handle }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a><br />
+                ({{ recommended_politician.twitter_followers_count|intcomma }} followers){% endif %}
+            </td>
+            <td>{% if recommended_politician.politician_url %}
+                <a href="{{ recommended_politician.politician_url }}" target="_blank">{{ recommended_politician.politician_url }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a>{% endif %}
+            </td>
+            <td>{{ recommended_politician.id }}</td>
+            <td>{{ recommended_politician.we_vote_id }}</td>
+            <td>{{ recommended_politician.vote_smart_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no recommended politicians found)</p>
+{% endif %}
 
 {% if duplicate_politician_list %}
     <h4>Possible Duplicate Politicians</h4>
@@ -1052,9 +1103,9 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if found_politician.politician_photo_url %}
+                {% if found_politician.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'politician:politician_edit' found_politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-                    <img src='{{ found_politician.politician_photo_url }}' height="48px" />
+                    <img src='{{ found_politician.we_vote_hosted_profile_image_url_medium }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
@@ -1063,7 +1114,7 @@
                 <br />
                 <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ politician.we_vote_id }}&politician2_we_vote_id={{ found_politician.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge</a>
             </td>
-            <td>{{ found_politician.state_code|default_if_none:"" }}</td>
+            <td>{{ found_politician.state_code|default_if_none:""|upper }}</td>
             <td>
                 {% if found_politician.politician_twitter_handle %}<a href="https://twitter.com/{{ found_politician.politician_twitter_handle }}"
                     target="_blank">{{ found_politician.politician_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />
