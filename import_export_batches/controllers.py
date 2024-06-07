@@ -2861,7 +2861,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 position = position_results['position']
                 position_we_vote_id = position.we_vote_id
 
-    if candidate_name:
+    if positive_value_exists(candidate_name):
         ballot_item_display_name = candidate_name
         # Note organization_name becomes speaker_display_name below
         variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \

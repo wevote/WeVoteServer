@@ -930,9 +930,12 @@ def batch_action_list_analyze_process_view(request):
     # if create_actions_button in (MEASURE, OFFICE_HELD, CANDIDATE, ORGANIZATION_WORD,
     # POSITION, POLITICIAN, IMPORT_BALLOT_ITEM)
     # Run the analysis of either A) every row in this batch, or B) Just the batch_row_id specified within this batch
-    results = create_batch_row_actions(batch_header_id=batch_header_id, batch_description=None,
-                                       batch_row_id=batch_row_id, state_code=state_code,
-                                       delete_analysis_only=delete_analysis_only)
+    results = create_batch_row_actions(
+        batch_header_id=batch_header_id,
+        batch_description=None,
+        batch_row_id=batch_row_id,
+        state_code=state_code,
+        delete_analysis_only=delete_analysis_only)
     kind_of_batch = results['kind_of_batch']
 
     messages.add_message(request, messages.INFO, 'Batch Actions: '

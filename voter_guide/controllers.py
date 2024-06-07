@@ -199,6 +199,9 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
         if results['candidate_found']:
             candidate = results['candidate']
             contest_office_name = candidate.contest_office_name
+        elif positive_value_exists(results['success']):
+            # Consider adding candidate here?
+            pass
     else:
         candidate_name = ""
         candidate_twitter_handle = ""
