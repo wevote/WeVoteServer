@@ -201,7 +201,7 @@
     </label>
     <div class="col-sm-8">
         <input type="text" name="organization_website" id="organization_website_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_website }}{% else %}{{ organization_website }}{% endif %}" />
+               value="{% if organization %}{{ organization.organization_website|default_if_none:"" }}{% else %}{{ organization_website }}{% endif %}" />
     </div>
 </div>
 
@@ -245,7 +245,7 @@
     </label>
     <div class="col-sm-8">
         <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
+               value="{% if organization %}{{ organization.organization_twitter_handle|default_if_none:"" }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
         {% if organization.organization_twitter_handle %}
             <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"
                     {% if organization.organization_twitter_updates_failing %}checked{% endif %} />

@@ -12,7 +12,7 @@ from candidate.models import CandidateCampaign, CandidateListManager, CandidateM
 from election.controllers import retrieve_this_and_next_years_election_id_list
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
 from organization.controllers import retrieve_organization_list_for_all_upcoming_elections
-from organization.models import OrganizationListManager, OrganizationManager, GROUP
+from organization.models import Organization, OrganizationListManager, OrganizationManager, GROUP, PUBLIC_FIGURE
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
 from measure.models import ContestMeasureListManager, ContestMeasureManager
@@ -983,7 +983,7 @@ def process_organization_endorsing_candidates_input_form(
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
-    # Now look for candidate possibilities that have states attached so we can add them to the database
+    # Now look for candidate possibilities that have states attached, so we can add them to the database
     if len(possible_endorsement_list):
         try:
             datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
@@ -1109,6 +1109,15 @@ def process_candidate_being_endorsed_input_form(
     state_code = request.POST.get('state_code', '')
     status = ""
     success = True
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'we_vote_id'):
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     # First, identify the candidate that is the subject of the page we are analyzing
     if positive_value_exists(candidate_we_vote_id):
         results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
@@ -1281,6 +1290,60 @@ def process_candidate_being_endorsed_input_form(
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
+    # Now look for organization possibilities that have states attached, so we can add them to the database
+    if len(possible_endorsement_list):
+        adjusted_possible_endorsement_list = []
+        for one_possible_endorsement in possible_endorsement_list:
+            if 'organization_we_vote_id' in one_possible_endorsement \
+                    and positive_value_exists(one_possible_endorsement['organization_we_vote_id']):
+                adjusted_possible_endorsement_list.append(one_possible_endorsement)
+                continue
+            organization_name = one_possible_endorsement['organization_name'] \
+                if 'organization_name' in one_possible_endorsement \
+                and positive_value_exists(one_possible_endorsement['organization_name']) else ''
+            endorser_state_code = one_possible_endorsement['endorser_state_code'] \
+                if 'endorser_state_code' in one_possible_endorsement \
+                and positive_value_exists(one_possible_endorsement['endorser_state_code']) else ''
+            endorser_is_group = positive_value_exists(one_possible_endorsement['endorser_is_group']) \
+                if 'endorser_is_group' in one_possible_endorsement else False
+            new_info_exists_to_create_organization = positive_value_exists(endorser_state_code) or positive_value_exists(endorser_is_group)
+            # Note: We currently assume this is a candidate (as opposed to a measure)
+            new_organization_created = False
+            if positive_value_exists(organization_name) and new_info_exists_to_create_organization:
+                if endorser_is_group:
+                    endorser_organization_type = GROUP
+                else:
+                    endorser_organization_type = PUBLIC_FIGURE
+                try:
+                    organization_on_stage, new_organization_created = Organization.objects.update_or_create(
+                        organization_name=organization_name,
+                        organization_type=endorser_organization_type,
+                        state_served_code=endorser_state_code,
+                    )
+                    if new_organization_created:
+                        status += "NEW_ORGANIZATION_CREATED "
+                    else:
+                        status += "ORGANIZATION_UPDATED "
+                    if positive_value_exists(organization_on_stage.we_vote_id):
+                        one_possible_endorsement['organization_we_vote_id'] = organization_on_stage.we_vote_id
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_ORGANIZATION ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            adjusted_possible_endorsement_list.append(one_possible_endorsement)
+            if new_organization_created and positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    # Dale NOTE: I realize this isn't adding a Candidate, but it is close enough for now
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        possible_endorsement_list = adjusted_possible_endorsement_list
+
     if positive_value_exists(ignore_stored_positions):
         # Identify which candidates already have positions stored, and remove them
         altered_position_list = []
@@ -1332,9 +1395,12 @@ def take_in_possible_endorsement_list_from_form(request):
         if (request.POST.get('ballot_item_name_' + str(number_index), None) is not None) \
                 or (request.POST.get('ballot_item_state_code_' + str(number_index), None) is not None) \
                 or (request.POST.get('candidate_we_vote_id_' + str(number_index), None) is not None) \
+                or (request.POST.get('endorser_is_group_' + str(number_index), None) is not None) \
+                or (request.POST.get('endorser_state_code_' + str(number_index), None) is not None) \
                 or (request.POST.get('google_civic_election_id_' + str(number_index), None) is not None) \
                 or (request.POST.get('measure_we_vote_id_' + str(number_index), None) is not None) \
                 or (request.POST.get('more_info_url_' + str(number_index), None) is not None) \
+                or (request.POST.get('organization_name_' + str(number_index), None) is not None) \
                 or (request.POST.get('organization_we_vote_' + str(number_index), None) is not None) \
                 or (request.POST.get('position_stance_' + str(number_index), None) is not None) \
                 or (request.POST.get('possibility_should_be_ignored_' + str(number_index), None) is not None) \
@@ -1345,8 +1411,11 @@ def take_in_possible_endorsement_list_from_form(request):
                 'ballot_item_name': request.POST.get('ballot_item_name_' + str(number_index), ""),
                 'ballot_item_state_code': request.POST.get('ballot_item_state_code_' + str(number_index), ""),
                 'candidate_we_vote_id': request.POST.get('candidate_we_vote_id_' + str(number_index), ""),
+                'endorser_is_group': request.POST.get('endorser_is_group_' + str(number_index), ""),
+                'endorser_state_code': request.POST.get('endorser_state_code_' + str(number_index), ""),
                 'google_civic_election_id': request.POST.get('google_civic_election_id_' + str(number_index), ""),
                 'measure_we_vote_id': request.POST.get('measure_we_vote_id_' + str(number_index), ""),
+                'organization_name': request.POST.get('organization_name_' + str(number_index), ""),
                 'organization_we_vote_id': request.POST.get('organization_we_vote_id_' + str(number_index), ""),
                 'more_info_url': request.POST.get('more_info_url_' + str(number_index), ""),
                 'statement_text': request.POST.get('statement_text_' + str(number_index), ""),
