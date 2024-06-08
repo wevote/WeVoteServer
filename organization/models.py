@@ -55,9 +55,39 @@ ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NON
 ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
     "ACCE", "ADAction", "BLOC", "Check", "Cher", "cia", "CoD", "CS", "CSS",
     "data", "DID", "donate", "Google", "Greg",
-    "Ian", "IMG", "Isaac", "JAC", "Location", "Mark", "Module", "More", "NEA", "NEXT",
-    "Pat", "Ping", "plan", "products", "Ray", "RESULTS", "Ro", "Sarah", "SAVE", "Section", "Settings", "spa", "steve",
+    "Ian", "IMG", "Isaac",
+    "JAC", "Jenn", "Location", "Mark", "Module", "More",
+    "NEA", "NEWS", "NEXT",
+    "Pat", "People", "Ping", "plan", "products",
+    "Ray", "RESULTS", "Ro",
+    "Sarah", "SAVE", "Section", "Settings", "spa", "steve",
     "The Candidate", "The Democrats", "TIME", "Twitter", "Uber", "vote", "Will", "Z",
+]
+
+# We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
+ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER = [
+    'ballotpedia.org',
+    'bit.ly',
+    'developer.chrome.com',
+    'developer.mozilla.org',
+    'en.wikipedia.org',
+    'facebook.com',
+    'instagram.com',
+    'linkedin.com',
+    'linktr.ee',
+    'nationbuilder.com',
+    'secure.actblue.com',
+    'secure.anedot.com',
+    'secure.ngpvan.com',
+    'secure.winred.com',
+    't.co',
+    'tinyurl.com',
+    'twitter.com',
+    'wix.com',
+    'wixsite.com',
+    'wordpress.com',
+    'www.',
+    'youtube.com',
 ]
 
 ORGANIZATION_TYPE_MAP = {
@@ -3130,12 +3160,10 @@ class Organization(models.Model):
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
     most_recent_name_update_from_voter_first_and_last = models.BooleanField(default=False)
-    organization_website = models.URLField(
-        verbose_name='url of the endorsing organization', max_length=255, blank=True, null=True)
+    organization_website = models.TextField(verbose_name='url of the endorsing organization', null=True)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
-    organization_contact_form_url = models.URLField(
-        verbose_name='url of the contact us form', max_length=255, blank=True, null=True)
+    organization_contact_form_url = models.TextField(verbose_name='url of the contact us form', null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,

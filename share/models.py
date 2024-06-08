@@ -20,7 +20,7 @@ class SharedItem(models.Model):
     the
     """
     # The ending destination -- meaning the link that is being shared
-    destination_full_url = models.URLField(max_length=255, blank=True, null=True)
+    destination_full_url = models.TextField(null=True)
     # A short code that is part of the link that is sent out. For example rFx5 as part of https://WeVote.US/-rFx5
     shared_item_code_no_opinions = models.CharField(max_length=50, null=True, blank=True, unique=True, db_index=True)
     # Code for include_public_positions - Not implemented yet
@@ -138,7 +138,7 @@ class SharedLinkClicked(models.Model):
     Keep track of each time the shared link was clicked
     """
     # The ending destination -- meaning the link that is being shared
-    destination_full_url = models.URLField(max_length=255, blank=True, null=True)
+    destination_full_url = models.TextField(null=True)
     # The voter and organization id of the person initiating the share
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     shared_by_organization_type = models.CharField(
@@ -1514,7 +1514,7 @@ class SuperShareItem(models.Model):
     date_created = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
     date_sent_to_email = models.DateTimeField(null=True, default=None)
     # The ending destination -- meaning the link that is being shared
-    destination_full_url = models.URLField(max_length=255, blank=True, null=True)
+    destination_full_url = models.TextField(null=True)
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     personalized_message = models.TextField(null=True, blank=True, db_index=True)
     personalized_subject = models.TextField(null=True, blank=True, db_index=True)

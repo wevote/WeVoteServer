@@ -813,6 +813,8 @@ def voter_guide_create_process_view(request):
         candidate_twitter_handle = results['candidate_twitter_handle']
         candidate_we_vote_id = results['candidate_we_vote_id']
         possible_endorsement_list = results['possible_endorsement_list']
+        if 'messages_info_to_display' in results:
+            messages.add_message(request, messages.INFO, results['messages_info_to_display'])
 
     # Now save the possibility so far
     if positive_value_exists(voter_guide_possibility_url):
@@ -1081,7 +1083,10 @@ def generate_voter_guide_possibility_batch_view(request):
         if positive_value_exists(voter_guide_possibility_id):
             file_name += "" + str(voter_guide_possibility_id)
         results = import_export_batch_manager.create_batch_from_json(
-            file_name, structured_json_list, BATCH_HEADER_MAP_FOR_POSITIONS, POSITION,
+            file_name,
+            structured_json_list,
+            BATCH_HEADER_MAP_FOR_POSITIONS,
+            POSITION,
             google_civic_election_id=google_civic_election_id)
         batch_rows_count = results['number_of_batch_rows']
         batch_header_id = results['batch_header_id']

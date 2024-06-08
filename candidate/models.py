@@ -2569,10 +2569,8 @@ class CandidateCampaign(models.Model):
         verbose_name="state this candidate serves", max_length=2, null=True, blank=True, db_index=True)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The URL for the candidate's campaign website.
-    candidate_url = models.URLField(
-        verbose_name='website url of candidate', max_length=255, blank=True, null=True)
-    candidate_contact_form_url = models.URLField(
-        verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
+    candidate_url = models.TextField(verbose_name='website url of candidate', null=True)
+    candidate_contact_form_url = models.TextField(verbose_name='website url of candidate contact form', null=True)
     # This is the URL for the candidate's photo on Facebook's servers
     facebook_photo_url = models.TextField(blank=True, null=True)
     facebook_photo_url_is_broken = models.BooleanField(default=False)

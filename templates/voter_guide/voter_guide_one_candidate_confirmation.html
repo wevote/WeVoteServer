@@ -17,9 +17,40 @@
             <a href="{% url 'organization:organization_we_vote_id_position_list' organization_we_vote_id=possible_endorsement.organization_we_vote_id %}"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+            <input type="hidden" name="endorser_is_group_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.endorser_is_group }}">
+            <input type="hidden" name="endorser_state_code_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.endorser_state_code }}">
+            <input type="hidden" name="organization_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_name }}">
+        {% else %}
+            {% if state_list %}
+                <select name="endorser_state_code_{{ possible_endorsement.possibility_position_number }}">
+                    <option value="">
+                        -- Choose State to Save Endorser --</option>
+                {% for key, state in state_list %}
+                    <option value="{{ key }}"
+                            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                        {{ state }}</option>
+                {% endfor %}
+                </select>
+            {% endif %}{# End of if state_list #}
+            <input type="checkbox" name="endorser_is_group_{{ possible_endorsement.possibility_position_number }}" value="1" />
+            is group
+            <br />
+            <a href="{% url 'organization:organization_list' %}?organization_search={{ possible_endorsement.organization_name|urlencode }}"
+               target="_blank"
+               class="u-no-break">
+                search&nbsp;db&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            &nbsp;
+            <a href="https://www.google.com/search?q={{ possible_endorsement.organization_name|urlencode }}%20politician"
+               target="_blank"
+               class="u-no-break">
+                google&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            
         {% endif %}
-        <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ candidate_we_vote_id }}">
-        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ organization_we_vote_id }}">
+        <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.candidate_we_vote_id }}">
+        <input type="hidden" name="organization_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_name }}">
+        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_we_vote_id }}">
     {% elif possible_endorsement.candidate_we_vote_id %}
         <span>
           <span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}{% if possible_endorsement.ballot_item_state_code %} ({{ possible_endorsement.ballot_item_state_code }}){% endif %}</span>{% if possible_endorsement.candidate.contest_office_name %},
