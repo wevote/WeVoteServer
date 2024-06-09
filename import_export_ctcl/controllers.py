@@ -931,16 +931,19 @@ def retrieve_from_ctcl_api_election_query():
 
     structured_json = json.loads(response.text)
     if 'success' in structured_json and structured_json['success'] is False:
-        logger.error("CTCL_ELECTION_QUERY_URL: " + str(CTCL_ELECTION_QUERY_URL) +
-                     ", CTCL_API_KEY:" + str(CTCL_API_KEY))
+        status_message = "CTCL_ELECTION_QUERY_URL: " + str(CTCL_ELECTION_QUERY_URL) + \
+                         ", CTCL_API_KEY:" + str(CTCL_API_KEY) + " "
+        logger.error(status_message)
+        status += status_message
+        status += structured_json['status']
         results = {
-            'status': "Error from CTCL: " + structured_json['status'],
+            'status': status,
             'structured_json':  structured_json,
             'success': False,
         }
     else:
         try:
-            status += "CTCL_ELECTION_QUERY_ERROR: " + str(response.text) + " "
+            status += "CTCL_ELECTION_QUERY_RESPONSE: " + str(response.text) + " "
             status += "RESPONSE.URL: " + response.url + " "
         except Exception as e:
             status += "CTCL_ELECTION_QUERY_ERROR_RESPONSE_TEXT_MISSING: " + str(e) + " "
@@ -953,22 +956,21 @@ def retrieve_from_ctcl_api_election_query():
 
 
 def store_results_from_ctcl_api_election_query(structured_json):
+    from election.models import ElectionManager
+    election_manager = ElectionManager()
     status = ''
     success = True
     if 'elections' in structured_json:
         elections_list_json = structured_json['elections']
     else:
         elections_list_json = {}
-    results = {
-        'status': status,
-        'success': success,
-    }
-    from election.models import ElectionManager
-    election_manager = ElectionManager()
     for one_election_dict in elections_list_json:
         # If there is an existing election, leave it as-is
-        one_result = election_manager.retrieve_election(ctcl_uuid=one_election_dict['id'], read_only=True)
+        one_result = election_manager.retrieve_election(
+            ctcl_uuid=one_election_dict['id'], read_only=True)
         if one_result['election_found']:
+            status += "ALREADY_EXISTS: " + str(one_election_dict['electionDay']) + " :: " \
+                      + str(one_election_dict['id']) + " "
             continue
 
         election_is_in_future = False
@@ -979,8 +981,12 @@ def store_results_from_ctcl_api_election_query(structured_json):
             datetime_now = datetime.now()
             if election_date > datetime_now:
                 election_is_in_future = True
+            else:
+                status += "NOT_IN_DB_BUT_NOT_IN_FUTURE: " + str(one_election_dict['electionDay']) + " "
+                continue
 
         if election_is_in_future:
+            status += "UPDATING_ELECTION: " + str(one_election_dict['electionDay']) + " "
             results = election_manager.update_or_create_election(
                 ctcl_uuid=one_election_dict['id'],
                 election_day_text=one_election_dict['electionDay'],
@@ -988,5 +994,12 @@ def store_results_from_ctcl_api_election_query(structured_json):
                 election_name_do_not_override=True,
                 ocd_division_id=one_election_dict['ocdDivisionId'],
                 use_ctcl_as_data_source=True)
+            status += results['status']
+        else:
+            status += "NOT_IN_FUTURE2: " + str(one_election_dict['electionDay']) + " "
 
+    results = {
+        'status': status,
+        'success': success,
+    }
     return results
