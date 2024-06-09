@@ -110,6 +110,7 @@ WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS = [
     # 'thenation.com', 'thestate.com', 'twitter.com',
     # 'usatoday.com',
     # 'vox.com',
+    'w3schools.com',
     # 'washingtonpost.com',
     # 'wapo.st', 'westword.com', 'wsj.com',
     # 'youtu.be', 'youtube.com',
@@ -2007,9 +2008,9 @@ class VoterGuidePossibilityManager(models.Manager):
             target_google_civic_election_id=0,
             updated_values={}):
         exception_multiple_object_returned = False
-        success = False
+        success = True
         voter_guide_possibility_created = False
-        voter_guide_possibility = VoterGuidePossibility()
+        voter_guide_possibility = None
         voter_guide_possibility_found = False
         status = ""
 
@@ -2028,25 +2029,29 @@ class VoterGuidePossibilityManager(models.Manager):
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_BY_WE_VOTE_ID ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
 
         if not voter_guide_possibility_found:
             try:
                 now = datetime.now()
-                voter_guide_possibility = VoterGuidePossibility.objects.get(
+                voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                     hide_from_active_review=False,
                     date_last_changed__year=now.year,
                 )
-                voter_guide_possibility_found = True
-                success = True
-                status += 'VOTER_GUIDE_POSSIBILITY_FOUND_BY_URL '
-            except VoterGuidePossibility.MultipleObjectsReturned as e:
-                status += 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL-CREATE_NEW '
+                # Dale: As of Jun 2024, we only want to save one voter_guide_possibility instance per year
+                voter_guide_possibility = voter_guide_possibility_query.first()
+                if voter_guide_possibility and hasattr(voter_guide_possibility, 'voter_guide_possibility_url'):
+                    voter_guide_possibility_found = True
+                    status += 'VOTER_GUIDE_POSSIBILITY_FOUND_BY_URL '
+                else:
+                    status += 'VOTER_GUIDE_POSSIBILITY_NOT_FOUND_BY_URL '
             except VoterGuidePossibility.DoesNotExist:
                 status += "RETRIEVE_VOTER_GUIDE_POSSIBILITY_NOT_FOUND_BY_URL "
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_BY_URL ' \
                           '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
 
         if voter_guide_possibility_found:
             # Update record
@@ -2072,7 +2077,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 status += 'FAILED_TO_UPDATE_VOTER_GUIDE_POSSIBILITY ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
-        else:
+        elif success:
             # Create record
             try:
                 voter_guide_possibility_created = False
@@ -2249,7 +2254,7 @@ class VoterGuidePossibilityManager(models.Manager):
             google_civic_election_id=google_civic_election_id,
             voter_guide_possibility_url=voter_guide_possibility_url,
             pdf_url=pdf_url,
-            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
+            # voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
             limit_to_this_year=limit_to_this_year)
 
     @staticmethod
@@ -2270,7 +2275,7 @@ class VoterGuidePossibilityManager(models.Manager):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        voter_guide_possibility_on_stage = VoterGuidePossibility()
+        voter_guide_possibility_on_stage = None
         voter_guide_possibility_on_stage_id = 0
         try:
             if positive_value_exists(voter_guide_possibility_id):
@@ -2302,11 +2307,12 @@ class VoterGuidePossibilityManager(models.Manager):
                     # Only retrieve by URL if it was created this year
                     now = datetime.now()
                     status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-                    voter_guide_possibility_query = (
+                    voter_guide_possibility_query = \
                         voter_guide_possibility_query.filter(date_last_changed__year=now.year)
-                    )
 
-                voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
+                # Dale: As of Jun 2024, we only want to save one voter_guide_possibility instance per year
+                # voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
+                voter_guide_possibility_on_stage = voter_guide_possibility_query.first()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                     status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
@@ -2330,7 +2336,9 @@ class VoterGuidePossibilityManager(models.Manager):
                         voter_guide_possibility_query.filter(date_last_changed__year=now.year)
                     )
 
-                voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
+                # Dale: As of Jun 2024, we only want to save one voter_guide_possibility instance per year
+                # voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
+                voter_guide_possibility_on_stage = voter_guide_possibility_query.first()
                 if voter_guide_possibility_on_stage is not None:
                     voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                     status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_PDF_URL "
@@ -2356,22 +2364,23 @@ class VoterGuidePossibilityManager(models.Manager):
                 else:
                     status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
                     success = True
-            elif positive_value_exists(voter_who_submitted_we_vote_id) and \
-                    positive_value_exists(google_civic_election_id):
-                # Set this status in case the 'get' fails
-                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID "
-                # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
-                voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
-                    google_civic_election_id=google_civic_election_id,
-                    voter_who_submitted_we_vote_id__iexact=voter_who_submitted_we_vote_id,
-                    hide_from_active_review=False)
-                if voter_guide_possibility_on_stage is not None:
-                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID "
-                    success = True
-                else:
-                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_VOTER_WE_VOTE_ID "
-                    success = True
+            # Dale: 2024-06 Deprecated
+            # elif positive_value_exists(voter_who_submitted_we_vote_id) and \
+            #         positive_value_exists(google_civic_election_id):
+            #     # Set this status in case the 'get' fails
+            #     status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID "
+            #     # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
+            #     voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
+            #         google_civic_election_id=google_civic_election_id,
+            #         voter_who_submitted_we_vote_id__iexact=voter_who_submitted_we_vote_id,
+            #         hide_from_active_review=False)
+            #     if voter_guide_possibility_on_stage is not None:
+            #         voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+            #         status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID "
+            #         success = True
+            #     else:
+            #         status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_VOTER_WE_VOTE_ID "
+            #         success = True
             else:
                 status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_INSUFFICIENT_VARIABLES "
                 success = False

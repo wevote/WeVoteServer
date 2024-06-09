@@ -138,7 +138,8 @@
             {% if candidate.fetch_twitter_handle or candidate.candidate_url %}{% if voter_guide_possibility_url %}<br />{% endif %}{% endif %}
             {% if voter_guide_possibility_url %}
                 <a href="{{ voter_guide_possibility_url }}"
-                   target="_blank">{{ voter_guide_possibility_url }}
+                   target="_blank">
+                    <span style="font-size: 1.2em;"><strong>{{ voter_guide_possibility_url }}</strong></span>
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}

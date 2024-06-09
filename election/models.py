@@ -269,6 +269,7 @@ class ElectionManager(models.Manager):
             election_possibility_list = list(queryset)
             if len(election_possibility_list) == 1:
                 election_on_same_day_found = True
+                status += "ELECTION_ON_SAME_DAY_FOUND, election_day_text: " + str(election_day_text) + " "
                 one_election = election_possibility_list[0]
                 one_election_state_code_lower_case = one_election.state_code.lower() \
                     if one_election.state_code else ''
@@ -277,13 +278,16 @@ class ElectionManager(models.Manager):
                     if state_code_lower_case == one_election_state_code_lower_case:
                         election_found = True
                         election_on_stage = one_election
-                        status += "ELECTION_ON_SAME_DAY_FOUND "
+                    else:
+                        status += "STATE_CODE_MISMATCH1: " + str(election_day_text) + " "
                 else:
                     if not positive_value_exists(one_election.state_code) or one_election_state_code_lower_case == 'na':
                         # We know this existing election is a national election, and we are looking for a
                         #  national election, so we can update it
                         election_found = True
                         election_on_stage = one_election
+                    else:
+                        status += "STATE_CODE_MISMATCH2: " + str(election_day_text) + " "
             elif len(election_possibility_list) > 0:
                 election_on_same_day_found = True
                 # Start by going through the list of elections and see any match an incoming variable without any doubt
@@ -297,7 +301,7 @@ class ElectionManager(models.Manager):
                     elif one_election.google_civic_election_id == google_civic_election_id:
                         election_found = True
                         election_on_stage = one_election
-                    elif one_election.ctcl_uuid == google_civic_election_id:
+                    elif one_election.ctcl_uuid == ctcl_uuid:
                         election_found = True
                         election_on_stage = one_election
                 # Then see if we can find a state-specific match
@@ -313,6 +317,9 @@ class ElectionManager(models.Manager):
                             election_on_stage = one_election
                     if not election_found:
                         existing_state_specific_election_not_found_for_this_state = True  # So we want to create new
+                elif not election_found:
+                    status += "ELECTION_NOT_FOUND_FROM_LIST: " + str(election_day_text) + " "
+
                 # At this point there might be a national election, or elections on same day for other states
                 # TODO: What to do here?
             else:
@@ -325,7 +332,8 @@ class ElectionManager(models.Manager):
         if success and not election_found:
             try:
                 updated_values = {
-                    'election_day_text':        election_day_text,
+                    # 'ctcl_uuid':          ctcl_uuid,  # Added below
+                    'election_day_text':    election_day_text,
                 }
                 if positive_value_exists(state_code):
                     updated_values['state_code'] = state_code
@@ -438,8 +446,7 @@ class ElectionManager(models.Manager):
                         positive_value_exists(use_ballotpedia_as_data_source)
                     election_changed = True
                 if use_ctcl_as_data_source is not None:
-                    election_on_stage.use_ctcl_as_data_source = \
-                        positive_value_exists(use_ctcl_as_data_source)
+                    election_on_stage.use_ctcl_as_data_source = positive_value_exists(use_ctcl_as_data_source)
                     election_changed = True
                 if use_ctcl_as_data_source_by_state_code is not None:
                     election_on_stage.use_ctcl_as_data_source_by_state_code = use_ctcl_as_data_source_by_state_code
@@ -449,8 +456,7 @@ class ElectionManager(models.Manager):
                         positive_value_exists(use_google_civic_as_data_source)
                     election_changed = True
                 if use_vote_usa_as_data_source is not None:
-                    election_on_stage.use_vote_usa_as_data_source = \
-                        positive_value_exists(use_vote_usa_as_data_source)
+                    election_on_stage.use_vote_usa_as_data_source = positive_value_exists(use_vote_usa_as_data_source)
                     election_changed = True
                 if vote_usa_election_id is not None:
                     election_on_stage.vote_usa_election_id = vote_usa_election_id
@@ -590,20 +596,23 @@ class ElectionManager(models.Manager):
             vote_usa_election_id=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
-        election = Election()
+        election = None
+        status = ""
         try:
             if positive_value_exists(ctcl_uuid):
                 if positive_value_exists(read_only):
-                    election = Election.objects.using('readonly').get(Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid))
+                    election = Election.objects.using('readonly').get(
+                        Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid) | Q(ctcl_uuid3=ctcl_uuid))
                 else:
-                    election = Election.objects.get(Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid))
+                    election = Election.objects.get(
+                        Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid) | Q(ctcl_uuid3=ctcl_uuid))
                 if election.id:
                     ctcl_uuid = election.ctcl_uuid
                     election_found = True
-                    status = "ELECTION_FOUND_WITH_CTCL_UUID "
+                    status += "ELECTION_FOUND_WITH_CTCL_UUID "
                 else:
                     election_found = False
-                    status = "ELECTION_NOT_FOUND_WITH_CTCL_UUID "
+                    status += "ELECTION_NOT_FOUND_WITH_CTCL_UUID "
                 success = True
             elif positive_value_exists(google_civic_election_id):
                 if positive_value_exists(read_only):
@@ -613,10 +622,10 @@ class ElectionManager(models.Manager):
                 if election.id:
                     ctcl_uuid = election.ctcl_uuid
                     election_found = True
-                    status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
+                    status += "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
                 else:
                     election_found = False
-                    status = "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
+                    status += "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
                 success = True
             elif positive_value_exists(election_id):
                 if positive_value_exists(read_only):
@@ -626,10 +635,10 @@ class ElectionManager(models.Manager):
                 if election.id:
                     ctcl_uuid = election.ctcl_uuid
                     election_found = True
-                    status = "ELECTION_FOUND_WITH_ELECTION_ID "
+                    status += "ELECTION_FOUND_WITH_ELECTION_ID "
                 else:
                     election_found = False
-                    status = "ELECTION_NOT_FOUND_WITH_ID "
+                    status += "ELECTION_NOT_FOUND_WITH_ID "
                 success = True
             elif positive_value_exists(vote_usa_election_id):
                 if positive_value_exists(read_only):
@@ -640,22 +649,22 @@ class ElectionManager(models.Manager):
                 if election.id:
                     ctcl_uuid = election.ctcl_uuid
                     election_found = True
-                    status = "ELECTION_FOUND_WITH_VOTE_USA_ELECTION_ID "
+                    status += "ELECTION_FOUND_WITH_VOTE_USA_ELECTION_ID "
                 else:
                     election_found = False
-                    status = "ELECTION_NOT_FOUND_WITH_VOTE_USA_ELECTION_ID "
+                    status += "ELECTION_NOT_FOUND_WITH_VOTE_USA_ELECTION_ID "
                 success = True
             else:
                 election_found = False
-                status = "Insufficient variables included to retrieve one election."
+                status += "Insufficient variables included to retrieve one election."
                 success = False
         except Election.MultipleObjectsReturned as e:
             election_found = False
-            status = "ERROR_MORE_THAN_ONE_ELECTION_FOUND"
+            status += "ERROR_MORE_THAN_ONE_ELECTION_FOUND"
             success = False
         except Election.DoesNotExist:
             election_found = False
-            status = "ELECTION_NOT_FOUND"
+            status += "ELECTION_NOT_FOUND"
             success = True
 
         results = {
@@ -675,6 +684,7 @@ class ElectionManager(models.Manager):
         :return:
         """
         election_list = []
+        status = ''
         try:
             election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.filter(include_in_list_for_voters=True)
@@ -682,10 +692,10 @@ class ElectionManager(models.Manager):
 
             election_list = list(election_list_query)
 
-            status = 'ELECTIONS_FOUND'
+            status += 'ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND'
+            status += 'NO_ELECTIONS_FOUND'
             success = True
 
         results = {
@@ -730,7 +740,7 @@ class ElectionManager(models.Manager):
             election_list_found = positive_value_exists(len(upcoming_election_list))
             success = True
         except Exception as e:
-            status = "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE " + str(e) + " "
+            status += "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE " + str(e) + " "
             success = False
 
         results = {
@@ -1167,6 +1177,7 @@ class ElectionManager(models.Manager):
         Only retrieve the elections we have entered without a Google Civic Election Id
         :return:
         """
+        status = ""
         try:
             election_list_query = Election.objects.all()
             # We can't do this as long as google_civic_election_id is stored as a char
@@ -1176,10 +1187,10 @@ class ElectionManager(models.Manager):
             election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) > 6"])
             election_list_query = election_list_query.order_by('election_day_text').reverse()
             election_list = election_list_query
-            status = 'WE_VOTE_ELECTIONS_FOUND'
+            status += 'WE_VOTE_ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_WE_VOTE_ELECTIONS_FOUND'
+            status += 'NO_WE_VOTE_ELECTIONS_FOUND'
             success = True
             election_list = []
 
@@ -1192,6 +1203,7 @@ class ElectionManager(models.Manager):
 
     @staticmethod
     def retrieve_google_civic_elections_in_state_list(state_code_list):
+        status = ""
         try:
             election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) < 7"])
@@ -1207,10 +1219,10 @@ class ElectionManager(models.Manager):
 
             election_list_query = election_list_query.order_by('election_day_text').reverse()
             election_list = election_list_query
-            status = 'WE_VOTE_ELECTIONS_FOUND'
+            status += 'WE_VOTE_ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_WE_VOTE_ELECTIONS_FOUND'
+            status += 'NO_WE_VOTE_ELECTIONS_FOUND'
             success = True
             election_list = []
 
@@ -1228,17 +1240,17 @@ class ElectionManager(models.Manager):
         :param include_test_election:
         :return:
         """
-
+        status = ""
         try:
             election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('-election_day_text')
             election_list = election_list_query
-            status = 'ELECTIONS_FOUND'
+            status += 'ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND'
+            status += 'NO_ELECTIONS_FOUND'
             success = True
             election_list = []
 
@@ -1261,7 +1273,7 @@ class ElectionManager(models.Manager):
         :param read_only:
         :return:
         """
-
+        status = ""
         try:
             if positive_value_exists(read_only):
                 election_list_query = Election.objects.using('readonly').all()
@@ -1273,10 +1285,10 @@ class ElectionManager(models.Manager):
                 election_list_query = election_list_query.filter(election_day_text=election_day_text)
             election_list_query = election_list_query.order_by('election_day_text', 'election_name')
             election_list = election_list_query
-            status = 'ELECTIONS_FOUND'
+            status += 'ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND'
+            status += 'NO_ELECTIONS_FOUND'
             success = True
             election_list = []
 
@@ -1297,7 +1309,7 @@ class ElectionManager(models.Manager):
         :param read_only:
         :return:
         """
-
+        status = ""
         if not positive_value_exists(len(google_civic_election_id_list)):
             results = {
                 'success':          False,
@@ -1314,14 +1326,14 @@ class ElectionManager(models.Manager):
             election_list_query = election_list_query.filter(google_civic_election_id__in=google_civic_election_id_list)
             election_list_query = election_list_query.order_by('-election_day_text')
             election_list = list(election_list_query)
-            status = 'ELECTIONS_FOUND '
+            status += 'ELECTIONS_FOUND '
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND '
+            status += 'NO_ELECTIONS_FOUND '
             success = True
             election_list = []
         except Exception as e:
-            status = 'NO_ELECTIONS_FOUND - ERROR ' + str(e) + ' '
+            status += 'NO_ELECTIONS_FOUND - ERROR ' + str(e) + ' '
             success = False
             election_list = []
 
@@ -1346,7 +1358,7 @@ class ElectionManager(models.Manager):
         :param read_only:
         :return:
         """
-
+        status = ""
         try:
             if positive_value_exists(read_only):
                 election_list_query = Election.objects.using('readonly').all()
@@ -1360,10 +1372,10 @@ class ElectionManager(models.Manager):
                                                                  election_day_text=election_day_text)
             election_list_query = election_list_query.order_by('election_day_text', 'election_name')
             election_list = election_list_query
-            status = 'ELECTIONS_FOUND'
+            status += 'ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND'
+            status += 'NO_ELECTIONS_FOUND'
             success = True
             election_list = []
 

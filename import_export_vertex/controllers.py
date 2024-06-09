@@ -155,11 +155,12 @@ def find_names_of_people_on_one_web_page(site_url=''):
     names_list = []
     names_list_found = False
     status = ""
-    success = False
+    success = True
     print('---- find_names_of_people_on_one_web_page for ', site_url)
     t0 = time()
     if len(site_url) < 10:
         status += 'FIND_NAMES_ON_ONE_PAGE-PROPER_URL_NOT_PROVIDED: ' + site_url
+        success = False
         results = {
             'status':           status,
             'success':          success,
@@ -174,23 +175,25 @@ def find_names_of_people_on_one_web_page(site_url=''):
             status += scrape_res.status
         except Exception as e:
             status += "ERROR: scrape_res doesn't have status attribute: " + str(e) + " "
+            success = False
         try:
             all_text_without_head = scrape_res.all_html
         except Exception as e:
             all_text_without_head = ""
             status += "ERROR: scrape_res doesn't have all_html attribute: " + str(e) + " "
+            success = False
 
-        success = True
-        status += "FINISHED_SCRAPING_PAGE "
+        if success:
+            status += "FINISHED_SCRAPING_PAGE "
 
-        print('---- find_names_of_people_on_one_web_page scrape took {:.6f} seconds'.format(time()-t0))
-        sub_results = find_names_of_people_from_incoming_text(all_text_without_head)
-        if 'status' in sub_results:
-            status += sub_results['status']
-        if 'success' in sub_results:
-            success &= sub_results['success']
-        names_list = sub_results['names_list']
-        names_list_found = sub_results['names_list_found']
+            print('---- find_names_of_people_on_one_web_page scrape took {:.6f} seconds'.format(time()-t0))
+            sub_results = find_names_of_people_from_incoming_text(all_text_without_head)
+            if 'status' in sub_results:
+                status += sub_results['status']
+            if 'success' in sub_results:
+                success &= sub_results['success']
+            names_list = sub_results['names_list']
+            names_list_found = sub_results['names_list_found']
 
     except timeout:
         status += "FIND_NAMES_ON_PAGE-WEB_PAGE_SCRAPE_TIMEOUT_ERROR "
