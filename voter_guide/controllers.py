@@ -1009,6 +1009,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                 voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
             updated_values = {
                 'voter_guide_possibility_type':     voter_guide_possibility_type,
+                'voter_guide_possibility_url':      url_to_scan,
                 'voter_who_submitted_name':         voter_who_submitted_name,
                 'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
                 'assigned_to_voter_we_vote_id':     assigned_to_voter_we_vote_id,
@@ -1017,9 +1018,10 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
             create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
                 voter_guide_possibility_url=url_to_scan,
                 # pdf_url,
-                voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
+                # voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                 updated_values=updated_values)
             if create_results['voter_guide_possibility_saved']:
+                status += create_results['status']
                 voter_guide_possibility_found = True
                 voter_guide_possibility = create_results['voter_guide_possibility']
                 voter_guide_possibility_id = create_results['voter_guide_possibility_id']
@@ -1381,6 +1383,7 @@ def clean_up_possible_endorsement_list(possible_endorsement_list):
 def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0, limit_to_this_year=True):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
+    success = True
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
 
     # Do not require voter_device_id yet
@@ -1408,103 +1411,114 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
     # TODO We will need the voter_id here so we can control volunteer actions
 
-    voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
-        voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
+    try:
+        voter_guide_possibility_manager = VoterGuidePossibilityManager()
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
+            voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
+        status += results['status']
+    except Exception as e:
+        status += "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE_FAILED1: " + str(e) + " "
+        success = False
 
-    move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
+    # We do not want to bring endorsements found on other web pages over to this voter_guide_possibility
+    #  because it creates clutter, and in practice isn't helpful.
+    # if positive_value_exists(results['success']):
+    #     move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
 
     possible_endorsement_list = []
-    if results['voter_guide_possibility_found']:
-        voter_guide_possibility = results['voter_guide_possibility']
-        limit_to_this_state_code = voter_guide_possibility.state_code
-        voter_guide_possibility_type = voter_guide_possibility.voter_guide_possibility_type
+    try:
+        if results['voter_guide_possibility_found']:
+            voter_guide_possibility = results['voter_guide_possibility']
+            limit_to_this_state_code = voter_guide_possibility.state_code
+            voter_guide_possibility_type = voter_guide_possibility.voter_guide_possibility_type
 
-        results = extract_voter_guide_possibility_position_list_from_database(
-            voter_guide_possibility, voter_guide_possibility_position_id)
-        if results['possible_endorsement_list_found']:
-            possible_endorsement_list = results['possible_endorsement_list']
+            results = extract_voter_guide_possibility_position_list_from_database(
+                voter_guide_possibility, voter_guide_possibility_position_id)
+            status += results['status']
+            if results['possible_endorsement_list_found']:
+                possible_endorsement_list = results['possible_endorsement_list']
 
-            google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
+                google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
 
-            if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-                    or voter_guide_possibility_type == UNKNOWN_TYPE:
-                organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
-                # Match incoming endorsements to candidates already in the database
-                results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list,
-                    google_civic_election_id_list=google_civic_election_id_list_this_year,
-                    state_code=limit_to_this_state_code,
-                    attach_objects=False)
-                if results['possible_endorsement_list_found']:
-                    possible_endorsement_list = results['possible_endorsement_list']
+                if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
+                        or voter_guide_possibility_type == UNKNOWN_TYPE:
+                    organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
+                    # Match incoming endorsements to candidates already in the database
+                    results = match_endorsement_list_with_candidates_in_database(
+                        possible_endorsement_list,
+                        google_civic_election_id_list=google_civic_election_id_list_this_year,
+                        state_code=limit_to_this_state_code,
+                        attach_objects=False)
+                    if results['possible_endorsement_list_found']:
+                        possible_endorsement_list = results['possible_endorsement_list']
 
-                # Match incoming endorsements to measures already in the database
-                results = match_endorsement_list_with_measures_in_database(
-                    possible_endorsement_list,
-                    google_civic_election_id_list=google_civic_election_id_list_this_year,
-                    state_code=limit_to_this_state_code,
-                    attach_objects=False)
-                if results['possible_endorsement_list_found']:
-                    possible_endorsement_list = results['possible_endorsement_list']
+                    # Match incoming endorsements to measures already in the database
+                    results = match_endorsement_list_with_measures_in_database(
+                        possible_endorsement_list,
+                        google_civic_election_id_list=google_civic_election_id_list_this_year,
+                        state_code=limit_to_this_state_code,
+                        attach_objects=False)
+                    if results['possible_endorsement_list_found']:
+                        possible_endorsement_list = results['possible_endorsement_list']
 
-                # Add on existing position information
-                for one_possible_endorsement in possible_endorsement_list:
-                    if 'candidate_we_vote_id' in one_possible_endorsement \
-                            and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
-                        position_exists_query = PositionEntered.objects.filter(
-                            organization_we_vote_id=organization_we_vote_id,
-                            candidate_campaign_we_vote_id=one_possible_endorsement['candidate_we_vote_id'])
-                        position_list = list(position_exists_query)
-                        if positive_value_exists(len(position_list)):
-                            one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
-                            one_possible_endorsement['position_stance_stored'] = position_list[0].stance
-                            one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
-                            one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
-                    elif 'measure_we_vote_id' in one_possible_endorsement \
-                            and positive_value_exists(one_possible_endorsement['measure_we_vote_id']):
-                        position_exists_query = PositionEntered.objects.filter(
-                            organization_we_vote_id=organization_we_vote_id,
-                            contest_measure_we_vote_id=one_possible_endorsement['measure_we_vote_id'])
-                        position_list = list(position_exists_query)
-                        if positive_value_exists(len(position_list)):
-                            one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
-                            one_possible_endorsement['position_stance_stored'] = position_list[0].stance
-                            one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
-                            one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
-            elif voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
-                candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
+                    # Add on existing position information
+                    for one_possible_endorsement in possible_endorsement_list:
+                        if 'candidate_we_vote_id' in one_possible_endorsement \
+                                and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
+                            position_exists_query = PositionEntered.objects.filter(
+                                organization_we_vote_id=organization_we_vote_id,
+                                candidate_campaign_we_vote_id=one_possible_endorsement['candidate_we_vote_id'])
+                            position_list = list(position_exists_query)
+                            if positive_value_exists(len(position_list)):
+                                one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
+                                one_possible_endorsement['position_stance_stored'] = position_list[0].stance
+                                one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
+                                one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
+                        elif 'measure_we_vote_id' in one_possible_endorsement \
+                                and positive_value_exists(one_possible_endorsement['measure_we_vote_id']):
+                            position_exists_query = PositionEntered.objects.filter(
+                                organization_we_vote_id=organization_we_vote_id,
+                                contest_measure_we_vote_id=one_possible_endorsement['measure_we_vote_id'])
+                            position_list = list(position_exists_query)
+                            if positive_value_exists(len(position_list)):
+                                one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
+                                one_possible_endorsement['position_stance_stored'] = position_list[0].stance
+                                one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
+                                one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
+                elif voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+                    candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
 
-                # Match incoming endorsements to candidates already in the database
-                results = match_endorsement_list_with_organizations_in_database(
-                    possible_endorsement_list,
-                    attach_objects=False)
-                if results['possible_endorsement_list_found']:
-                    possible_endorsement_list = results['possible_endorsement_list']
+                    # Match incoming endorsements to candidates already in the database
+                    results = match_endorsement_list_with_organizations_in_database(
+                        possible_endorsement_list,
+                        attach_objects=False)
+                    if results['possible_endorsement_list_found']:
+                        possible_endorsement_list = results['possible_endorsement_list']
 
-                # Add on existing position information
-                for one_possible_endorsement in possible_endorsement_list:
-                    if 'organization_we_vote_id' in one_possible_endorsement \
-                            and positive_value_exists(one_possible_endorsement['organization_we_vote_id']):
-                        position_exists_query = PositionEntered.objects.filter(
-                            organization_we_vote_id=one_possible_endorsement['organization_we_vote_id'],
-                            candidate_campaign_we_vote_id=candidate_we_vote_id)
-                        position_list = list(position_exists_query)
-                        if positive_value_exists(len(position_list)):
-                            one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
-                            one_possible_endorsement['position_stance_stored'] = position_list[0].stance
-                            one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
-                            one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
-            else:
-                pass
+                    # Add on existing position information
+                    for one_possible_endorsement in possible_endorsement_list:
+                        if 'organization_we_vote_id' in one_possible_endorsement \
+                                and positive_value_exists(one_possible_endorsement['organization_we_vote_id']):
+                            position_exists_query = PositionEntered.objects.filter(
+                                organization_we_vote_id=one_possible_endorsement['organization_we_vote_id'],
+                                candidate_campaign_we_vote_id=candidate_we_vote_id)
+                            position_list = list(position_exists_query)
+                            if positive_value_exists(len(position_list)):
+                                one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
+                                one_possible_endorsement['position_stance_stored'] = position_list[0].stance
+                                one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
+                                one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
+                else:
+                    pass
 
-    # June 2023, remove older dupe entries and entries with null names -- shouldn't need to do this, but ...
-    possible_endorsement_list = clean_up_possible_endorsement_list(possible_endorsement_list)
-
-    status += results['status']
+        # June 2023, remove older dupe entries and entries with null names -- shouldn't need to do this, but ...
+        possible_endorsement_list = clean_up_possible_endorsement_list(possible_endorsement_list)
+    except Exception as e:
+        status += "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE_FAILED2: " + str(e) + " "
+        success = False
     json_data = {
         'status':                       status,
-        'success':                      results['success'],
+        'success':                      success,
         'voter_guide_possibility_id':   voter_guide_possibility_id,
         'possible_position_list':       possible_endorsement_list,
     }
@@ -1512,6 +1526,12 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
 
 def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(voter_guide_possibility):
+    """
+    This finds endorsements on other VoterGuidePossibility entries and moves them over to this entry.
+    After using this for some months, we decided:
+    We do not want to bring endorsements found on other web pages over to this voter_guide_possibility
+    because it creates clutter, and in practice isn't helpful.
+    """
     voter_guide_possibility_id = voter_guide_possibility.id
     organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
     voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
@@ -1740,7 +1760,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
         return json_data
 
     voter = fetch_voter_from_voter_device_link(voter_device_id)
-    if hasattr(voter, 'we_vote_id'):
+    if voter and hasattr(voter, 'we_vote_id'):
         voter_id = voter.id
         voter_we_vote_id = voter.we_vote_id
     else:

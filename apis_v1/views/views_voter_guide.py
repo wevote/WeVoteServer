@@ -49,6 +49,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     :param request:
     :return:
     """
+    status = ''
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     is_post = True if request.method == 'POST' else False
 
@@ -80,25 +81,69 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     except:
         google_civic_election_id_list = None
 
-    json_data = voter_guide_possibility_position_save_for_api(
-        voter_device_id=voter_device_id,
-        voter_guide_possibility_id=voter_guide_possibility_id,
-        voter_guide_possibility_position_id=voter_guide_possibility_position_id,
-        ballot_item_name=ballot_item_name,
-        ballot_item_state_code=ballot_item_state_code,
-        position_stance=position_stance,
-        statement_text=statement_text,
-        more_info_url=more_info_url,
-        possibility_should_be_deleted=possibility_should_be_deleted,
-        possibility_should_be_ignored=possibility_should_be_ignored,
-        candidate_twitter_handle=candidate_twitter_handle,
-        candidate_we_vote_id=candidate_we_vote_id,
-        measure_we_vote_id=measure_we_vote_id,
-        organization_name=organization_name,
-        organization_twitter_handle=organization_twitter_handle,
-        organization_we_vote_id=organization_we_vote_id,
-        position_should_be_removed=position_should_be_removed,
-        google_civic_election_id_list=google_civic_election_id_list)
+    try:
+        json_data = voter_guide_possibility_position_save_for_api(
+            voter_device_id=voter_device_id,
+            voter_guide_possibility_id=voter_guide_possibility_id,
+            voter_guide_possibility_position_id=voter_guide_possibility_position_id,
+            ballot_item_name=ballot_item_name,
+            ballot_item_state_code=ballot_item_state_code,
+            position_stance=position_stance,
+            statement_text=statement_text,
+            more_info_url=more_info_url,
+            possibility_should_be_deleted=possibility_should_be_deleted,
+            possibility_should_be_ignored=possibility_should_be_ignored,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_we_vote_id=candidate_we_vote_id,
+            measure_we_vote_id=measure_we_vote_id,
+            organization_name=organization_name,
+            organization_twitter_handle=organization_twitter_handle,
+            organization_we_vote_id=organization_we_vote_id,
+            position_should_be_removed=position_should_be_removed,
+            google_civic_election_id_list=google_civic_election_id_list)
+    except Exception as e:
+        status += "VOTER_GUIDE_POSSIBILITY_POSITION_SAVE_FAILED1: " + str(e) + " "
+        json_data = {
+            'status': status,
+            'success': False,
+        }
+    try:
+        json_dumped = json.dumps(json_data)
+    except Exception as e:
+        status += "VOTER_GUIDE_POSSIBILITY_POSITION_SAVE_FAILED2: " + str(e) + " "
+        json_data = {
+            'status': status,
+            'success': False,
+        }
+    # Dale 2024-06-08 There is a weird bug happening with the following response that is independent of
+    #  the contents of the JSON when we save with POST.
+    #  Some sources on the web think it is related to a bug/change introduced in python 3.11.3+
+    # Traceback (most recent call last):
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 138, in run
+    #     self.finish_response()
+    #   File "/Users/dalemcgrew/PycharmEnvironments/WeVoteServer3.11/lib/python3.11/site-packages/django/core/servers/basehttp.py", line 173, in finish_response
+    #     super().finish_response()
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 184, in finish_response
+    #     self.write(data)
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 287, in write
+    #     self.send_headers()
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 345, in send_headers
+    #     self.send_preamble()
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 267, in send_preamble
+    #     self._write(
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 466, in _write
+    #     result = self.stdout.write(data)
+    #              ^^^^^^^^^^^^^^^^^^^^^^^
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socketserver.py", line 834, in write
+    #     self._sock.sendall(b)
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1273, in sendall
+    #     v = self.send(byte_view[count:])
+    #         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1242, in send
+    #     return self._sslobj.write(data)
+    #            ^^^^^^^^^^^^^^^^^^^^^^^^
+    # ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:2427)
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
