@@ -705,6 +705,26 @@ def voter_guide_create_process_view(request):
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
+    if not positive_value_exists(voter_guide_possibility_id) and positive_value_exists(voter_guide_possibility_url):
+        # If here, we want to go to the existing VoterGuidePossibility based on the url before scanning the page
+        # Otherwise, we can destroy a lot of work
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
+            voter_guide_possibility_url=voter_guide_possibility_url,
+            limit_to_this_year=True)
+        if positive_value_exists(results['voter_guide_possibility_id']):
+            voter_guide_possibility_id = results['voter_guide_possibility_id']
+            return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()) +
+                                        "?voter_guide_possibility_id=" + str(voter_guide_possibility_id))
+        elif not results['success']:
+            messages.add_message(request, messages.ERROR,
+                                 'There was a problem creating this VoterGuidePossibility. '
+                                 'Please report to Dale: '+ str(voter_guide_possibility_url) +
+                                 ' '+ str(results['status']))
+            return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()) +
+                                        "?voter_guide_possibility_url=" + str(voter_guide_possibility_url))
+
+
+
     voter_id = 0
     volunteer_task_manager = VolunteerTaskManager()
     voter_we_vote_id = ""
