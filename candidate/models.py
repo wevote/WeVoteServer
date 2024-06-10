@@ -27,6 +27,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
     'ballotpedia_candidate_id',
+    'ballotpedia_candidate_links_retrieved',
     'ballotpedia_candidate_name',
     'ballotpedia_candidate_summary',
     'ballotpedia_candidate_url',
@@ -2268,6 +2269,7 @@ class CandidateListManager(models.Manager):
                 one_candidate = {
                     'ballot_item_display_name':     candidate.display_candidate_name(),
                     'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
+                    'ballotpedia_candididate_links_retrieved': candidate.ballotpedia_candidate_links_retrieved,
                     'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
                     'ballotpedia_office_id':        candidate.ballotpedia_office_id,
                     'ballotpedia_person_id':        candidate.ballotpedia_person_id,
@@ -2696,6 +2698,8 @@ class CandidateCampaign(models.Model):
         verbose_name="candidate name exactly as received from ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
+    ballotpedia_candidate_links_retrieved = models.BooleanField(default=False)
+
     ballotpedia_candidate_url = models.TextField(
         verbose_name='url of candidate on ballotpedia', blank=True, null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
@@ -4774,6 +4778,9 @@ class CandidateManager(models.Manager):
                     values_changed = True
                 if 'ballotpedia_candidate_name' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_name = update_values['ballotpedia_candidate_name']
+                    values_changed = True
+                if 'ballotpedia_candidate_links_retrieved' in update_values:
+                    existing_candidate_entry.ballotpedia_candidate_links_retrieved = update_values['ballotpedia_candidate_links_retrieved']
                     values_changed = True
                 if 'ballotpedia_candidate_summary' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_summary = \

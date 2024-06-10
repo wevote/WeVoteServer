@@ -6,7 +6,8 @@ from wevote_settings.models import RemoteRequestHistoryManager
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
-    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api
+    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
+    get_candidate_links_from_ballotpedia_page, get_candidate_links_from_ballotpedia
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import date
@@ -29,7 +30,7 @@ from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_BALLO
 logger = wevote_functions.admin.get_logger(__name__)
 
 BALLOTPEDIA_API_CONTAINS_URL = get_environment_variable("BALLOTPEDIA_API_CONTAINS_URL")
-MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 50
+MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 10
 
 CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
@@ -150,6 +151,119 @@ def bulk_retrieve_ballotpedia_photos_view(request):
                                 '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                 '&page=' + str(page)
                                 )
+
+@login_required
+def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
+    status = ""
+    remote_request_history_manager = RemoteRequestHistoryManager()
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
+    page = request.GET.get('page', 0)
+    state_code = request.GET.get('state_code', '')
+    limit = convert_to_int(request.GET.get('limit', MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE))
+    print(google_civic_election_id, hide_candidate_tools, state_code, limit)
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
+            and not positive_value_exists(limit):
+        messages.add_message(request, messages.ERROR,
+                             'bulk_retrieve_ballotpedia_candidate_links_from_ballotpedia_view, LIMITING_VARIABLE_REQUIRED')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&page=' + str(page)
+                                    )
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+    # #############################################################
+    # Get candidates in the elections we care about - used below
+    candidate_list_manager = CandidateListManager()
+    if positive_value_exists(google_civic_election_id):
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=[google_civic_election_id])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    else:
+        # Only look at candidates for this year
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
+            year_list=[2024])
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+    candidate_list = []
+    already_retrieved = 0
+    already_stored = 0
+    try:
+        queryset = CandidateCampaign.objects.all()
+        queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
+        # queryset = queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
+        # Don't include candidates that do not have ballotpedia_candidate_url
+        queryset = queryset. \
+            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        # Only include candidates that don't have a photo
+        queryset = queryset.filter(
+            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
+
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        if positive_value_exists(limit):
+            candidate_list = queryset[:limit]
+        else:
+            candidate_list = list(queryset)
+        print(candidate_list)
+        # Run search in ballotpedia candidates
+        for one_candidate in candidate_list:
+            # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
+            #  search Ballotpedia more than once.
+            # request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
+            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+            #     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
+            # request_history_list = list(request_history_query)
+            request_history_list = []
+            if not positive_value_exists(len(request_history_list)):
+                add_messages = False
+                get_results = get_candidate_links_from_ballotpedia(
+                    incoming_object=one_candidate,
+                    request=request,
+                    remote_request_history_manager=remote_request_history_manager,
+                    save_to_database=True,
+                    add_messages=add_messages)
+                status += get_results['status']
+            else:
+                logger.info("Skipped URL: " + one_candidate.ballotpedia_candidate_url)
+                already_stored += 1
+    except CandidateCampaign.DoesNotExist:
+        # This is fine, do nothing
+        pass
+
+    if positive_value_exists(already_stored):
+        status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
+    if positive_value_exists(already_retrieved):
+        status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+
+    messages.add_message(request, messages.INFO, status)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code) +
+                                '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                '&page=' + str(page)
+                                )
+
 
 
 @login_required

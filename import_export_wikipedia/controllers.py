@@ -46,8 +46,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 def extract_wikipedia_page_title_from_wikipedia_url(wikipedia_page_url):
     last_part_of_url = wikipedia_page_url.split('/')[-1]
     wikipedia_page_title = ((last_part_of_url.replace('%28', '(').replace('%29', ')')
-                             .replace('_', ' ').replace('%27', '\'')).replace('%E9', 'é').replace('%FA', 'ú ')
-                            .replace('%F3', 'ó').replace('%E1', 'á'))
+                             .replace('_', ' ').replace('%27', '\'')).replace('%C3%A9', 'é').replace('%C3%BA', 'ú ')
+                            .replace('%C3%B3', 'ó').replace('%C3%A1', 'á').replace('%C3%AD', 'í').replace('%C3%B1', 'ñ'))
     return wikipedia_page_title
 
 

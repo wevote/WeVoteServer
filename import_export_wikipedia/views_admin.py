@@ -35,7 +35,6 @@ MAXIMUM_WIKIPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 50
 
 
 def bulk_retrieve_wikipedia_photos_view(request):
-    import codecs
     status = ""
     remote_request_history_manager = RemoteRequestHistoryManager()
 
