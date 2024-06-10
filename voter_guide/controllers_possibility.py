@@ -166,10 +166,12 @@ def augment_organization_possible_position_data(possible_endorsement, attach_obj
     return results
 
 
-def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsement_number=1,
-                                                 incoming_text_organization_names=False,
-                                                 candidate_we_vote_id_to_include='',
-                                                 organization_we_vote_id_to_include=''):
+def break_up_text_into_possible_endorsement_list(
+        ballot_items,
+        starting_endorsement_number=1,
+        incoming_text_organization_names=False,
+        candidate_we_vote_id_to_include='',
+        organization_we_vote_id_to_include=''):
     names_list = []
     # Break up multiple lines
     ballot_items_list = ballot_items.splitlines()
@@ -353,8 +355,8 @@ def convert_list_of_names_to_possible_endorsement_list(ballot_items_list, starti
     results = {
         'status':                           status,
         'success':                          success,
-        'possible_endorsement_list':          possible_endorsement_list,
-        'possible_endorsement_list_found':    possible_endorsement_list_found,
+        'possible_endorsement_list':        possible_endorsement_list,
+        'possible_endorsement_list_found':  possible_endorsement_list_found,
     }
     return results
 
