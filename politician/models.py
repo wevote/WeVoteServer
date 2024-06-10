@@ -197,6 +197,8 @@ class Politician(models.Model):
     # wikipedia_photo_url_is_broken = models.BooleanField(default=False)
     wikipedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached candidate profile image from wikipedia', blank=True, null=True)
+    ballotpedia_candidate_links_retrieved = models.BooleanField(default=False)
+
     ballotpedia_photo_url = models.TextField(
         verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
     ballotpedia_photo_url_is_broken = models.BooleanField(default=False)

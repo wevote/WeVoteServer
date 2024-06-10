@@ -30,7 +30,7 @@ from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_BALLO
 logger = wevote_functions.admin.get_logger(__name__)
 
 BALLOTPEDIA_API_CONTAINS_URL = get_environment_variable("BALLOTPEDIA_API_CONTAINS_URL")
-MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 50
+MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE = 10
 
 CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
@@ -216,6 +216,8 @@ def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
         # Only include candidates that don't have a photo
         queryset = queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
+
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(limit):

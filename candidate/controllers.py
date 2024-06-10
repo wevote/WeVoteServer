@@ -2773,6 +2773,33 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
         pass
 
 
+def save_ballotpedia_candidate_links_to_candidate_table(candidate, link_dict):
+    results = {'success': True, 'status': ''}
+    # if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
+    #     candidate.ballotpedia_page_title = google_search_link
+    for i in range(len(link_dict.keys())):
+        if 'linkedin_url' in link_dict:
+            candidate.linkedin_url = link_dict['linkedin_url']
+        elif 'wikipedia_url' in link_dict:
+            candidate.wikipedia_url = link_dict['wikipedia_url']
+        elif 'candidate_url' in link_dict:
+            candidate.candidate_url = link_dict['candidate_url']
+        elif 'facebook_url' in link_dict:
+            candidate.facebook_url = link_dict['facebook_url']
+        elif 'instagram_handle' in link_dict:
+            candidate.instagram_handle = link_dict['instagram_handle']
+        try:
+            candidate.save()
+            results['success'] = True
+            results['status'] = 'CANDIDATE_SAVED'
+        except Exception as e:
+            results['success'] = False
+            results['status'] = 'CANDIDATE_NOT_SAVED: ' + str(e)
+            pass
+
+    return results
+
+
 def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_list_light):
     organization_we_vote_ids_list = []
     endorsement_list_light_modified = []
