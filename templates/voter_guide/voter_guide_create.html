@@ -279,7 +279,6 @@
                         <span class="glyphicon glyphicon-new-window"></span></a>
                     {% endif %}
                     {% if possible_candidate.fetch_twitter_handle and possible_candidate.candidate_url %}<br />{% endif %}
-                    HI TOO
                         {% if possible_candidate.candidate_url %}
                         <a href="{{ possible_candidate.candidate_url }}"
                            target="_blank"
@@ -414,11 +413,11 @@
             <table class="table">
             {% if type_of_website != "CandidateWebsite" %}
                 {% for possible_endorsement in possible_endorsement_list %}
-                    {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with organization_we_vote_id=organization_we_vote_id has_suggested_voter_guide_rights=has_suggested_voter_guide_rights possible_endorsement=possible_endorsement state_list=state_list %}
+                    {% include "voter_guide/voter_guide_one_position_confirmation.html" with organization_we_vote_id=organization_we_vote_id has_suggested_voter_guide_rights=has_suggested_voter_guide_rights possible_endorsement=possible_endorsement state_list=state_list %}
                 {% endfor %}
             {% else %}
                 {% for possible_endorsement in possible_endorsement_list %}
-                    {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with is_list_of_endorsements_for_candidate=type_of_website candidate_we_vote_id=candidate_we_vote_id candidate_name=candidate_name organization_we_vote_id=possible_endorsement.organization_we_vote_id has_suggested_voter_guide_rights=has_suggested_voter_guide_rights possible_endorsement=possible_endorsement state_list=state_list %}
+                    {% include "voter_guide/voter_guide_one_position_confirmation.html" with is_list_of_endorsements_for_candidate=type_of_website candidate_we_vote_id=candidate_we_vote_id candidate_name=candidate_name organization_we_vote_id=possible_endorsement.organization_we_vote_id has_suggested_voter_guide_rights=has_suggested_voter_guide_rights possible_endorsement=possible_endorsement state_list=state_list %}
                 {% endfor %}
             {% endif %}
             </table>

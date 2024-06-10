@@ -1333,7 +1333,7 @@ class ElectionManager(models.Manager):
             success = True
             election_list = []
         except Exception as e:
-            status += 'NO_ELECTIONS_FOUND - ERROR ' + str(e) + ' '
+            status += 'NO_ELECTIONS_FOUND - ERROR: ' + str(e) + ' '
             success = False
             election_list = []
 

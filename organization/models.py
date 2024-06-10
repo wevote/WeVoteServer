@@ -53,15 +53,19 @@ ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NON
 
 # These names lead to text matches on Candidate "I am endorsed by this group" pages that are too common
 ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
-    "ACCE", "ADAction", "BLOC", "Check", "Cher", "cia", "CoD", "CS", "CSS",
-    "data", "DID", "donate", "Google", "Greg",
-    "Ian", "IMG", "Isaac",
-    "JAC", "Jenn", "Location", "Mark", "Module", "More",
-    "NEA", "NEWS", "NEXT",
-    "Pat", "People", "Ping", "plan", "products",
-    "Ray", "RESULTS", "Ro",
-    "Sarah", "SAVE", "Section", "Settings", "spa", "steve",
-    "The Candidate", "The Democrats", "TIME", "Twitter", "Uber", "vote", "Will", "Z",
+    "ACCE", "ADAction", "AJC", "Beacon", "BET", "BLOC", "BRAC",
+    "careers", "Check", "Cher", "cia", "Citi", "CoD", "CS", "CSS",
+    "data", "DCAR", "Demos", "DID", "donate", "GEA", "Google", "Greg",
+    "Ian", "IMG", "Intro", "Isaac",
+    "JAC", "Jenn", "Location", "Mark", "MEA", "Module", "More", "MSTA",
+    "NBA", "NEA", "NEWS", "NEXT", "NPR",
+    "Pam", "Pat", "People", "Ping", "plan", "products",
+    "Ray", "Reactions", "reason", "Representative", "RESULTS", "Rights", "Ro", "Robbie"
+    "Sarah", "SAVE", "SEAP", "Section", "Settings", "spa", "steve",
+    "The Advocate", "The Candidate", "The Democrats", "The Dispatch", "The Nation", "The Reporter",
+    "TIME", "Twitter",
+    "Uber", "vote",
+    "Will", "Wix", "WPR", "WTOP", "Z",
 ]
 
 # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
@@ -81,6 +85,7 @@ ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER = [
     'secure.ngpvan.com',
     'secure.winred.com',
     't.co',
+    't.me',
     'tinyurl.com',
     'twitter.com',
     'wix.com',

@@ -89,7 +89,7 @@ STATE_CODE_MAP = {
     'TX': 'Texas',
     'UT': 'Utah',
     'VA': 'Virginia',
-    # 'VI': 'Virgin Islands',
+    'VI': 'Virgin Islands',
     'VT': 'Vermont',
     'WA': 'Washington',
     'WI': 'Wisconsin',
