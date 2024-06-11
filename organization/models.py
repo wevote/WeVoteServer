@@ -54,45 +54,36 @@ ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NON
 # These names lead to text matches on Candidate "I am endorsed by this group" pages that are too common
 ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
     "ACCE", "ADAction", "AJC", "Beacon", "BET", "BLOC", "BRAC",
-    "careers", "Check", "Cher", "cia", "Citi", "CoD", "CS", "CSS",
+    "careers", "Check", "Cher", "CHLI", "cia", "Citi", "CNN", "CoD", "CS", "CSS",
     "data", "DCAR", "Demos", "DID", "donate", "GEA", "Google", "Greg",
     "Ian", "IMG", "Intro", "Isaac",
-    "JAC", "Jenn", "Location", "Mark", "MEA", "Module", "More", "MSTA",
+    "JAC", "Jenn", "Location", "LYNX",
+    "Mark", "MEA", "Module", "More", "MSTA",
     "NBA", "NEA", "NEWS", "NEXT", "NPR",
-    "Pam", "Pat", "People", "Ping", "plan", "products",
+    "Pam", "Pat", "People", "Pennsylvania", "Ping", "plan", "products",
     "Ray", "Reactions", "reason", "Representative", "RESULTS", "Rights", "Ro", "Robbie"
     "Sarah", "SAVE", "SEAP", "Section", "Settings", "spa", "steve",
     "The Advocate", "The Candidate", "The Democrats", "The Dispatch", "The Nation", "The Reporter",
-    "TIME", "Twitter",
+    "THLN", "TIME", "Twitter",
     "Uber", "vote",
     "Will", "Wix", "WPR", "WTOP", "Z",
 ]
 
 # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
 ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER = [
-    'ballotpedia.org',
-    'bit.ly',
-    'developer.chrome.com',
-    'developer.mozilla.org',
+    'app.com', 'apple.co',
+    'ballotpedia.org', 'bit.ly',
+    'developer.chrome.com', 'developer.mozilla.org',
     'en.wikipedia.org',
     'facebook.com',
     'instagram.com',
-    'linkedin.com',
-    'linktr.ee',
+    'linkedin.com', 'linktr.ee',
     'nationbuilder.com',
-    'secure.actblue.com',
-    'secure.anedot.com',
-    'secure.ngpvan.com',
-    'secure.winred.com',
-    't.co',
-    't.me',
-    'tinyurl.com',
-    'twitter.com',
-    'wix.com',
-    'wixsite.com',
-    'wordpress.com',
-    'www.',
-    'youtube.com',
+    'reddit.com',
+    'secure.actblue.com', 'secure.anedot.com', 'secure.ngpvan.com', 'secure.winred.com',
+    't.co', 't.me', 'tinyurl.com', 'twitter.com',
+    'wix.com', 'wixsite.com', 'wordpress.com', 'www.',
+    'yahoo.com', 'youtube.com',
 ]
 
 ORGANIZATION_TYPE_MAP = {
@@ -1228,6 +1219,9 @@ class OrganizationManager(models.Manager):
         if positive_value_exists(twitter_user.twitter_name):
             if twitter_user.twitter_name != organization.twitter_name:
                 organization.twitter_name = twitter_user.twitter_name
+                values_changed = True
+            if not positive_value_exists(organization.organization_name):
+                organization.organization_name = twitter_user.twitter_name
                 values_changed = True
         if positive_value_exists(twitter_user.twitter_profile_image_url_https):
             if twitter_user.twitter_profile_image_url_https != organization.twitter_profile_image_url_https:

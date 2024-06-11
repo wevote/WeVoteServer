@@ -27,7 +27,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
     'ballotpedia_candidate_id',
-    'ballotpedia_candidate_links_retrieved',
+    'ballotpedia_candidate_links_retrieved',  # DALE: I'm not sure we need to call this out here
     'ballotpedia_candidate_name',
     'ballotpedia_candidate_summary',
     'ballotpedia_candidate_url',
@@ -2269,7 +2269,8 @@ class CandidateListManager(models.Manager):
                 one_candidate = {
                     'ballot_item_display_name':     candidate.display_candidate_name(),
                     'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
-                    'ballotpedia_candididate_links_retrieved': candidate.ballotpedia_candidate_links_retrieved,
+                    # Not needed by front end
+                    # 'ballotpedia_candididate_links_retrieved': candidate.ballotpedia_candidate_links_retrieved,
                     'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
                     'ballotpedia_office_id':        candidate.ballotpedia_office_id,
                     'ballotpedia_person_id':        candidate.ballotpedia_person_id,

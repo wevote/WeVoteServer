@@ -710,7 +710,7 @@ def get_photo_url_from_ballotpedia(
     return results
 
 
-def get_candidate_links_from_ballotpedia_page(ballotpedia_candidate_url):
+def get_candidate_links_from_ballotpedia_page(ballotpedia_candidate_url):  # TWO functions?
     status = ""
     success = True
     candidate_link = ""
@@ -743,7 +743,7 @@ def get_candidate_links_from_ballotpedia_page(ballotpedia_candidate_url):
     return results
 
 
-def get_candidate_links_from_ballotpedia(
+def get_candidate_links_from_ballotpedia(  # TWO functions?
         incoming_object=None,
         request={},
         remote_request_history_manager=None,

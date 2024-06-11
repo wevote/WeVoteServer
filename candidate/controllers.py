@@ -2774,28 +2774,36 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
 
 
 def save_ballotpedia_candidate_links_to_candidate_table(candidate, link_dict):
+    # TODO Make sure this is the right approach
     results = {'success': True, 'status': ''}
     # if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
     #     candidate.ballotpedia_page_title = google_search_link
+    at_least_one_change = False
     for i in range(len(link_dict.keys())):
         if 'linkedin_url' in link_dict:
             candidate.linkedin_url = link_dict['linkedin_url']
+            at_least_one_change = True
         elif 'wikipedia_url' in link_dict:
             candidate.wikipedia_url = link_dict['wikipedia_url']
+            at_least_one_change = True
         elif 'candidate_url' in link_dict:
             candidate.candidate_url = link_dict['candidate_url']
+            at_least_one_change = True
         elif 'facebook_url' in link_dict:
             candidate.facebook_url = link_dict['facebook_url']
+            at_least_one_change = True
         elif 'instagram_handle' in link_dict:
             candidate.instagram_handle = link_dict['instagram_handle']
+            at_least_one_change = True
+
+    if at_least_one_change:
         try:
             candidate.save()
             results['success'] = True
-            results['status'] = 'CANDIDATE_SAVED'
+            results['status'] = 'CANDIDATE_SAVED '
         except Exception as e:
             results['success'] = False
-            results['status'] = 'CANDIDATE_NOT_SAVED: ' + str(e)
-            pass
+            results['status'] = 'CANDIDATE_NOT_SAVED: ' + str(e) + ' '
 
     return results
 
