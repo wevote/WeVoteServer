@@ -379,9 +379,10 @@ def refresh_twitter_data_for_organizations_view(request):
     first_retrieve_only = request.GET.get('first_retrieve_only', True)
     return_to_voter_guide_list = request.GET.get('return_to_voter_guide_list', False)
 
-    results = refresh_twitter_data_for_organizations(state_code=organization_state_code,
-                                                     google_civic_election_id=google_civic_election_id,
-                                                     first_retrieve_only=first_retrieve_only)
+    results = refresh_twitter_data_for_organizations(
+        state_code=organization_state_code,
+        google_civic_election_id=google_civic_election_id,
+        first_retrieve_only=first_retrieve_only)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])

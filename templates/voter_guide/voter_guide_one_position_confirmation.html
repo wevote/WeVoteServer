@@ -6,7 +6,7 @@
     {% if is_list_of_endorsements_for_candidate %}
         <span>
           <span class="h4">{% if possible_endorsement.organization_name %}{{ possible_endorsement.organization_name|default_if_none:"" }}{% else %}<input type="text" name="organization_name_{{ possible_endorsement.possibility_position_number }}"
-                   style="width: 290px;" />{% endif %}{% if candidate_name %}, endorsing {{ candidate_name }}{% endif %}</span>
+                   placeholder="Enter endorser name..." style="width: 290px;" />{% endif %}{% if candidate_name %}, endorsing {{ candidate_name }}{% endif %}</span>
           {% if possible_endorsement.google_civic_election_id %}
           <span>
           (election: {{ possible_endorsement.google_civic_election_id }})
