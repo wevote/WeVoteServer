@@ -3,30 +3,23 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.models import CandidateCampaign, CandidateListManager
-from import_export_ballotpedia.views_admin import MAXIMUM_BALLOTPEDIA_IMAGES_TO_RECEIVE_AT_ONCE
 from wevote_settings.models import RemoteRequestHistoryManager
 from .controllers import retrieve_all_organizations_logos_from_wikipedia, \
     retrieve_organization_logo_from_wikipedia_page, retrieve_wikipedia_page_from_wikipedia, \
     retrieve_candidate_images_from_wikipedia_page, get_photo_url_from_wikipedia
 from admin_tools.views import redirect_to_sign_in_page
-from config.base import get_environment_variable
-from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from election.models import Election, ElectionManager
-from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 
 
 from organization.models import OrganizationManager
-from polling_location.models import PollingLocation
 from volunteer_task.models import VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE, VolunteerTaskManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
-from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS
 
 
 logger = wevote_functions.admin.get_logger(__name__)

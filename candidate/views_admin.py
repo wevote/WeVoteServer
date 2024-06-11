@@ -1172,6 +1172,23 @@ def candidate_list_view(request):
     except Exception as e:
         logger.error("ERROR Finding Ballotpedia Photo URLs: ", e)
 
+    # How many candidates with ballotpedia_candidate_url's have never been checked for links we can use?
+    ballotpedia_urls_to_retrieve_for_links = 0
+    try:
+        count_queryset = CandidateCampaign.objects.using('readonly').all()
+        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        count_queryset = count_queryset.exclude(ballotpedia_candidate_links_retrieved=True)
+        # Exclude candidates without ballotpedia_candidate_url
+        count_queryset = count_queryset. \
+            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
+
+        ballotpedia_urls_to_retrieve_for_links = count_queryset.count()
+
+    except Exception as e:
+        logger.error("ERROR Finding Ballotpedia URLs to retrieve links: ", e)
+
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
@@ -1433,6 +1450,7 @@ def candidate_list_view(request):
         web_app_root_url = 'https://quality.WeVote.US'
 
     template_values = {
+        'ballotpedia_urls_to_retrieve_for_links':   ballotpedia_urls_to_retrieve_for_links,
         'ballotpedia_urls_without_picture_urls':    ballotpedia_urls_without_picture_urls,
         'candidate_count_start':                    candidate_count_start,
         'candidate_list':                           candidate_list,

@@ -11,7 +11,7 @@ from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
 from candidate.controllers import save_image_to_candidate_table, add_twitter_handle_to_next_candidate_spot, \
-    save_ballotpedia_candidate_links_to_candidate_table
+    add_to_candidate_new_links_from_ballotpedia
 from candidate.models import CandidateManager, CandidateListManager, fetch_candidate_count_for_office, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_UNKNOWN
 from config.base import get_environment_variable
@@ -551,6 +551,7 @@ def get_photo_url_from_ballotpedia(
     success = True
     ballotpedia_photo_saved = False
     is_candidate = False
+    is_organization = False
     is_politician = False
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
@@ -566,7 +567,7 @@ def get_photo_url_from_ballotpedia(
     else:
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
-        is_candidate = False
+        is_organization = True
 
     if not positive_value_exists(ballotpedia_page_url):
         status += "MISSING_BALLOTPEDIA_PAGE_URL "
@@ -581,7 +582,7 @@ def get_photo_url_from_ballotpedia(
         ballotpedia_page_url = 'https://' + ballotpedia_page_url
         incoming_object.ballotpedia_page_url = ballotpedia_page_url
         incoming_object_changes = True
-    print(ballotpedia_page_url)
+    # print(ballotpedia_page_url)
     results = get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
@@ -676,9 +677,8 @@ def get_photo_url_from_ballotpedia(
 
         if ballotpedia_photo_saved:
             status += "SAVED_BALLOTPEDIA_IMAGE "
-            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
-
             if is_candidate:
+                # Create a record denoting that we have retrieved from Ballotpedia for this candidate
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
                     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS,
                     google_civic_election_id=google_civic_election_id,
@@ -710,40 +710,46 @@ def get_photo_url_from_ballotpedia(
     return results
 
 
-def get_candidate_links_from_ballotpedia_page(ballotpedia_candidate_url):  # TWO functions?
+def get_candidate_links_from_ballotpedia_candidate_url_page(ballotpedia_candidate_url):
+    candidate_links_dict = {}
+    candidate_links_found = False
+    candidate_links_list = []
+    candidate_name = ""
     status = ""
     success = True
-    candidate_link = ""
 
-    soup = get_parsed_html(ballotpedia_candidate_url)
-    candidate_name = ballotpedia_candidate_url.split(".org/")[-1].replace("_", " ")
+    try:
+        soup = get_parsed_html(ballotpedia_candidate_url)
+        candidate_name = ballotpedia_candidate_url.split(".org/")[-1].replace("_", " ")
 
-    candidate_links_list = []
-    candidate_links_dict = {}
-    for candidate_links in soup.find_all('div', class_='widget-row value-only white'):
-        p_tag = candidate_links.find('p')
-        link_name = p_tag.text.strip()
-        candidate_link = p_tag.find('a').get('href')
-        if candidate_link:
-            try:
-                candidate_links_list.append([candidate_link,link_name])
+        count = 1
+        for candidate_links in soup.find_all('div', class_='widget-row value-only white'):
+            p_tag = candidate_links.find('p')
+            link_name = p_tag.text.strip()
+            candidate_link = p_tag.find('a').get('href')
+            if positive_value_exists(candidate_link):
+                candidate_links_list.append(candidate_link)
+                if not positive_value_exists(link_name):
+                    link_name = "unknown" + str(count)
+                    count += 1
                 candidate_links_dict[link_name] = candidate_link
-            except Exception as e:
-                status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_CANDIDATE_LINK: " + str(e) + " "
-                success = False
-                status += ("Candidate Link not found for:", candidate_name)
+        candidate_links_found = len(candidate_links_list) > 0
+    except Exception as e:
+        status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_CANDIDATE_LINK, " + ballotpedia_candidate_url + ": " + str(e) + " "
+        success = False
 
     results = {
-        'candidate_name': candidate_name,
-        'candidate_links_list': candidate_links_list,
         'candidate_links_dict': candidate_links_dict,
+        'candidate_links_found': candidate_links_found,
+        'candidate_links_list': candidate_links_list,
+        'candidate_name': candidate_name,
         'status': status,
         'success': success,
     }
     return results
 
 
-def get_candidate_links_from_ballotpedia(  # TWO functions?
+def get_candidate_links_from_ballotpedia(
         incoming_object=None,
         request={},
         remote_request_history_manager=None,
@@ -751,8 +757,8 @@ def get_candidate_links_from_ballotpedia(  # TWO functions?
         add_messages=False):
     status = ""
     success = True
-    ballotpedia_candidate_link_saved = False
     is_candidate = False
+    is_organization = False
     is_politician = False
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
@@ -768,7 +774,7 @@ def get_candidate_links_from_ballotpedia(  # TWO functions?
     else:
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
-        is_candidate = False
+        is_organization = True
 
     if not positive_value_exists(ballotpedia_page_url):
         status += "MISSING_BALLOTPEDIA_PAGE_URL "
@@ -784,85 +790,34 @@ def get_candidate_links_from_ballotpedia(  # TWO functions?
         incoming_object.ballotpedia_page_url = ballotpedia_page_url
         incoming_object_changes = True
     print(ballotpedia_page_url)
-    results = get_candidate_links_from_ballotpedia_page(ballotpedia_page_url)
+    results = get_candidate_links_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
-        candidate_links_list = results.get('candidate_links_list')
-        link_dict = {}
-        # To explore, when photo_url is found, but not valid... (low priority)
-        # ballotpedia_photo_url_is_broken = results.get('http_response_code') == 404
-        if results['candidate_links_list']:
+        # In all situations, we want to mark this incoming_object as having been processed
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        incoming_object_changes = True
+        candidate_links_dict = results.get('candidate_links_dict')
+        if results.get('candidate_links_found'):
             if is_candidate or is_politician:
-                link_dict = store_candidate_links_into_one_candidate(incoming_object, candidate_links_list)
-                incoming_object_changes = True
-                # incoming_object.ballotpedia_photo_url = photo_url
-                # incoming_object.ballotpedia_photo_url_is_broken = False
-                # incoming_object.ballotpedia_photo_url_is_placeholder = False
-                incoming_object.ballotpedia_candidate_links_retrieved = True
-
-                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
-                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
-                    incoming_object.we_vote_hosted_profile_image_url_large = None
-                    incoming_object.we_vote_hosted_profile_image_url_medium = None
-                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
-                        object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
-                    else:
-                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
-            # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
-            #         and not incoming_object.ballotpedia_photo_url_is_broken:
-            #     incoming_object.ballotpedia_photo_url_is_broken = True
-            #     incoming_object.save()
-
+                # print(candidate_links_dict)
+                results = add_to_candidate_new_links_from_ballotpedia(incoming_object, candidate_links_dict)
+                if results['at_least_one_change']:
+                    incoming_object = results['candidate']
+                    # incoming_object_changes = True
         else:
-            status += "BALLOTPEDIA_CANDIDATE_LINKS  _NOT_FOUND: " + ballotpedia_page_url + " "
+            status += "BALLOTPEDIA_CANDIDATE_LINKS_NOT_FOUND: " + ballotpedia_page_url + " "
             status += results['status']
 
         if save_to_database and incoming_object_changes:
             incoming_object.save()
-            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
-            if is_candidate:
-                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                    kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_CANDIDATES_LINKS,
-                    google_civic_election_id=google_civic_election_id,
-                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
-                    number_of_results=1,
-                    status="CANDIDATE_BALLOTPEDIA_URL_CANDIDATES_LINKS:" + str(candidate_links_list))
-                # Success!
-                logger.info("Queried URL: " + ballotpedia_page_url)
 
-                if save_to_database:
-                    if is_candidate or is_politician:
-                        results = save_ballotpedia_candidate_links_to_candidate_table(incoming_object, link_dict)
-
-                        # results = save_image_to_candidate_table(
-                        #     candidate=incoming_object,
-                        #     image_url=incoming_object.ballotpedia_photo_url,
-                        #     source_link=ballotpedia_page_url,
-                        #     url_is_broken=False,
-                        #     kind_of_source_website=IMAGE_SOURCE_BALLOTPEDIA)
-                        if results['success']:
-                            ballotpedia_candidate_link_saved= True
-                        # When saving to candidate object, update:
-                        # we_vote_hosted_profile_facebook_image_url_tiny
-                    else:
-                        results = save_image_to_organization_table(
-                            incoming_object, ballotpedia_page_url, False, IMAGE_SOURCE_BALLOTPEDIA)
-                        if results['success']:
-                            ballotpedia_candidate_link_saved = True
-
-        if ballotpedia_candidate_link_saved:
-            status += "SAVED_BALLOTPEDIA_CANDIDATE_LINK "
-            # Create a record denoting that we have retrieved from Ballotpedia for this candidate
-
-            if is_candidate:
-                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                    kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_CANDIDATES_LINKS,
-                    google_civic_election_id=google_civic_election_id,
-                    candidate_campaign_we_vote_id=incoming_object.we_vote_id,
-                    number_of_results=1,
-                    status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
+        # Create a record denoting that we have retrieved from Ballotpedia for this candidate
+        if is_candidate:
+            save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_CANDIDATES_LINKS,
+                google_civic_election_id=google_civic_election_id,
+                candidate_campaign_we_vote_id=incoming_object.we_vote_id,
+                number_of_results=1,
+                status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
 
         else:
             success = False
@@ -885,51 +840,6 @@ def get_candidate_links_from_ballotpedia(  # TWO functions?
         'status': status,
     }
     return results
-
-
-def store_candidate_links_into_one_candidate(incoming_object, candidate_links_list):
-    link_dict = {}
-    for link in candidate_links_list:
-
-        if link[1] == 'Official website':
-            # if not hasattr(incoming_object, 'candidate_url'):
-            if incoming_object.candidate_url == "" or incoming_object.candidate_url is None:
-                link_dict['candidate_url'] = link[0]  # candidate_url = link[0]
-                incoming_object_changes = True
-
-        elif 'Wikipedia' in link[1]:
-            # if not hasattr(incoming_object, 'wikipedia_url'):
-            if incoming_object.wikipedia_url == "" or incoming_object.wikipedia_url is None:
-                link_dict['wikipedia_url'] = link[0]  # wikipedia_url = link[0]
-                incoming_object_changes = True
-
-        elif 'Instagram' in link[1]:
-            # if not hasattr(incoming_object, 'instagram_handle'):
-            if incoming_object.instagram_handle is None or incoming_object.instagram_handle == "":
-                link_dict['instagram_handle'] = (link[0].split("/")[-1])
-                incoming_object_changes = True
-
-        # elif 'Twitter' in link[1]:
-        #     twitter_handle = (link[0].split("/")[-1])  # twitter_handle
-        #     incoming_object = add_twitter_handle_to_next_candidate_spot(incoming_object, twitter_handle)
-        #     incoming_object_changes = True
-        elif 'Facebook' in link[1]:
-            # if not hasattr(incoming_object, 'facebook_url'):
-            if incoming_object.facebook_url == "" or incoming_object.facebook_url is None:
-                link_dict['facebook_url'] = link[0]  # facebook_url = link[0]
-                incoming_object_changes = True
-        elif 'LinkedIn' in link[1]:
-            # if not (hasattr(incoming_object, 'linkedin_url')):
-            if incoming_object.linkedin_url == "" or incoming_object.linkedin_url is None:
-                link_dict['linkedin_url'] = link[0]  # linkedin_url = link[0]
-                incoming_object_changes = True
-        elif 'Youtube' in link[1]:
-            # if not hasattr(incoming_object, 'youtube_url'):
-            if incoming_object.youtube_url == "" or incoming_object.youtube_url is None:
-                link_dict['youtube_url'] = link[0]  # youtube_url = link[0]
-                incoming_object_changes = True
-
-    return link_dict
 
 
 def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id, state_code="",

@@ -26,7 +26,7 @@ from position.controllers import move_positions_to_another_candidate, update_all
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, convert_to_political_party_constant, \
-    extract_twitter_handle_from_text_string, extract_website_from_url, \
+    extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, extract_website_from_url, \
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
@@ -2773,39 +2773,120 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
         pass
 
 
-def save_ballotpedia_candidate_links_to_candidate_table(candidate, link_dict):
-    # TODO Make sure this is the right approach
-    results = {'success': True, 'status': ''}
-    # if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
-    #     candidate.ballotpedia_page_title = google_search_link
+def add_to_candidate_new_links_from_ballotpedia(candidate, candidate_links_dict):
+    status = ""
+    success = True
     at_least_one_change = False
-    for i in range(len(link_dict.keys())):
-        if 'linkedin_url' in link_dict:
-            candidate.linkedin_url = link_dict['linkedin_url']
+    candidate_url_campaign = ""
+    candidate_url_office_held = ""
+    facebook_url_campaign = ""
+    facebook_url_office_held = ""
+    facebook_url_personal = ""
+    instagram_handle_campaign = ""
+    instagram_handle_office_held = ""
+    # linkedin_url_personal = ""
+    twitter_handle_campaign = ""
+    twitter_handle_office_held = ""
+    youtube_url_campaign = ""
+    youtube_url_office_held = ""
+    if 'Personal LinkedIn' in candidate_links_dict:
+        if not positive_value_exists(candidate.linkedin_url):
+            candidate.linkedin_url = candidate_links_dict['Personal LinkedIn']
             at_least_one_change = True
-        elif 'wikipedia_url' in link_dict:
-            candidate.wikipedia_url = link_dict['wikipedia_url']
+    if 'Official Wikipedia' in candidate_links_dict:
+        if not positive_value_exists(candidate.wikipedia_url):
+            candidate.wikipedia_url = candidate_links_dict['Official Wikipedia']
             at_least_one_change = True
-        elif 'candidate_url' in link_dict:
-            candidate.candidate_url = link_dict['candidate_url']
-            at_least_one_change = True
-        elif 'facebook_url' in link_dict:
-            candidate.facebook_url = link_dict['facebook_url']
-            at_least_one_change = True
-        elif 'instagram_handle' in link_dict:
-            candidate.instagram_handle = link_dict['instagram_handle']
+    if 'Campaign website' in candidate_links_dict:
+        candidate_url_campaign = candidate_links_dict['Campaign website']
+    if 'Official website' in candidate_links_dict:
+        candidate_url_office_held = candidate_links_dict['Official website']
+    if 'Campaign Facebook' in candidate_links_dict:
+        facebook_url_campaign = candidate_links_dict['Campaign Facebook']
+    if 'Official Facebook' in candidate_links_dict:
+        facebook_url_office_held = candidate_links_dict['Official Facebook']
+    if 'Personal Facebook' in candidate_links_dict:
+        facebook_url_personal = candidate_links_dict['Personal Facebook']
+    if 'Campaign Instagram' in candidate_links_dict:
+        instagram_handle_campaign = \
+            extract_instagram_handle_from_text_string(candidate_links_dict['Campaign Instagram'])
+    if 'Official Instagram' in candidate_links_dict:
+        instagram_handle_office_held = \
+            extract_instagram_handle_from_text_string(candidate_links_dict['Official Instagram'])
+    if 'Campaign Twitter' in candidate_links_dict:
+        twitter_handle_campaign = extract_twitter_handle_from_text_string(candidate_links_dict['Campaign Twitter'])
+    if 'Official Twitter' in candidate_links_dict:
+        twitter_handle_office_held = extract_twitter_handle_from_text_string(candidate_links_dict['Official Twitter'])
+    if 'Campaign YouTube' in candidate_links_dict:
+        youtube_url_campaign = candidate_links_dict['Campaign YouTube']
+    if 'Official YouTube' in candidate_links_dict:
+        youtube_url_office_held = candidate_links_dict['Official YouTube']
+
+    if not positive_value_exists(candidate.candidate_url):
+        candidate, at_least_one_change_local = prefer_first_if_exists(
+            incoming_object=candidate, field_to_change='candidate_url',
+            value1=candidate_url_campaign, value2=candidate_url_office_held)
+        if at_least_one_change_local:
             at_least_one_change = True
 
-    if at_least_one_change:
-        try:
-            candidate.save()
-            results['success'] = True
-            results['status'] = 'CANDIDATE_SAVED '
-        except Exception as e:
-            results['success'] = False
-            results['status'] = 'CANDIDATE_NOT_SAVED: ' + str(e) + ' '
+    if not positive_value_exists(candidate.facebook_url):
+        candidate, at_least_one_change_local = prefer_first_if_exists(
+            incoming_object=candidate, field_to_change='facebook_url',
+            value1=facebook_url_campaign, value2=facebook_url_office_held, value3=facebook_url_personal)
+        if at_least_one_change_local:
+            at_least_one_change = True
 
+    if not positive_value_exists(candidate.instagram_handle):
+        candidate, at_least_one_change_local = prefer_first_if_exists(
+            incoming_object=candidate, field_to_change='instagram_handle',
+            value1=instagram_handle_campaign, value2=instagram_handle_office_held)
+        if at_least_one_change_local:
+            at_least_one_change = True
+
+    if not positive_value_exists(candidate.youtube_url):
+        candidate, at_least_one_change_local = prefer_first_if_exists(
+            incoming_object=candidate, field_to_change='youtube_url',
+            value1=youtube_url_campaign, value2=youtube_url_office_held)
+        if at_least_one_change_local:
+            at_least_one_change = True
+
+    if positive_value_exists(twitter_handle_campaign):
+        twitter_results = add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle_campaign)
+        candidate = twitter_results['candidate']
+        if twitter_results['values_changed']:
+            at_least_one_change = True
+
+    if positive_value_exists(twitter_handle_office_held):
+        twitter_results = add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle_office_held)
+        candidate = twitter_results['candidate']
+        if twitter_results['values_changed']:
+            at_least_one_change = True
+
+    results = {
+        'at_least_one_change':  at_least_one_change,
+        'candidate':            candidate,
+        'status':               status,
+        'success':              success,
+    }
     return results
+
+
+def prefer_first_if_exists(incoming_object=None, field_to_change='', value1='', value2='', value3=''):
+    at_least_one_change = False
+    if incoming_object and hasattr(incoming_object, field_to_change):
+        if positive_value_exists(value1):
+            setattr(incoming_object, field_to_change, value1)
+            at_least_one_change = True
+        elif positive_value_exists(value2):
+            setattr(incoming_object, field_to_change, value2)
+            at_least_one_change = True
+        elif positive_value_exists(value3):
+            setattr(incoming_object, field_to_change, value3)
+            at_least_one_change = True
+        else:
+            pass
+
+    return incoming_object, at_least_one_change
 
 
 def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_list_light):
