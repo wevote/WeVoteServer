@@ -19,7 +19,6 @@ from wevote_functions.functions import positive_value_exists, convert_to_int, ge
 logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
-# Creating CampaignX's locally seems to be best testing strategy
 allowable_tables = [
     'ballot_ballotitem',
     'position_positionentered',
