@@ -53,7 +53,7 @@ def retrieve_sql_files_from_master_server(request):
     status = ''
     t0 = time.time()
     print(
-        'Saving off a copy of your local db in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
+        'Saving off a copy of your local db (an an emergency fallback, that will almost never be needed) in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
     save_off_database()
     dt = time.time() - t0
     stats = {}
@@ -284,9 +284,12 @@ def csv_file_to_clean_csv_file2(table_name):
                     if row[1] == '':                        # candidate_we_vote_id
                         continue
                 elif table_name == "campaign_campaignx":
-                    clean_row(row, 6)
-                elif table_name == "campaign_campaignxowner":
-                    dump_row_col_labels_and_errors("campaign_campaignxowner", header, row, '5')
+                    clean_row(row, 6)                 # campaign_description
+                # elif table_name == "campaign_campaignxowner":
+                #     dump_row_col_labels_and_errors("campaign_campaignxowner", header, row, '5')
+                elif table_name == "campaign_campaignxsupporter":
+                    clean_row(row, 6)                 # supporter_endorsement
+                    # dump_row_col_labels_and_errors("campaign_campaignxsupporter", header, row, '45')
                 elif table_name == "election_election":
                     substitute_null(row, 2, '0')  # google_civic_election_id_new is an integer
                     if row[8] == '' or row[8] == '\\N' or row[8] == '0':
