@@ -1119,6 +1119,9 @@ class RepresentativeManager(models.Manager):
             if twitter_user.twitter_name != representative.twitter_name:
                 representative.twitter_name = twitter_user.twitter_name
                 values_changed = True
+            if not positive_value_exists(representative.representative_name):
+                representative.representative_name = twitter_user.twitter_name
+                values_changed = True
         if positive_value_exists(twitter_user.twitter_profile_image_url_https):
             if twitter_user.twitter_profile_image_url_https != representative.twitter_profile_image_url_https:
                 representative.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https

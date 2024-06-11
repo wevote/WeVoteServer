@@ -2494,6 +2494,9 @@ class PoliticianManager(models.Manager):
             if twitter_user.twitter_name != politician.twitter_name:
                 politician.twitter_name = twitter_user.twitter_name
                 values_changed = True
+            if not positive_value_exists(politician.politician_name):
+                politician.politician_name = twitter_user.twitter_name
+                values_changed = True
         if positive_value_exists(twitter_user.twitter_profile_image_url_https):
             if twitter_user.twitter_profile_image_url_https != politician.twitter_profile_image_url_https:
                 politician.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https

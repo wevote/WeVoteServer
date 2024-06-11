@@ -4314,6 +4314,9 @@ class CandidateManager(models.Manager):
             if twitter_user.twitter_name != candidate.twitter_name:
                 candidate.twitter_name = twitter_user.twitter_name
                 values_changed = True
+            if not positive_value_exists(candidate.candidate_name):
+                candidate.candidate_name = twitter_user.twitter_name
+                values_changed = True
         if positive_value_exists(twitter_user.twitter_profile_image_url_https):
             if twitter_user.twitter_profile_image_url_https != candidate.twitter_profile_image_url_https:
                 candidate.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
