@@ -152,7 +152,7 @@
         </td>
     {% endfor %}
         <td>
-            <strong><span style="font-size: 1.2em">{{ team_performance_dict.volunteer_task_total }}</span></strong><br />
+            <strong><span style="font-size: 1.2em">{{ team_performance_dict.volunteer_task_total|intcomma }}</span></strong><br />
             {% if team_performance_dict.candidates_created %}
             {{ team_performance_dict.candidates_created|intcomma }}<br />
             {% endif %}
@@ -318,7 +318,7 @@
     {% endfor %}
         <td>
         {% with voter_dict=individual_performance_dict|get_value_from_dict:voter_we_vote_id %}
-            <strong><span style="font-size: 1.2em">{{ voter_dict.volunteer_task_total }}</span></strong><br />
+            <strong><span style="font-size: 1.2em">{{ voter_dict.volunteer_task_total|intcomma }}</span></strong><br />
             {% if voter_dict.candidates_created %}
             {{ voter_dict.candidates_created|intcomma }}<br />
             {% endif %}

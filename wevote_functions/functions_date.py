@@ -108,3 +108,12 @@ def get_timezone_and_datetime_now(timezone_name="America/Los_Angeles", datetime_
 def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
     _, datetime_now = get_timezone_and_datetime_now(timezone_name)
     return convert_date_to_date_as_integer(datetime_now)
+
+
+def get_current_year_as_integer():
+    try:
+        datetime_now = localtime(now()).date()  # WeVote uses Pacific Time for TIME_ZONE
+        current_year = convert_to_int(datetime_now.year)
+    except Exception as e:
+        current_year = 2024
+    return current_year

@@ -1690,10 +1690,14 @@ def candidate_new_search_process_view(request):
     elif match_results['politician_list_found']:
         politician_list = match_results['politician_list']
     else:
-        messages.add_message(request, messages.INFO, 'No politician found. Please make sure you have entered '
-                                                     '1) Candidate Name, '
-                                                     '2) Twitter Handle, or '
-                                                     '3) TBD')
+        name_and_state_found = positive_value_exists(candidate_name) and positive_value_exists(state_code)
+        twitter_and_state_found = positive_value_exists(candidate_twitter_handle) and positive_value_exists(state_code)
+        required_variables_found = name_and_state_found or twitter_and_state_found
+        if not required_variables_found:
+            messages.add_message(request, messages.INFO,
+                                 'No politician found. Please make sure you have entered '
+                                 '1) Candidate Name with State, or '
+                                 '2) Twitter Handle with State')
 
     # Return all existing related candidates. Make sure the candidate we want to create doesn't already exist.
     candidate_list = []
@@ -2261,6 +2265,12 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 humanized_cleaned = humanized.replace('(', '').replace(')', '')
                 candidate_on_stage.candidate_name_normalized = string.capwords(humanized_cleaned)
 
+        # #########################################
+        # Search for possible duplicates
+        from candidate.controllers import find_possible_duplicate_candidates_to_merge_with_this_candidate
+        related_candidate_list = \
+            find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=candidate_on_stage)
+
         queryset = CandidateChangeLog.objects.using('readonly').all()
         queryset = queryset.filter(candidate_we_vote_id__iexact=candidate_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
@@ -2329,7 +2339,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_contact_form_url':       candidate_contact_form_url,
             'change_log_list':                  change_log_list,
             # 'contest_office_we_vote_id':        contest_office_we_vote_id,
-			'contest_office_name_dict':              
+			'contest_office_name_dict':
             {
                 'label':    'Contest Office Name (Cached)',
                 'id':       'contest_office_name_id',
@@ -2391,6 +2401,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'path_count':                       path_count,
             'path_list':                        path_list,
             'rating_list':                      rating_list,
+            'related_candidate_list':           related_candidate_list,
             'state_code':                       state_code,
             'state_code_dict':              
             {
@@ -4543,8 +4554,6 @@ def candidate_summary_view(request, candidate_id):
     state_code = ""
     candidate_on_stage_found = False
 
-    candidate_search = request.GET.get('candidate_search', "")
-
     candidate_on_stage = CandidateCampaign()
     candidate_manager = CandidateManager()
     try:
@@ -4587,76 +4596,6 @@ def candidate_summary_view(request, candidate_id):
             candidate_bookmark_count = 0
         candidate_on_stage.bookmarks_count = candidate_bookmark_count
 
-    candidate_search_results_list = []
-    # candidate_list_manager = CandidateListManager()
-    # results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-    #     google_civic_election_id_list=google_civic_election_id_list,
-    #     limit_to_this_state_code=state_code)
-    # if not positive_value_exists(results['success']):
-    #     status += results['status']
-    #     success = False
-    # candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-    if positive_value_exists(candidate_search) and positive_value_exists(candidate_we_vote_id):
-        candidate_query = CandidateCampaign.objects.all()
-        # office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
-        #     host_google_civic_election_id_list=[google_civic_election_id])
-        # candidate_query = candidate_query.filter(
-        #     Q(google_civic_election_id=google_civic_election_id) |
-        #     Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-        # Don't include the candidate whose page this is
-        candidate_query = candidate_query.exclude(we_vote_id__iexact=candidate_we_vote_id)
-
-        if positive_value_exists(state_code):
-            candidate_query = candidate_query.filter(state_code__iexact=state_code)
-
-        search_words = candidate_search.split()
-        for one_word in search_words:
-            filters = []  # Reset for each search word
-            new_filter = Q(candidate_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(ballotpedia_candidate_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_office_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(google_civic_candidate_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(google_civic_candidate_name2__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(google_civic_candidate_name3__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(twitter_name__icontains=one_word)
-            filters.append(new_filter)
-
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                candidate_query = candidate_query.filter(final_filters)
-
-        candidate_search_results_list = list(candidate_query)
-    elif candidate_on_stage_found:
-        ignore_candidate_we_vote_id_list = []
-        ignore_candidate_we_vote_id_list.append(candidate_on_stage.we_vote_id)
-        results = find_duplicate_candidate(candidate_on_stage, ignore_candidate_we_vote_id_list, read_only=True)
-        if results['candidate_merge_possibility_found']:
-            candidate_search_results_list = results['candidate_list']
-
     # Working with We Vote Positions
     try:
         candidate_position_query = PositionEntered.objects.order_by('stance')
@@ -4672,13 +4611,12 @@ def candidate_summary_view(request, candidate_id):
         candidate_position_list = []
 
     template_values = {
-        'messages_on_stage':                messages_on_stage,
         'candidate':                        candidate_on_stage,
-        'candidate_to_office_link_list':    candidate_to_office_link_list,
-        'candidate_search_results_list':    candidate_search_results_list,
-        'google_civic_election_id':         google_civic_election_id,
-        'state_code':                       state_code,
         'candidate_position_list':          candidate_position_list,
+        'candidate_to_office_link_list':    candidate_to_office_link_list,
+        'google_civic_election_id':         google_civic_election_id,
+        'messages_on_stage':                messages_on_stage,
+        'state_code':                       state_code,
     }
     return render(request, 'candidate/candidate_summary.html', template_values)
 
