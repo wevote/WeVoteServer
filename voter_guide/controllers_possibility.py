@@ -24,7 +24,7 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_facebook_username_from_text_string, \
     extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
     STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
-from wevote_functions.functions_date import convert_date_to_we_vote_date_string
+from wevote_functions.functions_date import get_current_year_as_integer
 from .controllers_possibility_shared import fix_sequence_of_possible_endorsement_list
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -988,8 +988,7 @@ def process_organization_endorsing_candidates_input_form(
     # Now look for candidate possibilities that have states attached, so we can add them to the database
     if len(possible_endorsement_list):
         try:
-            datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-            current_year = convert_to_int(datetime_now.year)
+            current_year = get_current_year_as_integer()
         except Exception as e:
             status += "FAILED_TO_GET_CURRENT_YEAR: " + str(e) + " "
             current_year = 2024

@@ -30,7 +30,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer
+    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer
 from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
@@ -554,6 +554,8 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
                     elif candidate1_attribute_value == candidate2_attribute_value:
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    elif candidate2_attribute_value == 'UNKNOWN':
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "withdrawn_from_election":
@@ -749,6 +751,11 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         #     status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
 
     # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
+    if positive_value_exists(candidate2_on_stage.candidate_name):
+        results = add_name_to_next_spot(
+            candidate1_on_stage, candidate2_on_stage.candidate_name)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate_or_politician']
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
         results = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name)
@@ -3044,6 +3051,132 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
         'endorsement_list_light':           endorsement_list_light_modified,
     }
     return results
+
+
+def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=None):
+    """
+    Find Candidates that might be duplicates to see if we want to merge them with this Candidate
+
+    :param candidate:
+    :return:
+    """
+    if not hasattr(candidate, 'we_vote_id'):
+        return []
+    try:
+        queryset = CandidateCampaign.objects.using('readonly').all()
+        current_year = get_current_year_as_integer()
+        queryset = queryset.exclude(we_vote_id=candidate.we_vote_id)
+        queryset = queryset.filter(
+            Q(candidate_year__gte=current_year) | \
+            Q(candidate_year__isnull=True)
+        )
+        if positive_value_exists(candidate.state_code):
+            queryset = queryset.filter(state_code__iexact=candidate.state_code)
+
+        first_name = candidate.extract_first_name()
+        last_name = candidate.extract_last_name()
+
+        filters = []
+
+        if positive_value_exists(last_name):
+            new_filter = \
+                Q(candidate_name__icontains=last_name) | \
+                Q(ballotpedia_candidate_name__icontains=last_name)
+            filters.append(new_filter)
+
+        new_filter = \
+            Q(candidate_name__icontains=first_name) & \
+            Q(candidate_name__icontains=last_name)
+        filters.append(new_filter)
+
+        new_filter = \
+            Q(ballotpedia_candidate_name__icontains=first_name) & \
+            Q(ballotpedia_candidate_name__icontains=last_name)
+        filters.append(new_filter)
+
+        new_filter = (
+                Q(candidate_name__iexact=candidate.candidate_name) |
+                Q(ballotpedia_candidate_name__iexact=candidate.candidate_name) |
+                Q(google_civic_candidate_name__iexact=candidate.candidate_name) |
+                Q(google_civic_candidate_name2__iexact=candidate.candidate_name) |
+                Q(google_civic_candidate_name3__iexact=candidate.candidate_name)
+        )
+        filters.append(new_filter)
+
+        if positive_value_exists(candidate.google_civic_candidate_name):
+            new_filter = (
+                    Q(candidate_name__iexact=candidate.google_civic_candidate_name) |
+                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name) |
+                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name) |
+                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.google_civic_candidate_name2):
+            new_filter = (
+                    Q(candidate_name__iexact=candidate.google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name2)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.google_civic_candidate_name3):
+            new_filter = (
+                    Q(candidate_name__iexact=candidate.google_civic_candidate_name3) |
+                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name3) |
+                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name3) |
+                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name3)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.candidate_twitter_handle):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=candidate.candidate_twitter_handle) |
+                Q(candidate_twitter_handle2__iexact=candidate.candidate_twitter_handle) |
+                Q(candidate_twitter_handle3__iexact=candidate.candidate_twitter_handle)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.candidate_twitter_handle2):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=candidate.candidate_twitter_handle2) |
+                Q(candidate_twitter_handle2__iexact=candidate.candidate_twitter_handle2) |
+                Q(candidate_twitter_handle3__iexact=candidate.candidate_twitter_handle2)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.candidate_twitter_handle3):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=candidate.candidate_twitter_handle3) |
+                Q(candidate_twitter_handle2__iexact=candidate.candidate_twitter_handle3) |
+                Q(candidate_twitter_handle3__iexact=candidate.candidate_twitter_handle3)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.vote_smart_id):
+            new_filter = Q(vote_smart_id=candidate.vote_smart_id)
+            filters.append(new_filter)
+
+        if positive_value_exists(candidate.vote_usa_politician_id):
+            new_filter = Q(vote_usa_politician_id__iexact=candidate.vote_usa_politician_id)
+            filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            queryset = queryset.filter(final_filters)
+
+        queryset = queryset.order_by('candidate_name')[:20]
+        related_candidate_list = list(queryset)
+    except Exception as e:
+        related_candidate_list = []
+    return related_candidate_list
 
 
 def organization_endorsements_scanner(endorsement_list_light, text_to_search_lower_case,

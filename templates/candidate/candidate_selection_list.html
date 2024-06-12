@@ -48,10 +48,6 @@
                           <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
                       </a>
                     </span>
-                    {% if candidate.candidate_year %}
-                        <br />
-                        <span><strong>{{ candidate.candidate_year }}</strong></span>
-                    {% endif %}
                     {% if candidate.withdrawn_from_election %}
                         <br />
                         <span><strong>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</strong></span>
@@ -73,7 +69,13 @@
                     <br /><span style="color: darkgray">{{ candidate.ballotpedia_candidate_summary|default_if_none:""|truncatechars:50 }}</span>
                     {% endif %}
                 </td>
-                <td>{{ candidate.get_candidate_state }}</td>
+                <td>
+                    {{ candidate.get_candidate_state }}
+                    {% if candidate.candidate_year %}
+                        <br />
+                        <span><strong>{{ candidate.candidate_year }}</strong></span>
+                    {% endif %}
+                </td>
                 {% if not google_civic_election_id %}
                 <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span></td>
                 {% endif %}

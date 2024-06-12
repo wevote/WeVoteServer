@@ -143,59 +143,9 @@ th, td {
   <p><a href="{% url 'candidate:candidate_edit' candidate.id %}">edit</a></p>
 
 
-<h3>Merge with Another Candidate</h3>
-<form name="find_another_to_merge" method="get" action="{% url 'candidate:candidate_summary' candidate.id %}">
-    {% csrf_token %}
-    {% if candidate_search %}
-        <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% endif %}
-    <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" style="width: 450px" />
-    <input type="hidden" name="candidate_id" value="{{ candidate.id }}">
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="submit" value="Search for Duplicate Candidates" />
-</form>
+{#<h3>Merge with Another Candidate</h3>#}
+{#<form name="find_another_to_merge" method="get" action="{% url 'candidate:candidate_summary' candidate.id %}">#}
 {% endif %}
-
-{% if candidate_search_results_list %}
-    <table class="table">
-    <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>ID</th>
-            <th>We Vote ID</th>
-            <th>Candidate Name</th>
-            <th>Year</th>
-            <th>State</th>
-            <th>Ballotpedia Race ID</th>
-            <th>Ballotpedia Candidate ID</th>
-        </tr>
-    </thead>
-    {% for found_candidate in candidate_search_results_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ found_candidate.id }}</td>
-            <td>{{ found_candidate.we_vote_id }}</td>
-            <td>
-              {% if found_candidate.candidates_match_root_candidate %}
-                <strong>{{ found_candidate.candidate_name }}</strong>
-              {% else %}
-                {{ found_candidate.candidate_name }}
-              {% endif %}
-              <br />
-              (<a href="{% url 'candidate:candidate_summary' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">view&nbsp;summary</a>,
-              <a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge</a>)
-            </td>
-            <td>{{ found_candidate.candidate_year }}</td>
-            <td>{{ found_candidate.state_code }}</td>
-            <td>{{ found_candidate.ballotpedia_race_id|default_if_none:"" }}</td>
-            <td>{{ found_candidate.ballotpedia_candidate_id|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-<br/>
 
 <h3>We Vote Positions Related to {{ candidate.candidate_name  }}</h3>
 {%  if candidate_position_list %}
