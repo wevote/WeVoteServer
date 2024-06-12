@@ -34,7 +34,7 @@
 
 {# There is another submit button at bottom of form #}
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
-<input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
+<input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" class="btn-primary" /></p>
 
 
 <div class="row form-group">
@@ -563,7 +563,7 @@
 {% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
 
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
-<input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
+<input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" class="btn-primary" /></p>
 
 <br />
 {% if politician %}
