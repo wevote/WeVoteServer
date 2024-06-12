@@ -809,6 +809,16 @@ th, td {
             <td>
                 {{ found_candidate.we_vote_id }}
                 <a href="{% url 'candidate:candidate_edit' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <form action="{% url 'candidate:candidate_merge_process' %}" method="post" target="_blank">
+                    {% csrf_token %}
+                    <input type="submit" value="Not Duplicate" name="skip" />
+                    <input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
+                    <input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
+                    <input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ found_candidate.state_code }}{% endif %}" />
+                    <input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate.google_civic_election_id }}{% endif %}" />
+                    <input type="hidden" name="candidate1_we_vote_id" value="{{ candidate.we_vote_id }}" />
+                    <input type="hidden" name="candidate2_we_vote_id" value="{{ found_candidate.we_vote_id }}" />
+                </form>
             </td>
             <td>
               {% if found_candidate.candidates_match_root_candidate %}

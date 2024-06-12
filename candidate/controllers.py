@@ -3062,10 +3062,15 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
     """
     if not hasattr(candidate, 'we_vote_id'):
         return []
+
+    candidate_manager = CandidateManager()
+    results = candidate_manager.retrieve_candidates_are_not_duplicates_list(candidate.we_vote_id, read_only=True)
+    candidates_are_not_duplicates_list_we_vote_ids = results['candidates_are_not_duplicates_list_we_vote_ids']
+    candidates_are_not_duplicates_list_we_vote_ids.append(candidate.we_vote_id)
     try:
         queryset = CandidateCampaign.objects.using('readonly').all()
         current_year = get_current_year_as_integer()
-        queryset = queryset.exclude(we_vote_id=candidate.we_vote_id)
+        queryset = queryset.exclude(we_vote_id__in=candidates_are_not_duplicates_list_we_vote_ids)
         queryset = queryset.filter(
             Q(candidate_year__gte=current_year) |
             Q(candidate_year__isnull=True)
