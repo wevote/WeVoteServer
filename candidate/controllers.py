@@ -3067,7 +3067,7 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
         current_year = get_current_year_as_integer()
         queryset = queryset.exclude(we_vote_id=candidate.we_vote_id)
         queryset = queryset.filter(
-            Q(candidate_year__gte=current_year) | \
+            Q(candidate_year__gte=current_year) |
             Q(candidate_year__isnull=True)
         )
         if positive_value_exists(candidate.state_code):
@@ -3076,23 +3076,30 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
         first_name = candidate.extract_first_name()
         last_name = candidate.extract_last_name()
 
+        # Eliminated some possibilities we want to see
+        # if positive_value_exists(last_name):
+        #     queryset = queryset.filter(
+        #         Q(candidate_name__icontains=last_name) |
+        #         Q(ballotpedia_candidate_name__icontains=last_name)
+        #     )
+
+        # "OR" filters below
         filters = []
 
-        if positive_value_exists(last_name):
-            new_filter = \
-                Q(candidate_name__icontains=last_name) | \
-                Q(ballotpedia_candidate_name__icontains=last_name)
-            filters.append(new_filter)
-
         new_filter = \
-            Q(candidate_name__icontains=first_name) & \
-            Q(candidate_name__icontains=last_name)
-        filters.append(new_filter)
-
-        new_filter = \
-            Q(ballotpedia_candidate_name__icontains=first_name) & \
+            Q(candidate_name__icontains=last_name) | \
             Q(ballotpedia_candidate_name__icontains=last_name)
         filters.append(new_filter)
+
+        # new_filter = \
+        #     Q(candidate_name__icontains=first_name) & \
+        #     Q(candidate_name__icontains=last_name)
+        # filters.append(new_filter)
+
+        # new_filter = \
+        #     Q(ballotpedia_candidate_name__icontains=first_name) & \
+        #     Q(ballotpedia_candidate_name__icontains=last_name)
+        # filters.append(new_filter)
 
         new_filter = (
                 Q(candidate_name__iexact=candidate.candidate_name) |
