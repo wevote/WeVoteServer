@@ -403,6 +403,7 @@
                 <span style="font-size: 1.4em">STATISTICS</span>
                 <br />
                 <span style="font-weight: normal !important;">
+                    {% if assigned_to_name %}Started by: <strong>{{ assigned_to_name }}</strong><br />{% endif %}
                     Total # of Endorsements: {{ number_of_ballot_items }}<br />
                     Visible to Voters: {{ positions_stored_count }}<br />
                     <strong>Not Visible to Voters Yet: {{ positions_not_stored_count }}</strong>

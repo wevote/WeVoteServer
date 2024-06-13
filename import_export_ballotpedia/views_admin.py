@@ -7,7 +7,7 @@ from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
     retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
-    get_candidate_links_from_ballotpedia_candidate_url_page, get_candidate_links_from_ballotpedia
+    get_candidate_links_from_ballotpedia
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import date
