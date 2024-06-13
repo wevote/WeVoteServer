@@ -47,7 +47,8 @@ from voter_guide.controllers_possibility import candidates_found_on_url, \
     match_endorsement_list_with_candidates_in_database, \
     match_endorsement_list_with_measures_in_database, match_endorsement_list_with_organizations_in_database, \
     organizations_found_on_url
-from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, UNKNOWN_TYPE, \
+from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, \
+    POSSIBILITY_LIST_LIMIT, UNKNOWN_TYPE, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
     VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition, \
     WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS, WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
@@ -76,7 +77,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
         # (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
         if one_voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                 or one_voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
-            # POSSIBILITY_LIST_LIMIT set to 400 possibilities to avoid very slow page loads
+            # POSSIBILITY_LIST_LIMIT set to 1000 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
@@ -94,7 +95,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
         elif one_voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
-            # POSSIBILITY_LIST_LIMIT set to 400 possibilities to avoid very slow page loads
+            # POSSIBILITY_LIST_LIMIT set to 1000 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
@@ -117,11 +118,10 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                 voter_guide_possibility_manager.number_of_measures_in_database(one_voter_guide_possibility.id)
             one_voter_guide_possibility.positions_ready_to_save_as_batch = \
                 voter_guide_possibility_manager.positions_ready_to_save_as_batch(one_voter_guide_possibility)
-            maximum_number_of_possible_endorsements_analyzed = 400  # Formerly 200
             number_of_possible_endorsements_analyzed = 0
             for one_possible_endorsement in possible_endorsement_list:
                 number_of_possible_endorsements_analyzed += 1
-                if number_of_possible_endorsements_analyzed > maximum_number_of_possible_endorsements_analyzed:
+                if number_of_possible_endorsements_analyzed > POSSIBILITY_LIST_LIMIT:
                     break
                 if 'candidate_we_vote_id' in one_possible_endorsement \
                         and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
@@ -350,7 +350,6 @@ def extract_voter_guide_possibility_position_list_from_database(
         candidate_we_vote_id = ""
         # contest_office_name = ""
 
-    POSSIBILITY_LIST_LIMIT = 400  # Limit to 400 to avoid very slow page loading, formerly 200
     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
     if positive_value_exists(voter_guide_possibility_position_id):

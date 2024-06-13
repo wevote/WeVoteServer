@@ -116,7 +116,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
             'success': False,
         }
     # Dale 2024-06-08 There is a weird bug happening with the following response that is independent of
-    #  the contents of the JSON when we save with POST.
+    #  the contents of the JSON when we save to this API with POST. Related to WV-345 and WV-410.
     #  Some sources on the web think it is related to a bug/change introduced in python 3.11.3+
     # Traceback (most recent call last):
     #   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/wsgiref/handlers.py", line 138, in run

@@ -21,6 +21,7 @@ urlpatterns = [
     re_path(r'^bulk_retrieve_ballotpedia_photos/$',
             views_admin.bulk_retrieve_ballotpedia_photos_view, name='bulk_retrieve_ballotpedia_photos', ),
     re_path(r'^bulk_retrieve_candidate_links_from_ballotpedia/$',
-            views_admin.bulk_retrieve_candidate_links_from_ballotpedia_view, name='bulk_retrieve_candidate_links_from_ballotpedia', ),
+            views_admin.bulk_retrieve_candidate_links_from_ballotpedia_view,
+            name='bulk_retrieve_candidate_links_from_ballotpedia', ),
 
 ]

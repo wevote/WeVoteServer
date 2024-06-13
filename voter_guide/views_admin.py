@@ -288,6 +288,7 @@ def voter_guide_create_view(request):
 
     batch_header_id = 0
     ignore_this_source = False
+    assigned_to_name = ''
     candidate = None
     candidate_found = False
     organization = None
@@ -306,6 +307,7 @@ def voter_guide_create_view(request):
             voter_guide_possibility = voter_guide_possibilities_query.get(id=voter_guide_possibility_id)
             if positive_value_exists(voter_guide_possibility.id):
                 # Bring the latest VoterGuidePossibility data into local variables
+                assigned_to_name = voter_guide_possibility.assigned_to_name
                 ballot_items_raw = voter_guide_possibility.ballot_items_raw
                 batch_header_id = voter_guide_possibility.batch_header_id
                 candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
@@ -343,7 +345,7 @@ def voter_guide_create_view(request):
                     is_list_of_endorsements_for_candidate = False
 
                 # Fill the possible_endorsement_list with the latest data
-                # POSSIBILITY_LIST_LIMIT set to 400 possibilities to avoid very slow page loads, formerly 200
+                # POSSIBILITY_LIST_LIMIT set to 1000 possibilities to avoid very slow page loads
                 results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
 
                 if results['possible_endorsement_list_found']:
@@ -596,6 +598,7 @@ def voter_guide_create_view(request):
     else:
         type_of_website = "CandidateWebsite"
     template_values = {
+        'assigned_to_name':             assigned_to_name,
         'ballot_items_raw':             ballot_items_raw,
         'batch_header_id':              batch_header_id,
         'candidate':                    candidate,
@@ -896,6 +899,25 @@ def voter_guide_create_process_view(request):
             voter_guide_possibility_position_list = []
             if results['voter_guide_possibility_position_list_found']:
                 voter_guide_possibility_position_list = results['voter_guide_possibility_position_list']
+            # Loop through first to deal with items which should be deleted
+            modified_possible_endorsement_list = []
+            for one_possible_endorsement in possible_endorsement_list:
+                if positive_value_exists(one_possible_endorsement['possibility_should_be_deleted']):
+                    # Now loop through voter_guide_possibility_position_list to find the entry to delete
+                    modified_voter_guide_possibility_position_list = []
+                    for temp_voter_guide_possibility_position in voter_guide_possibility_position_list:
+                        if temp_voter_guide_possibility_position.possibility_position_number == \
+                                one_possible_endorsement['possibility_position_number']:
+                            voter_guide_possibility_position_id_deleted = temp_voter_guide_possibility_position.id
+                            temp_voter_guide_possibility_position.delete()
+                            status += "DELETED-voter_guide_possibility_position.id" \
+                                      "(" + str(voter_guide_possibility_position_id_deleted) + ") "
+                        else:
+                            modified_voter_guide_possibility_position_list.append(temp_voter_guide_possibility_position)
+                    voter_guide_possibility_position_list = modified_voter_guide_possibility_position_list
+                else:
+                    modified_possible_endorsement_list.append(one_possible_endorsement)
+            possible_endorsement_list = modified_possible_endorsement_list
             for one_possible_endorsement in possible_endorsement_list:
                 voter_guide_possibility_position_updated = False
                 # if 'possibility_position_number' in one_possible_endorsement \
@@ -911,13 +933,6 @@ def voter_guide_create_process_view(request):
 
                 if not positive_value_exists(voter_guide_possibility_position.id):
                     status += "MISSING voter_guide_possibility_position.id"
-                    continue
-
-                if positive_value_exists(one_possible_endorsement['possibility_should_be_deleted']):
-                    voter_guide_possibility_position_id_deleted = voter_guide_possibility_position.id
-                    voter_guide_possibility_position.delete()
-                    status += "DELETED-voter_guide_possibility_position.id" \
-                              "(" + str(voter_guide_possibility_position_id_deleted) + ") "
                     continue
 
                 updated_position_values = {

@@ -21,6 +21,7 @@ def augment_candidate_possible_position_data(
         google_civic_election_id_list=[],
         limit_to_this_state_code="",
         all_possible_candidates=[],
+        possible_endorsement_we_vote_id_list=[],
         attach_objects=True):
     status = ""
     success = True
@@ -67,6 +68,8 @@ def augment_candidate_possible_position_data(
 
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
+        if possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+            possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
     elif 'ballot_item_name' in possible_endorsement and \
             positive_value_exists(possible_endorsement['ballot_item_name']):
         possible_endorsement_matched = True
@@ -82,78 +85,100 @@ def augment_candidate_possible_position_data(
             read_only=True)
 
         if matching_results['candidate_found']:
-            candidate = matching_results['candidate']
+            if possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                status += "ALREADY_IN_LIST "
+            else:
+                candidate = matching_results['candidate']
 
-            # If one candidate found, add we_vote_id here
-            possible_endorsement['candidate_we_vote_id'] = candidate.we_vote_id
-            if positive_value_exists(attach_objects):
-                possible_endorsement['candidate'] = candidate
-            possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
-            possible_endorsement['google_civic_election_id'] = candidate.google_civic_election_id
-            possible_endorsement['office_name'] = candidate.contest_office_name
-            possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
-            possible_endorsement['political_party'] = candidate.party
-            possible_endorsement['ballot_item_image_url_https_large'] = \
-                candidate.we_vote_hosted_profile_image_url_large
-            possible_endorsement['ballot_item_image_url_https_medium'] = \
-                candidate.we_vote_hosted_profile_image_url_medium
-            if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
-                    and positive_value_exists(candidate.contest_office_we_vote_id):
-                possible_endorsement['google_civic_election_id'] = \
-                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
-                        candidate.contest_office_we_vote_id)
-            possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
-            try:
-                withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
-            except Exception as e:
-                status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
-            possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
-            possible_endorsement_count += 1
-            possible_endorsement_return_list.append(possible_endorsement)
-        elif matching_results['candidate_list_found']:
-            # Keep the current option
-            possible_endorsement_count += 1
-            possible_endorsement_return_list.append(possible_endorsement)
-            possible_endorsement_matched = True
-            # ...and add entries for other possible matches
-            status += "MULTIPLE_CANDIDATES_FOUND "
-            candidate_list = matching_results['candidate_list']
-            for candidate in candidate_list:
-                possible_endorsement_copy = copy.deepcopy(possible_endorsement)
-                # Reset the possibility position id
-                possible_endorsement_copy['possibility_position_id'] = 0
                 # If one candidate found, add we_vote_id here
-                possible_endorsement_copy['candidate_we_vote_id'] = candidate.we_vote_id
+                possible_endorsement['candidate_we_vote_id'] = candidate.we_vote_id
                 if positive_value_exists(attach_objects):
-                    possible_endorsement_copy['candidate'] = candidate
-                possible_endorsement_copy['ballot_item_name'] = candidate.display_candidate_name()
-                possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
-                possible_endorsement_copy['office_name'] = candidate.contest_office_name
-                possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
-                possible_endorsement_copy['political_party'] = candidate.party
-                possible_endorsement_copy['ballot_item_image_url_https_large'] = \
+                    possible_endorsement['candidate'] = candidate
+                possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
+                possible_endorsement['google_civic_election_id'] = candidate.google_civic_election_id
+                possible_endorsement['office_name'] = candidate.contest_office_name
+                possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                possible_endorsement['political_party'] = candidate.party
+                possible_endorsement['ballot_item_image_url_https_large'] = \
                     candidate.we_vote_hosted_profile_image_url_large
-                possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
+                possible_endorsement['ballot_item_image_url_https_medium'] = \
                     candidate.we_vote_hosted_profile_image_url_medium
-                if not positive_value_exists(possible_endorsement_copy['google_civic_election_id']) \
+                if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
                         and positive_value_exists(candidate.contest_office_we_vote_id):
-                    possible_endorsement_copy['google_civic_election_id'] = \
+                    possible_endorsement['google_civic_election_id'] = \
                         contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
                             candidate.contest_office_we_vote_id)
-                possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
+                possible_endorsement['withdrawn_from_election'] = candidate.withdrawn_from_election
                 try:
                     withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
                 except Exception as e:
                     status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
                 possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
                 possible_endorsement_count += 1
-                possible_endorsement_return_list.append(possible_endorsement_copy)
+                possible_endorsement_return_list.append(possible_endorsement)
+                if possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                    possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
+        elif matching_results['candidate_list_found']:
+            if possible_endorsement['candidate_we_vote_id'] \
+                    and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                status += "ALREADY_IN_LIST2 "
+            else:
+                # Keep the current option
+                possible_endorsement_count += 1
+                possible_endorsement_return_list.append(possible_endorsement)
+                possible_endorsement_matched = True
+                if possible_endorsement['candidate_we_vote_id']:
+                    possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
+            # ...and add entries for other possible matches
+            status += "MULTIPLE_CANDIDATES_FOUND "
+            candidate_list = matching_results['candidate_list']
+            for candidate in candidate_list:
+                if candidate.we_vote_id in possible_endorsement_we_vote_id_list:
+                    status += "ALREADY_IN_LIST3 "
+                else:
+                    possible_endorsement_copy = copy.deepcopy(possible_endorsement)
+                    # Reset the possibility position id
+                    possible_endorsement_copy['possibility_position_id'] = 0
+                    # If one candidate found, add we_vote_id here
+                    possible_endorsement_copy['candidate_we_vote_id'] = candidate.we_vote_id
+                    if positive_value_exists(attach_objects):
+                        possible_endorsement_copy['candidate'] = candidate
+                    possible_endorsement_copy['ballot_item_name'] = candidate.display_candidate_name()
+                    possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
+                    possible_endorsement_copy['office_name'] = candidate.contest_office_name
+                    possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                    possible_endorsement_copy['political_party'] = candidate.party
+                    possible_endorsement_copy['ballot_item_image_url_https_large'] = \
+                        candidate.we_vote_hosted_profile_image_url_large
+                    possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
+                        candidate.we_vote_hosted_profile_image_url_medium
+                    if not positive_value_exists(possible_endorsement_copy['google_civic_election_id']) \
+                            and positive_value_exists(candidate.contest_office_we_vote_id):
+                        possible_endorsement_copy['google_civic_election_id'] = \
+                            contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                                candidate.contest_office_we_vote_id)
+                    possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
+                    try:
+                        withdrawal_date_as_string = convert_date_to_we_vote_date_string(candidate.withdrawal_date)
+                    except Exception as e:
+                        status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+                    possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
+                    possible_endorsement_count += 1
+                    possible_endorsement_return_list.append(possible_endorsement_copy)
+                    if possible_endorsement_copy['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                        possible_endorsement_we_vote_id_list.append(possible_endorsement_copy['candidate_we_vote_id'])
         elif not positive_value_exists(matching_results['success']):
             possible_endorsement_matched = True
             status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
             status += matching_results['status']
-            possible_endorsement_count += 1
-            possible_endorsement_return_list.append(possible_endorsement)
+            if possible_endorsement['candidate_we_vote_id'] \
+                    and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                status += "ALREADY_IN_LIST4 "
+            else:
+                possible_endorsement_count += 1
+                possible_endorsement_return_list.append(possible_endorsement)
+                if possible_endorsement['candidate_we_vote_id']:
+                    possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
         else:
             status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
 
@@ -162,6 +187,9 @@ def augment_candidate_possible_position_data(
             for one_endorsement_light in all_possible_candidates:
                 if one_endorsement_light['ballot_item_display_name'] in possible_endorsement['ballot_item_name']:
                     possible_endorsement['candidate_we_vote_id'] = one_endorsement_light['candidate_we_vote_id']
+                    if possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                        status += "ALREADY_IN_LIST5 "
+                        continue
                     possible_endorsement['ballot_item_name'] = one_endorsement_light['ballot_item_display_name']
                     if 'google_civic_election_id' in one_endorsement_light:
                         possible_endorsement['google_civic_election_id'] = \
@@ -201,6 +229,8 @@ def augment_candidate_possible_position_data(
                     possible_endorsement_matched = True
                     possible_endorsement_count += 1
                     possible_endorsement_return_list.append(possible_endorsement)
+                    if possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                        possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
                     break
     if not possible_endorsement_matched:
         # We want to check 'alternate_names' candidate names in upcoming elections
@@ -218,64 +248,83 @@ def augment_candidate_possible_position_data(
                 for ballot_item_display_name_alternate in alternate_names:
                     if ballot_item_display_name_alternate.lower() in \
                             possible_endorsement['ballot_item_name'].lower():
-                        # Make a copy so we don't change the incoming object -- if we find multiple upcoming
-                        # candidates that match, we should use them all
-                        possible_endorsement_copy = copy.deepcopy(possible_endorsement)
-                        possible_endorsement_copy['candidate_we_vote_id'] = \
-                            one_endorsement_light['candidate_we_vote_id']
-                        possible_endorsement_copy['ballot_item_name'] = \
-                            one_endorsement_light['ballot_item_display_name']
-                        if 'google_civic_election_id' in one_endorsement_light:
-                            possible_endorsement_copy['google_civic_election_id'] = \
-                                one_endorsement_light['google_civic_election_id']
+
+                        if one_endorsement_light['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                            status += "ALREADY_IN_LIST6 "
                         else:
-                            possible_endorsement_copy['google_civic_election_id'] = 0
-                        matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                            possible_endorsement_copy['candidate_we_vote_id'], read_only=True)
+                            # Make a copy, so we don't change the incoming object -- if we find multiple upcoming
+                            # candidates that match, we should use them all
+                            possible_endorsement_copy = copy.deepcopy(possible_endorsement)
+                            possible_endorsement_copy['candidate_we_vote_id'] = \
+                                one_endorsement_light['candidate_we_vote_id']
+                            possible_endorsement_copy['ballot_item_name'] = \
+                                one_endorsement_light['ballot_item_display_name']
+                            if 'google_civic_election_id' in one_endorsement_light:
+                                possible_endorsement_copy['google_civic_election_id'] = \
+                                    one_endorsement_light['google_civic_election_id']
+                            else:
+                                possible_endorsement_copy['google_civic_election_id'] = 0
+                            matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
+                                possible_endorsement_copy['candidate_we_vote_id'], read_only=True)
 
-                        if matching_results['candidate_found']:
-                            candidate = matching_results['candidate']
+                            if matching_results['candidate_found']:
+                                candidate = matching_results['candidate']
 
-                            # If one candidate found, augment the data if we can
-                            if positive_value_exists(attach_objects):
-                                possible_endorsement_copy['candidate'] = candidate
-                            possible_endorsement_copy['ballot_item_name'] = candidate.candidate_name
-                            possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
-                            possible_endorsement_copy['office_name'] = candidate.contest_office_name
-                            possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
-                            possible_endorsement_copy['political_party'] = candidate.party
-                            possible_endorsement_copy['ballot_item_image_url_https_large'] = \
-                                candidate.we_vote_hosted_profile_image_url_large
-                            possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
-                                candidate.we_vote_hosted_profile_image_url_medium
-                            possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
-                            try:
-                                withdrawal_date_as_string = convert_date_to_we_vote_date_string(
-                                    candidate.withdrawal_date)
-                            except Exception as e:
-                                status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
-                            possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
+                                # If one candidate found, augment the data if we can
+                                if positive_value_exists(attach_objects):
+                                    possible_endorsement_copy['candidate'] = candidate
+                                possible_endorsement_copy['ballot_item_name'] = candidate.candidate_name
+                                possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
+                                possible_endorsement_copy['office_name'] = candidate.contest_office_name
+                                possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                                possible_endorsement_copy['political_party'] = candidate.party
+                                possible_endorsement_copy['ballot_item_image_url_https_large'] = \
+                                    candidate.we_vote_hosted_profile_image_url_large
+                                possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
+                                    candidate.we_vote_hosted_profile_image_url_medium
+                                possible_endorsement_copy['withdrawn_from_election'] = candidate.withdrawn_from_election
+                                try:
+                                    withdrawal_date_as_string = convert_date_to_we_vote_date_string(
+                                        candidate.withdrawal_date)
+                                except Exception as e:
+                                    status += "COULD_NOT_CONVERT candidate.withdrawal_date TO_STRING: " + str(e) + " "
+                                possible_endorsement['withdrawal_date'] = withdrawal_date_as_string
 
-                        synonym_found = True
-                        possible_endorsement_count += 1
-                        possible_endorsement_return_list.append(possible_endorsement_copy)
-                        break
+                            synonym_found = True
+                            possible_endorsement_count += 1
+                            possible_endorsement_return_list.append(possible_endorsement_copy)
+                            if possible_endorsement_copy['candidate_we_vote_id'] \
+                                    not in possible_endorsement_we_vote_id_list:
+                                possible_endorsement_we_vote_id_list.append(possible_endorsement_copy['candidate_we_vote_id'])
+                            break
 
         if not synonym_found:
-            # If an entry based on a synonym wasn't found, then store the original possibility
-            possible_endorsement_count += 1
-            possible_endorsement_return_list.append(possible_endorsement)
+            if possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                status += "ALREADY_IN_LIST7 "
+            else:
+                # If an entry based on a synonym wasn't found, then store the original possibility
+                possible_endorsement_count += 1
+                possible_endorsement_return_list.append(possible_endorsement)
+                if possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                    possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
 
     # Finally, if the possible_endorsement wasn't matched to any existing records, we still want to use it
     if possible_endorsement_matched and not positive_value_exists(possible_endorsement_count):
-        possible_endorsement_count += 1
-        possible_endorsement_return_list.append(possible_endorsement)
+        if possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+            status += "ALREADY_IN_LIST8 "
+        else:
+            # If an entry based on a synonym wasn't found, then store the original possibility
+            possible_endorsement_count += 1
+            possible_endorsement_return_list.append(possible_endorsement)
+            if possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
 
     results = {
-        'status':                           status,
-        'success':                          success,
-        'possible_endorsement_return_list': possible_endorsement_return_list,
-        'possible_endorsement_count':       possible_endorsement_count,
+        'status':                               status,
+        'success':                              success,
+        'possible_endorsement_return_list':     possible_endorsement_return_list,
+        'possible_endorsement_we_vote_id_list': possible_endorsement_we_vote_id_list,
+        'possible_endorsement_count':           possible_endorsement_count,
     }
 
     return results

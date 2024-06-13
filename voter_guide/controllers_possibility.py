@@ -381,19 +381,32 @@ def match_endorsement_list_with_candidates_in_database(
     possible_endorsement_list_found = False
 
     possible_endorsement_list_modified = []
+    possible_endorsement_we_vote_id_list = []
+    from voter_guide.controllers_possibility_shared import augment_candidate_possible_position_data
     for possible_endorsement in possible_endorsement_list:
-        from voter_guide.controllers_possibility_shared import \
-            augment_candidate_possible_position_data
-        results = augment_candidate_possible_position_data(
-            possible_endorsement,
-            google_civic_election_id_list=google_civic_election_id_list,
-            limit_to_this_state_code=state_code,
-            all_possible_candidates=all_possible_candidates_list_light,
-            attach_objects=attach_objects)
-        if results['possible_endorsement_count'] > 0:
-            possible_endorsement_list_modified += results['possible_endorsement_return_list']
+        if 'candidate_we_vote_id' in possible_endorsement \
+                and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+            status += "ALREADY_IN_LIST-MATCH1 "
         else:
-            possible_endorsement_list_modified.append(possible_endorsement)
+            results = augment_candidate_possible_position_data(
+                possible_endorsement,
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code,
+                all_possible_candidates=all_possible_candidates_list_light,
+                possible_endorsement_we_vote_id_list=possible_endorsement_we_vote_id_list,
+                attach_objects=attach_objects)
+            possible_endorsement_we_vote_id_list = results['possible_endorsement_we_vote_id_list']
+            if results['possible_endorsement_count'] > 0:
+                possible_endorsement_list_modified += results['possible_endorsement_return_list']
+            else:
+                if 'candidate_we_vote_id' in possible_endorsement \
+                        and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+                    status += "ALREADY_IN_LIST-MATCH2 "
+                else:
+                    possible_endorsement_list_modified.append(possible_endorsement)
+                    if 'candidate_we_vote_id' in possible_endorsement \
+                            and possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
+                        possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
 
     if len(possible_endorsement_list_modified):
         possible_endorsement_list_found = True
