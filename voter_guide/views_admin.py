@@ -359,8 +359,9 @@ def voter_guide_create_view(request):
                     if is_organization_endorsing_candidates:
                         # Match incoming endorsements to candidates already in the database
                         results = match_endorsement_list_with_candidates_in_database(
-                            possible_endorsement_list,
+                            possible_endorsement_list=possible_endorsement_list,
                             google_civic_election_id_list=google_civic_election_id_list_this_year,
+                            is_organization_endorsing_candidates=True,
                             state_code=state_code)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
@@ -371,7 +372,7 @@ def voter_guide_create_view(request):
 
                         # Match incoming endorsements to measures already in the database
                         results = match_endorsement_list_with_measures_in_database(
-                            possible_endorsement_list,
+                            possible_endorsement_list=possible_endorsement_list,
                             google_civic_election_id_list=google_civic_election_id_list_this_year,
                             state_code=state_code)
                         if results['possible_endorsement_list_found']:
@@ -381,10 +382,12 @@ def voter_guide_create_view(request):
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
                     else:
+                        # is_list_of_endorsements_for_candidate
                         # Match possible_endorsement_list to candidates already in the database
                         results = match_endorsement_list_with_candidates_in_database(
-                            possible_endorsement_list,
+                            possible_endorsement_list=possible_endorsement_list,
                             google_civic_election_id_list=google_civic_election_id_list_this_year,
+                            is_organization_endorsing_candidates=False,
                             state_code=state_code)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
@@ -395,7 +398,9 @@ def voter_guide_create_view(request):
 
                         # Match possible_endorsement_list with organizations in database
                         results = match_endorsement_list_with_organizations_in_database(
-                            possible_endorsement_list)
+                            possible_endorsement_list=possible_endorsement_list,
+                            is_organization_endorsing_candidates=False,
+                        )
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
 

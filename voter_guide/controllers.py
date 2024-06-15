@@ -75,8 +75,12 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
         # (ORGANIZATION_ENDORSING_CANDIDATES, 'Organization or News Website Endorsing Candidates'),
         # (ENDORSEMENTS_FOR_CANDIDATE, 'List of Endorsements for One Candidate'),
         # (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
-        if one_voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-                or one_voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+        is_organization_endorsing_candidates = \
+            one_voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or \
+            one_voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE
+        is_list_of_endorsements_for_candidate = \
+            one_voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE
+        if is_organization_endorsing_candidates:
             # POSSIBILITY_LIST_LIMIT set to 1000 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
@@ -84,17 +88,20 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
 
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
+                    possible_endorsement_list=possible_endorsement_list,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year,
+                    is_organization_endorsing_candidates=is_organization_endorsing_candidates)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
-                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
+                    possible_endorsement_list=possible_endorsement_list,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
-        elif one_voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+        elif is_list_of_endorsements_for_candidate:
             # POSSIBILITY_LIST_LIMIT set to 1000 possibilities to avoid very slow page loads
             results = extract_voter_guide_possibility_position_list_from_database(one_voter_guide_possibility)
             if results['possible_endorsement_list_found']:
@@ -102,7 +109,9 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
 
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
+                    possible_endorsement_list=possible_endorsement_list,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year,
+                    is_organization_endorsing_candidates=is_organization_endorsing_candidates)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
@@ -166,26 +175,32 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
     state_code = voter_guide_possibility.state_code \
         if positive_value_exists(voter_guide_possibility.state_code) else ""
 
-    # ######################
-    # If we are starting from a single organization endorsing many candidates,
-    # we store that organization information once
-    if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-            or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+    is_organization_endorsing_candidates = \
+        voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or \
+        voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE
+    is_list_of_endorsements_for_candidate = \
+        voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE
+    if is_organization_endorsing_candidates:
+        # ######################
+        # If we are starting from a single organization endorsing many candidates,
+        # we store that organization information once
         organization_name = voter_guide_possibility.organization_name \
             if positive_value_exists(voter_guide_possibility.organization_name) else ""
         organization_we_vote_id = voter_guide_possibility.organization_we_vote_id \
             if positive_value_exists(voter_guide_possibility.organization_we_vote_id) else ""
         organization_twitter_handle = voter_guide_possibility.organization_twitter_handle \
             if positive_value_exists(voter_guide_possibility.organization_twitter_handle) else ""
-    else:
+        candidate_name = ""
+        candidate_twitter_handle = ""
+        candidate_we_vote_id = ""
+        contest_office_name = ""
+    elif is_list_of_endorsements_for_candidate:
+        # ######################
+        # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
+        # we store this candidate information once
         organization_name = ""
         organization_we_vote_id = ""
         organization_twitter_handle = ""
-
-    # ######################
-    # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
-    # we store this candidate information once
-    if voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
         candidate_name = voter_guide_possibility.candidate_name \
             if positive_value_exists(voter_guide_possibility.candidate_name) else ""
         candidate_twitter_handle = voter_guide_possibility.candidate_twitter_handle \
@@ -203,6 +218,10 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
             # Consider adding candidate here?
             pass
     else:
+        # Should not be possible to get here
+        organization_name = ""
+        organization_we_vote_id = ""
+        organization_twitter_handle = ""
         candidate_name = ""
         candidate_twitter_handle = ""
         candidate_we_vote_id = ""
@@ -216,8 +235,7 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
             more_info_url = possibility_position.more_info_url
         else:
             more_info_url = voter_guide_possibility.voter_guide_possibility_url
-        if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-                or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+        if is_organization_endorsing_candidates:
             # The organization variables have been set above
             # Note that UNKNOWN_TYPE might be set if we are looking at organization
             # ######################
@@ -256,7 +274,7 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
                 position_json_list.append(position_json)
             else:
                 status += "MISSING_BOTH_CANDIDATE_AND_MEASURE_WE_VOTE_ID "
-        elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+        elif is_list_of_endorsements_for_candidate:
             # ######################
             # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
             # we store the unique organization information in the VoterGuidePossibilityPosition table
@@ -315,26 +333,32 @@ def extract_voter_guide_possibility_position_list_from_database(
     state_code = voter_guide_possibility.state_code \
         if positive_value_exists(voter_guide_possibility.state_code) else ""
 
-    # ######################
-    # If we are starting from a single organization endorsing many candidates,
-    # we store that organization information once
-    if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-            or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+    is_organization_endorsing_candidates = \
+        voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or \
+        voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE
+    is_list_of_endorsements_for_candidate = \
+        voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE
+    if is_organization_endorsing_candidates:
+        # ######################
+        # If we are starting from a single organization endorsing many candidates,
+        # we store that organization information once
         organization_name = voter_guide_possibility.organization_name \
             if positive_value_exists(voter_guide_possibility.organization_name) else ""
         organization_we_vote_id = voter_guide_possibility.organization_we_vote_id \
             if positive_value_exists(voter_guide_possibility.organization_we_vote_id) else ""
         organization_twitter_handle = voter_guide_possibility.organization_twitter_handle \
             if positive_value_exists(voter_guide_possibility.organization_twitter_handle) else ""
-    else:
+        # candidate_name = ""
+        candidate_twitter_handle = ""
+        candidate_we_vote_id = ""
+        # contest_office_name = ""
+    elif is_list_of_endorsements_for_candidate:
+        # ######################
+        # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
+        # we store this candidate information once
         organization_name = ""
         organization_we_vote_id = ""
         organization_twitter_handle = ""
-
-    # ######################
-    # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
-    # we store this candidate information once
-    if voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
         candidate_twitter_handle = voter_guide_possibility.candidate_twitter_handle \
             if positive_value_exists(voter_guide_possibility.candidate_twitter_handle) else ""
         candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id \
@@ -345,10 +369,15 @@ def extract_voter_guide_possibility_position_list_from_database(
         #     candidate = results['candidate']
         #     contest_office_name = candidate.contest_office_name
     else:
+        # Should not be possible to get here
+        organization_name = ""
+        organization_we_vote_id = ""
+        organization_twitter_handle = ""
         # candidate_name = ""
         candidate_twitter_handle = ""
         candidate_we_vote_id = ""
         # contest_office_name = ""
+        pass
 
     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
@@ -363,8 +392,7 @@ def extract_voter_guide_possibility_position_list_from_database(
             more_info_url = possibility_position.more_info_url
         else:
             more_info_url = voter_guide_possibility.voter_guide_possibility_url
-        if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-                or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
+        if is_organization_endorsing_candidates:
             # The organization variables have been set above
             # Note that UNKNOWN_TYPE might be set if we are looking at organization
             # ######################
@@ -380,7 +408,7 @@ def extract_voter_guide_possibility_position_list_from_database(
                                                                                          read_only=True)
                 if candidate_results['candidate_found']:
                     candidate_alternate_names = candidate_results['candidate'].display_alternate_names_list()
-        elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+        elif is_list_of_endorsements_for_candidate:
             # ######################
             # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
             # we refresh the organization information from the VoterGuidePossibilityPosition table with each loop
@@ -392,10 +420,6 @@ def extract_voter_guide_possibility_position_list_from_database(
                 if positive_value_exists(possibility_position.organization_twitter_handle) else ""
         else:
             status += "PROBLEM-SHOULD_NOT_BE_HERE "
-            candidate_we_vote_id = ""
-            organization_name = ""
-            organization_we_vote_id = ""
-            organization_twitter_handle = ""
 
         position_json = {
             'possibility_position_id': possibility_position.id,
@@ -981,7 +1005,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
     voter_guide_possibility_found = False
     candidate_we_vote_id = ""
     organization_we_vote_id = ""
-    is_candidate_focused_page = False
+    is_list_of_endorsements_for_candidate = False
     if results['voter_guide_possibility_found']:
         status += "VOTER_GUIDE_POSSIBILITY_FOUND "
         voter_guide_possibility_found = True
@@ -991,9 +1015,9 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
         if positive_value_exists(voter_guide_possibility.candidate_name) \
                 or positive_value_exists(voter_guide_possibility.candidate_twitter_handle) \
                 or positive_value_exists(voter_guide_possibility.candidate_we_vote_id):
-            is_candidate_focused_page = True
+            is_list_of_endorsements_for_candidate = True
         else:
-            is_candidate_focused_page = False
+            is_list_of_endorsements_for_candidate = False
     else:
         # Current entry not found. Create new entry.
         status += "EXISTING_VOTER_GUIDE_POSSIBILITY_NOT_FOUND "
@@ -1001,8 +1025,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
             voter_guide_possibility_found = False
             status += "URL_TO_SCAN_IS_IN-WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS "
         else:
-            is_candidate_focused_page = False  # To be extended to also save candidate focused endorsement pages
-            if positive_value_exists(is_candidate_focused_page):
+            is_list_of_endorsements_for_candidate = False  # To be extended to also save candidate focused endorsement pages
+            if positive_value_exists(is_list_of_endorsements_for_candidate):
                 voter_guide_possibility_type = ENDORSEMENTS_FOR_CANDIDATE
             else:
                 voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
@@ -1096,7 +1120,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                 'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
             }
-    elif not positive_value_exists(is_candidate_focused_page):
+    elif not positive_value_exists(is_list_of_endorsements_for_candidate):
         # As long as we know there isn't a candidate_we_vote_id, try to find organization owner
         if positive_value_exists(possible_organization_name) \
                 or positive_value_exists(possible_organization_twitter_handle):
@@ -1130,7 +1154,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                 'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
                 'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
             }
-    elif positive_value_exists(is_candidate_focused_page):
+    elif positive_value_exists(is_list_of_endorsements_for_candidate):
         if positive_value_exists(possible_candidate_name) or positive_value_exists(possible_candidate_twitter_handle):
             google_civic_election_id_list = retrieve_upcoming_election_id_list(
                 limit_to_this_state_code=limit_to_this_state_code)
@@ -1365,7 +1389,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
 def clean_up_possible_endorsement_list(possible_endorsement_list):
     #  remove null value ballot_item_name entries
-    endorse_no_nulls = filter(lambda item: positive_value_exists(item['ballot_item_name']) , possible_endorsement_list)
+    endorse_no_nulls = filter(lambda item: positive_value_exists(item['ballot_item_name']), possible_endorsement_list)
     # Sort the list by id in place
     endorse_no_nulls_sorted = sorted(endorse_no_nulls, key=lambda item: item['possibility_position_id'], reverse=True)
     # Dedupe, excluding older dupe endorsements
@@ -1383,38 +1407,18 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0, limit_to_this_year=True):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     success = True
+    voter_guide_possibility = None
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
-
-    # Do not require voter_device_id yet
-    # results = is_voter_device_id_valid(voter_device_id)
-    # if not results['success']:
-    #     status += results['status']
-    #     json_data = {
-    #         'status':                       status,
-    #         'success':                      results['success'],
-    #         'voter_guide_possibility_id':   voter_guide_possibility_id,
-    #         'possible_position_list':       possible_endorsement_list,
-    #     }
-    #     return json_data
-    #
-    # voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    # if not positive_value_exists(voter_id):
-    #     status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
-    #     json_data = {
-    #         'status':                       status,
-    #         'success':                      False,
-    #         'voter_guide_possibility_id':   voter_guide_possibility_id,
-    #         'possible_position_list':       possible_endorsement_list,
-    #     }
-    #     return json_data
-
-    # TODO We will need the voter_id here so we can control volunteer actions
+    voter_guide_possibility_found = False
 
     try:
         voter_guide_possibility_manager = VoterGuidePossibilityManager()
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
             voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
         status += results['status']
+        if results['voter_guide_possibility_found']:
+            voter_guide_possibility = results['voter_guide_possibility']
+            voter_guide_possibility_found = True
     except Exception as e:
         status += "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE_FAILED1: " + str(e) + " "
         success = False
@@ -1426,10 +1430,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
     possible_endorsement_list = []
     try:
-        if results['voter_guide_possibility_found']:
-            voter_guide_possibility = results['voter_guide_possibility']
+        if voter_guide_possibility_found:
             limit_to_this_state_code = voter_guide_possibility.state_code
-            voter_guide_possibility_type = voter_guide_possibility.voter_guide_possibility_type
 
             results = extract_voter_guide_possibility_position_list_from_database(
                 voter_guide_possibility, voter_guide_possibility_position_id)
@@ -1438,22 +1440,27 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                 possible_endorsement_list = results['possible_endorsement_list']
 
                 google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
+                is_organization_endorsing_candidates = \
+                    voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or \
+                    voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE
+                is_list_of_endorsements_for_candidate = \
+                    voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE
 
-                if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-                        or voter_guide_possibility_type == UNKNOWN_TYPE:
+                if is_organization_endorsing_candidates:
                     organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
                     # Match incoming endorsements to candidates already in the database
                     results = match_endorsement_list_with_candidates_in_database(
-                        possible_endorsement_list,
+                        possible_endorsement_list=possible_endorsement_list,
                         google_civic_election_id_list=google_civic_election_id_list_this_year,
                         state_code=limit_to_this_state_code,
-                        attach_objects=False)
+                        attach_objects=False,
+                        is_organization_endorsing_candidates=is_organization_endorsing_candidates)
                     if results['possible_endorsement_list_found']:
                         possible_endorsement_list = results['possible_endorsement_list']
 
                     # Match incoming endorsements to measures already in the database
                     results = match_endorsement_list_with_measures_in_database(
-                        possible_endorsement_list,
+                        possible_endorsement_list=possible_endorsement_list,
                         google_civic_election_id_list=google_civic_election_id_list_this_year,
                         state_code=limit_to_this_state_code,
                         attach_objects=False)
@@ -1464,7 +1471,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     for one_possible_endorsement in possible_endorsement_list:
                         if 'candidate_we_vote_id' in one_possible_endorsement \
                                 and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
-                            position_exists_query = PositionEntered.objects.filter(
+                            position_exists_query = PositionEntered.objects.using('readonly').filter(
                                 organization_we_vote_id=organization_we_vote_id,
                                 candidate_campaign_we_vote_id=one_possible_endorsement['candidate_we_vote_id'])
                             position_list = list(position_exists_query)
@@ -1484,13 +1491,14 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                                 one_possible_endorsement['position_stance_stored'] = position_list[0].stance
                                 one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
                                 one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
-                elif voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
+                elif is_list_of_endorsements_for_candidate:
                     candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
 
                     # Match incoming endorsements to candidates already in the database
                     results = match_endorsement_list_with_organizations_in_database(
-                        possible_endorsement_list,
-                        attach_objects=False)
+                        possible_endorsement_list=possible_endorsement_list,
+                        attach_objects=False,
+                        is_organization_endorsing_candidates=False)
                     if results['possible_endorsement_list_found']:
                         possible_endorsement_list = results['possible_endorsement_list']
 
@@ -1498,7 +1506,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     for one_possible_endorsement in possible_endorsement_list:
                         if 'organization_we_vote_id' in one_possible_endorsement \
                                 and positive_value_exists(one_possible_endorsement['organization_we_vote_id']):
-                            position_exists_query = PositionEntered.objects.filter(
+                            position_exists_query = PositionEntered.objects.using('readonly').filter(
                                 organization_we_vote_id=one_possible_endorsement['organization_we_vote_id'],
                                 candidate_campaign_we_vote_id=candidate_we_vote_id)
                             position_list = list(position_exists_query)
@@ -1508,6 +1516,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                                 one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
                                 one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
                 else:
+                    status += "MISSING_VOTER_GUIDE_POSSIBILITY_TYPE "
                     pass
 
         # June 2023, remove older dupe entries and entries with null names -- shouldn't need to do this, but ...
@@ -2003,14 +2012,13 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
         # ballot_item_list_light = all_possible_candidates_list_light + all_possible_measures_list_light
 
         attach_objects = False
-        from voter_guide.controllers_possibility_shared import \
-            augment_candidate_possible_position_data
+        from voter_guide.controllers_possibility_shared import augment_candidate_possible_position_data
         augment_results = augment_candidate_possible_position_data(
-            possible_endorsement_dict,
-            google_civic_election_id_list=google_civic_election_id_list,
-            limit_to_this_state_code=limit_to_this_state_code,
+            possible_endorsement=possible_endorsement_dict,
             all_possible_candidates=all_possible_candidates_list_light,
-            attach_objects=attach_objects)
+            attach_objects=attach_objects,
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code)
         candidate_possible_endorsement_count = augment_results['possible_endorsement_count']
         if augment_results['possible_endorsement_count'] > 0:
             possible_endorsement_list = augment_results['possible_endorsement_return_list']
