@@ -3,7 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 import copy
-from django.utils.timezone import localtime, now
 from config.base import get_environment_variable
 from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
     find_organization_endorsements_of_candidates_on_one_web_page, \
@@ -23,9 +22,10 @@ from voter.models import fetch_voter_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_facebook_username_from_text_string, \
     extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
-    STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
+    get_voter_api_device_id
 from wevote_functions.functions_date import get_current_year_as_integer
-from .controllers_possibility_shared import fix_sequence_of_possible_endorsement_list
+from .controllers_possibility_shared import already_in_list_test, fix_sequence_of_possible_endorsement_list, \
+    unique_add_to_already_found_list
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -83,7 +83,13 @@ def convert_organization_endorsement_list_light_to_possible_endorsement_list(end
     return results
 
 
-def augment_organization_possible_position_data(possible_endorsement, attach_objects=True):
+def augment_organization_possible_position_data(
+        possible_endorsement={},
+        already_found_we_vote_id_list=[],
+        attach_objects=True,
+        is_organization_endorsing_candidates=True,
+        organizations_dict={}):
+    already_found_we_vote_id_list_local = copy.deepcopy(already_found_we_vote_id_list)
     status = ""
     success = True
 
@@ -94,13 +100,22 @@ def augment_organization_possible_position_data(possible_endorsement, attach_obj
     possible_endorsement_count = 0
     if 'organization_we_vote_id' in possible_endorsement \
             and positive_value_exists(possible_endorsement['organization_we_vote_id']):
-        results = organization_manager.retrieve_organization_from_we_vote_id(
-            possible_endorsement['organization_we_vote_id'])
-        if results['organization_found']:
-            organization = results['organization']
+        if possible_endorsement['organization_we_vote_id'] in organizations_dict:
+            organization = organizations_dict[possible_endorsement['organization_we_vote_id']]
+        else:
+            results = organization_manager.retrieve_organization_from_we_vote_id(
+                possible_endorsement['organization_we_vote_id'], read_only=True)
+            if results['organization_found']:
+                organization = results['organization']
+                organizations_dict[organization.we_vote_id] = organization
+            else:
+                organization = None
+        if hasattr(organization, 'we_vote_id') and positive_value_exists(organization.we_vote_id):
             if positive_value_exists(attach_objects):
                 possible_endorsement['organization'] = organization
-            possible_endorsement['organization_name'] = organization.organization_name
+            if not positive_value_exists(possible_endorsement['organization_name']):
+                # Only fill in if missing - don't replace so the text stay synced with what's on page
+                possible_endorsement['organization_name'] = organization.organization_name
             possible_endorsement['organization_twitter_handle'] = organization.organization_twitter_handle
             possible_endorsement['organization_website'] = organization.organization_website
             possible_endorsement['we_vote_hosted_profile_image_url_large'] = \
@@ -111,6 +126,11 @@ def augment_organization_possible_position_data(possible_endorsement, attach_obj
                 organization.we_vote_hosted_profile_image_url_tiny
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
+        if not is_organization_endorsing_candidates:
+            already_found_we_vote_id_list_local = unique_add_to_already_found_list(
+                possible_endorsement,
+                already_found_we_vote_id_list_local,
+                is_organization_endorsing_candidates)
     elif 'organization_name' in possible_endorsement and \
             positive_value_exists(possible_endorsement['organization_name']):
         # If here search for possible organization matches
@@ -118,50 +138,111 @@ def augment_organization_possible_position_data(possible_endorsement, attach_obj
             organization_name=possible_endorsement['organization_name'])
         if results['organization_found']:
             organization = results['organization']
-            if positive_value_exists(attach_objects):
-                possible_endorsement['organization'] = organization
-            possible_endorsement['organization_name'] = organization.organization_name
-            possible_endorsement['organization_twitter_handle'] = organization.organization_twitter_handle
-            possible_endorsement['organization_we_vote_id'] = organization.we_vote_id
-            possible_endorsement['organization_website'] = organization.organization_website
-            possible_endorsement['we_vote_hosted_profile_image_url_large'] = \
-                organization.we_vote_hosted_profile_image_url_large
-            possible_endorsement['we_vote_hosted_profile_image_url_medium'] = \
-                organization.we_vote_hosted_profile_image_url_medium
-            possible_endorsement['we_vote_hosted_profile_image_url_tiny'] = \
-                organization.we_vote_hosted_profile_image_url_tiny
-
-            possible_endorsement_return_list.append(possible_endorsement)
-            possible_endorsement_count += 1
-        elif results['organization_list_found']:
-            organization_list = results['organization_list']
-            first_in_list = True
-            for organization in organization_list:
-                if first_in_list:
-                    first_in_list = False
-                else:
-                    possible_endorsement = copy.deepcopy(possible_endorsement)
+            if hasattr(organization, 'we_vote_id') and positive_value_exists(organization.we_vote_id):
+                organizations_dict[organization.we_vote_id] = organization
                 if positive_value_exists(attach_objects):
                     possible_endorsement['organization'] = organization
-                possible_endorsement['organization_name'] = organization.organization_name
+                if not positive_value_exists(possible_endorsement['organization_name']):
+                    # Only fill in if missing - don't replace so the text stay synced with what's on page
+                    possible_endorsement['organization_name'] = organization.organization_name
                 possible_endorsement['organization_twitter_handle'] = organization.organization_twitter_handle
-                possible_endorsement['organization_website'] = organization.organization_website
                 possible_endorsement['organization_we_vote_id'] = organization.we_vote_id
+                possible_endorsement['organization_website'] = organization.organization_website
                 possible_endorsement['we_vote_hosted_profile_image_url_large'] = \
                     organization.we_vote_hosted_profile_image_url_large
                 possible_endorsement['we_vote_hosted_profile_image_url_medium'] = \
                     organization.we_vote_hosted_profile_image_url_medium
                 possible_endorsement['we_vote_hosted_profile_image_url_tiny'] = \
                     organization.we_vote_hosted_profile_image_url_tiny
+            else:
+                status += "ORGANIZATION_NOT_FOUND78 "
 
+            if is_organization_endorsing_candidates:
                 possible_endorsement_return_list.append(possible_endorsement)
                 possible_endorsement_count += 1
+            else:
+                # Check to see if organization_we_vote_id is already in already_found_we_vote_id_list_local,
+                #  and if so, don't add it to possible_endorsement_return_list
+                already_in_list = already_in_list_test(
+                    possible_endorsement, already_found_we_vote_id_list_local, is_organization_endorsing_candidates)
+                if already_in_list:
+                    status += "ALREADY_IN_LIST22 "
+                else:
+                    possible_endorsement_return_list.append(possible_endorsement)
+                    possible_endorsement_count += 1
+                    already_found_we_vote_id_list_local = unique_add_to_already_found_list(
+                        possible_endorsement,
+                        already_found_we_vote_id_list_local,
+                        is_organization_endorsing_candidates)
+        elif results['organization_list_found']:
+            if is_organization_endorsing_candidates:
+                # For is_organization_endorsing_candidates mode, instead of trying to solve the mystery of
+                #  *which* of this list of organizations we want, we just leave the organization ambiguous and
+                #  attach it, until we have a organization_we_vote_id.
+                possible_endorsement_return_list.append(possible_endorsement)
+                possible_endorsement_count += 1
+            else:
+                # Only proceed if is_list_of_endorsements_for_candidate (i.e. NOT is_organization_endorsing_candidates)
+                #  because in that case it is ok to add additional possibilities to the list
+                organization_list = results['organization_list']
+                first_in_list = True
+                at_least_one_organization_added = False
+                for organization in organization_list:
+                    if hasattr(organization, 'we_vote_id') and positive_value_exists(organization.we_vote_id):
+                        organizations_dict[organization.we_vote_id] = organization
+                        if first_in_list:
+                            first_in_list = False
+                        else:
+                            possible_endorsement = copy.deepcopy(possible_endorsement)
+                        if positive_value_exists(attach_objects):
+                            possible_endorsement['organization'] = organization
+                        if not positive_value_exists(possible_endorsement['organization_name']):
+                            # Only fill in if missing - don't replace so the text stay synced with what's on page
+                            possible_endorsement['organization_name'] = organization.organization_name
+                        possible_endorsement['organization_twitter_handle'] = organization.organization_twitter_handle
+                        possible_endorsement['organization_website'] = organization.organization_website
+                        possible_endorsement['organization_we_vote_id'] = organization.we_vote_id
+                        possible_endorsement['we_vote_hosted_profile_image_url_large'] = \
+                            organization.we_vote_hosted_profile_image_url_large
+                        possible_endorsement['we_vote_hosted_profile_image_url_medium'] = \
+                            organization.we_vote_hosted_profile_image_url_medium
+                        possible_endorsement['we_vote_hosted_profile_image_url_tiny'] = \
+                            organization.we_vote_hosted_profile_image_url_tiny
+
+                        # Check to see if organization_we_vote_id is already in already_found_we_vote_id_list_local,
+                        #  and if so, don't add it to possible_endorsement_return_list
+                        already_in_list = already_in_list_test(
+                            possible_endorsement, already_found_we_vote_id_list_local,
+                            is_organization_endorsing_candidates)
+                        if already_in_list:
+                            status += "ALREADY_IN_LIST33 "
+                        else:
+                            possible_endorsement_return_list.append(possible_endorsement)
+                            possible_endorsement_count += 1
+                            if not is_organization_endorsing_candidates:
+                                already_found_we_vote_id_list_local = unique_add_to_already_found_list(
+                                    possible_endorsement,
+                                    already_found_we_vote_id_list_local,
+                                    is_organization_endorsing_candidates)
+                # If we didn't get any organizations with a we_vote_id from the database, just use the
+                #  possible_endorsement which came back.
+                if not at_least_one_organization_added:
+                    possible_endorsement_return_list.append(possible_endorsement)
+                    possible_endorsement_count += 1
+        # Could add:
+        # elif not positive_value_exists(results['success']):
+        else:
+            # No matching organization(s) found
+            possible_endorsement_return_list.append(possible_endorsement)
+            possible_endorsement_count += 1
 
     results = {
-        'status':                           status,
-        'success':                          success,
+        'already_found_we_vote_id_list':    already_found_we_vote_id_list_local,
+        'organizations_dict':               organizations_dict,
         'possible_endorsement_return_list': possible_endorsement_return_list,
         'possible_endorsement_count':       possible_endorsement_count,
+        'status':                           status,
+        'success':                          success,
     }
     return results
 
@@ -363,14 +444,17 @@ def convert_list_of_names_to_possible_endorsement_list(ballot_items_list, starti
 
 def match_endorsement_list_with_candidates_in_database(
         possible_endorsement_list=[],
+        all_possible_candidates_list_light=[],
+        attach_objects=True,
+        is_organization_endorsing_candidates=True,  # is_list_of_endorsements_for_candidate is the opposite
         google_civic_election_id_list=[],
         state_code='',
-        all_possible_candidates_list_light=[],
-        attach_objects=True):
+):
     """
 
     :param possible_endorsement_list:
     :param google_civic_election_id_list:
+    :param is_organization_endorsing_candidates:
     :param state_code:
     :param all_possible_candidates_list_light: Only use when trying to match to new candidates
     :param attach_objects:
@@ -381,32 +465,47 @@ def match_endorsement_list_with_candidates_in_database(
     possible_endorsement_list_found = False
 
     possible_endorsement_list_modified = []
-    possible_endorsement_we_vote_id_list = []
+    already_found_we_vote_id_list = []
+    candidates_dict = {}
     from voter_guide.controllers_possibility_shared import augment_candidate_possible_position_data
     for possible_endorsement in possible_endorsement_list:
-        if 'candidate_we_vote_id' in possible_endorsement \
-                and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
+        already_in_list = already_in_list_test(
+            possible_endorsement, already_found_we_vote_id_list, is_organization_endorsing_candidates)
+        if already_in_list and is_organization_endorsing_candidates:
             status += "ALREADY_IN_LIST-MATCH1 "
         else:
             results = augment_candidate_possible_position_data(
-                possible_endorsement,
-                google_civic_election_id_list=google_civic_election_id_list,
-                limit_to_this_state_code=state_code,
+                possible_endorsement=possible_endorsement,
                 all_possible_candidates=all_possible_candidates_list_light,
-                possible_endorsement_we_vote_id_list=possible_endorsement_we_vote_id_list,
-                attach_objects=attach_objects)
-            possible_endorsement_we_vote_id_list = results['possible_endorsement_we_vote_id_list']
+                already_found_we_vote_id_list=already_found_we_vote_id_list,
+                attach_objects=attach_objects,
+                candidates_dict=candidates_dict,
+                google_civic_election_id_list=google_civic_election_id_list,
+                is_organization_endorsing_candidates=is_organization_endorsing_candidates,
+                limit_to_this_state_code=state_code)
+            # We don't bring this list out, because we want to add unique candidates coming out in the next few lines
+            # already_found_we_vote_id_list = results['already_found_we_vote_id_list']
+            candidates_dict = results['candidates_dict']
             if results['possible_endorsement_count'] > 0:
-                possible_endorsement_list_modified += results['possible_endorsement_return_list']
+                possible_endorsement_return_list = results['possible_endorsement_return_list']
+                for possible_endorsement_returned in possible_endorsement_return_list:
+                    already_in_list = already_in_list_test(
+                        possible_endorsement_returned,
+                        already_found_we_vote_id_list,
+                        is_organization_endorsing_candidates)
+                    if is_organization_endorsing_candidates and already_in_list:
+                        # We do not use this filter if is_list_of_endorsements_for_candidate
+                        status += "ALREADY_IN_LIST-MATCH2 "
+                    else:
+                        possible_endorsement_list_modified.append(possible_endorsement_returned)
+                        if is_organization_endorsing_candidates:
+                            already_found_we_vote_id_list = unique_add_to_already_found_list(
+                                possible_endorsement_returned,
+                                already_found_we_vote_id_list,
+                                is_organization_endorsing_candidates)
             else:
-                if 'candidate_we_vote_id' in possible_endorsement \
-                        and possible_endorsement['candidate_we_vote_id'] in possible_endorsement_we_vote_id_list:
-                    status += "ALREADY_IN_LIST-MATCH2 "
-                else:
-                    possible_endorsement_list_modified.append(possible_endorsement)
-                    if 'candidate_we_vote_id' in possible_endorsement \
-                            and possible_endorsement['candidate_we_vote_id'] not in possible_endorsement_we_vote_id_list:
-                        possible_endorsement_we_vote_id_list.append(possible_endorsement['candidate_we_vote_id'])
+                # It seems like we should append here?
+                pass
 
     if len(possible_endorsement_list_modified):
         possible_endorsement_list_found = True
@@ -421,7 +520,10 @@ def match_endorsement_list_with_candidates_in_database(
 
 
 def match_endorsement_list_with_measures_in_database(
-        possible_endorsement_list, google_civic_election_id_list, state_code='', all_possible_measures_list_light=[],
+        possible_endorsement_list=[],
+        google_civic_election_id_list=[],
+        state_code='',
+        all_possible_measures_list_light=[],
         attach_objects=True):
     """
 
@@ -433,6 +535,7 @@ def match_endorsement_list_with_measures_in_database(
     :param attach_objects: Should we attach objects that won't convert to json?
     :return:
     """
+    is_organization_endorsing_candidates = True
     status = ""
     success = True
     possible_endorsement_list_found = False
@@ -445,7 +548,7 @@ def match_endorsement_list_with_measures_in_database(
         if 'measure_we_vote_id' in possible_endorsement \
                 and positive_value_exists(possible_endorsement['measure_we_vote_id']):
             results = measure_manager.retrieve_contest_measure_from_we_vote_id(
-                possible_endorsement['measure_we_vote_id'])
+                possible_endorsement['measure_we_vote_id'], read_only=True)
             if results['contest_measure_found']:
                 measure = results['contest_measure']
                 if positive_value_exists(attach_objects):
@@ -464,7 +567,7 @@ def match_endorsement_list_with_measures_in_database(
                 positive_value_exists(possible_endorsement['ballot_item_name']):
             # If here search for possible measure matches
             matching_results = measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
-                google_civic_election_id_list, state_code, possible_endorsement['ballot_item_name'])
+                google_civic_election_id_list, state_code, possible_endorsement['ballot_item_name'], read_only=True)
 
             if matching_results['contest_measure_found']:
                 measure = matching_results['contest_measure']
@@ -551,7 +654,7 @@ def match_endorsement_list_with_measures_in_database(
                             possible_endorsement_list_modified.append(possible_endorsement_copy)
                             break
             if not synonym_found:
-                # If an entry based on a synonym wasn't found, then store the orginal possibility
+                # If an entry based on a synonym wasn't found, then store the original possibility
                 possible_endorsement_list_modified.append(possible_endorsement)
 
     if len(possible_endorsement_list_modified):
@@ -566,23 +669,51 @@ def match_endorsement_list_with_measures_in_database(
     return results
 
 
-def match_endorsement_list_with_organizations_in_database(possible_endorsement_list, attach_objects=True):
+def match_endorsement_list_with_organizations_in_database(
+        possible_endorsement_list=[],
+        attach_objects=True,
+        is_organization_endorsing_candidates=True):
     """
 
     :param possible_endorsement_list:
     :param attach_objects:
+    :param is_organization_endorsing_candidates:
     :return:
     """
     status = ""
     success = True
     possible_endorsement_list_found = False
 
+    already_found_we_vote_id_list = []
+    organizations_dict = {}
     possible_endorsement_list_modified = []
     for possible_endorsement in possible_endorsement_list:
         results = augment_organization_possible_position_data(
-            possible_endorsement, attach_objects=attach_objects)
+            possible_endorsement=possible_endorsement,
+            already_found_we_vote_id_list=already_found_we_vote_id_list,
+            attach_objects=attach_objects,
+            is_organization_endorsing_candidates=is_organization_endorsing_candidates,
+            organizations_dict=organizations_dict)
+        # We don't bring this list out, because we want to add unique candidates coming out in the next few lines
+        # already_found_we_vote_id_list = results['already_found_we_vote_id_list']
+        organizations_dict = results['organizations_dict']
         if results['possible_endorsement_count'] > 0:
-            possible_endorsement_list_modified += results['possible_endorsement_return_list']
+            possible_endorsement_return_list = results['possible_endorsement_return_list']
+            for possible_endorsement_returned in possible_endorsement_return_list:
+                already_in_list = already_in_list_test(
+                    possible_endorsement_returned,
+                    already_found_we_vote_id_list,
+                    is_organization_endorsing_candidates)
+                if not is_organization_endorsing_candidates and already_in_list:
+                    # We do not use this filter if is_list_of_endorsements_for_candidate
+                    status += "ALREADY_IN_LIST-MATCH3 "
+                else:
+                    possible_endorsement_list_modified.append(possible_endorsement_returned)
+                    if not is_organization_endorsing_candidates:
+                        already_found_we_vote_id_list = unique_add_to_already_found_list(
+                            possible_endorsement_returned,
+                            already_found_we_vote_id_list,
+                            is_organization_endorsing_candidates)
         else:
             possible_endorsement_list_modified.append(possible_endorsement)
 
@@ -756,6 +887,7 @@ def process_organization_endorsing_candidates_input_form(
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
     ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
+    is_organization_endorsing_candidates = True
     organization_found = False
     organization_manager = OrganizationManager()
     organization_twitter_followers_count = 0
@@ -982,14 +1114,16 @@ def process_organization_endorsing_candidates_input_form(
     if len(possible_endorsement_list):
         # Match possible_endorsement_list to candidates already in the database
         results = match_endorsement_list_with_candidates_in_database(
-            possible_endorsement_list,
+            possible_endorsement_list=possible_endorsement_list,
             google_civic_election_id_list=google_civic_election_id_list_this_year,
-            all_possible_candidates_list_light=all_possible_candidates_list_light)
+            all_possible_candidates_list_light=all_possible_candidates_list_light,
+            is_organization_endorsing_candidates=is_organization_endorsing_candidates)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
         results = match_endorsement_list_with_measures_in_database(
-            possible_endorsement_list, google_civic_election_id_list_this_year,
+            possible_endorsement_list=possible_endorsement_list,
+            google_civic_election_id_list=google_civic_election_id_list_this_year,
             all_possible_measures_list_light=all_possible_measures_list_light)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
@@ -1113,6 +1247,7 @@ def process_candidate_being_endorsed_input_form(
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
     ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
+    is_organization_endorsing_candidates = False
     candidate_found = False
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
@@ -1185,17 +1320,18 @@ def process_candidate_being_endorsed_input_form(
     possible_endorsement_list_from_url_scan = []
     all_possible_organizations_list_light_found = False
     all_possible_organizations_list_light = []
-    # We pass in the candidate_we_vote_id so that the possible_position data package includes that from the start
-    # DALE 2024 June 5: explore this candidate_we_vote_id_to_include code -- we may need instead an "exclude"
-    #  to prevent the candidate we are collecting endorsements for, from being shown on their own endorsements page
-    results = retrieve_organization_list_for_all_upcoming_elections(
-        limit_to_this_state_code=state_code, candidate_we_vote_id_to_include=candidate_we_vote_id)
-    if results['organization_list_found']:
-        all_possible_organizations_list_light_found = True
-        all_possible_organizations_list_light = results['organization_list_light']
-
     first_scan_needed = positive_value_exists(voter_guide_possibility_url) and not possible_endorsement_list_found
     scan_url_now = first_scan_needed or positive_value_exists(scan_url_again)
+    if scan_url_now:
+        # We pass in the candidate_we_vote_id so that the possible_position data package includes that from the start
+        # DALE 2024 June 5: explore this candidate_we_vote_id_to_include code -- we may need instead an "exclude"
+        #  to prevent the candidate we are collecting endorsements for, from being shown on their own endorsements page
+        results = retrieve_organization_list_for_all_upcoming_elections(
+            limit_to_this_state_code=state_code, candidate_we_vote_id_to_include=candidate_we_vote_id)
+        if results['organization_list_found']:
+            all_possible_organizations_list_light_found = True
+            all_possible_organizations_list_light = results['organization_list_light']
+
     if scan_url_now and all_possible_organizations_list_light_found:
         endorsement_scrape_results = find_candidate_endorsements_on_one_candidate_web_page(
             voter_guide_possibility_url, all_possible_organizations_list_light)
@@ -1285,8 +1421,9 @@ def process_candidate_being_endorsed_input_form(
     if len(possible_endorsement_list):
         # Match possible_endorsement_list to candidates already in the database
         results = match_endorsement_list_with_candidates_in_database(
-            possible_endorsement_list,
-            google_civic_election_id_list=google_civic_election_id_list_this_year)
+            possible_endorsement_list=possible_endorsement_list,
+            google_civic_election_id_list=google_civic_election_id_list_this_year,
+            is_organization_endorsing_candidates=is_organization_endorsing_candidates)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -1296,7 +1433,8 @@ def process_candidate_being_endorsed_input_form(
 
         # Match possible_endorsement_list with organizations in database
         results = match_endorsement_list_with_organizations_in_database(
-            possible_endorsement_list, state_code)
+            possible_endorsement_list=possible_endorsement_list,
+            is_organization_endorsing_candidates=is_organization_endorsing_candidates)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -1320,10 +1458,13 @@ def process_candidate_being_endorsed_input_form(
                 and positive_value_exists(one_possible_endorsement['endorser_state_code']) else ''
             endorser_is_group = positive_value_exists(one_possible_endorsement['endorser_is_group']) \
                 if 'endorser_is_group' in one_possible_endorsement else False
-            new_info_exists_to_create_organization = positive_value_exists(endorser_state_code) or positive_value_exists(endorser_is_group)
+            info_exists_to_create_person_organization = \
+                positive_value_exists(organization_name) and positive_value_exists(endorser_state_code)
+            info_exists_to_create_group_organization = \
+                positive_value_exists(organization_name) and positive_value_exists(endorser_is_group)
             # Note: We currently assume this is a candidate (as opposed to a measure)
             new_organization_created = False
-            if positive_value_exists(organization_name) and new_info_exists_to_create_organization:
+            if info_exists_to_create_person_organization or info_exists_to_create_group_organization:
                 if endorser_is_group:
                     endorser_organization_type = GROUP
                 else:
