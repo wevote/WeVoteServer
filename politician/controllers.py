@@ -169,7 +169,7 @@ def fetch_duplicate_politician_count(we_vote_politician, ignore_politician_id_li
         ignore_politician_id_list=ignore_politician_id_list)
 
 
-def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
+def find_duplicate_politician(we_vote_politician, ignore_politician_id_list, read_only=True):
     status = ''
     success = True
     if not hasattr(we_vote_politician, 'politician_name'):
@@ -201,7 +201,8 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
             state_code=we_vote_politician.state_code,
             twitter_handle_list=politician_twitter_handle_list,
             politician_name=we_vote_politician.politician_name,
-            ignore_politician_id_list=ignore_politician_id_list)
+            ignore_politician_id_list=ignore_politician_id_list,
+            read_only=read_only)
 
         if results['politician_found']:
             conflict_results = figure_out_politician_conflict_values(we_vote_politician, results['politician'])

@@ -212,16 +212,24 @@
 
 {% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
-        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
-        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a></li>
+        <li>
+            Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                        target="_blank" >Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a>
+        </li>
 
-        <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        <li>
+            Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
-        Find and Merge Duplicate Candidates for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+            Find and Merge Duplicate Candidates for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+            <a href="{% url 'candidate:duplicates_list' %}?state_code={{ state_code }}"
+               target="_blank" >Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+        </li>
 
-        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">
-        Match Candidates to Politicians (and Create Politicians) <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li>
+            Prepare: 
+            <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank">Match Candidates to Politicians (and Create Politicians) <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
+        </li>
 
         <li>
             Prepare: <a href="{% url 'candidate:update_candidates_from_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
@@ -286,9 +294,14 @@
         <li>
             Prepare: <a href="{% url 'candidate:update_candidates_from_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
             Update Candidates from Politician Data</a>
-        </li>
-        <li>Prepare: <a href="{% url 'candidate:update_profile_image_background_color' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}" >
+            &nbsp;&nbsp;
+            Prepare: <a href="{% url 'candidate:update_profile_image_background_color' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}" >
             Update 5,000 Candidates' background colors &#40;may take 10 minutes&#41;</a></li>
+        <li>
+            Prepare: 
+            <a href="{% url 'candidate:duplicates_list' %}?state_code={{ state_code }}"
+               target="_blank" >Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+        </li>
         <li><a href="{% url 'ballotpedia:bulk_retrieve_candidate_links_from_ballotpedia' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                target="_blank" >
             Retrieve Links from Ballotpedia for up to <strong>{{ballotpedia_urls_to_retrieve_for_links|intcomma}}</strong> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (50 at a time)</li>

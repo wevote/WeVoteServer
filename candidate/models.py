@@ -539,7 +539,7 @@ class CandidateListManager(models.Manager):
             self,
             candidate_year=0,
             index_start=0,
-            candidates_limit=300,
+            candidates_limit=0,
             is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
             politician_we_vote_id_list=[],
@@ -1358,7 +1358,8 @@ class CandidateListManager(models.Manager):
             ignore_candidate_id_list=[],
             instagram_handle='',
             read_only=False,
-            vote_usa_politician_id=''):
+            vote_usa_politician_id='',
+            year_list=[]):
         """
         This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
         with stricter parameters.
@@ -1375,6 +1376,7 @@ class CandidateListManager(models.Manager):
         :param instagram_handle:
         :param read_only:
         :param vote_usa_politician_id:
+        :param year_list:
         :return:
         """
         keep_looking_for_duplicates = True
@@ -1405,11 +1407,16 @@ class CandidateListManager(models.Manager):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
         election_manager = ElectionManager()
-        year_list = []
-        results = election_manager.retrieve_year_list_by_election_list(
-            google_civic_election_id_list=google_civic_election_id_list)
-        if results['success']:
-            year_list = results['year_list']
+        if len(year_list) > 0:
+            # do not change
+            pass
+        else:
+            results = election_manager.retrieve_year_list_by_election_list(
+                google_civic_election_id_list=google_civic_election_id_list)
+            if results['success']:
+                year_list = results['year_list']
+            else:
+                year_list = []
 
         # We want to let candidate_twitter_handle be the dominant search factor if it exists
         one_twitter_handle_exists = \
@@ -5082,6 +5089,24 @@ class CandidatesAreNotDuplicates(models.Model):
         verbose_name="first candidate we are tracking", max_length=255, null=True, unique=False)
     candidate2_we_vote_id = models.CharField(
         verbose_name="second candidate we are tracking", max_length=255, null=True, unique=False)
+
+    def fetch_other_candidate_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.candidate1_we_vote_id:
+            return self.candidate2_we_vote_id
+        elif one_we_vote_id == self.candidate2_we_vote_id:
+            return self.candidate1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+
+
+class CandidatesArePossibleDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two candidates as possible duplicates
+    """
+    candidate1_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    candidate2_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    state_code = models.CharField(max_length=2, null=True)
 
     def fetch_other_candidate_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.candidate1_we_vote_id:

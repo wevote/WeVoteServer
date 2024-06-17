@@ -419,6 +419,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_o
 
     # Search for other candidates that share the same elections that match name and election
     try:
+        this_year = get_current_year_as_integer()
         results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             candidate_name=we_vote_candidate.candidate_name,
             candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
@@ -428,6 +429,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_o
             ignore_candidate_id_list=ignore_candidate_id_list,
             state_code=we_vote_candidate.state_code,
             vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
+            year_list=[this_year],
             read_only=read_only,
         )
 
