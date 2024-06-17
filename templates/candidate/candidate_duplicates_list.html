@@ -126,6 +126,12 @@
 {#                    target="_blank">{{ possible_duplicate.candidate1.candidate_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}#}
 {#                {% if possible_duplicate.candidate1.candidate_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.candidate1.candidate_twitter_handle5 }}"#}
 {#                    target="_blank">{{ possible_duplicate.candidate1.candidate_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}#}
+                <br />
+                <a href="https://www.google.com/search?q={{ possible_duplicate.candidate1.candidate_name|urlencode }}%20politician"
+                   target="_blank"
+                   class="u-no-break">
+                    google search <span class="glyphicon glyphicon-new-window"></span>
+                </a>
             </td>
         {% endif %}
         {% if possible_duplicate.candidate2 %}
@@ -179,6 +185,12 @@
 {#                    target="_blank">{{ possible_duplicate.candidate2.candidate_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}#}
 {#                {% if possible_duplicate.candidate2.candidate_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.candidate2.candidate_twitter_handle5 }}"#}
 {#                    target="_blank">{{ possible_duplicate.candidate2.candidate_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}#}
+                <br />
+                <a href="https://www.google.com/search?q={{ possible_duplicate.candidate2.candidate_name|urlencode }}%20politician"
+                   target="_blank"
+                   class="u-no-break">
+                    google search <span class="glyphicon glyphicon-new-window"></span>
+                </a>
             </td>
         {% endif %}
         </tr>
