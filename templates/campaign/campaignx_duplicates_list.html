@@ -72,19 +72,19 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 <a href="{% url 'campaign:compare_two_campaigns_for_merge' %}?campaignx1_we_vote_id={{ possible_duplicate.campaignx1_we_vote_id }}&campaignx2_we_vote_id={{ possible_duplicate.campaignx2_we_vote_id }}&state_code={{ state_code }}"
-                   class="u-no-break"
+                   class="u-no-break btn btn-primary"
                    target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
                 <br />
                 <br />
                 <a href="{% url 'campaign:not_duplicates' %}?campaignx1_we_vote_id={{ possible_duplicate.campaignx1_we_vote_id }}&campaignx2_we_vote_id={{ possible_duplicate.campaignx2_we_vote_id }}&state_code={{ state_code }}"
-                   class="u-no-break">not duplicates</a>
+                   class="u-no-break btn btn-light">mark as not duplicates</a>
             </td>
         {% if possible_duplicate.campaignx1 %}
             <td style="border-left: 1px solid #cdd0d4;">
-                {% if possible_duplicate.campaignx1.we_vote_hosted_profile_image_url_tiny %}
+                {% if possible_duplicate.campaignx1.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'campaign:campaignx_edit' possible_duplicate.campaignx1.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                    <img src='{{ possible_duplicate.campaignx1.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                    <img src='{{ possible_duplicate.campaignx1.we_vote_hosted_profile_image_url_medium }}' height="64px" />
                 </a>
                 {% endif %}
             </td>
@@ -127,10 +127,10 @@
         {% endif %}
         {% if possible_duplicate.campaignx2 %}
             <td style="border-left: 1px solid #cdd0d4;">
-                {% if possible_duplicate.campaignx2.we_vote_hosted_profile_image_url_tiny %}
+                {% if possible_duplicate.campaignx2.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'campaign:campaignx_edit' possible_duplicate.campaignx2.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                    <img src='{{ possible_duplicate.campaignx2.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                    <img src='{{ possible_duplicate.campaignx2.we_vote_hosted_profile_image_url_medium }}' height="64px" />
                 </a>
                 {% endif %}
             </td>

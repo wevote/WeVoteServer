@@ -911,7 +911,7 @@ def deduplicate_politicians_first_attempt(state_code=''):
             we_vote_politician.we_vote_id)
         ignore_politician_we_vote_id_list += not_a_duplicate_list
 
-        results = find_duplicate_politician(we_vote_politician, ignore_politician_we_vote_id_list)
+        results = find_duplicate_politician(we_vote_politician, ignore_politician_we_vote_id_list, read_only=True)
         if results['politician_merge_possibility_found']:
             politician_option1_for_template = we_vote_politician
             politician_option2_for_template = results['politician_merge_possibility']

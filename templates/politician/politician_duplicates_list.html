@@ -59,11 +59,9 @@
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th>Politician 1 Name</th>
-            <th>ID - We Vote ID</th>
             <th>Twitter Handle</th>
             <th>&nbsp;</th>
             <th>Politician 2 Name</th>
-            <th>ID - We Vote ID</th>
             <th>Twitter Handle</th>
         </tr>
       </thead>
@@ -72,27 +70,28 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}"
-                   class="u-no-break"
+                   class="u-no-break btn btn-primary"
                    target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
                 <br />
                 <br />
                 <a href="{% url 'politician:not_duplicates' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}"
-                   class="u-no-break">not duplicates</a>
+                   class="u-no-break btn btn-light">mark as not duplicates</a>
             </td>
         {% if possible_duplicate.politician1 %}
             <td style="border-left: 1px solid #cdd0d4;">
-                {% if possible_duplicate.politician1.we_vote_hosted_profile_image_url_tiny %}
+                {% if possible_duplicate.politician1.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'politician:politician_edit' possible_duplicate.politician1.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                    <img src='{{ possible_duplicate.politician1.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                    <img src='{{ possible_duplicate.politician1.we_vote_hosted_profile_image_url_medium }}' height="64px" />
                 </a>
                 {% endif %}
             </td>
             <td>
                 <a href="{% url 'politician:politician_edit' possible_duplicate.politician1.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{% if possible_duplicate.politician1.politician_name %}{{ possible_duplicate.politician1.politician_name }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td>
+                   target="_blank">{% if possible_duplicate.politician1.politician_name %}<span style="font-size: 1.2em; font-weight: 600;">{{ possible_duplicate.politician1.politician_name }}</span>{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% if possible_duplicate.politician1.state_code %}<br /><span style="color: #999;">{{ possible_duplicate.politician1.state_code|upper }}</span>{% endif %}
+            <br />
+            <span style="color: #999;">
                 {{ possible_duplicate.politician1.id }} - {{ possible_duplicate.politician1.we_vote_id }}
                 {% if possible_duplicate.politician1.linked_representative_we_vote_id_list %}
                     <br />
@@ -106,6 +105,7 @@
                 {% if possible_duplicate.politician1.vote_smart_id %}
                     <br />VS: {{ possible_duplicate.politician1.vote_smart_id|default_if_none:"" }}
                 {% endif %}
+            </span>
             </td>
             <td>
                 {% if possible_duplicate.politician1.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle }}"
@@ -123,18 +123,19 @@
         {% endif %}
         {% if possible_duplicate.politician2 %}
             <td style="border-left: 1px solid #cdd0d4;">
-                {% if possible_duplicate.politician2.we_vote_hosted_profile_image_url_tiny %}
+                {% if possible_duplicate.politician2.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'politician:politician_edit' possible_duplicate.politician2.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                    <img src='{{ possible_duplicate.politician2.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                    <img src='{{ possible_duplicate.politician2.we_vote_hosted_profile_image_url_medium }}' height="64px" />
                 </a>
                 {% endif %}
             </td>
             <td>
                 <a href="{% url 'politician:politician_edit' possible_duplicate.politician2.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ possible_duplicate.politician2.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td>
+                   target="_blank"><span style="font-size: 1.2em; font-weight: 600;">{{ possible_duplicate.politician2.politician_name }}</span> <span class="glyphicon glyphicon-new-window"></span></a>
+                {% if possible_duplicate.politician2.state_code %}<br /><span style="color: #999;">{{ possible_duplicate.politician2.state_code|upper }}</span>{% endif %}
+            <br />
+            <span style="color: #999;">
                 {{ possible_duplicate.politician2.id }} - {{ possible_duplicate.politician2.we_vote_id }}
                 {% if possible_duplicate.politician2.linked_representative_we_vote_id_list %}
                     <br />
@@ -148,6 +149,7 @@
                 {% if possible_duplicate.politician2.vote_smart_id %}
                     <br />VS: {{ possible_duplicate.politician2.vote_smart_id|default_if_none:"" }}
                 {% endif %}
+            </span>
             </td>
             <td>
                 {% if possible_duplicate.politician2.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle }}"
