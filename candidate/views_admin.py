@@ -4098,13 +4098,11 @@ def candidate_merge_process_view(request):
                 status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
                           '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
     else:
-        # NOTE: We could also redirect to a page to look specifically at these two candidates, but this should
-        # also get you back to looking at the two candidates
         messages.add_message(request, messages.ERROR, merge_results['status'])
-        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
+        return HttpResponseRedirect(reverse('candidate:compare_two_candidates_for_merge', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    '&candidate_year=' + str(candidate_year) +
-                                    "&auto_merge_off=1" +
+                                    '&candidate1_we_vote_id=' + str(candidate1_we_vote_id) +
+                                    '&candidate2_we_vote_id=' + str(candidate2_we_vote_id) +
                                     "&state_code=" + str(state_code))
 
     if redirect_to_candidate_list:
@@ -4114,7 +4112,7 @@ def candidate_merge_process_view(request):
                                     '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
+        return HttpResponseRedirect(reverse('candidate:duplicates_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     '&candidate_year=' + str(candidate_year) +
                                     "&state_code=" + str(state_code))

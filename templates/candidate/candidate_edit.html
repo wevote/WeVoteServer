@@ -796,19 +796,48 @@ th, td {
     <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>We Vote ID</th>
             <th>Candidate Name</th>
+            <th>We Vote ID</th>
             <th>Year</th>
             <th>State</th>
             <th>Other IDs</th>
         </tr>
     </thead>
+        <tr>
+            <td>CURRENT</td>
+            <td>
+              {% if candidate.candidates_match_root_candidate %}
+                <strong>{{ candidate.candidate_name }}</strong>
+              {% else %}
+                {{ candidate.candidate_name }}
+              {% endif %}
+            </td>
+            <td>
+                {{ candidate.we_vote_id }} (this candidate)
+                {% if candidate.politician_we_vote_id %}
+                    - 
+                    <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+            </td>
+            <td>{{ candidate.candidate_year }}</td>
+            <td>{{ candidate.state_code }}</td>
+            <td>
+                {% if candidate.candidate_twitter_handle %}Twitter: {{ candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
+                {% if candidate.ballotpedia_race_id %}BP Race: {{ candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
+                {% if candidate.ballotpedia_candidate_id %}BP Cand: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
+            </td>
+        </tr>
     {% for found_candidate in related_candidate_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {{ found_candidate.we_vote_id }}
-                <a href="{% url 'candidate:candidate_edit' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              {% if found_candidate.candidates_match_root_candidate %}
+                <strong>{{ found_candidate.candidate_name }}</strong>
+              {% else %}
+                {{ found_candidate.candidate_name }}
+              {% endif %}
+              <br />
+              (<a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>)
                 <form action="{% url 'candidate:candidate_merge_process' %}" method="post" target="_blank">
                     {% csrf_token %}
                     <input type="submit" value="Not Duplicate" name="skip" />
@@ -821,13 +850,12 @@ th, td {
                 </form>
             </td>
             <td>
-              {% if found_candidate.candidates_match_root_candidate %}
-                <strong>{{ found_candidate.candidate_name }}</strong>
-              {% else %}
-                {{ found_candidate.candidate_name }}
-              {% endif %}
-              <br />
-              (<a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>)
+                {{ found_candidate.we_vote_id }}
+                <a href="{% url 'candidate:candidate_edit' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% if found_candidate.politician_we_vote_id %}
+                    - 
+                    <a href="{% url 'politician:politician_we_vote_id_edit' found_candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ found_candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
             </td>
             <td>{{ found_candidate.candidate_year }}</td>
             <td>{{ found_candidate.state_code }}</td>
