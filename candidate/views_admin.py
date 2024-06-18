@@ -2650,6 +2650,11 @@ def candidate_edit_process_view(request):
     candidate_twitter_handle3 = request.POST.get('candidate_twitter_handle3', False)
     if positive_value_exists(candidate_twitter_handle3):
         candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
+    candidate_year = request.POST.get('candidate_year', False)
+    if not positive_value_exists(candidate_year):
+        candidate_year = False
+    if positive_value_exists(candidate_year):
+        candidate_year = convert_to_int(candidate_year)
     contest_office_id = request.POST.get('contest_office_id', False)
     contest_office_name = request.POST.get('contest_office_name', False)
     district_name = request.POST.get('district_name', False)
@@ -2747,7 +2752,8 @@ def candidate_edit_process_view(request):
         if len(candidate_query):
             candidate_on_stage = candidate_query[0]
             candidate_we_vote_id = candidate_on_stage.we_vote_id
-            candidate_year = candidate_on_stage.candidate_year
+            if not positive_value_exists(candidate_year):
+                candidate_year = candidate_on_stage.candidate_year
             state_code_from_candidate = candidate_on_stage.state_code
             candidate_on_stage_found = True
 
@@ -2889,7 +2895,7 @@ def candidate_edit_process_view(request):
                 candidate_ultimate_election_date = election_day_as_integer
                 election_day_as_string = str(election_day_as_integer)
                 year = election_day_as_string[:4]
-                if year:
+                if year and not positive_value_exists(candidate_year):
                     candidate_year = convert_to_int(year)
                 latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
         except Exception as e:

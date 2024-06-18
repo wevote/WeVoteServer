@@ -222,21 +222,26 @@ th, td {
         </span>
     </div>
 </div>
-{% if candidate.we_vote_hosted_profile_image_url_large %}
 <div class="col">
 <div class="row form-group">
     
+{% if candidate.we_vote_hosted_profile_image_url_large %}
     <label for="profile_image_background_color_id" class="pl-3 control-label">Background Color</label>
     <div class="col">
-        
         <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
                value="{% if candidate %}{{ candidate.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
         <input name="regenerate_color" id="regenerate_color_id" type="checkbox"/>
         <label for="regenerate_color_id">&nbsp;Regenerate default color</label>
     </div>
-</div>
-</div>
 {% endif %}
+    
+    <label for="profile_image_background_color_id" class="pl-3 control-label">Candidate Year</label>
+    <div class="col">
+        <input type="text" name="candidate_year" id="candidate_year_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_year|default_if_none:"" }}{% else %}{{ candidate_year }}{% endif %}" />
+    </div>
+</div>
+</div>
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="row form-group">
@@ -249,6 +254,9 @@ th, td {
         {% endif %}
         {% if candidate.candidate_year %}
             {{ candidate.candidate_year }}
+            &nbsp;&nbsp;&nbsp;
+        {% else %}
+            {{ candidate.date_last_updated }}
             &nbsp;&nbsp;&nbsp;
         {% endif %}
         {% if candidate.candidate_ultimate_election_date %}
@@ -796,6 +804,7 @@ th, td {
     <thead>
         <tr>
             <th>&nbsp;</th>
+            <th>&nbsp;</th>
             <th>Candidate Name</th>
             <th>We Vote ID</th>
             <th>Year</th>
@@ -805,6 +814,11 @@ th, td {
     </thead>
         <tr>
             <td>CURRENT</td>
+            <td width="48px">
+            {% if candidate.we_vote_hosted_profile_image_url_medium %}
+                <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}" width="48px">
+            {% endif %}
+            </td>
             <td>
               {% if candidate.candidates_match_root_candidate %}
                 <strong>{{ candidate.candidate_name }}</strong>
@@ -820,16 +834,24 @@ th, td {
                 {% endif %}
             </td>
             <td>{{ candidate.candidate_year }}</td>
-            <td>{{ candidate.state_code }}</td>
+            <td>{{ candidate.state_code|upper }}</td>
             <td>
                 {% if candidate.candidate_twitter_handle %}Twitter: {{ candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
                 {% if candidate.ballotpedia_race_id %}BP Race: {{ candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
                 {% if candidate.ballotpedia_candidate_id %}BP Cand: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
+                {% if candidate.ballotpedia_candidate_url %}<br />{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% endif %}
+                {% if candidate.wikipedia_url %}<br />{{ candidate.wikipedia_url|default_if_none:"" }}{% endif %}
+                {% if candidate.candidate_url %}<br />{{ candidate.candidate_url|default_if_none:"" }}{% endif %}
             </td>
         </tr>
     {% for found_candidate in related_candidate_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
+            <td width="48px">
+            {% if found_candidate.we_vote_hosted_profile_image_url_medium %}
+                <img src="{{ found_candidate.we_vote_hosted_profile_image_url_medium }}" width="48px">
+            {% endif %}
+            </td>
             <td>
               {% if found_candidate.candidates_match_root_candidate %}
                 <strong>{{ found_candidate.candidate_name }}</strong>
@@ -858,11 +880,14 @@ th, td {
                 {% endif %}
             </td>
             <td>{{ found_candidate.candidate_year }}</td>
-            <td>{{ found_candidate.state_code }}</td>
+            <td>{{ found_candidate.state_code|upper }}</td>
             <td>
                 {% if found_candidate.candidate_twitter_handle %}Twitter: {{ found_candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
                 {% if found_candidate.ballotpedia_race_id %}BP Race: {{ found_candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
                 {% if found_candidate.ballotpedia_candidate_id %}BP Cand: {{ found_candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
+                {% if candidate.ballotpedia_candidate_url %}<br />{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% endif %}
+                {% if candidate.wikipedia_url %}<br />{{ candidate.wikipedia_url|default_if_none:"" }}{% endif %}
+                {% if candidate.candidate_url %}<br />{{ candidate.candidate_url|default_if_none:"" }}{% endif %}
             </td>
         </tr>
     {% endfor %}
