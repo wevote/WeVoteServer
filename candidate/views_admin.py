@@ -92,23 +92,32 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
     state_code = request.GET.get('state_code', '')
     candidate_search = request.GET.get('candidate_search', '')
 
-    if not positive_value_exists(google_civic_election_id):
+    candidate_we_vote_id_list = []
+    current_year = 0
+
+    if positive_value_exists(google_civic_election_id):
+        candidate_list_manager = CandidateListManager()
+        google_civic_election_id_list = [google_civic_election_id]
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    elif positive_value_exists(state_code):
+        current_year = get_current_year_as_integer()
+    else:
         json_data = {
             'success': False,
-            'status': 'GOOGLE_CIVIC_ELECTION_ID_REQUIRED'
+            'status': 'GOOGLE_CIVIC_ELECTION_ID_OR_STATE_CODE_REQUIRED'
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    candidate_list_manager = CandidateListManager()
-    google_civic_election_id_list = [google_civic_election_id]
-    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-        google_civic_election_id_list=google_civic_election_id_list,
-        limit_to_this_state_code=state_code)
-    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-
     try:
-        candidate_list = CandidateCampaign.objects.using('readonly').all()
-        candidate_list = candidate_list.filter(we_vote_id__in=candidate_we_vote_id_list)
+        queryset = CandidateCampaign.objects.using('readonly').all()
+        if positive_value_exists(google_civic_election_id):
+            queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+        elif positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+            queryset = queryset.filter(candidate_year=current_year)
         filters = []
         if positive_value_exists(candidate_search):
             new_filter = Q(candidate_name__icontains=candidate_search)
@@ -143,13 +152,11 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                 for item in filters:
                     final_filters |= item
 
-                candidate_list = candidate_list.filter(final_filters)
-        candidate_list_dict = {}
+                queryset = queryset.filter(final_filters)
+        candidate_dict_list = []
         try:
-            for one_candidate in candidate_list:
-                candidate_dict = vars(one_candidate)
-                # To be explored for this issue: https://wevoteusa.atlassian.net/browse/WV-366
-            candidate_list_dict = candidate_list.values(
+            # Fix made related to: https://wevoteusa.atlassian.net/browse/WV-366
+            candidate_dict_list = queryset.values(
                 'ballot_guide_official_statement',
                 'ballotpedia_candidate_id',
                 'ballotpedia_candidate_name',
@@ -245,13 +252,13 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                 'withdrawal_date',
                 'withdrawn_from_election',
                 'youtube_url',
-                )
+            )
         except Exception as e:
             status += "ERROR_CONVERTING_TO_DICT: " + str(e) + " "
 
-        if candidate_list_dict:
-            candidate_list_json = list(candidate_list_dict)
-            return HttpResponse(json.dumps(candidate_list_json, default=str), content_type='application/json')
+        if candidate_dict_list:
+            candidate_list_json = list(candidate_dict_list)
+            return HttpResponse(json.dumps(candidate_list_json, indent=4, sort_keys=True, default=str), content_type='application/json')
     except Exception as e:
         status += "CANDIDATE_LIST_MISSING: " + str(e) + " "
 
