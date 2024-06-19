@@ -1739,7 +1739,28 @@ def process_request_from_master(request, message_text, get_url, get_params):
 
     response = requests.get(get_url, params=get_params)
 
-    structured_json = json.loads(response.text)
+    #print response status and text for debugging
+    print("response.status_code: " + str(response.status_code)) # added by paul
+    print("response.text: " + response.text) # added by paul
+
+    import_results = { # added by paul
+        'success': False, # added by paul
+        'status': "Error: Default error message.", # added by paul
+    } # added by paul
+    structured_json = {} # added by paul
+
+    if not response.text: # added by paul
+        import_results['status'] = "Error: No response.text returned." # added by paul
+        return import_results, structured_json # added by paul
+
+    try: # added by paul
+        structured_json = json.loads(response.text)
+    except json.JSONDecodeError as e: # added by paul
+        import_results = { # added by paul
+            'success': False, # added by paul
+            'status': "Error: " + str(e), # added by paul
+        } # added by paul
+
     if 'success' in structured_json and not structured_json['success']:
         import_results = {
             'success': False,
