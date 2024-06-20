@@ -798,7 +798,7 @@ class VoterGuideManager(models.Manager):
         """
         Update voter_guide entry with the latest information from an organization
         """
-        success = False
+        success = True
         status = ""
         voter_guides_updated = 0
 
@@ -824,10 +824,23 @@ class VoterGuideManager(models.Manager):
                                     voter_guide.voter_we_vote_id = voter_we_vote_id
                                 except Exception as e:
                                     status += 'COULD_NOT_RETRIEVE_VOTER_WE_VOTE_ID ' + str(e) + ' '
-                        voter_guide.save()
-                        success = True
-                        voter_guides_updated += 1
-        status += "UPDATED_VOTER_GUIDES_WITH_ORG_DATA: " + str(voter_guides_updated) + " "
+                                    success = False
+                            elif not voter_results['success']:
+                                status += "RETRIEVE_VOTER_FAILED: " + voter_results['status'] + " "
+                        try:
+                            voter_guide.save()
+                            voter_guides_updated += 1
+                        except Exception as e:
+                            status += "SAVE_VOTER_GUIDE_FAILED: " + str(e) + " "
+                            success = False
+                    elif not refresh_results['success']:
+                        status += "REFRESH_VOTER_GUIDE_FAILED: " + refresh_results['status'] + " "
+                status += "UPDATED_VOTER_GUIDES_WITH_ORG_DATA: " + str(voter_guides_updated) + " "
+            elif not results['success']:
+                status += "RETRIEVE_VOTER_GUIDES_FAILED: " + results['status'] + " "
+        else:
+            status += "UPDATED_VOTER_GUIDES_ORGANIZATION_MISSING "
+            success = False
 
         results = {
             'success':                  success,
