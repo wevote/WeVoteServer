@@ -2084,10 +2084,12 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     organization_search_for_merge = request.GET.get('organization_search_for_merge', "")
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    # google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_id = request.GET.get('candidate_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
-    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+
+    # POST
+    show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
 
     # Bulk delete
     select_for_changing_position_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -2104,8 +2106,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     items_processed_successfully = 0
     if which_marking and select_for_changing_position_ids:
         # Get these values from hidden POST fields
-        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
-        show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+        # google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+        # show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
         state_code = request.POST.get('state_code', '')  # Already retrieved with GET, now retrieving with POST
 
         position_manager = PositionManager()
@@ -2131,30 +2133,6 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                              'errors: {error_count}'
                              ''.format(error_count=error_count,
                                        items_processed_successfully=items_processed_successfully))
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-        # Make sure we always include the current election in the election_list, even if it is older
-        if positive_value_exists(google_civic_election_id):
-            this_election_found = False
-            for one_election in election_list:
-                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
-                    this_election_found = True
-                    break
-            if not this_election_found:
-                results = election_manager.retrieve_election(google_civic_election_id)
-                if results['election_found']:
-                    one_election = results['election']
-                    election_list.append(one_election)
-
-    google_civic_election_id_list = []
-    for one_election in election_list:
-        google_civic_election_id_list.append(str(one_election.google_civic_election_id))
 
     # We pass candidate_we_vote_id to this page to pre-populate the form
     candidate_manager = CandidateManager()
@@ -2207,58 +2185,52 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                              'Could not find organization when trying to retrieve positions.')
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    # candidate_list_manager = CandidateListManager()
-    # results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-    #     google_civic_election_id_list)
-    # if not positive_value_exists(results['success']):
-    #     status += results['status']
-    # candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-
     friends_only_position_count = 0
     public_position_count = 0
     today = datetime.now().date()
     today_date_as_integer = convert_date_to_date_as_integer(today)
+
+    is_analytics_admin = False
+    authority_required = {'admin', 'analytics_admin'}
+    if voter_has_authority(request, authority_required):
+        is_analytics_admin = True
 
     try:
         public_position_query = PositionEntered.objects.all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
-        public_position_query = public_position_query \
-            .filter(Q(position_ultimate_election_not_linked=True) |
-                    Q(position_ultimate_election_date__gte=today_date_as_integer))
-        # if positive_value_exists(google_civic_election_id):
-        #     public_position_query = public_position_query\
-        #         .filter(Q(google_civic_election_id=google_civic_election_id) |
-        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        # elif len(google_civic_election_id_list):
-        #     public_position_query = public_position_query\
-        #         .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        public_position_query = public_position_query.order_by('-id')
+        if positive_value_exists(show_all_elections):
+            # Don't limit to positions for upcoming elections
+            pass
+        else:
+            public_position_query = public_position_query \
+                .filter(Q(position_ultimate_election_not_linked=True) |
+                        Q(position_ultimate_election_date__gte=today_date_as_integer))
+        public_position_query = public_position_query.order_by('-position_year')
         public_position_count = public_position_query.count()
         public_position_list = public_position_query[:50]
         public_position_list = list(public_position_list)
 
-        friends_only_position_query = PositionForFriends.objects.all()
-        # As of Aug 2018 we are no longer using PERCENT_RATING
-        friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
-        friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
-        friends_only_position_query = friends_only_position_query \
-            .filter(Q(position_ultimate_election_not_linked=True) |
-                    Q(position_ultimate_election_date__gte=today_date_as_integer))
-        # if positive_value_exists(google_civic_election_id):
-        #     friends_only_position_query = friends_only_position_query\
-        #         .filter(Q(google_civic_election_id=google_civic_election_id) |
-        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        # elif len(google_civic_election_id_list):
-        #     friends_only_position_query = friends_only_position_query\
-        #         .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        friends_only_position_query = friends_only_position_query.order_by('-id')
-        friends_only_position_count = friends_only_position_query.count()
-        friends_only_position_list = friends_only_position_query[:50]
-        friends_only_position_list = list(friends_only_position_list)
+        if is_analytics_admin:
+            friends_only_position_query = PositionForFriends.objects.all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
+            friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
+            if positive_value_exists(show_all_elections):
+                # Don't limit to positions for upcoming elections
+                pass
+            else:
+                friends_only_position_query = friends_only_position_query \
+                    .filter(Q(position_ultimate_election_not_linked=True) |
+                            Q(position_ultimate_election_date__gte=today_date_as_integer))
+            friends_only_position_query = friends_only_position_query.order_by('-id')
+            friends_only_position_count = friends_only_position_query.count()
+            friends_only_position_list = friends_only_position_query[:50]
+            friends_only_position_list = list(friends_only_position_list)
+        else:
+            friends_only_position_list = []
+            friends_only_position_count = 0
 
         organization_position_list = public_position_list + friends_only_position_list
         if len(public_position_list) or len(friends_only_position_list):
@@ -2404,9 +2376,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'change_log_list':                  change_log_list,
-        'election_list':                    election_list,
         'friends_only_position_count':      friends_only_position_count,
-        'google_civic_election_id':         google_civic_election_id,
         'messages_on_stage':                messages_on_stage,
         'organization':                     organization_on_stage,
         'organization_issues_list':         organization_issues_list,

@@ -1,7 +1,7 @@
 {# templates/position/position_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Opinions/Positions{% endblock %}
+{% block title %}Opinions/Positions/Endorsements{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -11,11 +11,13 @@
      target="_blank">Import New Positions <span class="glyphicon glyphicon-new-window"></span></a>
 </p>
 
-<h1>Opinions/Positions</h1>
+<h1>Opinions/Positions/Endorsements</h1>
 
 <p>
+    We use these three terms to mean the same thing: an opinion (Support, Oppose, or Info Only) 
+    by a group or public figure, about a candidate running for office.
     Also see positions listed under <a href="{% url 'organization:organization_list' %}">Endorsers</a>.
-    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.
+{#    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.#}
 </p>
 
 <ul>
