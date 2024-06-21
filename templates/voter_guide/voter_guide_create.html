@@ -256,7 +256,11 @@
           Choose Candidate this Website is About<br />
           <button type="submit"
                   name="clear_organization_options"
-                  class="btn btn-link btn-sm" value="1">Clear Candidate Options</button>
+                  class="btn btn-link btn-sm" value="1">Clear Candidate Options</button><br />
+          <a href="{% url 'candidate:candidate_new_search' %}?candidate_name={{ candidate_name|default_if_none:"" }}" 
+             class="u-no-break"
+             target="_blank">Add new Candidate <span class="glyphicon glyphicon-new-window"></span></a>
+
         </label>
         <div class="col-sm-8">
             <table class="table">
@@ -266,9 +270,13 @@
                     <th>Twitter / Website</th>
                 </tr>
             {% for possible_candidate in owner_of_website_candidate_list %}
-                {# DALE 2019-08-01 This block needs to be updated for candidates #}
                 <tr>
-                    <td>{{ possible_candidate.display_candidate_name }}</td>
+                    <td>
+                        <a href="{% url 'candidate:candidate_edit_we_vote_id' possible_candidate.we_vote_id %}" 
+                           class="u-no-break"
+                           style="font-size: 1.3em; font-weight: 600;"
+                           target="_blank">{{ possible_candidate.display_candidate_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    </td>
                     <td><button type="submit"
                                 name="candidate_we_vote_id"
                                 class="btn btn-primary btn-sm" value="{{ possible_candidate.we_vote_id }}">Choose</button></td>

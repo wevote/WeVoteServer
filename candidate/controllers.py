@@ -1328,9 +1328,13 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['youtube_url'] = one_candidate['youtube_url']
 
             results = candidate_manager.update_or_create_candidate(
-                we_vote_id, google_civic_election_id, ocd_division_id,
-                contest_office_id, contest_office_we_vote_id,
-                candidate_name, updated_candidate_values)
+                candidate_we_vote_id=we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                ocd_division_id=ocd_division_id,
+                contest_office_id=contest_office_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_candidate_name=candidate_name,
+                updated_candidate_values=updated_candidate_values)
         else:
             candidates_not_processed += 1
             results = {

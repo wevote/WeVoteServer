@@ -29,6 +29,7 @@ import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists
+from wevote_functions.functions_date import get_current_year_as_integer
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, \
     RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS, RETRIEVE_POSSIBLE_BALLOTPEDIA_CANDIDATES_LINKS
 
@@ -2541,7 +2542,9 @@ def groom_and_store_sample_ballot_results_api_v4(
                                     pass
                                 else:
                                     # Create new candidate
+                                    candidate_year = get_current_year_as_integer()
                                     update_values = {
+                                        'candidate_year':           candidate_year,
                                         'ballotpedia_candidate_id': ballotpedia_candidate_id,
                                         'google_civic_election_id': google_civic_election_id,
                                     }

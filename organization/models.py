@@ -54,7 +54,7 @@ ORGANIZATION_TYPE_CHOICES_IN_PUBLIC_SPHERE = [CORPORATION, GROUP, NONPROFIT, NON
 # These names lead to text matches on Candidate "I am endorsed by this group" pages that are too common
 ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
     "ACCE", "ADAction", "AJC", "Beacon", "BET", "BLOC", "BRAC",
-    "careers", "Check", "Cher", "CHLI", "cia", "Citi", "CNN", "CoD", "CS", "CSS",
+    "careers", "Check", "Cher", "Chica", "CHLI", "cia", "Citi", "CNN", "CoD", "CS", "CSS",
     "data", "DCAR", "Demos", "DID", "donate", "GEA", "Google", "Greg",
     "Ian", "IMG", "Intro", "Isaac",
     "JAC", "Jenn", "Location", "LYNX",
@@ -62,7 +62,7 @@ ORGANIZATION_NAMES_TO_EXCLUDE_FROM_SCRAPER = [
     "NBA", "NEA", "NEWS", "NEXT", "NPR",
     "Pam", "Pat", "People", "Pennsylvania", "Ping", "plan", "products",
     "Ray", "Reactions", "reason", "Representative", "RESULTS", "Rights", "Ro", "Robbie"
-    "Sarah", "SAVE", "SEAP", "Section", "Settings", "spa", "steve",
+    "Sarah", "SAVE", "SEAP", "Section", "Settings", "spa", "SpaceX", "Squarespace", "steve",
     "The Advocate", "The Candidate", "The Democrats", "The Dispatch", "The Nation", "The Reporter",
     "THLN", "TIME", "Twitter",
     "Uber", "vote",

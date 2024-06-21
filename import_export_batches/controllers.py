@@ -40,6 +40,7 @@ from voter_guide.controllers import refresh_existing_voter_guides
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
+from wevote_functions.functions_date import get_current_year_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -4421,6 +4422,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
         if positive_value_exists(one_batch_row_action.candidate_url):
             update_values['candidate_url'] = one_batch_row_action.candidate_url
+        if hasattr(one_batch_row_action, 'candidate_year') and \
+                positive_value_exists(one_batch_row_action.candidate_year):
+            update_values['candidate_year'] = one_batch_row_action.candidate_year
+        else:
+            candidate_year = get_current_year_as_integer()
+            update_values['candidate_year'] = candidate_year
         if positive_value_exists(one_batch_row_action.candidate_contact_form_url):
             update_values['candidate_contact_form_url'] = one_batch_row_action.candidate_contact_form_url
         if positive_value_exists(one_batch_row_action.candidate_email):

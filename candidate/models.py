@@ -4,6 +4,7 @@
 from datetime import datetime
 import re
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
 
@@ -4600,9 +4601,9 @@ class CandidateManager(models.Manager):
         ballotpedia_photo_url = update_values['ballotpedia_photo_url'] \
             if 'ballotpedia_photo_url' in update_values else ''
         ballotpedia_photo_url_is_broken = update_values['ballotpedia_photo_url_is_broken'] \
-            if 'ballotpedia_photo_url_is_broken' in update_values else ''
+            if 'ballotpedia_photo_url_is_broken' in update_values else False
         ballotpedia_photo_url_is_placeholder = update_values['ballotpedia_photo_url_is_placeholder'] \
-            if 'ballotpedia_photo_url_is_placeholder' in update_values else ''
+            if 'ballotpedia_photo_url_is_placeholder' in update_values else False
         ballotpedia_race_id = update_values['ballotpedia_race_id'] \
             if 'ballotpedia_race_id' in update_values else 0
         birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
@@ -4668,27 +4669,32 @@ class CandidateManager(models.Manager):
         wikipedia_photo_does_not_exist = update_values['wikipedia_photo_does_not_exist'] \
             if 'wikipedia_photo_does_not_exist' in update_values else ''
 
-
-
-        if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
-                or not positive_value_exists(contest_office_id) \
-                or not positive_value_exists(google_civic_election_id) or not positive_value_exists(state_code):
+        minimum_variables_found = \
+            positive_value_exists(candidate_name) and \
+            positive_value_exists(state_code)
+        # positive_value_exists(contest_office_we_vote_id) and \
+        # positive_value_exists(contest_office_id) and \
+        # positive_value_exists(google_civic_election_id)
+        if not minimum_variables_found:
             # If we don't have the minimum values required to create a candidate, then don't proceed
-            status += "CREATE_CANDIDATE_ROW "
+            status += "CREATE_CANDIDATE_ROW_MISSING_VARIABLES "
+            success = False
             results = {
                     'success':                  success,
                     'status':                   status,
                     'new_candidate_created':    new_candidate_created,
                     'candidate_updated':        candidate_updated,
+                    'candidate':                new_candidate,
                     'new_candidate':            new_candidate,
-                }
+            }
             return results
 
         try:
-            new_candidate = CandidateCampaign.objects.create(candidate_name=candidate_name,
-                                                             contest_office_we_vote_id=contest_office_we_vote_id,
-                                                             google_civic_election_id=google_civic_election_id,
-                                                             state_code=state_code)
+            new_candidate = CandidateCampaign.objects.create(
+                candidate_name=candidate_name,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code)
             if new_candidate:
                 success = True
                 status += "CANDIDATE_CREATED "
@@ -4749,9 +4755,13 @@ class CandidateManager(models.Manager):
                 new_candidate.save()
 
                 status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
+            except ValidationError as e:
+                success = False
+                # new_candidate_created = False
+                status += "CANDIDATE_CREATE_VALIDATION_ERROR: " + str(e) + " "
             except Exception as e:
                 success = False
-                new_candidate_created = False
+                # new_candidate_created = False
                 status += "CANDIDATE_CREATE_THEN_UPDATE_ERROR: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
 
@@ -4760,8 +4770,9 @@ class CandidateManager(models.Manager):
                 'status':                   status,
                 'new_candidate_created':    new_candidate_created,
                 'candidate_updated':        candidate_updated,
+                'candidate':                new_candidate,
                 'new_candidate':            new_candidate,
-            }
+        }
         return results
 
     def update_candidate_row_entry(self, candidate_we_vote_id, update_values):
