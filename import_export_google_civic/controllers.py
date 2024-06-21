@@ -224,9 +224,13 @@ def process_candidates_from_structured_json(
 
             candidate_manager = CandidateManager()
             results = candidate_manager.update_or_create_candidate(
-                we_vote_id, google_civic_election_id,
-                ocd_division_id, contest_office_id, contest_office_we_vote_id,
-                google_civic_candidate_name, updated_candidate_values)
+                candidate_we_vote_id=we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                ocd_division_id=ocd_division_id,
+                contest_office_id=contest_office_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_candidate_name=google_civic_candidate_name,
+                updated_candidate_values=updated_candidate_values)
 
     return results
 

@@ -1084,50 +1084,70 @@ class PoliticianManager(models.Manager):
             return_close_matches=False,
             state_code=''):
         filter_set = False
-        if politician_name:
-            if positive_value_exists(return_close_matches):
-                if positive_value_exists(state_code):
-                    new_filter = Q(politician_name__icontains=politician_name,
-                                   state_code__iexact=state_code)
-                else:
-                    new_filter = Q(politician_name__icontains=politician_name)
-            else:
-                if positive_value_exists(state_code):
-                    new_filter = Q(politician_name__iexact=politician_name,
-                                   state_code__iexact=state_code)
-                else:
-                    new_filter = Q(politician_name__iexact=politician_name)
-            filter_set = True
-            filters.append(new_filter)
+        final_search_filters = None
+        # if politician_name:
+        #     if positive_value_exists(return_close_matches):
+        #         if positive_value_exists(state_code):
+        #             new_filter = Q(politician_name__icontains=politician_name,
+        #                            state_code__iexact=state_code)
+        #         else:
+        #             new_filter = Q(politician_name__icontains=politician_name)
+        #     else:
+        #         if positive_value_exists(state_code):
+        #             new_filter = Q(politician_name__iexact=politician_name,
+        #                            state_code__iexact=state_code)
+        #         else:
+        #             new_filter = Q(politician_name__iexact=politician_name)
+        #     filter_set = True
+        #     filters.append(new_filter)
 
-            search_words = politician_name.split()
-            if len(search_words) > 0:
-                search_filters = []
-                for one_word in search_words:
+        search_words = politician_name.split()
+        if len(search_words) > 0 or positive_value_exists(politician_name):
+            search_filters = []
+
+            if politician_name:
+                filter_set = True
+                if positive_value_exists(return_close_matches):
                     if positive_value_exists(state_code):
-                        search_filter = Q(
-                            politician_name__icontains=one_word,
-                            state_code__iexact=state_code)
+                        search_filter = Q(politician_name__icontains=politician_name,
+                                          state_code__iexact=state_code)
                     else:
-                        search_filter = Q(politician_name__icontains=one_word)
-                    search_filters.append(search_filter)
-                # Add the first query
-                if len(search_filters) > 0:
-                    final_search_filters = search_filters.pop()
-                    if positive_value_exists(return_close_matches):
-                        # ..."OR" the remaining items in the list
-                        for item in search_filters:
-                            final_search_filters |= item
+                        search_filter = Q(politician_name__icontains=politician_name)
+                else:
+                    if positive_value_exists(state_code):
+                        search_filter = Q(politician_name__iexact=politician_name,
+                                          state_code__iexact=state_code)
                     else:
-                        # ..."AND" the remaining items in the list
-                        for item in search_filters:
-                            final_search_filters &= item
-                    queryset = queryset.filter(final_search_filters)
+                        search_filter = Q(politician_name__iexact=politician_name)
+                search_filters.append(search_filter)
+
+            for one_word in search_words:
+                filter_set = True
+                if positive_value_exists(state_code):
+                    search_filter = Q(
+                        politician_name__icontains=one_word,
+                        state_code__iexact=state_code)
+                else:
+                    search_filter = Q(politician_name__icontains=one_word)
+                search_filters.append(search_filter)
+            # Add the first query
+            if len(search_filters) > 0:
+                final_search_filters = search_filters.pop()
+                if positive_value_exists(return_close_matches):
+                    # ..."OR" the remaining items in the list
+                    for item in search_filters:
+                        final_search_filters |= item
+                else:
+                    # ..."AND" the remaining items in the list
+                    for item in search_filters:
+                        final_search_filters &= item
+                queryset = queryset.filter(final_search_filters)
 
         results = {
-            'filters':      filters,
-            'filter_set':   filter_set,
-            'queryset':     queryset,
+            'filters':          filters,
+            'filter_set':       filter_set,
+            'queryset':             queryset,
+            'final_search_filters': final_search_filters,
         }
         return results
 
@@ -1201,8 +1221,9 @@ class PoliticianManager(models.Manager):
                     )
                     if filter_results['filter_set']:
                         filter_set = True
-                        filters = filter_results['filters']
-                    politician_queryset = filter_results['queryset']
+                        final_search_filters = filter_results['final_search_filters']
+                        filters.append(final_search_filters)
+                    # politician_queryset = filter_results['queryset']
 
             if positive_value_exists(vote_smart_id):
                 new_filter = Q(vote_smart_id__iexact=vote_smart_id)

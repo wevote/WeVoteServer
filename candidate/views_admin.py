@@ -1680,6 +1680,7 @@ def candidate_new_search_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_list_manager = CandidateListManager()
+    candidate_manager = CandidateManager()
     politician_manager = PoliticianManager()
 
     status = ""
@@ -1694,6 +1695,7 @@ def candidate_new_search_process_view(request):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     candidate_url = request.POST.get('candidate_url', '')
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
+    create_new_candidate = positive_value_exists(request.POST.get('create_new_candidate', False))
     facebook_url = request.POST.get('facebook_url', False)
     instagram_handle = request.POST.get('instagram_handle', False)
     if positive_value_exists(instagram_handle):
@@ -1712,6 +1714,37 @@ def candidate_new_search_process_view(request):
     if not positive_value_exists(politician_we_vote_id):
         politician_we_vote_id = politician_we_vote_id_for_start
 
+    name_and_state_found = positive_value_exists(candidate_name) and positive_value_exists(state_code)
+    twitter_and_state_found = positive_value_exists(candidate_twitter_handle) and positive_value_exists(state_code)
+    required_variables_found = name_and_state_found or twitter_and_state_found
+
+    if create_new_candidate and required_variables_found:
+        if twitter_and_state_found:
+            # This scenario happens when the Twitter handle isn't in our database. To be verified.
+            pass
+        elif name_and_state_found:
+            candidate_year = get_current_year_as_integer()
+            update_values_dict = {
+                'candidate_name': candidate_name,
+                'candidate_year': candidate_year,
+                'state_code': state_code,
+            }
+            if positive_value_exists(candidate_email):
+                update_values_dict['candidate_email'] = candidate_email
+            if positive_value_exists(candidate_url):
+                update_values_dict['candidate_url'] = candidate_url
+            if positive_value_exists(facebook_url):
+                update_values_dict['facebook_url'] = facebook_url
+            if positive_value_exists(instagram_handle):
+                update_values_dict['instagram_handle'] = instagram_handle
+            results = candidate_manager.create_candidate_row_entry(update_values=update_values_dict)
+            if results['new_candidate_created']:
+                candidate = results['candidate']
+                messages.add_message(request, messages.INFO, 'Candidate created.')
+                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate.id,)))
+            else:
+                messages.add_message(request, messages.ERROR, 'Candidate could not be created.')
+
     politician_list = []
     # If here, we specifically want to see if a politician exists, given the information submitted
     from wevote_functions.functions import add_to_list_if_positive_value_exists
@@ -1728,7 +1761,6 @@ def candidate_new_search_process_view(request):
         return_close_matches=True,
         state_code=state_code,
         vote_usa_politician_id=vote_usa_politician_id)
-    # TODO This is still a work in progress
     if match_results['politician_found']:
         messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
         matching_politician = match_results['politician']
@@ -1750,14 +1782,13 @@ def candidate_new_search_process_view(request):
     elif match_results['politician_list_found']:
         politician_list = match_results['politician_list']
     else:
-        name_and_state_found = positive_value_exists(candidate_name) and positive_value_exists(state_code)
-        twitter_and_state_found = positive_value_exists(candidate_twitter_handle) and positive_value_exists(state_code)
-        required_variables_found = name_and_state_found or twitter_and_state_found
         if not required_variables_found:
-            messages.add_message(request, messages.INFO,
+            messages.add_message(request, messages.ERROR,
                                  'No politician found. Please make sure you have entered '
                                  '1) Candidate Name with State, or '
                                  '2) Twitter Handle with State')
+        else:
+            messages.add_message(request, messages.INFO, 'No politicians found that match your search.')
 
     # Return all existing related candidates. Make sure the candidate we want to create doesn't already exist.
     candidate_list = []
@@ -1772,7 +1803,9 @@ def candidate_new_search_process_view(request):
     # ##################################
     # Find Candidates that *might* be "children" of this politician
     candidate_we_vote_id_list = []
+    politician_list_found = False
     if positive_value_exists(politician_list) and len(politician_list) > 0:
+        politician_list_found = True
         from politician.controllers import find_candidates_to_link_to_this_politician
         related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_list[0])
         for candidate in candidate_list:
@@ -1781,6 +1814,25 @@ def candidate_new_search_process_view(request):
             if candidate.we_vote_id not in candidate_we_vote_id_list:
                 candidate_we_vote_id_list.append(candidate.we_vote_id)
                 candidate_list.append(candidate)
+
+    # ##################################
+    # Find other related candidates in same state
+    if name_and_state_found:
+        candidate_year = get_current_year_as_integer()
+        year_list = [candidate_year]
+        candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            candidate_name=candidate_name,
+            state_code=state_code,
+            year_list=year_list,
+            read_only=True)
+        if candidate_results['candidate_found']:
+            candidate_list.append(candidate_results['candidate'])
+            messages.add_message(request, messages.INFO, 'Candidate found by name and state.')
+        elif candidate_results['candidate_list_found']:
+            candidate_list = candidate_list + candidate_results['candidate_list']
+            messages.add_message(request, messages.INFO, 'Candidate possibilities found by name and state.')
+        else:
+            messages.add_message(request, messages.INFO, 'Candidate not found by name and state.')
 
     # Make sure candidate_list entries have office and election information
     candidate_list_modified = []
@@ -1862,7 +1914,9 @@ def candidate_new_search_process_view(request):
         'candidate_twitter_handle':     candidate_twitter_handle,
         'candidate_url':                candidate_url,
         'candidate_contact_form_url':   candidate_contact_form_url,
+        'name_and_state_found':         name_and_state_found,
         'politician_list':              politician_list,
+        'politician_list_found':        politician_list_found,
         'politician_we_vote_id':        politician_we_vote_id,
         'state_code':                   state_code,
     }

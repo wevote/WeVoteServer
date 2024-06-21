@@ -191,7 +191,11 @@ th, td {
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
       cancel</a>
 {% endif %}
-<input name="submit_text" type="submit" value="Search" /></p>
+<input name="submit_text" type="submit" value="Search" />
+{% if name_and_state_found and not politician_list_found %}
+<input name="create_new_candidate" type="submit" value="Create New Candidate" class="btn-primary" />
+{% endif %}
+</p>
 </form>
 
 <br />
