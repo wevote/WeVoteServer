@@ -23,10 +23,24 @@
     </tr>
     <tr>
         <td>&nbsp;</td>
-        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option1.we_vote_id %}"
-               target="_blank">view candidate 1 <span class="glyphicon glyphicon-new-window"></span></a></td>
-        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option2.we_vote_id %}"
-               target="_blank">view candidate 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td>
+            <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option1.we_vote_id %}"
+               target="_blank">view candidate 1 <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
+            <a href="https://www.google.com/search?q={{ candidate_option1.candidate_name|urlencode }}%20politician"
+               target="_blank"
+               class="u-no-break">
+                google search <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        </td>
+        <td>
+            <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option2.we_vote_id %}"
+               target="_blank">view candidate 2 <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
+            <a href="https://www.google.com/search?q={{ candidate_option2.candidate_name|urlencode }}%20politician"
+               target="_blank"
+               class="u-no-break">
+                google search <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        </td>
     </tr>
     <tr>
         <td>

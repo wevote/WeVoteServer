@@ -36,6 +36,13 @@ def voter_guide_possibility_save_doc_template_values(url_root):
             'description':  'Are there candidates endorsed on this page that we do not have in our Candidate table?',
         },
         {
+            'name':         'cannot_find_endorsements',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'This endorser hasn\'t posted their endorsements for the upcoming election yet, '
+                            'but it is worth coming back to this website later to find endorsements '
+                            'when they are posted.',
+        },
+        {
             'name':         'capture_detailed_comments',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'Are there comments that go along with endorsements that remain to be captured?',
@@ -56,14 +63,23 @@ def voter_guide_possibility_save_doc_template_values(url_root):
             'description':  'The email address (unverified) of the person submitting this VoterGuidePossibility.',
         },
         {
+            'name':         'from_prior_election',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'The URL to these endorsements was meant for prior year. If the URL might be used again '
+                            'by endorser in future years, please mark "Not Available Yet".',
+        },
+        {
             'name':         'hide_from_active_review',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'We are done reviewing and processing this VoterGuidePossibility.',
+            'description':  'This may have some valuable information in it, but we can put it into storage. '
+                            'We might use this URL again in a future election.',
         },
         {
             'name':         'ignore_this_source',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'This web page does not have endorsements and should be ignored.',
+            'description':  'This web page does not have endorsements and should be ignored. This website should not '
+                            'be looked at in this or future elections, for any reason. '
+                            'If it was from a prior year (in the URL) you can label as "from_prior_election" instead.',
         },
         {
             'name':         'internal_notes',
@@ -144,6 +160,7 @@ def voter_guide_possibility_save_doc_template_values(url_root):
                    '  "capture_detailed_comments": boolean,\n' \
                    '  "contributor_comments": string,\n' \
                    '  "contributor_email": string,\n' \
+                   '  "from_prior_election": boolean,\n' \
                    '  "hide_from_active_review": boolean,\n' \
                    '  "ignore_this_source": boolean,\n' \
                    '  "internal_notes": string,\n' \

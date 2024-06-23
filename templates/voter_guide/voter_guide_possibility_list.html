@@ -1,7 +1,7 @@
 {# templates/voter_guide/voter_guide_possibility_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Voter Guide Possibilities to Approve{% endblock %}
+{% block title %}Endorsement Websites{% endblock %}
 
 {% block content %}
 {% load template_filters %}
@@ -10,23 +10,25 @@
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-<h1>Voter Guide Possibilities</h1>
+<h1 style="font-size: 32px;">
+    Endorsement Websites
+{% if filtered_by_title %}
+  - {{ filtered_by_title }}
+{% endif %}
+</h1>
 
 <ul>
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">Suggest a Voter Guide <span class="glyphicon glyphicon-new-window"></span></a></strong>
+                   target="_blank">Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>
         Quick public tools that feeds into import_export_batch system.</li>
     <li><strong><a href="{% url 'volunteer_task:performance_list' %}"
                    target="_blank">Scoreboard <span class="glyphicon glyphicon-new-window"></span></a></strong>
         Tasks completed by the political data team, person-by-person.</li>
     <li><strong><a href="{% url 'voter_guide:create_possible_voter_guides_from_prior_elections' %}?google_civic_election_id={{ google_civic_election_id }}">
         Suggest Possible Voter Guides, from Prior Elections</a></strong>. (3 at a time)
-        Look back at voter guides in the last 5 years from organizations that might have endorsements in upcoming elections.</li>
+        Look back at voter guides in the last 5 years from endorsers that might have endorsements in upcoming elections.</li>
 </ul>
 
-{% if filtered_by_title %}
-  <h3>{{ filtered_by_title }}</h3>
-{% endif %}
 
 <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
     {% csrf_token %}
@@ -66,11 +68,12 @@
     {% endif %}
     {# Pass along the url_variables this page is using, so we can return to the same page state #}
     <input type="hidden" name="assigned_to_voter_we_vote_id" value="{{ assigned_to_voter_we_vote_id }}">
-    <input type="hidden" name="from_prior_election" value="{{ from_prior_election }}">
-    <input type="hidden" name="show_candidates_missing_from_we_vote" value="{{ show_candidates_missing_from_we_vote }}">
-    <input type="hidden" name="show_cannot_find_endorsements" value="{{ show_cannot_find_endorsements }}">
-    <input type="hidden" name="show_capture_detailed_comments" value="{{ show_capture_detailed_comments }}">
-    <input type="hidden" name="show_only_hide_from_active_review" value="{{ show_only_hide_from_active_review }}">
+    <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
+    <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
+    <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
+    <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
+    <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
+    <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">
     <input type="hidden" name="show_ignore_this_source" value="{{ show_ignore_this_source }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
 </form>
@@ -80,75 +83,84 @@
     Filters:&nbsp;
 
     {# Return to see voter guides to review #}
-    <span class="mdl-chip" {% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source and not from_prior_election %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_to_review %} mdl-color--grey{% endif %}" {% if filter_selected_to_review %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
             <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}">
-              To Review
-              ({{ to_review_count }})
+              <span style="{% if filter_selected_to_review %}color: #fff;{% endif %}">
+                To Review
+                  ({{ to_review_count }})
+              </span>
             </a>
         </span>
     </span>
 
-    &nbsp;&nbsp;&nbsp;
     {# Show voter guides suggested from prior elections #}
-    <span class="mdl-chip"  {% if from_prior_election %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_from_prior_election %} mdl-color--grey{% endif %}" {% if filter_selected_from_prior_election %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&from_prior_election=1">
-                  From Prior Elections
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_from_prior_election=1">
+              <span style="{% if filter_selected_from_prior_election %}color: #fff;{% endif %}">
+                  Past Year
                   ({{ from_prior_election_count }})
+              </span>
             </a>
         </span>
     </span>
 
-    &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we previously couldn't find endorsements #}
-    <span class="mdl-chip" {% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_not_available_yet %} mdl-color--grey{% endif %}" {% if filter_selected_not_available_yet %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_cannot_find_endorsements=1">
-              Endorsements Not Available Yet
-              ({{ cannot_find_endorsements_count }})
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_not_available_yet=1">
+              <span style="{% if filter_selected_not_available_yet %}color: #fff;{% endif %}">
+              Not Available Yet
+              ({{ not_available_yet_count }})
+              </span>
             </a>
         </span>
     </span>
 
-    &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we don't have the matching candidates or measures in our database #}
-    <span class="mdl-chip" {% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_candidates_missing %} mdl-color--grey{% endif %}" {% if filter_selected_candidates_missing %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_candidates_missing_from_we_vote=1">
-                  Candidates/Measures Missing
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_candidates_missing=1">
+              <span style="{% if filter_selected_candidates_missing %}color: #fff;{% endif %}">
+                  Candidates Missing
                   ({{ candidates_missing_count }})
+              </span>
             </a>
         </span>
     </span>
 
-    &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
-    <span class="mdl-chip" {% if show_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_capture_detailed_comments %} mdl-color--grey{% endif %}" {% if filter_selected_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_capture_detailed_comments=1">
-              Capture Detailed Comments
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_capture_detailed_comments=1">
+              <span style="{% if filter_selected_capture_detailed_comments %}color: #fff;{% endif %}">
+              Capture Comments
               ({{ capture_detailed_comments_count }})
+              </span>
             </a>
         </span>
     </span>
 
     &nbsp;&nbsp;&nbsp;
     {# Return to see voter guides to review #}
-    <span class="mdl-chip" {% if show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_archive %} mdl-color--grey{% endif %}" {% if filter_selected_archive %} style="font-weight: bold;"{% endif %}>
        <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_only_hide_from_active_review=1">
-              Stop Reviewing
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_archive=1">
+              <span style="{% if filter_selected_archive %}color: #fff;{% endif %}">
+              Archived
+              </span>
             </a>
         </span>
     </span>
 
-    &nbsp;&nbsp;&nbsp;
     {# Show voter guides where we ignore the source #}
-    <span class="mdl-chip" {% if show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
+    <span class="mdl-chip{% if filter_selected_ignore %} mdl-color--grey{% endif %}" {% if filter_selected_ignore %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&show_ignore_this_source=1">
-                Ignore this Website
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_ignore=1">
+              <span style="{% if filter_selected_ignore %}color: #fff;{% endif %}">
+                Ignored
+              </span>
             </a>
         </span>
     </span>
@@ -199,12 +211,13 @@
         <div class="col-xs-6">
             <select id="which_marking_id" name="which_marking">
                 {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-                <option value="hide_from_active_review">Stop Reviewing</option>
                 <option value="add_to_active_review">To Review</option>
-                <option value="capture_detailed_comments">Capture Detailed Comments</option>
-                <option value="candidates_missing_from_we_vote">Candidates/Measures Missing</option>
-                <option value="cannot_find_endorsements">Endorsements Not Available Yet</option>
-                <option value="ignore_this_source">Ignore Website in Future Elections</option>
+                <option value="from_prior_election">Past Year</option>
+                <option value="cannot_find_endorsements">Not Available Yet</option>
+                <option value="candidates_missing_from_we_vote">Candidates Missing</option>
+                <option value="capture_detailed_comments">Capture Comments</option>
+                <option value="hide_from_active_review">Archive</option>
+                <option value="ignore_this_source">Ignore Website in Future</option>
                 <option value="delete_this_source">Hard Delete this Entry</option>
             </select>
         </div>
@@ -220,13 +233,13 @@
     {# Pass along the url_variables this page is using, so we can return to the same page state #}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
-    <input type="hidden" name="from_prior_election" value="{{ from_prior_election }}">
     <input type="hidden" name="page" value="{{ page }}">
-    <input type="hidden" name="show_candidates_missing_from_we_vote" value="{{ show_candidates_missing_from_we_vote }}">
-    <input type="hidden" name="show_cannot_find_endorsements" value="{{ show_cannot_find_endorsements }}">
-    <input type="hidden" name="show_capture_detailed_comments" value="{{ show_capture_detailed_comments }}">
-    <input type="hidden" name="show_only_hide_from_active_review" value="{{ show_only_hide_from_active_review }}">
-    <input type="hidden" name="show_ignore_this_source" value="{{ show_ignore_this_source }}">
+    <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
+    <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
+    <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
+    <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
+    <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
+    <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
     <input type="hidden" name="voter_guide_possibility_search" value="{{ voter_guide_possibility_search }}">
 </form>
@@ -241,20 +254,7 @@
     <br />
     <br />
     <br />
-    <br />
-    "<strong>To Review</strong>" means: These are suggested voter guides (endorsements collected onto one page) that need to be looked at.<br />
-    <br />
-    "<strong>Endorsements Not Available Yet</strong>" means: This organizations hasn't posted their endorsements for the
-    upcoming election yet, but it is worth coming back to this website later to find endorsements when they are posted.<br />
-    <br />
-    "<strong>Candidates/Measures Missing</strong>" means: Our voter guide scraping tool isn't retrieving all of the
-    candidates or measures from the website. Further research is needed to see if we need to add the missing candidates or measures.<br />
-    <br />
-    "<strong>Capture Detailed Comments</strong>" means: There are detailed comments under each candidate or measure,
-    and/or a unique link to the more detailed commentary for each candidate or measure that we can capture.<br />
-    <br />
-    "<strong>Archived</strong>" means: We have extracted all of the data that we can from these Voter Guide Possibilities.<br />
-    <br />
+    {% include "voter_guide/voter_guide_possibility_filter_descriptions.html" %}
 
 
     <br />

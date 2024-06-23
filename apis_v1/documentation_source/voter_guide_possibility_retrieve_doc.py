@@ -85,6 +85,7 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
                    '  "capture_detailed_comments": boolean,\n' \
                    '  "contributor_comments": string,\n' \
                    '  "contributor_email": string,\n' \
+                   '  "from_prior_election": boolean,\n' \
                    '  "hide_from_active_review": boolean,\n' \
                    '  "ignore_this_source": boolean,\n' \
                    '  "internal_notes": string,\n' \

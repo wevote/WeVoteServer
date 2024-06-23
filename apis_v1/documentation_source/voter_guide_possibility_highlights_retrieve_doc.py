@@ -105,7 +105,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityHighlightsRetrieve',
         'api_slug': 'voterGuidePossibilityHighlightsRetrieve',
         'api_introduction':
-            "WeVote's Political Data team uses an admin tool we call 'Voter Guide Possibilities'. With this tool, we "
+            "WeVote's Political Data team reviews endorsement websites. We "
             "scan an organization's webpage that contains political endorsements. (Ex/ The National Bird Conservatory "
             "endorses Donald Duck for County Tax Collector) WeVote finds the owner of the web page, "
             "then finds all of the candidates listed on the page. We store in temporary tables, the SUPPORT and OPPOSE "
@@ -113,7 +113,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             "captured. Once the Political Data Manager has reviewed these endorsements, they can be saved to our "
             "publicly available list of endorsements. This tool helps our team provide quality assurance as we "
             "collect the data. This voterGuidePossibilityHighlightsRetrieve API connects WeVote's Chrome Extension to "
-            "the 'Voter Guide Possibilities' admin tools on WeVoteServer, and returns "
+            "the 'Endorsement Websites' admin tools on WeVoteServer, and returns "
             "what candidates have been identified, and whether the endorsing organization SUPPORTs, OPPOSEs, "
             "or shares INFO_ONLY about the candidate. This API also returns names found on the page who might be "
             "politicians, so the Political Data Manager can more easily capture endorsements.",

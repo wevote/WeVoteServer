@@ -45,26 +45,33 @@
 
 {% if organization_found and organization %}
     <div class="form-group">
-        <label for="organization_name_id" class="col-sm-3 control-label">
-          <span class="hidden-xs">Endorser<br /></span>
-          <button type="submit"
-                  name="clear_organization_options"
-                  class="btn btn-link btn-sm" value="1">Unlink</button>
+        <label for="organization_name_id" class="col-md-3 col-sm-12 control-label">
+          <span class="hidden-xs">
+              <button type="submit"
+                      name="clear_organization_options"
+                      class="btn btn-link btn-sm" value="1">Unlink Endorser</button>
+          </span>
        </label>
-        <div class="col-sm-8">
-            {% if organization.we_vote_hosted_profile_image_url_tiny %}
-                <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+        <div class="col-md-8 col-sm-12">
+            {% if organization.we_vote_hosted_profile_image_url_medium %}
+                <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" />
             {% endif %}
             {% if organization.organization_name %}
-                <span class="h3">{{ organization.organization_name }}</span>
+                <span class="h3">
+                    {{ organization.organization_name }}
+                    <span style="color: #999; font-size: .8em; font-weight: 400;">sharing opinions about candidates</span>
+                </span>
             {% else %}
-                <span class="h3">Endorser Name Missing</span>
+                <span class="h3">Endorser Sharing Opinions (Name Missing)</span>
             {% endif %}
             {% if has_suggested_voter_guide_rights and organization.we_vote_id %}
                 &nbsp;
                 <a href="{% url "organization:organization_position_list" organization.id %}"
                    target="_blank"
                    class="u-no-break">{% if organization.organization_name %}(edit){% else %}(please add name){% endif %}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+            {% if organization.organization_twitter_handle or organization.organization_website %}
+                <br />
             {% endif %}
             {% if organization.organization_twitter_handle %}
                 <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
@@ -84,6 +91,11 @@
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
+          <span class="visible-xs">
+              <button type="submit"
+                      name="clear_organization_options"
+                      class="btn btn-link btn-sm" value="1">Unlink Endorser</button>
+          </span>
             {% if organization.organization_twitter_handle or organization.organization_website %}
                 {% if voter_guide_possibility_url %}<br /><br />{% endif %}
             {% endif %}
@@ -102,16 +114,18 @@
     <input type="hidden" name="organization_twitter_handle" value="{{ organization_twitter_handle }}">
 {% elif candidate_found and candidate %}
     <div class="form-group">
-        <label for="candidate_name_id" class="col-sm-3 control-label">
-          <span class="hidden-xs">Candidate<br /></span>
-          <button type="submit"
-                  name="clear_candidate_options"
-                  class="btn btn-link btn-sm" value="1">Unlink</button>
+        <label for="candidate_name_id" class="col-md-3 col-sm-12 control-label">
+          <span class="hidden-xs">
+              <button type="submit"
+                      name="clear_candidate_options"
+                      class="btn btn-link btn-sm" value="1">Unlink Candidate</button>
+          </span>
        </label>
-        <div class="col-sm-8">
-            <span class="h3">Groups &amp; People Endorsing&nbsp;</span>
-            {% if candidate.we_vote_hosted_profile_image_url_tiny %}
-                <img src="{{ candidate.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+        <div class="col-md-8 col-sm-12">
+            <span class="h3"><span style="color: #999; font-size: .8em; font-weight: 400;">Groups &amp; People Endorsing&nbsp;</span></span>
+        <span class="u-no-break">
+            {% if candidate.we_vote_hosted_profile_image_url_medium %}
+                <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}" width="48px" />
             {% endif %}
                 <span class="h3">{{ candidate.display_candidate_name }}</span>
             {% if has_suggested_voter_guide_rights and candidate.display_candidate_name and candidate.we_vote_id %}
@@ -119,7 +133,10 @@
                    target="_blank"
                    class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
+        </span>
+            {% if candidate.fetch_twitter_handle or candidate.candidate_url %}
                 <br />
+            {% endif %}
             {% if candidate.fetch_twitter_handle %}
                 <a href="https://twitter.com/{{ candidate.fetch_twitter_handle }}"
                    target="_blank"
@@ -135,6 +152,11 @@
                 &nbsp;
                 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
+          <span class="visible-xs">
+              <button type="submit"
+                      name="clear_candidate_options"
+                      class="btn btn-link btn-sm" value="1">Unlink Candidate</button>
+          </span>
             {% if candidate.fetch_twitter_handle or candidate.candidate_url %}{% if voter_guide_possibility_url %}<br />{% endif %}{% endif %}
             {% if voter_guide_possibility_url %}
                 <a href="{{ voter_guide_possibility_url }}"
@@ -156,13 +178,14 @@
 
 {% if voter_guide_possibility_url %}
 {% else %}
+    <h1>Suggest an Endorsement Website</h1>
     <p>Want to suggest endorsements you have found for candidates or measures?</p>
 {% endif %}
 
 <input type="hidden" name="voter_guide_possibility_id" value="{{ voter_guide_possibility_id }}">
 
 <div class="form-group">
-    <label for="voter_guide_possibility_url_id" class="col-sm-3 control-label">
+    <label for="voter_guide_possibility_url_id" class="col-md-3 col-sm-12 control-label">
     {% if voter_guide_possibility_url %}
         Link to endorsements&nbsp;
         {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility_url text="" count=1 only %}
@@ -170,7 +193,7 @@
         Paste link to endorsements
     {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col-md-8 col-sm-12">
         <input type="text"
                name="voter_guide_possibility_url"
                id="voter_guide_possibility_url_id"
@@ -184,8 +207,8 @@
   {# Do not continue to offer the choice between kind-of-voter-guide #}
 {% else %}
     <div class="form-group">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-8">
+        <div class="col-md-3 col-sm-12 control-label"></div>
+        <div class="col-md-8 col-sm-12">
             <label for="organization_website_id">
                 <input type="radio" name="type_of_website" value="OrganizationWebsite"{% if type_of_website != "CandidateWebsite" %} checked{% endif %} id="organization_website_id" >
                 Option 1: Endorser website, listing endorsements for one or more Candidate(s)&nbsp;
@@ -204,13 +227,13 @@
     {# Interface code for this is above #}
 {% elif organizations_list %}
     <div class="form-group">
-        <label for="organization_name_id" class="col-sm-3 control-label">
+        <label for="organization_name_id" class="col-md-3 col-sm-12 control-label">
           Choose Endorser<br />
           <button type="submit"
                   name="clear_organization_options"
                   class="btn btn-link btn-sm" value="1">Clear Endorser Options</button>
         </label>
-        <div class="col-sm-8">
+        <div class="col-md-8 col-sm-12">
             <table class="table">
                 <tr>
                     <th>Name</th>
@@ -252,17 +275,17 @@
     {# Interface code for this is above #}
 {% elif owner_of_website_candidate_list %}
     <div class="form-group">
-        <label for="organization_name_id" class="col-sm-3 control-label">
+        <label for="organization_name_id" class="col-md-3 col-sm-12 control-label">
           Choose Candidate this Website is About<br />
           <button type="submit"
                   name="clear_organization_options"
                   class="btn btn-link btn-sm" value="1">Clear Candidate Options</button><br />
-          <a href="{% url 'candidate:candidate_new_search' %}?candidate_name={{ candidate_name|default_if_none:"" }}" 
+          <a href="{% url 'candidate:candidate_new_search' %}?candidate_name={{ candidate_name|default_if_none:"" }}"
              class="u-no-break"
              target="_blank">Add new Candidate <span class="glyphicon glyphicon-new-window"></span></a>
 
         </label>
-        <div class="col-sm-8">
+        <div class="col-md-8 col-sm-12">
             <table class="table">
                 <tr>
                     <th>Name</th>
@@ -272,7 +295,7 @@
             {% for possible_candidate in owner_of_website_candidate_list %}
                 <tr>
                     <td>
-                        <a href="{% url 'candidate:candidate_edit_we_vote_id' possible_candidate.we_vote_id %}" 
+                        <a href="{% url 'candidate:candidate_edit_we_vote_id' possible_candidate.we_vote_id %}"
                            class="u-no-break"
                            style="font-size: 1.3em; font-weight: 600;"
                            target="_blank">{{ possible_candidate.display_candidate_name }} <span class="glyphicon glyphicon-new-window"></span></a>
@@ -305,8 +328,8 @@
     {% if voter_guide_possibility_url %}
         {% if type_of_website == "CandidateWebsite" %}
             <div class="form-group">
-                <label for="candidate_name_id" class="col-sm-3 control-label">Candidate Name</label>
-                <div class="col-sm-8">
+                <label for="candidate_name_id" class="col-md-3 col-sm-12 control-label">Candidate Name</label>
+                <div class="col-md-8 col-sm-12">
                     <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                            value="{{ candidate_name|default_if_none:"" }}" />
 {#                    {% if not candidate_name and not candidate_twitter_handle %}#}
@@ -316,24 +339,24 @@
             </div>
 
             <div class="form-group">
-                <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Candidate Twitter Handle</label>
-                <div class="col-sm-8">
+                <label for="candidate_twitter_handle_id" class="col-md-3 col-sm-12 control-label">Candidate Twitter Handle</label>
+                <div class="col-md-8 col-sm-12">
                     <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                            value="{{ candidate_twitter_handle|default_if_none:"" }}" />
                 </div>
             </div>
         {% else %}
             <div class="form-group">
-                <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
-                <div class="col-sm-8">
+                <label for="organization_name_id" class="col-md-3 col-sm-12 control-label">Endorser Name</label>
+                <div class="col-md-8 col-sm-12">
                     <input type="text" name="organization_name" id="organization_name_id" class="form-control"
                            value="{{ organization_name|default_if_none:"" }}" />
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Endorser Twitter Handle</label>
-                <div class="col-sm-8">
+                <label for="organization_twitter_handle_id" class="col-md-3 col-sm-12 control-label">Endorser Twitter Handle</label>
+                <div class="col-md-8 col-sm-12">
                     <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
                            value="{{ organization_twitter_handle|default_if_none:"" }}" />
                 </div>
@@ -352,8 +375,8 @@
 
 {#{% if has_suggested_voter_guide_rights and state_list %}#}
 {#    <div class="form-group">#}
-{#        <label for="ballot_items_raw_id" class="col-sm-3 control-label">Limit to this State</label>#}
-{#        <div class="col-sm-8">#}
+{#        <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">Limit to this State</label>#}
+{#        <div class="col-md-8 col-sm-12">#}
 {#            <select id="state_code_id" name="state_code">#}
 {#                <option value="" {% if '' == state_code %} selected="selected"{% endif %}>#}
 {#                    -- Any State --</option>#}
@@ -371,10 +394,10 @@
     {# Don't show comments or 'Your email' fields #}
 {% else %}
     <div class="form-group">
-        <label for="contributor_comments_id" class="col-sm-3 control-label">
+        <label for="contributor_comments_id" class="col-md-3 col-sm-12 control-label">
         Your comments or questions (optional)
         </label>
-        <div class="col-sm-8">
+        <div class="col-md-8 col-sm-12">
             <textarea name="contributor_comments"
                       class="form-control animated"
                       placeholder="Do you have any comments or questions for the We Vote Political Data Team? (optional)"
@@ -384,8 +407,8 @@
     </div>
 
     <div class="form-group">
-        <label for="contributor_email_id" class="col-sm-3 control-label">Your email (optional)</label>
-        <div class="col-sm-8">
+        <label for="contributor_email_id" class="col-md-3 col-sm-12 control-label">Your email (optional)</label>
+        <div class="col-md-8 col-sm-12">
             <input type="text"
                    placeholder="We will try to let you know when this is live."
                    name="contributor_email"
@@ -398,15 +421,15 @@
 
 {% if possible_endorsement_list_found and not hide_possible_endorsement_list %}
     <div class="form-group">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-8">
+        <div class="col-md-3 col-sm-12 control-label"></div>
+        <div class="col-md-8 col-sm-12">
             <button type="submit" class="btn btn-primary" name="save_endorsements" value="1">Analyze & Save</button>
         </div>
     </div>
 
     <div class="form-group">
     {% if possible_endorsement_list %}
-        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+        <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">
             <span class="hidden-xs">
                 <span style="font-size: 1.4em">STATISTICS</span>
                 <br />
@@ -414,11 +437,24 @@
                     {% if assigned_to_name %}Started by: <strong>{{ assigned_to_name }}</strong><br />{% endif %}
                     Total # of Endorsements: {{ number_of_ballot_items }}<br />
                     Visible to Voters: {{ positions_stored_count }}<br />
-                    <strong>Not Visible to Voters Yet: {{ positions_not_stored_count }}</strong>
+                    <strong>Not On WeVote.US Yet: {{ positions_not_stored_count }}</strong>
                 </span>
             </span>
         </label>
-        <div class="col-sm-8">
+        <div class="col-md-8 col-sm-12">
+            <span class="visible-xs">
+                <span style="font-size: 1.4em">STATISTICS</span>
+                <br />
+                <span style="font-weight: normal !important;">
+                    {% if assigned_to_name %}Started by: <strong>{{ assigned_to_name }}</strong><br />{% endif %}
+                    Total # of Endorsements: {{ number_of_ballot_items }}<br />
+                    Visible to Voters: {{ positions_stored_count }}<br />
+                    <strong>Not on WeVote.US Yet: {{ positions_not_stored_count }}</strong>
+                </span>
+                <br />
+                <br />
+            </span>
+
             <table class="table">
             {% if type_of_website != "CandidateWebsite" %}
                 {% for possible_endorsement in possible_endorsement_list %}
@@ -434,10 +470,10 @@
     {% endif %}
     {% if voter_guide_possibility_url %}
         {% if type_of_website != "CandidateWebsite" %}
-            <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">
                 Add More Candidates or Measures
             </label>
-            <div class="col-sm-8">
+            <div class="col-md-8 col-sm-12">
                 <textarea name="ballot_items_additional"
                           class="form-control animated"
                           placeholder="Please enter one candidate or measure per line..."
@@ -445,10 +481,10 @@
                           >{{ ballot_items_additional|default_if_none:"" }}</textarea>
             </div>
         {% else %}
-            <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">
                 Add More Endorsers
             </label>
-            <div class="col-sm-8">
+            <div class="col-md-8 col-sm-12">
                 <textarea name="ballot_items_additional"
                           class="form-control animated"
                           placeholder="Please enter one endorser per line, or separated by commas..."
@@ -467,10 +503,10 @@
     {% if voter_guide_possibility_url %}
         {% if type_of_website != "CandidateWebsite" %}
             <div class="form-group">
-                <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+                <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">
                     Candidates or Measures
                 </label>
-                <div class="col-sm-8">
+                <div class="col-md-8 col-sm-12">
                     <textarea name="ballot_items_raw"
                               class="form-control animated"
                               placeholder="Please enter one candidate or measure per line..."
@@ -480,10 +516,10 @@
             </div>
         {% else %}
             <div class="form-group">
-                <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+                <label for="ballot_items_raw_id" class="col-md-3 col-sm-12 control-label">
                     Endorsers
                 </label>
-                <div class="col-sm-8">
+                <div class="col-md-8 col-sm-12">
                     <textarea name="ballot_items_raw"
                               class="form-control animated"
                               placeholder="Please enter one endorser per line, or separated by commas..."
@@ -501,17 +537,34 @@
 
     {% if has_suggested_voter_guide_rights and voter_guide_possibility_url %}
     <div class="form-group">
-        <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes</label>
-        <div class="col-sm-8">
+        <label for="internal_notes_id" class="col-md-3 col-sm-12 control-label">Internal Notes</label>
+        <div class="col-md-8 col-sm-12">
             <textarea name="internal_notes"
                       class="form-control animated"
                       id="internal_notes_id"
                       placeholder="Status of data gathering?">{{ internal_notes|default_if_none:"" }}</textarea>
+
+            <span class="u-no-break">
+                <input type="checkbox" name="filter_selected_to_review" id="filter_selected_to_review_id"
+                       value="True"
+                       {% if filter_selected_to_review %}checked{% endif %} />
+                <label for="filter_selected_to_review_id" style="font-weight: normal !important;">To Review</label>
+            </span>
+
+            &nbsp;&nbsp;&nbsp;
+            <span class="u-no-break">
+                <input type="checkbox" name="from_prior_election" id="from_prior_election_id"
+                       value="True"
+                       {% if from_prior_election %}checked{% endif %} />
+                <label for="from_prior_election_id" style="font-weight: normal !important;">Past Year</label>
+            </span>
+
+            &nbsp;&nbsp;&nbsp;
             <span class="u-no-break">
                 <input type="checkbox" name="cannot_find_endorsements" id="cannot_find_endorsements_id"
                        value="True"
                        {% if cannot_find_endorsements %}checked{% endif %} />
-                <label for="cannot_find_endorsements_id" style="font-weight: normal !important;">Endorsements Not Available Yet</label>
+                <label for="cannot_find_endorsements_id" style="font-weight: normal !important;">Not Available Yet</label>
             </span>
 
             &nbsp;&nbsp;&nbsp;
@@ -519,7 +572,7 @@
                 <input type="checkbox" name="capture_detailed_comments" id="capture_detailed_comments_id"
                        value="True"
                        {% if capture_detailed_comments %}checked{% endif %} />
-                <label for="capture_detailed_comments_id" style="font-weight: normal !important;">Capture Detailed Comments</label>
+                <label for="capture_detailed_comments_id" style="font-weight: normal !important;">Capture Comments</label>
             </span>
 
             &nbsp;&nbsp;&nbsp;
@@ -527,7 +580,7 @@
                 <input type="checkbox" name="candidates_missing_from_we_vote" id="candidates_missing_from_we_vote_id"
                        value="True"
                        {% if candidates_missing_from_we_vote %}checked{% endif %} />
-                <label for="candidates_missing_from_we_vote_id" style="font-weight: normal !important;">Candidates/Measures Missing</label>
+                <label for="candidates_missing_from_we_vote_id" style="font-weight: normal !important;">Candidates Missing</label>
             </span>
 
             &nbsp;&nbsp;&nbsp;
@@ -535,7 +588,7 @@
                 <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
                        value="True"
                        {% if hide_from_active_review %}checked{% endif %} />
-                <label for="hide_from_active_review_id" style="font-weight: normal !important;">Stop Reviewing</label>
+                <label for="hide_from_active_review_id" style="font-weight: normal !important;">Archive</label>
             </span>
 
             &nbsp;&nbsp;&nbsp;
@@ -543,7 +596,7 @@
                 <input type="checkbox" name="ignore_this_source" id="ignore_this_source_id"
                        value="True"
                        {% if ignore_this_source %}checked{% endif %} />
-                <label for="ignore_this_source_id" style="font-weight: normal !important;">Ignore this Website</label>
+                <label for="ignore_this_source_id" style="font-weight: normal !important;">Ignore</label>
             </span>
 
             <div class="float-right" style="color: darkgray">Target Election: {{ target_google_civic_election_id }}</div>
@@ -552,8 +605,8 @@
     {% endif %}
 
     <div class="form-group">
-        <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
-        <div class="col-sm-8">
+        <label for="find_voter_guide_button_id" class="col-md-3 col-sm-12 control-label"></label>
+        <div class="col-md-8 col-sm-12">
             <button type="submit" class="btn btn-primary" name="save_endorsements" value="1">Analyze & Save</button>
         {% if voter_guide_possibility_url %}
             &nbsp;&nbsp;&nbsp;
@@ -562,12 +615,12 @@
         {% if has_suggested_voter_guide_rights and voter_guide_possibility_id %}
             <br />
             <br />
-            <input type="checkbox" name="ignore_stored_positions" id="ignore_stored_positions_id"
-                   value="True"
-                   {% if ignore_stored_positions %}checked{% endif %} />
-                <label for="ignore_stored_positions_id" style="font-weight: normal !important;">Ignore Stored Positions</label>
-            <br />
-            <br />
+{#            <input type="checkbox" name="ignore_stored_positions" id="ignore_stored_positions_id"#}
+{#                   value="True"#}
+{#                   {% if ignore_stored_positions %}checked{% endif %} />#}
+{#                <label for="ignore_stored_positions_id" style="font-weight: normal !important;">Ignore Stored Positions</label>#}
+{#            <br />#}
+{#            <br />#}
 
             {% if positions_ready_to_save_as_batch %}
             <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility_id }}"
@@ -599,33 +652,19 @@
     <br />
     <br />
     <div class="form-group">
-        <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
-        <div class="col-sm-8">
+        <label for="find_voter_guide_button_id" class="col-md-3 col-sm-12 control-label"></label>
+        <div class="col-md-8 col-sm-12">
             <button type="submit" class="btn btn-danger">Delete</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label for="confirm_delete_id" style="font-weight: normal !important;">
               <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this
             </label>
         </div>
     </div>
-    <br />
-    <br />
-    "<strong>Endorsements Not Available Yet</strong>" means: This organization hasn't posted their endorsements for the
-    upcoming election yet, but it is worth coming back to this website later to find endorsements when they are posted.<br />
-    <br />
-    "<strong>Capture Detailed Comments</strong>" means: There is detailed commentary about candidates or measures that
-    we need to capture.<br />
-    <br />
-    "<strong>Candidates/Measures Missing</strong>" means: The voter guide has candidates or measures that aren't in the
-    We Vote database yet. Analyze this voter guide after we have added more offices/candidates/measures to the
-    We Vote database.<br />
-    <br />
-    "<strong>Stop Reviewing</strong>" means: There isn't any more data to extract from this website
-    for upcoming election(s), so we want to take it off the Voter Guide Possibilities task list.<br />
-    <br />
-    "<strong>Ignore this Website</strong>" means: This website URL is not a good place to find endorsements.
-    No further review needed.<br />
-    <br />
+{% endif %}
 
+{% if has_suggested_voter_guide_rights and voter_guide_possibility_url %}
+    <br />
+    {% include "voter_guide/voter_guide_possibility_filter_descriptions.html" %}
 {% endif %}
 
 
@@ -652,6 +691,82 @@ function dontSendUnnecessaryFormValues(form) {
     }
   }
 }
+$(function() {
+    $('#filter_selected_to_review_id').change(function() {
+        if (this.form.filter_selected_to_review_id.checked === true) {
+            this.form.from_prior_election_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#from_prior_election_id').change(function() {
+        if (this.form.from_prior_election_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#cannot_find_endorsements_id').change(function() {
+        if (this.form.cannot_find_endorsements_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.from_prior_election_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#capture_detailed_comments_id').change(function() {
+        if (this.form.capture_detailed_comments_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.from_prior_election_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#candidates_missing_from_we_vote_id').change(function() {
+        if (this.form.candidates_missing_from_we_vote_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.from_prior_election_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#hide_from_active_review_id').change(function() {
+        if (this.form.hide_from_active_review_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#ignore_this_source_id').change(function() {
+        if (this.form.ignore_this_source_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+        }
+    });
+});
 </script>
 
 {% endblock %}
