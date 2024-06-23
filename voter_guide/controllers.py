@@ -1064,13 +1064,14 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                         status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
                                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
-    candidates_missing_from_we_vote = False
-    cannot_find_endorsements = False
-    capture_detailed_comments = False
+    candidates_missing_from_we_vote = False  # filter_selected_candidates_missing
+    cannot_find_endorsements = False  # filter_selected_not_available_yet
+    capture_detailed_comments = False  # filter_selected_capture_detailed_comments
     contributor_email = ""
     contributor_comments = ""
-    hide_from_active_review = False
-    ignore_this_source = False
+    from_prior_election = False  # filter_selected_from_prior_election
+    hide_from_active_review = False  # filter_selected_archive
+    ignore_this_source = False  # filter_selected_ignore
     internal_notes = ""
     possible_candidate_name = ""
     possible_candidate_twitter_handle = ""
@@ -1086,6 +1087,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
         capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
         contributor_email = voter_guide_possibility.contributor_email
         contributor_comments = voter_guide_possibility.contributor_comments
+        from_prior_election = voter_guide_possibility.from_prior_election
         hide_from_active_review = voter_guide_possibility.hide_from_active_review
         ignore_this_source = voter_guide_possibility.ignore_this_source
         internal_notes = voter_guide_possibility.internal_notes
@@ -1198,13 +1200,14 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
         'capture_detailed_comments':            capture_detailed_comments,
         'contributor_comments':                 contributor_comments,
         'contributor_email':                    contributor_email,
+        'from_prior_election':                  from_prior_election,
         'hide_from_active_review':              hide_from_active_review,
         'ignore_this_source':                   ignore_this_source,
         'internal_notes':                       internal_notes,
         'organization':                         organization_dict,
         'possible_candidate_name':              possible_candidate_name,
         'possible_candidate_twitter_handle':    possible_candidate_twitter_handle,
-        'possible_owner_of_website_candidates_list':    possible_owner_of_website_candidates_list,
+        'possible_owner_of_website_candidates_list': possible_owner_of_website_candidates_list,
         'possible_organization_name':           possible_organization_name,
         'possible_organization_twitter_handle': possible_organization_twitter_handle,
         'possible_owner_of_website_organizations_list': possible_owner_of_website_organizations_list,
@@ -1536,7 +1539,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(voter_guide_possibility):
     """
     This finds endorsements on other VoterGuidePossibility entries and moves them over to this entry.
-    After using this for some months, we decided:
+    2024-06 After using this for some months, we decided:
     We do not want to bring endorsements found on other web pages over to this voter_guide_possibility
     because it creates clutter, and in practice isn't helpful.
     """
@@ -1602,13 +1605,15 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
 def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
         voter_device_id,
         voter_guide_possibility_id,
-        candidates_missing_from_we_vote=None,
-        capture_detailed_comments=None,
+        candidates_missing_from_we_vote=None,  # filter_selected_candidates_missing
+        cannot_find_endorsements=None,  # filter_selected_not_available_yet
+        capture_detailed_comments=None,  # filter_selected_capture_detailed_comments
         clear_organization_options=None,
         contributor_comments=None,
         contributor_email=None,
-        hide_from_active_review=None,
-        ignore_this_source=None,
+        from_prior_election=None,  # filter_selected_from_prior_election
+        hide_from_active_review=None,  # filter_selected_archive
+        ignore_this_source=None,  # filter_selected_ignore
         internal_notes=None,
         voter_guide_possibility_type=None,
         organization_we_vote_id=None,
@@ -1665,9 +1670,11 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
             voter_guide_possibility.candidates_missing_from_we_vote = \
                 positive_value_exists(candidates_missing_from_we_vote)
             at_least_one_change = True
+        if cannot_find_endorsements is not None:
+            voter_guide_possibility.cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
+            at_least_one_change = True
         if capture_detailed_comments is not None:
-            voter_guide_possibility.capture_detailed_comments = \
-                positive_value_exists(capture_detailed_comments)
+            voter_guide_possibility.capture_detailed_comments = positive_value_exists(capture_detailed_comments)
             at_least_one_change = True
         if contributor_comments is not None:
             voter_guide_possibility.contributor_comments = contributor_comments
@@ -1675,13 +1682,14 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
         if contributor_email is not None:
             voter_guide_possibility.contributor_email = contributor_email
             at_least_one_change = True
+        if from_prior_election is not None:
+            voter_guide_possibility.from_prior_election = positive_value_exists(from_prior_election)
+            at_least_one_change = True
         if hide_from_active_review is not None:
-            voter_guide_possibility.hide_from_active_review = \
-                positive_value_exists(hide_from_active_review)
+            voter_guide_possibility.hide_from_active_review = positive_value_exists(hide_from_active_review)
             at_least_one_change = True
         if ignore_this_source is not None:
-            voter_guide_possibility.ignore_this_source = \
-                positive_value_exists(ignore_this_source)
+            voter_guide_possibility.ignore_this_source = positive_value_exists(ignore_this_source)
             at_least_one_change = True
         if internal_notes is not None:
             voter_guide_possibility.internal_notes = internal_notes

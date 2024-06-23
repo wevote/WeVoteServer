@@ -48,6 +48,12 @@
       Endorsers
     </div>
   </a>
+  <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <div class="sidebar-item">
+      <img src="https://quality.wevote.us/img/api-server/VoterGuidePossibilities.svg" alt="">
+        Endorsement Websites
+    </div>
+  </a>
   <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     <div class="sidebar-item">
       <img src="https://quality.wevote.us/img/api-server/Opinions.svg" alt="">
@@ -64,12 +70,6 @@
     <div class="sidebar-item">
       <img src="https://quality.wevote.us/img/api-server/VoterGuides.svg" alt="">
       Voter&nbsp;Guides
-    </div>
-  </a>
-  <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    <div class="sidebar-item">
-      <img src="https://quality.wevote.us/img/api-server/VoterGuidePossibilities.svg" alt="">
-        Voter&nbsp;Guide Possibilities
     </div>
   </a>
   <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">

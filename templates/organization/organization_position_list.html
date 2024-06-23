@@ -220,7 +220,7 @@
             <br />
             <ul>
                 <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
-                    Suggest a Voter Guide <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
+                    Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
                 <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
                        target="_blank">Add New Position Form <span class="glyphicon glyphicon-new-window"></span></a></li>
                 <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >

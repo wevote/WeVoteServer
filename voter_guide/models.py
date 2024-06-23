@@ -2393,6 +2393,7 @@ class VoterGuidePossibilityManager(models.Manager):
             show_prior_years=False,
             assigned_to_no_one=False,
             assigned_to_voter_we_vote_id=False,
+            read_only=True,
             return_count_only=False):
         start_number = convert_to_int(start_number)
         end_number = convert_to_int(end_number)
@@ -2409,7 +2410,10 @@ class VoterGuidePossibilityManager(models.Manager):
         voter_guide_possibility_list_found = False
         voter_guide_possibility_list_count = 0
         try:
-            voter_guide_query = VoterGuidePossibility.objects.all()
+            if positive_value_exists(read_only):
+                voter_guide_query = VoterGuidePossibility.objects.using('readonly').all()
+            else:
+                voter_guide_query = VoterGuidePossibility.objects.all()
             if positive_value_exists(order_by):
                 voter_guide_query = voter_guide_query.order_by(order_by)
             if not positive_value_exists(show_prior_years):
@@ -2424,34 +2428,6 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_query = voter_guide_query.filter(
                     assigned_to_voter_we_vote_id__iexact=assigned_to_voter_we_vote_id)
 
-            if not positive_value_exists(search_string):
-                if not positive_value_exists(ignore_this_source):
-                    # generally skip these unless we specifically ask for it?
-                    voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
-                voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
-                if positive_value_exists(from_prior_election):
-                    # Cannot find endorsements
-                    voter_guide_query = voter_guide_query.filter(from_prior_election=True)
-                elif positive_value_exists(cannot_find_endorsements):
-                    # Cannot find endorsements
-                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
-                elif positive_value_exists(candidates_missing_from_we_vote):
-                    # Candidates/Measures Missing
-                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=True)
-                elif positive_value_exists(capture_detailed_comments):
-                    # Capture Detailed Comments
-                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
-                elif positive_value_exists(ignore_this_source):
-                    # Ignore this Website
-                    voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
-                elif not positive_value_exists(hide_from_active_review):
-                    # Remove items that need further work (and that are shown in other views) from main "Review" list
-                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
-                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
-                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
-                    voter_guide_query = voter_guide_query.filter(from_prior_election=False)
-
-            # Allow searching for voter guide possibilities that are being ignored
             if positive_value_exists(search_string):
                 try:
                     search_words = search_string.split()
@@ -2538,11 +2514,67 @@ class VoterGuidePossibilityManager(models.Manager):
                             final_filters |= item
 
                         voter_guide_query = voter_guide_query.filter(final_filters)
+                # These are similar to the non-search query below
+                if positive_value_exists(return_count_only):
+                    if positive_value_exists(from_prior_election):
+                        # This URL is specific to elections in prior election/year - filter_selected_from_prior_election
+                        voter_guide_query = voter_guide_query.filter(from_prior_election=True)
+                    elif positive_value_exists(cannot_find_endorsements):
+                        # Cannot find endorsements - filter_selected_not_available_yet
+                        voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
+                    elif positive_value_exists(candidates_missing_from_we_vote):
+                        # Candidates/Measures Missing - filter_selected_candidates_missing
+                        voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=True)
+                    elif positive_value_exists(capture_detailed_comments):
+                        # Capture Comments - filter_selected_capture_detailed_comments
+                        voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                    elif positive_value_exists(ignore_this_source):
+                        # Ignore - filter_selected_ignore
+                        voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
+                    elif positive_value_exists(hide_from_active_review):
+                        # Archive - filter_selected_archive
+                        voter_guide_query = voter_guide_query.filter(hide_from_active_review=True)
+                    else:
+                        # To Review - filter_selected_to_review Only count items NOT categorized as one of the above
+                        voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
+                        voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
+                        voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
+                        voter_guide_query = voter_guide_query.filter(hide_from_active_review=False)
+                        voter_guide_query = voter_guide_query.filter(ignore_this_source=False)
+                        voter_guide_query = voter_guide_query.filter(from_prior_election=False)
 
-            if positive_value_exists(return_count_only):
                 voter_guide_possibility_list_count = voter_guide_query.count()
             else:
+                voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
+                if not positive_value_exists(ignore_this_source):
+                    # generally only look for entries we aren't ignoring
+                    voter_guide_query = voter_guide_query.filter(ignore_this_source=False)
+                if positive_value_exists(from_prior_election):
+                    # Cannot find endorsements
+                    voter_guide_query = voter_guide_query.filter(from_prior_election=True)
+                elif positive_value_exists(cannot_find_endorsements):
+                    # Cannot find endorsements
+                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
+                elif positive_value_exists(candidates_missing_from_we_vote):
+                    # Candidates/Measures Missing
+                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=True)
+                elif positive_value_exists(capture_detailed_comments):
+                    # Capture Comments
+                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                elif positive_value_exists(ignore_this_source):
+                    # Ignore
+                    voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
+                elif not positive_value_exists(hide_from_active_review):
+                    # Remove items that need further work (and that are shown in other views) from main "Review" list
+                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
+                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
+                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
+                    voter_guide_query = voter_guide_query.filter(from_prior_election=False)
                 voter_guide_possibility_list_count = voter_guide_query.count()
+
+            if positive_value_exists(return_count_only):
+                pass
+            else:
                 if positive_value_exists(end_number):
                     voter_guide_possibility_list = voter_guide_query[start_number:end_number]
                 else:
