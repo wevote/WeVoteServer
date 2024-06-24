@@ -254,9 +254,8 @@ def voter_guide_create_view(request):
     candidate_name = request.GET.get('candidate_name', "")
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', "")
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', "")
-    candidates_missing_from_we_vote = \
-        positive_value_exists(
-            request.GET.get('candidates_missing_from_we_vote', ""))  # filter_selected_candidates_missing
+    candidates_missing_from_we_vote = positive_value_exists(
+            request.GET.get('candidates_missing_from_we_vote', False))  # filter_selected_candidates_missing
     cannot_find_endorsements = request.GET.get('cannot_find_endorsements', False)  # filter_selected_not_available_yet
     capture_detailed_comments = \
         request.GET.get('capture_detailed_comments ', False)  # filter_selected_capture_detailed_comments
@@ -265,6 +264,9 @@ def voter_guide_create_view(request):
     contributor_comments = request.GET.get('contributor_comments', "")
     contributor_email = request.GET.get('contributor_email', "")
     from_prior_election = request.GET.get('from_prior_election', False)  # filter_selected_from_prior_election
+    done_needs_verification = \
+        request.GET.get('done_needs_verification', False)  # filter_selected_done_needs_verification
+    done_verified = request.GET.get('done_verified', False)  # filter_selected_done_verified
     hide_from_active_review = request.GET.get('hide_from_active_review', False)  # filter_selected_archive
     ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
     ignore_this_source = request.GET.get('ignore_this_source', False)  # filter_selected_ignore
@@ -324,6 +326,9 @@ def voter_guide_create_view(request):
                     voter_guide_possibility.capture_detailed_comments  # filter_selected_capture_detailed_comments
                 contributor_comments = voter_guide_possibility.contributor_comments
                 contributor_email = voter_guide_possibility.contributor_email
+                done_needs_verification = \
+                    voter_guide_possibility.done_needs_verification  # filter_selected_done_needs_verification
+                done_verified = voter_guide_possibility.done_verified  # filter_selected_done_verified
                 from_prior_election = voter_guide_possibility.from_prior_election  # filter_selected_from_prior_election
                 hide_from_active_review = voter_guide_possibility.hide_from_active_review  # filter_selected_archive
                 ignore_stored_positions = voter_guide_possibility.ignore_stored_positions
@@ -343,6 +348,8 @@ def voter_guide_create_view(request):
                 # cannot_find_endorsements == filter_selected_not_available_yet
                 # candidates_missing_from_we_vote == filter_selected_candidates_missing
                 # capture_detailed_comments == filter_selected_capture_detailed_comments
+                # done_needs_verification == filter_selected_done_needs_verification
+                # done_verified == filter_selected_done_verified
                 # from_prior_election == filter_selected_from_prior_election
                 # hide_from_active_review == filter_selected_archive
                 # ignore_this_source == filter_selected_ignore
@@ -350,6 +357,8 @@ def voter_guide_create_view(request):
                     True if not cannot_find_endorsements and \
                     not candidates_missing_from_we_vote and \
                     not capture_detailed_comments and \
+                    not done_needs_verification and \
+                    not done_verified and \
                     not hide_from_active_review and \
                     not ignore_this_source and \
                     not from_prior_election \
@@ -641,6 +650,8 @@ def voter_guide_create_view(request):
         'capture_detailed_comments':    capture_detailed_comments,
         'contributor_comments':         contributor_comments,
         'contributor_email':            contributor_email,
+        'done_needs_verification':      done_needs_verification,
+        'done_verified':                done_verified,
         'filter_selected_to_review':    filter_selected_to_review,
         'from_prior_election':          from_prior_election,
         'hide_from_active_review':      hide_from_active_review,
@@ -715,6 +726,11 @@ def voter_guide_create_process_view(request):
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     contributor_comments = request.POST.get('contributor_comments', "")
     contributor_email = request.POST.get('contributor_email', "")
+    done_needs_verification = \
+        positive_value_exists(
+            request.POST.get('done_needs_verification', False))  # filter_selected_done_needs_verification
+    done_verified = \
+        positive_value_exists(request.POST.get('done_verified', False))  # filter_selected_done_verified
     form_submitted = request.POST.get('form_submitted', False)
     from_prior_election = \
         positive_value_exists(request.POST.get('from_prior_election', False))  # filter_selected_from_prior_election
@@ -774,7 +790,7 @@ def voter_guide_create_process_view(request):
     organization_twitter_followers_count = 0
     voter_who_submitted_name = ""
     voter_found = False
-    if not positive_value_exists(voter_who_submitted_we_vote_id):
+    if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
@@ -789,7 +805,7 @@ def voter_guide_create_process_view(request):
             voter_who_submitted_name = ""
             voter_who_submitted_we_vote_id = ""
 
-    if not positive_value_exists(voter_who_submitted_we_vote_id):
+    if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -805,7 +821,7 @@ def voter_guide_create_process_view(request):
             voter_who_submitted_name = ""
             voter_who_submitted_we_vote_id = ""
 
-    if not positive_value_exists(voter_found):
+    if not positive_value_exists(voter_found) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -912,6 +928,8 @@ def voter_guide_create_process_view(request):
                 updated_values['candidates_missing_from_we_vote'] = False
                 updated_values['cannot_find_endorsements'] = False
                 updated_values['capture_detailed_comments'] = False
+                updated_values['done_needs_verification'] = False
+                updated_values['done_verified'] = False
                 updated_values['from_prior_election'] = False
                 updated_values['hide_from_active_review'] = False
             else:
@@ -919,6 +937,8 @@ def voter_guide_create_process_view(request):
                 updated_values['candidates_missing_from_we_vote'] = candidates_missing_from_we_vote
                 updated_values['cannot_find_endorsements'] = cannot_find_endorsements
                 updated_values['capture_detailed_comments'] = capture_detailed_comments
+                updated_values['done_needs_verification'] = done_needs_verification
+                updated_values['done_verified'] = done_verified
                 updated_values['from_prior_election'] = from_prior_election
                 updated_values['hide_from_active_review'] = hide_from_active_review
 
@@ -1766,6 +1786,12 @@ def voter_guide_possibility_list_view(request):
     filter_selected_capture_detailed_comments = \
         positive_value_exists(
             request.GET.get('filter_selected_capture_detailed_comments', False))  # capture_detailed_comments
+    filter_selected_done_needs_verification = \
+        positive_value_exists(
+            request.GET.get('filter_selected_done_needs_verification', False))  # done_needs_verification
+    filter_selected_done_verified = \
+        positive_value_exists(
+            request.GET.get('filter_selected_done_verified', False))  # done_verified
     filter_selected_from_prior_election = \
         positive_value_exists(request.GET.get('filter_selected_from_prior_election', False))  # from_prior_election
     filter_selected_ignore = \
@@ -1858,6 +1884,28 @@ def voter_guide_possibility_list_view(request):
         return_count_only=True)
     capture_detailed_comments_count = results['voter_guide_possibility_list_count']
 
+    # Done-To Verify
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        done_needs_verification=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    done_needs_verification_count = results['voter_guide_possibility_list_count']
+
+    # Done-Verified
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+        done_verified=True,
+        search_string=voter_guide_possibility_search,
+        google_civic_election_id=google_civic_election_id,
+        show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
+        assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+        return_count_only=True)
+    done_verified_count = results['voter_guide_possibility_list_count']
+
     number_to_show = 25
     start_number = number_to_show * page
     end_number = start_number + number_to_show
@@ -1921,6 +1969,36 @@ def voter_guide_possibility_list_view(request):
             assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             capture_detailed_comments=filter_selected_capture_detailed_comments)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+    elif positive_value_exists(filter_selected_done_needs_verification):
+        filtered_by_title = "Done-To Verify"
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+            done_needs_verification=filter_selected_done_needs_verification)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+    elif positive_value_exists(filter_selected_done_verified):
+        filtered_by_title = "Done-Verified"
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by=order_by,
+            start_number=start_number,
+            end_number=end_number,
+            search_string=voter_guide_possibility_search,
+            google_civic_election_id=google_civic_election_id,
+            show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
+            assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
+            done_verified=filter_selected_done_verified)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
     elif positive_value_exists(filter_selected_archive):
@@ -2009,6 +2087,8 @@ def voter_guide_possibility_list_view(request):
     # candidates_missing_from_we_vote == filter_selected_candidates_missing
     # cannot_find_endorsements == filter_selected_not_available_yet
     # capture_detailed_comments == filter_selected_capture_detailed_comments
+    # done_needs_verification == filter_selected_done_needs_verification
+    # done_verified == filter_selected_done_verified
     # from_prior_election == filter_selected_from_prior_election
     # hide_from_active_review == filter_selected_archive
     # ignore_this_source == filter_selected_ignore
@@ -2016,6 +2096,8 @@ def voter_guide_possibility_list_view(request):
         True if not filter_selected_archive and \
         not filter_selected_candidates_missing and \
         not filter_selected_capture_detailed_comments and \
+        not filter_selected_done_needs_verification and \
+        not filter_selected_done_verified and \
         not filter_selected_ignore and \
         not filter_selected_from_prior_election and \
         not filter_selected_not_available_yet and \
@@ -2031,12 +2113,16 @@ def voter_guide_possibility_list_view(request):
         'candidates_missing_count':             candidates_missing_count,
         'not_available_yet_count':              not_available_yet_count,
         'capture_detailed_comments_count':      capture_detailed_comments_count,
+        'done_needs_verification_count':        done_needs_verification_count,
+        'done_verified_count':                  done_verified_count,
         'current_page_number':                  page,
         'election_list':                        election_list,
         'filtered_by_title':                    filtered_by_title,
         'filter_selected_archive':              filter_selected_archive,
         'filter_selected_candidates_missing':   filter_selected_candidates_missing,
         'filter_selected_capture_detailed_comments': filter_selected_capture_detailed_comments,
+        'filter_selected_done_needs_verification': filter_selected_done_needs_verification,
+        'filter_selected_done_verified':        filter_selected_done_verified,
         'filter_selected_from_prior_election':  filter_selected_from_prior_election,
         'filter_selected_ignore':               filter_selected_ignore,
         'filter_selected_not_available_yet':    filter_selected_not_available_yet,
@@ -2075,7 +2161,11 @@ def voter_guide_possibility_list_process_view(request):
     filter_selected_candidates_missing = \
         request.POST.get('filter_selected_candidates_missing', False)  # candidates_missing_from_we_vote
     filter_selected_capture_detailed_comments = \
-            request.POST.get('filter_selected_capture_detailed_comments', False)  # capture_detailed_comments
+        request.POST.get('filter_selected_capture_detailed_comments', False)  # capture_detailed_comments
+    filter_selected_done_needs_verification = \
+        request.POST.get('filter_selected_done_needs_verification', False)  # done_needs_verification
+    filter_selected_done_verified = \
+        request.POST.get('filter_selected_done_verified', False)  # done_verified
     filter_selected_from_prior_election = \
         request.POST.get('filter_selected_from_prior_election', False)  # from_prior_election
     filter_selected_ignore = request.POST.get('filter_selected_ignore', False)  # ignore_this_source
@@ -2094,6 +2184,10 @@ def voter_guide_possibility_list_process_view(request):
         url_variables += "&filter_selected_candidates_missing=" + str(filter_selected_candidates_missing)
     if positive_value_exists(filter_selected_capture_detailed_comments):  # capture_detailed_comments
         url_variables += "&filter_selected_capture_detailed_comments=" + str(filter_selected_capture_detailed_comments)
+    if positive_value_exists(filter_selected_done_needs_verification):  # done_needs_verification
+        url_variables += "&filter_selected_done_needs_verification=" + str(filter_selected_done_needs_verification)
+    if positive_value_exists(filter_selected_done_verified):  # done_verified
+        url_variables += "&filter_selected_done_verified=" + str(filter_selected_done_verified)
     if positive_value_exists(filter_selected_from_prior_election):  # from_prior_election
         url_variables += "&filter_selected_from_prior_election=" + str(filter_selected_from_prior_election)
     if positive_value_exists(filter_selected_ignore):  # ignore_this_source
@@ -2115,6 +2209,8 @@ def voter_guide_possibility_list_process_view(request):
                                       'cannot_find_endorsements',
                                       'capture_detailed_comments',
                                       'delete_this_source',
+                                      'done_needs_verification',
+                                      'done_verified',
                                       'hide_from_active_review',
                                       'ignore_this_source',
                                       'from_prior_election']:
@@ -2195,6 +2291,8 @@ def voter_guide_possibility_list_process_view(request):
                             'candidates_missing_from_we_vote': False,
                             'cannot_find_endorsements': False,
                             'capture_detailed_comments': False,
+                            'done_needs_verification': False,
+                            'done_verified': False,
                             'from_prior_election': False,
                             'hide_from_active_review': False,
                             'ignore_this_source': False,
@@ -2225,18 +2323,6 @@ def voter_guide_possibility_list_process_view(request):
                         one_item_processed_successfully = True
                     else:
                         which_marking_status += results['status']
-                elif which_marking == "from_prior_election":
-                    results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-                        voter_guide_possibility_id=voter_guide_possibility_id,
-                        updated_values={
-                            'from_prior_election': True,
-                            'hide_from_active_review': False,
-                            'ignore_this_source': False,
-                        })
-                    if results['success']:
-                        one_item_processed_successfully = True
-                    else:
-                        which_marking_status += results['status']
                 elif which_marking == "delete_this_source":
                     results = voter_guide_possibility_manager.delete_voter_guide_possibility(
                         voter_guide_possibility_id=voter_guide_possibility_id)
@@ -2248,21 +2334,39 @@ def voter_guide_possibility_list_process_view(request):
                     'candidates_missing_from_we_vote',
                     'cannot_find_endorsements',
                     'capture_detailed_comments',
+                    'done_needs_verification',
+                    'done_verified',
+                    'from_prior_election',
                 ]:
                     candidates_missing_from_we_vote = \
                         True if which_marking == 'candidates_missing_from_we_vote' else False
                     cannot_find_endorsements = True if which_marking == 'cannot_find_endorsements' else False
                     capture_detailed_comments = True if which_marking == 'capture_detailed_comments' else False
+                    done_needs_verification = True if which_marking == 'done_needs_verification' else False
+                    done_verified = True if which_marking == 'done_verified' else False
+                    from_prior_election = True if which_marking == 'from_prior_election' else False
+                    updates = {
+                        'candidates_missing_from_we_vote': candidates_missing_from_we_vote,
+                        'cannot_find_endorsements': cannot_find_endorsements,
+                        'capture_detailed_comments': capture_detailed_comments,
+                        'done_needs_verification': done_needs_verification,
+                        'done_verified': done_verified,
+                        'from_prior_election': from_prior_election,
+                        'hide_from_active_review': False,
+                        'ignore_this_source': False,
+                    }
+                    if positive_value_exists(done_verified):
+                        voter_manager = VoterManager()
+                        generate_if_no_value = True
+                        voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
+                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+                        if voter_results['voter_found']:
+                            voter = voter_results['voter']
+                            updates['voter_who_submitted_name'] = voter.get_full_name()
+                            updates['voter_who_submitted_we_vote_id'] = voter.we_vote_id
                     results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
                         voter_guide_possibility_id=voter_guide_possibility_id,
-                        updated_values={
-                            'candidates_missing_from_we_vote': candidates_missing_from_we_vote,
-                            'cannot_find_endorsements': cannot_find_endorsements,
-                            'capture_detailed_comments': capture_detailed_comments,
-                            'from_prior_election': False,
-                            'hide_from_active_review': False,
-                            'ignore_this_source': False,
-                        })
+                        updated_values=updates)
                     if results['success']:
                         one_item_processed_successfully = True
                     else:
@@ -2271,7 +2375,8 @@ def voter_guide_possibility_list_process_view(request):
                     items_processed_successfully += 1
                 else:
                     messages.add_message(request, messages.ERROR,
-                                         'voter_guide_possibility_list_process_view {which_marking_status}'
+                                         'voter_guide_possibility_list_process_view, '
+                                         'which_marking_status: {which_marking_status}'
                                          ''.format(which_marking_status=which_marking_status))
             except ValueError:
                 messages.add_message(request, messages.ERROR,

@@ -160,6 +160,14 @@
                 Capture Comments
                 <br />
                 {% endif %}
+                {% if voter_guide_possibility.done_needs_verification %}
+                    <span class="u-no-break">Done-To Verify</span>
+                <br />
+                {% endif %}
+                {% if voter_guide_possibility.done_verified %}
+                    <span class="u-no-break">Done-Verified</span>
+                <br />
+                {% endif %}
                 {% if voter_guide_possibility.hide_from_active_review %}
                 Archived
                 <br />
@@ -168,7 +176,7 @@
                 Ignored
                 <br />
                 {% endif %}
-                {% if not voter_guide_possibility.from_prior_election and not voter_guide_possibility.cannot_find_endorsements and not voter_guide_possibility.candidates_missing_from_we_vote and not voter_guide_possibility.capture_detailed_comments and not voter_guide_possibility.hide_from_active_review and not voter_guide_possibility.ignore_this_source %}
+                {% if not voter_guide_possibility.from_prior_election and not voter_guide_possibility.cannot_find_endorsements and not voter_guide_possibility.candidates_missing_from_we_vote and not voter_guide_possibility.capture_detailed_comments and not voter_guide_possibility.done_needs_verification and not voter_guide_possibility.done_verified and not voter_guide_possibility.hide_from_active_review and not voter_guide_possibility.ignore_this_source %}
                     <span class="u-no-break">To Review</span>
                 <br />
                 {% endif %}
@@ -198,6 +206,15 @@
             <td>
               {% if voter_guide_possibility.assigned_to_name %}
                 {{ voter_guide_possibility.assigned_to_name }}
+              {% endif %}
+              {% if voter_guide_possibility.verified_by_we_vote_id and voter_guide_possibility.verified_by_name %}
+              <span{% if not voter_guide_possibility.done_verified %} style="text-decoration: line-through;"{% endif %}>
+                  Verified by
+                  <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_who_submitted_we_vote_id %}"
+                     target="_blank">
+                    <strong>{{ voter_guide_possibility.voter_who_submitted_name|default_if_none:"" }}</strong></a>
+{#                  {{ voter_guide_possibility.date_last_changed|default_if_none:"" }} PT#}
+              </span>
               {% endif %}
             </td>
             <td>

@@ -2023,6 +2023,18 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_created = False
                 voter_guide_possibility_updated = False
                 voter_guide_possibility_has_changes = False
+                done_verified_previous = voter_guide_possibility.done_verified
+                done_verified_flipped_from_false_to_true = False
+                if 'done_verified' in updated_values and positive_value_exists(updated_values['done_verified']):
+                    done_verified_new = updated_values['done_verified']
+                    done_verified_flipped_from_false_to_true = done_verified_new and not done_verified_previous
+                if done_verified_flipped_from_false_to_true:
+                    if 'voter_who_submitted_name' in updated_values and \
+                            positive_value_exists(updated_values['voter_who_submitted_name']):
+                        updated_values['verified_by_name'] = updated_values['voter_who_submitted_name']
+                    if 'voter_who_submitted_we_vote_id' in updated_values and \
+                            positive_value_exists(updated_values['voter_who_submitted_we_vote_id']):
+                        updated_values['verified_by_we_vote_id'] = updated_values['voter_who_submitted_we_vote_id']
                 for key, value in updated_values.items():
                     if hasattr(voter_guide_possibility, key):
                         voter_guide_possibility_has_changes = True
@@ -2388,6 +2400,8 @@ class VoterGuidePossibilityManager(models.Manager):
             cannot_find_endorsements=False,
             candidates_missing_from_we_vote=False,
             capture_detailed_comments=False,
+            done_needs_verification=False,
+            done_verified=False,
             from_prior_election=False,
             ignore_this_source=False,
             show_prior_years=False,
@@ -2401,6 +2415,8 @@ class VoterGuidePossibilityManager(models.Manager):
         candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
         capture_detailed_comments = positive_value_exists(capture_detailed_comments)
+        done_needs_verification = positive_value_exists(done_needs_verification)
+        done_verified = positive_value_exists(done_verified)
         from_prior_election = positive_value_exists(from_prior_election)
         ignore_this_source = positive_value_exists(ignore_this_source)
         return_count_only = positive_value_exists(return_count_only)
@@ -2528,6 +2544,12 @@ class VoterGuidePossibilityManager(models.Manager):
                     elif positive_value_exists(capture_detailed_comments):
                         # Capture Comments - filter_selected_capture_detailed_comments
                         voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                    elif positive_value_exists(done_needs_verification):
+                        # Capture Comments - filter_selected_done_needs_verification
+                        voter_guide_query = voter_guide_query.filter(done_needs_verification=True)
+                    elif positive_value_exists(done_verified):
+                        # Capture Comments - filter_selected_done_verified
+                        voter_guide_query = voter_guide_query.filter(done_verified=True)
                     elif positive_value_exists(ignore_this_source):
                         # Ignore - filter_selected_ignore
                         voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
@@ -2539,6 +2561,8 @@ class VoterGuidePossibilityManager(models.Manager):
                         voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
                         voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
                         voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
+                        voter_guide_query = voter_guide_query.filter(done_needs_verification=False)
+                        voter_guide_query = voter_guide_query.filter(done_verified=False)
                         voter_guide_query = voter_guide_query.filter(hide_from_active_review=False)
                         voter_guide_query = voter_guide_query.filter(ignore_this_source=False)
                         voter_guide_query = voter_guide_query.filter(from_prior_election=False)
@@ -2550,10 +2574,10 @@ class VoterGuidePossibilityManager(models.Manager):
                     # generally only look for entries we aren't ignoring
                     voter_guide_query = voter_guide_query.filter(ignore_this_source=False)
                 if positive_value_exists(from_prior_election):
-                    # Cannot find endorsements
+                    # Was a link from a prior election
                     voter_guide_query = voter_guide_query.filter(from_prior_election=True)
                 elif positive_value_exists(cannot_find_endorsements):
-                    # Cannot find endorsements
+                    # Cannot find endorsements, but they may be added to the website
                     voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
                 elif positive_value_exists(candidates_missing_from_we_vote):
                     # Candidates/Measures Missing
@@ -2561,6 +2585,12 @@ class VoterGuidePossibilityManager(models.Manager):
                 elif positive_value_exists(capture_detailed_comments):
                     # Capture Comments
                     voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                elif positive_value_exists(done_needs_verification):
+                    # Done. Now needs to be verified - filter_selected_done_needs_verification
+                    voter_guide_query = voter_guide_query.filter(done_needs_verification=True)
+                elif positive_value_exists(done_verified):
+                    # Done, and verified - filter_selected_done_verified
+                    voter_guide_query = voter_guide_query.filter(done_verified=True)
                 elif positive_value_exists(ignore_this_source):
                     # Ignore
                     voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
@@ -2569,6 +2599,8 @@ class VoterGuidePossibilityManager(models.Manager):
                     voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
                     voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
                     voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
+                    voter_guide_query = voter_guide_query.filter(done_needs_verification=False)
+                    voter_guide_query = voter_guide_query.filter(done_verified=False)
                     voter_guide_query = voter_guide_query.filter(from_prior_election=False)
                 voter_guide_possibility_list_count = voter_guide_query.count()
 
@@ -2995,6 +3027,9 @@ class VoterGuidePossibility(models.Model):
     voter_who_submitted_we_vote_id = models.CharField(
         verbose_name="voter we vote id who submitted this", max_length=255, null=True, blank=True, unique=False)
 
+    verified_by_name = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    verified_by_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+
     # Political data manager responsible for processing this voter guide possibility
     assigned_to_name = models.CharField(max_length=255, null=True, blank=True, unique=False)
     assigned_to_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
@@ -3031,6 +3066,13 @@ class VoterGuidePossibility(models.Model):
 
     # Data manager will need to put more work into this in order to capture all the details
     capture_detailed_comments = models.BooleanField(default=False)
+
+    # We have extracted all the data that we can from this Endorsement Website,
+    # and it is ready for review by another teammate.
+    done_needs_verification = models.BooleanField(default=False)
+
+    # Another teammate reviewed the captured data for accuracy, and approved all the stored data as valid.
+    done_verified = models.BooleanField(default=False)
 
     # Data manager will need to put more work into this in order to capture all the details
     from_prior_election = models.BooleanField(default=False)

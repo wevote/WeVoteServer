@@ -71,6 +71,8 @@
     <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
     <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
     <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
+    <input type="hidden" name="filter_selected_done_needs_verification" value="{{ filter_selected_done_needs_verification }}">
+    <input type="hidden" name="filter_selected_done_verified" value="{{ filter_selected_done_verified }}">
     <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
     <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
     <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">
@@ -143,6 +145,28 @@
     </span>
 
     &nbsp;&nbsp;&nbsp;
+    {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
+    <span class="mdl-chip{% if filter_selected_done_needs_verification %} mdl-color--grey{% endif %}" {% if filter_selected_done_needs_verification %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_needs_verification=1">
+              <span style="{% if filter_selected_done_needs_verification %}color: #fff;{% endif %}">
+              Done-To Verify
+              ({{ done_needs_verification_count }})
+              </span>
+            </a>
+        </span>
+    </span>
+    {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
+    <span class="mdl-chip{% if filter_selected_done_verified %} mdl-color--grey{% endif %}" {% if filter_selected_done_verified %} style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_verified=1">
+              <span style="{% if filter_selected_done_verified %}color: #fff;{% endif %}">
+              Done-Verified
+              ({{ done_verified_count }})
+              </span>
+            </a>
+        </span>
+    </span>
     {# Return to see voter guides to review #}
     <span class="mdl-chip{% if filter_selected_archive %} mdl-color--grey{% endif %}" {% if filter_selected_archive %} style="font-weight: bold;"{% endif %}>
        <span class="mdl-chip__text">
@@ -216,6 +240,8 @@
                 <option value="cannot_find_endorsements">Not Available Yet</option>
                 <option value="candidates_missing_from_we_vote">Candidates Missing</option>
                 <option value="capture_detailed_comments">Capture Comments</option>
+                <option value="done_needs_verification">Done-To Verify</option>
+                <option value="done_verified">Done-Verified</option>
                 <option value="hide_from_active_review">Archive</option>
                 <option value="ignore_this_source">Ignore Website in Future</option>
                 <option value="delete_this_source">Hard Delete this Entry</option>
@@ -237,6 +263,8 @@
     <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
     <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
     <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
+    <input type="hidden" name="filter_selected_done_needs_verification" value="{{ filter_selected_done_needs_verification }}">
+    <input type="hidden" name="filter_selected_done_verified" value="{{ filter_selected_done_verified }}">
     <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
     <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
     <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">

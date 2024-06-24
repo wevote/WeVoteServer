@@ -1069,6 +1069,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
     capture_detailed_comments = False  # filter_selected_capture_detailed_comments
     contributor_email = ""
     contributor_comments = ""
+    done_needs_verification = False  # filter_selected_done_needs_verification
+    done_verified = False  # filter_selected_done_verified
     from_prior_election = False  # filter_selected_from_prior_election
     hide_from_active_review = False  # filter_selected_archive
     ignore_this_source = False  # filter_selected_ignore
@@ -1087,6 +1089,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
         capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
         contributor_email = voter_guide_possibility.contributor_email
         contributor_comments = voter_guide_possibility.contributor_comments
+        done_needs_verification = voter_guide_possibility.done_needs_verification
+        done_verified = voter_guide_possibility.done_verified
         from_prior_election = voter_guide_possibility.from_prior_election
         hide_from_active_review = voter_guide_possibility.hide_from_active_review
         ignore_this_source = voter_guide_possibility.ignore_this_source
@@ -1200,6 +1204,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
         'capture_detailed_comments':            capture_detailed_comments,
         'contributor_comments':                 contributor_comments,
         'contributor_email':                    contributor_email,
+        'done_needs_verification':              done_needs_verification,
+        'done_verified':                        done_verified,
         'from_prior_election':                  from_prior_election,
         'hide_from_active_review':              hide_from_active_review,
         'ignore_this_source':                   ignore_this_source,
@@ -1611,6 +1617,8 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
         clear_organization_options=None,
         contributor_comments=None,
         contributor_email=None,
+        done_needs_verification=None,  # filter_selected_done_needs_verification
+        done_verified=None,  # filter_selected_done_verified
         from_prior_election=None,  # filter_selected_from_prior_election
         hide_from_active_review=None,  # filter_selected_archive
         ignore_this_source=None,  # filter_selected_ignore
@@ -1681,6 +1689,12 @@ def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
             at_least_one_change = True
         if contributor_email is not None:
             voter_guide_possibility.contributor_email = contributor_email
+            at_least_one_change = True
+        if done_needs_verification is not None:
+            voter_guide_possibility.done_needs_verification = positive_value_exists(done_needs_verification)
+            at_least_one_change = True
+        if done_verified is not None:
+            voter_guide_possibility.done_verified = positive_value_exists(done_verified)
             at_least_one_change = True
         if from_prior_election is not None:
             voter_guide_possibility.from_prior_election = positive_value_exists(from_prior_election)
