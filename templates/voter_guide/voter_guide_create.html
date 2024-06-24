@@ -585,6 +585,22 @@
 
             &nbsp;&nbsp;&nbsp;
             <span class="u-no-break">
+                <input type="checkbox" name="done_needs_verification" id="done_needs_verification_id"
+                       value="True"
+                       {% if done_needs_verification %}checked{% endif %} />
+                <label for="done_needs_verification_id" style="font-weight: normal !important;">Done-To Verify</label>
+            </span>
+
+            &nbsp;&nbsp;&nbsp;
+            <span class="u-no-break">
+                <input type="checkbox" name="done_verified" id="done_verified_id"
+                       value="True"
+                       {% if done_verified %}checked{% endif %} />
+                <label for="done_verified_id" style="font-weight: normal !important;">Done-Verified</label>
+            </span>
+
+            &nbsp;&nbsp;&nbsp;
+            <span class="u-no-break">
                 <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
                        value="True"
                        {% if hide_from_active_review %}checked{% endif %} />
@@ -698,6 +714,8 @@ $(function() {
             this.form.cannot_find_endorsements_id.checked = false;
             this.form.capture_detailed_comments_id.checked = false;
             this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.done_verified_id.checked = false;
             this.form.hide_from_active_review_id.checked = false;
             this.form.ignore_this_source_id.checked = false;
         }
@@ -710,6 +728,8 @@ $(function() {
             this.form.cannot_find_endorsements_id.checked = false;
             this.form.capture_detailed_comments_id.checked = false;
             this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.done_verified_id.checked = false;
             this.form.hide_from_active_review_id.checked = false;
             this.form.ignore_this_source_id.checked = false;
         }
@@ -722,6 +742,8 @@ $(function() {
             this.form.from_prior_election_id.checked = false;
             this.form.capture_detailed_comments_id.checked = false;
             this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.done_verified_id.checked = false;
             this.form.hide_from_active_review_id.checked = false;
             this.form.ignore_this_source_id.checked = false;
         }
@@ -734,6 +756,8 @@ $(function() {
             this.form.from_prior_election_id.checked = false;
             this.form.cannot_find_endorsements_id.checked = false;
             this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.done_verified_id.checked = false;
             this.form.hide_from_active_review_id.checked = false;
             this.form.ignore_this_source_id.checked = false;
         }
@@ -746,6 +770,36 @@ $(function() {
             this.form.from_prior_election_id.checked = false;
             this.form.cannot_find_endorsements_id.checked = false;
             this.form.capture_detailed_comments_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.done_verified_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#done_needs_verification_id').change(function() {
+        if (this.form.done_needs_verification_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.from_prior_election_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
+            this.form.done_verified_id.checked = false;
+            this.form.hide_from_active_review_id.checked = false;
+            this.form.ignore_this_source_id.checked = false;
+        }
+    });
+});
+$(function() {
+    $('#done_verified_id').change(function() {
+        if (this.form.done_verified_id.checked === true) {
+            this.form.filter_selected_to_review_id.checked = false;
+            this.form.from_prior_election_id.checked = false;
+            this.form.cannot_find_endorsements_id.checked = false;
+            this.form.capture_detailed_comments_id.checked = false;
+            this.form.done_needs_verification_id.checked = false;
+            this.form.candidates_missing_from_we_vote_id.checked = false;
             this.form.hide_from_active_review_id.checked = false;
             this.form.ignore_this_source_id.checked = false;
         }

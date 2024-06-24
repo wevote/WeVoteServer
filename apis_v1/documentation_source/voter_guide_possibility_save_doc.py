@@ -63,6 +63,18 @@ def voter_guide_possibility_save_doc_template_values(url_root):
             'description':  'The email address (unverified) of the person submitting this VoterGuidePossibility.',
         },
         {
+            'name':         'done_needs_verification',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'We have extracted all the data that we can from these Endorsement Websites, '
+                            'and it is ready for review by another teammate.',
+        },
+        {
+            'name':         'done_verified',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Another teammate reviewed the captured data for accuracy, '
+                            'and approved all the stored data as valid.',
+        },
+        {
             'name':         'from_prior_election',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'The URL to these endorsements was meant for prior year. If the URL might be used again '
@@ -160,6 +172,8 @@ def voter_guide_possibility_save_doc_template_values(url_root):
                    '  "capture_detailed_comments": boolean,\n' \
                    '  "contributor_comments": string,\n' \
                    '  "contributor_email": string,\n' \
+                   '  "done_needs_verification": string,\n' \
+                   '  "done_verified": string,\n' \
                    '  "from_prior_election": boolean,\n' \
                    '  "hide_from_active_review": boolean,\n' \
                    '  "ignore_this_source": boolean,\n' \
