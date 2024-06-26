@@ -13,7 +13,7 @@ from organization.models import Organization
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, get_current_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, generate_localized_datetime_from_obj
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 ACTION_VOTER_GUIDE_VISIT = 1
@@ -1142,8 +1142,8 @@ class AnalyticsManager(models.Manager):
             
             # timezone = pytz.timezone("America/Los_Angeles")
             # pacific_time_datetime_now = timezone.localize(datetime.now())
-            # pacific_time_date_as_integer = convert_date_to_date_as_integer(pacific_time_datetime_now)
-            pacific_time_date_as_integer = get_current_date_as_integer()
+            pacific_time_datetime_now = generate_localized_datetime_from_obj(datetime.now())
+            pacific_time_date_as_integer = convert_date_to_date_as_integer(pacific_time_datetime_now)
 
             if new_analytics_date_as_integer > pacific_time_date_as_integer:
                 # Wait until we pass midnight to process the analytics
