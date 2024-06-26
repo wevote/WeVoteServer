@@ -23,7 +23,7 @@ from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, Vote
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
     process_request_from_master, strip_html_tags
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -2139,7 +2139,7 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
         # may not be related to their address.
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         election_choice_is_stale_boolean = False
         election_choice_is_stale_duration = timedelta(days=1)
         election_choice_is_stale_date = datetime_now
@@ -2207,7 +2207,7 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
         # nor do we want to assume the ballot from a week ago is the most current for their location/address.
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         election_choice_is_stale_boolean = False
         election_choice_is_stale_duration = timedelta(days=7)
         election_choice_is_stale_date = datetime_now
