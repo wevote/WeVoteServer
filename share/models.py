@@ -11,7 +11,6 @@ from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN
 import pytz
 import sys
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
 
 
 class SharedItem(models.Model):
@@ -958,10 +957,8 @@ class ShareManager(models.Manager):
             date_as_string = "{date}".format(date=date_as_integer)
             date_start = datetime.strptime(date_as_string, "%Y%m%d").date()
             datetime_start = datetime.combine(date_start, datetime.min.time())
-
-            # pst_timezone = pytz.timezone("America/Los_Angeles")
-            # date_start_pst = pst_timezone.localize(datetime_start)
-            date_start_pst = get_timezone_and_datetime_now(datetime_obj=datetime_start)[1]
+            pst_timezone = pytz.timezone("America/Los_Angeles")
+            date_start_pst = pst_timezone.localize(datetime_start)
             date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
             queryset = queryset.filter(date_clicked__range=(date_start_pst, date_end_pst))
         if positive_value_exists(len(shared_by_state_code_list)):
