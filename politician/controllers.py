@@ -33,7 +33,7 @@ from wevote_functions.functions import candidate_party_display, convert_to_int, 
     convert_to_political_party_constant, extract_instagram_handle_from_text_string, \
     generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, generate_localized_datetime_from_obj
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -657,7 +657,7 @@ def generate_campaignx_for_politician(
         if datetime_now is None:
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
         politician.linked_campaignx_we_vote_id = results['campaignx'].we_vote_id
         politician.linked_campaignx_we_vote_id_date_last_updated = datetime_now
         if positive_value_exists(save_individual_politician):
