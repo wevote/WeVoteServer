@@ -1740,7 +1740,6 @@ def process_request_from_master(request, message_text, get_url, get_params):
     response = requests.get(get_url, params=get_params)
 
     structured_json = json.loads(response.text)
-
     if 'success' in structured_json and not structured_json['success']:
         import_results = {
             'success': False,
