@@ -135,11 +135,6 @@
                   <span class="u-no-break" style="color: green">{{ voter_guide_possibility.number_of_endorsements_with_position }} visible to voters</span>
                   <br />
                 {% endif %}
-{#                {% with voter_guide_possibility.number_of_ballot_items|sub:voter_guide_possibility.number_of_endorsements_with_position as number_of_endorsements_not_visible %}#}
-{#                  {% if number_of_endorsements_not_visible %}#}
-{#                      <span class="u-no-break"><strong>{{ number_of_endorsements_not_visible }} NOT visible to voters</strong></span>#}
-{#                  {% endif %}#}
-{#                {% endwith %}#}
                 {% if voter_guide_possibility.number_of_endorsements_not_visible %}
                   <span class="u-no-break"><strong>{{ voter_guide_possibility.number_of_endorsements_not_visible }} NOT visible to voters</strong></span>
                     <br />
