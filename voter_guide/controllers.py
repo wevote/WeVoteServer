@@ -134,8 +134,14 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
                     break
                 if 'candidate_we_vote_id' in one_possible_endorsement \
                         and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
+                    if is_organization_endorsing_candidates:
+                        organization_we_vote_id = one_voter_guide_possibility.organization_we_vote_id
+                    elif is_list_of_endorsements_for_candidate:
+                        organization_we_vote_id = one_possible_endorsement['organization_we_vote_id']
+                    else:
+                        organization_we_vote_id = ''
                     position_exists_query = PositionEntered.objects.filter(
-                        organization_we_vote_id=one_voter_guide_possibility.organization_we_vote_id,
+                        organization_we_vote_id=organization_we_vote_id,
                         candidate_campaign_we_vote_id=one_possible_endorsement['candidate_we_vote_id'])
                     position_count = position_exists_query.count()
                     if positive_value_exists(position_count):
