@@ -19,7 +19,7 @@ from organization.models import Organization, OrganizationManager, \
 from pledge_to_vote.models import PledgeToVoteManager
 from voter.models import VoterManager
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1690,7 +1690,7 @@ class VoterGuideListManager(models.Manager):
                     status += "EXCLUDE_PAST_ELECTION_DAYS "
                     # timezone = pytz.timezone("America/Los_Angeles")
                     # datetime_now = timezone.localize(datetime.now())
-                    datetime_now = get_timezone_and_datetime_now()[1]
+                    datetime_now = generate_localized_datetime_from_obj()[1]
                     two_days = timedelta(days=2)
                     datetime_two_days_ago = datetime_now - two_days
                     earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
