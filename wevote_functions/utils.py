@@ -19,6 +19,7 @@ def scrape_url(site_url, with_soup=True):
     all_html_found = False
     all_html = []
     status = ''
+    success = True
     try:
         request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
@@ -35,18 +36,14 @@ def scrape_url(site_url, with_soup=True):
             all_html = soup.get_text()
 
     except Exception as e:
-        status = "scrape_url returned exception ", e
-
-    # res = {
-    #     'all_html': all_html,
-    #     'all_html_found': all_html_found,
-    #     'status': status
-    # }
+        status = "SCRAPE_URL_ERROR: ", e
+        success = False
 
     return {
         'all_html': all_html,
         'all_html_found': all_html_found,
-        'status': status
+        'status': status,
+        'success': success,
     }
 
 
