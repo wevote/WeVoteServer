@@ -174,7 +174,7 @@ class ContestMeasure(models.Model):
             return self.ballotpedia_measure_url
         return ""
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -240,7 +240,7 @@ class MeasureCampaign(models.Model):
     # The voice phone number for the campaign office for this measure.
     measure_phone = models.CharField(verbose_name="measure phone", max_length=255, null=True, blank=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

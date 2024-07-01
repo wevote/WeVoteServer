@@ -1929,40 +1929,42 @@ def generate_campaignx_dict_from_campaignx_object(
 
     # Get campaignx news items / updates
     campaignx_news_item_list = []
-    news_item_list_results = campaignx_manager.retrieve_campaignx_news_item_list(
-        campaignx_we_vote_id=campaignx.we_vote_id,
-        read_only=True,
-        voter_is_campaignx_owner=voter_is_campaignx_owner)
-    if news_item_list_results['campaignx_news_item_list_found']:
-        news_item_list = news_item_list_results['campaignx_news_item_list']
-        for news_item in news_item_list:
-            date_last_changed_string = ''
-            date_posted_string = ''
-            date_sent_to_email_string = ''
-            try:
-                date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-                date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
-                if positive_value_exists(news_item.date_sent_to_email):
-                    date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
-            except Exception as e:
-                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-            one_news_item_dict = {
-                'campaign_news_subject': news_item.campaign_news_subject,
-                'campaign_news_text': news_item.campaign_news_text,
-                'campaignx_news_item_we_vote_id': news_item.we_vote_id,
-                'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
-                'date_last_changed': date_last_changed_string,
-                'date_posted': date_posted_string,
-                'date_sent_to_email': date_sent_to_email_string,
-                'in_draft_mode': news_item.in_draft_mode,
-                'organization_we_vote_id': news_item.organization_we_vote_id,
-                'speaker_name': news_item.speaker_name,
-                'visible_to_public': news_item.visible_to_public,
-                'voter_we_vote_id': news_item.voter_we_vote_id,
-                'we_vote_hosted_profile_image_url_medium': news_item.we_vote_hosted_profile_image_url_medium,
-                'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
-            }
-            campaignx_news_item_list.append(one_news_item_dict)
+    # Only retrieve news items if NOT linked to a politician
+    if campaignx and not positive_value_exists(campaignx.linked_politician_we_vote_id):
+        news_item_list_results = campaignx_manager.retrieve_campaignx_news_item_list(
+            campaignx_we_vote_id=campaignx.we_vote_id,
+            read_only=True,
+            voter_is_campaignx_owner=voter_is_campaignx_owner)
+        if news_item_list_results['campaignx_news_item_list_found']:
+            news_item_list = news_item_list_results['campaignx_news_item_list']
+            for news_item in news_item_list:
+                date_last_changed_string = ''
+                date_posted_string = ''
+                date_sent_to_email_string = ''
+                try:
+                    date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                    date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+                    if positive_value_exists(news_item.date_sent_to_email):
+                        date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                one_news_item_dict = {
+                    'campaign_news_subject': news_item.campaign_news_subject,
+                    'campaign_news_text': news_item.campaign_news_text,
+                    'campaignx_news_item_we_vote_id': news_item.we_vote_id,
+                    'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
+                    'date_last_changed': date_last_changed_string,
+                    'date_posted': date_posted_string,
+                    'date_sent_to_email': date_sent_to_email_string,
+                    'in_draft_mode': news_item.in_draft_mode,
+                    'organization_we_vote_id': news_item.organization_we_vote_id,
+                    'speaker_name': news_item.speaker_name,
+                    'visible_to_public': news_item.visible_to_public,
+                    'voter_we_vote_id': news_item.voter_we_vote_id,
+                    'we_vote_hosted_profile_image_url_medium': news_item.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
+                }
+                campaignx_news_item_list.append(one_news_item_dict)
 
     from organization.controllers import site_configuration_retrieve_for_api
     site_results = site_configuration_retrieve_for_api(hostname)
@@ -2013,103 +2015,112 @@ def generate_campaignx_dict_from_campaignx_object(
             campaignx_we_vote_id=campaignx.we_vote_id,
         )
 
-    supporter_results = campaignx_manager.retrieve_campaignx_supporter(
-        campaignx_we_vote_id=campaignx.we_vote_id,
-        voter_we_vote_id=voter_we_vote_id,
-        read_only=True)
-    if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
-        campaignx_supporter = supporter_results['campaignx_supporter']
-        chip_in_total = 'none'
-        date_last_changed_string = ''
-        date_supported_string = ''
-        try:
-            date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-            date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
-        except Exception as e:
-            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-        try:
-            from stripe_donations.models import StripeManager
-            chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, campaignx.we_vote_id)
-        except Exception as e:
-            status += "RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
-
-        voter_campaignx_supporter_dict = {
-            'campaign_supported':           campaignx_supporter.campaign_supported,
-            'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
-            'chip_in_total':                chip_in_total,
-            'date_last_changed':            date_last_changed_string,
-            'date_supported':               date_supported_string,
-            'id':                           campaignx_supporter.id,
-            'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
-            'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
-            'supporter_name':               campaignx_supporter.supporter_name,
-            'visible_to_public':            campaignx_supporter.visible_to_public,
-            'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
-            'voter_signed_in_with_email':   voter_signed_in_with_email,
-            'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
-            'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
-        }
-    else:
-        voter_campaignx_supporter_dict = {}
-
-    # Get most recent supporters, regardless of whether there is a written endorsement.
-    latest_campaignx_supporter_list = []
-    supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
-        campaignx_we_vote_id=campaignx.we_vote_id,
-        limit=7,
-        read_only=True,
-        require_supporter_endorsement=False,
-        require_visible_to_public=True)
-    if supporter_list_results['supporter_list_found']:
-        supporter_list = supporter_list_results['supporter_list']
-        for campaignx_supporter in supporter_list:
-            date_supported_string = ''
-            try:
-                date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
-            except Exception as e:
-                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-            one_supporter_dict = {
-                'id': campaignx_supporter.id,
-                'campaign_supported': campaignx_supporter.campaign_supported,
-                'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
-                'date_supported': date_supported_string,
-                'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
-                'supporter_endorsement': campaignx_supporter.supporter_endorsement,
-                'supporter_name': campaignx_supporter.supporter_name,
-                'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
-                'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
-                'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
-            }
-            latest_campaignx_supporter_list.append(one_supporter_dict)
-
-    # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
     latest_campaignx_supporter_endorsement_list = []
-    supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
-        campaignx_we_vote_id=campaignx.we_vote_id,
-        limit=10,
-        read_only=True,
-        require_supporter_endorsement=True)
-    if supporter_list_results['supporter_list_found']:
-        supporter_list = supporter_list_results['supporter_list']
-        for campaignx_supporter in supporter_list:
+    latest_campaignx_supporter_list = []
+    supporters_count_next_goal = 0
+    voter_campaignx_supporter_dict = {}
+    # Only retrieve news items if NOT linked to a politician
+    if campaignx and positive_value_exists(campaignx.linked_politician_we_vote_id):
+        # If linked to a politician, retrieve positions instead of campaignx_supporters
+        pass
+    elif campaignx and not positive_value_exists(campaignx.linked_politician_we_vote_id):
+        # If NOT linked to a politician, retrieve campaignx_supporters instead of positions
+        supporter_results = campaignx_manager.retrieve_campaignx_supporter(
+            campaignx_we_vote_id=campaignx.we_vote_id,
+            voter_we_vote_id=voter_we_vote_id,
+            read_only=True)
+        if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
+            campaignx_supporter = supporter_results['campaignx_supporter']
+            chip_in_total = 'none'
+            date_last_changed_string = ''
             date_supported_string = ''
             try:
+                date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
                 date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-            one_supporter_dict = {
-                'id': campaignx_supporter.id,
-                'campaign_supported': campaignx_supporter.campaign_supported,
-                'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
-                'date_supported': date_supported_string,
-                'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
-                'supporter_endorsement': campaignx_supporter.supporter_endorsement,
-                'supporter_name': campaignx_supporter.supporter_name,
-                'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+            try:
+                from stripe_donations.models import StripeManager
+                chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, campaignx.we_vote_id)
+            except Exception as e:
+                status += "RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
+
+            voter_campaignx_supporter_dict = {
+                'campaign_supported':           campaignx_supporter.campaign_supported,
+                'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+                'chip_in_total':                chip_in_total,
+                'date_last_changed':            date_last_changed_string,
+                'date_supported':               date_supported_string,
+                'id':                           campaignx_supporter.id,
+                'organization_we_vote_id':      campaignx_supporter.organization_we_vote_id,
+                'supporter_endorsement':        campaignx_supporter.supporter_endorsement,
+                'supporter_name':               campaignx_supporter.supporter_name,
+                'visible_to_public':            campaignx_supporter.visible_to_public,
+                'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
+                'voter_signed_in_with_email':   voter_signed_in_with_email,
                 'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
             }
-            latest_campaignx_supporter_endorsement_list.append(one_supporter_dict)
+
+        # Get most recent supporters, regardless of whether there is a written endorsement.
+        supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
+            campaignx_we_vote_id=campaignx.we_vote_id,
+            limit=7,
+            read_only=True,
+            require_supporter_endorsement=False,
+            require_visible_to_public=True)
+        if supporter_list_results['supporter_list_found']:
+            supporter_list = supporter_list_results['supporter_list']
+            for campaignx_supporter in supporter_list:
+                date_supported_string = ''
+                try:
+                    date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                one_supporter_dict = {
+                    'id': campaignx_supporter.id,
+                    'campaign_supported': campaignx_supporter.campaign_supported,
+                    'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
+                    'date_supported': date_supported_string,
+                    'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
+                    'supporter_endorsement': campaignx_supporter.supporter_endorsement,
+                    'supporter_name': campaignx_supporter.supporter_name,
+                    'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                    'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+                }
+                latest_campaignx_supporter_list.append(one_supporter_dict)
+
+        # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
+        supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
+            campaignx_we_vote_id=campaignx.we_vote_id,
+            limit=10,
+            read_only=True,
+            require_supporter_endorsement=True)
+        if supporter_list_results['supporter_list_found']:
+            supporter_list = supporter_list_results['supporter_list']
+            for campaignx_supporter in supporter_list:
+                date_supported_string = ''
+                try:
+                    date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                one_supporter_dict = {
+                    'id': campaignx_supporter.id,
+                    'campaign_supported': campaignx_supporter.campaign_supported,
+                    'campaignx_we_vote_id': campaignx_supporter.campaignx_we_vote_id,
+                    'date_supported': date_supported_string,
+                    'organization_we_vote_id': campaignx_supporter.organization_we_vote_id,
+                    'supporter_endorsement': campaignx_supporter.supporter_endorsement,
+                    'supporter_name': campaignx_supporter.supporter_name,
+                    'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                    'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+                }
+                latest_campaignx_supporter_endorsement_list.append(one_supporter_dict)
+        supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
+            supporters_count=campaignx.supporters_count,
+            supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
 
     if voter_can_send_updates_campaignx_we_vote_ids is not None:
         # Leave it as is, even if empty
@@ -2131,9 +2142,6 @@ def generate_campaignx_dict_from_campaignx_object(
         we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_small_url
     else:
         we_vote_hosted_campaign_photo_small_url = campaignx.we_vote_hosted_campaign_photo_large_url
-    supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
-        supporters_count=campaignx.supporters_count,
-        supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
     final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
     final_election_date_in_past = \
         final_election_date_plus_cool_down >= campaignx.final_election_date_as_integer \

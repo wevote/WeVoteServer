@@ -105,7 +105,7 @@ class PollingLocation(models.Model):
         results = self.get_text_for_map_search_results()
         return results['text_for_map_search']
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

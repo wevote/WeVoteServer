@@ -538,25 +538,27 @@ class OrganizationManager(models.Manager):
         return results
 
     def retrieve_organization_from_id(self, organization_id, read_only=False):
-        return self.retrieve_organization(organization_id, read_only=read_only)
+        return self.retrieve_organization(organization_id=organization_id, read_only=read_only)
 
     def retrieve_organization_from_we_vote_id(self, organization_we_vote_id, read_only=False):
-        return self.retrieve_organization(0, organization_we_vote_id, read_only=read_only)
+        return self.retrieve_organization(we_vote_id=organization_we_vote_id, read_only=read_only)
 
-    def retrieve_organization_from_we_vote_id_and_pass_code(self, organization_we_vote_id, organization_api_pass_code,
-                                                            read_only=False):
-        return self.retrieve_organization(0, organization_we_vote_id,
+    def retrieve_organization_from_we_vote_id_and_pass_code(
+            self,
+            organization_we_vote_id,
+            organization_api_pass_code,
+            read_only=False):
+        return self.retrieve_organization(we_vote_id=organization_we_vote_id,
                                           organization_api_pass_code=organization_api_pass_code,
                                           read_only=read_only)
 
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id, read_only=False):
-        return self.retrieve_organization(0, '', vote_smart_id, read_only=read_only)
+        return self.retrieve_organization(vote_smart_id=vote_smart_id, read_only=read_only)
 
     def retrieve_organization_from_incoming_hostname(self, incoming_hostname, read_only=False):
         return self.retrieve_organization(incoming_hostname=incoming_hostname, read_only=read_only)
 
     def retrieve_organization_from_twitter_handle(self, twitter_handle, read_only=False):
-        organization_id = 0
         organization_we_vote_id = ""
 
         twitter_user_manager = TwitterUserManager()
@@ -566,7 +568,7 @@ class OrganizationManager(models.Manager):
             twitter_link_to_organization = twitter_retrieve_results['twitter_link_to_organization']
             organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
 
-        return self.retrieve_organization(organization_id, organization_we_vote_id, read_only=read_only)
+        return self.retrieve_organization(we_vote_id=organization_we_vote_id, read_only=read_only)
 
     def retrieve_organization_from_twitter_user_id(self, twitter_user_id):
         organization_we_vote_id = ''
@@ -578,8 +580,7 @@ class OrganizationManager(models.Manager):
             twitter_link_to_organization = twitter_retrieve_results['twitter_link_to_organization']
             organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
 
-        organization_id = 0
-        return self.retrieve_organization(organization_id, organization_we_vote_id)
+        return self.retrieve_organization(we_vote_id=organization_we_vote_id)
 
     def retrieve_organization_from_twitter_user_id_old(self, twitter_user_id):
         """
@@ -587,7 +588,7 @@ class OrganizationManager(models.Manager):
         :param twitter_user_id:
         :return:
         """
-        return self.retrieve_organization(0, '', '', twitter_user_id)
+        return self.retrieve_organization(twitter_user_id=twitter_user_id)
 
     def retrieve_organization_from_facebook_id(self, facebook_id):
         status = ""
@@ -625,24 +626,26 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_organization(
-            self,
             organization_id=None,
-            we_vote_id=None,
-            vote_smart_id=None,
-            twitter_user_id=None,
             incoming_hostname=None,
             organization_api_pass_code=False,
-            read_only=False):
+            politician_we_vote_id=None,
+            read_only=False,
+            twitter_user_id=None,
+            vote_smart_id=None,
+            we_vote_id=None):
         """
         Get an organization, based the passed in parameters
-        :param organization_id:
-        :param we_vote_id:
-        :param vote_smart_id:
-        :param twitter_user_id:
         :param incoming_hostname:
+        :param organization_id:
         :param organization_api_pass_code:
+        :param politician_we_vote_id:
         :param read_only:
+        :param twitter_user_id:
+        :param vote_smart_id:
+        :param we_vote_id:
         :return: the matching organization object
         """
         error_result = False
@@ -682,6 +685,16 @@ class OrganizationManager(models.Manager):
                     organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID "
+            elif positive_value_exists(politician_we_vote_id):
+                status = "RETRIEVING_ORGANIZATION_WITH_POLITICIAN_WE_VOTE_ID "
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly')\
+                        .get(politician_we_vote_id=politician_we_vote_id)
+                else:
+                    organization_on_stage = Organization.objects\
+                        .get(politician_we_vote_id=politician_we_vote_id)
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_POLITICIAN_WE_VOTE_ID "
             elif positive_value_exists(vote_smart_id):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_VOTE_SMART_ID "
                 if read_only:
@@ -732,7 +745,7 @@ class OrganizationManager(models.Manager):
             status += "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND "
             # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist as e:
-            status += "DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND "
+            status += "DOES_NOT_EXIST-ORGANIZATION_NOT_FOUND: " + str(e) + " "
             # handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
@@ -754,7 +767,8 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_reserved_hostname(self, incoming_hostname, read_only=False):
+    @staticmethod
+    def retrieve_organization_reserved_hostname(incoming_hostname, read_only=False):
         status = ""
         success = False
         hostname_is_reserved = False
@@ -857,16 +871,17 @@ class OrganizationManager(models.Manager):
                 return external_voter.external_voter_id
         return ''
 
-    def fetch_organization_id(self, we_vote_id):
-        organization_id = 0
+    @staticmethod
+    def fetch_organization_id(we_vote_id):
         if positive_value_exists(we_vote_id):
             organization_manager = OrganizationManager()
-            results = organization_manager.retrieve_organization(organization_id, we_vote_id, read_only=True)
+            results = organization_manager.retrieve_organization(we_vote_id=we_vote_id, read_only=True)
             if results['success']:
                 return results['organization_id']
         return 0
 
-    def fetch_twitter_id_from_organization_we_vote_id(self, organization_we_vote_id):
+    @staticmethod
+    def fetch_twitter_id_from_organization_we_vote_id(organization_we_vote_id):
         if positive_value_exists(organization_we_vote_id):
             twitter_user_manager = TwitterUserManager()
             organization_twitter_id = twitter_user_manager.fetch_twitter_id_from_organization_we_vote_id(
@@ -888,7 +903,7 @@ class OrganizationManager(models.Manager):
 
     def fetch_we_vote_id_from_local_id(self, organization_id):
         if positive_value_exists(organization_id):
-            results = self.retrieve_organization(organization_id, read_only=True)
+            results = self.retrieve_organization(organization_id=organization_id, read_only=True)
             if results['organization_found']:
                 organization = results['organization']
                 return organization.we_vote_id
@@ -1453,7 +1468,7 @@ class OrganizationManager(models.Manager):
             # If here, we know we are updating
             # 1) organization_id exists? Find it with organization_id or fail
             # 2) we_vote_id exists? Find it with we_vote_id or fail
-            organization_results = self.retrieve_organization(organization_id, we_vote_id)
+            organization_results = self.retrieve_organization(organization_id=organization_id, we_vote_id=we_vote_id)
             if organization_results['success']:
                 organization_on_stage = organization_results['organization']
                 organization_on_stage_found = True
@@ -2274,7 +2289,7 @@ class OrganizationManager(models.Manager):
         """
 
         organization_manager = OrganizationManager()
-        results = organization_manager.retrieve_organization(0, '', '', twitter_user_id)
+        results = organization_manager.retrieve_organization(twitter_user_id=twitter_user_id)
 
         if not results['organization_found']:
             logger.info("update_organization_single_voter_data was not able to find " + str(twitter_user_id))
@@ -2365,7 +2380,7 @@ class OrganizationManager(models.Manager):
 
         try:
             if organization_id:
-                results = self.retrieve_organization(organization_id)
+                results = self.retrieve_organization(organization_id=organization_id)
                 if results['organization_found']:
                     organization = results['organization']
                     organization_id = organization.id

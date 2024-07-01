@@ -98,7 +98,7 @@ class EmailAddress(models.Model):
     subscription_secret_key = models.CharField(max_length=255, null=True, blank=True, unique=True)
     deleted = models.BooleanField(default=False)  # If email address is removed from person's account, mark as deleted
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

@@ -263,7 +263,9 @@ def edit_team_members_view(request, organization_id=0, organization_we_vote_id="
     organization_id = convert_to_int(organization_id)
     organization_manager = OrganizationManager()
     organization_on_stage = Organization()
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id)
 
     if results['organization_found']:
         organization_on_stage = results['organization']
@@ -959,7 +961,9 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     organization_on_stage = None
     state_served_code = ''
     new_issue_list = []
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id)
 
     organization_twitter_handle = ""
     if results['organization_found']:
@@ -1058,7 +1062,9 @@ def organization_edit_account_view(request, organization_id=0, organization_we_v
     organization_on_stage = Organization()
     state_served_code = ''
     new_issue_list = []
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id)
 
     if results['organization_found']:
         organization_on_stage = results['organization']
@@ -1136,7 +1142,9 @@ def organization_edit_listed_campaigns_view(request, organization_id=0, organiza
     organization_id = convert_to_int(organization_id)
     organization_manager = OrganizationManager()
     organization_on_stage = Organization()
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id)
 
     if results['organization_found']:
         organization_on_stage = results['organization']
@@ -1203,7 +1211,7 @@ def organization_delete_process_view(request):
                                     "&state_code=" + str(state_code))
 
     organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id)
+    results = organization_manager.retrieve_organization(organization_id=organization_id)
     if results['organization_found']:
         organization = results['organization']
 

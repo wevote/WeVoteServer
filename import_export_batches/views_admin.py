@@ -1630,14 +1630,14 @@ def batch_process_list_view(request):
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
+        results = election_manager.retrieve_elections(read_only=True)
         election_list = results['election_list']
     else:
-        results = election_manager.retrieve_upcoming_elections()
+        results = election_manager.retrieve_upcoming_elections(read_only=True)
         election_list = results['election_list']
 
     try:
-        batch_process_queryset = BatchProcess.objects.all()
+        batch_process_queryset = BatchProcess.objects.using('readonly').all()
         if positive_value_exists(batch_process_id):
             batch_process_queryset = batch_process_queryset.filter(id=batch_process_id)
         if positive_value_exists(google_civic_election_id):
@@ -1811,7 +1811,7 @@ def batch_process_list_view(request):
         if not positive_value_exists(batch_process_ballot_item_chunk_list_found):
             # Now check to see if this is an analytics
             try:
-                batch_process_chunk_queryset = BatchProcessAnalyticsChunk.objects.all()
+                batch_process_chunk_queryset = BatchProcessAnalyticsChunk.objects.using('readonly').all()
                 batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
                 batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
                 batch_process_analytics_chunk_list = list(batch_process_chunk_queryset)
@@ -1824,7 +1824,7 @@ def batch_process_list_view(request):
 
         if not positive_value_exists(batch_process_analytics_chunk_list_found):
             try:
-                batch_process_chunk_queryset = BatchProcessRepresentativesChunk.objects.all()
+                batch_process_chunk_queryset = BatchProcessRepresentativesChunk.objects.using('readonly').all()
                 batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
                 batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
                 batch_process_representatives_chunk_list = list(batch_process_chunk_queryset)
@@ -1856,7 +1856,7 @@ def batch_process_list_view(request):
                 use_vote_usa_as_data_source = one_election.use_vote_usa_as_data_source
                 break
         if not this_election_found:
-            results = election_manager.retrieve_election(google_civic_election_id)
+            results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
             if results['election_found']:
                 election = results['election']
                 use_ballotpedia_as_data_source = election.use_ballotpedia_as_data_source
