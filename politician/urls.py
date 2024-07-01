@@ -20,6 +20,8 @@ urlpatterns = [
     re_path(r'^not_duplicates/$', views_admin.politicians_not_duplicates_view, name='not_duplicates'),
     re_path(r'^import/$',
             views_admin.politicians_import_from_master_server_view, name='politicians_import_from_master_server'),
+    re_path(r'^match_politicians_to_organizations/$',
+            views_admin.match_politicians_to_organizations_view, name='match_politicians_to_organizations'),
     re_path(r'^merge/$', views_admin.politician_merge_process_view, name='politician_merge_process'),
     re_path(r'^new/$', views_admin.politician_new_view, name='politician_new'),
     re_path(r'^(?P<politician_id>[0-9]+)/edit/$', views_admin.politician_edit_view, name='politician_edit'),

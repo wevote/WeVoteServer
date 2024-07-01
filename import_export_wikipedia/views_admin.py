@@ -149,7 +149,7 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
     logo_found = False
 
     organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id)
+    results = organization_manager.retrieve_organization(organization_id=organization_id)
 
     if not results['organization_found']:
         messages.add_message(request, messages.INFO, results['status'])

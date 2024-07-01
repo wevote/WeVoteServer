@@ -580,6 +580,7 @@ def campaign_edit_process_view(request):
     is_not_promoted_by_we_vote = request.POST.get('is_not_promoted_by_we_vote', False)
     is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
+    linked_politician_we_vote_id = request.POST.get('linked_politician_we_vote_id', None)
     ocd_id_state_mismatch_resolved = request.POST.get('ocd_id_state_mismatch_resolved', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     seo_friendly_path = request.POST.get('seo_friendly_path', None)
@@ -629,6 +630,8 @@ def campaign_edit_process_view(request):
                 campaignx.ocd_id_state_mismatch_resolved = positive_value_exists(ocd_id_state_mismatch_resolved)
             if politician_starter_list_serialized is not None:
                 campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
+            if linked_politician_we_vote_id is not None:
+                campaignx.linked_politician_we_vote_id = linked_politician_we_vote_id
             if positive_value_exists(campaignx.linked_politician_we_vote_id):
                 politician_results = politician_manager.retrieve_politician(
                     politician_we_vote_id=campaignx.linked_politician_we_vote_id)
@@ -844,7 +847,7 @@ def campaign_list_view(request):
                     "".format(e=e,
                               politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))
 
-    update_campaigns_from_politicians_script = True
+    update_campaigns_from_politicians_script = False
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
     if update_campaigns_from_politicians_script:
         campaignx_list = []
@@ -938,9 +941,23 @@ def campaign_list_view(request):
                     messages.add_message(
                         request, messages.ERROR,
                         "ERROR with update_campaignx_list_from_politicians_script: {e} "
-                        "politician_we_vote_id_remaining_list: {politician_we_vote_id_remaining_list}"
+                        "politician_we_vote_id_remaining_list: {politician_we_vote_id_remaining_list} "
+                        "{total_to_update_after:,} remaining."
                         "".format(e=e,
+                                  total_to_update_after=total_to_update_after,
                                   politician_we_vote_id_remaining_list=politician_we_vote_id_remaining_list))
+                    second_save_failed = False
+                    for campaignx in update_list:
+                        try:
+                            campaignx.save()
+                        except Exception as e:
+                            status += "CAMPAIGNX_SAVE_FAILED: " + str(e) + " "
+                            second_save_failed = True
+                    if second_save_failed:
+                        messages.add_message(
+                            request, messages.ERROR,
+                            "Second save failed, status: {status} remaining."
+                            "".format(status=status))
 
     campaignx_we_vote_ids_in_order = []
     if campaignx_owner_organization_we_vote_id:
@@ -1242,20 +1259,46 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     campaignx_politician_list_modified = []
     campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
         campaignx_we_vote_id=campaignx_we_vote_id,
+        read_only=True,
     )
 
     for campaignx_politician in campaignx_politician_list:
         campaignx_politician_list_modified.append(campaignx_politician)
 
-    supporters_query = CampaignXSupporter.objects.all()
-    supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
-    supporters_query = supporters_query.exclude(
-        Q(supporter_endorsement__isnull=True) |
-        Q(supporter_endorsement__exact='')
-    )
-    campaignx_supporter_list = list(supporters_query[:4])
+    campaignx_supporter_list = []
+    position_list = []
+    if positive_value_exists(campaignx.linked_politician_we_vote_id):
+        from position.models import PositionEntered
+        position_query = PositionEntered.objects.using('readonly').all()
+        position_query = position_query.filter(politician_we_vote_id__iexact=campaignx.linked_politician_we_vote_id)
+        position_query = position_query.exclude(
+            Q(statement_text__isnull=True) |
+            Q(statement_text__exact='')
+        )
+        position_list = list(position_query[:4])
+    else:
+        supporters_query = CampaignXSupporter.objects.using('readonly').all()
+        supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+        supporters_query = supporters_query.exclude(
+            Q(supporter_endorsement__isnull=True) |
+            Q(supporter_endorsement__exact='')
+        )
+        campaignx_supporter_list = list(supporters_query[:4])
 
-    campaignx_supporters_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
+    campaignx_supporters_count = 0
+    if positive_value_exists(campaignx.linked_politician_we_vote_id):
+        organization_manager = OrganizationManager()
+        results = organization_manager.retrieve_organization(politician_we_vote_id=campaignx.linked_politician_we_vote_id)
+        if results['organization_found']:
+            organization = results['organization']
+            organization_we_vote_id = organization.we_vote_id
+
+            from follow.models import FollowMetricsManager
+            follow_metrics_manager = FollowMetricsManager()
+            campaignx_supporters_count = follow_metrics_manager.fetch_organization_followers(organization_we_vote_id)
+    else:
+        campaignx_supporters_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
+
     if 'localhost' in CAMPAIGNS_ROOT_URL:
         campaigns_site_root_url = 'https://localhost:3000'
     else:
@@ -1273,6 +1316,7 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
         'messages_on_stage':                        messages_on_stage,
         'path_count':                               path_count,
         'path_list':                                path_list,
+        'position_list':                            position_list,
         'state_code':                               state_code,
     }
     return render(request, 'campaign/campaignx_summary.html', template_values)

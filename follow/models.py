@@ -644,7 +644,8 @@ class FollowMetricsManager(models.Manager):
             count_query = FollowOrganization.objects.using('readonly').all()
             count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
-            count_query = count_query.values("voter_id").distinct()
+            # count_query = count_query.values("voter_id").distinct()
+            count_query = count_query.values("voter_linked_organization_we_vote_id").distinct()
             if positive_value_exists(google_civic_election_id):
                 election_manager = ElectionManager()
                 election_result = election_manager.retrieve_election(google_civic_election_id)
@@ -1032,9 +1033,9 @@ class FollowOrganizationManager(models.Manager):
                 # First make sure that organization_id is for a valid organization
                 organization_manager = OrganizationManager()
                 if positive_value_exists(organization_id):
-                    results = organization_manager.retrieve_organization(organization_id)
+                    results = organization_manager.retrieve_organization(organization_id=organization_id)
                 else:
-                    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+                    results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
                 if results['organization_found']:
                     organization = results['organization']
                     follow_organization_on_stage = FollowOrganization(

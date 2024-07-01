@@ -8,7 +8,7 @@ from PIL import Image, ImageOps
 import re
 
 from django.db.models import Q
-from campaign.models import CampaignXManager
+from campaign.models import CampaignXManager, FINAL_ELECTION_DATE_COOL_DOWN
 from candidate.controllers import add_name_to_next_spot, copy_field_value_from_object1_to_object2, \
     generate_candidate_dict_list_from_candidate_object_list, move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager, PROFILE_IMAGE_TYPE_FACEBOOK, \
@@ -33,7 +33,8 @@ from wevote_functions.functions import candidate_party_display, convert_to_int, 
     convert_to_political_party_constant, extract_instagram_handle_from_text_string, \
     generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, generate_date_as_integer, \
+    get_timezone_and_datetime_now
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1288,26 +1289,28 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         status += results['status']
     if not success or not politician_found:
         results = {
-            'status':                           status,
-            'success':                          False,
-            'politician_description':             '',
-            'politician_name':                   '',
-            'politician_owner_list':             politician_owner_list,
-            'politician_candidate_list':        [],
-            'politician_candidate_list_exists': False,
-            'politician_we_vote_id':             '',
+            'final_election_date_in_past':      True,
             'in_draft_mode':                    True,
             'is_supporters_count_minimum_exceeded': False,
             'linked_campaignx_we_vote_id':      '',
+            'politician_description':           '',
+            'politician_name':                  '',
+            'politician_owner_list':            politician_owner_list,
+            'politician_candidate_list':        [],
+            'politician_candidate_list_exists': False,
+            'politician_ultimate_election_date': 0,
+            'politician_we_vote_id':            '',
             'seo_friendly_path':                seo_friendly_path,
             'seo_friendly_path_list':           seo_friendly_path_list,
+            'status':                           status,
+            'success':                          False,
             'supporters_count':                 0,
             'supporters_count_next_goal':       0,
             'supporters_count_victory_goal':    0,
             'visible_on_this_site':             False,
-            'voter_politician_supporter':        {},
+            'voter_politician_supporter':       {},
             'voter_can_send_updates_to_politician': False,
-            'voter_is_politician_owner':         False,
+            'voter_is_politician_owner':        False,
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_profile_image_url_large': '',
             'we_vote_hosted_profile_image_url_medium': '',
@@ -1391,13 +1394,13 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     politician_candidate_list_exists = results['candidate_list_found']
 
     # Retrieve most recent opponents of this candidate (showing this on politician page helps with SEO)
-    candidate_ultimate_election_date = 0
+    politician_ultimate_election_date = 0
     most_recent_candidate_we_vote_id = None
     opponent_candidate_list = []
     for one_candidate in politician_candidate_list:
         if one_candidate and one_candidate.candidate_ultimate_election_date \
-                and one_candidate.candidate_ultimate_election_date > candidate_ultimate_election_date:
-            candidate_ultimate_election_date = one_candidate.candidate_ultimate_election_date
+                and one_candidate.candidate_ultimate_election_date > politician_ultimate_election_date:
+            politician_ultimate_election_date = one_candidate.candidate_ultimate_election_date
             most_recent_candidate_we_vote_id = one_candidate.we_vote_id
     if positive_value_exists(most_recent_candidate_we_vote_id):
         opponent_candidate_we_vote_id_list = []
@@ -1615,10 +1618,10 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     # supporters_count_next_goal = politician_manager.fetch_supporters_count_next_goal(
     #     supporters_count=politician.supporters_count,
     #     supporters_count_victory_goal=politician.supporters_count_victory_goal)
-    # final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
-    # final_election_date_in_past = \
-    #     final_election_date_plus_cool_down >= politician.final_election_date_as_integer \
-    #     if positive_value_exists(politician.final_election_date_as_integer) else False
+    today_as_integer = generate_date_as_integer()
+    final_election_date_in_past = \
+        today_as_integer > politician.politician_ultimate_election_date \
+        if positive_value_exists(politician.politician_ultimate_election_date) else True
     if positive_value_exists(politician.ballot_guide_official_statement):
         politician_description = politician.ballot_guide_official_statement
     elif positive_value_exists(politician.twitter_description):
@@ -1630,6 +1633,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
         'candidate_list':                   politician_candidate_dict_list,
         'candidate_list_exists':            politician_candidate_list_exists,
+        'final_election_date_in_past':      final_election_date_in_past,
         'instagram_handle':                 instagram_handle,
         'linked_campaignx_we_vote_id':      politician.linked_campaignx_we_vote_id,
         'office_held_list':                 office_held_dict_list,
@@ -1645,14 +1649,13 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'politician_twitter_handle2':       politician.politician_twitter_handle2,
         'politician_url':                   politician.politician_url,
         'politician_we_vote_id':            politician.we_vote_id,
-        # 'final_election_date_as_integer':   politician.final_election_date_as_integer,
-        # 'final_election_date_in_past':      final_election_date_in_past,
         # 'in_draft_mode':                    politician.in_draft_mode,
         # 'is_blocked_by_we_vote':            politician.is_blocked_by_we_vote,
         # 'is_blocked_by_we_vote_reason':     politician.is_blocked_by_we_vote_reason,
         # 'is_supporters_count_minimum_exceeded': politician.is_supporters_count_minimum_exceeded(),
         # 'latest_politician_supporter_endorsement_list':  latest_politician_supporter_endorsement_list,
         # 'latest_politician_supporter_list':  latest_politician_supporter_list,
+        'politician_ultimate_election_date': politician_ultimate_election_date,
         'profile_image_background_color':   politician.profile_image_background_color,
         'representative_list':              politician_representative_dict_list,
         'representative_list_exists':       politician_representative_list_exists,

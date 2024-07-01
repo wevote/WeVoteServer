@@ -1820,7 +1820,7 @@ class BallotReturned(models.Model):
     date_last_updated = models.DateTimeField(
         verbose_name='date ballot items last retrieved', auto_now=True, db_index=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this voter_guide came from another source we still need a unique we_vote_id
         if self.we_vote_id:

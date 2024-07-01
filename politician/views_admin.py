@@ -255,6 +255,137 @@ def find_and_merge_duplicate_politicians_view(request):
                                 "".format(state_code=state_code))
 
 
+@login_required
+def match_politicians_to_organizations_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+
+    politician_we_vote_id_list = []
+    politicians_dict = {}
+
+    organization_might_be_needed_count = 0
+    politician_error_count = 0
+    politician_has_two_linked_organizations = 0
+    politician_list_count = 0
+    politician_update_count = 0
+    status = ''
+    update_list = []
+    try:
+        from organization.models import Organization
+        queryset = Politician.objects.all()
+        queryset = queryset.filter(organization_might_be_needed=True)
+        organization_might_be_needed_count = queryset.count()
+        politician_data_list = list(queryset[:1000])
+        politician_list_count = len(politician_data_list)
+        for politician in politician_data_list:
+            # Now search the Organization table to see if there is already an organization linked to this politician
+            try:
+                queryset = Organization.objects.using('readonly').all()
+                queryset = queryset.filter(politician_we_vote_id__iexact=politician.we_vote_id)
+                linked_organization_list = list(queryset)
+                if len(linked_organization_list) > 1:
+                    politician.organization_might_be_needed = False
+                    update_list.append(politician)
+                    politician_update_count += 1
+                    politician_has_two_linked_organizations += 1
+                elif len(linked_organization_list) > 0:
+                    politician.organization_might_be_needed = False
+                    update_list.append(politician)
+                    politician_update_count += 1
+                else:
+                    # Organization needed
+                    # See if we can find an organization that matches the primary Twitter handle for this politician
+                    #  that isn't already connected to another politician
+                    at_least_one_politician_twitter_handle_found = False
+                    queryset = Organization.objects.all()
+                    queryset = queryset.filter(
+                        Q(politician_we_vote_id__isnull=True) |
+                        Q(politician_we_vote_id__iexact=''))
+                    filters = []
+
+                    if positive_value_exists(politician.politician_twitter_handle):
+                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle)
+                        filters.append(new_filter)
+                        at_least_one_politician_twitter_handle_found = True
+
+                    if positive_value_exists(politician.politician_twitter_handle2):
+                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle2)
+                        filters.append(new_filter)
+                        at_least_one_politician_twitter_handle_found = True
+
+                    if positive_value_exists(politician.politician_twitter_handle3):
+                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle3)
+                        filters.append(new_filter)
+                        at_least_one_politician_twitter_handle_found = True
+
+                    if positive_value_exists(politician.politician_twitter_handle4):
+                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle4)
+                        filters.append(new_filter)
+                        at_least_one_politician_twitter_handle_found = True
+
+                    if positive_value_exists(politician.politician_twitter_handle5):
+                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle5)
+                        filters.append(new_filter)
+                        at_least_one_politician_twitter_handle_found = True
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        queryset = queryset.filter(final_filters)
+
+                    if at_least_one_politician_twitter_handle_found:
+                        # Return the organization with the most Twitter followers if there are multiple choices
+                        queryset = queryset.order_by('-twitter_followers_count')
+                        existing_organization_list = list(queryset)
+                        if len(existing_organization_list):
+                            organization = existing_organization_list[0]
+                            organization.politician_we_vote_id = politician.we_vote_id
+                            organization.save()
+
+                            politician.organization_might_be_needed = False
+                            update_list.append(politician)
+                            politician_update_count += 1
+            except Exception as e:
+                politician_error_count += 1
+                if politician_error_count < 10:
+                    status += "COULD_NOT_SAVE_POLITICIAN: " + str(e) + " "
+            # politicians_dict[politician.we_vote_id] = politician
+            # politician_we_vote_id_list.append(politician.we_vote_id)
+        if politician_update_count > 0:
+            Politician.objects.bulk_update(update_list, ['organization_might_be_needed'])
+
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "Politicians that might need orgs at start: {organization_might_be_needed_count:,}. "
+                         "Politicians analyzed: {politician_list_count:,}. "
+                         "politician_update_count: {politician_update_count:,}. "
+                         "politician_has_two_linked_organizations: {politician_has_two_linked_organizations:,}. "
+                         "politician_error_count: {politician_error_count} "
+                         "status: {status}"
+                         "".format(
+                             organization_might_be_needed_count=organization_might_be_needed_count,
+                             politician_list_count=politician_list_count,
+                             politician_update_count=politician_update_count,
+                             politician_has_two_linked_organizations=politician_has_two_linked_organizations,
+                             politician_error_count=politician_error_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?state_code={state_code}"
+                                "".format(state_code=state_code))
+
+
 def render_politician_merge_form(
         request,
         politician_option1_for_template,
@@ -488,7 +619,7 @@ def politician_list_view(request):
                                      "ERROR with google_civic_name_alternates_generated: {e} "
                                      "".format(e=e))
 
-    generate_backgrounds = True
+    generate_backgrounds = False
     number_to_generate = 10
     if generate_backgrounds and positive_value_exists(state_code) and run_scripts:
         politician_query = Politician.objects.all()
@@ -623,7 +754,7 @@ def politician_list_view(request):
     # Find all politicians with linked_campaignx_we_vote_id and make sure Campaignx
     # entry includes linked_politician_we_vote_id
     # We don't want to always leave this on
-    update_campaignx_with_linked_politician_we_vote_id = True
+    update_campaignx_with_linked_politician_we_vote_id = False
     number_to_update = 7000  # We have to run this routine on the entire state
     if update_campaignx_with_linked_politician_we_vote_id and positive_value_exists(state_code) and run_scripts:
         update_campaignx_with_linked_politician_we_vote_id_status = ""
@@ -683,11 +814,12 @@ def politician_list_view(request):
                     "ERROR with update_campaignx_with_linked_politician_we_vote_id: {e} " \
                     "".format(e=e)
         elif positive_value_exists(campaignx_with_linked_politician_we_vote_id_count):
-            update_campaignx_with_linked_politician_we_vote_id_status += \
-                "NO UPDATES: {campaignx_with_linked_politician_we_vote_id_count} CampaignX entries " \
-                "already have linked_politician_we_vote_id. " \
-                "".format(
-                    campaignx_with_linked_politician_we_vote_id_count=campaignx_with_linked_politician_we_vote_id_count)
+            pass
+            # update_campaignx_with_linked_politician_we_vote_id_status += \
+            #     "NO UPDATES: {campaignx_with_linked_politician_we_vote_id_count} CampaignX entries " \
+            #     "already have linked_politician_we_vote_id. " \
+            #     "".format(
+            #         campaignx_with_linked_politician_we_vote_id_count=campaignx_with_linked_politician_we_vote_id_count)
         if positive_value_exists(update_campaignx_with_linked_politician_we_vote_id_status):
             update_campaignx_with_linked_politician_we_vote_id_status = \
                 update_campaignx_with_linked_politician_we_vote_id_status + \

@@ -56,7 +56,7 @@ class ActivityComment(models.Model):
     visibility_is_public = models.BooleanField(default=False)
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True, db_index=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -1707,7 +1707,7 @@ class ActivityNoticeSeed(models.Model):
     # we_vote_id of this SEED
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -1745,7 +1745,7 @@ class ActivityPost(models.Model):
     visibility_is_public = models.BooleanField(default=False)
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

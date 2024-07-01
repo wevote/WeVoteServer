@@ -30,9 +30,10 @@
             <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >
                 Repair Politician Names</a>,
             <a href="{% url 'politician:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
-                Repair OCD ID Mismatches</a>
+                Repair OCD ID Mismatches</a>,
+            <a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a>
         </li>
-        <li><a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a></li>
+        <li><a href="{% url 'politician:match_politicians_to_organizations' %}" >Match Politicians to Organizations</a></li>
         <li><a href="{% url 'politician:update_profile_image_background_color' %}" >Update 5,000 Politicians' background colors &#40;may take 10 minutes&#41;</a></li>
     </ul>
 

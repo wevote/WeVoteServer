@@ -115,7 +115,7 @@ class QuickInfo(models.Model):
     class Meta:
         ordering = ('last_updated',)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this organization came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -649,7 +649,7 @@ class QuickInfoMaster(models.Model):
     class Meta:
         ordering = ('last_updated',)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this organization came from another source we still need a unique we_vote_id
         if self.we_vote_id:
