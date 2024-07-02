@@ -190,10 +190,30 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Campaign Supporters: {{ campaignx_supporters_count|intcomma }} total</th>
+                    <th>
+                        {% if campaignx.linked_politician_we_vote_id %}
+                            Endorsers: {{ campaignx_supporters_count|intcomma }}
+                        {% else %}
+                            Supporters: {{ campaignx_supporters_count|intcomma }}
+                        {% endif %}
+                    </th>
                     <th>Comment</th>
                 </tr>
             </thead>
+    {% if campaignx.linked_politician_we_vote_id %}
+        {# PositionEntered #}
+        {% for position in position_list %}
+            <tr>
+                <td>
+                    {{ position.speaker_display_name }}&nbsp;&nbsp;
+                </td>
+                <td>
+                    <div style="white-space: pre-wrap;">{{ position.statement_text }}</div>&nbsp;&nbsp;
+                </td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        {# Campaign Supporters #}
         {% for campaignx_supporter in campaignx_supporter_list %}
             <tr>
                 <td>
@@ -204,9 +224,17 @@
                 </td>
             </tr>
         {% endfor %}
+    {% endif %}
             <tr>
-                <td colspan="3"><a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
-                                   class="btn btn-primary">View All Supporters for Campaign</a></td>
+                <td colspan="3">
+                {% if campaignx.linked_politician_we_vote_id %}
+{#                    <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"#}
+{#                                   class="btn btn-primary">View All Positions</a>#}
+                {% else %}
+                    <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
+                                   class="btn btn-primary">View All Supporters for Campaign</a>
+                {% endif %}
+                </td>
             </tr>
         </table>
     </td>

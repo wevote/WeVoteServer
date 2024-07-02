@@ -143,7 +143,7 @@ def delete_images_view(request):
         delete_image_results = delete_cached_images_for_candidate(candidate)
     elif positive_value_exists(organization_id):
         organization_manager = OrganizationManager()
-        results = organization_manager.retrieve_organization(organization_id)
+        results = organization_manager.retrieve_organization(organization_id=organization_id)
         if not results['organization_found']:
             messages.add_message(request, messages.INFO, results['status'])
             return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
@@ -218,7 +218,7 @@ def refresh_twitter_organization_details_view(request, organization_id):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id)
+    results = organization_manager.retrieve_organization(organization_id=organization_id)
 
     if not results['organization_found']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -309,7 +309,7 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
     twitter_handle = False
 
     organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id)
+    results = organization_manager.retrieve_organization(organization_id=organization_id)
 
     if not results['organization_found']:
         messages.add_message(request, messages.INFO, results['status'])

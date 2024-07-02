@@ -36,31 +36,39 @@ def organization_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_follow(voter_device_id, organization_id=0, organization_we_vote_id='',  # organizationFollow
-                        organization_twitter_handle='', organization_follow_based_on_issue=None,
-                        user_agent_string='', user_agent_object=None):
+def organization_follow(  # organizationFollow
+        organization_follow_based_on_issue=None,
+        organization_id=None,
+        organization_twitter_handle=None,
+        organization_we_vote_id=None,
+        politician_we_vote_id=None,
+        user_agent_object=None,
+        user_agent_string=None,
+        voter_device_id=None):
     """
-    Save that the voter wants to follow this org
-    :param voter_device_id: 
-    :param organization_id: 
-    :param organization_we_vote_id:
-    :param organization_twitter_handle;
+    Save that the voter wants to follow this org. Used by HeartFavoriteToggle.
     :param organization_follow_based_on_issue:
-    :param user_agent_string:
+    :param organization_id:
+    :param organization_twitter_handle;
+    :param organization_we_vote_id:
+    :param politician_we_vote_id:
     :param user_agent_object:
-    :return: 
+    :param user_agent_string:
+    :param voter_device_id:
+    :return:
     """
-    if positive_value_exists(organization_twitter_handle):
-        organization_manager = OrganizationManager()
-        organization_results = organization_manager.retrieve_organization_from_twitter_handle(
-            organization_twitter_handle, read_only=True)
-        if organization_results['organization_found']:
-            organization_we_vote_id = organization_results['organization'].we_vote_id
 
     results = organization_follow_or_unfollow_or_ignore(
-        voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING,
-        organization_follow_based_on_issue=organization_follow_based_on_issue, user_agent_string=user_agent_string,
-        user_agent_object=user_agent_object)
+        follow_kind=FOLLOWING,
+        organization_follow_based_on_issue=organization_follow_based_on_issue,
+        organization_id=organization_id,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+    )
 
     json_data = {
         'status': results['status'],
@@ -76,58 +84,102 @@ def organization_follow(voter_device_id, organization_id=0, organization_we_vote
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-# TODO Update organization_stop_following to match organization_follow (and include "organization_twitter_handle")
-def organization_stop_following(voter_device_id, organization_id=0, organization_we_vote_id='',
-                                user_agent_string='', user_agent_object=None):
+def organization_stop_following(  # organizationStopFollowing
+        organization_follow_based_on_issue=None,
+        organization_id=None,
+        organization_twitter_handle=None,
+        organization_we_vote_id=None,
+        politician_we_vote_id=None,
+        user_agent_object=None,
+        user_agent_string=None,
+        voter_device_id=None):
     """
     Save that the voter wants to stop following this org, organizationStopFollowing
-    :param voter_device_id:
+    :param organization_follow_based_on_issue:
     :param organization_id:
-    :param organization_we_vote_id
-    :param user_agent_string:
+    :param organization_twitter_handle;
+    :param organization_we_vote_id:
+    :param politician_we_vote_id:
     :param user_agent_object:
+    :param user_agent_string:
+    :param voter_device_id:
     :return:
     """
-    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
-                                                          follow_kind=STOP_FOLLOWING,
-                                                          user_agent_string=user_agent_string,
-                                                          user_agent_object=user_agent_object)
+    json_data = organization_follow_or_unfollow_or_ignore(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        follow_kind=STOP_FOLLOWING,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_stop_ignoring(voter_device_id, organization_id=0, organization_we_vote_id='',
-                               user_agent_string='', user_agent_object=None):
+def organization_stop_ignoring(
+        # organization_follow_based_on_issue=None,
+        organization_id=None,
+        organization_twitter_handle=None,
+        organization_we_vote_id=None,
+        politician_we_vote_id=None,
+        user_agent_object=None,
+        user_agent_string=None,
+        voter_device_id=None):
     """
     Save that the voter wants to stop following this org, organizationStopIgnoring
-    :param voter_device_id:
+    # :param organization_follow_based_on_issue:
     :param organization_id:
-    :param organization_we_vote_id
-    :param user_agent_string:
+    :param organization_twitter_handle;
+    :param organization_we_vote_id:
+    :param politician_we_vote_id:
     :param user_agent_object:
+    :param user_agent_string:
+    :param voter_device_id:
     :return:
     """
-    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
-                                                          follow_kind=STOP_IGNORING,
-                                                          user_agent_string=user_agent_string,
-                                                          user_agent_object=user_agent_object)
+    json_data = organization_follow_or_unfollow_or_ignore(
+        follow_kind=STOP_IGNORING,
+        organization_id=organization_id,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_object=user_agent_object,
+        user_agent_string=user_agent_string,
+        voter_device_id=voter_device_id)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_follow_ignore(voter_device_id, organization_id=0, organization_we_vote_id='',
-                               user_agent_string='', user_agent_object=None):
+def organization_follow_ignore(  # organizationFollowIgnore
+        organization_follow_based_on_issue=None,
+        organization_id=None,
+        organization_twitter_handle=None,
+        organization_we_vote_id=None,
+        politician_we_vote_id=None,
+        user_agent_object=None,
+        user_agent_string=None,
+        voter_device_id=None):
     """
     Save that the voter wants to ignore this org, organizationFollowIgnore
-    :param voter_device_id:
+    :param organization_follow_based_on_issue:
     :param organization_id:
-    :param organization_we_vote_id
-    :param user_agent_string:
+    :param organization_twitter_handle;
+    :param organization_we_vote_id:
+    :param politician_we_vote_id:
     :param user_agent_object:
+    :param user_agent_string:
+    :param voter_device_id:
     :return:
     """
-    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
-                                                          follow_kind=FOLLOW_IGNORE,
-                                                          user_agent_string=user_agent_string,
-                                                          user_agent_object=user_agent_object)
+    json_data = organization_follow_or_unfollow_or_ignore(
+        follow_kind=FOLLOW_IGNORE,
+        organization_id=organization_id,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_object=user_agent_object,
+        user_agent_string=user_agent_string,
+        voter_device_id=voter_device_id)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

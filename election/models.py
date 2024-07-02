@@ -1234,15 +1234,19 @@ class ElectionManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_elections(include_test_election=False):
+    def retrieve_elections(include_test_election=False, read_only=False):
         """
         Retrieve all elections
         :param include_test_election:
+        :param read_only:
         :return:
         """
         status = ""
         try:
-            election_list_query = Election.objects.all()
+            if positive_value_exists(read_only):
+                election_list_query = Election.objects.using('readonly').all()
+            else:
+                election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('-election_day_text')

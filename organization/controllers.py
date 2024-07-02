@@ -1463,52 +1463,47 @@ def transfer_to_organization_if_missing(from_organization, to_organization, fiel
     return save_to_organization
 
 
-def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
-                                              follow_kind=FOLLOWING,
-                                              organization_follow_based_on_issue=None,
-                                              user_agent_string='', user_agent_object=None):
+def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizationStopFollowing
+        follow_kind=FOLLOWING,
+        organization_id=None,
+        organization_twitter_handle=None,
+        organization_we_vote_id=None,
+        politician_we_vote_id=None,
+        organization_follow_based_on_issue=None,
+        user_agent_object=None,
+        user_agent_string='',
+        voter_device_id=None):
     status = ""
     if organization_follow_based_on_issue is None:
         organization_follow_based_on_issue = False
 
+    error_results = {
+        'status': '',
+        'success': False,
+        'voter_device_id': voter_device_id,
+        'organization_id': organization_id,
+        'organization_we_vote_id': organization_we_vote_id,
+        'organization_follow_based_on_issue': organization_follow_based_on_issue,
+        'voter_linked_organization_we_vote_id': "",
+    }
+
     if not positive_value_exists(voter_device_id):
-        json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_follow_based_on_issue': organization_follow_based_on_issue,
-            'voter_linked_organization_we_vote_id': "",
-        }
-        return json_data
+        status += "VALID_VOTER_DEVICE_ID_MISSING "
+        error_results['status'] = status
+        return error_results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
-            'status': 'VALID_VOTER_ID_MISSING ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_follow_based_on_issue': organization_follow_based_on_issue,
-            'voter_linked_organization_we_vote_id': "",
-        }
-        return json_data
+        status += "VALID_VOTER_ID_MISSING "
+        error_results['status'] = status
+        return error_results
 
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if not results['voter_found']:
-        json_data = {
-            'status': 'VOTER_NOT_FOUND ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_follow_based_on_issue': organization_follow_based_on_issue,
-            'voter_linked_organization_we_vote_id': "",
-        }
-        return json_data
+        status += "VOTER_NOT_FOUND "
+        error_results['status'] = status
+        return error_results
 
     voter = results['voter']
     voter_we_vote_id = voter.we_vote_id
@@ -1517,16 +1512,28 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
 
     organization_id = convert_to_int(organization_id)
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
-        json_data = {
-            'status': 'VALID_ORGANIZATION_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_follow_based_on_issue': organization_follow_based_on_issue,
-            'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
-        }
-        return json_data
+        if positive_value_exists(politician_we_vote_id):
+            organization_manager = OrganizationManager()
+            organization_results = organization_manager.retrieve_organization(
+                politician_we_vote_id=politician_we_vote_id,
+                read_only=True)
+            if organization_results['organization_found']:
+                organization_id = organization_results['organization'].id
+                organization_we_vote_id = organization_results['organization'].we_vote_id
+    if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
+        if positive_value_exists(organization_twitter_handle):
+            organization_manager = OrganizationManager()
+            organization_results = organization_manager.retrieve_organization_from_twitter_handle(
+                organization_twitter_handle, read_only=True)
+            if organization_results['organization_found']:
+                organization_id = organization_results['organization'].id
+                organization_we_vote_id = organization_results['organization'].we_vote_id
+
+    if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
+        status+= "VALID_ORGANIZATION_ID_MISSING "
+        error_results['status'] = status
+        return error_results
+
     is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
     follow_organization_manager = FollowOrganizationManager()
@@ -1616,7 +1623,6 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
         number_of_organizations_followed = \
             follow_organization_manager.fetch_number_of_organizations_followed(voter_id)
 
-        voter_manager = VoterManager()
         voter_manager.update_organizations_interface_status(voter_we_vote_id, number_of_organizations_followed)
 
     json_data = {
@@ -2288,7 +2294,9 @@ def organization_retrieve_for_api(  # organizationRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(
+        organization_id=organization_id,
+        we_vote_id=organization_we_vote_id)
     status += results['status']
 
     if results['organization_found']:
@@ -3058,7 +3066,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     twitter_user_manager = TwitterUserManager()
     voter_manager = VoterManager()
 
-    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
     status += results['status']
     if not results['organization_found']:
         status += "REFRESH_ORGANIZATION_FROM_MASTER_TABLES-ORGANIZATION_NOT_FOUND "
@@ -3163,7 +3171,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
 def push_organization_data_to_other_table_caches(organization_we_vote_id):
     organization_manager = OrganizationManager()
     voter_guide_manager = VoterGuideManager()
-    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
     organization = results['organization']
 
     save_voter_guide_from_organization_results = \

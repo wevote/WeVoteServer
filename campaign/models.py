@@ -111,12 +111,14 @@ class CampaignX(models.Model):
     ocd_id_state_mismatch_checked_campaign_title = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_resolved = models.BooleanField(default=False, null=False)
+    # If this CampaignX has a linked_politician_we_vote_id, then opposers_count comes from Organization opposers
     opposers_count = models.PositiveIntegerField(default=0)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
+    # If this CampaignX has a linked_politician_we_vote_id, then supporters_count comes from Organization followers
     supporters_count = models.PositiveIntegerField(default=0)
     # How many supporters are required before showing in We Vote lists
     supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
@@ -154,7 +156,7 @@ class CampaignX(models.Model):
             return
         return politician
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -3228,7 +3230,7 @@ class CampaignXNewsItem(models.Model):
         max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

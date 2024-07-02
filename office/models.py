@@ -287,7 +287,7 @@ class ContestOffice(models.Model):
             return "primary_runoff_election"
         return ""
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

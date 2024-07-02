@@ -1712,7 +1712,7 @@ def delete_cached_images_for_voter(voter):
 
         # Reset Organization with original image details
         organization_manager = OrganizationManager()
-        organization_results = organization_manager.retrieve_organization(0, '', '', voter.twitter_id)
+        organization_results = organization_manager.retrieve_organization(twitter_user_id=voter.twitter_id)
         organization = organization_results['organization']
         if organization_results['organization_found']:
             reset_organization_image_results = organization_manager.reset_organization_image_details(
