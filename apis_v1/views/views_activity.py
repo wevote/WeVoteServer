@@ -21,7 +21,7 @@ from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager, VoterDeviceLinkManager, \
     VoterDeviceLink
 from wevote_functions.functions import get_voter_device_id, positive_value_exists, wevote_functions
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -120,8 +120,8 @@ def activity_comment_save_view(request):  # activityCommentSave
         activity_comment = results['activity_comment']
         activity_comment_dict = {
             'activity_comment_created':             results['activity_comment_created'],
-            'date_created':                         activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':                    activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_created':                         activity_comment.date_created.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':                    activity_comment.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'commenter_name':                       activity_comment.commenter_name,
             'commenter_organization_we_vote_id':    activity_comment.commenter_organization_we_vote_id,
             'commenter_voter_we_vote_id':           activity_comment.commenter_voter_we_vote_id,
@@ -204,9 +204,9 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
             except Exception as e:
                 status += "COULD_NOT_UPDATE_SEED_WE_VOTE_ID: " + str(e) + ' '
         activity_notice_seed_dict = {
-            'date_created':                     activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':                activity_notice_seed.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_of_notice':                   activity_notice_seed.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_created':                     activity_notice_seed.date_of_notice.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':                activity_notice_seed.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_of_notice':                   activity_notice_seed.date_of_notice.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'id':                               activity_notice_seed.id,  # We normalize to generate activityTidbitKey
             'activity_notice_seed_id':          activity_notice_seed.id,
             'kind_of_activity':                 "ACTIVITY_NOTICE_SEED",
@@ -240,7 +240,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
     for activity_post in activity_post_list:
         date_created_string = ''
         if activity_post.date_created:
-            date_created_string = activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S')
+            date_created_string = activity_post.date_created.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         if not positive_value_exists(activity_post.we_vote_id):
             try:
                 activity_post.save()
@@ -248,7 +248,7 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
                 status += "COULD_NOT_UPDATE_POST_WE_VOTE_ID: " + str(e) + ' '
         activity_post_dict = {
             'date_created':                     date_created_string,
-            'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_last_changed':                activity_post.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'date_of_notice':                   date_created_string,
             'id':                               activity_post.id,  # We normalize to generate activityTidbitKey
             'activity_post_id':                 activity_post.id,
@@ -287,8 +287,8 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
                     child_comment_object_list = child_results['activity_comment_list']
                     for child_comment in child_comment_object_list:
                         child_comment_dict = {
-                            'date_created': child_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-                            'date_last_changed': child_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                            'date_created': child_comment.date_created.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                            'date_last_changed': child_comment.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
                             'commenter_name': child_comment.commenter_name,
                             'commenter_organization_we_vote_id': child_comment.commenter_organization_we_vote_id,
                             'commenter_voter_we_vote_id': child_comment.commenter_voter_we_vote_id,
@@ -306,8 +306,8 @@ def activity_list_retrieve_view(request):  # activityListRetrieve
 
                 activity_comment_dict = {
                     'comment_list': child_comment_list,
-                    'date_created': activity_comment.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-                    'date_last_changed': activity_comment.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'date_created': activity_comment.date_created.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                    'date_last_changed': activity_comment.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
                     'commenter_name': activity_comment.commenter_name,
                     'commenter_organization_we_vote_id': activity_comment.commenter_organization_we_vote_id,
                     'commenter_voter_we_vote_id': activity_comment.commenter_voter_we_vote_id,
@@ -419,8 +419,8 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'activity_tidbit_we_vote_id':       activity_notice.activity_tidbit_we_vote_id,
                 'campaignx_news_item_we_vote_id':   activity_notice.campaignx_news_item_we_vote_id,
                 'campaignx_we_vote_id':             activity_notice.campaignx_we_vote_id,
-                'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-                'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
+                'date_last_changed':                activity_notice.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                'date_of_notice':                   activity_notice.date_of_notice.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
                 'activity_notice_id':               activity_notice.id,
                 'kind_of_notice':                   activity_notice.kind_of_notice,
                 'new_positions_entered_count':      new_positions_entered_count,
@@ -568,9 +568,9 @@ def activity_post_save_view(request):  # activityPostSave
             statement_text=activity_post.statement_text)
         status += activity_results['status']
         activity_post_dict = {
-            'date_created':                     activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':                activity_post.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_of_notice':                   activity_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_created':                     activity_post.date_created.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':                activity_post.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_of_notice':                   activity_post.date_created.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'id':                               activity_post.id,  # We normalize to generate activityTidbitKey
             'activity_post_id':                 activity_post.id,
             'kind_of_activity':                 'ACTIVITY_POST',

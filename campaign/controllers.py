@@ -22,7 +22,7 @@ import pytz
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer, get_current_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer, get_current_date_as_integer, DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -377,9 +377,9 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
         date_posted_string = ''
         date_sent_to_email_string = ''
         try:
-            date_last_changed_string = campaignx_news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-            date_posted_string = campaignx_news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
-            date_sent_to_email_string = campaignx_news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+            date_last_changed_string = campaignx_news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_posted_string = campaignx_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_sent_to_email_string = campaignx_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         results = {
@@ -942,8 +942,8 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
     date_last_changed_string = ''
     date_supported_string = ''
     try:
-        date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-        date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+        date_last_changed_string = campaignx_supporter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+        date_supported_string = campaignx_supporter.date_supported.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
     except Exception as e:
         status += "DATE_CONVERSION_ERROR: " + str(e) + " "
     results = {
@@ -1140,8 +1140,8 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         date_last_changed_string = ''
         date_supported_string = ''
         try:
-            date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-            date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+            date_last_changed_string = campaignx_supporter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_supported_string = campaignx_supporter.date_supported.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         results = {
@@ -1942,10 +1942,10 @@ def generate_campaignx_dict_from_campaignx_object(
                 date_posted_string = ''
                 date_sent_to_email_string = ''
                 try:
-                    date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-                    date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+                    date_last_changed_string = news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    date_posted_string = news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                     if positive_value_exists(news_item.date_sent_to_email):
-                        date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                        date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR: " + str(e) + " "
                 one_news_item_dict = {
@@ -2035,8 +2035,8 @@ def generate_campaignx_dict_from_campaignx_object(
             date_last_changed_string = ''
             date_supported_string = ''
             try:
-                date_last_changed_string = campaignx_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-                date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                date_last_changed_string = campaignx_supporter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                date_supported_string = campaignx_supporter.date_supported.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             try:
@@ -2074,7 +2074,7 @@ def generate_campaignx_dict_from_campaignx_object(
             for campaignx_supporter in supporter_list:
                 date_supported_string = ''
                 try:
-                    date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                    date_supported_string = campaignx_supporter.date_supported.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR: " + str(e) + " "
                 one_supporter_dict = {
@@ -2102,7 +2102,7 @@ def generate_campaignx_dict_from_campaignx_object(
             for campaignx_supporter in supporter_list:
                 date_supported_string = ''
                 try:
-                    date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+                    date_supported_string = campaignx_supporter.date_supported.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR: " + str(e) + " "
                 one_supporter_dict = {
