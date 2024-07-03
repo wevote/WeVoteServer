@@ -30,7 +30,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer
+    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer, DATE_FORMAT_YMD_HMS
 from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
@@ -1851,7 +1851,7 @@ def generate_candidate_dict_from_candidate_object(
     # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
     date_last_updated = ''
     if positive_value_exists(candidate.date_last_updated):
-        date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+        date_last_updated = candidate.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
     candidate_dict = {
         'ballot_guide_official_statement':  candidate.ballot_guide_official_statement,
         'ballot_item_display_name':         candidate.display_candidate_name(),
