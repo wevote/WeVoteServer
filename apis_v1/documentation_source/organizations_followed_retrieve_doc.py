@@ -68,6 +68,7 @@ def organizations_followed_retrieve_doc_template_values(url_root):
                    '     "organization_photo_url_large": string,\n' \
                    '     "organization_photo_url_medium": string,\n' \
                    '     "organization_photo_url_tiny": string,\n' \
+                   '     "politician_we_vote_id": string,\n' \
                    '   ],\n' \
                    '}'
 

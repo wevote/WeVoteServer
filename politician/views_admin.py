@@ -256,6 +256,67 @@ def find_and_merge_duplicate_politicians_view(request):
 
 
 @login_required
+def match_politician_to_organization_view(request, politician_we_vote_id):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    organization_created = False
+    organization_creation_error = False
+    politician_error = False
+    politician_has_two_linked_organizations = False
+    politician_has_two_possible_organizations = False
+    politician_updated = False
+    state_code = request.GET.get('state_code', '')
+    status = ''
+    success = True
+
+    try:
+        queryset = Politician.objects.all()
+        politician = queryset.get(we_vote_id__iexact=politician_we_vote_id)
+        from politician.controllers import match_politician_to_organization
+        match_results = match_politician_to_organization(politician=politician)
+        status += match_results['status']
+        if match_results['politician_updated']:
+            politician = match_results['politician']
+            politician.save()
+            politician_updated = True
+        organization_created = match_results['organization_created']
+        organization_creation_error = match_results['organization_creation_error']
+        politician_error = match_results['politician_error']
+        politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
+        politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
+        politician_updated = match_results['politician_updated']
+    except Exception as e:
+        status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
+        success = False
+
+    messages.add_message(request, messages.INFO,
+                         "match_politician_to_organization:: "
+                         "politician_updated: {politician_updated}. "
+                         "politician_has_two_linked_organizations: {politician_has_two_linked_organizations}. "
+                         "politician_has_two_possible_organizations: {politician_has_two_possible_organizations}. "
+                         "politician_error: {politician_error} "
+                         "organization_created: {organization_created} "
+                         "organization_creation_error: {organization_creation_error} "
+                         "status: {status}"
+                         "".format(
+                             organization_creation_error=organization_creation_error,
+                             organization_created=organization_created,
+                             politician_updated=politician_updated,
+                             politician_has_two_linked_organizations=politician_has_two_linked_organizations,
+                             politician_has_two_possible_organizations=politician_has_two_possible_organizations,
+                             politician_error=politician_error,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('politician:politician_we_vote_id_edit',
+                                        args=(politician_we_vote_id,)) +
+                                "?state_code={state_code}"
+                                "".format(state_code=state_code))
+
+
+@login_required
 def match_politicians_to_organizations_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
@@ -264,102 +325,36 @@ def match_politicians_to_organizations_view(request):
 
     state_code = request.GET.get('state_code', '')
 
-    politician_we_vote_id_list = []
-    politicians_dict = {}
-
     organization_might_be_needed_count = 0
+    organizations_created_count = 0
+    organization_creation_errors_count = 0
     politician_error_count = 0
     politician_has_two_linked_organizations = 0
+    politician_has_two_possible_organizations = 0
     politician_list_count = 0
     politician_update_count = 0
     status = ''
     update_list = []
     try:
-        from organization.models import Organization
         queryset = Politician.objects.all()
         queryset = queryset.filter(organization_might_be_needed=True)
+        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
         organization_might_be_needed_count = queryset.count()
-        politician_data_list = list(queryset[:1000])
+        politician_data_list = list(queryset[:10])
         politician_list_count = len(politician_data_list)
+        from politician.controllers import match_politician_to_organization
         for politician in politician_data_list:
-            # Now search the Organization table to see if there is already an organization linked to this politician
-            try:
-                queryset = Organization.objects.using('readonly').all()
-                queryset = queryset.filter(politician_we_vote_id__iexact=politician.we_vote_id)
-                linked_organization_list = list(queryset)
-                if len(linked_organization_list) > 1:
-                    politician.organization_might_be_needed = False
-                    update_list.append(politician)
-                    politician_update_count += 1
-                    politician_has_two_linked_organizations += 1
-                elif len(linked_organization_list) > 0:
-                    politician.organization_might_be_needed = False
-                    update_list.append(politician)
-                    politician_update_count += 1
-                else:
-                    # Organization needed
-                    # See if we can find an organization that matches the primary Twitter handle for this politician
-                    #  that isn't already connected to another politician
-                    at_least_one_politician_twitter_handle_found = False
-                    queryset = Organization.objects.all()
-                    queryset = queryset.filter(
-                        Q(politician_we_vote_id__isnull=True) |
-                        Q(politician_we_vote_id__iexact=''))
-                    filters = []
+            results = match_politician_to_organization(politician=politician)
+            if results['politician_updated']:
+                update_list.append(results['politician'])
+            organizations_created_count += 1 if results['organization_created'] else 0
+            organization_creation_errors_count += 1 if results['organization_creation_error'] else 0
+            politician_error_count += 1 if results['politician_error'] else 0
+            politician_has_two_linked_organizations += 1 if results['politician_has_two_linked_organizations'] else 0
+            politician_has_two_possible_organizations += \
+                1 if results['politician_has_two_possible_organizations'] else 0
+            politician_update_count += 1 if results['politician_updated'] else 0
 
-                    if positive_value_exists(politician.politician_twitter_handle):
-                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle)
-                        filters.append(new_filter)
-                        at_least_one_politician_twitter_handle_found = True
-
-                    if positive_value_exists(politician.politician_twitter_handle2):
-                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle2)
-                        filters.append(new_filter)
-                        at_least_one_politician_twitter_handle_found = True
-
-                    if positive_value_exists(politician.politician_twitter_handle3):
-                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle3)
-                        filters.append(new_filter)
-                        at_least_one_politician_twitter_handle_found = True
-
-                    if positive_value_exists(politician.politician_twitter_handle4):
-                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle4)
-                        filters.append(new_filter)
-                        at_least_one_politician_twitter_handle_found = True
-
-                    if positive_value_exists(politician.politician_twitter_handle5):
-                        new_filter = Q(organization_twitter_handle__iexact=politician.politician_twitter_handle5)
-                        filters.append(new_filter)
-                        at_least_one_politician_twitter_handle_found = True
-
-                    # Add the first query
-                    if len(filters):
-                        final_filters = filters.pop()
-
-                        # ...and "OR" the remaining items in the list
-                        for item in filters:
-                            final_filters |= item
-
-                        queryset = queryset.filter(final_filters)
-
-                    if at_least_one_politician_twitter_handle_found:
-                        # Return the organization with the most Twitter followers if there are multiple choices
-                        queryset = queryset.order_by('-twitter_followers_count')
-                        existing_organization_list = list(queryset)
-                        if len(existing_organization_list):
-                            organization = existing_organization_list[0]
-                            organization.politician_we_vote_id = politician.we_vote_id
-                            organization.save()
-
-                            politician.organization_might_be_needed = False
-                            update_list.append(politician)
-                            politician_update_count += 1
-            except Exception as e:
-                politician_error_count += 1
-                if politician_error_count < 10:
-                    status += "COULD_NOT_SAVE_POLITICIAN: " + str(e) + " "
-            # politicians_dict[politician.we_vote_id] = politician
-            # politician_we_vote_id_list.append(politician.we_vote_id)
         if politician_update_count > 0:
             Politician.objects.bulk_update(update_list, ['organization_might_be_needed'])
 
@@ -371,13 +366,19 @@ def match_politicians_to_organizations_view(request):
                          "Politicians analyzed: {politician_list_count:,}. "
                          "politician_update_count: {politician_update_count:,}. "
                          "politician_has_two_linked_organizations: {politician_has_two_linked_organizations:,}. "
+                         "politician_has_two_possible_organizations: {politician_has_two_possible_organizations:,}. "
                          "politician_error_count: {politician_error_count} "
+                         "organizations_created_count: {organizations_created_count} "
+                         "organization_creation_errors_count: {organization_creation_errors_count} "
                          "status: {status}"
                          "".format(
+                             organization_creation_errors_count=organization_creation_errors_count,
+                             organizations_created_count=organizations_created_count,
                              organization_might_be_needed_count=organization_might_be_needed_count,
                              politician_list_count=politician_list_count,
                              politician_update_count=politician_update_count,
                              politician_has_two_linked_organizations=politician_has_two_linked_organizations,
+                             politician_has_two_possible_organizations=politician_has_two_possible_organizations,
                              politician_error_count=politician_error_count,
                              status=status))
 
@@ -1582,9 +1583,7 @@ def politician_duplicates_list_view(request):
 
 @login_required
 def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
-    politician_manager = PoliticianManager()
-    politician_id = politician_manager.fetch_politician_id_from_we_vote_id(politician_we_vote_id)
-    return politician_we_vote_id(request, politician_id)
+    return politician_edit_view(request, politician_we_vote_id=politician_we_vote_id)
 
 
 @login_required
@@ -1701,6 +1700,22 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 path_list = path_list_modified
             path_list = path_list[:3]
 
+        # ##################################
+        # Find related organization (endorser)
+        try:
+            from organization.models import Organization
+            organization_queryset = Organization.objects.using('readonly').all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            organization_linked_to_politician = organization_queryset.get(
+                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+            organization_we_vote_id = organization_linked_to_politician.we_vote_id
+        except ObjectDoesNotExist:
+            organization_we_vote_id = ''
+        except Exception as e:
+            organization_we_vote_id = ''
+            status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
+        # ##################################
         # Working with We Vote Positions
         try:
             politician_position_query = PositionEntered.objects.order_by('stance')
@@ -1904,6 +1919,13 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
 
+        if positive_value_exists(politician_on_stage.we_vote_hosted_profile_image_url_large):
+            if politician_on_stage.profile_image_background_color_needed is not False:
+                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
+                politician_on_stage.profile_image_background_color_needed = False
+                politician_on_stage.save()
+                messages.add_message(request, messages.INFO, "Background color generated")
+
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
         else:
@@ -1914,7 +1936,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'label':    'Name from Ballotpedia',
                 'id':       'ballotpedia_politician_name_id',
                 'name':     'ballotpedia_politician_name',
-                'value':     ballotpedia_politician_name if ballotpedia_politician_name else politician_on_stage.ballotpedia_politician_name
+                'value':     ballotpedia_politician_name
+                if ballotpedia_politician_name else politician_on_stage.ballotpedia_politician_name
             },
             'ballotpedia_politician_url':   ballotpedia_politician_url,
             'birth_date_dict':
@@ -1955,21 +1978,24 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'label':    'Politician Alt Name (for Google Civic matching)',
                 'id':       'google_civic_candidate_name_id',
                 'name':     'google_civic_candidate_name',
-                'value':     google_civic_candidate_name if google_civic_candidate_name else politician_on_stage.google_civic_candidate_name
+                'value':     google_civic_candidate_name
+                if google_civic_candidate_name else politician_on_stage.google_civic_candidate_name
             },
             'google_civic_candidate_name2_dict':
             {
                 'label':    'Politician Alt Name 2',
                 'id':       'google_civic_candidate_name2_id',
                 'name':     'google_civic_candidate_name2',
-                'value':     google_civic_candidate_name2 if google_civic_candidate_name2 else politician_on_stage.google_civic_candidate_name2
+                'value':     google_civic_candidate_name2
+                if google_civic_candidate_name2 else politician_on_stage.google_civic_candidate_name2
             },
             'google_civic_candidate_name3_dict':
             {
                 'label':    'Politician Alt Name 3',
                 'id':       'google_civic_candidate_name3_id',
                 'name':     'google_civic_candidate_name3',
-                'value':     google_civic_candidate_name3 if google_civic_candidate_name3 else politician_on_stage.google_civic_candidate_name3
+                'value':     google_civic_candidate_name3
+                if google_civic_candidate_name3 else politician_on_stage.google_civic_candidate_name3
             },
             'instagram_handle':             instagram_handle,
             'linked_campaignx_list':        linked_campaignx_list,
@@ -1983,6 +2009,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'value':     maplight_id if maplight_id else politician_on_stage.maplight_id
             },
             'messages_on_stage':            messages_on_stage,
+            'organization_we_vote_id':      organization_we_vote_id,
             'path_count':                   path_count,
             'path_list':                    path_list,
             'politician':                   politician_on_stage,
@@ -2018,21 +2045,24 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'label':    'Politician Phone',
                 'id':       'politician_phone_number_id',
                 'name':     'politician_phone_number',
-                'value':     politician_phone_number if politician_phone_number else politician_on_stage.politician_phone_number
+                'value':     politician_phone_number
+                if politician_phone_number else politician_on_stage.politician_phone_number
             },
             'politician_phone_number2_dict':
             {
                 'label':    'Phone 2',
                 'id':       'politician_phone_number2_id',
                 'name':     'politician_phone_number2',
-                'value':     politician_phone_number2 if politician_phone_number2 else politician_on_stage.politician_phone_number2
+                'value':     politician_phone_number2
+                if politician_phone_number2 else politician_on_stage.politician_phone_number2
             },
             'politician_phone_number3_dict':
             {
                 'label':    'Phone 3',
                 'id':       'politician_phone_number3_id',
                 'name':     'politician_phone_number3',
-                'value':     politician_phone_number3 if politician_phone_number3 else politician_on_stage.politician_phone_number3
+                'value':     politician_phone_number3
+                if politician_phone_number3 else politician_on_stage.politician_phone_number3
             },
             'politician_position_list':     politician_position_list,
             'politician_twitter_handle':    politician_twitter_handle,
@@ -2080,7 +2110,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'label':    'Vote USA Politician Id',
                 'id':       'vote_usa_politician_id_id',
                 'name':     'vote_usa_politician_id',
-                'value':     vote_usa_politician_id if vote_usa_politician_id else politician_on_stage.vote_usa_politician_id
+                'value':     vote_usa_politician_id
+                if vote_usa_politician_id else politician_on_stage.vote_usa_politician_id
             },
             'web_app_root_url':             web_app_root_url,
             'youtube_url_dict':
@@ -2091,13 +2122,6 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 'value':     youtube_url if youtube_url else politician_on_stage.youtube_url
             },
         }
-        
-        if positive_value_exists(politician_on_stage.we_vote_hosted_profile_image_url_large):
-            if politician_on_stage.profile_image_background_color_needed is not False:
-                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
-                politician_on_stage.profile_image_background_color_needed = False
-                politician_on_stage.save()
-                messages.add_message(request, messages.INFO, "Background color generated")       
     else:
         template_values = {
             'messages_on_stage':    messages_on_stage,

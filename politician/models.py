@@ -351,6 +351,7 @@ class Politician(models.Model):
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     profile_image_background_color_needed = models.BooleanField(null=True)
     organization_might_be_needed = models.BooleanField(default=True)
+    organization_and_manual_intervention_needed = models.BooleanField(default=False)
 
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

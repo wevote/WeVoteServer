@@ -478,7 +478,8 @@ def voter_guide_create_view(request):
             # Search for organizations that match
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=organization_name,
-                organization_twitter_handle=organization_twitter_handle
+                organization_twitter_handle=organization_twitter_handle,
+                read_only=True,
             )
 
             if results['organizations_found']:
@@ -2519,11 +2520,13 @@ def voter_guide_search_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     # Search for organizations that match
-    organization_email = ''
     organization_list_manager = OrganizationListManager()
     results = organization_list_manager.organization_search_find_any_possibilities(
-        organization_name, organization_twitter_handle, organization_website, organization_email,
-        organization_facebook)
+        organization_name=organization_name,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_website=organization_website,
+        organization_facebook=organization_facebook,
+        read_only=True)
 
     if results['organizations_found']:
         organizations_list = results['organizations_list']

@@ -93,10 +93,13 @@ ACTION_NEWS = 74
 ACTION_SHARE_ORGANIZATION = 75
 ACTION_SHARE_ORGANIZATION_ALL_OPINIONS = 76
 ACTION_VIEW_SHARED_ORGANIZATION = 77
-ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 77
+ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 78
+ACTION_ORGANIZATION_FOLLOW_DISLIKE = 79
+ACTION_ORGANIZATION_STOP_DISLIKING = 80
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
+     ACTION_ORGANIZATION_FOLLOW_DISLIKE, ACTION_ORGANIZATION_STOP_DISLIKING,
      ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_FOLLOWING,
      ACTION_ORGANIZATION_STOP_IGNORING, ACTION_VOTER_GUIDE_VISIT]
 
@@ -2042,6 +2045,10 @@ def display_action_constant_human_readable(action_constant):
         return "ORGANIZATION_AUTO_FOLLOW"
     if action_constant == ACTION_ORGANIZATION_FOLLOW:
         return "ORGANIZATION_FOLLOW"
+    if action_constant == ACTION_ORGANIZATION_FOLLOW_DISLIKE:
+        return "ORGANIZATION_FOLLOW_DISLIKE"
+    if action_constant == ACTION_ORGANIZATION_STOP_DISLIKING:
+        return "ORGANIZATION_STOP_DISLIKING"
     if action_constant == ACTION_ORGANIZATION_FOLLOW_IGNORE:
         return "ORGANIZATION_FOLLOW_IGNORE"
     if action_constant == ACTION_ORGANIZATION_STOP_FOLLOWING:
@@ -2140,6 +2147,7 @@ def display_action_constant_human_readable(action_constant):
 
 def fetch_action_constant_number_from_constant_string(action_constant_string):
     action_constant_string = action_constant_string.upper()
+    # Dale 2024-07-03 should this be "==" instead of "in"? Needs deeper look.
     if action_constant_string in 'ACTION_VOTER_GUIDE_VISIT':
         return 1
     if action_constant_string in 'ACTION_VOTER_GUIDE_ENTRY':
@@ -2296,4 +2304,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 77
     if action_constant_string in 'ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS':
         return 78
+    if action_constant_string in 'ACTION_ORGANIZATION_FOLLOW_DISLIKE':
+        return 79
+    if action_constant_string in 'ACTION_ORGANIZATION_STOP_DISLIKING':
+        return 80
     return 0
