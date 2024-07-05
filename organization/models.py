@@ -2402,11 +2402,18 @@ class OrganizationListManager(models.Manager):
     A class for working with lists of endorsers
     """
 
-    def organization_search_find_any_possibilities(self, organization_name='', organization_twitter_handle='',
-                                                   organization_website='', organization_email='',
-                                                   organization_facebook='', organization_search_term='',
-                                                   twitter_handle_list='', facebook_page_list='',
-                                                   exact_match=False):
+    @staticmethod
+    def organization_search_find_any_possibilities(
+            organization_name='',
+            organization_twitter_handle='',
+            organization_website='',
+            organization_email='',
+            organization_facebook='',
+            organization_search_term='',
+            twitter_handle_list='',
+            facebook_page_list='',
+            exact_match=False,
+            read_only=False):
         """
         We want to find *any* possible organization that includes any of the search terms
         We do "OR" across the incoming fields like name, twitter_handle, website, etc.
@@ -2420,6 +2427,7 @@ class OrganizationListManager(models.Manager):
         :param twitter_handle_list:
         :param facebook_page_list:
         :param exact_match:
+        :param read_only:
         :return:
         """
         organization_list_for_json = {}
@@ -2507,7 +2515,10 @@ class OrganizationListManager(models.Manager):
                     new_filter = Q(organization_facebook__icontains=organization_facebook)
                 filters.append(new_filter)
 
-            organization_query = Organization.objects.all()
+            if positive_value_exists(read_only):
+                organization_query = Organization.objects.using('readonly').all()
+            else:
+                organization_query = Organization.objects.all()
             # "OR" filters
             or_filters_found = False
             if len(filters) > 0:
@@ -2725,12 +2736,15 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
-    def retrieve_organizations_by_id_list(self, organization_ids_followed_by_voter):
+    @staticmethod
+    def retrieve_organizations_by_id_list(organization_ids_followed_by_voter, read_only=False):
+        status = ''
+        success = True
         organization_list = []
         organization_list_found = False
 
         if not type(organization_ids_followed_by_voter) is list:
-            status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
+            status += 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST '
             success = False
             results = {
                 'success':                      success,
@@ -2741,7 +2755,7 @@ class OrganizationListManager(models.Manager):
             return results
 
         if not len(organization_ids_followed_by_voter):
-            status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            status += 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST '
             success = False
             results = {
                 'success':                      success,
@@ -2752,7 +2766,10 @@ class OrganizationListManager(models.Manager):
             return results
 
         try:
-            organization_queryset = Organization.objects.all()
+            if positive_value_exists(read_only):
+                organization_queryset = Organization.objects.using('readonly').all()
+            else:
+                organization_queryset = Organization.objects.all()
             organization_queryset = organization_queryset.filter(
                 id__in=organization_ids_followed_by_voter)
             organization_queryset = organization_queryset.order_by('organization_name')
@@ -2760,12 +2777,11 @@ class OrganizationListManager(models.Manager):
 
             if len(organization_list):
                 organization_list_found = True
-                status = 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+                status += 'ORGANIZATIONS_FOUND_BY_ID_LIST '
             else:
-                status = 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
-            success = True
+                status += 'NO_ORGANIZATIONS_FOUND_BY_ID_LIST '
         except Exception as e:
-            status = 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
+            status += 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 

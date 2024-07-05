@@ -1527,10 +1527,12 @@ def organization_edit_process_view(request):
         else:
             # Create new
             # But first double-check that we don't have an org entry already
-            organization_email = ''
             organization_list_manager = OrganizationListManager()
             results = organization_list_manager.organization_search_find_any_possibilities(
-                organization_name, organization_twitter_handle, organization_website, organization_email)
+                organization_name=organization_name,
+                organization_twitter_handle=organization_twitter_handle,
+                organization_website=organization_website,
+                read_only=True)
 
             if results['organizations_found']:
                 organizations_list = results['organizations_list']

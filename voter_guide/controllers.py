@@ -1140,7 +1140,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
             organization_list_manager = OrganizationListManager()
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=possible_organization_name,
-                organization_twitter_handle=possible_organization_twitter_handle
+                organization_twitter_handle=possible_organization_twitter_handle,
+                read_only=True,
             )
             if results['organizations_found']:
                 possible_owner_of_website_organizations_list = results['organizations_list']

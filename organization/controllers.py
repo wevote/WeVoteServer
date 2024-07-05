@@ -14,7 +14,8 @@ from django.db.models import Q
 from django.http import HttpResponse
 
 import wevote_functions.admin
-from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
+from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW_DISLIKE, \
+    ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_DISLIKING, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
 from campaign.controllers import move_campaignx_to_another_organization
 from config.base import get_environment_variable
@@ -22,8 +23,8 @@ from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.controllers import delete_organization_followers_for_organization, \
     move_organization_followers_to_another_organization
-from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
-    STOP_FOLLOWING, STOP_IGNORING
+from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_DISLIKE, FOLLOW_IGNORE, FOLLOWING, \
+    STOP_DISLIKING, STOP_FOLLOWING, STOP_IGNORING
 from image.controllers import cache_image_object_to_aws, cache_master_and_resized_image, FACEBOOK, \
     PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
@@ -1483,6 +1484,7 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         'voter_device_id': voter_device_id,
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
+        'politician_we_vote_id': politician_we_vote_id,
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'voter_linked_organization_we_vote_id': "",
     }
@@ -1520,6 +1522,10 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
             if organization_results['organization_found']:
                 organization_id = organization_results['organization'].id
                 organization_we_vote_id = organization_results['organization'].we_vote_id
+                politician_we_vote_id = organization_results['organization'].politician_we_vote_id
+            else:
+                # Reset politician_we_vote_id, since it wasn't verified
+                politician_we_vote_id = ""
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         if positive_value_exists(organization_twitter_handle):
             organization_manager = OrganizationManager()
@@ -1528,9 +1534,10 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
             if organization_results['organization_found']:
                 organization_id = organization_results['organization'].id
                 organization_we_vote_id = organization_results['organization'].we_vote_id
+                politician_we_vote_id = organization_results['organization'].politician_we_vote_id
 
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
-        status+= "VALID_ORGANIZATION_ID_MISSING "
+        status += "VALID_ORGANIZATION_ID_MISSING "
         error_results['status'] = status
         return error_results
 
@@ -1557,7 +1564,25 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         else:
             status += results['status'] + ' '
             success = False
+    elif follow_kind == FOLLOW_DISLIKE:
+        results = follow_organization_manager.toggle_on_voter_disliking_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
+        if results['follow_organization_found']:
+            status += 'DISLIKING '
+            success = True
+            state_code = ''
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
 
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_FOLLOW_DISLIKE, voter_we_vote_id, voter_id, is_signed_in, state_code,
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
+        else:
+            status += results['status'] + ' '
+            success = False
     elif follow_kind == FOLLOW_IGNORE:
         results = follow_organization_manager.toggle_ignore_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
@@ -1571,6 +1596,25 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
+        else:
+            status += results['status'] + ' '
+            success = False
+    elif follow_kind == STOP_DISLIKING:
+        results = follow_organization_manager.toggle_off_voter_disliking_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
+        if results['follow_organization_found']:
+            status += 'STOPPED_FOLLOWING '
+            success = True
+            state_code = ''
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
+
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_STOP_DISLIKING, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
@@ -1632,13 +1676,48 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
+        'politician_we_vote_id': politician_we_vote_id,
         'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
     }
     return json_data
 
 
-def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0,
-                                            auto_followed_from_twitter_suggestion=False):
+def convert_organization_to_dictionary(organization):
+    one_organization_dict = {
+        'organization_email':
+            organization.organization_email if positive_value_exists(organization.organization_email) else '',
+        'organization_facebook': organization.organization_facebook
+        if positive_value_exists(organization.organization_facebook) else '',
+        'organization_id': organization.id,
+        'organization_name':
+            organization.organization_name if positive_value_exists(organization.organization_name) else '',
+        'organization_photo_url_large': organization.we_vote_hosted_profile_image_url_large
+        if positive_value_exists(organization.we_vote_hosted_profile_image_url_large)
+        else organization.organization_photo_url(),
+        'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+        'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
+        'politician_we_vote_id': organization.politician_we_vote_id if positive_value_exists(
+            organization.politician_we_vote_id) else '',
+        'organization_twitter_handle':
+            organization.organization_twitter_handle if positive_value_exists(
+                organization.organization_twitter_handle) else '',
+        'organization_we_vote_id': organization.we_vote_id,
+        'organization_website': organization.organization_website if positive_value_exists(
+            organization.organization_website) else '',
+        'twitter_description':
+            organization.twitter_description
+            if positive_value_exists(organization.twitter_description) else '',
+        'twitter_followers_count':
+            organization.twitter_followers_count if positive_value_exists(
+                organization.twitter_followers_count) else 0,
+    }
+    return one_organization_dict
+
+
+def organizations_followed_retrieve_for_api(
+        voter_device_id,
+        maximum_number_to_retrieve=0,
+        auto_followed_from_twitter_suggestion=False):
     """
     organizationsFollowedRetrieve Return a list of the organizations followed. See also
     voter_guides_followed_retrieve_for_api, which starts with organizations followed, but returns data as a list of
@@ -1648,9 +1727,11 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
     :param auto_followed_from_twitter_suggestion:
     :return:
     """
+    status = ''
+    success = True
     if not positive_value_exists(voter_device_id):
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_list': [],
@@ -1660,58 +1741,52 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': 'VALID_VOTER_ID_MISSING',
+            'status': 'VALID_VOTER_ID_MISSING ',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_list': [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion)
-    status = results['status']
-    organizations_for_api = []
-    if results['organization_list_found']:
+    results = retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion, read_only=True)
+    status += results['status']
+    organizations_followed_list_of_dicts = []
+    if results['success']:
         organization_list = results['organization_list']
         number_added_to_list = 0
         for organization in organization_list:
-            one_organization = {
-                'organization_id': organization.id,
-                'organization_we_vote_id': organization.we_vote_id,
-                'organization_name':
-                    organization.organization_name if positive_value_exists(organization.organization_name) else '',
-                'organization_website': organization.organization_website if positive_value_exists(
-                    organization.organization_website) else '',
-                'organization_twitter_handle':
-                    organization.organization_twitter_handle if positive_value_exists(
-                        organization.organization_twitter_handle) else '',
-                'twitter_followers_count':
-                    organization.twitter_followers_count if positive_value_exists(
-                        organization.twitter_followers_count) else 0,
-                'twitter_description':
-                    organization.twitter_description
-                    if positive_value_exists(organization.twitter_description) else '',
-                'organization_email':
-                    organization.organization_email if positive_value_exists(organization.organization_email) else '',
-                'organization_facebook': organization.organization_facebook
-                    if positive_value_exists(organization.organization_facebook) else '',
-                'organization_photo_url_large': organization.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_large)
-                    else organization.organization_photo_url(),
-                'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
-                'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
-            }
-            organizations_for_api.append(one_organization.copy())
-            if positive_value_exists(maximum_number_to_retrieve):
-                number_added_to_list += 1
-                if number_added_to_list >= maximum_number_to_retrieve:
-                    break
+            one_organization_dict = convert_organization_to_dictionary(organization)
+            organizations_followed_list_of_dicts.append(one_organization_dict.copy())
+            # if positive_value_exists(maximum_number_to_retrieve):
+            #     number_added_to_list += 1
+            #     if number_added_to_list >= maximum_number_to_retrieve:
+            #         break
 
-        if len(organizations_for_api):
-            status = 'ORGANIZATIONS_FOLLOWED_RETRIEVED'
-            success = True
+        if len(organizations_followed_list_of_dicts):
+            status += 'ORGANIZATIONS_FOLLOWED_RETRIEVED '
         else:
-            status = 'NO_ORGANIZATIONS_FOLLOWED_FOUND'
-            success = True
+            status += 'ORGANIZATIONS_FOLLOWED_NONE_FOUND '
+    else:
+        success = False
+
+    results = retrieve_organizations_followed(voter_id, kind_of_follow=FOLLOW_DISLIKE, read_only=True)
+    status += results['status']
+    organizations_disliked_list_of_dicts = []
+    if results['success']:
+        organization_list = results['organization_list']
+        number_added_to_list = 0
+        for organization in organization_list:
+            one_organization_dict = convert_organization_to_dictionary(organization)
+            organizations_disliked_list_of_dicts.append(one_organization_dict.copy())
+            # if positive_value_exists(maximum_number_to_retrieve):
+            #     number_added_to_list += 1
+            #     if number_added_to_list >= maximum_number_to_retrieve:
+            #         break
+
+        if len(organizations_disliked_list_of_dicts):
+            status += 'ORGANIZATIONS_DISLIKED_RETRIEVED '
+        else:
+            status += 'ORGANIZATIONS_DISLIKED_NONE_FOUND '
     else:
         success = False
 
@@ -1719,7 +1794,8 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
         'status': status,
         'success': success,
         'voter_device_id': voter_device_id,
-        'organization_list': organizations_for_api,
+        'organization_list': organizations_followed_list_of_dicts,
+        'organization_disliked_list': organizations_disliked_list_of_dicts,
         'auto_followed_from_twitter_suggestion': auto_followed_from_twitter_suggestion
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -3007,10 +3083,14 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     organization_list_manager = OrganizationListManager()
-    organization_facebook = None
     results = organization_list_manager.organization_search_find_any_possibilities(
-        organization_name, organization_twitter_handle, organization_website, organization_email,
-        organization_facebook, organization_search_term, exact_match=exact_match)
+        organization_name=organization_name,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_website=organization_website,
+        organization_email=organization_email,
+        organization_search_term=organization_search_term,
+        exact_match=exact_match,
+        read_only=True)
 
     organizations_list = []
     if results['organizations_found']:
@@ -3178,9 +3258,18 @@ def push_organization_data_to_other_table_caches(organization_we_vote_id):
         voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
 
     save_position_from_organization_results = update_position_entered_details_from_organization(organization)
+    results = {
+        'success':  True,
+        'status':   "",
+    }
+    return results
 
 
-def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion=False):
+def retrieve_organizations_followed(
+        voter_id,
+        auto_followed_from_twitter_suggestion=False,
+        kind_of_follow=FOLLOWING,
+        read_only=True):
     organization_list_found = False
     organization_list = []
     status = ''
@@ -3190,26 +3279,32 @@ def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggest
     try:
         organization_ids_followed_by_voter = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-                voter_id, auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+                voter_id,
+                auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion,
+                kind_of_follow=kind_of_follow)
     except Exception as e:
         organization_ids_followed_by_voter = []
         status += "RETRIEVE_FOLLOW_ORGANIZATION_FAILED: " + str(e) + " "
         success = False
 
-    if success:
+    if len(organization_ids_followed_by_voter) > 0:
         organization_list_manager = OrganizationListManager()
-        results = organization_list_manager.retrieve_organizations_by_id_list(organization_ids_followed_by_voter)
+        results = organization_list_manager.retrieve_organizations_by_id_list(
+            organization_ids_followed_by_voter,
+            read_only=read_only)
         if results['organization_list_found']:
             organization_list = results['organization_list']
-            if len(organization_list):
+            if len(organization_list) > 0:
                 organization_list_found = True
-                status = 'SUCCESSFUL_RETRIEVE_OF_ORGANIZATIONS_FOLLOWED'
+                status += 'ORGANIZATIONS_FOLLOWED_RETRIEVED '
             else:
-                status = 'ORGANIZATIONS_FOLLOWED_NOT_FOUND'
-        else:
-            status = results['status']
+                status += 'ORGANIZATIONS_FOLLOWED_NOT_FOUND '
+        elif not results['success']:
+            status += results['status']
             if not results['success']:
                 success = False
+    else:
+        status += 'NO_ORGANIZATIONS_FOLLOWED_BY_VOTER-' + str(kind_of_follow) + " "
 
     results = {
         'success':                      success,
