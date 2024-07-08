@@ -1662,7 +1662,7 @@ class VoterManager(BaseUserManager):
 
     @staticmethod
     def retrieve_voter(
-            voter_id,
+            voter_id='',
             email='',
             voter_we_vote_id='',
             twitter_request_token='',

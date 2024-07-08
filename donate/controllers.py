@@ -551,7 +551,7 @@ def is_voter_logged_in(request):
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         logger.error("invalid voter_device_id passed to is_voter_logged_in" + voter_device_id)

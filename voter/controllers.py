@@ -2060,7 +2060,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     voter_device_link = voter_device_link_results['voter_device_link']
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {

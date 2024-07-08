@@ -498,7 +498,7 @@ def voter_campaignx_follow_for_api(voter_device_id, issue_we_vote_id, follow_val
     issue_id = ''
     if positive_value_exists(voter_device_id):
         voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_we_vote_id = voter.we_vote_id
@@ -573,7 +573,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
     issue_id = ''
     if positive_value_exists(voter_device_id):
         voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_we_vote_id = voter.we_vote_id
@@ -731,7 +731,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {

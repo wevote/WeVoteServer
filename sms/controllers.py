@@ -628,7 +628,7 @@ def voter_sms_phone_number_retrieve_for_api(voter_device_id):  # voterSMSPhoneNu
         return json_data
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     if not voter_results['voter_found']:
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
@@ -709,7 +709,7 @@ def voter_sms_phone_number_sign_in_for_api(voter_device_id, sms_secret_key):  # 
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -869,7 +869,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not voter_results['voter_found']:
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
@@ -893,6 +893,8 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         }
         return error_results
     voter = voter_results['voter']
+    voter_read_only = True
+    voter_id = voter.id
     voter_we_vote_id = voter.we_vote_id
 
     sms_manager = SMSManager()
@@ -981,6 +983,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             primary_sms_phone_number_deleted = False
             if positive_value_exists(voter.primary_sms_we_vote_id) \
                     and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
+                if voter_read_only:
+                    results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_read_only = False
                 try:
                     voter.primary_sms_we_vote_id = None
                     voter.sms_ownership_is_verified = False
@@ -1042,6 +1049,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                         for sms_phone_number_for_promotion in sms_phone_number_list_for_promotion:
                             if positive_value_exists(sms_phone_number_for_promotion.sms_ownership_is_verified):
                                 # Assign this as voter's new primary sms
+                                if voter_read_only:
+                                    results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                                    if results['voter_found']:
+                                        voter = results['voter']
+                                        voter_read_only = False
                                 try:
                                     voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
                                     voter.sms_ownership_is_verified = True
@@ -1057,6 +1069,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                                         voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
                                             sms_phone_number_for_promotion)
                                     status += remove_cached_results['status']
+                                    if voter_read_only:
+                                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                                        if results['voter_found']:
+                                            voter = results['voter']
+                                            voter_read_only = False
                                     try:
                                         voter.primary_sms_we_vote_id = sms_phone_number_for_promotion.we_vote_id
                                         voter.sms_ownership_is_verified = True
@@ -1080,6 +1097,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                 if positive_value_exists(voter.primary_sms_we_vote_id) \
                         and voter.primary_sms_we_vote_id.lower() == sms_phone_number.we_vote_id.lower():
                     # If already the primary sms, leave it but make sure to heal the data
+                    if voter_read_only:
+                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                        if results['voter_found']:
+                            voter = results['voter']
+                            voter_read_only = False
                     try:
                         voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
                         voter.sms_ownership_is_verified = True
@@ -1094,6 +1116,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                             voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
                                 sms_phone_number)
                         status += remove_cached_results['status']
+                        if voter_read_only:
+                            results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                            if results['voter_found']:
+                                voter = results['voter']
+                                voter_read_only = False
                         try:
                             voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
                             voter.sms_ownership_is_verified = True
@@ -1112,11 +1139,15 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                     # normalized_sms_phone_number or primary_sms_we_vote_id. If there are other records
                     # using these, they are bad data that don't reflect
                     remove_cached_results = \
-                        voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
-                            sms_phone_number)
+                        voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(sms_phone_number)
                     status += remove_cached_results['status']
 
                     # And now, update current voter
+                    if voter_read_only:
+                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                        if results['voter_found']:
+                            voter = results['voter']
+                            voter_read_only = False
                     try:
                         voter.primary_sms_we_vote_id = sms_phone_number.we_vote_id
                         voter.sms_ownership_is_verified = True
@@ -1126,7 +1157,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
                         status += "SAVED_SMS_PHONE_NUMBER_AS_PRIMARY "
                         success = True
                     except Exception as e:
-                        status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY "
+                        status += "UNABLE_TO_SAVE_SMS_PHONE_NUMBER_AS_PRIMARY: " + str(e) + " "
                         success = False
                 break  # Break out of the sms_phone_number_list loop
             elif positive_value_exists(voter.primary_sms_we_vote_id) \
@@ -1241,6 +1272,11 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
     if sms_results['sms_phone_number_list_found']:
         sms_phone_number_list_found = True
         sms_phone_number_list = sms_results['sms_phone_number_list']
+        if voter_read_only:
+            results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+            if results['voter_found']:
+                voter = results['voter']
+                voter_read_only = False
         augment_results = augment_sms_phone_number_list(sms_phone_number_list, voter)
         sms_phone_number_list_augmented = augment_results['sms_phone_number_list']
         status += augment_results['status']
