@@ -105,16 +105,26 @@ def create_organization_from_politician(
         }
         return results
 
+    political_party_constant = ''
+    political_parties_tied_to_issues = [DEMOCRAT, GREEN, INDEPENDENT, LIBERTARIAN, REPUBLICAN]
     try:
-        political_party_constant = ''
-        political_parties_tied_to_issues = [DEMOCRAT, GREEN, INDEPENDENT, LIBERTARIAN, REPUBLICAN]
         if positive_value_exists(politician.political_party):
             political_party_constant = convert_to_political_party_constant(politician.political_party)
-        issue_analysis_done = \
-            True if positive_value_exists(politician.political_party) \
-            and political_party_constant in political_parties_tied_to_issues else False
+        # Since there are so many Politicians without party affiliation in our dataset, we will mark all politicians
+        #  we run through this process as issue_analysis_done = True. In the future, we could create another update
+        #  script, but for now I don't want to introduce 10s-of-thousands of entries
+        #  marked with issue_analysis_done = False.
+        # If a political party exists, mark as analyzed
+        # issue_analysis_done = True if positive_value_exists(politician.political_party) else False
+        issue_analysis_done = True
+        if positive_value_exists(politician.political_party):
+            # To be changed below after Organization creation
+            issue_analysis_admin_notes = None
+        else:
+            issue_analysis_admin_notes = "Not tagged by political party (no party specified)."
         organization = Organization.objects.create(
             issue_analysis_done=issue_analysis_done,
+            issue_analysis_admin_notes=issue_analysis_admin_notes,
             organization_contact_form_url=politician.politician_contact_form_url,
             organization_description=politician.ballot_guide_official_statement,
             organization_facebook=politician.facebook_url,
@@ -140,60 +150,71 @@ def create_organization_from_politician(
         success = False
 
     try:
-        change_description = "Organization created from Politician: " + politician.politician_name + " "
+        change_description = "Entry created from Politician: " + politician.politician_name + " "
+        if not positive_value_exists(politician.political_party):
+            change_description += "Not tagged by political party (no party specified)."
         organization_created = True
         organization_found = True
         organization_we_vote_id = organization.we_vote_id
         # Auto-tag the Politician to Issue if they have a political party
-        if positive_value_exists(organization_we_vote_id) and positive_value_exists(politician.political_party) \
-                and political_party_constant in political_parties_tied_to_issues:
-            link_issue_manager = OrganizationLinkToIssueManager()
+        if positive_value_exists(organization_we_vote_id) and positive_value_exists(politician.political_party):
+            if political_party_constant in political_parties_tied_to_issues:
+                link_issue_manager = OrganizationLinkToIssueManager()
 
-            issue_we_vote_id = ''
-            key_list = list(ACTIVE_ISSUES_DICTIONARY.keys())
-            val_list = list(ACTIVE_ISSUES_DICTIONARY.values())
-            if political_party_constant is DEMOCRAT:
-                # If here, this is a new issue link
-                position = val_list.index('Democratic Party Politicians')
-                issue_we_vote_id = key_list[position]
-            elif political_party_constant is GREEN:
-                # If here, this is a new issue link
-                position = val_list.index('Green Party Politicians')
-                issue_we_vote_id = key_list[position]
-            elif political_party_constant is INDEPENDENT:
-                # If here, this is a new issue link
-                position = val_list.index('Independent Politicians')
-                issue_we_vote_id = key_list[position]
-            elif political_party_constant is LIBERTARIAN:
-                # If here, this is a new issue link
-                position = val_list.index('Libertarian Party Politicians')
-                issue_we_vote_id = key_list[position]
-            elif political_party_constant is REPUBLICAN:
-                # If here, this is a new issue link
-                position = val_list.index('Republican Party Politicians')
-                issue_we_vote_id = key_list[position]
-            else:
-                status += "POLITICAL_PARTY_MISMATCH1 "
-            if positive_value_exists(issue_we_vote_id):
-                link_results = link_issue_manager.link_organization_to_issue(
-                    organization_we_vote_id=organization_we_vote_id,
-                    issue_we_vote_id=issue_we_vote_id,
-                    issue_count_update_allowed=False)
-                if link_results['success']:
-                    change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                issue_we_vote_id = ''
+                key_list = list(ACTIVE_ISSUES_DICTIONARY.keys())
+                val_list = list(ACTIVE_ISSUES_DICTIONARY.values())
+                if political_party_constant is DEMOCRAT:
+                    # If here, this is a new issue link
+                    position = val_list.index('Democratic Party Politicians')
+                    issue_we_vote_id = key_list[position]
+                elif political_party_constant is GREEN:
+                    # If here, this is a new issue link
+                    position = val_list.index('Green Party Politicians')
+                    issue_we_vote_id = key_list[position]
+                elif political_party_constant is INDEPENDENT:
+                    # If here, this is a new issue link
+                    position = val_list.index('Independent Politicians')
+                    issue_we_vote_id = key_list[position]
+                elif political_party_constant is LIBERTARIAN:
+                    # If here, this is a new issue link
+                    position = val_list.index('Libertarian Party Politicians')
+                    issue_we_vote_id = key_list[position]
+                elif political_party_constant is REPUBLICAN:
+                    # If here, this is a new issue link
+                    position = val_list.index('Republican Party Politicians')
+                    issue_we_vote_id = key_list[position]
                 else:
-                    change_description += "PROBLEM: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
-                issue_analysis_admin_notes = \
-                    "Auto-tagged to political party: {political_party}" \
-                    "".format(political_party=politician.political_party)
-                organization.issue_analysis_admin_notes = issue_analysis_admin_notes
-                try:
-                    organization.save()
-                except Exception as e:
-                    status += "FAILED_TO_SAVE_ORGANIZATION_AFTER_ISSUE_TAGGING " \
-                              "{error} [type: {error_type}]".format(error=e, error_type=type(e))
+                    status += "POLITICAL_PARTY_MISMATCH1 "
+                if positive_value_exists(issue_we_vote_id):
+                    link_results = link_issue_manager.link_organization_to_issue(
+                        organization_we_vote_id=organization_we_vote_id,
+                        issue_we_vote_id=issue_we_vote_id,
+                        issue_count_update_allowed=False)
+                    if link_results['success']:
+                        change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                    else:
+                        change_description += "PROBLEM: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                    issue_analysis_admin_notes = \
+                        "Auto-tagged to political party: {political_party}" \
+                        "".format(political_party=politician.political_party)
+                else:
+                    issue_analysis_admin_notes = \
+                        "Not tagged by political party, issue_we_vote_id missing: {political_party}" \
+                        "".format(political_party=politician.political_party)
+                    status += "POLITICAL_PARTY_MISMATCH2 "
             else:
-                status += "POLITICAL_PARTY_MISMATCH2 "
+                # A political party exists, but is not one we use to connect to an Issue
+                issue_analysis_admin_notes = \
+                    "Not tagged by political party: {political_party}" \
+                    "".format(political_party=politician.political_party)
+                change_description += issue_analysis_admin_notes
+            organization.issue_analysis_admin_notes = issue_analysis_admin_notes
+            try:
+                organization.save()
+            except Exception as e:
+                status += "FAILED_TO_SAVE_ORGANIZATION_AFTER_ISSUE_TAGGING " \
+                          "{error} [type: {error_type}]".format(error=e, error_type=type(e))
     except Exception as e:
         status += 'FAILED_LINKING_TO_ISSUE ' \
                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -2557,17 +2578,19 @@ def organization_retrieve_for_api(  # organizationRetrieve
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(
         organization_id=organization_id,
-        we_vote_id=organization_we_vote_id)
+        we_vote_id=organization_we_vote_id,
+        read_only=True)
     status += results['status']
 
     if results['organization_found']:
         organization = results['organization']
 
         # Heal data: If the organization_name is a placeholder name, repair it with fresh data
-        if organization_manager.organization_name_needs_repair(organization):
-            organization = organization_manager.repair_organization(organization)
-            position_list_manager = PositionListManager()
-            position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
+        # 2024-07 Dale: This is too expensive to run every retrieve.
+        # if organization_manager.organization_name_needs_repair(organization):
+        #     organization = organization_manager.repair_organization(organization)
+        #     position_list_manager = PositionListManager()
+        #     position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
         # Favor the Twitter banner and profile image if they exist
         # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
@@ -2595,8 +2618,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'success': True,
             'status': status,
             'chosen_domain_string':             organization.chosen_domain_string,
-            'chosen_domain_string2':             organization.chosen_domain_string2,
-            'chosen_domain_string3':             organization.chosen_domain_string3,
+            'chosen_domain_string2':            organization.chosen_domain_string2,
+            'chosen_domain_string3':            organization.chosen_domain_string3,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_feature_package':           organization.chosen_feature_package,
             'chosen_google_analytics_tracking_id': organization.chosen_google_analytics_tracking_id,
