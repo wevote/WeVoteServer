@@ -2070,7 +2070,7 @@ def create_candidate_from_politician(politician_we_vote_id=''):
     candidate_found = False
 
     politician_manager = PoliticianManager()
-    results = politician_manager.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
+    results = politician_manager.retrieve_politician(politician_we_vote_id=politician_we_vote_id, read_only=True)
     politician = None
     politician_found = False
     if results['politician_found']:

@@ -149,6 +149,7 @@ ORGANIZATION_UNIQUE_IDENTIFIERS = [
     'organization_type',
     'organization_website',
     'organization_zip',
+    'politician_we_vote_id',
     'state_served_code',
     'subscription_plan_end_day_text',
     'subscription_plan_features_active',
@@ -167,9 +168,10 @@ ORGANIZATION_UNIQUE_IDENTIFIERS = [
     'wikipedia_page_id',
     'wikipedia_page_title',
     'wikipedia_photo_url',
-    'wikipedia_thumbnail_height',
+    'wikipedia_url',
     'wikipedia_thumbnail_url',
     'wikipedia_thumbnail_width',
+    'youtube_url',
 ]
 
 # These are values used in features_provided_bitmap
@@ -3217,7 +3219,7 @@ class Organization(models.Model):
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
-    organization_facebook = models.URLField(blank=True, null=True)  # facebook_url
+    organization_facebook = models.TextField(blank=True, null=True)  # facebook_url
     fb_username = models.CharField(unique=True, max_length=50, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of image from facebook', blank=True, null=True)

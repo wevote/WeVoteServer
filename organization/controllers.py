@@ -17,7 +17,8 @@ import wevote_functions.admin
 from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW_DISLIKE, \
     ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_DISLIKING, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
-from campaign.controllers import move_campaignx_to_another_organization
+from campaign.controllers import move_campaignx_to_another_organization, \
+    refresh_campaignx_supporters_count_in_all_children
 from config.base import get_environment_variable
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
@@ -29,6 +30,7 @@ from image.controllers import cache_image_object_to_aws, cache_master_and_resize
     PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
+from issue.models import ACTIVE_ISSUES_DICTIONARY, OrganizationLinkToIssueManager
 from politician.models import PoliticianManager
 from position.controllers import delete_positions_for_organization, move_positions_to_another_organization, \
     update_position_entered_details_from_organization
@@ -37,13 +39,15 @@ from stripe_donations.controllers import move_donation_info_to_another_organizat
 from twitter.models import TwitterUserManager, create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
-from wevote_functions.functions import convert_to_int, \
+from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_twitter_handle_from_text_string, positive_value_exists, \
-    process_request_from_master, extract_website_from_url
+    process_request_from_master, extract_website_from_url, \
+    DEMOCRAT, GREEN, INDEPENDENT, LIBERTARIAN, REPUBLICAN
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
-from .models import Organization, OrganizationListManager, OrganizationManager, OrganizationMembershipLinkToVoter, \
-    OrganizationReservedDomain, OrganizationTeamMember, ORGANIZATION_UNIQUE_IDENTIFIERS
+from .models import Organization, OrganizationChangeLog, OrganizationListManager, OrganizationManager, \
+    OrganizationMembershipLinkToVoter, \
+    OrganizationReservedDomain, OrganizationTeamMember, ORGANIZATION_UNIQUE_IDENTIFIERS, PUBLIC_FIGURE
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -63,6 +67,166 @@ CHOSEN_LOGO_MAX_WIDTH = 132
 CHOSEN_LOGO_MAX_HEIGHT = 42
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH = 1600
 CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
+
+
+def create_organization_from_politician(
+        changed_by_name='',
+        changed_by_voter_we_vote_id='',
+        politician=None,
+        politician_we_vote_id=''):
+    change_description = ""
+    status = ''
+    success = True
+    organization = None
+    organization_created = False
+    organization_found = False
+    organization_we_vote_id = ''
+    politician_found = False
+
+    if hasattr(politician, 'we_vote_id'):
+        politician_found = True
+    elif positive_value_exists(politician_we_vote_id):
+        politician_manager = PoliticianManager()
+        results = politician_manager.retrieve_politician(politician_we_vote_id=politician_we_vote_id, read_only=True)
+        politician = None
+        politician_found = False
+        if results['politician_found']:
+            politician = results['politician']
+            politician_found = True
+    if not politician_found or not hasattr(politician, 'politician_name'):
+        status += "VALID_POLITICIAN_NOT_FOUND "
+        success = False
+        results = {
+            'organization':         organization,
+            'organization_created': organization_created,
+            'organization_found':   organization_found,
+            'status':               status,
+            'success':              success,
+        }
+        return results
+
+    try:
+        political_party_constant = ''
+        political_parties_tied_to_issues = [DEMOCRAT, GREEN, INDEPENDENT, LIBERTARIAN, REPUBLICAN]
+        if positive_value_exists(politician.political_party):
+            political_party_constant = convert_to_political_party_constant(politician.political_party)
+        issue_analysis_done = \
+            True if positive_value_exists(politician.political_party) \
+            and political_party_constant in political_parties_tied_to_issues else False
+        organization = Organization.objects.create(
+            issue_analysis_done=issue_analysis_done,
+            organization_contact_form_url=politician.politician_contact_form_url,
+            organization_description=politician.ballot_guide_official_statement,
+            organization_facebook=politician.facebook_url,
+            organization_instagram_handle=politician.instagram_handle,
+            organization_name=politician.politician_name,
+            organization_state=politician.state_code,
+            organization_type=PUBLIC_FIGURE,
+            organization_twitter_handle=politician.politician_twitter_handle,
+            organization_website=politician.politician_url,
+            politician_we_vote_id=politician.we_vote_id,
+            state_served_code=politician.state_code,
+            twitter_description=politician.twitter_description,
+            twitter_followers_count=politician.twitter_followers_count,
+            we_vote_hosted_profile_image_url_large=politician.we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=politician.we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=politician.we_vote_hosted_profile_image_url_tiny,
+            wikipedia_url=politician.wikipedia_url,
+            youtube_url=politician.youtube_url,
+        )
+    except Exception as e:
+        status += 'FAILED_DURING_CREATE_ORGANIZATION ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    try:
+        change_description = "Organization created from Politician: " + politician.politician_name + " "
+        organization_created = True
+        organization_found = True
+        organization_we_vote_id = organization.we_vote_id
+        # Auto-tag the Politician to Issue if they have a political party
+        if positive_value_exists(organization_we_vote_id) and positive_value_exists(politician.political_party) \
+                and political_party_constant in political_parties_tied_to_issues:
+            link_issue_manager = OrganizationLinkToIssueManager()
+
+            issue_we_vote_id = ''
+            key_list = list(ACTIVE_ISSUES_DICTIONARY.keys())
+            val_list = list(ACTIVE_ISSUES_DICTIONARY.values())
+            if political_party_constant is DEMOCRAT:
+                # If here, this is a new issue link
+                position = val_list.index('Democratic Party Politicians')
+                issue_we_vote_id = key_list[position]
+            elif political_party_constant is GREEN:
+                # If here, this is a new issue link
+                position = val_list.index('Green Party Politicians')
+                issue_we_vote_id = key_list[position]
+            elif political_party_constant is INDEPENDENT:
+                # If here, this is a new issue link
+                position = val_list.index('Independent Politicians')
+                issue_we_vote_id = key_list[position]
+            elif political_party_constant is LIBERTARIAN:
+                # If here, this is a new issue link
+                position = val_list.index('Libertarian Party Politicians')
+                issue_we_vote_id = key_list[position]
+            elif political_party_constant is REPUBLICAN:
+                # If here, this is a new issue link
+                position = val_list.index('Republican Party Politicians')
+                issue_we_vote_id = key_list[position]
+            else:
+                status += "POLITICAL_PARTY_MISMATCH1 "
+            if positive_value_exists(issue_we_vote_id):
+                link_results = link_issue_manager.link_organization_to_issue(
+                    organization_we_vote_id=organization_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                    issue_count_update_allowed=False)
+                if link_results['success']:
+                    change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                else:
+                    change_description += "PROBLEM: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                issue_analysis_admin_notes = \
+                    "Auto-tagged to political party: {political_party}" \
+                    "".format(political_party=politician.political_party)
+                organization.issue_analysis_admin_notes = issue_analysis_admin_notes
+                try:
+                    organization.save()
+                except Exception as e:
+                    status += "FAILED_TO_SAVE_ORGANIZATION_AFTER_ISSUE_TAGGING " \
+                              "{error} [type: {error_type}]".format(error=e, error_type=type(e))
+            else:
+                status += "POLITICAL_PARTY_MISMATCH2 "
+    except Exception as e:
+        status += 'FAILED_LINKING_TO_ISSUE ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    try:
+        if positive_value_exists(change_description) and positive_value_exists(organization_we_vote_id):
+            if not positive_value_exists(changed_by_name):
+                changed_by_name = "Created by create_organization_from_politician"
+            OrganizationChangeLog.objects.create(
+                change_description=change_description,
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                status=status,
+            )
+    except Exception as e:
+        status += 'FAILED_WITH_CHANGE_DESCRIPTION ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+    if organization_created:
+        status += "ORGANIZATION_CREATED "
+    else:
+        status += "ORGANIZATION_NOT_CREATED "
+
+    results = {
+        'organization_created': organization_created,
+        'organization_found':   organization_found,
+        'organization':         organization,
+        'status':               status,
+        'success':              success,
+    }
+    return results
 
 
 def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
@@ -1543,12 +1707,14 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
 
     is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
+    campaign_counts_changed = False
     follow_organization_manager = FollowOrganizationManager()
     position_list_manager = PositionListManager()
     if follow_kind == FOLLOWING:
         results = follow_organization_manager.toggle_on_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
+            campaign_counts_changed = True
             status += 'FOLLOWING '
             success = True
             state_code = ''
@@ -1568,6 +1734,7 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         results = follow_organization_manager.toggle_on_voter_disliking_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
+            campaign_counts_changed = True
             status += 'DISLIKING '
             success = True
             state_code = ''
@@ -1606,6 +1773,7 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         results = follow_organization_manager.toggle_off_voter_disliking_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
+            campaign_counts_changed = True
             status += 'STOPPED_FOLLOWING '
             success = True
             state_code = ''
@@ -1625,6 +1793,7 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         results = follow_organization_manager.toggle_off_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
+            campaign_counts_changed = True
             status += 'STOPPED_FOLLOWING '
             success = True
             state_code = ''
@@ -1662,6 +1831,22 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
     else:
         status += 'INCORRECT_FOLLOW_KIND'
         success = False
+
+    if campaign_counts_changed and positive_value_exists(politician_we_vote_id):
+        from campaign.models import CampaignXManager
+        campaignx_manager = CampaignXManager()
+        count_results = campaignx_manager.update_campaignx_supporters_count(politician_we_vote_id=politician_we_vote_id)
+        if count_results['success']:
+            campaignx_we_vote_id = count_results['campaignx_we_vote_id']
+            campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
+            results = refresh_campaignx_supporters_count_in_all_children(
+                campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+            status += results['status']
+            if not count_results['success']:
+                status += count_results['status']
+        else:
+            status += count_results['status']
+            status += "COULD_NOT_UPDATE_CAMPAIGNX_SUPPORTERS_COUNT "
 
     if positive_value_exists(voter_id):
         number_of_organizations_followed = \

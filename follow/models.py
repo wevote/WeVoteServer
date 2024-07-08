@@ -116,9 +116,9 @@ class FollowCampaignXManager(models.Manager):
                 # First make sure that issue_id is for a valid issue
                 issue_manager = IssueManager()
                 if positive_value_exists(issue_id):
-                    results = issue_manager.retrieve_issue(issue_id)
+                    results = issue_manager.retrieve_issue(issue_id=issue_id)
                 else:
-                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+                    results = issue_manager.retrieve_issue(issue_we_vote_id=issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
                     follow_campaignx_on_stage = FollowIssue(
@@ -399,9 +399,9 @@ class FollowIssueManager(models.Manager):
                 # First make sure that issue_id is for a valid issue
                 issue_manager = IssueManager()
                 if positive_value_exists(issue_id):
-                    results = issue_manager.retrieve_issue(issue_id)
+                    results = issue_manager.retrieve_issue(issue_id=issue_id)
                 else:
-                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+                    results = issue_manager.retrieve_issue(issue_we_vote_id=issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
                     follow_issue_on_stage = FollowIssue(

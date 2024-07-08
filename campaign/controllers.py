@@ -56,6 +56,7 @@ CAMPAIGNX_ERROR_DICT = {
     'latest_campaignx_supporter_endorsement_list': [],
     'latest_campaignx_supporter_list': [],
     'linked_politician_we_vote_id': '',
+    'opposers_count': 0,
     'order_in_list': 0,
     'seo_friendly_path': '',
     'seo_friendly_path_list': [],
@@ -1571,7 +1572,7 @@ def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_w
                     politician_bulk_updates_made += 1
         if len(politician_bulk_update_list) > 0:
             try:
-                Politician.objects.bulk_update(politician_bulk_update_list, ['supporters_count'])
+                Politician.objects.bulk_update(politician_bulk_update_list, ['opposers_count', 'supporters_count'])
                 update_message += \
                     "{politician_bulk_updates_made:,} Politician entries updated with fresh supporters_count, " \
                     "".format(politician_bulk_updates_made=politician_bulk_updates_made)
@@ -2015,8 +2016,9 @@ def generate_campaignx_dict_from_campaignx_object(
             campaignx_we_vote_id=campaignx.we_vote_id,
         )
 
-    latest_campaignx_supporter_endorsement_list = []
-    latest_campaignx_supporter_list = []
+    latest_campaignx_supporter_endorsement_list = []  # Latest supporters with comments
+    latest_campaignx_supporter_list = []  # Latest supporters with or without comments
+    latest_position_dict_list = []  # DALE 2024-07-06 I don't know if we want to bring this in here
     supporters_count_next_goal = 0
     voter_campaignx_supporter_dict = {}
     # Only retrieve news items if NOT linked to a politician
@@ -2091,7 +2093,8 @@ def generate_campaignx_dict_from_campaignx_object(
                 }
                 latest_campaignx_supporter_list.append(one_supporter_dict)
 
-        # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
+        # Get most recent supporter_endorsements which include written endorsement
+        # (require_supporter_endorsement == True)
         supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
             campaignx_we_vote_id=campaignx.we_vote_id,
             limit=10,
@@ -2170,6 +2173,7 @@ def generate_campaignx_dict_from_campaignx_object(
         'latest_campaignx_supporter_endorsement_list':  latest_campaignx_supporter_endorsement_list,
         'latest_campaignx_supporter_list':  latest_campaignx_supporter_list,
         'linked_politician_we_vote_id':     campaignx.linked_politician_we_vote_id,
+        'opposers_count':                   campaignx.opposers_count,
         'order_in_list':                    order_in_list,
         'profile_image_background_color':   campaignx.profile_image_background_color,
         'seo_friendly_path':                campaignx.seo_friendly_path,
