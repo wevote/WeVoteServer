@@ -12,7 +12,7 @@ from django.utils.text import slugify
 import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception
-from organization.models import OrganizationManager, OrganizationTeamMember
+from organization.models import Organization, OrganizationManager, OrganizationTeamMember
 from politician.models import Politician
 from wevote_functions.functions import convert_to_int, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
@@ -2209,24 +2209,61 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def update_campaignx_supporters_count(self, campaignx_we_vote_id):
+    def update_campaignx_supporters_count(self, campaignx_we_vote_id='', politician_we_vote_id=''):
         status = ''
+        opposers_count = 0
         supporters_count = 0
-        try:
-            count_query = CampaignXSupporter.objects.using('readonly').all()
-            count_query = count_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
-            count_query = count_query.filter(campaign_supported=True)
-            supporters_count = count_query.count()
-        except Exception as e:
-            status += "FAILED_RETRIEVING_SUPPORTER_COUNT: " + str(e) + ' '
-            results = {
-                'success': False,
-                'status': status,
-                'supporters_count': supporters_count,
-            }
-            return results
+        error_results = {
+            'campaignx_we_vote_id': campaignx_we_vote_id,
+            'status': status,
+            'success': False,
+            'supporters_count': supporters_count,
+        }
+        if positive_value_exists(politician_we_vote_id):
+            if not positive_value_exists(campaignx_we_vote_id):
+                try:
+                    queryset = CampaignX.objects.using('readonly').all()
+                    queryset = queryset.filter(linked_politician_we_vote_id__iexact=politician_we_vote_id)
+                    temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
+                    campaignx_we_vote_id = temp_list[0]
+                except Exception as e:
+                    status += "FAILED_RETRIEVING_CAMPAIGNX: " + str(e) + ' '
+                    error_results['status'] += status
+                    return error_results
+            try:
+                queryset = Organization.objects.using('readonly').all()
+                queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
+                organization_we_vote_id = temp_list[0]
+            except Exception as e:
+                status += "FAILED_RETRIEVING_ORGANIZATION: " + str(e) + ' '
+                error_results['status'] += status
+                return error_results
+            try:
+                from follow.models import FOLLOWING, FOLLOW_DISLIKE, FollowOrganization
+                queryset = FollowOrganization.objects.using('readonly').all()
+                queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                following_queryset = queryset.filter(following_status=FOLLOWING)
+                supporters_count = following_queryset.count()
+                disliking_queryset = queryset.filter(following_status=FOLLOW_DISLIKE)
+                opposers_count = disliking_queryset.count()
+            except Exception as e:
+                status += "FAILED_RETRIEVING_FOLLOW_ORGANIZATION_COUNTS: " + str(e) + ' '
+                error_results['status'] += status
+                return error_results
+        else:
+            try:
+                count_query = CampaignXSupporter.objects.using('readonly').all()
+                count_query = count_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+                count_query = count_query.filter(campaign_supported=True)
+                supporters_count = count_query.count()
+            except Exception as e:
+                status += "FAILED_RETRIEVING_CAMPAIGNX_SUPPORTER_COUNT: " + str(e) + ' '
+                error_results['status'] += status
+                return error_results
 
         update_values = {
+            'opposers_count': opposers_count,
             'supporters_count': supporters_count,
         }
         update_results = self.update_or_create_campaignx(
@@ -2237,9 +2274,10 @@ class CampaignXManager(models.Manager):
         success = update_results['success']
 
         results = {
-            'success':          success,
-            'status':           status,
-            'supporters_count': supporters_count,
+            'campaignx_we_vote_id': campaignx_we_vote_id,
+            'status':               status,
+            'success':              success,
+            'supporters_count':     supporters_count,
         }
         return results
 
@@ -2405,6 +2443,14 @@ class CampaignXManager(models.Manager):
                     if in_draft_mode_may_be_updated:
                         campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
                         campaignx_changed = True
+                if 'linked_politician_we_vote_id' in update_values \
+                        and positive_value_exists(update_values['linked_politician_we_vote_id']):
+                    campaignx.linked_politician_we_vote_id = update_values['linked_politician_we_vote_id']
+                    campaignx_changed = True
+                if 'opposers_count' in update_values \
+                        and positive_value_exists(update_values['opposers_count']):
+                    campaignx.opposers_count = update_values['opposers_count']
+                    campaignx_changed = True
                 if 'politician_delete_list_serialized' in update_values \
                         and positive_value_exists(update_values['politician_delete_list_serialized']):
                     # Delete from politician_delete_list
@@ -2462,10 +2508,6 @@ class CampaignXManager(models.Manager):
                         campaignx.politician_starter_list_serialized = \
                             update_values['politician_starter_list_serialized']
                         campaignx_changed = True
-                if 'linked_politician_we_vote_id' in update_values \
-                        and positive_value_exists(update_values['linked_politician_we_vote_id']):
-                    campaignx.linked_politician_we_vote_id = update_values['linked_politician_we_vote_id']
-                    campaignx_changed = True
                 if 'supporters_count' in update_values \
                         and positive_value_exists(update_values['supporters_count']):
                     campaignx.supporters_count = update_values['supporters_count']
@@ -2627,7 +2669,6 @@ class CampaignXManager(models.Manager):
             }
             return results
 
-        # from organization.models import OrganizationManager
         organization_manager = OrganizationManager()
         # Update existing campaignx_news_item with changes
         try:

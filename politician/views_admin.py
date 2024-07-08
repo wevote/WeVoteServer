@@ -264,51 +264,71 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
 
     organization_created = False
     organization_creation_error = False
+    politician = None
     politician_error = False
     politician_has_two_linked_organizations = False
     politician_has_two_possible_organizations = False
     politician_updated = False
     state_code = request.GET.get('state_code', '')
     status = ''
-    success = True
 
     try:
         queryset = Politician.objects.all()
         politician = queryset.get(we_vote_id__iexact=politician_we_vote_id)
-        from politician.controllers import match_politician_to_organization
-        match_results = match_politician_to_organization(politician=politician)
-        status += match_results['status']
-        if match_results['politician_updated']:
-            politician = match_results['politician']
-            politician.save()
-            politician_updated = True
-        organization_created = match_results['organization_created']
-        organization_creation_error = match_results['organization_creation_error']
-        politician_error = match_results['politician_error']
-        politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
-        politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
-        politician_updated = match_results['politician_updated']
     except Exception as e:
-        status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
-        success = False
+        status += "POLITICIAN_RETRIEVE_ERROR: " + str(e) + " "
 
-    messages.add_message(request, messages.INFO,
-                         "match_politician_to_organization:: "
-                         "politician_updated: {politician_updated}. "
-                         "politician_has_two_linked_organizations: {politician_has_two_linked_organizations}. "
-                         "politician_has_two_possible_organizations: {politician_has_two_possible_organizations}. "
-                         "politician_error: {politician_error} "
-                         "organization_created: {organization_created} "
-                         "organization_creation_error: {organization_creation_error} "
-                         "status: {status}"
-                         "".format(
-                             organization_creation_error=organization_creation_error,
-                             organization_created=organization_created,
+    if hasattr(politician, 'we_vote_id'):
+        voter_device_id = get_voter_api_device_id(request)
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'last_name'):
+            changed_by_name = voter.get_full_name()
+            changed_by_voter_we_vote_id = voter.we_vote_id
+        else:
+            changed_by_name = ""
+            changed_by_voter_we_vote_id = ''
+
+        try:
+            from politician.controllers import match_politician_to_organization
+            match_results = match_politician_to_organization(
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                politician=politician)
+            status += match_results['status']
+            if match_results['politician_updated']:
+                politician = match_results['politician']
+                politician.save()
+                politician_updated = True
+            organization_created = match_results['organization_created']
+            organization_creation_error = match_results['organization_creation_error']
+            politician_error = match_results['politician_error']
+            politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
+            politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
+            politician_updated = match_results['politician_updated']
+        except Exception as e:
+            status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
+
+    message_to_print = "match_politician_to_organization:: " \
+                       "politician_updated: {politician_updated}. " \
+                       "status: {status} ".format(
                              politician_updated=politician_updated,
-                             politician_has_two_linked_organizations=politician_has_two_linked_organizations,
-                             politician_has_two_possible_organizations=politician_has_two_possible_organizations,
-                             politician_error=politician_error,
-                             status=status))
+                             status=status)
+    if positive_value_exists(politician_has_two_linked_organizations):
+        message_to_print += "politician_has_two_linked_organizations: " + \
+                            str(politician_has_two_linked_organizations) + " "
+    if positive_value_exists(politician_has_two_possible_organizations):
+        message_to_print += "politician_has_two_possible_organizations: " + \
+                            str(politician_has_two_possible_organizations) + " "
+    if positive_value_exists(politician_error):
+        message_to_print += "politician_error: " + \
+                            str(politician_error) + " "
+    if positive_value_exists(organization_created):
+        message_to_print += "organization_created: " + \
+                            str(organization_created) + " "
+    if positive_value_exists(organization_creation_error):
+        message_to_print += "organization_creation_error: " + \
+                            str(organization_creation_error) + " "
+    messages.add_message(request, messages.INFO, message_to_print)
 
     return HttpResponseRedirect(reverse('politician:politician_we_vote_id_edit',
                                         args=(politician_we_vote_id,)) +
@@ -324,6 +344,7 @@ def match_politicians_to_organizations_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     state_code = request.GET.get('state_code', '')
+    status = ''
 
     organization_might_be_needed_count = 0
     organizations_created_count = 0
@@ -333,20 +354,37 @@ def match_politicians_to_organizations_view(request):
     politician_has_two_possible_organizations = 0
     politician_list_count = 0
     politician_update_count = 0
-    status = ''
+    politician_we_vote_id_update_list = []
     update_list = []
+
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'last_name'):
+        changed_by_name = voter.get_full_name()
+        changed_by_voter_we_vote_id = voter.we_vote_id
+    else:
+        changed_by_name = ""
+        changed_by_voter_we_vote_id = ''
+
     try:
         queryset = Politician.objects.all()
         queryset = queryset.filter(organization_might_be_needed=True)
         queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
         organization_might_be_needed_count = queryset.count()
+        queryset = queryset.order_by('-politician_ultimate_election_date')
         politician_data_list = list(queryset[:10])
         politician_list_count = len(politician_data_list)
         from politician.controllers import match_politician_to_organization
         for politician in politician_data_list:
-            results = match_politician_to_organization(politician=politician)
+            results = match_politician_to_organization(
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                politician=politician)
             if results['politician_updated']:
                 update_list.append(results['politician'])
+                politician_we_vote_id_update_list.append(politician.we_vote_id)
+            else:
+                pass
             organizations_created_count += 1 if results['organization_created'] else 0
             organization_creation_errors_count += 1 if results['organization_creation_error'] else 0
             politician_error_count += 1 if results['politician_error'] else 0
@@ -361,26 +399,34 @@ def match_politicians_to_organizations_view(request):
     except Exception as e:
         status += "GENERAL_ERROR: " + str(e) + " "
 
-    messages.add_message(request, messages.INFO,
-                         "Politicians that might need orgs at start: {organization_might_be_needed_count:,}. "
-                         "Politicians analyzed: {politician_list_count:,}. "
-                         "politician_update_count: {politician_update_count:,}. "
-                         "politician_has_two_linked_organizations: {politician_has_two_linked_organizations:,}. "
-                         "politician_has_two_possible_organizations: {politician_has_two_possible_organizations:,}. "
-                         "politician_error_count: {politician_error_count} "
-                         "organizations_created_count: {organizations_created_count} "
-                         "organization_creation_errors_count: {organization_creation_errors_count} "
-                         "status: {status}"
-                         "".format(
-                             organization_creation_errors_count=organization_creation_errors_count,
-                             organizations_created_count=organizations_created_count,
-                             organization_might_be_needed_count=organization_might_be_needed_count,
-                             politician_list_count=politician_list_count,
-                             politician_update_count=politician_update_count,
-                             politician_has_two_linked_organizations=politician_has_two_linked_organizations,
-                             politician_has_two_possible_organizations=politician_has_two_possible_organizations,
-                             politician_error_count=politician_error_count,
-                             status=status))
+    message_to_print = "match_politicians_to_organizations:: " \
+                       "organization_might_be_needed_count: {organization_might_be_needed_count}. " \
+                       "politician_list_count: {politician_list_count}. " \
+                       "politician_update_count: {politician_update_count}. " \
+                       "status: {status} :: ".format(
+                            organization_might_be_needed_count=organization_might_be_needed_count,
+                            politician_list_count=politician_list_count,
+                            politician_update_count=politician_update_count,
+                            status=status)
+    if positive_value_exists(politician_has_two_linked_organizations):
+        message_to_print += "politician_has_two_linked_organizations: " + \
+                            str(politician_has_two_linked_organizations) + " "
+    if positive_value_exists(politician_has_two_possible_organizations):
+        message_to_print += "politician_has_two_possible_organizations: " + \
+                            str(politician_has_two_possible_organizations) + " "
+    if positive_value_exists(politician_error_count):
+        message_to_print += "politician_error_count: " + \
+                            str(politician_error_count) + " "
+    if positive_value_exists(organizations_created_count):
+        message_to_print += "organizations_created_count: " + \
+                            str(organizations_created_count) + " "
+    if positive_value_exists(organization_creation_errors_count):
+        message_to_print += "organization_creation_errors_count: " + \
+                            str(organization_creation_errors_count) + " "
+    if positive_value_exists(len(politician_we_vote_id_update_list) > 0):
+        message_to_print += "politician_we_vote_id_update_list: " + \
+                            str(politician_we_vote_id_update_list) + " "
+    messages.add_message(request, messages.INFO, message_to_print)
 
     return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
                                 "?state_code={state_code}"

@@ -84,10 +84,18 @@ def organization_link_to_issue_view(request):
     link_manager = OrganizationLinkToIssueManager()
     if organization_linked_to_issue:
         link_result = link_manager.link_organization_to_issue(
-            organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_link)
+            organization_we_vote_id=organization_we_vote_id,
+            issue_id=issue_id,
+            issue_we_vote_id=issue_we_vote_id,
+            reason_for_link=reason_for_link,
+            issue_count_update_allowed=True)
     else:
         link_result = link_manager.unlink_organization_to_issue(
-            organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_unlink)
+            organization_we_vote_id=organization_we_vote_id,
+            issue_id=issue_id,
+            issue_we_vote_id=issue_we_vote_id,
+            reason_for_unlink=reason_for_unlink,
+            issue_count_update_allowed=True)
 
     link_issue_on_stage = {}
     organization_linked_to_issue = False
