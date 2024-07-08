@@ -372,7 +372,7 @@ def match_politicians_to_organizations_view(request):
         queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
         organization_might_be_needed_count = queryset.count()
         queryset = queryset.order_by('-politician_ultimate_election_date')
-        politician_data_list = list(queryset[:10])
+        politician_data_list = list(queryset[:1000])
         politician_list_count = len(politician_data_list)
         from politician.controllers import match_politician_to_organization
         for politician in politician_data_list:

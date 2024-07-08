@@ -1476,7 +1476,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     politician_manager = PoliticianManager()
     politician = None
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -1633,6 +1633,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_candidate_list(
         politician_we_vote_id_list=[politician.we_vote_id],
+        read_only=True,
     )
     status += results['status']
     politician_candidate_list = results['candidate_list']
@@ -1710,6 +1711,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     representative_manager = RepresentativeManager()
     results = representative_manager.retrieve_representative_list(
         politician_we_vote_id_list=[politician.we_vote_id],
+        read_only=True,
     )
     status += results['status']
     politician_representative_list = results['representative_list']

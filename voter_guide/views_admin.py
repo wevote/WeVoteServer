@@ -67,7 +67,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
     voter_manager = VoterManager()
     voter_who_submitted_name = ''
     voter_who_submitted_we_vote_id = ''
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_who_submitted_name = voter.get_full_name()
@@ -238,7 +238,7 @@ def voter_guide_create_view(request):
 
     voter_manager = VoterManager()
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_who_submitted_name = voter.get_full_name()
@@ -793,7 +793,7 @@ def voter_guide_create_process_view(request):
     voter_found = False
     if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -809,7 +809,7 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -825,7 +825,7 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_found) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -2360,7 +2360,7 @@ def voter_guide_possibility_list_process_view(request):
                         voter_manager = VoterManager()
                         generate_if_no_value = True
                         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
                         if voter_results['voter_found']:
                             voter = voter_results['voter']
                             updates['voter_who_submitted_name'] = voter.get_full_name()

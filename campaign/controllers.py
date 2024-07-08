@@ -440,7 +440,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
 
     campaignx_manager = CampaignXManager()
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -542,7 +542,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
     campaignx_error_dict = copy.deepcopy(CAMPAIGNX_ERROR_DICT)
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -869,7 +869,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
     voter_signed_in_with_email = False
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -997,7 +997,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
     }
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()

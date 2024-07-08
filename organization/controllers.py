@@ -152,7 +152,7 @@ def create_organization_from_politician(
     try:
         change_description = "Entry created from Politician: " + politician.politician_name + " "
         if not positive_value_exists(politician.political_party):
-            change_description += "Not tagged by political party (no party specified)."
+            change_description += ":: Not tagged by political party (no party specified)."
         organization_created = True
         organization_found = True
         organization_we_vote_id = organization.we_vote_id
@@ -192,9 +192,9 @@ def create_organization_from_politician(
                         issue_we_vote_id=issue_we_vote_id,
                         issue_count_update_allowed=False)
                     if link_results['success']:
-                        change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                        change_description += ":: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
                     else:
-                        change_description += "PROBLEM: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
+                        change_description += ":: PROBLEM: {issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
                     issue_analysis_admin_notes = \
                         "Auto-tagged to political party: {political_party}" \
                         "".format(political_party=politician.political_party)
@@ -208,7 +208,7 @@ def create_organization_from_politician(
                 issue_analysis_admin_notes = \
                     "Not tagged by political party: {political_party}" \
                     "".format(political_party=politician.political_party)
-                change_description += issue_analysis_admin_notes
+                change_description += ":: " + issue_analysis_admin_notes
             organization.issue_analysis_admin_notes = issue_analysis_admin_notes
             try:
                 organization.save()
@@ -563,8 +563,7 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
     voter_manager = VoterManager()
     status += "ORGANIZATION_ANALYTICS_BY_VOTER "
     if positive_value_exists(voter_device_id):
-        read_only = True
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
@@ -2961,7 +2960,8 @@ def organization_save_for_api(  # organizationSave
         return results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)  # Cannot be read_only
+    voter_results = \
+        voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)  # Cannot be read_only
     if voter_results['voter_found']:
         voter_found = True
         voter = voter_results['voter']
