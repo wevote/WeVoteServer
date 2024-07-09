@@ -99,9 +99,9 @@ def generate_localized_datetime_from_obj(timezone_name="America/Los_Angeles"):
 # convert current date to a date as integer. replaces all instances when searching for "pytz.timezone"
 #     -import function into file
 #     -replace all instances when searching "pytz.timezone" with "date_today_as_integer = get_current_date_as_integer()"
-# def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
-#     _, datetime_now = get_timezone_and_datetime_now(timezone_name)
-#     return convert_date_to_date_as_integer(datetime_now)
+def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
+    _, datetime_now = generate_localized_datetime_from_obj(timezone_name)
+    return convert_date_to_date_as_integer(datetime_now)
 
 
 def get_current_year_as_integer():
