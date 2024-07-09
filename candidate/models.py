@@ -618,7 +618,8 @@ class CandidateListManager(models.Manager):
             if politician_we_vote_id_list and len(politician_we_vote_id_list) > 0:
                 candidate_query = candidate_query.filter(politician_we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
-                candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
+                candidate_query = candidate_query.filter(
+                    Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
             if positive_value_exists(search_string):
                 # This is an "OR" search for each term, but an "AND" search across all search_words
                 for search_word in search_words:
@@ -1948,7 +1949,7 @@ class CandidateListManager(models.Manager):
             if positive_value_exists(len(google_civic_election_id_list)):
                 query = query.filter(google_civic_election_id__in=google_civic_election_id_integer_list)
             if positive_value_exists(state_code):
-                query = query.filter(state_code__iexact=state_code)
+                query = query.filter(Q(state_code__iexact=state_code) | Q(state_code__iexact='na'))
 
             link_list = list(query)
         except Exception as e:
@@ -2920,7 +2921,7 @@ class CandidateCampaign(models.Model):
     def political_party_display(self):
         return candidate_party_display(self.party)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

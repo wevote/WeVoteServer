@@ -1236,13 +1236,18 @@ class VoterManager(BaseUserManager):
         else:
             return None
 
-    def fetch_voter_we_vote_id_by_linked_organization_we_vote_id(self, linked_organization_we_vote_id):
-        results = self.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id, read_only=True)
-        if results['voter_found']:
-            voter = results['voter']
-            return voter.we_vote_id
-        else:
+    @staticmethod
+    def fetch_voter_we_vote_id_by_linked_organization_we_vote_id(linked_organization_we_vote_id):
+        if not positive_value_exists(linked_organization_we_vote_id):
             return None
+        try:
+            queryset = Voter.objects.using('readonly').filter(
+                linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
+            return we_vote_id_list[0] if we_vote_id_list else None
+        except Exception as e:
+            pass
+        return None
 
     @staticmethod
     def this_voter_has_first_or_last_name_saved(voter):
@@ -1657,7 +1662,8 @@ class VoterManager(BaseUserManager):
 
     @staticmethod
     def retrieve_voter(
-            voter_id, email='',
+            voter_id='',
+            email='',
             voter_we_vote_id='',
             twitter_request_token='',
             facebook_id=0,

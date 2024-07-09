@@ -981,13 +981,10 @@ class VoteSmartSpecialInterestGroupManager(models.Manager):
             return results
 
         we_vote_organization_manager = OrganizationManager()
-        organization_id = 0
-        organization_we_vote_id = None
         we_vote_organization_found = False
         we_vote_organization_created = False
         we_vote_organization_updated = False
-        results = we_vote_organization_manager.retrieve_organization(organization_id, organization_we_vote_id,
-                                                                     vote_smart_special_interest_group_id)
+        results = we_vote_organization_manager.retrieve_organization(vote_smart_id=vote_smart_special_interest_group_id)
 
         if results['organization_found']:
             success = True

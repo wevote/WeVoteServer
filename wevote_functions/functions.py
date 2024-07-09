@@ -322,6 +322,7 @@ NON_PARTISAN = 'NON_PARTISAN'
 PEACE_AND_FREEDOM = 'PEACE_AND_FREEDOM'
 REFORM = 'REFORM'
 REPUBLICAN = 'REPUBLICAN'
+UNAFFILIATED = 'UNAFFILIATED'
 WORKING_FAMILIES = 'WORKING_FAMILIES'
 
 LANGUAGE_CODE_ENGLISH = 'en'
@@ -637,6 +638,8 @@ def candidate_party_display(raw_party_incoming):
         return 'Republican'
     if raw_party == 'Party Preference: Republican'.lower():
         return 'Republican'
+    if raw_party == UNAFFILIATED.lower():
+        return 'Unaffiliated'
     if raw_party == 'Unknown National Party'.lower():
         return 'Party Unknown'
     if raw_party == 'none':
@@ -787,6 +790,8 @@ def convert_to_political_party_constant(raw_party_incoming):
         return REPUBLICAN
     if raw_party == 'republican party':
         return REPUBLICAN
+    if raw_party == 'unaffiliated':
+        return UNAFFILIATED
     if raw_party == 'working families':
         return WORKING_FAMILIES
     else:

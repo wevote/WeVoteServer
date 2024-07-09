@@ -33,7 +33,7 @@ class Party(models.Model):
     # for now we are not handling party_color as it is not seen in the CTCL data so far. Refer to this link for details
     # http://vip-specification.readthedocs.io/en/release/built_rst/xml/elements/party.html#multi-xml-party
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

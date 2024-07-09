@@ -177,7 +177,7 @@ class VoterGuideManager(models.Manager):
                 organization = organizations_dict[organization_we_vote_id]
                 organization_found = True
             else:
-                results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+                results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
                 if results['organization_found']:
                     organization = results['organization']
                     organizations_dict[organization_we_vote_id] = organization
@@ -353,7 +353,7 @@ class VoterGuideManager(models.Manager):
         else:
             # Retrieve the organization object so we can bring over values
             organization_manager = OrganizationManager()
-            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+            results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
             if results['organization_found']:
                 organization_found = True
                 organization = results['organization']
@@ -1176,9 +1176,8 @@ class VoterGuide(models.Model):
 
     def retrieve_organization_display_name(self):
         organization_manager = OrganizationManager()
-        organization_id = 0
         organization_we_vote_id = self.organization_we_vote_id
-        results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+        results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id, read_only=True)
         if results['organization_found']:
             organization = results['organization']
             organization_name = organization.organization_name
@@ -1190,9 +1189,8 @@ class VoterGuide(models.Model):
             return self.image_url
         elif self.voter_guide_owner_type == ORGANIZATION:
             organization_manager = OrganizationManager()
-            organization_id = 0
             organization_we_vote_id = self.organization_we_vote_id
-            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id, read_only=True)
             if results['organization_found']:
                 organization = results['organization']
                 organization_photo_url = organization.organization_photo_url()
@@ -1238,7 +1236,7 @@ class VoterGuide(models.Model):
             return
         return organization
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this voter_guide came from another source we still need a unique we_vote_id
         if self.we_vote_id:

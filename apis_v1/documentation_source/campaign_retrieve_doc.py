@@ -61,6 +61,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "is_blocked_by_we_vote": boolean,\n' \
                    '  "is_blocked_by_we_vote_reason": string,\n' \
                    '  "is_supporters_count_minimum_exceeded": boolean,\n' \
+                   '  "opposers_count": integer,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "seo_friendly_path": string,\n' \
                    '  "supporters_count": integer,\n' \

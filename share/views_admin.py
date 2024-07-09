@@ -44,7 +44,7 @@ def shared_item_list_view(request):
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
     voter_id = 0
     if results['voter_found']:
         voter = results['voter']
@@ -249,6 +249,7 @@ def shared_item_list_view(request):
     }
     return render(request, 'share/shared_item_list.html', template_values)
 
+
 @login_required
 def voter_who_shares_summary_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -266,7 +267,7 @@ def voter_who_shares_summary_list_view(request):
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
     voter_id = 0
     if results['voter_found']:
         voter = results['voter']

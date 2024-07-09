@@ -426,7 +426,7 @@ class Representative(models.Model):
     def political_party_display(self):
         return candidate_party_display(self.political_party)
 
-    # We override the save function so we can auto-generate we_vote_id
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:

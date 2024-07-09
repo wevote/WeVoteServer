@@ -12,6 +12,7 @@ from django.db.models import Q
 import wevote_functions.admin
 from candidate.models import PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
+from organization.models import Organization
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
 from wevote_functions.functions import candidate_party_display, convert_to_int, convert_to_political_party_constant, \
@@ -222,6 +223,7 @@ class Politician(models.Model):
     icpsr_id = models.CharField(verbose_name="icpsr unique identifier",
                                 max_length=200, null=True, unique=False)
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
+    opposers_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     politician_analysis_done = models.BooleanField(default=False)
@@ -327,6 +329,8 @@ class Politician(models.Model):
     politician_email = models.CharField(max_length=255, null=True, unique=False)
     politician_email2 = models.CharField(max_length=255, null=True, unique=False)
     politician_email3 = models.CharField(max_length=255, null=True, unique=False)
+    # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
+    politician_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     twitter_name = models.CharField(
         verbose_name="politician plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -347,7 +351,10 @@ class Politician(models.Model):
     date_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     profile_image_background_color_needed = models.BooleanField(null=True)
-    # We override the save function so we can auto-generate we_vote_id
+    organization_might_be_needed = models.BooleanField(default=True)
+    organization_and_manual_intervention_needed = models.BooleanField(default=False)
+
+    # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
@@ -401,6 +408,17 @@ class Politician(models.Model):
             return self.twitter_description
         else:
             return ""
+
+    def organization(self):
+        try:
+            organization = Organization.objects.using('readonly').get(politician_we_vote_id=self.we_vote_id)
+        except Organization.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("politician.organization Found multiple")
+            return
+        except Organization.DoesNotExist:
+            return
+        return organization
 
     def politician_photo_url(self):
         """

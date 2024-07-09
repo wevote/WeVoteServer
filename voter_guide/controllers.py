@@ -954,7 +954,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
     assigned_to_voter_we_vote_id = ''
     assigned_to_name = ''
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         voter_id = voter.id
@@ -1140,7 +1140,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
             organization_list_manager = OrganizationListManager()
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=possible_organization_name,
-                organization_twitter_handle=possible_organization_twitter_handle
+                organization_twitter_handle=possible_organization_twitter_handle,
+                read_only=True,
             )
             if results['organizations_found']:
                 possible_owner_of_website_organizations_list = results['organizations_list']
@@ -3190,7 +3191,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
 
     voter_manager = VoterManager()
     voter = None
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = 0
     voter_full_name = ""
     linked_organization_we_vote_id = ""
