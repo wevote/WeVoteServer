@@ -4,16 +4,16 @@
 
 from django.db import models
 from django.db.models import Q
-from django.utils.timezone import localtime, now
+from django.utils.timezone import now
 from datetime import datetime, timedelta
 from election.models import Election
 from exception.models import print_to_log
 from follow.models import FollowOrganizationList
 from organization.models import Organization
-import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, get_current_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    get_current_date_as_integer
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 ACTION_VOTER_GUIDE_VISIT = 1
@@ -93,10 +93,13 @@ ACTION_NEWS = 74
 ACTION_SHARE_ORGANIZATION = 75
 ACTION_SHARE_ORGANIZATION_ALL_OPINIONS = 76
 ACTION_VIEW_SHARED_ORGANIZATION = 77
-ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 77
+ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 78
+ACTION_ORGANIZATION_FOLLOW_DISLIKE = 79
+ACTION_ORGANIZATION_STOP_DISLIKING = 80
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
+     ACTION_ORGANIZATION_FOLLOW_DISLIKE, ACTION_ORGANIZATION_STOP_DISLIKING,
      ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_FOLLOWING,
      ACTION_ORGANIZATION_STOP_IGNORING, ACTION_VOTER_GUIDE_VISIT]
 
@@ -1142,6 +1145,7 @@ class AnalyticsManager(models.Manager):
             
             # timezone = pytz.timezone("America/Los_Angeles")
             # pacific_time_datetime_now = timezone.localize(datetime.now())
+            # pacific_time_datetime_now = generate_localized_datetime_from_obj()[1]
             # pacific_time_date_as_integer = convert_date_to_date_as_integer(pacific_time_datetime_now)
             pacific_time_date_as_integer = get_current_date_as_integer()
 
@@ -2042,6 +2046,10 @@ def display_action_constant_human_readable(action_constant):
         return "ORGANIZATION_AUTO_FOLLOW"
     if action_constant == ACTION_ORGANIZATION_FOLLOW:
         return "ORGANIZATION_FOLLOW"
+    if action_constant == ACTION_ORGANIZATION_FOLLOW_DISLIKE:
+        return "ORGANIZATION_FOLLOW_DISLIKE"
+    if action_constant == ACTION_ORGANIZATION_STOP_DISLIKING:
+        return "ORGANIZATION_STOP_DISLIKING"
     if action_constant == ACTION_ORGANIZATION_FOLLOW_IGNORE:
         return "ORGANIZATION_FOLLOW_IGNORE"
     if action_constant == ACTION_ORGANIZATION_STOP_FOLLOWING:
@@ -2140,6 +2148,7 @@ def display_action_constant_human_readable(action_constant):
 
 def fetch_action_constant_number_from_constant_string(action_constant_string):
     action_constant_string = action_constant_string.upper()
+    # Dale 2024-07-03 should this be "==" instead of "in"? Needs deeper look.
     if action_constant_string in 'ACTION_VOTER_GUIDE_VISIT':
         return 1
     if action_constant_string in 'ACTION_VOTER_GUIDE_ENTRY':
@@ -2296,4 +2305,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 77
     if action_constant_string in 'ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS':
         return 78
+    if action_constant_string in 'ACTION_ORGANIZATION_FOLLOW_DISLIKE':
+        return 79
+    if action_constant_string in 'ACTION_ORGANIZATION_STOP_DISLIKING':
+        return 80
     return 0

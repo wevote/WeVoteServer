@@ -1208,7 +1208,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -1310,7 +1310,8 @@ def voter_email_address_verify_for_api(  # voterEmailAddressVerify
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    voter_read_only = True
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -1452,6 +1453,11 @@ def voter_email_address_verify_for_api(  # voterEmailAddressVerify
             last_name = False
 
     if positive_value_exists(first_name) or positive_value_exists(last_name):
+        if voter_read_only:
+            results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+            if results['voter_found']:
+                voter = results['voter']
+                voter_read_only = False
         try:
             if positive_value_exists(first_name):
                 voter.first_name = first_name
@@ -1514,6 +1520,11 @@ def voter_email_address_verify_for_api(  # voterEmailAddressVerify
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 organization = create_results['organization']
+                if voter_read_only:
+                    results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_read_only = False
                 try:
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()
@@ -1689,7 +1700,7 @@ def voter_email_address_save_for_api(
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -1715,6 +1726,7 @@ def voter_email_address_save_for_api(
         }
         return error_results
     voter = voter_results['voter']
+    voter_read_only = True
     voter_we_vote_id = voter.we_vote_id
 
     email_manager = EmailManager()
@@ -1854,6 +1866,11 @@ def voter_email_address_save_for_api(
             # If this email is cached in a voter record, remove it as long as primary_email_we_vote_id
             # matches email_address_object.we_vote_id
             primary_email_address_deleted = False
+            if voter_read_only:
+                results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                if results['voter_found']:
+                    voter = results['voter']
+                    voter_read_only = False
             if positive_value_exists(voter.primary_email_we_vote_id) \
                     and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
                 try:
@@ -1896,7 +1913,7 @@ def voter_email_address_save_for_api(
                                     email_address_object_to_delete.delete()
                                     status += "DELETED_DUP_EMAIL_ADDRESS_IN_LIST "
                                 except Exception as e:
-                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS_IN_LIST "
+                                    status += "UNABLE_TO_DELETE_DUP_EMAIL_ADDRESS_IN_LIST: " + str(e) + " "
 
                 # If there are any other verified emails, promote the first one to be the voter's verified email
                 if positive_value_exists(primary_email_address_deleted):
@@ -1914,6 +1931,11 @@ def voter_email_address_save_for_api(
                             if positive_value_exists(
                                     email_address_object_for_promotion.email_ownership_is_verified):
                                 # Assign this as voter's new primary email
+                                if voter_read_only:
+                                    results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                                    if results['voter_found']:
+                                        voter = results['voter']
+                                        voter_read_only = False
                                 try:
                                     voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
                                     voter.email_ownership_is_verified = True
@@ -1927,6 +1949,11 @@ def voter_email_address_save_for_api(
                                         voter_manager.remove_voter_cached_email_entries_from_email_address_object(
                                             email_address_object_for_promotion)
                                     status += remove_cached_results['status']
+                                    if voter_read_only:
+                                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                                        if results['voter_found']:
+                                            voter = results['voter']
+                                            voter_read_only = False
                                     try:
                                         voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
                                         voter.email_ownership_is_verified = True
@@ -1950,6 +1977,11 @@ def voter_email_address_save_for_api(
                 if positive_value_exists(voter.primary_email_we_vote_id) \
                         and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
                     # If already the primary email, leave it but make sure to heal the data
+                    if voter_read_only:
+                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                        if results['voter_found']:
+                            voter = results['voter']
+                            voter_read_only = False
                     try:
                         voter.primary_email_we_vote_id = email_address_object.we_vote_id
                         voter.email_ownership_is_verified = True
@@ -1963,6 +1995,11 @@ def voter_email_address_save_for_api(
                             voter_manager.remove_voter_cached_email_entries_from_email_address_object(
                                 email_address_object)
                         status += remove_cached_results['status']
+                        if voter_read_only:
+                            results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                            if results['voter_found']:
+                                voter = results['voter']
+                                voter_read_only = False
                         try:
                             voter.primary_email_we_vote_id = email_address_object.we_vote_id
                             voter.email_ownership_is_verified = True
@@ -1986,6 +2023,11 @@ def voter_email_address_save_for_api(
                     status += remove_cached_results['status']
 
                     # And now, update current voter
+                    if voter_read_only:
+                        results = voter_manager.retrieve_voter(voter_id=voter_id, read_only=False)
+                        if results['voter_found']:
+                            voter = results['voter']
+                            voter_read_only = False
                     try:
                         voter.primary_email_we_vote_id = email_address_object.we_vote_id
                         voter.email_ownership_is_verified = True

@@ -54,7 +54,7 @@ from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSIN
     WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS, WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -954,7 +954,7 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
     assigned_to_voter_we_vote_id = ''
     assigned_to_name = ''
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         voter_id = voter.id
@@ -1140,7 +1140,8 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
             organization_list_manager = OrganizationListManager()
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=possible_organization_name,
-                organization_twitter_handle=possible_organization_twitter_handle
+                organization_twitter_handle=possible_organization_twitter_handle,
+                read_only=True,
             )
             if results['organizations_found']:
                 possible_owner_of_website_organizations_list = results['organizations_list']
@@ -3190,7 +3191,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
 
     voter_manager = VoterManager()
     voter = None
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = 0
     voter_full_name = ""
     linked_organization_we_vote_id = ""
@@ -4261,7 +4262,7 @@ def retrieve_voter_guides_from_friends(
             status += "EXCLUDE_PAST_ELECTION_DAYS "
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
             earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
@@ -4399,7 +4400,7 @@ def retrieve_voter_guides_from_shared_items(
             status += "EXCLUDE_PAST_ELECTION_DAYS "
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
             earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")

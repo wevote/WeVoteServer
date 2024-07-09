@@ -35,7 +35,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ST
     convert_to_political_party_constant, \
     extract_first_name_from_full_name, \
     extract_last_name_from_full_name, extract_state_from_ocd_division_id
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
@@ -487,7 +487,7 @@ def representative_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         for one_representative in representative_list:
             one_politician = politician_dict_list.get(one_representative.politician_we_vote_id)
             if one_politician and positive_value_exists(one_politician.seo_friendly_path):
@@ -593,7 +593,7 @@ def representative_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False

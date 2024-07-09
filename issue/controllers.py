@@ -1371,7 +1371,7 @@ def retrieve_organization_preview_list(issue_we_vote_id):
         organization_we_vote_id_list = results['organization_we_vote_id_list']
         from organization.models import Organization
         try:
-            organization_queryset = Organization.objects.all()
+            organization_queryset = Organization.objects.using('readonly').all()
             organization_queryset = organization_queryset.filter(we_vote_id__in=organization_we_vote_id_list)
             organization_queryset = organization_queryset.order_by('-twitter_followers_count')
             organization_list = organization_queryset[:5]

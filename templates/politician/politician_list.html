@@ -129,7 +129,11 @@
             </td>
             <td>
                 <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   class="u-no-break"
                    target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% if politician.political_party %}
+                    <span style="color: #999;">({{ politician.political_party }})</span>
+                {% endif %}
                 {% if politician.seo_friendly_path %}
                     <br />
                     <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-"
@@ -183,6 +187,7 @@
                 {% if politician.politician_phone_number %}{{ politician.politician_phone_number }}&nbsp;{% endif %}
                 {% if politician.politician_phone_number2 %}{{ politician.politician_phone_number2 }}&nbsp;{% endif %}
                 {% if politician.politician_phone_number3 %}{{ politician.politician_phone_number3 }}&nbsp;{% endif %}
+                {% if politician.politician_ultimate_election_date %}<span style="color: #999;">{{ politician.politician_ultimate_election_date }}</span>&nbsp;{% endif %}
             </td>
             <td>
                 {% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}

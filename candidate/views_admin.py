@@ -60,7 +60,7 @@ from wevote_functions.functions import convert_to_int, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, \
-    get_current_year_as_integer, get_timezone_and_datetime_now
+    get_current_year_as_integer, generate_localized_datetime_from_obj
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -744,7 +744,7 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         seo_friendly_path_missing = 0
         update_list = []
         updates_needed = False
@@ -817,7 +817,7 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False
@@ -1319,7 +1319,7 @@ def candidate_list_view(request):
             batch_manager = BatchManager()
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            timezone, datetime_now = get_timezone_and_datetime_now()
+            timezone, datetime_now = generate_localized_datetime_from_obj()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                 if date_of_election > datetime_now:
@@ -2645,7 +2645,7 @@ def candidate_change_names(changes):
             setattr(candidate, 'candidate_name', change['name_after'])
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
             count += 1

@@ -878,7 +878,7 @@ def campaign_list_view(request):
 
         politician_list_by_campaignx_we_vote_id = {}
         if len(politician_we_vote_id_list) > 0:
-            queryset = Politician.objects.all()
+            queryset = Politician.objects.using('readonly').all()
             queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
             politician_list = list(queryset)
             for one_politician in politician_list:
@@ -1010,7 +1010,7 @@ def campaign_list_view(request):
                         campaignx_owner.order_in_list = new_order
                         campaignx_owner.save()
 
-    campaignx_list_query = CampaignX.objects.all()
+    campaignx_list_query = CampaignX.objects.using('readonly').all()
     if positive_value_exists(hide_campaigns_not_visible_yet):
         campaignx_list_query = campaignx_list_query.filter(
             Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
@@ -1051,7 +1051,7 @@ def campaign_list_view(request):
         campaignx_list_query = campaignx_list_query.filter(
             we_vote_id__in=campaignx_we_vote_id_list_from_owner_organization_we_vote_id)
 
-    client_list_query = Organization.objects.all()
+    client_list_query = Organization.objects.using('readonly').all()
     client_list_query = client_list_query.filter(chosen_feature_package__isnull=False)
     client_organization_list = list(client_list_query)
 
@@ -1138,7 +1138,8 @@ def campaign_list_view(request):
     for campaignx in campaignx_list:
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
             campaignx_we_vote_id_list=[campaignx.we_vote_id],
-            viewer_is_owner=True)
+            viewer_is_owner=True,
+            read_only=True)
         campaignx.chip_in_total = StripeManager.retrieve_chip_in_total('', campaignx.we_vote_id)
         modified_campaignx_list.append(campaignx)
         if positive_value_exists(campaignx.linked_politician_we_vote_id):
@@ -1146,7 +1147,7 @@ def campaign_list_view(request):
 
     if len(politician_we_vote_id_list) > 0:
         modified_campaignx_list2 = []
-        queryset = Politician.objects.all()
+        queryset = Politician.objects.using('readonly').all()
         queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
         politician_list = list(queryset)
         for campaignx in modified_campaignx_list:

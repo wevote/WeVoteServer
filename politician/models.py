@@ -223,6 +223,7 @@ class Politician(models.Model):
     icpsr_id = models.CharField(verbose_name="icpsr unique identifier",
                                 max_length=200, null=True, unique=False)
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
+    opposers_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     politician_analysis_done = models.BooleanField(default=False)
@@ -351,6 +352,7 @@ class Politician(models.Model):
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     profile_image_background_color_needed = models.BooleanField(null=True)
     organization_might_be_needed = models.BooleanField(default=True)
+    organization_and_manual_intervention_needed = models.BooleanField(default=False)
 
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

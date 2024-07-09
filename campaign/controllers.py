@@ -7,7 +7,6 @@ from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, 
     FINAL_ELECTION_DATE_COOL_DOWN
 import base64
 import copy
-from datetime import datetime, timedelta
 from django.contrib import messages
 from django.db.models import Q
 from image.controllers import cache_image_object_to_aws, create_resized_images
@@ -18,11 +17,10 @@ import re
 from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response
 from candidate.models import CandidateCampaign
 from position.models import OPPOSE, SUPPORT
-import pytz
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer, get_current_date_as_integer
+from wevote_functions.functions_date import generate_date_as_integer, get_current_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -56,6 +54,7 @@ CAMPAIGNX_ERROR_DICT = {
     'latest_campaignx_supporter_endorsement_list': [],
     'latest_campaignx_supporter_list': [],
     'linked_politician_we_vote_id': '',
+    'opposers_count': 0,
     'order_in_list': 0,
     'seo_friendly_path': '',
     'seo_friendly_path_list': [],
@@ -439,7 +438,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
 
     campaignx_manager = CampaignXManager()
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -541,7 +540,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
     campaignx_error_dict = copy.deepcopy(CAMPAIGNX_ERROR_DICT)
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -868,7 +867,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
     voter_signed_in_with_email = False
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -996,7 +995,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
     }
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_signed_in_with_email = voter.signed_in_with_email()
@@ -1295,8 +1294,10 @@ def create_campaignx_supporters_from_positions(
     success = True
     # timezone = pytz.timezone("America/Los_Angeles")
     # datetime_now = timezone.localize(datetime.now())
+    # datetime_now = generate_localized_datetime_from_obj()[1]
     # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
     date_today_as_integer = get_current_date_as_integer()
+
     voter_we_vote_id_list = []  # Must be signed in to create a campaignx_supporter entry from friends_only_positions
 
     if positive_value_exists(friends_only_positions):
@@ -1512,6 +1513,7 @@ def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_w
         from representative.models import Representative
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
+        # datetime_now = generate_localized_datetime_from_obj()[1]
         # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
         date_today_as_integer = get_current_date_as_integer()
 
@@ -1571,7 +1573,7 @@ def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_w
                     politician_bulk_updates_made += 1
         if len(politician_bulk_update_list) > 0:
             try:
-                Politician.objects.bulk_update(politician_bulk_update_list, ['supporters_count'])
+                Politician.objects.bulk_update(politician_bulk_update_list, ['opposers_count', 'supporters_count'])
                 update_message += \
                     "{politician_bulk_updates_made:,} Politician entries updated with fresh supporters_count, " \
                     "".format(politician_bulk_updates_made=politician_bulk_updates_made)
@@ -2015,8 +2017,9 @@ def generate_campaignx_dict_from_campaignx_object(
             campaignx_we_vote_id=campaignx.we_vote_id,
         )
 
-    latest_campaignx_supporter_endorsement_list = []
-    latest_campaignx_supporter_list = []
+    latest_campaignx_supporter_endorsement_list = []  # Latest supporters with comments
+    latest_campaignx_supporter_list = []  # Latest supporters with or without comments
+    latest_position_dict_list = []  # DALE 2024-07-06 I don't know if we want to bring this in here
     supporters_count_next_goal = 0
     voter_campaignx_supporter_dict = {}
     # Only retrieve news items if NOT linked to a politician
@@ -2091,7 +2094,8 @@ def generate_campaignx_dict_from_campaignx_object(
                 }
                 latest_campaignx_supporter_list.append(one_supporter_dict)
 
-        # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
+        # Get most recent supporter_endorsements which include written endorsement
+        # (require_supporter_endorsement == True)
         supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
             campaignx_we_vote_id=campaignx.we_vote_id,
             limit=10,
@@ -2170,6 +2174,7 @@ def generate_campaignx_dict_from_campaignx_object(
         'latest_campaignx_supporter_endorsement_list':  latest_campaignx_supporter_endorsement_list,
         'latest_campaignx_supporter_list':  latest_campaignx_supporter_list,
         'linked_politician_we_vote_id':     campaignx.linked_politician_we_vote_id,
+        'opposers_count':                   campaignx.opposers_count,
         'order_in_list':                    order_in_list,
         'profile_image_background_color':   campaignx.profile_image_background_color,
         'seo_friendly_path':                campaignx.seo_friendly_path,
@@ -2858,6 +2863,7 @@ def delete_campaignx_supporters_after_positions_removed(
     success = True
     # timezone = pytz.timezone("America/Los_Angeles")
     # datetime_now = timezone.localize(datetime.now())
+    # datetime_now = generate_localized_datetime_from_obj()[1]
     # date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
     date_today_as_integer = get_current_date_as_integer()
     update_message = ''

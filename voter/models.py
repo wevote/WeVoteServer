@@ -28,7 +28,7 @@ from sms.models import SMSManager
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import extract_state_code_from_address_string, convert_to_int, generate_random_string, \
     generate_voter_device_id, get_voter_api_device_id, positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 from wevote_settings.models import fetch_next_we_vote_id_voter_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1236,13 +1236,18 @@ class VoterManager(BaseUserManager):
         else:
             return None
 
-    def fetch_voter_we_vote_id_by_linked_organization_we_vote_id(self, linked_organization_we_vote_id):
-        results = self.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id, read_only=True)
-        if results['voter_found']:
-            voter = results['voter']
-            return voter.we_vote_id
-        else:
+    @staticmethod
+    def fetch_voter_we_vote_id_by_linked_organization_we_vote_id(linked_organization_we_vote_id):
+        if not positive_value_exists(linked_organization_we_vote_id):
             return None
+        try:
+            queryset = Voter.objects.using('readonly').filter(
+                linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
+            return we_vote_id_list[0] if we_vote_id_list else None
+        except Exception as e:
+            pass
+        return None
 
     @staticmethod
     def this_voter_has_first_or_last_name_saved(voter):
@@ -1657,7 +1662,8 @@ class VoterManager(BaseUserManager):
 
     @staticmethod
     def retrieve_voter(
-            voter_id, email='',
+            voter_id='',
+            email='',
             voter_we_vote_id='',
             twitter_request_token='',
             facebook_id=0,
@@ -4001,7 +4007,7 @@ class VoterDeviceLinkManager(models.Manager):
                     # We have an existing secret code. Verify it is still valid.
                     # timezone = pytz.timezone("America/Los_Angeles")
                     # datetime_now = timezone.localize(datetime.now())
-                    datetime_now = get_timezone_and_datetime_now()[1]
+                    datetime_now = generate_localized_datetime_from_obj()[1]
                     secret_code_is_stale_duration = timedelta(days=1)
                     secret_code_is_stale_date = voter_device_link.date_secret_code_generated + \
                         secret_code_is_stale_duration
@@ -4233,7 +4239,7 @@ class VoterDeviceLinkManager(models.Manager):
                         # We have an existing secret code. Verify it is still valid.
                         # timezone = pytz.timezone("America/Los_Angeles")
                         # datetime_now = timezone.localize(datetime.now())
-                        datetime_now = get_timezone_and_datetime_now()[1]
+                        datetime_now = generate_localized_datetime_from_obj()[1]
                         secret_code_is_stale_duration = timedelta(days=1)
                         secret_code_is_stale_date = voter_device_link.date_secret_code_generated + \
                             secret_code_is_stale_duration

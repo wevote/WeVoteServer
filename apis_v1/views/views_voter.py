@@ -1355,7 +1355,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     if merge_two_accounts:
         voter_manager = VoterManager()
         # voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-        from_voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        from_voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
         if not from_voter_results['success']:
             status += from_voter_results['status']
             success = False

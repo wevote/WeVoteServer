@@ -1527,10 +1527,12 @@ def organization_edit_process_view(request):
         else:
             # Create new
             # But first double-check that we don't have an org entry already
-            organization_email = ''
             organization_list_manager = OrganizationListManager()
             results = organization_list_manager.organization_search_find_any_possibilities(
-                organization_name, organization_twitter_handle, organization_website, organization_email)
+                organization_name=organization_name,
+                organization_twitter_handle=organization_twitter_handle,
+                organization_website=organization_website,
+                read_only=True)
 
             if results['organizations_found']:
                 organizations_list = results['organizations_list']
@@ -1738,7 +1740,6 @@ def organization_edit_process_view(request):
     # Link the selected issues with organization and delete any links that were unselected
     link_issue_list_manager = OrganizationLinkToIssueList()
     link_issue_manager = OrganizationLinkToIssueManager()
-    issue_id = 0
 
     organization_follow_issues_we_vote_id_list_prior_to_update = link_issue_list_manager.\
         fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_we_vote_id)
@@ -1750,15 +1751,20 @@ def organization_edit_process_view(request):
                 organization_follow_issues_we_vote_id_list_prior_to_update.remove(issue_we_vote_id)
             else:
                 # If here, this is a new issue link
-                link_issue_manager.link_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
-                link_issue_changed = True
+                link_issue_manager.link_organization_to_issue(
+                    organization_we_vote_id=organization_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                    issue_count_update_allowed=True)
                 change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
     # this check necessary when, organization has issues linked previously, but all the
     # issues are unchecked
     if positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):
         # If a previously linked issue was NOT on the complete list of issues taken in above, unlink those issues
         for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
-            link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
+            link_issue_manager.unlink_organization_to_issue(
+                organization_we_vote_id=organization_we_vote_id,
+                issue_we_vote_id=issue_we_vote_id,
+                issue_count_update_allowed=True)
             change_description += "{issue_we_vote_id} REMOVE ".format(issue_we_vote_id=issue_we_vote_id)
     if issue_analysis_done_changed:
         if issue_analysis_done:
