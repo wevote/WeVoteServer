@@ -49,7 +49,7 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, get_timezone_and_datetime_now
+    convert_we_vote_date_string_to_date_as_integer, generate_localized_datetime_from_obj
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
@@ -722,7 +722,7 @@ def politician_list_view(request):
         updates_made = 0
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         for one_politician in politician_list_to_convert:
             results = politician_manager.generate_seo_friendly_path(
                 politician_name=one_politician.politician_name,
@@ -771,7 +771,7 @@ def politician_list_view(request):
         updates_made = 0
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         for one_politician in politician_list_to_convert:
             results = generate_campaignx_for_politician(
                 datetime_now=datetime_now,
@@ -2248,7 +2248,7 @@ def politician_change_gender_id_view(changes):
                         logger.error('politician_change_gender_id gender_likelihood caught: ', err)
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             setattr(politician, 'date_last_changed', datetime_now)
             politician.save()
             count += 1
@@ -2327,7 +2327,7 @@ def politician_change_names(changes):
             setattr(politician, 'politician_name', change['name_after'])
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             setattr(politician, 'date_last_changed', datetime_now)
             politician.save()
             count += 1

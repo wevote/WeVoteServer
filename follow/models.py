@@ -12,7 +12,7 @@ from organization.models import OrganizationManager
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import generate_localized_datetime_from_obj
 from voter.models import VoterManager
 
 
@@ -656,9 +656,8 @@ class FollowMetricsManager(models.Manager):
                 if election_result['election_found']:
                     election = election_result['election']
                     if positive_value_exists(election.election_day_text):
-                        # timezone = pytz.timezone("America/Los_Angeles")
-                        # date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
-                        date_of_election = get_timezone_and_datetime_now(election.election_day_text, "%Y-%m-%d")[1]
+                        timezone = pytz.timezone("America/Los_Angeles")
+                        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                         date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
                         # Find all the follow entries before or on the day of the election
                         count_query = count_query.filter(date_last_changed__lte=date_of_election)
@@ -695,7 +694,7 @@ class FollowMetricsManager(models.Manager):
 
                 # pst_timezone = pytz.timezone("America/Los_Angeles")
                 # date_start_pst = pst_timezone.localize(datetime_start)
-                date_start_pst = get_timezone_and_datetime_now()[1]
+                date_start_pst = generate_localized_datetime_from_obj()[1]
                 date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
                 count_query = count_query.filter(date_last_changed__range=(date_start_pst, date_end_pst))
             elif positive_value_exists(count_through_this_date_as_integer):
