@@ -346,17 +346,6 @@ def match_politicians_to_organizations_view(request):
     state_code = request.GET.get('state_code', '')
     status = ''
 
-    organization_might_be_needed_count = 0
-    organizations_created_count = 0
-    organization_creation_errors_count = 0
-    politician_error_count = 0
-    politician_has_two_linked_organizations = 0
-    politician_has_two_possible_organizations = 0
-    politician_list_count = 0
-    politician_update_count = 0
-    politician_we_vote_id_update_list = []
-    update_list = []
-
     voter_device_id = get_voter_api_device_id(request)
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     if hasattr(voter, 'last_name'):
@@ -366,38 +355,22 @@ def match_politicians_to_organizations_view(request):
         changed_by_name = ""
         changed_by_voter_we_vote_id = ''
 
-    try:
-        queryset = Politician.objects.all()
-        queryset = queryset.filter(organization_might_be_needed=True)
-        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
-        organization_might_be_needed_count = queryset.count()
-        queryset = queryset.order_by('-politician_ultimate_election_date')
-        politician_data_list = list(queryset[:1000])
-        politician_list_count = len(politician_data_list)
-        from politician.controllers import match_politician_to_organization
-        for politician in politician_data_list:
-            results = match_politician_to_organization(
-                changed_by_name=changed_by_name,
-                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
-                politician=politician)
-            if results['politician_updated']:
-                update_list.append(results['politician'])
-                politician_we_vote_id_update_list.append(politician.we_vote_id)
-            else:
-                pass
-            organizations_created_count += 1 if results['organization_created'] else 0
-            organization_creation_errors_count += 1 if results['organization_creation_error'] else 0
-            politician_error_count += 1 if results['politician_error'] else 0
-            politician_has_two_linked_organizations += 1 if results['politician_has_two_linked_organizations'] else 0
-            politician_has_two_possible_organizations += \
-                1 if results['politician_has_two_possible_organizations'] else 0
-            politician_update_count += 1 if results['politician_updated'] else 0
+    from politician.controllers import match_politicians_to_organizations
+    results = match_politicians_to_organizations(
+        changed_by_name=changed_by_name,
+        changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+        number_of_politicians_to_match=1000,
+        state_code=state_code)
 
-        if politician_update_count > 0:
-            Politician.objects.bulk_update(update_list, ['organization_might_be_needed'])
-
-    except Exception as e:
-        status += "GENERAL_ERROR: " + str(e) + " "
+    organizations_created_count = results['organizations_created_count']
+    organization_creation_errors_count = results['organization_creation_errors_count']
+    organization_might_be_needed_count = results['organization_might_be_needed_count']
+    politician_error_count = results['politician_error_count']
+    politician_has_two_linked_organizations = results['politician_has_two_linked_organizations']
+    politician_has_two_possible_organizations = results['politician_has_two_possible_organizations']
+    politician_list_count = results['politician_list_count']
+    politician_update_count = results['politician_update_count']
+    politician_we_vote_id_update_list = results['politician_we_vote_id_update_list']
 
     message_to_print = "match_politicians_to_organizations:: " \
                        "organization_might_be_needed_count: {organization_might_be_needed_count}. " \
@@ -983,20 +956,29 @@ def politician_list_view(request):
         pass
 
     # Attach candidates linked to these politicians
-    temp_politician_list = []
-    for one_politician in politician_list:
-        try:
-            linked_candidate_query = CandidateCampaign.objects.using('readonly').all()
-            linked_candidate_query = linked_candidate_query.filter(
-                Q(politician_we_vote_id__iexact=one_politician.we_vote_id) |
-                Q(politician_id=one_politician.id))
-            linked_candidate_list_count = linked_candidate_query.count()
-            one_politician.linked_candidate_list_count = linked_candidate_list_count
-            temp_politician_list.append(one_politician)
-        except Exception as e:
-            pass
+    # temp_politician_list = []
+    # for one_politician in politician_list:
+    #     try:
+    #         linked_candidate_query = CandidateCampaign.objects.using('readonly').all()
+    #         linked_candidate_query = linked_candidate_query.filter(
+    #             Q(politician_we_vote_id__iexact=one_politician.we_vote_id) |
+    #             Q(politician_id=one_politician.id))
+    #         linked_candidate_list_count = linked_candidate_query.count()
+    #         one_politician.linked_candidate_list_count = linked_candidate_list_count
+    #         temp_politician_list.append(one_politician)
+    #     except Exception as e:
+    #         pass
+    #
+    # politician_list = temp_politician_list
 
-    politician_list = temp_politician_list
+    # ###############################
+    # Count the number of Politicians who need an organization to be generated
+    queryset = Politician.objects.using('readonly').all()
+    queryset = queryset.filter(organization_might_be_needed=True)
+    queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    organization_might_be_needed_count = queryset.count()
 
     # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
     if show_related_candidates:
@@ -1108,11 +1090,12 @@ def politician_list_view(request):
     else:
         web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
-        'messages_on_stage':            messages_on_stage,
+        'election_list':                election_list,
         'google_civic_election_id':     google_civic_election_id,
+        'messages_on_stage':            messages_on_stage,
+        'organization_might_be_needed_count':   organization_might_be_needed_count,
         'politician_list':              politician_list,
         'politician_search':            politician_search,
-        'election_list':                election_list,
         'show_all':                     show_all,
         'show_battleground':            show_battleground,
         'show_politicians_with_email':  show_politicians_with_email,

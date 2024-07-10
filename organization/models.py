@@ -3190,7 +3190,7 @@ class Organization(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     organization_name = models.CharField(
-        verbose_name="organization name", max_length=255, null=False, blank=False)
+        verbose_name="organization name", max_length=255, null=False, db_index=True)
     most_recent_name_update_from_voter_first_and_last = models.BooleanField(default=False)
     organization_website = models.TextField(verbose_name='url of the endorsing organization', null=True)
     organization_email = models.EmailField(
@@ -3199,7 +3199,7 @@ class Organization(models.Model):
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,
-                                         null=True, blank=True)
+                                         null=True, db_index=True)
     # The vote_smart special interest group sigId for this organization
     vote_smart_id = models.BigIntegerField(
         verbose_name="vote smart special interest group id", null=True, blank=True, unique=True)
@@ -3213,7 +3213,7 @@ class Organization(models.Model):
     organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
-    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
 
     # Facebook session information
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
@@ -3232,7 +3232,7 @@ class Organization(models.Model):
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
-        verbose_name='organization twitter username', max_length=255, null=True, unique=False)
+        verbose_name='organization twitter username', max_length=255, null=True, unique=False, db_index=True)
     # organization_twitter_handle2 = models.CharField(
     #     verbose_name='organization twitter screen_name2', max_length=255, null=True, unique=False)
     organization_twitter_updates_failing = models.BooleanField(default=False)
@@ -3255,7 +3255,7 @@ class Organization(models.Model):
 
     # Instagram
     organization_instagram_handle = models.CharField(
-        verbose_name='organization instagram username', max_length=255, null=True, unique=False)
+        verbose_name='organization instagram username', max_length=255, null=True, unique=False, db_index=True)
     instagram_followers_count = models.IntegerField(null=True, blank=True)
 
     # Which organization image is currently active?

@@ -1516,7 +1516,7 @@ def batch_process_system_toggle_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
+    # Ex/ ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
     kind_of_process = request.GET.get('kind_of_process', '')
 
     from wevote_settings.models import WeVoteSettingsManager
@@ -1531,6 +1531,8 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_system_representatives_on'
     elif kind_of_process == 'CALCULATE_ANALYTICS':
         setting_name = 'batch_process_system_calculate_analytics_on'
+    elif kind_of_process == 'GENERAL_MAINTENANCE':
+        setting_name = 'batch_process_system_general_maintenance_on'
     elif kind_of_process == 'GENERATE_VOTER_GUIDES':
         setting_name = 'batch_process_system_generate_voter_guides_on'
     elif kind_of_process == 'SEARCH_TWITTER':
@@ -1545,7 +1547,7 @@ def batch_process_system_toggle_view(request):
         we_vote_setting.boolean_value = not we_vote_setting.boolean_value
         we_vote_setting.save()
     else:
-        messages.add_message(request, messages.ERROR, "CANNOT_FIND_WE_VOTE_SETTING-batch_process_system_on")
+        messages.add_message(request, messages.ERROR, "CANNOT_FIND_WE_VOTE_SETTING-" + str(setting_name))
 
     url_variables = pass_through_batch_list_incoming_variables(request)
     return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) + url_variables)
@@ -1687,6 +1689,9 @@ def batch_process_list_view(request):
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
             elif kind_of_processes_to_show == "GENERATE_VOTER_GUIDES":
                 processes = ['GENERATE_VOTER_GUIDES']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS":
+                processes = ['MATCH_POLITICIANS_TO_ORGANIZATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
             elif kind_of_processes_to_show == "REPRESENTATIVES":
                 processes = ['RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS']
@@ -1892,7 +1897,8 @@ def batch_process_list_view(request):
 
     from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
         fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
-        fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_generate_voter_guides_on, \
+        fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_general_maintenance_on, \
+        fetch_batch_process_system_generate_voter_guides_on, \
         fetch_batch_process_system_representatives_on, fetch_batch_process_system_search_twitter_on, \
         fetch_batch_process_system_update_twitter_on
 
@@ -1936,6 +1942,7 @@ def batch_process_list_view(request):
         'batch_process_system_api_refresh_on':          fetch_batch_process_system_api_refresh_on(),
         'batch_process_system_ballot_items_on':         fetch_batch_process_system_ballot_items_on(),
         'batch_process_system_calculate_analytics_on':  fetch_batch_process_system_calculate_analytics_on(),
+        'batch_process_system_general_maintenance_on': fetch_batch_process_system_general_maintenance_on(),
         'batch_process_system_generate_voter_guides_on': fetch_batch_process_system_generate_voter_guides_on(),
         'batch_process_system_representatives_on':      fetch_batch_process_system_representatives_on(),
         'batch_process_system_search_twitter_on':       fetch_batch_process_system_search_twitter_on(),

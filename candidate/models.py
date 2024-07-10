@@ -2523,10 +2523,10 @@ class CandidateCampaign(models.Model):
     # Which office held is this candidate running for?
     office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
-    politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
+    politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, db_index=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
-        verbose_name="we vote politician id", max_length=255, null=True, blank=True, db_index=True)
+        verbose_name="we vote politician id", max_length=255, null=True, db_index=True)
     candidate_analysis_done = models.BooleanField(default=False)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
