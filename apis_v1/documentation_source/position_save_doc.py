@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/position_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def position_save_doc_template_values(url_root):
     """
@@ -200,7 +200,7 @@ def position_save_doc_template_values(url_root):
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
                    '  "more_info_url": string,\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '}'
 
     template_values = {

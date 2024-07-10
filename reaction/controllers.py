@@ -9,6 +9,7 @@ import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -201,8 +202,8 @@ def reaction_like_status_retrieve_for_api(voter_device_id, liked_item_we_vote_id
             status += "REACTION_LIKE_LIST_RETRIEVE "
             for reaction_like in reaction_like_object_list:
                 reaction_like_dict = {
-                    'date_last_changed':            reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
-                    'last_updated':                 reaction_like.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+                    'date_last_changed':            reaction_like.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                    'last_updated':                 reaction_like.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
                     'activity_tidbit_we_vote_id':   reaction_like.activity_tidbit_we_vote_id,
                     'liked_item_we_vote_id':        reaction_like.liked_item_we_vote_id,
                     'voter_display_name':           reaction_like.voter_display_name,

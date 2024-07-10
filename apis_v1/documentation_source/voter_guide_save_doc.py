@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/voter_guide_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def voter_guide_save_doc_template_values(url_root):
     """
@@ -62,7 +62,7 @@ def voter_guide_save_doc_template_values(url_root):
                    '(We Vote ID for the person that owns the voter guide),\n' \
                    '  "voter_guide_image_url_tiny": string ' \
                    '(We Vote ID for the person that owns the voter guide),\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "twitter_description": string,\n' \
                    '  "twitter_followers_count": integer,\n' \

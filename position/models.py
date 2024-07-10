@@ -29,6 +29,7 @@ from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vo
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 from wevote_settings.models import fetch_next_we_vote_id_position_integer, fetch_site_unique_id_prefix
 
 
@@ -3513,7 +3514,7 @@ class PositionListManager(models.Manager):
                 politician_we_vote_id = position.politician_we_vote_id \
                     if positive_value_exists(position.politician_we_vote_id) else ''
                 try:
-                    date_last_changed = position.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                    date_last_changed = position.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += 'VOTER_POSITION_DATE_LAST_CHANGED_FAILED: ' + str(e) + ' '
                     date_last_changed = ''

@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/position_list_for_voter_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def position_list_for_voter_doc_template_values(url_root):
     """
@@ -124,7 +124,7 @@ def position_list_for_voter_doc_template_values(url_root):
                    '     "is_information_only": boolean,\n' \
                    '     "kind_of_ballot_item": string, ' \
                    '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
-                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '     "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '     "more_info_url": string,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "position_ultimate_election_date": integer,\n' \

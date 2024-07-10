@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/quick_info_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def quick_info_retrieve_doc_template_values(url_root):
     """
@@ -53,7 +53,7 @@ def quick_info_retrieve_doc_template_values(url_root):
                    '  "ballot_item_display_name": string,\n' \
                    '  "more_info_url": string,\n' \
                    '  "more_info_credit_text": string,\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '  "last_editor_we_vote_id": string,\n' \
                    '  "office_we_vote_id": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \

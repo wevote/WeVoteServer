@@ -34,7 +34,7 @@ from wevote_functions.functions import candidate_party_display, convert_to_int, 
     generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, generate_date_as_integer, \
-    get_timezone_and_datetime_now
+    get_timezone_and_datetime_now, DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1879,7 +1879,7 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
         for one_field in character_to_datetime_fields:
             if one_field in one_politician and positive_value_exists(one_politician[one_field]):
                 updated_politician_values[one_field] = \
-                    datetime.strptime(one_politician[one_field], '%Y-%m-%d %H:%M:%S')
+                    datetime.strptime(one_politician[one_field], DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
             else:
                 updated_politician_values[one_field] = None
         for one_field in integer_fields:

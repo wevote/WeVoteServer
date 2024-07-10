@@ -15,6 +15,7 @@ import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.models import RetrieveTableState
 from wevote_functions.functions import positive_value_exists, convert_to_int, get_voter_api_device_id
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -253,7 +254,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         success = False
         row_id = ''
 
-    started_txt = started.strftime('%Y-%m-%d %H:%M:%S') if started else ""
+    started_txt = started.strftime(DATE_FORMAT_YMD_HMS) if started else "" # '%Y-%m-%d %H:%M:%S'
     results = {
         'status': status,
         'success': success,
