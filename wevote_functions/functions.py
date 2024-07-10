@@ -16,6 +16,7 @@ from django.core.validators import URLValidator
 from nameparser import HumanName
 from nameparser.config import CONSTANTS
 import wevote_functions.admin
+from wevote_functions.functions_date import DATE_FORMAT_A_DBY_HMS_GMT
 CONSTANTS.string_format = "{title} {first} {middle} \"{nickname}\" {last} {suffix}"
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
@@ -1443,7 +1444,7 @@ def set_cookie(response, cookie_name, cookie_value, days_expire=None):
     else:
         max_age = days_expire * 24 * 60 * 60
     expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
-                                         "%a, %d-%b-%Y %H:%M:%S GMT")
+                                         DATE_FORMAT_A_DBY_HMS_GMT) # "%a, %d-%b-%Y %H:%M:%S GMT"
     response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires, path="/")
 
 
