@@ -33,7 +33,9 @@
                 Repair OCD ID Mismatches</a>,
             <a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a>
         </li>
-        <li><a href="{% url 'politician:match_politicians_to_organizations' %}" >Match Politicians to Organizations</a></li>
+    {% if organization_might_be_needed_count %}
+        <li><a href="{% url 'politician:match_politicians_to_organizations' %}" >Match Politicians to Organizations{% if organization_might_be_needed_count %} ({{ organization_might_be_needed_count|intcomma }}){% endif %}</a></li>
+    {% endif %}
         <li><a href="{% url 'politician:update_profile_image_background_color' %}" >Update 5,000 Politicians' background colors &#40;may take 10 minutes&#41;</a></li>
     </ul>
 
@@ -101,7 +103,7 @@
             <th>Twitter Handle</th>
             <th>Email(s)</th>
             <th>Website(s)</th>
-            <th>Candidates Linked</th>
+{#            <th>Candidates Linked</th>#}
         {% if show_related_candidates %}
             <th>Related Candidates?</th>
         {% endif %}
@@ -200,7 +202,7 @@
                 {% if politician.facebook_url3 %}<br /><a href="{{ politician.facebook_url3 }}" target="_blank">{{ politician.facebook_url3 }}</a>{% endif %}
             {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=politician %}
             </td>
-            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
+{#            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>#}
         {% if show_related_candidates %}
             <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
         {% endif %}

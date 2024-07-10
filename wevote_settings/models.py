@@ -291,6 +291,24 @@ def fetch_batch_process_system_calculate_analytics_on():
         return False
 
 
+def fetch_batch_process_system_general_maintenance_on():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(
+        'batch_process_system_general_maintenance_on', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='batch_process_system_general_maintenance_on',
+                setting_value=True,
+                value_type=WeVoteSetting.BOOLEAN)
+            return results['success']
+    else:
+        return False
+
+
 def fetch_batch_process_system_generate_voter_guides_on():
     we_vote_settings_manager = WeVoteSettingsManager()
     results = \

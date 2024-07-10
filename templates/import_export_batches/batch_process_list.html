@@ -13,15 +13,22 @@
 </h1>
 {% if not batch_process_system_activity_notices_on or not batch_process_system_api_refresh_on or not batch_process_system_ballot_items_on or not batch_process_system_representatives_on or not batch_process_system_calculate_analytics_on or not batch_process_system_generate_voter_guides_on or not batch_process_system_search_twitter_on or not batch_process_system_update_twitter_on %}
 <h2>
-PROCESSING TURNED OFF:
+OFF:
     {% if not batch_process_system_activity_notices_on %} <span style="color: darkred;">[Activity]</span>{% endif %}
-    {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh]</span>{% endif %}
+    {% if not batch_process_system_api_refresh_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[API Refresh]</span>{% endif %}
     {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item]</span>{% endif %}
     {% if not batch_process_system_representatives_on %} <span style="color: darkred;">[Representatives]</span>{% endif %}
-    {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics]</span>{% endif %}
-    {% if not batch_process_system_generate_voter_guides_on %} <span style="color: darkred;">[Generate Voter Guides]</span>{% endif %}
-    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Searching]</span>{% endif %}
-    {% if not batch_process_system_update_twitter_on %} <span style="color: darkred;">[Twitter Updates]</span>{% endif %}
+    {% if not batch_process_system_calculate_analytics_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Analytics]</span>{% endif %}
+    {% if not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[General Maintenance]</span>{% endif %}
+    {% if not batch_process_system_generate_voter_guides_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Generate Voter Guides]</span>{% endif %}
+    {% if not batch_process_system_search_twitter_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Twitter Searching]</span>{% endif %}
+    {% if not batch_process_system_update_twitter_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Twitter Updates]</span>{% endif %}
 </h2>
 {% endif %}
 
@@ -36,10 +43,6 @@ PROCESSING TURNED OFF:
         {% if batch_process_system_activity_notices_on %}Turn OFF Activity Processing{% else %}<strong>Turn ON Activity Processing</strong>{% endif %}
         </a>
         &nbsp;&nbsp;
-        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=API_REFRESH_REQUEST&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_api_refresh_on %}Turn OFF API Refresh{% else %}<strong>Turn ON API Refresh</strong>{% endif %}
-        </a>
-        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=BALLOT_ITEMS&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_ballot_items_on %}Turn OFF Ballot Items{% else %}<strong>Turn ON Ballot Items</strong>{% endif %}
         </a>
@@ -48,26 +51,51 @@ PROCESSING TURNED OFF:
         {% if batch_process_system_representatives_on %}Turn OFF Representatives{% else %}<strong>Turn ON Representatives</strong>{% endif %}
         </a>
         &nbsp;&nbsp;
+    </li>
+    <li>
+        General Maintenance(
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=GENERAL_MAINTENANCE&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_general_maintenance_on %}Turn OFF All{% else %}<strong>Turn ON</strong>{% endif %}
+        </a>
+        ):
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=CALCULATE_ANALYTICS&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics{% else %}<strong>Turn ON Analytics</strong>{% endif %}
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics{% else %}<strong>Turn ON Analytics</strong>{% endif %}
+        </span> 
         </a>
         &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=GENERATE_VOTER_GUIDES&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_generate_voter_guides_on %}Turn OFF Generate Voter Guides{% else %}<strong>Turn ON Generate Voter Guides</strong>{% endif %}
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_generate_voter_guides_on %}Turn OFF Generate Voter Guides{% else %}<strong>Turn ON Generate Voter Guides</strong>{% endif %}
+        </span>
+        </a>
+        &nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=API_REFRESH_REQUEST&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_api_refresh_on %}Turn OFF API Refresh{% else %}<strong>Turn ON API Refresh</strong>{% endif %}
+        </span>
         </a>
         &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=SEARCH_TWITTER&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Search{% else %}<strong>Turn ON Twitter Search</strong>{% endif %}
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Search{% else %}<strong>Turn ON Twitter Search</strong>{% endif %}
+        </span>
         </a>
         &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=UPDATE_TWITTER_DATA&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_update_twitter_on %}Turn OFF Twitter Updates{% else %}<strong>Turn ON Twitter Updates</strong>{% endif %}
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_update_twitter_on %}Turn OFF Twitter Updates{% else %}<strong>Turn ON Twitter Updates</strong>{% endif %}
+        </span>
         </a>
     </li>
-    <li><a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
-      Batch Set List <span class="glyphicon glyphicon-new-window"></span></a></li>
-    <li><a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-      Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a></li>
+    <li>
+        <a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
+        Batch Set List <span class="glyphicon glyphicon-new-window"></span></a>
+        &nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+      Batch Process Log <span class="glyphicon glyphicon-new-window"></span></a>
+    </li>
     <li>
         <a href="{% url 'import_export_batches:process_next_activity_notices' %}" target="_blank" >
            Start Activity Processing <span class="glyphicon glyphicon-new-window"></span>
@@ -78,7 +106,7 @@ PROCESSING TURNED OFF:
         </a>
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:process_next_general_maintenance' %}" target="_blank" >
-           Start General Maintenance (Analytics, API Refresh, Search Twitter) <span class="glyphicon glyphicon-new-window"></span>
+           Start General Maintenance (Analytics, API Refresh, Twitter, etc.) <span class="glyphicon glyphicon-new-window"></span>
         </a>
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:process_next_representatives' %}" target="_blank" >
@@ -158,6 +186,9 @@ PROCESSING TURNED OFF:
         <option value="BALLOT_ITEMS"
         {% if kind_of_processes_to_show == "BALLOT_ITEMS" %} selected="selected"{% endif %}>
             Ballot Items</option>
+        <option value="MATCH_POLITICIANS_TO_ORGANIZATIONS"
+        {% if kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS" %} selected="selected"{% endif %}>
+            Match Politicians to Endorsers</option>
         <option value="REPRESENTATIVES"
         {% if kind_of_processes_to_show == "REPRESENTATIVES" %} selected="selected"{% endif %}>
             Representatives</option>

@@ -171,6 +171,19 @@ def fetch_duplicate_politician_count(we_vote_politician, ignore_politician_id_li
         ignore_politician_id_list=ignore_politician_id_list)
 
 
+def fetch_number_of_politicians_to_match_to_organizations():
+    try:
+        # Count the number of Politicians who need an organization to be generated
+        queryset = Politician.objects.using('readonly').all()
+        queryset = queryset.filter(organization_might_be_needed=True)
+        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+        organization_might_be_needed_count = queryset.count()
+        return organization_might_be_needed_count
+    except Exception as e:
+        status = f"ERROR: fetch_number_of_politicians_to_match_to_organizations: {e}"
+        return 0
+
+
 def find_duplicate_politician(we_vote_politician, ignore_politician_id_list, read_only=True):
     status = ''
     success = True
@@ -901,6 +914,81 @@ def match_politician_to_organization(
         results['politician_updated'] = True
     else:
         results['organization_creation_error'] = True
+    return results
+
+
+def match_politicians_to_organizations(
+        changed_by_name='',
+        changed_by_voter_we_vote_id='',
+        number_of_politicians_to_match=100,
+        state_code='',
+):
+    organization_might_be_needed_count = 0
+    organizations_created_count = 0
+    organization_creation_errors_count = 0
+    politician_error_count = 0
+    politician_has_two_linked_organizations = 0
+    politician_has_two_possible_organizations = 0
+    politician_list_count = 0
+    politician_update_count = 0
+    politician_we_vote_id_update_list = []
+    politicians_analyzed_count = 0
+    status = ''
+    success = True
+    update_list = []
+
+    try:
+        queryset = Politician.objects.all()
+        queryset = queryset.filter(organization_might_be_needed=True)
+        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+        organization_might_be_needed_count = queryset.count()
+        queryset = queryset.order_by('-politician_ultimate_election_date')
+        politician_data_list = list(queryset[:number_of_politicians_to_match])
+        politician_list_count = len(politician_data_list)
+        for politician in politician_data_list:
+            results = match_politician_to_organization(
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                politician=politician)
+            if results['politician_updated']:
+                update_list.append(results['politician'])
+                politician_we_vote_id_update_list.append(politician.we_vote_id)
+            else:
+                pass
+            organizations_created_count += 1 if results['organization_created'] else 0
+            organization_creation_errors_count += 1 if results['organization_creation_error'] else 0
+            politician_error_count += 1 if results['politician_error'] else 0
+            politician_has_two_linked_organizations += 1 if results['politician_has_two_linked_organizations'] else 0
+            politician_has_two_possible_organizations += \
+                1 if results['politician_has_two_possible_organizations'] else 0
+            politician_update_count += 1 if results['politician_updated'] else 0
+            politicians_analyzed_count += 1
+
+        if politician_update_count > 0:
+            try:
+                Politician.objects.bulk_update(update_list, ['organization_might_be_needed'])
+            except Exception as e:
+                status += "FAILED_TO_BULK_UPDATE_POLITICIANS: " + str(e) + " "
+                politician_update_count = 0
+
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+        success = False
+
+    results = {
+        'organizations_created_count': organizations_created_count,
+        'organization_creation_errors_count': organization_creation_errors_count,
+        'organization_might_be_needed_count': organization_might_be_needed_count,
+        'politician_error_count': politician_error_count,
+        'politician_has_two_linked_organizations': politician_has_two_linked_organizations,
+        'politician_has_two_possible_organizations': politician_has_two_possible_organizations,
+        'politician_list_count': politician_list_count,
+        'politician_update_count': politician_update_count,
+        'politician_we_vote_id_update_list': politician_we_vote_id_update_list,
+        'politicians_analyzed': politicians_analyzed_count,
+        'status': status,
+        'success': success,
+    }
     return results
 
 

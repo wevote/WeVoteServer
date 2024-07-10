@@ -643,6 +643,7 @@ CALCULATE_SITEWIDE_DAILY_METRICS = "CALCULATE_SITEWIDE_DAILY_METRICS"
 CALCULATE_SITEWIDE_ELECTION_METRICS = "CALCULATE_SITEWIDE_ELECTION_METRICS"
 CALCULATE_SITEWIDE_VOTER_METRICS = "CALCULATE_SITEWIDE_VOTER_METRICS"
 GENERATE_VOTER_GUIDES = "GENERATE_VOTER_GUIDES"
+MATCH_POLITICIANS_TO_ORGANIZATIONS = "MATCH_POLITICIANS_TO_ORGANIZATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
@@ -661,6 +662,7 @@ KIND_OF_PROCESS_CHOICES = (
     (CALCULATE_ORGANIZATION_DAILY_METRICS,  'Organization specific daily metrics'),
     (CALCULATE_ORGANIZATION_ELECTION_METRICS,  'Organization specific election metrics'),
     (GENERATE_VOTER_GUIDES,  'Generate voter guides'),
+    (MATCH_POLITICIANS_TO_ORGANIZATIONS,  'Match politicians to organizations'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
@@ -5003,6 +5005,7 @@ class BatchProcessManager(models.Manager):
                     CALCULATE_ORGANIZATION_DAILY_METRICS,
                     CALCULATE_ORGANIZATION_ELECTION_METRICS,
                     GENERATE_VOTER_GUIDES,
+                    MATCH_POLITICIANS_TO_ORGANIZATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
@@ -5407,6 +5410,8 @@ class BatchProcessManager(models.Manager):
                     elif batch_process.kind_of_process == API_REFRESH_REQUEST:
                         checked_out_expiration_time = 360  # 6 minutes * 60 seconds
                     elif batch_process.kind_of_process == GENERATE_VOTER_GUIDES:
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds
+                    elif batch_process.kind_of_process == MATCH_POLITICIANS_TO_ORGANIZATIONS:
                         checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process in [
                             REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
