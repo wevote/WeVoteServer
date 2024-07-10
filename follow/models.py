@@ -12,7 +12,7 @@ from organization.models import OrganizationManager
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import get_timezone_and_datetime_now, DATE_FORMAT_YMD
 from voter.models import VoterManager
 
 
@@ -653,7 +653,7 @@ class FollowMetricsManager(models.Manager):
                     election = election_result['election']
                     if positive_value_exists(election.election_day_text):
                         # timezone = pytz.timezone("America/Los_Angeles")
-                        # date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                        # date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"))   
                         date_of_election = get_timezone_and_datetime_now(election.election_day_text, "%Y-%m-%d")[1]
                         date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
                         # Find all the follow entries before or on the day of the election

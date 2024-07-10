@@ -17,6 +17,7 @@ from googlebot_site_map.models import GooglebotRequest
 from politician.models import Politician
 from voter.models import voter_has_authority
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -87,7 +88,7 @@ def get_googlebot_map_xml_body(request):
     num = int(map_num_result[0])
     https_root = "https://wevote.us/"
     dt = datetime.date.today()
-    lastmod = dt.strftime("%Y-%m-%d")
+    lastmod = dt.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
     map_xml = ''
     queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
     politician_list = list(queryset)

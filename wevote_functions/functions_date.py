@@ -69,8 +69,8 @@ def convert_we_vote_date_string_to_date_as_integer(we_vote_date_string):
 # new date constants and functions
 # new date format constants
 DATE_FORMAT_YMD_HMS = "%Y-%m-%d %H:%M:%S"                   # 2024-03-04 21:58:40
-DATE_FORMAT_YMD_HM = "%Y-%m-%d %H:%M"                       # 2024-03-04 21:58
-DATE_FORMAT_YMD_HM_SLASH = "%Y/%m/%d %H:%M"                 # 2024/03/04 21:58
+# DATE_FORMAT_YMD_HM = "%Y-%m-%d %H:%M"                       # 2024-03-04 21:58
+# DATE_FORMAT_YMD_HM_SLASH = "%Y/%m/%d %H:%M"                 # 2024/03/04 21:58
 DATE_FORMAT_YMD = "%Y-%m-%d"                                # 2024-03-04
 DATE_FORMAT_YMD_SLASH = "%Y/%m/%d"                          # 2024/03/04
 DATE_FORMAT_B_D_Y = "%b. %d, %Y"                            # Mar. 04, 2024

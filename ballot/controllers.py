@@ -23,7 +23,7 @@ from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, Vote
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
     process_request_from_master, strip_html_tags
-from wevote_functions.functions_date import get_timezone_and_datetime_now
+from wevote_functions.functions_date import get_timezone_and_datetime_now, DATE_FORMAT_YMD
 from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1181,7 +1181,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                     if not positive_value_exists(election_day_text):
                         if positive_value_exists(election.election_day_text):
                             voter_ballot_saved.election_date = \
-                                datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                                datetime.strptime(election.election_day_text, DATE_FORMAT_YMD).date() # "%Y-%m-%d"
                             voter_ballot_saved_changed = True
                 if voter_address.text_for_map_search != voter_ballot_saved.original_text_for_map_search and \
                         not specific_ballot_requested:
@@ -2335,7 +2335,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 candidate_state_code_lower_case = ""
                             withdrawal_date = ''
                             if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-                                withdrawal_date = candidate.withdrawal_date.strftime("%Y-%m-%d")
+                                withdrawal_date = candidate.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
                             one_candidate = {
                                 # 'id':                           candidate.id,
                                 'we_vote_id':                   candidate.we_vote_id,
@@ -2544,7 +2544,7 @@ def ballot_items_search_retrieve_for_api(search_string):  # ballotItemsSearchRet
     #                             candidate_state_code_lower_case = ""
     #                         withdrawal_date = ''
     #                         if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-    #                             withdrawal_date = candidate.withdrawal_date.strftime("%Y-%m-%d")
+    #                             withdrawal_date = candidate.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
     #                         one_candidate = {
     #                             # 'id':                           candidate.id,
     #                             'we_vote_id':                   candidate.we_vote_id,

@@ -60,7 +60,7 @@ from wevote_functions.functions import convert_to_int, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, \
-    get_current_year_as_integer, get_timezone_and_datetime_now
+    get_current_year_as_integer, get_timezone_and_datetime_now, DATE_FORMAT_YMD
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -1321,7 +1321,7 @@ def candidate_list_view(request):
             # datetime_now = timezone.localize(datetime.now())
             timezone, datetime_now = get_timezone_and_datetime_now()
             if positive_value_exists(election.election_day_text):
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
                     election.days_until_election = convert_to_int("%d" % time_until_election.days)
@@ -3457,7 +3457,7 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
                 if positive_value_exists(candidate_on_stage.withdrawal_date):
-                    candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
+                    candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
                 else:
                     candidate_withdrawal_date_string = ''
                 change_results = change_tracking(
@@ -3475,7 +3475,7 @@ def candidate_edit_process_view(request):
             if not positive_value_exists(withdrawn_from_election):
                 candidate_on_stage.withdrawal_date = None
             elif positive_value_exists(withdrawal_date):
-                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, "%Y-%m-%d").date()
+                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, DATE_FORMAT_YMD).date() # "%Y-%m-%d"
             else:
                 candidate_on_stage.withdrawal_date = None
 
