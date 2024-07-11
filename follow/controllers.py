@@ -118,7 +118,7 @@ def delete_organization_followers_for_organization(from_organization_id, from_or
             success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
-        from_organization_we_vote_id)
+        from_organization_we_vote_id, read_only=False)
     for from_follow_entry in from_follow_list:
         try:
             from_follow_entry.delete()
@@ -445,7 +445,7 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
                 success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
-        from_organization_we_vote_id)
+        from_organization_we_vote_id, read_only=False)
     for from_follow_entry in from_follow_list:
         heal_data = False
         # See if we need to heal the data
@@ -669,7 +669,7 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
                 success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
-        from_organization_we_vote_id)
+        from_organization_we_vote_id, read_only=False)
     for from_follow_entry in from_follow_list:
         # See if the "to_voter" already has an entry for the to_organization
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(

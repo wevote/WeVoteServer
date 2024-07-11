@@ -258,7 +258,7 @@
             {% endif %}
             {% if election.offices_without_candidates_count %}
                 <br />
-                <span style="color: darkgray">{{ election.offices_without_candidates_count|intcomma }} w/o candidate</span>
+                <span style="color: red">{{ election.offices_without_candidates_count|intcomma }} w/o candidate</span>
             {% endif %}
             </td>
         {% if show_election_statistics %}
@@ -419,7 +419,7 @@
             {% endif %}
             {% if one_state_dict.offices_without_candidates_count %}
                 <br />
-                <span style="color: darkgray">{{ one_state_dict.offices_without_candidates_count|default_if_none:"" }} w/o candidate</span>
+                <span style="color: red">{{ one_state_dict.offices_without_candidates_count|default_if_none:"" }} w/o candidate</span>
             {% endif %}
             </td>
         {% if show_election_statistics %}

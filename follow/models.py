@@ -1549,7 +1549,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list_manager = FollowOrganizationList()
         followers_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
-                organization_we_vote_id)
+                organization_we_vote_id, read_only=True)
         followers_list_simple_array = []
         if len(followers_list):
             voter_manager = VoterManager()
@@ -1565,7 +1565,7 @@ class FollowOrganizationList(models.Model):
 
     @staticmethod
     def retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
-            organization_we_vote_id,
+            organization_we_vote_id='',
             return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         """
@@ -1578,7 +1578,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list_manager = FollowOrganizationList()
         followers_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
-                organization_we_vote_id)
+                organization_we_vote_id, read_only=True)
         followers_organization_list_simple_array = []
         if len(followers_organization_list):
             for follow_organization in followers_organization_list:
@@ -1630,15 +1630,19 @@ class FollowOrganizationList(models.Model):
             return follow_organization_list
 
     @staticmethod
-    def retrieve_follow_organization_by_organization_we_vote_id(organization_we_vote_id):
+    def retrieve_follow_organization_by_organization_we_vote_id(organization_we_vote_id, read_only=False):
         # Retrieve a list of follow_organization entries for this organization
         follow_organization_list_found = False
         following_status = FOLLOWING
         follow_organization_list = {}
         try:
-            follow_organization_list = FollowOrganization.objects.all()
-            follow_organization_list = follow_organization_list.filter(organization_we_vote_id=organization_we_vote_id)
-            follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            if positive_value_exists(read_only):
+                queryset = FollowOrganization.objects.using('readonly').all()
+            else:
+                queryset = FollowOrganization.objects.all()
+            queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
+            queryset = queryset.filter(following_status=following_status)
+            follow_organization_list = list(queryset)
             if len(follow_organization_list):
                 follow_organization_list_found = True
         except Exception as e:

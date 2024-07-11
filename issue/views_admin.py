@@ -398,7 +398,7 @@ def issue_edit_view(request, issue_we_vote_id):
     organization_list = []
 
     try:
-        issue_on_stage = Issue.objects.get(we_vote_id__iexact=issue_we_vote_id)
+        issue_on_stage = Issue.objects.using('readonly').get(we_vote_id__iexact=issue_we_vote_id)
         issue_on_stage_found = True
     except Issue.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -427,7 +427,9 @@ def issue_edit_view(request, issue_we_vote_id):
             organization_we_vote_id_list = organization_results['organization_we_vote_id_list']
             organization_list_results = \
                 organization_list_manager.retrieve_organizations_by_organization_we_vote_id_list(
-                    organization_we_vote_id_list)
+                    limit=200,
+                    list_of_organization_we_vote_ids=organization_we_vote_id_list,
+                    read_only=True)
             if organization_list_results['organization_list_found']:
                 organization_list = organization_list_results['organization_list']
 
@@ -578,6 +580,10 @@ def issue_edit_process_view(request):
         issue_on_stage.considered_left = considered_left
         issue_on_stage.considered_right = considered_right
         issue_on_stage.hide_issue = hide_issue
+        organization_link_issue_list_manager = OrganizationLinkToIssueList()
+        linked_organization_count = organization_link_issue_list_manager.fetch_linked_organization_count(
+            issue_we_vote_id=issue_on_stage.we_vote_id)
+        issue_on_stage.linked_organization_count = linked_organization_count
 
         issue_on_stage.save()
         issue_we_vote_id = issue_on_stage.we_vote_id

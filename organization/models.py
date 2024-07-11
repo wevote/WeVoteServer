@@ -3123,12 +3123,17 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
-    def retrieve_organizations_by_organization_we_vote_id_list(self, list_of_organization_we_vote_ids):
+    @staticmethod
+    def retrieve_organizations_by_organization_we_vote_id_list(
+            list_of_organization_we_vote_ids=[],
+            limit=200,
+            read_only=True):
         organization_list = []
         organization_list_found = False
+        status = ''
 
         if not type(list_of_organization_we_vote_ids) is list:
-            status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
+            status += 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST '
             success = False
             results = {
                 'success':                      success,
@@ -3139,7 +3144,7 @@ class OrganizationListManager(models.Manager):
             return results
 
         if not len(list_of_organization_we_vote_ids):
-            status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            status += 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST '
             success = False
             results = {
                 'success':                      success,
@@ -3150,22 +3155,27 @@ class OrganizationListManager(models.Manager):
             return results
 
         try:
-            organization_queryset = Organization.objects.all()
+            if positive_value_exists(read_only):
+                organization_queryset = Organization.objects.using('readonly').all()
+            else:
+                organization_queryset = Organization.objects.all()
             organization_queryset = organization_queryset.filter(
                 we_vote_id__in=list_of_organization_we_vote_ids)
             organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+            if positive_value_exists(limit):
+                organization_queryset = organization_queryset[:limit]
             organization_list = organization_queryset
 
             if len(organization_list):
                 organization_list_found = True
-                status = 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+                status += 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST '
             else:
-                status = 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+                status += 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesFollowersRetrieve: Unable to retrieve organizations from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'voterGuidesFollowersRetrieve: Unable to retrieve organizations from db. ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
 
         results = {
