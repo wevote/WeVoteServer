@@ -290,7 +290,7 @@ def batch_list_process_view(request):
     election_name = ""  # For printing status
     if positive_value_exists(google_civic_election_id):
         election_manager = ElectionManager()
-        results = election_manager.retrieve_election(google_civic_election_id)
+        results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
         if results['election_found']:
             election = results['election']
             election_name = election.election_name

@@ -201,7 +201,7 @@ def data_cleanup_organization_analysis_view(request):
     twitter_link_to_this_organization_exists = False
     twitter_link_to_another_organization_exists = False
     try:
-        organization = Organization.objects.get(we_vote_id__iexact=organization_we_vote_id)
+        organization = Organization.objects.using('readonly').get(we_vote_id__iexact=organization_we_vote_id)
         organization_found = True
         try:
             organization.linked_voter = Voter.objects.get(

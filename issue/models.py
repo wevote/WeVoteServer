@@ -823,7 +823,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return link_issue_list_count
 
     @staticmethod
-    def fetch_linked_organization_count(issue_we_vote_id):
+    def fetch_linked_organization_count(issue_we_vote_id=''):
         number_of_organizations_following_this_issue = 0
 
         try:
