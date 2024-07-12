@@ -1535,6 +1535,10 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_system_general_maintenance_on'
     elif kind_of_process == 'GENERATE_VOTER_GUIDES':
         setting_name = 'batch_process_system_generate_voter_guides_on'
+    elif kind_of_process == 'MATCH_POLITICIANS_TO_ORGANIZATIONS':
+        setting_name = 'batch_process_system_match_politicians_to_organizations_on'
+    elif kind_of_process == 'RETRIEVE_FROM_BALLOTPEDIA':
+        setting_name = 'batch_process_system_retrieve_from_ballotpedia_on'
     elif kind_of_process == 'SEARCH_TWITTER':
         setting_name = 'batch_process_system_search_twitter_on'
     elif kind_of_process == 'UPDATE_TWITTER_DATA':
@@ -1696,6 +1700,9 @@ def batch_process_list_view(request):
             elif kind_of_processes_to_show == "REPRESENTATIVES":
                 processes = ['RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "RETRIEVE_FROM_BALLOTPEDIA":
+                processes = ['RETRIEVE_FROM_BALLOTPEDIA']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
             elif kind_of_processes_to_show == "SEARCH_TWITTER":
                 search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
@@ -1741,7 +1748,7 @@ def batch_process_list_view(request):
 
         batch_process_list_count = batch_process_queryset.count()
 
-        batch_process_queryset = batch_process_queryset[:100]
+        batch_process_queryset = batch_process_queryset[:25]
         batch_process_list = list(batch_process_queryset)
 
         if len(batch_process_list):
@@ -1798,7 +1805,7 @@ def batch_process_list_view(request):
         batch_process_representatives_chunk_list = []
         batch_process_representatives_chunk_list_found = False
         try:
-            batch_process_chunk_queryset = BatchProcessBallotItemChunk.objects.all()
+            batch_process_chunk_queryset = BatchProcessBallotItemChunk.objects.using('readonly').all()
             batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
             batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
             batch_process_ballot_item_chunk_list = list(batch_process_chunk_queryset)
@@ -1899,7 +1906,9 @@ def batch_process_list_view(request):
         fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
         fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_general_maintenance_on, \
         fetch_batch_process_system_generate_voter_guides_on, \
-        fetch_batch_process_system_representatives_on, fetch_batch_process_system_search_twitter_on, \
+        fetch_batch_process_system_match_politicians_to_organizations_on, \
+        fetch_batch_process_system_representatives_on, fetch_batch_process_system_retrieve_from_ballotpedia_on, \
+        fetch_batch_process_system_search_twitter_on, \
         fetch_batch_process_system_update_twitter_on
 
     ballot_returned_oldest_date = ""
@@ -1942,8 +1951,12 @@ def batch_process_list_view(request):
         'batch_process_system_api_refresh_on':          fetch_batch_process_system_api_refresh_on(),
         'batch_process_system_ballot_items_on':         fetch_batch_process_system_ballot_items_on(),
         'batch_process_system_calculate_analytics_on':  fetch_batch_process_system_calculate_analytics_on(),
-        'batch_process_system_general_maintenance_on': fetch_batch_process_system_general_maintenance_on(),
+        'batch_process_system_general_maintenance_on':  fetch_batch_process_system_general_maintenance_on(),
         'batch_process_system_generate_voter_guides_on': fetch_batch_process_system_generate_voter_guides_on(),
+        'batch_process_system_match_politicians_to_organizations_on': \
+            fetch_batch_process_system_match_politicians_to_organizations_on(),
+        'batch_process_system_retrieve_from_ballotpedia_on': \
+            fetch_batch_process_system_retrieve_from_ballotpedia_on(),
         'batch_process_system_representatives_on':      fetch_batch_process_system_representatives_on(),
         'batch_process_system_search_twitter_on':       fetch_batch_process_system_search_twitter_on(),
         'batch_process_system_update_twitter_on':       fetch_batch_process_system_update_twitter_on(),

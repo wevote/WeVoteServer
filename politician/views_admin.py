@@ -2637,6 +2637,10 @@ def politician_edit_process_view(request):
                 )
                 if results['success']:
                     politician_on_stage = results['object_with_photo_fields']
+                    if results['profile_image_default_updated']:
+                        regenerate_color = True
+                        # politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
+                        # politician_on_stage.profile_image_background_color_needed = False
 
             # ###############################################
             # Now process all other politician fields
@@ -2750,7 +2754,8 @@ def politician_edit_process_view(request):
                     politician_on_stage.profile_image_background_color = profile_image_background_color
                     politician_on_stage.profile_image_background_color_needed = False
                 else:
-                    messages.add_message(request, messages.ERROR, 'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
+                    messages.add_message(request, messages.ERROR,
+                                         'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if gender is not False:
                 gender = gender[0]
                 if politician_on_stage.gender != gender:
@@ -3067,6 +3072,10 @@ def politician_edit_process_view(request):
                     incoming_object=politician_on_stage,
                     save_to_database=True,
                 )
+                if positive_value_exists(results['error_message_to_print']):
+                    messages.add_message(request, messages.ERROR, results['error_message_to_print'])
+                if positive_value_exists(results['info_message_to_print']):
+                    messages.add_message(request, messages.INFO, results['info_message_to_print'])
 
             # Now generate_seo_friendly_path if there isn't one
             seo_results = politician_manager.generate_seo_friendly_path(

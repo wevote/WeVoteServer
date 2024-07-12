@@ -25,6 +25,10 @@ OFF:
         <span style="color: darkred;">[General Maintenance]</span>{% endif %}
     {% if not batch_process_system_generate_voter_guides_on or not batch_process_system_general_maintenance_on %} 
         <span style="color: darkred;">[Generate Voter Guides]</span>{% endif %}
+    {% if not batch_process_system_match_politicians_to_organizations_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Politicians-to-Orgs]</span>{% endif %}
+    {% if not batch_process_system_retrieve_from_ballotpedia_on or not batch_process_system_general_maintenance_on %} 
+        <span style="color: darkred;">[Retrieve from Ballotpedia]</span>{% endif %}
     {% if not batch_process_system_search_twitter_on or not batch_process_system_general_maintenance_on %} 
         <span style="color: darkred;">[Twitter Searching]</span>{% endif %}
     {% if not batch_process_system_update_twitter_on or not batch_process_system_general_maintenance_on %} 
@@ -53,7 +57,7 @@ OFF:
         &nbsp;&nbsp;
     </li>
     <li>
-        General Maintenance(
+        General Maintenance (
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=GENERAL_MAINTENANCE&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_general_maintenance_on %}Turn OFF All{% else %}<strong>Turn ON</strong>{% endif %}
         </a>
@@ -74,6 +78,18 @@ OFF:
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=API_REFRESH_REQUEST&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
             {% if batch_process_system_api_refresh_on %}Turn OFF API Refresh{% else %}<strong>Turn ON API Refresh</strong>{% endif %}
+        </span>
+        </a>
+        &nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=MATCH_POLITICIANS_TO_ORGANIZATIONS&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_match_politicians_to_organizations_on %}Turn OFF Politicians-to-Orgs{% else %}<strong>Turn ON Politicians-to-Orgs</strong>{% endif %}
+        </span>
+        </a>
+        &nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=RETRIEVE_FROM_BALLOTPEDIA&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if batch_process_system_retrieve_from_ballotpedia_on %}Turn OFF Ballotpedia Retrieve{% else %}<strong>Turn ON Ballotpedia Retrieve</strong>{% endif %}
         </span>
         </a>
         &nbsp;&nbsp;
@@ -192,6 +208,9 @@ OFF:
         <option value="REPRESENTATIVES"
         {% if kind_of_processes_to_show == "REPRESENTATIVES" %} selected="selected"{% endif %}>
             Representatives</option>
+        <option value="RETRIEVE_FROM_BALLOTPEDIA"
+        {% if kind_of_processes_to_show == "RETRIEVE_FROM_BALLOTPEDIA" %} selected="selected"{% endif %}>
+            Retrieve from Ballotpedia</option>
         <option value="SEARCH_TWITTER"
         {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
             Search Twitter</option>
