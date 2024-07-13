@@ -1771,7 +1771,7 @@ class BallotReturned(models.Model):
     """
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
 
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
@@ -1779,7 +1779,7 @@ class BallotReturned(models.Model):
     # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -1859,7 +1859,7 @@ class BallotReturnedEmpty(models.Model):
     # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -3747,7 +3747,7 @@ class VoterBallotSaved(models.Model):
     # When we copy a ballot from a master ballot_returned entry, we want to store a link back to that source
     ballot_returned_we_vote_id = models.CharField(
         verbose_name="ballot_returned we_vote_id this was copied from",
-        max_length=255, default=None, null=True, blank=True, unique=False)
+        max_length=255, default=None, null=True, blank=True, unique=False, db_index=True)
     ballot_location_display_name = models.CharField(
         verbose_name="the name of the ballot the voter is looking at",
         max_length=255, default=None, null=True, blank=True, unique=False)

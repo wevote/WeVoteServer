@@ -136,7 +136,7 @@ class Politician(models.Model):
     objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this politician", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default=None)

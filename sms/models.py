@@ -46,9 +46,9 @@ class SMSPhoneNumber(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_sms_integer
     we_vote_id = models.CharField(
         verbose_name="we vote id of this sms address", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sms owner", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sms owner", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # Until an SMSPhoneNumber has had its ownership verified, multiple voter accounts can try to use it
     normalized_sms_phone_number = models.CharField(
         verbose_name='sms address', max_length=50, null=False, blank=False, unique=False)
@@ -87,13 +87,14 @@ class SMSOutboundDescription(models.Model):
     kind_of_sms_template = models.CharField(
         max_length=50, choices=KIND_OF_SMS_TEMPLATE_CHOICES, default=GENERIC_SMS_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_voter_sms = models.CharField(
         verbose_name='sms address for sender', max_length=50, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the recipient if we have it",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_sms_we_vote_id = models.CharField(
-        verbose_name="sms we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="sms we vote id for recipient", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # We include this here for data monitoring and debugging
     recipient_voter_sms = models.CharField(
         verbose_name='sms address for recipient', max_length=50, null=True, blank=True, unique=False)
@@ -108,13 +109,13 @@ class SMSScheduled(models.Model):
     """
     message_text = models.TextField(null=True, blank=True)
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_voter_sms = models.CharField(
         verbose_name='sender sms address', max_length=50, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_sms_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sms", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sms", max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_voter_sms = models.CharField(
         verbose_name='recipient sms address', max_length=50, null=True, blank=True, unique=False)
     send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)

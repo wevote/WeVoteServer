@@ -50,7 +50,7 @@ def augment_voter_analytics_action_entries_without_election_id(date_as_integer, 
     # Get distinct voters in the time period
     voter_analytics_list = []
     try:
-        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
         voter_list_query = voter_list_query.filter(date_as_integer__gte=date_as_integer)
         voter_list_query = voter_list_query.filter(date_as_integer__lte=through_date_as_integer)
         # Find entries where there is at least one empty google_civic_election_id
@@ -110,7 +110,7 @@ def process_one_analytics_batch_process_augment_with_election_id(batch_process, 
 
     # Find voters who haven't been processed yet for analytics_date_as_integer
     try:
-        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
         voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
         if len(exclude_voter_we_vote_id_list):
             voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)
@@ -241,7 +241,7 @@ def process_one_analytics_batch_process_augment_with_first_visit(batch_process, 
 
     # Find voters who haven't been processed yet for analytics_date_as_integer
     try:
-        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
         voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
         if len(exclude_voter_we_vote_id_list):
             voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)
@@ -663,7 +663,7 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
 
     # Find voters who haven't been processed yet for analytics_date_as_integer
     try:
-        voter_list_query = AnalyticsAction.objects.using('analytics').all()
+        voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
         voter_list_query = voter_list_query.filter(date_as_integer=batch_process.analytics_date_as_integer)
         if len(exclude_voter_we_vote_id_list):
             voter_list_query = voter_list_query.exclude(voter_we_vote_id__in=exclude_voter_we_vote_id_list)

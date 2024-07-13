@@ -50,9 +50,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 class FollowCampaignX(models.Model):
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
-    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
-    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    campaignx_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
 
@@ -281,14 +281,14 @@ class FollowIssue(models.Model):
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The issue being followed
     issue_id = models.PositiveIntegerField(null=True, blank=True)
 
     # This is used when we want to export the issues that are being following
     issue_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following, not following, or ignoring this issue?
     following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING, db_index=True)
@@ -1660,9 +1660,9 @@ class SuggestedIssueToFollow(models.Model):
     This table stores possible suggested issues to follow
     """
     viewer_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     issue_we_vote_id = models.CharField(
-        verbose_name="issue we vote id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="issue we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # organization_we_vote_id_making_suggestion = models.CharField(
     #    verbose_name="organization we vote id making decision", max_length=255, null=True, blank=True, unique=False)
     # from_twitter = models.BooleanField(verbose_name="from twitter", default=False)
@@ -1681,9 +1681,10 @@ class SuggestedOrganizationToFollow(models.Model):
     This table stores possible suggested organization from twitter ids i follow or organization of my friends follow.
     """
     viewer_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(
-        verbose_name="organization we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="organization we vote id person 2",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # organization_we_vote_id_making_suggestion = models.CharField(
     #    verbose_name="organization we vote id making decision", max_length=255, null=True, blank=True, unique=False)
     from_twitter = models.BooleanField(verbose_name="from twitter", default=False)
