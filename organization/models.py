@@ -3375,7 +3375,7 @@ class Organization(models.Model):
         indexes = [
             models.Index(
                 fields=['politician_we_vote_id', 'state_served_code', 'organization_name', '-twitter_followers_count'],
-                name='organization_politicians_match_to_orgs_index'),
+                name='organization_politicians_match'),
         ]
 
     def __unicode__(self):
