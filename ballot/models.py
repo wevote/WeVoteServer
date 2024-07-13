@@ -108,6 +108,12 @@ class BallotItem(models.Model):
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_office_we_vote_id']),
+        ]
+
     def is_contest_office(self):
         if positive_value_exists(self.contest_office_id) or positive_value_exists(self.contest_office_we_vote_id):
             return True

@@ -103,7 +103,8 @@ def process_one_analytics_batch_process_augment_with_election_id(batch_process, 
     exclude_voter_we_vote_id_list = []
     results = analytics_manager.retrieve_analytics_processed_list(
         analytics_date_as_integer=batch_process.analytics_date_as_integer,
-        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID)
+        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID,
+        read_only=True)
     if results['retrieved_voter_we_vote_id_list_found']:
         # Exclude the voters already processed for analytics_date_as_integer
         exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
@@ -234,7 +235,8 @@ def process_one_analytics_batch_process_augment_with_first_visit(batch_process, 
     exclude_voter_we_vote_id_list = []
     results = analytics_manager.retrieve_analytics_processed_list(
         analytics_date_as_integer=batch_process.analytics_date_as_integer,
-        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT)
+        kind_of_process=AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
+        read_only=True)
     if results['retrieved_voter_we_vote_id_list_found']:
         # Exclude the voters already processed for analytics_date_as_integer
         exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
@@ -656,7 +658,8 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
     exclude_voter_we_vote_id_list = []
     results = analytics_manager.retrieve_analytics_processed_list(
         analytics_date_as_integer_more_recent_than=batch_process.analytics_date_as_integer,
-        kind_of_process=CALCULATE_SITEWIDE_VOTER_METRICS)
+        kind_of_process=CALCULATE_SITEWIDE_VOTER_METRICS,
+        read_only=True)
     if results['retrieved_voter_we_vote_id_list_found']:
         # Exclude the voters already processed for analytics_date_as_integer
         exclude_voter_we_vote_id_list = results['retrieved_voter_we_vote_id_list']
@@ -1318,7 +1321,8 @@ def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
         return results
 
     analytics_manager = AnalyticsManager()
-    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(voter_to_delete_we_vote_id)
+    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(
+        voter_to_delete_we_vote_id, read_only=False)
     if analytics_action_list_results['analytics_action_list_found']:
         analytics_action_list = analytics_action_list_results['analytics_action_list']
 
@@ -1379,7 +1383,8 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
         return results
 
     analytics_manager = AnalyticsManager()
-    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(from_voter_we_vote_id)
+    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(
+        from_voter_we_vote_id, read_only=False)
     if not analytics_action_list_results['success']:
         status += analytics_action_list_results['status']
         success = False

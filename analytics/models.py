@@ -129,14 +129,14 @@ class AnalyticsAction(models.Model):
     is_signed_in = models.BooleanField(verbose_name='', default=False)
 
     state_code = models.CharField(
-        verbose_name="state_code", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="state_code", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_id = models.PositiveIntegerField(null=True, blank=True)
 
     ballot_item_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -703,13 +703,17 @@ class AnalyticsManager(models.Manager):
             organization_we_vote_id='',
             action_constant='',
             distinct_for_members=False,
-            state_code=''):
+            state_code='',
+            read_only=False):
         success = True
         status = ""
         analytics_action_list = []
 
         try:
-            list_query = AnalyticsAction.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = AnalyticsAction.objects.using('readonly').all()
+            else:
+                list_query = AnalyticsAction.objects.using('analytics').all()
             if positive_value_exists(voter_we_vote_id):
                 list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             elif len(voter_we_vote_id_list):
@@ -750,14 +754,18 @@ class AnalyticsManager(models.Manager):
             kind_of_process='',
             batch_process_id=0,
             batch_process_analytics_chunk_id=0,
-            analytics_date_as_integer_more_recent_than=0):
+            analytics_date_as_integer_more_recent_than=0,
+            read_only=False):
         success = True
         status = ""
         analytics_processed_list = []
         retrieved_voter_we_vote_id_list = []
 
         try:
-            list_query = AnalyticsProcessed.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = AnalyticsProcessed.objects.using('readonly').all()
+            else:
+                list_query = AnalyticsProcessed.objects.using('analytics').all()
             if positive_value_exists(batch_process_id):
                 list_query = list_query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(batch_process_analytics_chunk_id):
@@ -902,7 +910,7 @@ class AnalyticsManager(models.Manager):
         status = ""
 
         try:
-            analytics_processing_status = AnalyticsProcessingStatus.objects.using('analytics').get(
+            analytics_processing_status = AnalyticsProcessingStatus.objects.using('readonly').get(  # 'analytics'
                 analytics_date_as_integer=analytics_date_as_integer)
             analytics_processing_status_found = True
         except Exception as e:
@@ -1185,13 +1193,16 @@ class AnalyticsManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_organization_election_metrics_list(google_civic_election_id=0):
+    def retrieve_organization_election_metrics_list(google_civic_election_id=0, read_only=False):
         success = False
         status = ""
         organization_election_metrics_list = []
 
         try:
-            list_query = OrganizationElectionMetrics.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = OrganizationElectionMetrics.objects.using('readonly').all()
+            else:
+                list_query = OrganizationElectionMetrics.objects.using('analytics').all()
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             organization_election_metrics_list = list(list_query)

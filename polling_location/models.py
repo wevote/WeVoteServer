@@ -141,6 +141,11 @@ class PollingLocationLogEntry(models.Model):
     text_for_map_search = models.CharField(max_length=255, null=True, unique=False)
     voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['kind_of_log_entry', 'log_entry_deleted'], name='kind_of_log_entry_and_deleted'),
+        ]
+
 
 class PollingLocationManager(models.Manager):
 
