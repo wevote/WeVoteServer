@@ -275,9 +275,11 @@ class PositionEntered(models.Model):
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
                 name='positions_for_candidate_org'),
             models.Index(
-                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
-                        'google_civic_election_id', 'stance'],
+                fields=['candidate_campaign_we_vote_id', 'google_civic_election_id', 'organization_we_vote_id'],
                 name='positions_for_election_index'),
+            models.Index(
+                fields=['organization_we_vote_id', 'candidate_campaign_we_vote_id'],
+                name='positions_for_org_candidate'),
         ]
         ordering = ('date_entered',)
 
@@ -704,9 +706,11 @@ class PositionForFriends(models.Model):
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
                 name='friends_for_candidate_org'),
             models.Index(
-                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
-                        'google_civic_election_id', 'stance'],
+                fields=['candidate_campaign_we_vote_id', 'google_civic_election_id', 'organization_we_vote_id'],
                 name='friends_positions_election'),
+            models.Index(
+                fields=['organization_we_vote_id', 'candidate_campaign_we_vote_id'],
+                name='friends_for_org_candidate'),
         ]
         ordering = ('date_entered',)
 
