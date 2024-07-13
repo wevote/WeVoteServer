@@ -144,6 +144,8 @@ class PollingLocationLogEntry(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['kind_of_log_entry', 'log_entry_deleted'], name='kind_of_log_entry_and_deleted'),
+            models.Index(fields=['polling_location_we_vote_id', 'kind_of_log_entry', 'log_entry_deleted'],
+                         name='polling_location_log_entry_one_location_index'),
         ]
 
 

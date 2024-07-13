@@ -267,6 +267,15 @@ class PositionEntered(models.Model):
         return self.stance
 
     class Meta:
+        indexes = [
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
+                name='position_entered_all_positions_for_candidate_index'),
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
+                        'google_civic_election_id', 'stance'],
+                name='position_entered_positions_for_election_index'),
+        ]
         ordering = ('date_entered',)
 
     # We override the save function, so we can auto-generate we_vote_id
@@ -684,6 +693,15 @@ class PositionForFriends(models.Model):
         return self.stance
 
     class Meta:
+        indexes = [
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
+                name='position_for_friends_all_positions_for_candidate_index'),
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
+                        'google_civic_election_id', 'stance'],
+                name='position_for_friends_positions_for_election_index'),
+        ]
         ordering = ('date_entered',)
 
     # We override the save function, so we can auto-generate we_vote_id
