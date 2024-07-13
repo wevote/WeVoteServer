@@ -106,7 +106,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             target_google_civic_election_id = election.google_civic_election_id
             status += "STATE: " + str(election.state_code) + " "
             # Get a list of all voter_guides in last 5 years
-            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
             voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
@@ -121,7 +121,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             national_election = results['election']
             target_google_civic_election_id = national_election.google_civic_election_id
             # Get a list of all voter_guides in last 5 years
-            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
             voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
@@ -140,7 +140,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 target_google_civic_election_id = election.google_civic_election_id
                 status += "STATE: " + str(election.state_code) + " "
                 # Get a list of all voter_guides in last 5 years
-                voter_guide_query = VoterGuide.objects.all()
+                voter_guide_query = VoterGuide.objects.using('readonly').all()
                 voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
                 voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
                 voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
@@ -170,7 +170,8 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             position_list = position_list_manager.retrieve_all_positions_for_election(
                 voter_guide.google_civic_election_id,
                 public_only=True,
-                limit_to_organization_we_vote_ids=limit_to_organization_we_vote_ids)
+                limit_to_organization_we_vote_ids=limit_to_organization_we_vote_ids,
+                read_only=True)
             if len(position_list):
                 for one_position in position_list:
                     if positive_value_exists(one_position.more_info_url):
