@@ -1308,7 +1308,8 @@ def process_one_analytics_batch_process(batch_process):
         status += "ANALYTICS_CHUNK_PREVIOUSLY_STARTED_BUT_NOT_FINISHED "
         results = analytics_manager.retrieve_analytics_processed_list(
             batch_process_id=batch_process.id,
-            batch_process_analytics_chunk_id=batch_process_analytics_chunk.id)
+            batch_process_analytics_chunk_id=batch_process_analytics_chunk.id,
+            read_only=True)
         analytics_processed_count = 0
         if results['analytics_processed_list_found']:
             # Exclude the voters already processed for analytics_date_as_integer
