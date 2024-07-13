@@ -1883,9 +1883,9 @@ class ContestOfficesAreNotDuplicates(models.Model):
     DoesNotExist = None
     objects = None
     contest_office1_we_vote_id = models.CharField(
-        verbose_name="first contest office we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="first contest office we are tracking", max_length=255, null=True, unique=False, db_index=True)
     contest_office2_we_vote_id = models.CharField(
-        verbose_name="second contest office we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="second contest office we are tracking", max_length=255, null=True, unique=False, db_index=True)
 
     def fetch_other_office_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.contest_office1_we_vote_id:
@@ -1904,7 +1904,7 @@ class ContestOfficeVisitingOtherElection(models.Model):
     With this table, we can allow certain offices to "visit" other elections
     """
     contest_office_we_vote_id = models.CharField(
-        verbose_name="contest office we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="contest office we are tracking", max_length=255, null=True, unique=False, db_index=True)
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     host_google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id of election the office is visiting", default=0, null=False, blank=False)

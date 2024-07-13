@@ -25,7 +25,8 @@ class TwitterLinkToOrganization(models.Model):
     """
     DoesNotExist = None
     objects = None
-    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=True)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote id for the org owner", max_length=255, unique=True, db_index=True)
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
 
@@ -68,8 +69,9 @@ class TwitterLinkToVoter(models.Model):
     """
     DoesNotExist = None
     objects = None
-    voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=True)
-    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=True)
+    voter_we_vote_id = models.CharField(
+        verbose_name="we vote id for the voter owner", max_length=255, unique=True, db_index=True)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=True, db_index=True)
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership twitter account", max_length=255, null=False, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
@@ -109,7 +111,8 @@ class TwitterLinkPossibility(models.Model):
     """
     MultipleObjectsReturned = None
     objects = None
-    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False)
+    candidate_campaign_we_vote_id = models.CharField(
+        verbose_name="candidate we vote id", max_length=255, unique=False, db_index=True)
 
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
     twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
@@ -1554,7 +1557,7 @@ class Tweet(models.Model):
                                   verbose_name='text field from twitter tweet api')
     date_published = models.DateTimeField(null=True, verbose_name='date published')
     organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, null=True,
-                                               blank=True, unique=False)
+                                               blank=True, unique=False, db_index=True)
 
 
 class TweetFavorite(models.Model):
@@ -1620,7 +1623,8 @@ class TwitterApiCounter(models.Model):
     search_term = models.CharField(verbose_name='search term to API', max_length=255, null=True, unique=False)
     text = models.CharField(verbose_name='text', max_length=255, null=True, unique=False)
     username = models.CharField(verbose_name='twitter screen name / handle', max_length=64, null=True, unique=False)
-    voter_we_vote_id = models.CharField(verbose_name='voter we vote id', max_length=255, null=True, unique=False)
+    voter_we_vote_id = models.CharField(
+        verbose_name='voter we vote id', max_length=255, null=True, unique=False, db_index=True)
 
 
 class TwitterApiCounterDailySummary(models.Model):

@@ -193,7 +193,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 class OrganizationLinkToHashtag(models.Model):
 
     objects = None
-    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=False)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, unique=False, db_index=True)
     hashtag_text = models.CharField(verbose_name="hashtag text", max_length=255, unique=False)
     # tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
     # published_datetime = models.DateTimeField(verbose_name="published datetime")
@@ -205,7 +206,8 @@ class OrganizationLinkToWordOrPhrase(models.Model):
     def __unicode__(self):
         return "OrganizationLinkToWordOrPhrase"
 
-    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=True)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, unique=True, db_index=True)
     word_or_phrase_text = models.CharField(verbose_name="text of a word or phrase", max_length=255, unique=False)
     tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
     published_datetime = models.DateTimeField(verbose_name="published datetime")
@@ -223,8 +225,10 @@ class OrganizationMembershipLinkToVoter(models.Model):
     data about their members.
     """
     objects = None
-    organization_we_vote_id = models.CharField(verbose_name="we vote id for organization", max_length=255, unique=False)
-    voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=False)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote id for organization", max_length=255, unique=False, db_index=True)
+    voter_we_vote_id = models.CharField(
+        verbose_name="we vote id for the voter owner", max_length=255, unique=False, db_index=True)
     external_voter_id = models.CharField(
         verbose_name="id for the voter in other system", max_length=255, unique=False)
 
@@ -3552,10 +3556,10 @@ class OrganizationChangeLog(models.Model):  # OrganizationLogEntry would be anot
     What changes were made, and by whom?
     """
     changed_by_name = models.CharField(max_length=255, default=None, null=True)
-    changed_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    changed_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     change_description = models.TextField(null=True, blank=True)
     log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
-    organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    organization_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     status = models.TextField(null=True, blank=True)
 
     def change_description_augmented(self):
@@ -3587,7 +3591,7 @@ class OrganizationReservedDomain(models.Model):
         return "OrganizationReservedDomain"
 
     # If there is a value, this is the owner
-    organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
 
     # One one of the following is expected to be used for each database row
     # Ex/ bestdomain.org
@@ -3606,14 +3610,15 @@ class OrganizationTeamMember(models.Model):
     def __unicode__(self):
         return "OrganizationTeamMember"
 
-    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     can_edit_campaignx_owned_by_organization = models.BooleanField(default=True)
     can_edit_organization = models.BooleanField(default=True)
     can_manage_team_members = models.BooleanField(default=False)
     can_moderate_campaignx_owned_by_organization = models.BooleanField(default=True)
     can_send_updates_for_campaignx_owned_by_organization = models.BooleanField(default=False)
     team_member_name = models.CharField(max_length=255, null=False, blank=False)
-    team_member_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    team_member_organization_we_vote_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)

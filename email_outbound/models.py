@@ -83,9 +83,10 @@ class EmailAddress(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_email_integer
     we_vote_id = models.CharField(
         verbose_name="we vote id of this email address", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the email owner", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the email owner",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # Until an EmailAddress has had its ownership verified, multiple voter accounts can try to use it
     normalized_email_address = models.EmailField(
         verbose_name='email address', max_length=255, null=False, blank=False, unique=False)
@@ -127,13 +128,15 @@ class EmailOutboundDescription(models.Model):
     sender_voter_name = models.CharField(
         verbose_name='sender full name', max_length=255, null=True, blank=True, unique=False)
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_voter_email = models.EmailField(
         verbose_name='email address for sender', max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the recipient if we have it",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_email_we_vote_id = models.CharField(
-        verbose_name="email we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="email we vote id for recipient",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
@@ -154,13 +157,13 @@ class EmailScheduled(models.Model):
     sender_voter_name = models.CharField(
         verbose_name='sender full name', max_length=255, null=True, blank=True, unique=False)
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_voter_email = models.EmailField(
         verbose_name='sender email address', max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_email_we_vote_id = models.CharField(
-        verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_voter_email = models.EmailField(
         verbose_name='recipient email address', max_length=255, null=True, blank=True, unique=False)
     list_unsubscribe_mailto = models.TextField(null=True, blank=True)

@@ -97,17 +97,18 @@ class FriendInvitationEmailLink(models.Model):
     rely on the FriendInvitationVoterLink.
     """
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_email_ownership_is_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_email_we_vote_id = models.CharField(
-        verbose_name="email we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="email we vote id for recipient",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
     recipient_first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     recipient_last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     secret_key = models.CharField(
-        verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True, db_index=True)
     invited_friend_accepted_notification_sent = models.BooleanField(default=False)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
@@ -124,7 +125,7 @@ class FriendInvitationTwitterLink(models.Model):
     rely on the FriendInvitationVoterLink.
     """
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     recipient_twitter_handle = models.CharField(
         verbose_name='twitter username', max_length=255, null=False, unique=False)
     secret_key = models.CharField(

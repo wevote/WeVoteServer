@@ -31,15 +31,15 @@ class BookmarkItem(models.Model):
     # The candidate being bookmarked
     candidate_id = models.BigIntegerField(null=True, blank=True)
     candidate_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # The office being bookmarked
     contest_office_id = models.BigIntegerField(null=True, blank=True)
     contest_office_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # The measure being bookmarked
-    contest_measure_id = models.BigIntegerField(null=True, blank=True)
+    contest_measure_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     contest_measure_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following or ignoring this organization?
     bookmark_status = models.CharField(max_length=16, choices=BOOKMARK_CHOICES, default=ITEM_NOT_BOOKMARKED)

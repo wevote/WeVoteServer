@@ -1574,7 +1574,10 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
             status += "VALID_VOTER_ID_MISSING "
             success = False
         if success:
-            results = politician_manager.retrieve_politician_as_owner(
+            # retrieve_politician_as_owner was here 2024-07-12
+            #  but that function didn't exist anywhere else in the codebase. It looks like politicianRetrieveAsOwner
+            #  is not being called right now from WebApp.
+            results = politician_manager.retrieve_politician(
                 politician_we_vote_id=politician_we_vote_id,
                 seo_friendly_path=seo_friendly_path,
                 voter_we_vote_id=voter_we_vote_id,

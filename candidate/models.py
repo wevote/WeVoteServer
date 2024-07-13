@@ -2738,7 +2738,7 @@ class CandidateCampaign(models.Model):
     crowdpac_candidate_id = models.PositiveIntegerField(
         verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True, db_index=True)
 
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
