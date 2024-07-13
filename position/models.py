@@ -270,7 +270,10 @@ class PositionEntered(models.Model):
         indexes = [
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
-                name='positions_for_candidate_index'),
+                name='positions_for_candidate_voter'),
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
+                name='positions_for_candidate_org'),
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
                         'google_civic_election_id', 'stance'],
@@ -697,6 +700,9 @@ class PositionForFriends(models.Model):
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
                 name='friends_positions_candidate'),
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
+                name='friends_for_candidate_org'),
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id',
                         'google_civic_election_id', 'stance'],

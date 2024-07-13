@@ -3292,6 +3292,9 @@ class Voter(AbstractBaseUser):
                 fields=['linked_organization_we_vote_id'],
                 name='voter_fetch_voter_by_org_index'),
             models.Index(
+                fields=['linked_organization_we_vote_id', 'we_vote_id'],
+                name='fetch_voter_by_org2_index'),
+            models.Index(
                 fields=['primary_email_we_vote_id', 'primary_sms_we_vote_id', 'twitter_id', 'facebook_id'],
                 name='voter_signin_count_index'),
         ]
