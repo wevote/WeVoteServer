@@ -671,14 +671,16 @@ def issues_retrieve_for_api(  # issuesRetrieve  # DEPRECATED
     if not positive_value_exists(google_civic_election_id):
         ballot_returned_manager = BallotReturnedManager()
         if positive_value_exists(ballot_location_shortcut):
-            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
-                ballot_location_shortcut)
+            results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                ballot_location_shortcut=ballot_location_shortcut,
+                read_only=True)
             if results['ballot_returned_found']:
                 ballot_returned = results['ballot_returned']
                 google_civic_election_id = ballot_returned.google_civic_election_id
         elif positive_value_exists(ballot_returned_we_vote_id):
-            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-                ballot_returned_we_vote_id)
+            results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                read_only=True)
             if results['ballot_returned_found']:
                 ballot_returned = results['ballot_returned']
                 google_civic_election_id = ballot_returned.google_civic_election_id
@@ -835,14 +837,16 @@ def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetriev
     if not positive_value_exists(google_civic_election_id):
         ballot_returned_manager = BallotReturnedManager()
         if positive_value_exists(ballot_location_shortcut):
-            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
-                ballot_location_shortcut)
+            results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                ballot_location_shortcut=ballot_location_shortcut,
+                read_only=True)
             if results['ballot_returned_found']:
                 ballot_returned = results['ballot_returned']
                 google_civic_election_id = ballot_returned.google_civic_election_id
         elif positive_value_exists(ballot_returned_we_vote_id):
-            results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-                ballot_returned_we_vote_id)
+            results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                read_only=True)
             if results['ballot_returned_found']:
                 ballot_returned = results['ballot_returned']
                 google_civic_election_id = ballot_returned.google_civic_election_id
@@ -1047,8 +1051,11 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
     position_list_manager = PositionListManager()
     # This function returns a list, not a results dict
     public_position_list = position_list_manager.retrieve_all_positions_for_election(
-        google_civic_election_id, stance_we_are_looking_for, retrieve_public_positions,
-        organization_we_vote_ids_for_all_issues, read_only=True)
+        google_civic_election_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        public_only=retrieve_public_positions,
+        limit_to_organization_we_vote_ids=organization_we_vote_ids_for_all_issues,
+        read_only=True)
 
     # Now we loop through all of these positions and assemble a list of ballot_item_we_vote_ids for all positions
     for one_position in public_position_list:

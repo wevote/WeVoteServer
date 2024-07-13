@@ -2208,8 +2208,9 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
         return results
 
     ballot_returned_manager = BallotReturnedManager()
-    results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-        voter_ballot_saved.ballot_returned_we_vote_id)
+    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+        ballot_returned_we_vote_id=voter_ballot_saved.ballot_returned_we_vote_id,
+        read_only=False)  # We don't know if it needs to NOT read_only, so assume that until we know in future
     if not results['ballot_returned_found']:
         results = {
             'status':                       "BALLOT_RETURNED_NOT_FOUND ",
