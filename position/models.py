@@ -3561,7 +3561,8 @@ class PositionListManager(models.Manager):
             google_civic_election_id,
             stance_we_are_looking_for=ANY_STANCE,
             public_only=False,
-            limit_to_organization_we_vote_ids=[]):
+            limit_to_organization_we_vote_ids=[],
+            read_only=True):
         """
         Since we don't have a single way to ask the positions tables for only the positions related to a single
         election, we need to look up the data in a round-about way. We get all candidates and measures in the election,
@@ -3570,6 +3571,7 @@ class PositionListManager(models.Manager):
         :param stance_we_are_looking_for:
         :param public_only: Do we care about public positions? Or friend's only positions?
         :param limit_to_organization_we_vote_ids: Pass in a list of organizations
+        :param read_only:
         :return:
         """
         position_list = []
@@ -3595,11 +3597,16 @@ class PositionListManager(models.Manager):
         try:
             if public_only:
                 # Only return public positions
-                position_list_query = PositionEntered.objects.order_by('-date_entered')
+                if positive_value_exists(read_only):
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
             else:
                 # Only return PositionForFriends entries
-                position_list_query = PositionForFriends.objects.order_by('-date_entered')
-
+                if positive_value_exists(read_only):
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
+                else:
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
             position_list_query = position_list_query.filter(
                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
                 Q(google_civic_election_id=google_civic_election_id))

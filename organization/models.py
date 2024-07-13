@@ -3253,7 +3253,7 @@ class Organization(models.Model):
     twitter_location = models.CharField(
         verbose_name="org location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=False, blank=True, default=0)
+                                                  null=False, blank=True, default=0, db_index=True)
     twitter_profile_image_url_https = models.TextField(
         verbose_name='url of user logo from twitter', blank=True, null=True)
     twitter_profile_background_image_url_https = models.TextField(

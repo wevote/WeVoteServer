@@ -904,7 +904,7 @@ def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id
     # This function returns a list, not a results dict
     public_position_list = position_list_manager.retrieve_all_positions_for_election(
         google_civic_election_id, stance_we_are_looking_for, retrieve_public_positions,
-        organization_we_vote_ids_for_all_voter_issues)
+        organization_we_vote_ids_for_all_voter_issues, read_only=True)
 
     # Now we loop through all of these positions and assemble a list of ballot_item_we_vote_ids for all positions
     for one_position in public_position_list:
@@ -1048,7 +1048,7 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
     # This function returns a list, not a results dict
     public_position_list = position_list_manager.retrieve_all_positions_for_election(
         google_civic_election_id, stance_we_are_looking_for, retrieve_public_positions,
-        organization_we_vote_ids_for_all_issues)
+        organization_we_vote_ids_for_all_issues, read_only=True)
 
     # Now we loop through all of these positions and assemble a list of ballot_item_we_vote_ids for all positions
     for one_position in public_position_list:
@@ -1308,7 +1308,8 @@ def retrieve_issues_linked_to_organization_for_api(organization_we_vote_id):
     empty_issue_we_vote_id_list_to_exclude = None
     require_filter_or_exclude = True
     issues_linked_result = issue_list_manager.retrieve_issues(
-        sort_formula, issue_we_vote_ids_linked, empty_issue_we_vote_id_list_to_exclude, require_filter_or_exclude)
+        sort_formula, issue_we_vote_ids_linked, empty_issue_we_vote_id_list_to_exclude, require_filter_or_exclude,
+        read_only=True)
 
     issues_linked = []
     if issues_linked_result['issue_list_found']:
@@ -1338,7 +1339,8 @@ def retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id):
     empty_issue_we_vote_id_list_to_filter = None
     require_filter_or_exclude = True
     issues_linked_result = issue_list_manager.retrieve_issues(
-        sort_formula, empty_issue_we_vote_id_list_to_filter, issue_we_vote_ids_linked, require_filter_or_exclude)
+        sort_formula, empty_issue_we_vote_id_list_to_filter, issue_we_vote_ids_linked, require_filter_or_exclude,
+        read_only=True)
 
     issues_not_linked = []
     if issues_linked_result['issue_list_found']:
