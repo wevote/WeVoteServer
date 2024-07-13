@@ -2757,6 +2757,12 @@ class CandidateCampaign(models.Model):
     # Set this for existing candidates once we have created CandidateToOfficeLink (is temporary variable)
     migrated_to_link = models.BooleanField(default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['seo_friendly_path', 'politician_we_vote_id']),
+        ]
+
     def election(self):
         try:
             election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)

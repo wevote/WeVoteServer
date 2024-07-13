@@ -3371,6 +3371,13 @@ class Organization(models.Model):
         verbose_name='endorsements importer url', blank=True, null=True)
     youtube_url = models.TextField(blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['politician_we_vote_id', 'state_served_code', 'organization_name', '-twitter_followers_count'],
+                name='organization_politicians_match_to_orgs_index'),
+        ]
+
     def __unicode__(self):
         return str(self.organization_name)
 

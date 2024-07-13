@@ -3266,7 +3266,7 @@ class Voter(AbstractBaseUser):
     interface_status_flags = models.PositiveIntegerField(verbose_name="interface status flags", default=0)
 
     # This is how we keep track of whether we have run certain updates on voter records
-    #  to the latest defaults, for example
+    #  to the latest defaults
     # For example, have we updated a voter's notification_settings_flags after adding new feature?
     # We update the default value for maintenance_status_flags for new voters with MAINTENANCE_STATUS_FLAGS_COMPLETED
     #  since we updated the NOTIFICATION_SETTINGS_FLAGS_DEFAULT to match what we want after all the maintenance
@@ -3285,6 +3285,16 @@ class Voter(AbstractBaseUser):
     voter_issues_lookup_updated = models.BooleanField(default=False)
 
     objects = VoterManager()
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['linked_organization_we_vote_id'],
+                name='voter_fetch_voter_by_org_index'),
+            models.Index(
+                fields=['primary_email_we_vote_id', 'primary_sms_we_vote_id', 'twitter_id', 'facebook_id'],
+                name='voter_signin_count_index'),
+        ]
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []  # Since we need to store a voter based solely on voter_device_id, no values are required
