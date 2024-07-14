@@ -75,6 +75,12 @@ class PollingLocation(models.Model):
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
     polling_location_deleted = models.BooleanField(verbose_name="removed from usage", default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['state', 'polling_location_deleted'],
+                         name='state_and_not_deleted'),
+        ]
+
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
 

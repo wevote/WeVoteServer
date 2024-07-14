@@ -423,7 +423,7 @@ def issue_descriptions_retrieve_for_api():  # issueDescriptionsRetrieve
 
     try:
         issue_list_object = IssueListManager()
-        results = issue_list_object.retrieve_issues()
+        results = issue_list_object.retrieve_issues(read_only=True)
         success = results['success']
         status = results['status']
         issue_list = results['issue_list']
@@ -809,7 +809,7 @@ def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetriev
 
     try:
         issue_list_object = IssueListManager()
-        results = issue_list_object.retrieve_issues()
+        results = issue_list_object.retrieve_issues(read_only=True)
         success = results['success']
         status += results['status']
         issue_list = results['issue_list']

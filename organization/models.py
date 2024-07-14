@@ -3376,7 +3376,15 @@ class Organization(models.Model):
             models.Index(
                 fields=['politician_we_vote_id', 'state_served_code', 'organization_name', '-twitter_followers_count'],
                 name='organization_politicians_match'),
+            models.Index(
+                fields=['chosen_domain_string', 'chosen_domain_string2',
+                        'chosen_domain_string3', 'chosen_subdomain_string'],
+                name='site_configuration'),
+            models.Index(
+                fields=['we_vote_id', '-twitter_followers_count'],
+                name='orgs_by_twitter_followers'),
         ]
+        ordering = ('organization_name',)
 
     def __unicode__(self):
         return str(self.organization_name)
@@ -3426,9 +3434,6 @@ class Organization(models.Model):
             return self.twitter_profile_image_url_https.replace("_normal", "")
         else:
             return ''
-
-    class Meta:
-        ordering = ('organization_name',)
 
     objects = OrganizationManager()
 

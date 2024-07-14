@@ -105,6 +105,7 @@ class PositionEntered(models.Model):
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter username for candidate, measure, or office', max_length=255, null=True, unique=False)
     campaignx_supporter_created = models.BooleanField(default=None, null=True)
+    politician_follow_created = models.BooleanField(default=None, null=True)  # When position is created, also follow
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -3635,12 +3636,15 @@ class PositionListManager(models.Manager):
                     position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
                 else:
                     position_list_query = PositionForFriends.objects.order_by('-date_entered')
-            position_list_query = position_list_query.filter(
-                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
-                Q(google_civic_election_id=google_civic_election_id))
+            # 2024-07 Removing google_civic_election_id to speed up the query
+            # position_list_query = position_list_query.filter(
+            #     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
+            #     Q(google_civic_election_id=google_civic_election_id))
+            position_list_query = \
+                position_list_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
