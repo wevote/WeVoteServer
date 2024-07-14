@@ -105,6 +105,7 @@ class PositionEntered(models.Model):
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter username for candidate, measure, or office', max_length=255, null=True, unique=False)
     campaignx_supporter_created = models.BooleanField(default=None, null=True)
+    politician_follow_created = models.BooleanField(default=None, null=True)  # When position is created, also follow
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -1077,7 +1078,7 @@ class PositionListManager(models.Manager):
             public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
+            # public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(candidate_id):
                 public_position_list = public_position_list.filter(candidate_campaign_id=candidate_id)
@@ -1195,7 +1196,7 @@ class PositionListManager(models.Manager):
             public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
+            # public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(contest_measure_id):
                 public_position_list = public_position_list.filter(contest_measure_id=contest_measure_id)
@@ -1324,7 +1325,7 @@ class PositionListManager(models.Manager):
             position_query = position_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
             
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_query = position_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_query = position_query.exclude(stance__iexact=PERCENT_RATING)
 
             position_query = position_query.filter(organization_we_vote_id__in=organization_we_vote_id_list)
 
@@ -1852,7 +1853,7 @@ class PositionListManager(models.Manager):
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(candidate_id):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_id)
@@ -1991,7 +1992,7 @@ class PositionListManager(models.Manager):
                     position_list_query = PositionForFriends.objects.order_by('-date_entered')
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(candidate_id):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_id)
@@ -2121,7 +2122,7 @@ class PositionListManager(models.Manager):
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(contest_measure_id):
                 position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
@@ -2232,7 +2233,7 @@ class PositionListManager(models.Manager):
                     position_list_query = PositionForFriends.objects.order_by('-date_entered')
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(contest_measure_id):
                 position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
@@ -2333,7 +2334,7 @@ class PositionListManager(models.Manager):
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             position_list_query = position_list_query.filter(
                 candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
@@ -2431,7 +2432,7 @@ class PositionListManager(models.Manager):
                     position_list_query = PositionForFriends.objects.order_by('-date_entered')
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(contest_office_we_vote_id):
                 position_list_query = position_list_query.filter(
@@ -2668,7 +2669,7 @@ class PositionListManager(models.Manager):
                     public_positions_query = PositionEntered.objects.all()
                 public_query_exists = True
                 # As of Aug 2018 we are no longer using PERCENT_RATING
-                public_positions_query = public_positions_query.exclude(stance__iexact=PERCENT_RATING)
+                # public_positions_query = public_positions_query.exclude(stance__iexact=PERCENT_RATING)
 
                 if positive_value_exists(organization_id):
                     public_positions_query = public_positions_query.filter(organization_id=organization_id)
@@ -2868,7 +2869,7 @@ class PositionListManager(models.Manager):
                         friends_positions_query = PositionForFriends.objects.all()
                     friends_query_exists = True
                     # As of Aug 2018 we are no longer using PERCENT_RATING
-                    friends_positions_query = friends_positions_query.exclude(stance__iexact=PERCENT_RATING)
+                    # friends_positions_query = friends_positions_query.exclude(stance__iexact=PERCENT_RATING)
 
                     # Get the entries saved by the organization's voter account
                     if positive_value_exists(organization_voter_local_id):
@@ -3150,7 +3151,7 @@ class PositionListManager(models.Manager):
                     public_positions_list_query = PositionEntered.objects.all()
 
                 # As of Aug 2018 we are no longer using PERCENT_RATING
-                public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+                # public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
 
                 if positive_value_exists(voter_id):
                     public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
@@ -3210,7 +3211,7 @@ class PositionListManager(models.Manager):
                     friends_positions_list_query = PositionForFriends.objects.all()
 
                 # As of Aug 2018 we are no longer using PERCENT_RATING
-                friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+                # friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
 
                 if positive_value_exists(voter_id):
                     friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
@@ -3390,7 +3391,7 @@ class PositionListManager(models.Manager):
                 public_positions_list_query = PositionEntered.objects.all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(voter_id):
                 public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
@@ -3429,7 +3430,7 @@ class PositionListManager(models.Manager):
                 friends_positions_list_query = PositionForFriends.objects.all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(voter_id):
                 friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
@@ -3635,12 +3636,15 @@ class PositionListManager(models.Manager):
                     position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
                 else:
                     position_list_query = PositionForFriends.objects.order_by('-date_entered')
-            position_list_query = position_list_query.filter(
-                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
-                Q(google_civic_election_id=google_civic_election_id))
+            # 2024-07 Removing google_civic_election_id to speed up the query
+            # position_list_query = position_list_query.filter(
+            #     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
+            #     Q(google_civic_election_id=google_civic_election_id))
+            position_list_query = \
+                position_list_query.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+            # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
@@ -3877,7 +3881,7 @@ class PositionListManager(models.Manager):
             position_list_query = PositionEntered.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         if retrieve_public_positions:
             # If retrieving PositionEntered, make sure we have the necessary variables
@@ -4009,7 +4013,7 @@ class PositionListManager(models.Manager):
             candidate_we_vote_id_list.append(one_candidate.we_vote_id)
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         # Retrieve the support positions for this contest_office_id
         position_count = 0
@@ -4083,7 +4087,7 @@ class PositionListManager(models.Manager):
             position_list_query = PositionEntered.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         # Retrieve the support positions for this contest_measure_id
         position_count = 0
@@ -4144,7 +4148,7 @@ class PositionListManager(models.Manager):
             position_list_query = PositionEntered.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         # Retrieve the support positions for this politician_id
         position_count = 0
@@ -4235,7 +4239,7 @@ class PositionListManager(models.Manager):
             position_list_query = PositionEntered.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         if retrieve_public_positions:
             # If retrieving PositionEntered, make sure we have the necessary variables
@@ -4300,7 +4304,7 @@ class PositionListManager(models.Manager):
             position_queryset = PositionEntered.objects.all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            position_queryset = position_queryset.exclude(stance__iexact=PERCENT_RATING)
+            # position_queryset = position_queryset.exclude(stance__iexact=PERCENT_RATING)
 
             position_queryset = position_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for office_we_vote_id because of the chance that locally we are using a
@@ -8884,7 +8888,7 @@ class PositionManager(models.Manager):
             position_item_queryset = PositionForFriends.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_item_queryset = position_item_queryset.exclude(stance__iexact=PERCENT_RATING)
+        # position_item_queryset = position_item_queryset.exclude(stance__iexact=PERCENT_RATING)
 
         positions_count = 0
         success = False
@@ -8937,7 +8941,7 @@ class PositionMetricsManager(models.Manager):
             count_query = PositionEntered.objects.using('readonly').all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(
@@ -8967,7 +8971,7 @@ class PositionMetricsManager(models.Manager):
             count_query = PositionEntered.objects.using('readonly').all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(
@@ -9000,7 +9004,7 @@ class PositionMetricsManager(models.Manager):
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
@@ -9028,7 +9032,7 @@ class PositionMetricsManager(models.Manager):
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
@@ -9052,7 +9056,7 @@ class PositionMetricsManager(models.Manager):
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
                 (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
@@ -9072,7 +9076,7 @@ class PositionMetricsManager(models.Manager):
             count_query = PositionEntered.objects.using('readonly').all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
 
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
@@ -9092,7 +9096,7 @@ class PositionMetricsManager(models.Manager):
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
@@ -9106,7 +9110,7 @@ class PositionMetricsManager(models.Manager):
             count_query = PositionEntered.objects.using('readonly').all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
-            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+            # count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
 
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_result = count_query.count()
@@ -9140,7 +9144,7 @@ class PositionMetricsManager(models.Manager):
         position_list_query = PositionEntered.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         position_list_query = position_list_query.filter(final_position_filters)
 
@@ -9150,7 +9154,7 @@ class PositionMetricsManager(models.Manager):
         position_list_query = PositionForFriends.objects.using('readonly').all()
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         position_list_query = position_list_query.filter(final_position_filters)
 
