@@ -204,7 +204,8 @@ def voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api(  # vot
     if positive_value_exists(offices_held_for_location_id):
         pass
         # ballot_returned_results = \
-        #     ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(offices_held_for_location_id)
+        #     ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+        #         ballot_returned_we_vote_id=offices_held_for_location_id)
         # if ballot_returned_results['ballot_returned_found']:
         #     ballot_returned = ballot_returned_results['ballot_returned']
         #     polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id

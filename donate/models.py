@@ -57,7 +57,7 @@ class DonateLinkToVoter(models.Model):
                                           unique=True, null=False, blank=False)
     # There are scenarios where a voter_we_vote_id might have multiple customer_id's
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=255, unique=False, null=False,
-                                        blank=False)
+                                        blank=False, db_index=True)
 
 
 class DonationPlanDefinition(models.Model):

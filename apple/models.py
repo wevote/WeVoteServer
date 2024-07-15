@@ -20,7 +20,8 @@ class AppleUser(models.Model):
     #                                    max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
     DoesNotExist = None
     objects = None
-    voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=True)
+    voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner",
+                                        max_length=255, unique=True, db_index=True)
     user_code = models.CharField(verbose_name="User's apple id code", max_length=255, null=False, unique=False)
     email = models.EmailField(verbose_name='apple email address', max_length=255, unique=False,
                               null=True, blank=True)

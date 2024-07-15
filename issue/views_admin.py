@@ -179,7 +179,6 @@ def issue_list_view(request):
 
     issue_we_vote_id_list = []
     organization_we_vote_id_in_this_election_list = []
-    organization_retrieved_list = {}
     organization_link_to_issue_list = []
     organizations_attached_to_this_issue = {}
     if positive_value_exists(google_civic_election_id):
@@ -188,34 +187,45 @@ def issue_list_view(request):
         #  in this election linked to issues.
         voter_guide_list_manager = VoterGuideListManager()
         organization_manager = OrganizationManager()
+        organization_we_vote_ids_to_retrieve = []
         google_civic_election_id_list = [google_civic_election_id]
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id_list)
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(
+            google_civic_election_id_list,
+            read_only=True)
         if results['voter_guide_list_found']:
             voter_guide_list = results['voter_guide_list']
             for one_voter_guide in voter_guide_list:
                 organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
 
+            # Get all organizations in one database call (instead of 30K calls)
             if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
-                organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
+                organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.using('readonly').all()
                 organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
                     organization_we_vote_id__in=organization_we_vote_id_in_this_election_list)
                 organization_link_to_issue_list = list(organization_link_to_issue_list_query)
             for one_organization_link_to_issue in organization_link_to_issue_list:
-                if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
-                    # If here, we need to retrieve the organization
-                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        one_organization_link_to_issue.organization_we_vote_id)
-                    if organization_results['organization_found']:
-                        organization_object = organization_results['organization']
-                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
-                            organization_object
+                if one_organization_link_to_issue.organization_we_vote_id not in organization_we_vote_ids_to_retrieve:
+                    organization_we_vote_ids_to_retrieve\
+                        .append(one_organization_link_to_issue.organization_we_vote_vote_id)
+            organizations_retrieved_dict = {}
+            if len(organization_we_vote_ids_to_retrieve) > 0:
+                from organization.models import Organization
+                try:
+                    queryset = Organization.objects.using('readonly')\
+                        .filter(we_vote_id__in=organization_we_vote_ids_to_retrieve)
+                    organization_list = list(queryset)
+                    for organization in organization_list:
+                        organizations_retrieved_dict[organization.we_vote_id] = organization
+                except Exception as e:
+                    pass
+            for one_organization_link_to_issue in organization_link_to_issue_list:
                 if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
                     organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
                 try:
-                    if one_organization_link_to_issue.organization_we_vote_id in organization_retrieved_list:
+                    if one_organization_link_to_issue.organization_we_vote_id in organizations_retrieved_dict:
                         organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
                             append(
-                            organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
+                            organizations_retrieved_dict[one_organization_link_to_issue.organization_we_vote_id])
                     # if one_organization_link_to_issue.issue_we_vote_id not in issue_we_vote_id_list:
                     #     issue_we_vote_id_list.append(one_organization_link_to_issue.issue_we_vote_id)
 
@@ -223,7 +233,7 @@ def issue_list_view(request):
                     handle_exception(e, logger, exception_message="In organization list")
 
     try:
-        issue_list_query = Issue.objects.all()
+        issue_list_query = Issue.objects.using('readonly').all()
 
         if positive_value_exists(show_hidden_issues) or positive_value_exists(issue_search):
             # If trying to show hidden issues, no change to the query needed
@@ -304,10 +314,10 @@ def issue_list_view(request):
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
+        results = election_manager.retrieve_elections(read_only=True)
         election_list = results['election_list']
     else:
-        results = election_manager.retrieve_upcoming_elections()
+        results = election_manager.retrieve_upcoming_elections(read_only=True)
         election_list = results['election_list']
         # Make sure we always include the current election in the election_list, even if it is older
         if positive_value_exists(google_civic_election_id):
@@ -317,7 +327,7 @@ def issue_list_view(request):
                     this_election_found = True
                     break
             if not this_election_found:
-                results = election_manager.retrieve_election(google_civic_election_id)
+                results = election_manager.retrieve_election(google_civic_election_id, read_only=True)
                 if results['election_found']:
                     one_election = results['election']
                     election_list.append(one_election)
@@ -398,7 +408,7 @@ def issue_edit_view(request, issue_we_vote_id):
     organization_list = []
 
     try:
-        issue_on_stage = Issue.objects.get(we_vote_id__iexact=issue_we_vote_id)
+        issue_on_stage = Issue.objects.using('readonly').get(we_vote_id__iexact=issue_we_vote_id)
         issue_on_stage_found = True
     except Issue.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -427,7 +437,9 @@ def issue_edit_view(request, issue_we_vote_id):
             organization_we_vote_id_list = organization_results['organization_we_vote_id_list']
             organization_list_results = \
                 organization_list_manager.retrieve_organizations_by_organization_we_vote_id_list(
-                    organization_we_vote_id_list)
+                    limit=200,
+                    list_of_organization_we_vote_ids=organization_we_vote_id_list,
+                    read_only=True)
             if organization_list_results['organization_list_found']:
                 organization_list = organization_list_results['organization_list']
 
@@ -578,6 +590,10 @@ def issue_edit_process_view(request):
         issue_on_stage.considered_left = considered_left
         issue_on_stage.considered_right = considered_right
         issue_on_stage.hide_issue = hide_issue
+        organization_link_issue_list_manager = OrganizationLinkToIssueList()
+        linked_organization_count = organization_link_issue_list_manager.fetch_linked_organization_count(
+            issue_we_vote_id=issue_on_stage.we_vote_id)
+        issue_on_stage.linked_organization_count = linked_organization_count
 
         issue_on_stage.save()
         issue_we_vote_id = issue_on_stage.we_vote_id
@@ -902,7 +918,7 @@ def issue_partisan_analysis_view(request):
             organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
         # Retrieve all the linkages between organizations and issues
         if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
-            organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
+            organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.using('readonly').all()
             organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
                 organization_we_vote_id__in=organization_we_vote_id_in_this_election_list)
             organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(

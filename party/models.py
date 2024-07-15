@@ -14,7 +14,7 @@ class Party(models.Model):
     # The unique ID of this Party. (Provided by CTCL).
     # TODO party_ctcl_id_temp is unique for each data file, however it may not be unique across different data feeds
     party_id_temp = models.CharField(verbose_name="temporary party id", max_length=255, null=True, unique=True)
-    we_vote_id = models.CharField(verbose_name="party we_vote_id", max_length=32, null=True, unique=True)
+    we_vote_id = models.CharField(verbose_name="party we_vote_id", max_length=32, null=True, unique=True, db_index=True)
     # Make unique=True after data is migrated
     party_name = models.CharField(verbose_name="party name", max_length=255, null=False, unique=False)
     party_abbreviation = models.CharField(verbose_name="party abbreviation", max_length=255, null=True, unique=False,

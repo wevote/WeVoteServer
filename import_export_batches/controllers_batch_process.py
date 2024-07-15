@@ -12,9 +12,10 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     CALCULATE_SITEWIDE_DAILY_METRICS, \
     CALCULATE_SITEWIDE_ELECTION_METRICS, \
     CALCULATE_SITEWIDE_VOTER_METRICS, \
-    GENERATE_VOTER_GUIDES, IMPORT_CREATE, IMPORT_DELETE, \
-    RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
-    RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS, \
+    GENERATE_VOTER_GUIDES, IMPORT_CREATE, IMPORT_DELETE, MATCH_POLITICIANS_TO_ORGANIZATIONS, \
+    REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS, \
+    RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, RETRIEVE_FROM_BALLOTPEDIA, \
+    RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS, \
     SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, UPDATE_TWITTER_DATA_FROM_TWITTER
 from activity.controllers import process_activity_notice_seeds_triggered_by_batch_process
 from analytics.controllers import calculate_sitewide_daily_metrics, \
@@ -24,6 +25,8 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
 from analytics.models import AnalyticsManager
 from api_internal_cache.models import ApiInternalCacheManager
 from ballot.models import BallotReturnedListManager
+from candidate.controllers import fetch_ballotpedia_urls_to_retrieve_for_links_count, \
+    fetch_ballotpedia_urls_to_retrieve_for_photos_count
 from candidate.models import CandidateListManager
 from datetime import timedelta
 from django.db.models import Q
@@ -37,6 +40,7 @@ from import_export_twitter.controllers import fetch_number_of_candidates_needing
     retrieve_and_update_representatives_needing_twitter_update, retrieve_possible_twitter_handles_in_bulk
 from issue.controllers import update_issue_statistics
 import json
+from politician.controllers import fetch_number_of_politicians_to_match_to_organizations
 from position.models import PositionEntered
 from voter_guide.controllers import voter_guides_upcoming_retrieve_for_api
 from voter_guide.models import VoterGuideManager, VoterGuidesGenerated
@@ -44,9 +48,12 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
     fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
-    fetch_batch_process_system_representatives_on, fetch_batch_process_system_calculate_analytics_on, \
-    fetch_batch_process_system_search_twitter_on, \
-    fetch_batch_process_system_generate_voter_guides_on, fetch_batch_process_system_update_twitter_on
+    fetch_batch_process_system_general_maintenance_on, \
+    fetch_batch_process_system_match_politicians_to_organizations_on, \
+    fetch_batch_process_system_representatives_on, \
+    fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_generate_voter_guides_on, \
+    fetch_batch_process_system_retrieve_from_ballotpedia_on, \
+    fetch_batch_process_system_search_twitter_on, fetch_batch_process_system_update_twitter_on
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -455,15 +462,29 @@ def process_next_general_maintenance():
     if fetch_batch_process_system_generate_voter_guides_on():
         generate_voter_guides_process_list = [GENERATE_VOTER_GUIDES]
         kind_of_processes_to_run = kind_of_processes_to_run + generate_voter_guides_process_list
+    if fetch_batch_process_system_retrieve_from_ballotpedia_on():
+        retrieve_from_ballotpedia_process_list = [RETRIEVE_FROM_BALLOTPEDIA]
+        kind_of_processes_to_run = kind_of_processes_to_run + retrieve_from_ballotpedia_process_list
     if fetch_batch_process_system_search_twitter_on():
         search_twitter_process_list = [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]
         kind_of_processes_to_run = kind_of_processes_to_run + search_twitter_process_list
     if fetch_batch_process_system_update_twitter_on():
         update_twitter_process_list = [UPDATE_TWITTER_DATA_FROM_TWITTER]
         kind_of_processes_to_run = kind_of_processes_to_run + update_twitter_process_list
+    if fetch_batch_process_system_match_politicians_to_organizations_on():
+        match_politicians_to_organizations_process_list = [MATCH_POLITICIANS_TO_ORGANIZATIONS]
+        kind_of_processes_to_run = kind_of_processes_to_run + match_politicians_to_organizations_process_list
 
     if not fetch_batch_process_system_on():
         status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-GENERAL "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if not fetch_batch_process_system_general_maintenance_on():
+        status += "BATCH_PROCESS_SYSTEM_GENERAL_MAINTENANCE_TURNED_OFF-GENERAL "
         results = {
             'success': success,
             'status': status,
@@ -638,6 +659,92 @@ def process_next_general_maintenance():
                         batch_process_id=0,
                         kind_of_process=GENERATE_VOTER_GUIDES,
                         google_civic_election_id=first_election_id,
+                        status=status,
+                    )
+
+    # ############################
+    # MATCH_POLITICIANS_TO_ORGANIZATIONS
+    if not fetch_batch_process_system_match_politicians_to_organizations_on():
+        status += "BATCH_PROCESS_SYSTEM_MATCH_POLITICIANS_TO_ORGANIZATIONS_OFF "
+    else:
+        # We only want one MATCH_POLITICIANS_TO_ORGANIZATIONS process to be running at a time
+        # Check to see if one of the existing batches is for MATCH_POLITICIANS_TO_ORGANIZATIONS.
+        # If so, skip creating a new one.
+        match_politicians_to_organizations_is_already_in_queue = False
+        for batch_process in batch_process_list_already_scheduled:
+            if batch_process.kind_of_process in [MATCH_POLITICIANS_TO_ORGANIZATIONS]:
+                status += "MATCH_POLITICIANS_TO_ORGANIZATIONS_ALREADY_SCHEDULED(" + str(batch_process.id) + ") "
+                match_politicians_to_organizations_is_already_in_queue = True
+        for batch_process in batch_process_list_already_running:
+            if batch_process.kind_of_process in [MATCH_POLITICIANS_TO_ORGANIZATIONS]:
+                status += "MATCH_POLITICIANS_TO_ORGANIZATIONS_ALREADY_RUNNING(" + str(batch_process.id) + ") "
+                match_politicians_to_organizations_is_already_in_queue = True
+        if match_politicians_to_organizations_is_already_in_queue:
+            pass
+        else:
+            number_to_analyze = fetch_number_of_politicians_to_match_to_organizations()
+            if positive_value_exists(number_to_analyze):
+                results = batch_process_manager.create_batch_process(
+                    kind_of_process=MATCH_POLITICIANS_TO_ORGANIZATIONS)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    status += "SCHEDULED_NEW_MATCH_POLITICIANS_TO_ORGANIZATIONS "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        status=status,
+                    )
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(MATCH_POLITICIANS_TO_ORGANIZATIONS) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=MATCH_POLITICIANS_TO_ORGANIZATIONS,
+                        status=status,
+                    )
+
+    # ############################
+    # RETRIEVE_FROM_BALLOTPEDIA
+    if not fetch_batch_process_system_retrieve_from_ballotpedia_on():
+        status += "BATCH_PROCESS_SYSTEM_RETRIEVE_FROM_BALLOTPEDIA_OFF "
+    else:
+        # We only want one RETRIEVE_FROM_BALLOTPEDIA process to be running at a time
+        # Check to see if one of the existing batches is for RETRIEVE_FROM_BALLOTPEDIA.
+        # If so, skip creating a new one.
+        retrieve_from_ballotpedia_is_already_in_queue = False
+        for batch_process in batch_process_list_already_scheduled:
+            if batch_process.kind_of_process in [RETRIEVE_FROM_BALLOTPEDIA]:
+                status += "RETRIEVE_FROM_BALLOTPEDIA_ALREADY_SCHEDULED(" + str(batch_process.id) + ") "
+                retrieve_from_ballotpedia_is_already_in_queue = True
+        for batch_process in batch_process_list_already_running:
+            if batch_process.kind_of_process in [RETRIEVE_FROM_BALLOTPEDIA]:
+                status += "RETRIEVE_FROM_BALLOTPEDIA_ALREADY_RUNNING(" + str(batch_process.id) + ") "
+                retrieve_from_ballotpedia_is_already_in_queue = True
+        if retrieve_from_ballotpedia_is_already_in_queue:
+            pass
+        else:
+            number_to_retrieve1 = fetch_ballotpedia_urls_to_retrieve_for_links_count()
+            number_to_retrieve2 = fetch_ballotpedia_urls_to_retrieve_for_photos_count()
+            number_to_retrieve = number_to_retrieve1 + number_to_retrieve2
+            if positive_value_exists(number_to_retrieve):
+                results = batch_process_manager.create_batch_process(
+                    kind_of_process=RETRIEVE_FROM_BALLOTPEDIA)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    status += "SCHEDULED_NEW_RETRIEVE_FROM_BALLOTPEDIA "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        status=status,
+                    )
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(RETRIEVE_FROM_BALLOTPEDIA) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=RETRIEVE_FROM_BALLOTPEDIA,
                         status=status,
                     )
 
@@ -879,6 +986,12 @@ def process_next_general_maintenance():
             status += results['status']
         elif batch_process.kind_of_process in [GENERATE_VOTER_GUIDES]:
             results = process_one_generate_voter_guides_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [MATCH_POLITICIANS_TO_ORGANIZATIONS]:
+            results = process_one_match_politicians_to_organizations_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [RETRIEVE_FROM_BALLOTPEDIA]:
+            results = process_one_retrieve_from_ballotpedia_batch_process(batch_process)
             status += results['status']
         elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
             results = process_one_search_twitter_batch_process(batch_process, status=status)
@@ -1195,7 +1308,8 @@ def process_one_analytics_batch_process(batch_process):
         status += "ANALYTICS_CHUNK_PREVIOUSLY_STARTED_BUT_NOT_FINISHED "
         results = analytics_manager.retrieve_analytics_processed_list(
             batch_process_id=batch_process.id,
-            batch_process_analytics_chunk_id=batch_process_analytics_chunk.id)
+            batch_process_analytics_chunk_id=batch_process_analytics_chunk.id,
+            read_only=True)
         analytics_processed_count = 0
         if results['analytics_processed_list_found']:
             # Exclude the voters already processed for analytics_date_as_integer
@@ -2572,6 +2686,215 @@ def process_one_generate_voter_guides_batch_process(batch_process):
             google_civic_election_id=google_civic_election_id,
             status=status,
         )
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def process_one_match_politicians_to_organizations_batch_process(batch_process):
+    status = ""
+    success = True
+    batch_process_manager = BatchProcessManager()
+    kind_of_process = batch_process.kind_of_process
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        if batch_process.date_started is None:
+            batch_process.date_started = now()
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    from politician.controllers import match_politicians_to_organizations
+    retrieve_results = match_politicians_to_organizations(
+        changed_by_name='BATCH_PROCESS',
+        changed_by_voter_we_vote_id='',
+        number_of_politicians_to_match=250,
+        state_code='')
+
+    status += retrieve_results['status']
+
+    if retrieve_results['success']:
+        politicians_analyzed = retrieve_results['politicians_analyzed']
+        politicians_to_analyze = retrieve_results['organization_might_be_needed_count']
+        try:
+            completion_summary = \
+                "Politicians Analyzed: {politicians_analyzed:,} " \
+                "out of {politicians_to_analyze:,}" \
+                "".format(politicians_analyzed=politicians_analyzed,
+                          politicians_to_analyze=politicians_to_analyze)
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            status += str(retrieve_results['politician_we_vote_id_update_list']) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "ERROR-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+    else:
+        status += "MATCH_POLITICIANS_TO_ORGANIZATIONS_FAILED-MARKED_COMPLETED "
+        success = False
+        try:
+            completion_summary = \
+                "MATCH_POLITICIANS_TO_ORGANIZATIONS_FAILED: {status}" \
+                "".format(status=status)
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "ERROR-COMPLETION_SUMMARY_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def process_one_retrieve_from_ballotpedia_batch_process(batch_process):
+    status = ""
+    success = True
+    batch_process_manager = BatchProcessManager()
+    kind_of_process = batch_process.kind_of_process
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        if batch_process.date_started is None:
+            batch_process.date_started = now()
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    from import_export_ballotpedia.controllers_bulk_retrieve import \
+        retrieve_links_and_photos_from_ballotpedia_batch_process
+    retrieve_results = retrieve_links_and_photos_from_ballotpedia_batch_process(limit=10)  # Should be 50
+
+    status += retrieve_results['status']
+
+    if retrieve_results['success']:
+        try:
+            completion_summary = \
+                "Ballotpedia Photos: {photos_retrieved:,} " \
+                "out of {photos_to_retrieve:,}" \
+                "Ballotpedia Links: {profiles_retrieved:,} " \
+                "out of {profiles_to_retrieve:,}" \
+                "".format(photos_retrieved=retrieve_results['photos_retrieved'],
+                          photos_to_retrieve=retrieve_results['photos_to_retrieve'],
+                          profiles_retrieved=retrieve_results['profiles_retrieved'],
+                          profiles_to_retrieve=retrieve_results['profiles_to_retrieve'])
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            status += str(retrieve_results['politician_we_vote_id_update_list']) + " "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "ERROR-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+    else:
+        status += "RETRIEVE_FROM_BALLOTPEDIA_FAILED-MARKED_COMPLETED "
+        success = False
+        try:
+            completion_summary = \
+                "RETRIEVE_FROM_BALLOTPEDIA_FAILED: {status}" \
+                "".format(status=status)
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "ERROR-COMPLETION_SUMMARY_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
 
     results = {
         'success':              success,

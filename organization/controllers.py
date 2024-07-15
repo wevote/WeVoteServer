@@ -651,7 +651,8 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
         google_civic_election_id=google_civic_election_id,
         organization_we_vote_id=organization_we_vote_id,
         action_constant=ACTION_BALLOT_VISIT,
-        distinct_for_members=True)
+        distinct_for_members=True,
+        read_only=True)
     election_participation_list = results['analytics_action_list']
     # Split up this one list into multiple lists, organized by voter
     election_participation_dict_with_we_vote_id_lists = {}

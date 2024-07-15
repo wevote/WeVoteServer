@@ -108,6 +108,22 @@ class BallotItem(models.Model):
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_office_we_vote_id'],
+                name='election_poll_office_index'),
+            models.Index(
+                fields=['polling_location_we_vote_id', 'contest_office_we_vote_id', 'google_civic_election_id'],
+                name='poll_office_election_index'),
+            models.Index(
+                fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_measure_we_vote_id'],
+                name='election_poll_measure_index'),
+            models.Index(
+                fields=['polling_location_we_vote_id', 'contest_measure_we_vote_id', 'google_civic_election_id'],
+                name='poll_measure_election_index'),
+        ]
+
     def is_contest_office(self):
         if positive_value_exists(self.contest_office_id) or positive_value_exists(self.contest_office_we_vote_id):
             return True
@@ -1771,7 +1787,7 @@ class BallotReturned(models.Model):
     """
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
 
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
@@ -1779,7 +1795,7 @@ class BallotReturned(models.Model):
     # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -1795,7 +1811,7 @@ class BallotReturned(models.Model):
     ballot_location_display_name = models.CharField(verbose_name='name that shows in button',
                                                     max_length=255, blank=True, null=True, db_index=True)
     ballot_location_shortcut = models.CharField(verbose_name='the url string to find this location',
-                                                max_length=255, blank=True, null=True)
+                                                max_length=255, blank=True, null=True, db_index=True)
     ballot_location_order = models.PositiveIntegerField(
         verbose_name="order of these ballot locations in display", default=0, null=False)
 
@@ -1859,7 +1875,7 @@ class BallotReturnedEmpty(models.Model):
     # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -1936,12 +1952,6 @@ class BallotReturnedManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_ballot_returned_from_google_civic_election_id(google_civic_election_id):
-        ballot_returned_id = 0
-        ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id, google_civic_election_id)
-    
-    @staticmethod
     def retrieve_ballot_returned_from_voter_id(voter_id, google_civic_election_id):
         ballot_returned_id = 0
         ballot_returned_manager = BallotReturnedManager()
@@ -1958,29 +1968,6 @@ class BallotReturnedManager(models.Manager):
         voter_id = 0
         ballot_returned_manager = BallotReturnedManager()
         return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id)
-    
-    @staticmethod
-    def retrieve_ballot_returned_from_ballot_returned_we_vote_id(ballot_returned_we_vote_id):
-        ballot_returned_id = 0
-        google_civic_election_id = 0
-        voter_id = 0
-        polling_location_we_vote_id = ''
-        ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
-            ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id,
-            ballot_returned_we_vote_id)
-
-    @staticmethod
-    def retrieve_ballot_returned_from_ballot_location_shortcut(ballot_location_shortcut):
-        ballot_returned_id = 0
-        google_civic_election_id = 0
-        voter_id = 0
-        polling_location_we_vote_id = ''
-        ballot_returned_we_vote_id = ''
-        ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
-            ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id,
-            ballot_returned_we_vote_id, ballot_location_shortcut)
 
     @staticmethod
     def retrieve_existing_ballot_returned_by_identifier(
@@ -1989,7 +1976,8 @@ class BallotReturnedManager(models.Manager):
             voter_id=0,
             polling_location_we_vote_id='',
             ballot_returned_we_vote_id='',
-            ballot_location_shortcut=''):
+            ballot_location_shortcut='',
+            read_only=False):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
         :param ballot_returned_id:
@@ -1998,6 +1986,7 @@ class BallotReturnedManager(models.Manager):
         :param polling_location_we_vote_id:
         :param ballot_returned_we_vote_id:
         :param ballot_location_shortcut:
+        :param read_only:
         :return:
         """
         exception_does_not_exist = False
@@ -2008,47 +1997,73 @@ class BallotReturnedManager(models.Manager):
 
         try:
             if positive_value_exists(ballot_returned_id):
-                ballot_returned = BallotReturned.objects.get(id=ballot_returned_id)
+                if positive_value_exists(read_only):
+                    ballot_returned = BallotReturned.objects.using('readonly').get(id=ballot_returned_id)
+                else:
+                    ballot_returned = BallotReturned.objects.get(id=ballot_returned_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(ballot_returned_we_vote_id):
-                ballot_returned = BallotReturned.objects.get(we_vote_id__iexact=ballot_returned_we_vote_id)
+                if positive_value_exists(read_only):
+                    ballot_returned = BallotReturned.objects.using('readonly').get(
+                        we_vote_id__iexact=ballot_returned_we_vote_id)
+                else:
+                    ballot_returned = BallotReturned.objects.get(we_vote_id__iexact=ballot_returned_we_vote_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
             elif positive_value_exists(ballot_location_shortcut):
-                ballot_returned = BallotReturned.objects.get(
-                    ballot_location_shortcut=ballot_location_shortcut)
+                if positive_value_exists(read_only):
+                    ballot_returned = BallotReturned.objects.using('readonly').get(
+                        ballot_location_shortcut=ballot_location_shortcut)
+                else:
+                    ballot_returned = BallotReturned.objects.get(ballot_location_shortcut=ballot_location_shortcut)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned = BallotReturned.objects.get(
-                    voter_id=voter_id,
-                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    ballot_returned = BallotReturned.objects.using('readonly').get(
+                        voter_id=voter_id,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    ballot_returned = BallotReturned.objects.get(
+                        voter_id=voter_id,
+                        google_civic_election_id=google_civic_election_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned = BallotReturned.objects.get(
-                    polling_location_we_vote_id=polling_location_we_vote_id,
-                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    ballot_returned = BallotReturned.objects.using('readonly').get(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    ballot_returned = BallotReturned.objects.get(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        google_civic_election_id=google_civic_election_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status += "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
             elif positive_value_exists(google_civic_election_id):
-                ballot_returned_query = BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(read_only):
+                    ballot_returned_query = \
+                        BallotReturned.objects.using('readonly').filter(
+                            google_civic_election_id=google_civic_election_id)
+                else:
+                    ballot_returned_query = \
+                        BallotReturned.objects.filter(google_civic_election_id=google_civic_election_id)
                 ballot_returned_query = ballot_returned_query.filter(Q(voter_id__isnull=True) | Q(voter_id=0))
                 ballot_returned_query = ballot_returned_query.order_by("-ballot_location_shortcut")
                 ballot_returned = ballot_returned_query.first()
@@ -3747,7 +3762,7 @@ class VoterBallotSaved(models.Model):
     # When we copy a ballot from a master ballot_returned entry, we want to store a link back to that source
     ballot_returned_we_vote_id = models.CharField(
         verbose_name="ballot_returned we_vote_id this was copied from",
-        max_length=255, default=None, null=True, blank=True, unique=False)
+        max_length=255, default=None, null=True, blank=True, unique=False, db_index=True)
     ballot_location_display_name = models.CharField(
         verbose_name="the name of the ballot the voter is looking at",
         max_length=255, default=None, null=True, blank=True, unique=False)
@@ -4297,8 +4312,9 @@ def find_best_previously_stored_ballot_returned(
     text_for_map_search_empty = not positive_value_exists(text_for_map_search) or text_for_map_search == ""
 
     if positive_value_exists(ballot_returned_we_vote_id):
-        find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-            ballot_returned_we_vote_id)
+        find_results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+            read_only=True)
         status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_WE_VOTE_ID, status: [["
         status += find_results['status']
         status += "]] "
@@ -4330,8 +4346,9 @@ def find_best_previously_stored_ballot_returned(
         # A specific ballot was found.
         closest_ballot_returned = find_results['ballot_returned']
     elif positive_value_exists(ballot_location_shortcut):
-        find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
-            ballot_location_shortcut)
+        find_results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_location_shortcut=ballot_location_shortcut,
+            read_only=True)
         status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_BALLOT_LOCATION_SHORTCUT, status: [["
         status += find_results['status']
         status += "]] "
@@ -4363,8 +4380,9 @@ def find_best_previously_stored_ballot_returned(
         # A specific ballot was found.
         closest_ballot_returned = find_results['ballot_returned']
     elif positive_value_exists(google_civic_election_id) and text_for_map_search_empty:
-        find_results = ballot_returned_manager.retrieve_ballot_returned_from_google_civic_election_id(
-            google_civic_election_id)
+        find_results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            google_civic_election_id=google_civic_election_id,
+            read_only=True)
         status += "1-CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
         status += find_results['status']
         status += "]] "

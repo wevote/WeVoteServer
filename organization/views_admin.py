@@ -459,7 +459,7 @@ def organization_list_view(request):
     show_up_to_2000 = request.GET.get('show_up_to_2000', False)
 
     messages_on_stage = get_messages(request)
-    organization_list_query = Organization.objects.all()
+    organization_list_query = Organization.objects.using('readonly').all()
     if positive_value_exists(sort_by):
         if sort_by == "twitter":
             organization_list_query = \
@@ -2166,9 +2166,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_twitter_handle = ""
     try:
         if positive_value_exists(organization_id):
-            organization_query = Organization.objects.filter(id=organization_id)
+            organization_query = Organization.objects.using('readonly').filter(id=organization_id)
         else:
-            organization_query = Organization.objects.filter(we_vote_id__iexact=organization_we_vote_id)
+            organization_query = Organization.objects.using('readonly').filter(we_vote_id__iexact=organization_we_vote_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
@@ -2185,7 +2185,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         # TwitterLinkToOrganization
         twitter_user_manager = TwitterUserManager()
         results = twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
-            organization_we_vote_id)
+            organization_we_vote_id, read_only=True)
         if results['twitter_link_to_organization_found']:
             twitter_link_to_organization = results['twitter_link_to_organization']
             twitter_link_to_organization_handle = \
@@ -2210,7 +2210,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         is_analytics_admin = True
 
     try:
-        public_position_query = PositionEntered.objects.all()
+        public_position_query = PositionEntered.objects.using('readonly').all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
@@ -2227,7 +2227,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         public_position_list = list(public_position_list)
 
         if is_analytics_admin:
-            friends_only_position_query = PositionForFriends.objects.all()
+            friends_only_position_query = PositionForFriends.objects.using('readonly').all()
             # As of Aug 2018 we are no longer using PERCENT_RATING
             friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
@@ -2252,14 +2252,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
         link_issue_list_manager = OrganizationLinkToIssueList()
         organization_link_issue_list = link_issue_list_manager. \
-            retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+            retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id, read_only=True)
         issue_manager = IssueManager()
         for link_issue in organization_link_issue_list:
             issue_object = issue_manager.fetch_issue_from_we_vote_id(link_issue.issue_we_vote_id)
             organization_issues_list.append(issue_object)
 
         organization_link_block_issue_list = link_issue_list_manager.\
-            retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id)
+            retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id, read_only=True)
         for blocked_issue in organization_link_block_issue_list:
             issue_object = issue_manager.fetch_issue_from_we_vote_id(blocked_issue.issue_we_vote_id)
             organization_blocked_issues_list.append(issue_object)
@@ -2269,7 +2269,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         organization_position_list = []
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id, read_only=True)
     if voter_results['voter_found']:
         organization_voter = voter_results['voter']
     else:
@@ -2296,7 +2296,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     organization_search_results_list = []
     if positive_value_exists(organization_search_for_merge) and positive_value_exists(organization_we_vote_id):
-        organization_query = Organization.objects.all()
+        organization_query = Organization.objects.using('readonly').all()
         organization_query = organization_query.exclude(we_vote_id__iexact=organization_we_vote_id)
 
         search_words = organization_search_for_merge.split()

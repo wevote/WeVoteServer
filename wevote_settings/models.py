@@ -256,142 +256,65 @@ def fetch_batch_process_system_on():
         return False
 
 
-def fetch_batch_process_system_activity_notices_on():
+def fetch_batch_process_system_on_by_process_name(batch_process_name=''):
     we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_activity_notices_on', read_only=True)
+    results = we_vote_settings_manager.fetch_setting_results(batch_process_name, read_only=True)
     if results['success']:
         if results['we_vote_setting_found']:
             return results['setting_value']
         else:
             # Create the setting the first time
             results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_activity_notices_on',
+                setting_name=batch_process_name,
                 setting_value=True,
                 value_type=WeVoteSetting.BOOLEAN)
             return results['success']
     else:
         return False
+
+
+def fetch_batch_process_system_activity_notices_on():
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_activity_notices_on')
 
 
 def fetch_batch_process_system_calculate_analytics_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = \
-        we_vote_settings_manager.fetch_setting_results('batch_process_system_calculate_analytics_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_calculate_analytics_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_calculate_analytics_on')
+
+
+def fetch_batch_process_system_general_maintenance_on():
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_general_maintenance_on')
 
 
 def fetch_batch_process_system_generate_voter_guides_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = \
-        we_vote_settings_manager.fetch_setting_results('batch_process_system_generate_voter_guides_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_generate_voter_guides_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_generate_voter_guides_on')
 
 
 def fetch_batch_process_system_api_refresh_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_api_refresh_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_api_refresh_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_api_refresh_on')
 
 
 def fetch_batch_process_system_ballot_items_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_ballot_items_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_ballot_items_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_ballot_items_on')
+
+
+def fetch_batch_process_system_match_politicians_to_organizations_on():
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_match_politicians_to_organizations_on')
 
 
 def fetch_batch_process_system_representatives_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_representatives_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_representatives_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_representatives_on')
+
+
+def fetch_batch_process_system_retrieve_from_ballotpedia_on():
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_retrieve_from_ballotpedia_on')
 
 
 def fetch_batch_process_system_search_twitter_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_search_twitter_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_search_twitter_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_search_twitter_on')
 
 
 def fetch_batch_process_system_update_twitter_on():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_update_twitter_on', read_only=True)
-    if results['success']:
-        if results['we_vote_setting_found']:
-            return results['setting_value']
-        else:
-            # Create the setting the first time
-            results = we_vote_settings_manager.save_setting(
-                setting_name='batch_process_system_update_twitter_on',
-                setting_value=True,
-                value_type=WeVoteSetting.BOOLEAN)
-            return results['success']
-    else:
-        return False
+    return fetch_batch_process_system_on_by_process_name('batch_process_system_update_twitter_on')
 
 
 def fetch_site_unique_id_prefix():
