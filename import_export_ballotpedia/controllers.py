@@ -578,9 +578,10 @@ def get_photo_url_from_ballotpedia(
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
         is_organization = True
+    incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):
-        status += "MISSING_BALLOTPEDIA_PAGE_URL "
+        status += "MISSING_BALLOTPEDIA_PAGE_URL: " + str(incoming_object_we_vote_id) + " "
         results = {
             'error_message_to_print': error_message_to_print,
             'info_message_to_print': info_message_to_print,
@@ -821,9 +822,10 @@ def get_candidate_links_from_ballotpedia(
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
         is_organization = True
+    incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):
-        status += "MISSING_BALLOTPEDIA_PAGE_URL "
+        status += "MISSING_BALLOTPEDIA_PAGE_URL: " + str(incoming_object_we_vote_id) + " "
         results = {
             'error_message_to_print': error_message_to_print,
             'profile_retrieved': profile_retrieved,
