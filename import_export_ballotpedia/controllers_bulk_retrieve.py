@@ -186,6 +186,7 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
     )
     photos_retrieved = photo_results['photos_retrieved']
     photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count()
+    status += photo_results['status']
 
     links_results = retrieve_ballotpedia_links_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
@@ -193,6 +194,7 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
     )
     profiles_retrieved = links_results['profiles_retrieved']
     profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count()
+    status += links_results['status']
 
     results = {
         'photos_retrieved': photos_retrieved,
