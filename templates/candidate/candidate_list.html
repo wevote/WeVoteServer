@@ -36,7 +36,7 @@
             -- Filter by Election --</option>
         {% for one_election in election_list %}
         <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected" {% endif %}>
         {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
             {{ one_election.election_day_text }}: {{ one_election.election_name }} &ndash; {{ one_election.google_civic_election_id }}</option>
         {% endfor %}
@@ -816,11 +816,34 @@
             this.form.submit();
         });
     });
-    $(function() {
-        $('#google_civic_election_id').change(function() {
-            this.form.submit();
+
+function displayWarningBanner(displayed) {
+    if (displayed) {
+        const banner = $('<div class="alert alert-danger" role="alert" id="CandidateFilterPopupMessage">' +
+                        '<p>Fresh data being retrieved. Please wait before choosing any other filters.</p>' +
+                    '</div>');
+
+        banner.css({
+            'padding': '20px',
+            'text-align': 'center',
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'width': '100%',
+            'z-index': '9999'
+
+
         });
+        $('body').append(banner);
+    }
+}
+$(function() {
+    $('#google_civic_election_id').change(function() {
+        displayWarningBanner(true);
+        this.form.submit();
+        displayWarningBanner(false);
     });
+});
     $(function() {
         $('#review_mode_id').change(function() {
             this.form.submit();
@@ -886,12 +909,16 @@
     });
     $(function() {
         $('#show_this_year_of_candidates_id').change(function() {
+            displayWarningBanner(true);
             this.form.submit();
+            displayWarningBanner(false);
         });
     });
     $(function() {
         $('#state_code_id').change(function() {
+            displayWarningBanner(true);
             this.form.submit();
+            displayWarningBanner(false);
         });
     });
     $(function() {
