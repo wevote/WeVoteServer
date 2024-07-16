@@ -114,7 +114,7 @@ class WeVoteImage(models.Model):
     we_vote_parent_image_id = models.BigIntegerField(verbose_name="Local id of parent image", null=True, blank=True)
     date_image_saved = models.DateTimeField(verbose_name="date when image saved on wevote", auto_now_add=True)
     same_day_image_version = models.BigIntegerField(verbose_name="image version on same day", null=True, blank=True)
-    is_active_version = models.BooleanField(verbose_name="True if image is newest", default=False)
+    is_active_version = models.BooleanField(verbose_name="True if image is newest", default=False, db_index=True)
 
     kind_of_image_ballotpedia_profile = models.BooleanField(verbose_name="image is ballotpedia", default=False)
     kind_of_image_ctcl_profile = models.BooleanField(default=False)
@@ -144,6 +144,14 @@ class WeVoteImage(models.Model):
     kind_of_image_tiny = models.BooleanField(verbose_name="is image size tiny", default=False)
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
     representative_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['campaignx_we_vote_id', 'candidate_we_vote_id', 'organization_we_vote_id',
+                        'politician_we_vote_id', 'representative_we_vote_id', 'issue_we_vote_id', 'voter_we_vote_id'],
+                name='image_we_vote_ids_index'),
+        ]
 
     def display_kind_of_image(self):
         if self.kind_of_image_campaignx_photo:

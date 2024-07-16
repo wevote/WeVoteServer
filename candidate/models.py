@@ -2770,6 +2770,12 @@ class CandidateCampaign(models.Model):
                         'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
                 name='candidate_list_for_politician'),
             models.Index(
+                fields=['politician_we_vote_id', 'candidate_name'],
+                name='list_politician_and_name'),
+            models.Index(
+                fields=['candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
+                name='candidate_list_twitter'),
+            models.Index(
                 fields=['politician_we_vote_id', 'linked_campaignx_we_vote_id', '-id'],
                 name='politician_linked_campaignx'),
         ]
