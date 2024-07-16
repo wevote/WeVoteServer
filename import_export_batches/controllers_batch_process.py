@@ -2829,7 +2829,7 @@ def process_one_retrieve_from_ballotpedia_batch_process(batch_process):
 
     from import_export_ballotpedia.controllers_bulk_retrieve import \
         retrieve_links_and_photos_from_ballotpedia_batch_process
-    retrieve_results = retrieve_links_and_photos_from_ballotpedia_batch_process(limit=10)  # Should be 50
+    retrieve_results = retrieve_links_and_photos_from_ballotpedia_batch_process()
 
     status += retrieve_results['status']
 
@@ -2837,9 +2837,9 @@ def process_one_retrieve_from_ballotpedia_batch_process(batch_process):
         try:
             completion_summary = \
                 "Ballotpedia Photos: {photos_retrieved:,} " \
-                "out of {photos_to_retrieve:,}" \
+                "out of {photos_to_retrieve:,} " \
                 "Ballotpedia Links: {profiles_retrieved:,} " \
-                "out of {profiles_to_retrieve:,}" \
+                "out of {profiles_to_retrieve:,} " \
                 "".format(photos_retrieved=retrieve_results['photos_retrieved'],
                           photos_to_retrieve=retrieve_results['photos_to_retrieve'],
                           profiles_retrieved=retrieve_results['profiles_retrieved'],
@@ -2850,7 +2850,6 @@ def process_one_retrieve_from_ballotpedia_batch_process(batch_process):
             batch_process.date_completed = now()
             batch_process.save()
 
-            status += str(retrieve_results['politician_we_vote_id_update_list']) + " "
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
                 kind_of_process=kind_of_process,
@@ -2874,7 +2873,7 @@ def process_one_retrieve_from_ballotpedia_batch_process(batch_process):
         success = False
         try:
             completion_summary = \
-                "RETRIEVE_FROM_BALLOTPEDIA_FAILED: {status}" \
+                "RETRIEVE_FROM_BALLOTPEDIA_FAILED: {status} " \
                 "".format(status=status)
             status += completion_summary + " "
             batch_process.completion_summary = completion_summary
