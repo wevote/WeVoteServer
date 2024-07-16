@@ -1,6 +1,8 @@
 from django.db.models import Q
 
 from candidate.models import CandidateCampaign, CandidateListManager
+from candidate.controllers import fetch_ballotpedia_urls_to_retrieve_for_links_count, \
+    fetch_ballotpedia_urls_to_retrieve_for_photos_count
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
@@ -109,7 +111,7 @@ def retrieve_ballotpedia_photos_in_bulk(
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
         queryset = queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
-        # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
+        queryset = queryset.exclude(ballotpedia_photo_url_is_broken=True)
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
@@ -163,7 +165,7 @@ def retrieve_ballotpedia_photos_in_bulk(
     return results
 
 
-def retrieve_links_and_photos_from_ballotpedia_batch_process(limit=50):
+def retrieve_links_and_photos_from_ballotpedia_batch_process():
     status = ''
     success = True
 
@@ -177,17 +179,17 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process(limit=50):
 
     photo_results = retrieve_ballotpedia_photos_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
-        limit=limit,
+        limit=10,
     )
     photos_retrieved = photo_results['photos_retrieved']
-    photos_to_retrieve = photo_results['photos_to_retrieve']
+    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count()
 
     links_results = retrieve_ballotpedia_links_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
-        limit=limit,
+        limit=50,
     )
     profiles_retrieved = links_results['already_retrieved']
-    profiles_to_retrieve = links_results['profiles_to_retrieve']
+    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count()
 
     results = {
         'photos_retrieved': photos_retrieved,
