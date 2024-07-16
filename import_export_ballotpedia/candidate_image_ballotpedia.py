@@ -30,11 +30,11 @@ def get_state_elections_url(url):
               "Rhode_Island", "South_Carolina", "South_Dakota", "Tennessee", "Texas", "Utah",
               "Vermont", "Virginia", "Washington", "West_Virginia", "Wisconsin", "Wyoming"]
 
-    html = get_parsed_html(ballotpedia_page)
+    soup = get_parsed_html(ballotpedia_page)
     state_elections_info = set()
     for state in states:
 
-        tags = html.find_all('a', href=re.compile('(?i){}.*elections,_2022'.format(state)))
+        tags = soup.find_all('a', href=re.compile('(?i){}.*elections,_2022'.format(state)))
         links = [requests.compat.urljoin(ballotpedia_page, tag.attrs['href']) for tag in tags]
 
         for link in links:
@@ -44,15 +44,18 @@ def get_state_elections_url(url):
 
 # This will extract candidate data from election page that is in a span of class "candidate"
 def get_candidate_urls_page(url):
-    soup = get_parsed_html(url)
-    # Find all the HTML elements that contain the candidate names
-    candidate_elements = soup.find_all("span", class_="candidate")
-    # Extract the candidate names and construct the candidate URLs
     candidate_urls = []
-    for element in candidate_elements:
-        anchor_element = element.find("a")
-        if anchor_element:
-            candidate_urls.append(anchor_element['href'])
+    try:
+        soup = get_parsed_html(url)
+        # Find all the HTML elements that contain the candidate names
+        candidate_elements = soup.find_all("span", class_="candidate")
+        # Extract the candidate names and construct the candidate URLs
+        for element in candidate_elements:
+            anchor_element = element.find("a")
+            if anchor_element:
+                candidate_urls.append(anchor_element['href'])
+    except Exception as e:
+        print("Candidate URL not found for:" + url + " Error: " + str(e))
 
     return candidate_urls
 

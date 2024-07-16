@@ -22,7 +22,7 @@ def retrieve_ballotpedia_links_in_bulk(
     remote_request_history_manager=None,
     state_code='',
 ):
-    already_retrieved = 0
+    profiles_retrieved = 0
     already_stored = 0
     candidate_list = []
     error_message_to_print = ''
@@ -64,14 +64,17 @@ def retrieve_ballotpedia_links_in_bulk(
                 remote_request_history_manager=remote_request_history_manager,
                 save_to_database=True)
             error_message_to_print += get_results['error_message_to_print']
+            profile_retrieved = get_results['profile_retrieved']
             status += get_results['status']
+            if profile_retrieved:
+                profiles_retrieved += 1
 
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing
         pass
 
     results = {
-        'already_retrieved': already_retrieved,
+        'profiles_retrieved': profiles_retrieved,
         'already_stored': already_stored,
         'candidate_list': candidate_list,
         'error_message_to_print': error_message_to_print,
@@ -186,9 +189,9 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
 
     links_results = retrieve_ballotpedia_links_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
-        limit=50,
+        limit=30,
     )
-    profiles_retrieved = links_results['already_retrieved']
+    profiles_retrieved = links_results['profiles_retrieved']
     profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count()
 
     results = {
