@@ -174,11 +174,69 @@ def generate_seo_friendly_path_generic(
             path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
             path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
             match_count = path_query.count()
+            campaignx_deleted = False
+            if positive_value_exists(match_count):
+                # See if the other campaign object still exists
+                campaignx_path_list = list(path_query)
+                for campaignx_path in campaignx_path_list:
+                    if positive_value_exists(campaignx_path.campaignx_we_vote_id):
+                        try:
+                            campaignx_exists = CampaignX.objects.using('readonly').filter(
+                                    we_vote_id=campaignx_path.campaignx_we_vote_id).exists()
+                            if not campaignx_exists:
+                                CampaignXSEOFriendlyPath.objects\
+                                    .filter(campaignx_we_vote_id=campaignx_path.campaignx_we_vote_id).delete()
+                                campaignx_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_CAMPAIGNX_SEO_FRIENDLY_PATH_BY_WE_VOTE_ID:' + str(e) + ' '
+                            break
+                    elif positive_value_exists(campaignx_path.id):
+                        # Delete the entry
+                        try:
+                            CampaignXSEOFriendlyPath.objects.filter(id=campaignx_path.id).delete()
+                            campaignx_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_CAMPAIGNX_SEO_FRIENDLY_PATH_BY_ID:' + str(e) + ' '
+                    else:
+                        status += "CANNOT_DELETE_SEO_FRIENDLY_PATH_ENTRY_WITH_NO_ID "
+            if campaignx_deleted:
+                path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+                path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+                match_count = path_query.count()
         elif for_politician:
             # Is it being used by any politician?
             path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
             path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
             match_count = path_query.count()
+            politician_deleted = False
+            if positive_value_exists(match_count):
+                # See if the other campaign object still exists
+                politician_path_list = list(path_query)
+                for politician_path in politician_path_list:
+                    if positive_value_exists(politician_path.politician_we_vote_id):
+                        try:
+                            politician_exists = Politician.objects.using('readonly').filter(
+                                    we_vote_id=politician_path.politician_we_vote_id).exists()
+                            if not politician_exists:
+                                PoliticianSEOFriendlyPath.objects\
+                                    .filter(politician_we_vote_id=politician_path.politician_we_vote_id).delete()
+                                politician_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_POLITICIAN_SEO_FRIENDLY_PATH_BY_WE_VOTE_ID:' + str(e) + ' '
+                            break
+                    elif positive_value_exists(politician_path.id):
+                        # Delete the entry
+                        try:
+                            PoliticianSEOFriendlyPath.objects.filter(id=politician_path.id).delete()
+                            politician_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_POLITICIAN_SEO_FRIENDLY_PATH_BY_ID:' + str(e) + ' '
+                    else:
+                        status += "CANNOT_DELETE_SEO_FRIENDLY_PATH_ENTRY_WITH_NO_ID "
+            if politician_deleted:
+                path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+                path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+                match_count = path_query.count()
         if positive_value_exists(match_count):
             owned_by_another = True
             if for_campaign:

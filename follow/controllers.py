@@ -2,14 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
-    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FOLLOWING, FollowMetricsManager
+from .models import FollowOrganization, FollowOrganizationList, FollowOrganizationManager, \
+    UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_DISLIKE, FOLLOWING, \
+    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FollowMetricsManager
 from analytics.models import ACTION_ISSUE_FOLLOW, ACTION_ISSUE_FOLLOW_IGNORE, \
     ACTION_ISSUE_STOP_FOLLOWING, AnalyticsManager
+import copy
 from django.http import HttpResponse
 from friend.models import FriendManager
 import json
-from organization.models import OrganizationManager
+from organization.models import Organization, OrganizationManager
+from politician.models import Politician
+from position.models import OPPOSE, PositionEntered, PositionForFriends, SUPPORT
 import robot_detection
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, fetch_voter_we_vote_id_from_voter_device_link
@@ -923,5 +927,372 @@ def organization_suggestion_tasks_for_api(voter_device_id,
         'organization_suggestion_task_saved':       organization_suggestion_task_saved,
         'organization_suggestion_list':             organization_suggestion_list,
         'organization_suggestion_followed_list':    organization_suggestion_followed_list
+    }
+    return results
+
+
+def create_followers_from_positions(
+        friends_only_positions=False,
+        politicians_to_follow_we_vote_id_list=[],
+        state_code=''):
+    # Create default variables needed below
+    follow_organization_bulk_create_list = []
+    follow_organization_entry_create_needed = False
+    follow_organization_entries_created = 0
+    follow_organization_entries_not_created = 0
+    campaignx_we_vote_id_list_to_refresh = []
+    error_message_to_print = ''
+    info_message_to_print = ''
+    # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
+    linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
+    number_to_create = 10
+    # key: politician_we_vote_id, value: organization_we_vote_id
+    organization_we_vote_id_by_politician_we_vote_id_dict = {}
+    organization_we_vote_id_following_politician_list = []
+    # politician_we_vote_id_list_being_followed = []  # List of politician_we_vote_ids being followed
+    position_objects_to_mark_as_having_follow_organization_created = []
+    position_updates_made = 0
+    position_updates_needed = False
+    position_we_vote_id_list_to_create_follower = []
+    status = ''
+    success = True
+    voter_we_vote_id_list_following = []  # Must be signed in to create FollowOrganization from friends_only_positions
+
+    # #####################################
+    # Retrieve Positions that haven't been reviewed yet (limited by number_to_create)
+    if positive_value_exists(friends_only_positions):
+        position_query = PositionForFriends.objects.all()  # Cannot be readonly, since we bulk_update at the end
+    else:
+        position_query = PositionEntered.objects.all()  # Cannot be readonly, since we bulk_update at the end
+    position_query = position_query.exclude(follow_organization_analysis_complete=True)
+    # We need to handle both SUPPORT and OPPOSE
+    # position_query = position_query.filter(stance=SUPPORT)
+    # DALE 2024-07-14 We can include positions from prior years
+    # date_today_as_integer = get_current_date_as_integer()
+    # position_query = position_query.filter(
+    #     Q(position_ultimate_election_not_linked=True) |
+    #     Q(position_ultimate_election_date__gte=date_today_as_integer)
+    # )
+    if positive_value_exists(len(politicians_to_follow_we_vote_id_list) > 0):
+        # Note that this will miss any positions where the politician_we_vote_id didn't get stored with them
+        #  2024-07-14 Check to see if we have a script that populates the politician_we_vote_id when there is only
+        #   the candidate_campaign_we_vote_id
+        position_query = position_query.filter(politician_we_vote_id__in=politicians_to_follow_we_vote_id_list)
+    elif positive_value_exists(state_code):
+        position_query = position_query.filter(state_code__iexact=state_code)
+    total_to_convert = position_query.count()
+    position_list_to_create_follower = list(position_query[:number_to_create])
+    position_list_to_bulk_update = []  # Move positions over to this for bulk_update
+
+    # Assemble we_vote_id lists, so we can retrieve the objects to work with them
+    for one_position in position_list_to_create_follower:
+        if positive_value_exists(one_position.voter_we_vote_id):
+            voter_we_vote_id_list_following.append(one_position.voter_we_vote_id)
+        # politician_we_vote_id_list_being_followed.append(one_position.politician_we_vote_id)
+        position_we_vote_id_list_to_create_follower.append(one_position.we_vote_id)
+        # We are taking the organization endorsing a politician, and creating a FollowOrganization entry
+        organization_we_vote_id_following_politician_list.append(one_position.organization_we_vote_id)
+
+    # Retrieve all relevant voters associated with positions in a single query, so we can access voter.is_signed_in
+    #  for friends_only_positions, we want to only create a follow_organization entry if the voter is signed in
+    voter_is_signed_in_by_voter_we_vote_id_dict = {}
+    if positive_value_exists(friends_only_positions) and len(voter_we_vote_id_list_following) > 0:
+        from voter.models import Voter
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list_following)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_is_signed_in_by_voter_we_vote_id_dict[one_voter.we_vote_id] = one_voter.is_signed_in()
+        position_list_to_create_follower_modified = []
+        for one_position in position_list_to_create_follower:
+            if positive_value_exists(one_position.voter_we_vote_id):
+                if one_position.voter_we_vote_id in voter_is_signed_in_by_voter_we_vote_id_dict:
+                    if voter_is_signed_in_by_voter_we_vote_id_dict[one_position.voter_we_vote_id]:
+                        position_list_to_create_follower_modified.append(one_position)
+                    else:
+                        one_position.follow_organization_analysis_complete = True
+                        one_position.follow_organization_created = False
+                        position_list_to_bulk_update.append(one_position)
+                        total_to_convert -= 1
+                else:
+                    one_position.follow_organization_analysis_complete = True
+                    one_position.follow_organization_created = False
+                    position_list_to_bulk_update.append(one_position)
+                    total_to_convert -= 1
+            else:
+                # Is from organization not linked to voter
+                position_list_to_create_follower_modified.append(one_position)
+        position_list_to_create_follower = position_list_to_create_follower_modified
+
+    # Retrieve all the related politicians in a single query, so we can access the linked_campaignx_we_vote_id
+    #  when we are cycling through the positions
+    politician_list = []
+    if len(politicians_to_follow_we_vote_id_list) > 0:
+        politician_query = Politician.objects.using('readonly').all()
+        politician_query = politician_query.filter(we_vote_id__in=politicians_to_follow_we_vote_id_list)
+        politician_list = list(politician_query)
+    for one_politician in politician_list:
+        if positive_value_exists(one_politician.linked_campaignx_we_vote_id):
+            linked_campaignx_we_vote_id_by_politician_we_vote_id_dict[one_politician.we_vote_id] = \
+                one_politician.linked_campaignx_we_vote_id
+            if one_politician.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
+                campaignx_we_vote_id_list_to_refresh.append(one_politician.linked_campaignx_we_vote_id)
+
+    # Retrieve all the related Organizations in a single query, so we can access get the organization_we_vote_id
+    #  from politician_we_vote_id
+    expected_organization_count = len(politicians_to_follow_we_vote_id_list)
+    organization_count = 0
+    organization_list = []
+    politician_we_vote_ids_not_found = copy.deepcopy(politicians_to_follow_we_vote_id_list)
+    if len(politicians_to_follow_we_vote_id_list) > 0:
+        queryset = Organization.objects.using('readonly').all()
+        queryset = queryset.filter(politician_we_vote_id__in=politicians_to_follow_we_vote_id_list)
+        organization_list = list(queryset)
+    for one_organization in organization_list:
+        organization_count += 1
+        if positive_value_exists(one_organization.politician_we_vote_id):
+            politician_we_vote_ids_not_found.remove(one_organization.politician_we_vote_id)
+            organization_we_vote_id_by_politician_we_vote_id_dict[one_organization.politician_we_vote_id] = \
+                one_organization.we_vote_id
+    if organization_count != expected_organization_count:
+        # If here, then 1+ of the politicians doesn't have an organization linked to it.
+        error_message_to_print += "ORGANIZATIONS_MISSING_FOR: " + str(politician_we_vote_ids_not_found) + " "
+
+    # Check FollowOrganization table to see if any of these positions already have a FollowOrganization entry
+    #  if so, don't try to add a duplicate.
+    # Retrieve existing FollowOrganization entries that are related to the organization which is endorsing
+    #  this politician, so we can mark them as already processed in the PositionEntered table.
+    if len(organization_we_vote_id_following_politician_list) > 0:
+        queryset = FollowOrganization.objects.using('readonly').all()
+        queryset = queryset.filter(
+            voter_linked_organization_we_vote_id__in=organization_we_vote_id_following_politician_list)
+        follow_organizations_already_exist_count = queryset.count()
+        if positive_value_exists(follow_organizations_already_exist_count):
+            existing_follow_organization_entries = list(queryset)
+            position_list_to_create_follower_modified = []
+            # key = organization_we_vote_id endorsing, value = org we_vote_id being endorsed (i.e., Politician)
+            follow_organization_dict_by_endorser = {}
+            for one_follow_organization in existing_follow_organization_entries:
+                follow_organization_dict_by_endorser[one_follow_organization.voter_linked_organization_we_vote_id] = \
+                    one_follow_organization.organization_we_vote_id
+            for one_position in position_list_to_create_follower:
+                # If we have FollowOrganization entry in existing_follow_organization_entries, then save one_position,
+                #  so we can mark as reviewed
+                follow_organization_entry_for_this_position_already_exists = False
+                organization_we_vote_id_with_opinion = one_position.organization_we_vote_id
+                politician_we_vote_id_being_endorsed = one_position.politician_we_vote_id
+                organization_we_vote_id_being_endorsed = ''
+                if politician_we_vote_id_being_endorsed in organization_we_vote_id_by_politician_we_vote_id_dict:
+                    organization_we_vote_id_being_endorsed = \
+                        organization_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id_being_endorsed]
+                if positive_value_exists(organization_we_vote_id_with_opinion) and \
+                        positive_value_exists(organization_we_vote_id_being_endorsed):
+                    existing_org_being_endorsed = \
+                        follow_organization_dict_by_endorser.get(organization_we_vote_id_with_opinion)
+                    if existing_org_being_endorsed == organization_we_vote_id_being_endorsed:
+                        follow_organization_entry_for_this_position_already_exists = True
+                else:
+                    # Shouldn't be able to get here
+                    pass
+                if follow_organization_entry_for_this_position_already_exists:
+                    one_position.follow_organization_analysis_complete = True
+                    one_position.follow_organization_created = True
+                    position_objects_to_mark_as_having_follow_organization_created.append(one_position)
+                    position_updates_made += 1
+                    position_updates_needed = True
+                else:
+                    position_list_to_create_follower_modified.append(one_position)
+            position_list_to_create_follower = position_list_to_create_follower_modified
+
+    for one_position in position_list_to_create_follower:
+        if one_position.stance == SUPPORT:
+            following_status = FOLLOWING
+        elif one_position.stance == OPPOSE:
+            following_status = FOLLOW_DISLIKE
+        else:
+            continue
+        is_follow_visible_publicly = not positive_value_exists(friends_only_positions)
+
+        # ######################
+        organization_we_vote_id_with_opinion = one_position.organization_we_vote_id
+        politician_we_vote_id_being_endorsed = one_position.politician_we_vote_id
+        organization_we_vote_id_being_endorsed = ''
+        if politician_we_vote_id_being_endorsed in organization_we_vote_id_by_politician_we_vote_id_dict:
+            organization_we_vote_id_being_endorsed = \
+                organization_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id_being_endorsed]
+        if positive_value_exists(organization_we_vote_id_with_opinion) and \
+                positive_value_exists(organization_we_vote_id_being_endorsed):
+            created = False
+            try:
+                follow_organization, created = FollowOrganization.objects.update_or_create(
+                    voter_linked_organization_we_vote_id=organization_we_vote_id_with_opinion,
+                    organization_we_vote_id=organization_we_vote_id_being_endorsed,
+                    defaults={
+                        'voter_linked_organization_we_vote_id': organization_we_vote_id_with_opinion,
+                        'organization_we_vote_id': organization_we_vote_id_being_endorsed,
+                        'following_status': following_status,
+                        'is_follow_visible_publicly': is_follow_visible_publicly,
+                    }
+                )
+                # follow_organization_bulk_create_list.append(follow_organization)
+                # follow_organization_entry_create_needed = True
+                if positive_value_exists(created):
+                    follow_organization_entries_created += 1
+                    status += "FOLLOW_ORGANIZATION_CREATED "
+                else:
+                    status += "FOLLOW_ORGANIZATION_UPDATED "
+                one_position.follow_organization_analysis_complete = True
+                one_position.follow_organization_created = True
+                position_objects_to_mark_as_having_follow_organization_created.append(one_position)
+                position_updates_made += 1
+                position_updates_needed = True
+            except Exception as e:
+                follow_organization_entries_not_created += 1
+                success = False
+                status += "FOLLOW_ORGANIZATION_NOT_UPDATED: " + str(e) + ' '
+            if created:
+                # If an entry was created, we should refresh the CampaignX supporters_count
+                if one_position.politician_we_vote_id in linked_campaignx_we_vote_id_by_politician_we_vote_id_dict:
+                    linked_campaignx_we_vote_id = \
+                        linked_campaignx_we_vote_id_by_politician_we_vote_id_dict[one_position.politician_we_vote_id]
+                    if positive_value_exists(linked_campaignx_we_vote_id):
+                        if linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
+                            campaignx_we_vote_id_list_to_refresh.append(linked_campaignx_we_vote_id)
+
+    follow_organization_bulk_create_success = True
+    if position_updates_needed and follow_organization_bulk_create_success:
+        try:
+            if friends_only_positions:
+                PositionForFriends.objects.bulk_update(
+                    position_objects_to_mark_as_having_follow_organization_created,
+                    ['follow_organization_analysis_complete', 'follow_organization_created'])
+            else:
+                PositionEntered.objects.bulk_update(
+                    position_objects_to_mark_as_having_follow_organization_created,
+                    ['follow_organization_analysis_complete', 'follow_organization_created'])
+            info_message_to_print += \
+                "{position_updates_made:,} positions updated with follow_organization_created=True, " \
+                "".format(position_updates_made=position_updates_made)
+        except Exception as e:
+            error_message_to_print += "ERROR with PositionEntered.objects.bulk_create: {e}, ".format(e=e)
+
+    info_message_to_print += \
+        "{follow_organization_entries_created:,} FollowOrganization entries created, " \
+        "".format(follow_organization_entries_created=follow_organization_entries_created)
+
+    total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
+    if positive_value_exists(total_to_convert_after):
+        info_message_to_print += \
+            "{total_to_convert_after:,} positions remaining in 'create FollowOrganization' process. " \
+            "".format(total_to_convert_after=total_to_convert_after)
+
+    results = {
+        'follow_organization_entries_created':  follow_organization_entries_created,
+        'campaignx_we_vote_id_list_to_refresh': campaignx_we_vote_id_list_to_refresh,
+        'error_message_to_print': error_message_to_print,
+        'info_message_to_print': info_message_to_print,
+        'status':   status,
+        'success':  success,
+    }
+    return results
+
+
+def create_follow_organization_from_position(
+        campaignx_we_vote_id='',
+        create_object_in_database=False,
+        position=None,
+        position_we_vote_id='',
+        show_to_public=True,
+):
+    status = ''
+    campaignx_supporter = None
+    campaignx_supporter_found = False
+
+    if not positive_value_exists(campaignx_we_vote_id):
+        status += "VALID_CAMPAIGNX_WE_VOTE_ID_NOT_FOUND "
+        results = {
+            'success':                      False,
+            'status':                       status,
+            'campaignx_supporter':          campaignx_supporter,
+            'campaignx_supporter_found':    campaignx_supporter_found,
+        }
+        return results
+
+    if hasattr(position, 'ballot_item_display_name'):
+        pass
+    else:
+        from position.models import PositionManager
+        position_manager = PositionManager()
+        results = position_manager.retrieve_position(position_we_vote_id=position_we_vote_id)
+        position = None
+        position_found = False
+        if results['position_found']:
+            position = results['position']
+            position_found = True
+        if not position_found or not hasattr(position, 'ballot_item_display_name'):
+            status += "VALID_POSITION_NOT_FOUND "
+            results = {
+                'campaignx_supporter':        campaignx_supporter,
+                'campaignx_supporter_found':  campaignx_supporter_found,
+                'status':                       status,
+                'success': False,
+            }
+            return results
+
+    # Make sure that the position.stance shows support
+    if position.stance != SUPPORT:
+        status += "VALID_POSITION_NOT_FOUND "
+        results = {
+            'success': False,
+            'status': status,
+            'campaignx_supporter': campaignx_supporter,
+            'campaignx_supporter_found': campaignx_supporter_found,
+        }
+        return results
+
+    campaignx_supporter_created = False
+    try:
+        campaignx_supporter = FollowOrganization(
+            campaign_supported=True,
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            date_supported=position.date_entered,
+            linked_position_we_vote_id=position.we_vote_id,
+            organization_we_vote_id=position.organization_we_vote_id,
+            supporter_name=position.speaker_display_name,
+            supporter_endorsement=position.statement_text,
+            # visibility_blocked_by_we_vote=False,
+            visible_to_public=show_to_public,
+            voter_we_vote_id=position.voter_we_vote_id,
+            we_vote_hosted_profile_image_url_medium=position.speaker_image_url_https_medium,
+            we_vote_hosted_profile_image_url_tiny=position.speaker_image_url_https_tiny,
+        )
+        # Phone
+        # if positive_value_exists(position.politician_phone_number):
+        #     campaignx_supporter.campaignx_supporter_phone = position.politician_phone_number
+        if positive_value_exists(create_object_in_database):
+            campaignx_supporter.save()
+            campaignx_supporter_created = True
+        else:
+            campaignx_supporter_found = True
+        if campaignx_supporter_created:
+            success = True
+            status += "CAMPAIGNX_SUPPORTER_CREATED "
+        elif campaignx_supporter_found:
+            success = True
+            status += "CAMPAIGNX_SUPPORTER_BUILT_BUT_NOT_SAVED "
+        else:
+            success = False
+            status += "CAMPAIGNX_SUPPORTER_NOT_CREATED "
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_CAMPAIGNX_SUPPORTER ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    results = {
+        'campaignx_supporter_created':  campaignx_supporter_created,
+        'campaignx_supporter_found':    campaignx_supporter_found,
+        'campaignx_supporter':          campaignx_supporter,
+        'status':                       status,
+        'success':                      success,
     }
     return results

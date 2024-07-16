@@ -120,6 +120,8 @@ class CampaignX(models.Model):
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
     # If this CampaignX has a linked_politician_we_vote_id, then supporters_count comes from Organization followers
     supporters_count = models.PositiveIntegerField(default=0)
+    # Updates both supporters_count and opposers_count from the position_list page in position/views_admin.py
+    supporters_count_to_update_with_bulk_script = models.BooleanField(default=True)
     # How many supporters are required before showing in We Vote lists
     supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
     supporters_count_victory_goal = models.PositiveIntegerField(default=0)

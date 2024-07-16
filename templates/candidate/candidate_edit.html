@@ -48,7 +48,7 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" class="btn-primary" /></p>
 
-<div class="row form-group" style="height: 60px;">
+<div class="row form-group">
     <label for="candidate_name_id" class="pl-4 control-label">
       Candidate Name
       {% if candidate %}
@@ -106,7 +106,12 @@ th, td {
                             target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
                     {% endif %}
                     {% if path_list %}
+                        <div>
+                        <div style="color: darkgray">
+                            {{ candidate.seo_friendly_path }}
+                        </div>
                         {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+                        </div>
                     {% else %}
                         <div style="color: darkgray">
                         No alternate URL paths found.

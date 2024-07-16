@@ -2760,7 +2760,18 @@ class CandidateCampaign(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=['seo_friendly_path', 'politician_we_vote_id']),
+                fields=['seo_friendly_path', 'politician_we_vote_id', '-id'],
+                name='candidate_seo_friendly_path1'),
+            models.Index(
+                fields=['politician_we_vote_id', 'seo_friendly_path', '-id'],
+                name='candidate_seo_friendly_path2'),
+            models.Index(
+                fields=['politician_we_vote_id', 'candidate_name',
+                        'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
+                name='candidate_list_for_politician'),
+            models.Index(
+                fields=['politician_we_vote_id', 'linked_campaignx_we_vote_id', '-id'],
+                name='politician_linked_campaignx'),
         ]
 
     def election(self):

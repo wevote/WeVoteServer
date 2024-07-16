@@ -17,6 +17,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
 from election.models import ElectionManager
+from follow.controllers import create_followers_from_positions
 from organization.models import Organization, OrganizationManager
 from politician.models import Politician, PoliticianManager
 from stripe_donations.models import StripeManager
@@ -26,7 +27,7 @@ from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, \
     get_voter_api_device_id, positive_value_exists, STATE_CODE_MAP
 from wevote_functions.functions_date import generate_date_as_integer
-from .controllers import create_campaignx_supporters_from_positions, fetch_duplicate_campaignx_count, \
+from .controllers import fetch_duplicate_campaignx_count, \
     figure_out_campaignx_conflict_values, find_duplicate_campaignx, merge_if_duplicate_campaignx_entries, \
     refresh_campaignx_supporters_count_in_all_children, merge_these_two_campaignx_entries
 from .models import CampaignX, CampaignXEntriesAreNotDuplicates, CampaignXEntriesArePossibleDuplicates, \
@@ -1632,29 +1633,36 @@ def campaign_supporters_list_process_view(request):
         messages.add_message(request, messages.INFO, update_message)
 
     campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
-    if len(politician_we_vote_id_list) > 0:
+    error_message_to_print = ''
+    info_message_to_print = ''
+    pigs_can_fly = False
+    if pigs_can_fly and len(politician_we_vote_id_list) > 0:
         # #############################
         # Create campaignx_supporters
-        create_from_friends_only_positions = False
-        results = create_campaignx_supporters_from_positions(
-            request,
+        #  From PUBLIC positions
+        results = create_followers_from_positions(
             friends_only_positions=False,
-            politician_we_vote_id_list=politician_we_vote_id_list)
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        if not positive_value_exists(results['campaignx_supporter_entries_created']):
-            create_from_friends_only_positions = True
-        if create_from_friends_only_positions:
-            results = create_campaignx_supporters_from_positions(
-                request,
-                friends_only_positions=True,
-                politician_we_vote_id_list=politician_we_vote_id_list)
-            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-            if len(campaignx_we_vote_id_list_changed) > 0:
-                campaignx_we_vote_id_list_to_refresh = \
-                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # From FRIENDS_ONLY positions
+        results = create_followers_from_positions(
+            friends_only_positions=True,
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
 
     # We update here only if we didn't save above
     if update_campaignx_supporter_count and positive_value_exists(campaignx_we_vote_id):
@@ -1671,6 +1679,11 @@ def campaign_supporters_list_process_view(request):
         campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
     if positive_value_exists(results['update_message']):
         update_message += results['update_message']
+
+    if positive_value_exists(error_message_to_print):
+        messages.add_message(request, messages.ERROR, error_message_to_print)
+    if positive_value_exists(info_message_to_print):
+        messages.add_message(request, messages.INFO, info_message_to_print)
 
     return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
