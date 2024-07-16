@@ -2489,6 +2489,7 @@ def fetch_ballotpedia_urls_to_retrieve_for_photos_count(
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
+        count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_broken=True)
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
 

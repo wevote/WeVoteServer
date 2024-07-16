@@ -106,6 +106,8 @@ def bulk_retrieve_ballotpedia_photos_view(request):
         status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
     if positive_value_exists(already_retrieved):
         status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+    if not positive_value_exists(already_stored) and not positive_value_exists(already_retrieved):
+        status += "NO_IMAGES_RETRIEVED_FROM_BALLOTPEDIA "
 
     messages.add_message(request, messages.INFO, status)
 
@@ -131,8 +133,7 @@ def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
     hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
     page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', '')
-    # limit = convert_to_int(request.GET.get('limit', MAXIMUM_BALLOTPEDIA_LINKS_TO_RECEIVE_AT_ONCE))
-    limit = 5
+    limit = convert_to_int(request.GET.get('limit', MAXIMUM_BALLOTPEDIA_LINKS_TO_RECEIVE_AT_ONCE))
     if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
             and not positive_value_exists(limit):
         messages.add_message(
