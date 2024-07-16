@@ -59,7 +59,7 @@ def positions_sync_out_view(request):  # positionsSyncOut
         position_list_query = PositionEntered.objects.order_by('date_entered')
 
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
         position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
         # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
@@ -266,34 +266,45 @@ def position_list_view(request):
         show_admin_options = True
     # wv-103 end
 
-    create_campaignx_supporter_from_positions_on = True
+    # DALE 2024-07-13 We need to update the campaignx.supporters_count and opposers_count
+    # update_campaignx_supporters_count_on = False
+    # Added to campaignx object the variable 'supporters_count_to_update_with_bulk_script'
+
+    create_campaignx_supporter_from_positions_on = False
+    error_message_to_print = ''
+    info_message_to_print = ''
     if create_campaignx_supporter_from_positions_on:
-        from campaign.controllers import create_campaignx_supporters_from_positions, \
-            delete_campaignx_supporters_after_positions_removed, refresh_campaignx_supporters_count_in_all_children, \
+        from follow.controllers import create_followers_from_positions
+        from campaign.controllers import delete_campaignx_supporters_after_positions_removed, \
+            refresh_campaignx_supporters_count_in_all_children, \
             refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list
         campaignx_we_vote_id_list_to_refresh = []
         # #############################
         # Create campaignx_supporters
-        create_from_friends_only_positions = False
-        results = create_campaignx_supporters_from_positions(
-            request,
+        # From PUBLIC positions
+        results = create_followers_from_positions(
             friends_only_positions=False,
             state_code=state_code)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        if not positive_value_exists(results['campaignx_supporter_entries_created']):
-            create_from_friends_only_positions = True
-        if create_from_friends_only_positions:
-            results = create_campaignx_supporters_from_positions(
-                request,
-                friends_only_positions=True,
-                state_code=state_code)
-            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-            if len(campaignx_we_vote_id_list_changed) > 0:
-                campaignx_we_vote_id_list_to_refresh = \
-                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # From FRIENDS_ONLY positions
+        results = create_followers_from_positions(
+            friends_only_positions=True,
+            state_code=state_code)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
         # #############################
         # Delete campaignx_supporters
         delete_from_friends_only_positions = False
@@ -448,7 +459,7 @@ def position_list_view(request):
     public_position_list_comments_count = 0
     if not positive_value_exists(show_friends_only):  # always run unless Friends only is checked
         public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
-        public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
         public_position_list_query = public_position_list_query.filter(
             Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
             Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
@@ -518,7 +529,7 @@ def position_list_view(request):
     if voter_has_authority(request, admin_authority_required) and positive_value_exists(show_friends_only):
         friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
         # As of Aug 2018 we are no longer using PERCENT_RATING
-        friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        # friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
         friends_only_position_list_query = friends_only_position_list_query.filter(
             Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
             Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
@@ -653,6 +664,11 @@ def position_list_view(request):
     results = election_manager.retrieve_elections_by_google_civic_election_id_list(
         google_civic_election_id_list_for_dropdown, read_only=True)
     election_list = results['election_list']
+
+    if positive_value_exists(error_message_to_print):
+        messages.add_message(request, messages.ERROR, error_message_to_print)
+    if positive_value_exists(info_message_to_print):
+        messages.add_message(request, messages.INFO, info_message_to_print)
 
     template_values = {
         'messages_on_stage':        messages_on_stage,

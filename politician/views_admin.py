@@ -3078,17 +3078,23 @@ def politician_edit_process_view(request):
                     messages.add_message(request, messages.INFO, results['info_message_to_print'])
 
             # Now generate_seo_friendly_path if there isn't one
-            seo_results = politician_manager.generate_seo_friendly_path(
-                base_pathname_string=politician_on_stage.seo_friendly_path,
-                politician_name=politician_on_stage.politician_name,
-                politician_we_vote_id=politician_on_stage.we_vote_id,
-                state_code=politician_on_stage.state_code)
-            if seo_results['success']:
-                seo_friendly_path = seo_results['seo_friendly_path']
-                if positive_value_exists(seo_friendly_path):
-                    politician_on_stage.seo_friendly_path = seo_friendly_path
-                    politician_on_stage.save()
-            messages.add_message(request, messages.INFO, 'Politician saved.')
+            if not positive_value_exists(politician_on_stage.seo_friendly_path):
+                seo_results = politician_manager.generate_seo_friendly_path(
+                    base_pathname_string=politician_on_stage.seo_friendly_path,
+                    politician_name=politician_on_stage.politician_name,
+                    politician_we_vote_id=politician_on_stage.we_vote_id,
+                    state_code=politician_on_stage.state_code)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        politician_on_stage.seo_friendly_path = seo_friendly_path
+                        politician_on_stage.save()
+                        messages.add_message(request, messages.INFO,
+                                             'Politician saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
 
             if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
                 campaignx_results = campaignx_manager.retrieve_campaignx(
@@ -3379,39 +3385,47 @@ def politician_edit_process_view(request):
 
     # ####################################################################
     # To make sure we have the freshest data, update supporters_count on all objects
-    if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
-        from campaign.controllers import create_campaignx_supporters_from_positions, \
-            refresh_campaignx_supporters_count_in_all_children
+    error_message_to_print = ''
+    info_message_to_print = ''
+    pigs_can_fly = False
+    if pigs_can_fly and positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+        from follow.controllers import create_followers_from_positions
+        from campaign.controllers import refresh_campaignx_supporters_count_in_all_children
         campaignx_we_vote_id_list_to_refresh = [politician_on_stage.linked_campaignx_we_vote_id]
         politician_we_vote_id_list = [politician_on_stage.we_vote_id]
         # #############################
         # Create campaignx_supporters
-        create_from_friends_only_positions = False
-        results = create_campaignx_supporters_from_positions(
-            request,
+        # From PUBLIC positions
+        results = create_followers_from_positions(
             friends_only_positions=False,
-            politician_we_vote_id_list=politician_we_vote_id_list)
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        if not positive_value_exists(results['campaignx_supporter_entries_created']):
-            create_from_friends_only_positions = True
-        if create_from_friends_only_positions:
-            results = create_campaignx_supporters_from_positions(
-                request,
-                friends_only_positions=True,
-                politician_we_vote_id_list=politician_we_vote_id_list)
-            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-            if len(campaignx_we_vote_id_list_changed) > 0:
-                campaignx_we_vote_id_list_to_refresh = \
-                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # From FRIENDS_ONLY positions
+        results = create_followers_from_positions(
+            friends_only_positions=True,
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
 
         campaignx_manager = CampaignXManager()
         supporter_count = campaignx_manager.fetch_campaignx_supporter_count(
             politician_on_stage.linked_campaignx_we_vote_id)
         results = campaignx_manager.retrieve_campaignx(
-            campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+            campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id,
+            read_only=False)
         if results['campaignx_found']:
             campaignx = results['campaignx']
             campaignx.supporters_count = supporter_count
@@ -3493,6 +3507,11 @@ def politician_edit_process_view(request):
 
     if positive_value_exists(update_message):
         messages.add_message(request, messages.INFO, update_message)
+
+    if positive_value_exists(error_message_to_print):
+        messages.add_message(request, messages.ERROR, error_message_to_print)
+    if positive_value_exists(info_message_to_print):
+        messages.add_message(request, messages.INFO, info_message_to_print)
 
     if politician_id:
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))

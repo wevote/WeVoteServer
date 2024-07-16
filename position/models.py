@@ -105,7 +105,8 @@ class PositionEntered(models.Model):
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter username for candidate, measure, or office', max_length=255, null=True, unique=False)
     campaignx_supporter_created = models.BooleanField(default=None, null=True)
-    politician_follow_created = models.BooleanField(default=None, null=True)  # When position is created, also follow
+    follow_organization_analysis_complete = models.BooleanField(default=False)
+    follow_organization_created = models.BooleanField(default=None, null=True)  # When position is created, also follow
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -539,6 +540,8 @@ class PositionForFriends(models.Model):
         verbose_name='twitter username for candidate, measure, or office',
         max_length=255, null=True, unique=False)
     campaignx_supporter_created = models.BooleanField(default=None, null=True)
+    follow_organization_analysis_complete = models.BooleanField(default=False)
+    follow_organization_created = models.BooleanField(default=None, null=True)  # When position is created, also follow
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
