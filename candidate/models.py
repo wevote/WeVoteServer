@@ -4613,7 +4613,8 @@ class CandidateManager(models.Manager):
         ballotpedia_candidate_summary = update_values['ballotpedia_candidate_summary'] \
             if 'ballotpedia_candidate_summary' in update_values else ''
         ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
-            if 'ballotpedia_candidate_url' in update_values else ''
+            if 'ballotpedia_candidate_url' in update_values \
+               and positive_value_exists(update_values['ballotpedia_candidate_url']) else None
         ballotpedia_election_id = update_values['ballotpedia_election_id'] \
             if 'ballotpedia_election_id' in update_values else 0
         ballotpedia_image_id = update_values['ballotpedia_image_id'] \
@@ -4833,7 +4834,8 @@ class CandidateManager(models.Manager):
                         update_values['ballotpedia_candidate_summary']
                     values_changed = True
                 if 'ballotpedia_candidate_url' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url']
+                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
+                        if positive_value_exists(update_values['ballotpedia_candidate_url']) else None
                     values_changed = True
                 if 'ballotpedia_election_id' in update_values:
                     existing_candidate_entry.ballotpedia_election_id = \

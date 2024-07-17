@@ -2490,8 +2490,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.ballotpedia_candidate_summary = ballotpedia_candidate_summary
         if positive_value_exists(vote_usa_ballotpedia_candidate_url):
             batch_row_action_candidate.ballotpedia_candidate_url = vote_usa_ballotpedia_candidate_url
-        else:
+        elif positive_value_exists(ballotpedia_candidate_url):
             batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
+        else:
+            batch_row_action_candidate.ballotpedia_candidate_url = None
         batch_row_action_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
         batch_row_action_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)

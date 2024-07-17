@@ -2344,7 +2344,11 @@ def politician_edit_process_view(request):
 
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
+    if positive_value_exists(ballotpedia_politician_name):
+        ballotpedia_politician_name = ballotpedia_politician_name.strip()
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
+    if positive_value_exists(ballotpedia_politician_url):
+        ballotpedia_politician_url = ballotpedia_politician_url.strip()
     birth_date = request.POST.get('birth_date', False)
     first_name = request.POST.get('first_name', False)
     gender = request.POST.get('gender', 'False')
@@ -2356,8 +2360,14 @@ def politician_edit_process_view(request):
     facebook_url2 = request.POST.get('facebook_url2', False)
     facebook_url3 = request.POST.get('facebook_url3', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    if positive_value_exists(google_civic_candidate_name):
+        google_civic_candidate_name = google_civic_candidate_name.strip()
     google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
+    if positive_value_exists(google_civic_candidate_name2):
+        google_civic_candidate_name2 = google_civic_candidate_name2.strip()
     google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
+    if positive_value_exists(google_civic_candidate_name3):
+        google_civic_candidate_name3 = google_civic_candidate_name3.strip()
     instagram_handle = request.POST.get('instagram_handle', False)
     if positive_value_exists(instagram_handle):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
@@ -2373,6 +2383,8 @@ def politician_edit_process_view(request):
     politician_id = request.POST.get('politician_id', 0)
     politician_id = convert_to_int(politician_id)
     politician_name = request.POST.get('politician_name', False)
+    if positive_value_exists(politician_name):
+        politician_name = politician_name.strip()
     politician_phone_number = request.POST.get('politician_phone_number', False)
     politician_phone_number2 = request.POST.get('politician_phone_number2', False)
     politician_phone_number3 = request.POST.get('politician_phone_number3', False)
@@ -2416,6 +2428,8 @@ def politician_edit_process_view(request):
     vote_smart_id = request.POST.get('vote_smart_id', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     wikipedia_url = request.POST.get('wikipedia_url', False)
+    if positive_value_exists(wikipedia_url):
+        wikipedia_url = wikipedia_url.strip()
     youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
 
@@ -2673,8 +2687,10 @@ def politician_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                     ballotpedia_politician_url_changed = True
-                politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
-                if not positive_value_exists(ballotpedia_politician_url):
+                if positive_value_exists(ballotpedia_politician_url):
+                    politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
+                else:
+                    politician_on_stage.ballotpedia_politician_url = None
                     politician_on_stage.ballotpedia_photo_url = None
                     politician_on_stage.ballotpedia_photo_url_is_broken = False
                     politician_on_stage.ballotpedia_photo_url_is_placeholder = False
