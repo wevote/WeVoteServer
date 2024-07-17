@@ -79,7 +79,7 @@ DATE_FORMAT_A_DBY_HMS_GMT = "%a, %d-%b-%Y %H:%M:%S GMT"   # Wed, 04-Mar-2024 21:
 # DATE_FORMAT_MDY_IMS_P_SLASH = "%m/%d/%Y %I:%M:%S %p"        # 03/04/2024 09:58:40 PM
 DATE_FORMAT_MDY_HM = "%m/%d/%Y %H:%M"                    # 03/04/2024 21:58
 DATE_FORMAT_B_D_Y_AT_HM = "%B %d, %Y at %H:%M"                # March 04, 2024 at 21:58
-DATE_FORMAT_D = "%d"                                        # 04
+DATE_FORMAT_DAY_OF_WEEK_TWO_DIGIT = "%d"                      # 04
 
 
 # parse string into localized date time object

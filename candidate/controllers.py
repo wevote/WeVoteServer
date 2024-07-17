@@ -30,7 +30,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer, DATE_FORMAT_YMD_HMS
+    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer, DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD
 from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
@@ -1786,7 +1786,7 @@ def generate_candidate_dict_from_candidate_object(
 
     withdrawal_date_string = ''
     if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-        withdrawal_date_string = candidate.withdrawal_date.strftime("%Y-%m-%d")
+        withdrawal_date_string = candidate.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
     list_found = False
     office_list_for_candidate = []
     if len(candidate_to_office_link_list_from_multiple_candidates) > 0:
