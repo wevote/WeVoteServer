@@ -180,24 +180,24 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
         year_list=[2024])
     candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     photo_results = retrieve_ballotpedia_photos_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
         limit=10,
     )
     photos_retrieved = photo_results['photos_retrieved']
-    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count(
-        candidate_we_vote_id_list=candidate_we_vote_id_list,
-    )
     status += photo_results['status']
 
+    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     links_results = retrieve_ballotpedia_links_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
         limit=30,
     )
     profiles_retrieved = links_results['profiles_retrieved']
-    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count(
-        candidate_we_vote_id_list=candidate_we_vote_id_list,
-    )
     status += links_results['status']
 
     results = {

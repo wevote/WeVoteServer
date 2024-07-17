@@ -2673,8 +2673,10 @@ def politician_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                     ballotpedia_politician_url_changed = True
-                politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
-                if not positive_value_exists(ballotpedia_politician_url):
+                if positive_value_exists(ballotpedia_politician_url):
+                    politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
+                else:
+                    politician_on_stage.ballotpedia_politician_url = None
                     politician_on_stage.ballotpedia_photo_url = None
                     politician_on_stage.ballotpedia_photo_url_is_broken = False
                     politician_on_stage.ballotpedia_photo_url_is_placeholder = False

@@ -3189,8 +3189,10 @@ def candidate_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                     ballotpedia_candidate_url_changed = True
-                candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
-                if not positive_value_exists(ballotpedia_candidate_url):
+                if positive_value_exists(ballotpedia_candidate_url):
+                    candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+                else:
+                    candidate_on_stage.ballotpedia_candidate_url = None
                     candidate_on_stage.ballotpedia_photo_url = None
                     candidate_on_stage.ballotpedia_photo_url_is_broken = False
                     candidate_on_stage.ballotpedia_photo_url_is_placeholder = False

@@ -567,17 +567,23 @@ def get_photo_url_from_ballotpedia(
         remote_request_history_manager = RemoteRequestHistoryManager()
 
     if hasattr(incoming_object, 'ballotpedia_candidate_url'):
-        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
-        google_civic_election_id = incoming_object.google_civic_election_id
         is_candidate = True
+        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.ballotpedia_candidate_url = None
+        google_civic_election_id = incoming_object.google_civic_election_id
     elif hasattr(incoming_object, 'ballotpedia_politician_url'):
-        ballotpedia_page_url = incoming_object.ballotpedia_politician_url
-        google_civic_election_id = ''
         is_politician = True
-    else:
-        ballotpedia_page_url = incoming_object.organization_ballotpedia
+        ballotpedia_page_url = incoming_object.ballotpedia_politician_url
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.ballotpedia_politician_url = None
         google_civic_election_id = ''
+    else:
         is_organization = True
+        ballotpedia_page_url = incoming_object.organization_ballotpedia
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.organization_ballotpedia = None
+        google_civic_election_id = ''
     incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):
@@ -811,17 +817,23 @@ def get_candidate_links_from_ballotpedia(
         remote_request_history_manager = RemoteRequestHistoryManager()
 
     if hasattr(incoming_object, 'ballotpedia_candidate_url'):
-        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
-        google_civic_election_id = incoming_object.google_civic_election_id
         is_candidate = True
+        ballotpedia_page_url = incoming_object.ballotpedia_candidate_url
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.ballotpedia_candidate_url = None
+        google_civic_election_id = incoming_object.google_civic_election_id
     elif hasattr(incoming_object, 'ballotpedia_politician_url'):
-        ballotpedia_page_url = incoming_object.ballotpedia_politician_url
-        google_civic_election_id = ''
         is_politician = True
-    else:
-        ballotpedia_page_url = incoming_object.organization_ballotpedia
+        ballotpedia_page_url = incoming_object.ballotpedia_politician_url
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.ballotpedia_politician_url = None
         google_civic_election_id = ''
+    else:
         is_organization = True
+        ballotpedia_page_url = incoming_object.organization_ballotpedia
+        if not positive_value_exists(ballotpedia_page_url):
+            incoming_object.organization_ballotpedia = None
+        google_civic_election_id = ''
     incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):

@@ -860,7 +860,10 @@ class PoliticianManager(models.Manager):
             twitter_handles = []
             try:
                 if object_is_candidate:
-                    politician.ballotpedia_politician_url = similar_object.ballotpedia_candidate_url
+                    if positive_value_exists(similar_object.ballotpedia_candidate_url):
+                        politician.ballotpedia_politician_url = similar_object.ballotpedia_candidate_url
+                    else:
+                        politician.ballotpedia_politician_url = None
                     politician.ballotpedia_politician_name = similar_object.ballotpedia_candidate_name
                     politician.politician_contact_form_url = similar_object.candidate_contact_form_url
                     politician.politician_url = similar_object.candidate_url
@@ -898,7 +901,10 @@ class PoliticianManager(models.Manager):
                         twitter_handles.append(similar_object.organization_twitter_handle)
                     politician.vote_smart_id = similar_object.vote_smart_id
                 elif object_is_representative:
-                    politician.ballotpedia_politician_url = similar_object.ballotpedia_representative_url
+                    if positive_value_exists(similar_object.ballotpedia_representative_url):
+                        politician.ballotpedia_politician_url = similar_object.ballotpedia_representative_url
+                    else:
+                        politician.ballotpedia_politician_url = None
                     politician.google_civic_candidate_name = similar_object.google_civic_representative_name
                     politician.google_civic_candidate_name2 = similar_object.google_civic_representative_name2
                     politician.google_civic_candidate_name3 = similar_object.google_civic_representative_name3
