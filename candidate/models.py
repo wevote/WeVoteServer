@@ -4614,7 +4614,7 @@ class CandidateManager(models.Manager):
             if 'ballotpedia_candidate_summary' in update_values else ''
         ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
             if 'ballotpedia_candidate_url' in update_values \
-               and positive_value_exists(update_values['ballotpedia_candidate_url']) else ''
+               and positive_value_exists(update_values['ballotpedia_candidate_url']) else None
         ballotpedia_election_id = update_values['ballotpedia_election_id'] \
             if 'ballotpedia_election_id' in update_values else 0
         ballotpedia_image_id = update_values['ballotpedia_image_id'] \
