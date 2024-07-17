@@ -2766,7 +2766,7 @@ class CandidateCampaign(models.Model):
                 fields=['politician_we_vote_id', 'seo_friendly_path', '-id'],
                 name='candidate_seo_friendly_path2'),
             models.Index(
-                fields=['politician_we_vote_id', 'candidate_name',
+                fields=['candidate_name', 'politician_we_vote_id',
                         'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
                 name='candidate_list_for_politician'),
             models.Index(

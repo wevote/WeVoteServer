@@ -43,12 +43,12 @@ def retrieve_ballotpedia_links_in_bulk(
     try:
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
+        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset.exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
         # Only include candidates that don't have a photo
         queryset = queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(limit):
@@ -185,7 +185,9 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
         limit=10,
     )
     photos_retrieved = photo_results['photos_retrieved']
-    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count()
+    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     status += photo_results['status']
 
     links_results = retrieve_ballotpedia_links_in_bulk(
@@ -193,7 +195,9 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
         limit=30,
     )
     profiles_retrieved = links_results['profiles_retrieved']
-    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count()
+    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     status += links_results['status']
 
     results = {

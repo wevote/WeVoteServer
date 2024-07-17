@@ -2459,13 +2459,17 @@ def fetch_ballotpedia_urls_to_retrieve_for_links_count(
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         count_queryset = count_queryset.exclude(ballotpedia_candidate_links_retrieved=True)
-        # Exclude candidates without ballotpedia_candidate_url
+        # Don't include candidates that do not have ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        # Only include candidates that don't have a photo
+        count_queryset = count_queryset.filter(
+            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
         ballotpedia_urls_to_retrieve_for_links = count_queryset.count()
@@ -2485,21 +2489,20 @@ def fetch_ballotpedia_urls_to_retrieve_for_photos_count(
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
         count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_broken=True)
-        if positive_value_exists(state_code):
-            count_queryset = count_queryset.filter(state_code__iexact=state_code)
-
-        # Exclude candidates without ballotpedia_candidate_url
+        # Don't include candidates that do not have ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-
-        # Find candidates that don't have a photo (i.e. that are null or '')
+        # Only include candidates that don't have a photo
         count_queryset = count_queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
         ballotpedia_urls_to_retrieve_for_photos = count_queryset.count()
     except Exception as e:

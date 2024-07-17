@@ -826,6 +826,9 @@ def get_candidate_links_from_ballotpedia(
 
     if not positive_value_exists(ballotpedia_page_url):
         status += "MISSING_BALLOTPEDIA_PAGE_URL: " + str(incoming_object_we_vote_id) + " "
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
         results = {
             'error_message_to_print': error_message_to_print,
             'profile_retrieved': profile_retrieved,
@@ -838,6 +841,9 @@ def get_candidate_links_from_ballotpedia(
         ballotpedia_page_url = ""
     if not positive_value_exists(ballotpedia_page_url):
         status += "BALLOTPEDIA_PAGE_URL_WAS_BAD "
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
         results = {
             'error_message_to_print': error_message_to_print,
             'profile_retrieved': profile_retrieved,
@@ -871,7 +877,7 @@ def get_candidate_links_from_ballotpedia(
                     incoming_object = add_links_results['candidate']
                     # incoming_object_changes = True  # We always save, so this is redundant
         else:
-            status += "BALLOTPEDIA_CANDIDATE_LINKS_NOT_FOUND: " + ballotpedia_page_url + " "
+            status += "LINKS_NOT_FOUND: " + ballotpedia_page_url + " "
             status += results['status']
 
         if save_to_database and incoming_object_changes:
@@ -893,6 +899,9 @@ def get_candidate_links_from_ballotpedia(
         success = False
         status += "NOT_SUCCESSFUL_get_ballotpedia_candidate_links_ballotpedia_candidate_url_page: "
         status += results['status']
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
 
         error_message_to_print += 'Ballotpedia links NOT retrieved (2). status: ' + results.get('status')
 
