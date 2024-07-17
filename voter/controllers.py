@@ -72,6 +72,7 @@ from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManag
 from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
     move_voter_guides_to_another_voter
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 from campaign.controllers import delete_campaign_supporter
 
 
@@ -4250,7 +4251,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'success':                          True,
             'address':                          address_results,
             'can_edit_campaignx_owned_by_organization_list': can_edit_campaignx_owned_by_organization_list,
-            'date_joined':                      voter.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_joined':                      voter.date_joined.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
             'facebook_id':                      voter.facebook_id,

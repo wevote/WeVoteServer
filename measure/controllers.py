@@ -13,6 +13,7 @@ from position.controllers import update_all_position_details_from_contest_measur
 import wevote_functions.admin
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, MEASURE_TITLE_SYNONYMS, \
     positive_value_exists, process_request_from_master, strip_html_tags
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -232,7 +233,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             election_display_name = ""
         date_last_updated = ''
         if positive_value_exists(contest_measure.date_last_updated):
-            date_last_updated = contest_measure.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+            date_last_updated = contest_measure.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         json_data = {
             'status':                   status,
             'success':                  True,

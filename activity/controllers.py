@@ -24,6 +24,7 @@ from voter.models import \
     VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, return_first_x_words
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -775,7 +776,7 @@ def assemble_voter_daily_summary(
             if number_of_likes > 0:
                 priority_score += number_of_likes * 1
             highlight_item_dict = {
-                # 'date_created':                     one_post.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+                # 'date_created':                     one_post.date_created.strftime(DATE_FORMAT_YMD_HMS),
                 'number_of_comments':               number_of_comments,
                 'number_of_likes':                  number_of_likes,
                 'priority_score':                   priority_score,

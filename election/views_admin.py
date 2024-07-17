@@ -51,7 +51,7 @@ from voter_guide.models import VoterGuide, VoterGuidePossibility, \
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, \
     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date, generate_localized_datetime_from_obj
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date, generate_localized_datetime_from_obj, DATE_FORMAT_YMD, DATE_FORMAT_DAY_TWO_DIGIT
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistoryManager
 
@@ -903,7 +903,7 @@ def election_list_view(request):
     elif not positive_value_exists(show_all_elections):
         two_days = timedelta(days=2)
         datetime_two_days_ago = datetime_now - two_days
-        earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+        earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
         election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
 
     if positive_value_exists(election_search):
@@ -969,10 +969,10 @@ def election_list_view(request):
 
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass
@@ -1519,7 +1519,7 @@ def nationwide_election_list_view(request):
         elif not positive_value_exists(show_all_elections):
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
-            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
             election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
 
         if positive_value_exists(election_search):
@@ -1554,10 +1554,10 @@ def nationwide_election_list_view(request):
     for election in election_list:
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass
@@ -1914,10 +1914,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         timezone, datetime_now = generate_localized_datetime_from_obj()
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass

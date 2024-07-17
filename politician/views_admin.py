@@ -49,7 +49,7 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, generate_localized_datetime_from_obj
+    convert_we_vote_date_string_to_date_as_integer, generate_localized_datetime_from_obj, DATE_FORMAT_YMD_HMS
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
@@ -3793,15 +3793,15 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
                     one_dict['birth_date'] = birth_date.strftime('%Y-%m-%d')
                 date_last_updated = one_dict.get('date_last_updated', '')
                 if positive_value_exists(date_last_updated):
-                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                    one_dict['date_last_updated'] = date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 date_last_updated_from_candidate = one_dict.get('date_last_updated_from_candidate', '')
                 if positive_value_exists(date_last_updated_from_candidate):
                     one_dict['date_last_updated_from_candidate'] = \
-                        date_last_updated_from_candidate.strftime('%Y-%m-%d %H:%M:%S')
+                        date_last_updated_from_candidate.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 seo_friendly_path_date_last_updated = one_dict.get('seo_friendly_path_date_last_updated', '')
                 if positive_value_exists(seo_friendly_path_date_last_updated):
                     one_dict['seo_friendly_path_date_last_updated'] = \
-                        seo_friendly_path_date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                        seo_friendly_path_date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 modified_politician_dict_list.append(one_dict)
             politician_list_json = list(modified_politician_dict_list)
             return HttpResponse(json.dumps(politician_list_json), content_type='application/json')

@@ -56,7 +56,7 @@ from voter_guide.controllers import voter_follow_all_organizations_followed_by_o
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -1604,8 +1604,8 @@ def voter_plan_list_retrieve_view(request):  # voterPlanListRetrieve
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),  # what the format constant used to be
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,
@@ -1661,8 +1661,8 @@ def voter_plans_for_voter_retrieve_view(request):  # voterPlansForVoterRetrieve
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,
@@ -1746,8 +1746,8 @@ def voter_plan_save_view(request):  # voterPlanSave
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,

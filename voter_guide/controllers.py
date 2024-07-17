@@ -54,7 +54,7 @@ from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSIN
     WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS, WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
-from wevote_functions.functions_date import generate_localized_datetime_from_obj
+from wevote_functions.functions_date import generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -4269,7 +4269,7 @@ def retrieve_voter_guides_from_friends(
             datetime_now = generate_localized_datetime_from_obj()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
-            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
             voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
             voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 
@@ -4407,7 +4407,7 @@ def retrieve_voter_guides_from_shared_items(
             datetime_now = generate_localized_datetime_from_obj()[1]
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
-            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
             voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
             voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 

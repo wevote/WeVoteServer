@@ -5,6 +5,7 @@ from dateutil import parser
 from email_outbound.models import EmailManager
 from wevote_functions.functions import positive_value_exists
 from voter.models import VoterContactEmail, VoterManager
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 
 def assemble_contact_display_name(
@@ -241,8 +242,8 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
             else:
                 voter_contact_from_google_api += 1
         try:
-            date_last_changed_string = voter_contact_email.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-            google_date_last_updated_string = voter_contact_email.google_date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+            date_last_changed_string = voter_contact_email.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            google_date_last_updated_string = voter_contact_email.google_date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         voter_contact_email_dict = {

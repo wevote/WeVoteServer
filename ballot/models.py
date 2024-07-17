@@ -20,7 +20,7 @@ from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, \
     positive_value_exists, STATE_CODE_MAP
-from wevote_functions.functions_date import convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer, DATE_FORMAT_YMD
 from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
 
 OFFICE = 'OFFICE'
@@ -3009,7 +3009,7 @@ class BallotReturnedManager(models.Manager):
                     if ballot_location_display_name is not False:
                         ballot_returned.ballot_location_display_name = ballot_location_display_name
                     if election_day_text is not False and election_day_text is not None:
-                        ballot_returned.election_date = datetime.strptime(election_day_text, "%Y-%m-%d").date()
+                        ballot_returned.election_date = datetime.strptime(election_day_text, DATE_FORMAT_YMD).date() # "%Y-%m-%d"
                     if election_description_text is not False:
                         ballot_returned.election_description_text = election_description_text
                     if latitude is not False:

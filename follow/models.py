@@ -12,7 +12,7 @@ from organization.models import OrganizationManager
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import generate_localized_datetime_from_obj
+from wevote_functions.functions_date import generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 from voter.models import VoterManager
 
 

@@ -16,6 +16,7 @@ import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 from .models import Representative, RepresentativeManager, REPRESENTATIVE_UNIQUE_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -411,7 +412,7 @@ def generate_representative_dict_from_representative_object(
 
     date_last_updated = ''
     if positive_value_exists(representative.date_last_updated):
-        date_last_updated = representative.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+        date_last_updated = representative.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
     representative_dict = {
         'id':                           representative.id,
         'we_vote_id':                   representative.we_vote_id,
@@ -1108,7 +1109,7 @@ def representatives_import_from_structured_json(structured_json):  # representat
         for one_field in character_to_datetime_fields:
             if one_field in one_representative and positive_value_exists(one_representative[one_field]):
                 updated_representative_values[one_field] = \
-                    datetime.strptime(one_representative[one_field], '%Y-%m-%d %H:%M:%S')
+                    datetime.strptime(one_representative[one_field], DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
             else:
                 updated_representative_values[one_field] = None
         for one_field in integer_fields:
