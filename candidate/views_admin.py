@@ -99,6 +99,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
     if positive_value_exists(google_civic_election_id):
         candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
+        # if state code is na, don't filter by state code of office link, get all candidates for that election
         if state_code == 'na' or state_code == 'NA':
             results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
                 google_civic_election_id_list=google_civic_election_id_list)
@@ -123,6 +124,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         elif positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
             queryset = queryset.filter(candidate_year=current_year)
+        # with na state code, filter by candidate's state code from the previously fetched full election data
         if state_code == 'na' or state_code == 'NA':
             queryset = queryset.filter(state_code__iexact=state_code)
         filters = []
