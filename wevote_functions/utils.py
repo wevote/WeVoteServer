@@ -6,7 +6,7 @@ from datetime import datetime, date
 from django.db import connection
 from django.utils.timezone import localtime
 
-from wevote_functions.functions_time import DATE_FORMAT_YMD_T_HMS_Z
+from wevote_functions.functions_date import DATE_FORMAT_YMD_T_HMS_Z, DATE_FORMAT_YMD_HMS
 
 def staticUserAgent():
     # Updated March 26, 2024
@@ -55,8 +55,8 @@ def get_git_commit_date():
         date_string = "Not found"
         if date and reg.group(1):
             dt = reg.group(1)
-            utc_time = datetime.strptime(dt, DATE_FORMAT_YMD_T_HMS_Z)            # "%Y-%m-%dT%H:%M:%S%z"
-            date_string = localtime(utc_time).strftime("%m/%d/%Y %H:%M")
+            utc_time = datetime.strptime(dt, DATE_FORMAT_YMD_T_HMS_Z) # "%Y-%m-%dT%H:%M:%S%z"
+            date_string = localtime(utc_time).strftime(DATE_FORMAT_YMD_HMS) # now: "%Y-%m-%d %H:%M:%S" original: "%m/%d/%Y %H:%M"
         return date_string
     except Exception as e:
         return 'Not found: ' + str(e)
