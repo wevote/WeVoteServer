@@ -2184,7 +2184,7 @@ def election_migration_view(request):
     from_election_organization_election_metrics_count = 0
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         organization_election_metrics_results = analytics_action_manager.retrieve_organization_election_metrics_list(
-            from_election_id)
+            from_election_id, read_only=False)
         if organization_election_metrics_results['organization_election_metrics_list_found']:
             from_election_organization_election_metrics_list = \
                 organization_election_metrics_results['organization_election_metrics_list']

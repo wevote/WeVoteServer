@@ -3882,7 +3882,7 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_by_id(voter_id)
+    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
     if not results['voter_found']:
         json_data = {
             'status':                       'VOTER_NOT_FOUND',
@@ -3894,7 +3894,10 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vote_id)
+    results = retrieve_voter_guide_followers_by_organization_we_vote_id(
+        limit=0,
+        organization_we_vote_id=organization_we_vote_id,
+        read_only=True)
     status = results['status']
     voter_guides = []
     if results['organization_list_found']:
@@ -4148,18 +4151,19 @@ def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vo
     return results
 
 
-def retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vote_id):  # voterGuidesFollowersRetrieve
+def retrieve_voter_guide_followers_by_organization_we_vote_id(limit=200, organization_we_vote_id='', read_only=True):  # voterGuidesFollowersRetrieve
     organization_list_found = False
 
     follow_organization_list_manager = FollowOrganizationList()
-    return_we_vote_id = True
     organization_we_vote_ids_followers = \
         follow_organization_list_manager.retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
-            organization_we_vote_id, return_we_vote_id)
+            organization_we_vote_id=organization_we_vote_id, return_we_vote_id=True)
 
     organization_list_object = OrganizationListManager()
     results = organization_list_object.retrieve_organizations_by_organization_we_vote_id_list(
-        organization_we_vote_ids_followers)
+        limit=limit,
+        list_of_organization_we_vote_ids=organization_we_vote_ids_followers,
+        read_only=read_only)
 
     organization_list = []
     if results['organization_list_found']:

@@ -136,7 +136,7 @@ class Politician(models.Model):
     objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this politician", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default=None)
@@ -354,6 +354,9 @@ class Politician(models.Model):
     organization_might_be_needed = models.BooleanField(default=True)
     organization_and_manual_intervention_needed = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ('last_name',)
+
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
@@ -389,9 +392,6 @@ class Politician(models.Model):
         politician_manager = PoliticianManager()
         results = politician_manager.fetch_recommend_list_by_we_vote_id(self.we_vote_id)
         return results
-
-    class Meta:
-        ordering = ('last_name',)
 
     def display_full_name(self):
         if self.politician_name:
@@ -695,20 +695,23 @@ class PoliticianManager(models.Manager):
         }
 
     @staticmethod
-    def get_politician_from_politicianseofriendlypath_table(path):
+    def retrieve_politician_from_politicianseofriendlypath_table(seo_friendly_path='', read_only=True):
         try:
-            path_query = PoliticianSEOFriendlyPath.objects.all()
-            path_query = path_query.filter(final_pathname_string=path)
+            path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(final_pathname_string__iexact=seo_friendly_path)
             path_count = path_query.count()
             path_list = list(path_query)
             if path_count == 0:
-                path_query = path_query.filter(Q(base_pathname_string=path))
+                path_query = path_query.filter(Q(base_pathname_string=seo_friendly_path))
                 path_count = path_query.count()
                 path_list = list(path_query)
             if path_count == 0:
                 return 0, '', None, 'NO_PATH_MATCH_IN_POLITICIANSEOFRIENDLYPATH_TABLE '
 
-            politician = Politician.objects.get(we_vote_id=path_list[0].politician_we_vote_id)
+            if positive_value_exists(read_only):
+                politician = Politician.objects.using('readonly').get(we_vote_id=path_list[0].politician_we_vote_id)
+            else:
+                politician = Politician.objects.get(we_vote_id=path_list[0].politician_we_vote_id)
 
             return path_list[0].id, path_list[0].politician_we_vote_id, politician, ''
         except Exception as e:
@@ -1045,7 +1048,9 @@ class PoliticianManager(models.Manager):
             status += "MULTIPLE_POLITICIANS_FOUND "
         except Politician.DoesNotExist:
             politician_id, politician_we_vote_id, politician, status2 = \
-                self.get_politician_from_politicianseofriendlypath_table(seo_friendly_path)
+                self.retrieve_politician_from_politicianseofriendlypath_table(
+                    seo_friendly_path=seo_friendly_path,
+                    read_only=read_only)
             status += status2
             if politician_id == 0:
                 error_result = True

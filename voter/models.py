@@ -3165,7 +3165,7 @@ class Voter(AbstractBaseUser):
     # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
     #  we link the voter account to the organization.
     linked_organization_we_vote_id = models.CharField(
-        verbose_name="we vote id for linked organization", max_length=255, null=True, unique=True, db_index=True)
+        verbose_name="we vote id for linked organization", max_length=255, null=True, unique=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=50, validators=[alphanumeric])  # Increase max_length to 255
@@ -3173,12 +3173,14 @@ class Voter(AbstractBaseUser):
     # is referenced by primary_email_we_vote_id and stored in the EmailAddress table
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
     primary_email_we_vote_id = models.CharField(
-        verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote id for primary email for this voter",
+        max_length=255, null=True, blank=True, unique=True, db_index=True)
     # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
     email_ownership_is_verified = models.BooleanField(default=False)
     normalized_sms_phone_number = models.CharField(max_length=50, null=True, blank=True)
     primary_sms_we_vote_id = models.CharField(
-        verbose_name="we vote id for primary phone number", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote id for primary phone number",
+        max_length=255, null=True, blank=True, unique=True, db_index=True)
     sms_ownership_is_verified = models.BooleanField(default=False)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
@@ -3264,7 +3266,7 @@ class Voter(AbstractBaseUser):
     interface_status_flags = models.PositiveIntegerField(verbose_name="interface status flags", default=0)
 
     # This is how we keep track of whether we have run certain updates on voter records
-    #  to the latest defaults, for example
+    #  to the latest defaults
     # For example, have we updated a voter's notification_settings_flags after adding new feature?
     # We update the default value for maintenance_status_flags for new voters with MAINTENANCE_STATUS_FLAGS_COMPLETED
     #  since we updated the NOTIFICATION_SETTINGS_FLAGS_DEFAULT to match what we want after all the maintenance
@@ -3283,6 +3285,19 @@ class Voter(AbstractBaseUser):
     voter_issues_lookup_updated = models.BooleanField(default=False)
 
     objects = VoterManager()
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['linked_organization_we_vote_id'],
+                name='voter_fetch_voter_by_org_index'),
+            models.Index(
+                fields=['linked_organization_we_vote_id', 'we_vote_id'],
+                name='fetch_voter_by_org2_index'),
+            models.Index(
+                fields=['primary_email_we_vote_id', 'primary_sms_we_vote_id', 'twitter_id', 'facebook_id'],
+                name='voter_signin_count_index'),
+        ]
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []  # Since we need to store a voter based solely on voter_device_id, no values are required

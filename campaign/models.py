@@ -120,6 +120,8 @@ class CampaignX(models.Model):
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
     # If this CampaignX has a linked_politician_we_vote_id, then supporters_count comes from Organization followers
     supporters_count = models.PositiveIntegerField(default=0)
+    # Updates both supporters_count and opposers_count from the position_list page in position/views_admin.py
+    supporters_count_to_update_with_bulk_script = models.BooleanField(default=True)
     # How many supporters are required before showing in We Vote lists
     supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
     supporters_count_victory_goal = models.PositiveIntegerField(default=0)
@@ -181,9 +183,9 @@ class CampaignXEntriesAreNotDuplicates(models.Model):
     When checking for duplicates, there are times we want to explicitly mark two CampaignX entries as NOT duplicates
     """
     campaignx1_we_vote_id = models.CharField(
-        verbose_name="first campaignx we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="first campaignx we are tracking", max_length=255, null=True, unique=False, db_index=True)
     campaignx2_we_vote_id = models.CharField(
-        verbose_name="second campaignx we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="second campaignx we are tracking", max_length=255, null=True, unique=False, db_index=True)
 
     def fetch_other_campaignx_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.campaignx1_we_vote_id:
@@ -199,8 +201,8 @@ class CampaignXEntriesArePossibleDuplicates(models.Model):
     """
     When checking for duplicates, there are times when we want to explicitly mark two entries as possible duplicates
     """
-    campaignx1_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
-    campaignx2_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    campaignx1_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
+    campaignx2_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True)
 
     def fetch_other_campaignx_we_vote_id(self, one_we_vote_id):
@@ -223,8 +225,9 @@ class CampaignXListedByOrganization(models.Model):
     def __unicode__(self):
         return "CampaignXListedByOrganization"
 
-    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    site_owner_organization_we_vote_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # If a candidate or campaign-starter requests to be included in a private label site:
     listing_requested_by_voter_we_vote_id = \
         models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)

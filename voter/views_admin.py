@@ -2036,4 +2036,4 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
 
 def create_dev_user_view(request):
     create_dev_user()
-    return None
+    return HttpResponseRedirect(reverse('login_we_vote', args=()))

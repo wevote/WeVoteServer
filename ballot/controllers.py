@@ -763,8 +763,9 @@ def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election
             # Make sure a BallotReturned entry exists for entries with voter_ballot_saved.ballot_returned_we_vote_id
             if positive_value_exists(voter_ballot_saved.ballot_returned_we_vote_id):
                 ballot_returned_results = \
-                    ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-                        voter_ballot_saved.ballot_returned_we_vote_id)
+                    ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                        ballot_returned_we_vote_id=voter_ballot_saved.ballot_returned_we_vote_id,
+                        read_only=False)
                 if not positive_value_exists(ballot_returned_results['ballot_returned_found']):
                     # Delete the voter_ballot_saved entry
                     voter_ballot_saved.delete()
@@ -2791,7 +2792,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
 
     if positive_value_exists(ballot_returned_we_vote_id):
         ballot_returned_results = \
-            ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(ballot_returned_we_vote_id)
+            ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+                ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                read_only=True)
         if ballot_returned_results['ballot_returned_found']:
             ballot_returned = ballot_returned_results['ballot_returned']
             polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id

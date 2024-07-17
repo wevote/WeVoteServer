@@ -149,13 +149,15 @@ class IssueListManager(models.Manager):
     This is a class to make it easy to retrieve lists of Issues
     """
 
-    def fetch_visible_issue_we_vote_ids(self):
+    @staticmethod
+    def fetch_visible_issue_we_vote_ids():
         issue_we_vote_ids_list = []
-        results = self.retrieve_issues()
-        if results['issue_list_found']:
-            issue_list = results['issue_list']
-            for issue in issue_list:
-                issue_we_vote_ids_list.append(issue.we_vote_id)
+        try:
+            queryset = Issue.objects.using('readonly').all()
+            queryset = queryset.filter(hide_issue=False)
+            issue_we_vote_ids_list = queryset.values_list('we_vote_id', flat=True).distinct()
+        except Exception as e:
+            pass
 
         return issue_we_vote_ids_list
 
@@ -352,7 +354,7 @@ class Issue(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_issue_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this issue", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     # Order by 1, 2, 3. Push 0's to the bottom in the same order.
     forced_sort_order = models.PositiveIntegerField(null=True, default=None)
     issue_name = models.CharField(verbose_name="name of the issue",
@@ -679,7 +681,7 @@ class OrganizationLinkToIssue(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Are the organization and the issue linked?
-    link_active = models.BooleanField(verbose_name='', default=True)
+    link_active = models.BooleanField(verbose_name='', default=True, db_index=True)
 
     # AUTO_TAGGED_BY_TEXT, AUTO_TAGGED_BY_HASHTAG, TAGGED_BY_ORGANIZATION, TAGGED_BY_WE_VOTE, NO_REASON
     reason_for_link = models.CharField(max_length=25, choices=LINKING_REASON_CHOICES,
@@ -823,7 +825,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return link_issue_list_count
 
     @staticmethod
-    def fetch_linked_organization_count(issue_we_vote_id):
+    def fetch_linked_organization_count(issue_we_vote_id=''):
         number_of_organizations_following_this_issue = 0
 
         try:
@@ -849,12 +851,10 @@ class OrganizationLinkToIssueList(models.Manager):
             # we decided not to use case-insensitivity in favour of '__in'
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)
-            link_queryset = link_queryset.values('organization_we_vote_id').distinct()
-            organization_link_to_issue_results = list(link_queryset)
-            if len(organization_link_to_issue_results):
+            link_queryset = link_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            organization_we_vote_id_list = list(link_queryset)
+            if len(organization_we_vote_id_list):
                 organization_we_vote_id_list_found = True
-                for one_link in organization_link_to_issue_results:
-                    organization_we_vote_id_list.append(one_link['organization_we_vote_id'])
                 status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED '
             else:
                 status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED '
@@ -963,7 +963,8 @@ class OrganizationLinkToIssueManager(models.Manager):
         results = self.retrieve_issue_link(
             organization_we_vote_id=organization_we_vote_id,
             issue_id=issue_id,
-            issue_we_vote_id=issue_we_vote_id)
+            issue_we_vote_id=issue_we_vote_id,
+            read_only=False)
 
         if results['link_issue_found']:
             link_issue_on_stage = results['link_issue']

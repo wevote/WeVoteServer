@@ -202,7 +202,8 @@ class MeasureCampaign(models.Model):
     # then the string "meascam", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_measure_campaign_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id",
+        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
     # contest_measure link
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_measure_id = models.CharField(verbose_name="contest_measure unique id",
@@ -1898,9 +1899,9 @@ class ContestMeasuresAreNotDuplicates(models.Model):
     When checking for duplicates, there are times when we want to explicitly mark two contest measures as NOT duplicates
     """
     contest_measure1_we_vote_id = models.CharField(
-        verbose_name="first contest measure we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="first contest measure we are tracking", max_length=255, null=True, unique=False, db_index=True)
     contest_measure2_we_vote_id = models.CharField(
-        verbose_name="second contest measure we are tracking", max_length=255, null=True, unique=False)
+        verbose_name="second contest measure we are tracking", max_length=255, null=True, unique=False, db_index=True)
 
     def fetch_other_office_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.contest_measure1_we_vote_id:

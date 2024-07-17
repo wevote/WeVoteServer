@@ -1275,13 +1275,19 @@ class VoterGuideListManager(models.Manager):
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
     @staticmethod
-    def retrieve_voter_guides_for_election(google_civic_election_id_list, exclude_voter_guide_owner_type_list=[]):
+    def retrieve_voter_guides_for_election(
+            google_civic_election_id_list,
+            exclude_voter_guide_owner_type_list=[],
+            read_only=False):
         voter_guide_list = []
         voter_guide_list_found = False
 
         try:
-            # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
-            voter_guide_query = VoterGuide.objects.order_by('display_name')
+            if positive_value_exists(read_only):
+                # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
+                voter_guide_query = VoterGuide.objects.using('readonly').order_by('display_name')
+            else:
+                voter_guide_query = VoterGuide.objects.order_by('display_name')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(
                 google_civic_election_id__in=google_civic_election_id_list)
@@ -1291,9 +1297,9 @@ class VoterGuideListManager(models.Manager):
             voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDE_FOUND'
+                status = 'VOTER_GUIDE_FOUND '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND'
+                status = 'NO_VOTER_GUIDES_FOUND '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)

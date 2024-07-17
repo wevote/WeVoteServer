@@ -171,7 +171,7 @@ def get_parsed_html(url):
 
     except requests.exceptions.RequestException:
         print('Unable to connect to {}'.format(url))
-        return BeautifulSoup('', "lxml")
+        return None
 
 
 def extract_value_from_array(structured_json, index_key, default_value):
@@ -509,30 +509,38 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
 
 
 def get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_candidate_url):
+    is_broken = False
     is_silhouette = False
     photo_url = ""
     photo_url_found = False
     status = ""
     success = True
-    soup = get_parsed_html(ballotpedia_candidate_url)
-    for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
-        if photo_url_found:
-            continue
-        photo_url = img.get('src')  # Use get() method to safely retrieve attributes
-        if photo_url:
-            try:
-                print(img['alt'], photo_url)
-                is_silhouette = SILHOUETTE_PLACEHOLDER_IMAGE_NAME in photo_url
-                if is_silhouette:
-                    status += "SILHOUETTE_PLACEHOLDER_FOUND "
-                else:
-                    photo_url_found = True
-            except Exception as e:
-                status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
-                success = False
-                status += ("Image URL not found for:", img['alt'])
+    try:
+        soup = get_parsed_html(ballotpedia_candidate_url)
+        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
+            if photo_url_found:
+                continue
+            photo_url = img.get('src')  # Use get() method to safely retrieve attributes
+            if photo_url:
+                try:
+                    print(img['alt'], photo_url)
+                    is_silhouette = SILHOUETTE_PLACEHOLDER_IMAGE_NAME in photo_url
+                    if is_silhouette:
+                        status += "SILHOUETTE_PLACEHOLDER_FOUND "
+                    else:
+                        photo_url_found = True
+                except Exception as e:
+                    status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
+                    success = False
+                    status += ("Image URL not found for:", img['alt'])
+        if not photo_url_found and not is_silhouette:
+            is_broken = True
+    except Exception as e:
+        status += "ERROR_TRYING_TO_FIND_BALLOTPEDIA_IMAGE_URL: " + str(e) + " "
+        success = False
 
     results = {
+        'is_broken':        is_broken,
         'is_silhouette':    is_silhouette,
         'photo_url':        photo_url,
         'photo_url_found':  photo_url_found,
@@ -544,16 +552,17 @@ def get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_ca
 
 def get_photo_url_from_ballotpedia(
         incoming_object=None,
-        request={},
         remote_request_history_manager=None,
-        save_to_database=False,
-        add_messages=False):
+        save_to_database=False):
+    error_message_to_print = ''
+    info_message_to_print = ''
     status = ""
     success = True
     ballotpedia_photo_saved = False
     is_candidate = False
     is_organization = False
     is_politician = False
+    photo_url_found = False
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -569,10 +578,27 @@ def get_photo_url_from_ballotpedia(
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
         is_organization = True
+    incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):
-        status += "MISSING_BALLOTPEDIA_PAGE_URL "
+        status += "MISSING_BALLOTPEDIA_PAGE_URL: " + str(incoming_object_we_vote_id) + " "
         results = {
+            'error_message_to_print': error_message_to_print,
+            'info_message_to_print': info_message_to_print,
+            'photo_url_found': photo_url_found,
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if ballotpedia_page_url in ["http://", "https://"]:
+        ballotpedia_page_url = ""
+    if not positive_value_exists(ballotpedia_page_url):
+        status += "BALLOTPEDIA_PAGE_URL_WAS_BAD "
+        results = {
+            'error_message_to_print': error_message_to_print,
+            'info_message_to_print': info_message_to_print,
+            'photo_url_found': photo_url_found,
             'success': success,
             'status': status,
         }
@@ -581,9 +607,11 @@ def get_photo_url_from_ballotpedia(
     incoming_object_changes = False
     if positive_value_exists(ballotpedia_page_url) and not ballotpedia_page_url.startswith('http'):
         ballotpedia_page_url = 'https://' + ballotpedia_page_url
+        ballotpedia_page_url = ballotpedia_page_url.replace('https:// https://', 'https://')
         incoming_object.ballotpedia_page_url = ballotpedia_page_url
         incoming_object_changes = True
-    # print(ballotpedia_page_url)
+
+    print(ballotpedia_page_url)
     results = get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
@@ -600,16 +628,33 @@ def get_photo_url_from_ballotpedia(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + organize_results['status']
             # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
             #         and not incoming_object.ballotpedia_photo_url_is_broken:
             #     incoming_object.ballotpedia_photo_url_is_broken = True
             #     incoming_object.save()
+        elif results.get('is_broken'):
+            if is_candidate or is_politician:
+                incoming_object_changes = True
+                incoming_object.ballotpedia_photo_url = None
+                incoming_object.ballotpedia_photo_url_is_broken = True
+                incoming_object.ballotpedia_photo_url_is_placeholder = False
+                if incoming_object.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                    incoming_object.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    incoming_object.we_vote_hosted_profile_image_url_large = None
+                    incoming_object.we_vote_hosted_profile_image_url_medium = None
+                    incoming_object.we_vote_hosted_profile_image_url_tiny = None
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
+                        object_with_photo_fields=incoming_object)
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
+                    else:
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + organize_results['status']
         elif results.get('is_silhouette'):
             if is_candidate or is_politician:
                 incoming_object_changes = True
@@ -621,12 +666,12 @@ def get_photo_url_from_ballotpedia(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + organize_results['status']
         else:
             status += "BALLOTPEDIA_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + ballotpedia_page_url + " "
             status += results['status']
@@ -635,16 +680,15 @@ def get_photo_url_from_ballotpedia(
             incoming_object.save()
 
         # link_is_broken = results.get('http_response_code') == 404
+        is_broken_photo = results.get('is_broken')
         is_placeholder_photo = results.get('is_silhouette')
         if is_placeholder_photo:
             success = False
             # status += results['status']
             status += "IS_PLACEHOLDER_PHOTO "
             logger.info("Placeholder/Silhouette: " + photo_url)
-            if add_messages:
-                messages.add_message(
-                    request, messages.ERROR,
-                    'Failed to retrieve Ballotpedia picture:  The Ballotpedia URL is for placeholder/Silhouette image.')
+            error_message_to_print += \
+                'Failed to retrieve Ballotpedia picture:  The Ballotpedia URL is for placeholder/Silhouette image.'
             # Create a record denoting that we have retrieved from Ballotpedia for this candidate
             if is_candidate:
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
@@ -656,25 +700,29 @@ def get_photo_url_from_ballotpedia(
         elif results['photo_url_found']:
             # Success!
             logger.info("Queried URL: " + ballotpedia_page_url + " ==> " + photo_url)
-            if add_messages:
-                messages.add_message(request, messages.INFO, 'Ballotpedia photo retrieved.')
+            info_message_to_print += 'Ballotpedia photo retrieved: ' + ballotpedia_page_url + ' '
+            photo_url_found = True
             if save_to_database:
                 if is_candidate or is_politician:
-                    results = save_image_to_candidate_table(
+                    save_results = save_image_to_candidate_table(
                         candidate=incoming_object,
                         image_url=photo_url,
                         source_link=ballotpedia_page_url,
                         url_is_broken=False,
                         kind_of_source_website=IMAGE_SOURCE_BALLOTPEDIA)
-                    if results['success']:
+                    if save_results['success']:
                         ballotpedia_photo_saved = True
+                    else:
+                        status += save_results['status']
                     # When saving to candidate object, update:
                     # we_vote_hosted_profile_facebook_image_url_tiny
                 else:
-                    results = save_image_to_organization_table(
+                    save_results = save_image_to_organization_table(
                         incoming_object, photo_url, ballotpedia_page_url, False, IMAGE_SOURCE_BALLOTPEDIA)
-                    if results['success']:
+                    if save_results['success']:
                         ballotpedia_photo_saved = True
+                    else:
+                        status += save_results['status']
 
         if ballotpedia_photo_saved:
             status += "SAVED_BALLOTPEDIA_IMAGE "
@@ -686,7 +734,7 @@ def get_photo_url_from_ballotpedia(
                     candidate_campaign_we_vote_id=incoming_object.we_vote_id,
                     number_of_results=1,
                     status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
-        elif is_placeholder_photo:
+        elif is_broken_photo or is_placeholder_photo:
             pass
         else:
             success = False
@@ -697,14 +745,12 @@ def get_photo_url_from_ballotpedia(
         status += "NOT_SUCCESSFUL_get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page: "
         status += results['status']
 
-        if add_messages:
-            if len(results.get('clean_message')) > 0:
-                messages.add_message(request, messages.ERROR, results.get('clean_message'))
-            else:
-                messages.add_message(
-                    request, messages.ERROR, 'Ballotpedia photo NOT retrieved (2). status: ' + results.get('status'))
+        error_message_to_print += 'Ballotpedia photo NOT retrieved (2). status: ' + results.get('status')
 
     results = {
+        'error_message_to_print': error_message_to_print,
+        'info_message_to_print': info_message_to_print,
+        'photo_url_found':  photo_url_found,
         'success': success,
         'status': status,
     }
@@ -752,15 +798,15 @@ def get_candidate_links_from_ballotpedia_candidate_url_page(ballotpedia_candidat
 
 def get_candidate_links_from_ballotpedia(
         incoming_object=None,
-        request={},
         remote_request_history_manager=None,
-        save_to_database=False,
-        add_messages=False):
+        save_to_database=False):
+    error_message_to_print = ''
     status = ""
     success = True
     is_candidate = False
     is_organization = False
     is_politician = False
+    profile_retrieved = False
     if remote_request_history_manager is None:
         remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -776,10 +822,31 @@ def get_candidate_links_from_ballotpedia(
         ballotpedia_page_url = incoming_object.organization_ballotpedia
         google_civic_election_id = ''
         is_organization = True
+    incoming_object_we_vote_id = incoming_object.we_vote_id
 
     if not positive_value_exists(ballotpedia_page_url):
-        status += "MISSING_BALLOTPEDIA_PAGE_URL "
+        status += "MISSING_BALLOTPEDIA_PAGE_URL: " + str(incoming_object_we_vote_id) + " "
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
         results = {
+            'error_message_to_print': error_message_to_print,
+            'profile_retrieved': profile_retrieved,
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if ballotpedia_page_url in ["http://", "https://"]:
+        ballotpedia_page_url = ""
+    if not positive_value_exists(ballotpedia_page_url):
+        status += "BALLOTPEDIA_PAGE_URL_WAS_BAD "
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
+        results = {
+            'error_message_to_print': error_message_to_print,
+            'profile_retrieved': profile_retrieved,
             'success': success,
             'status': status,
         }
@@ -788,8 +855,10 @@ def get_candidate_links_from_ballotpedia(
     incoming_object_changes = False
     if positive_value_exists(ballotpedia_page_url) and not ballotpedia_page_url.startswith('http'):
         ballotpedia_page_url = 'https://' + ballotpedia_page_url
+        ballotpedia_page_url = ballotpedia_page_url.replace('https:// https://', 'https://')
         incoming_object.ballotpedia_page_url = ballotpedia_page_url
         incoming_object_changes = True
+
     print(ballotpedia_page_url)
     results = get_candidate_links_from_ballotpedia_candidate_url_page(ballotpedia_page_url)
     if results.get('success'):
@@ -798,14 +867,17 @@ def get_candidate_links_from_ballotpedia(
         incoming_object_changes = True
         candidate_links_dict = results.get('candidate_links_dict')
         if results.get('candidate_links_found'):
+            profile_retrieved = True
+            status += "LINKS_FOUND: " + ballotpedia_page_url + " "
             if is_candidate or is_politician:
                 # print(candidate_links_dict)
-                results = add_to_candidate_new_links_from_ballotpedia(incoming_object, candidate_links_dict)
-                if results['at_least_one_change']:
-                    incoming_object = results['candidate']
-                    # incoming_object_changes = True
+                add_links_results = add_to_candidate_new_links_from_ballotpedia(incoming_object, candidate_links_dict)
+                status += add_links_results['status']
+                if add_links_results['at_least_one_change']:
+                    incoming_object = add_links_results['candidate']
+                    # incoming_object_changes = True  # We always save, so this is redundant
         else:
-            status += "BALLOTPEDIA_CANDIDATE_LINKS_NOT_FOUND: " + ballotpedia_page_url + " "
+            status += "LINKS_NOT_FOUND: " + ballotpedia_page_url + " "
             status += results['status']
 
         if save_to_database and incoming_object_changes:
@@ -822,21 +894,20 @@ def get_candidate_links_from_ballotpedia(
 
         else:
             success = False
-            status += results['status']
             status += "SAVE_BALLOTPEDIA_IMAGE_TO_CANDIDATE_TABLE_FAILED "
     else:
         success = False
         status += "NOT_SUCCESSFUL_get_ballotpedia_candidate_links_ballotpedia_candidate_url_page: "
         status += results['status']
+        incoming_object.ballotpedia_candidate_links_retrieved = True
+        if save_to_database:
+            incoming_object.save()
 
-        if add_messages:
-            if len(results.get('clean_message')) > 0:
-                messages.add_message(request, messages.ERROR, results.get('clean_message'))
-            else:
-                messages.add_message(
-                    request, messages.ERROR, 'Ballotpedia links NOT retrieved (2). status: ' + results.get('status'))
+        error_message_to_print += 'Ballotpedia links NOT retrieved (2). status: ' + results.get('status')
 
     results = {
+        'error_message_to_print': error_message_to_print,
+        'profile_retrieved': profile_retrieved,
         'success': success,
         'status': status,
     }
