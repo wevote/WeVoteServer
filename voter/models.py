@@ -1885,7 +1885,7 @@ class VoterManager(BaseUserManager):
             }
             return result
 
-        voter_queryset = Voter.objects.all()
+        voter_queryset = Voter.objects.using('readonly').all()
         voter_queryset = voter_queryset.order_by('first_name')
 
         voter_raw_filters = []

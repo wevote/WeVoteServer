@@ -2245,7 +2245,7 @@ def voter_guide_possibility_list_process_view(request):
 
     if positive_value_exists(reassign_to_voter_we_vote_id):
         voter_manager = VoterManager()
-        results = voter_manager.retrieve_voter_by_we_vote_id(reassign_to_voter_we_vote_id)
+        results = voter_manager.retrieve_voter_by_we_vote_id(reassign_to_voter_we_vote_id, read_only=True)
         if results['voter_found']:
             voter = results['voter']
             assigned_to_name = voter.get_full_name()
@@ -2361,7 +2361,8 @@ def voter_guide_possibility_list_process_view(request):
                         voter_manager = VoterManager()
                         generate_if_no_value = True
                         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+                        voter_results = \
+                            voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
                         if voter_results['voter_found']:
                             voter = voter_results['voter']
                             updates['voter_who_submitted_name'] = voter.get_full_name()

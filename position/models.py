@@ -7114,7 +7114,7 @@ class PositionManager(models.Manager):
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_by_id(voter_id)
+                results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
                 organization_id = 0
                 organization_we_vote_id = ""
                 voter_we_vote_id = ""
@@ -7680,7 +7680,7 @@ class PositionManager(models.Manager):
                     # Lookup organization_id based on organization_we_vote_id and update
                     organization_manager = OrganizationManager()
                     organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        organization_we_vote_id)
+                        organization_we_vote_id, read_only=True)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
                         position_on_stage.organization_id = organization.id
@@ -8282,7 +8282,7 @@ class PositionManager(models.Manager):
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+                results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
                 voter_id = 0
                 speaker_type = UNKNOWN
                 twitter_followers_count = 0
@@ -8294,7 +8294,7 @@ class PositionManager(models.Manager):
                     # Look up the organization_id
                     organization_manager = OrganizationManager()
                     organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        organization_we_vote_id)
+                        organization_we_vote_id, read_only=True)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
                         organization_id = organization.id

@@ -1240,7 +1240,7 @@ def batch_action_list_update_or_create_process_view(request):
     voter_device_id = get_voter_api_device_id(request)
     # do for entire batch_rows
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -1249,16 +1249,17 @@ def batch_action_list_update_or_create_process_view(request):
 
     if batch_header_map_found:
         try:
-            batch_row_query = BatchRow.objects.all()
+            batch_row_query = BatchRow.objects.using('readonly').all()
             batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
                 batch_row_query = batch_row_query.filter(id=batch_row_id)
             if positive_value_exists(state_code):
                 batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
-
-            batch_row_list = list(batch_row_query)
-            if len(batch_row_list):
-                batch_row_list_found = True
+            batch_row_count = batch_row_query.count()
+            batch_row_list_found = positive_value_exists(batch_row_count)
+            # batch_row_list = list(batch_row_query)
+            # if len(batch_row_list):
+            #     batch_row_list_found = True
         except BatchDescription.DoesNotExist:
             # This is fine
             batch_row_list_found = False
