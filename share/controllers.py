@@ -198,7 +198,7 @@ def shared_item_list_save_for_api(  # sharedItemListSave
     voter = None
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         if positive_value_exists(voter.first_name):
@@ -419,7 +419,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
     share_manager = ShareManager()
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_id = voter.id
@@ -816,7 +816,7 @@ def shared_item_save_for_api(  # sharedItemSave
         shared_by_organization_type = INDIVIDUAL
     else:
         voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             shared_by_voter_we_vote_id = voter.we_vote_id

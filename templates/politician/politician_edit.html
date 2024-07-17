@@ -177,17 +177,17 @@
                 {{ politician.we_vote_id }} (politician id: {{ politician.id }})
                 (<a href="{% url 'politician:politician_delete_process' %}?politician_id={{ politician.id }}">delete politician</a>)
                 {{ we_vote_id }}
-                {% if politician.organization.we_vote_id %}
+                {% if organization_we_vote_id %}
                     &nbsp;&nbsp;&nbsp;
-                    <span style="color: darkgray;">Endorser object:</span>
-                    <a href="{% url 'organization:organization_edit_we_vote_id' politician.organization.we_vote_id %}"
+                    <span style="color: darkgray;">Endorser:</span>
+                    <a href="{% url 'organization:organization_edit_we_vote_id' organization_we_vote_id %}"
                        target="_blank">
-                        {{ politician.organization.we_vote_id }}
+                        {{ organization_we_vote_id }}
                         <span class="glyphicon glyphicon-new-window"></span>
                     </a>
                 {% else %}
                     &nbsp;&nbsp;&nbsp;
-                    Match Politician to Endorser Object
+                    <a href="{% url 'politician:match_politician_to_organization' politician.we_vote_id %}" >Match Politician to Endorser</a>
                 {% endif %}
 
                 {% if politician.linked_campaignx_we_vote_id %}

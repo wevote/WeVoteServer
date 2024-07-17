@@ -643,9 +643,11 @@ CALCULATE_SITEWIDE_DAILY_METRICS = "CALCULATE_SITEWIDE_DAILY_METRICS"
 CALCULATE_SITEWIDE_ELECTION_METRICS = "CALCULATE_SITEWIDE_ELECTION_METRICS"
 CALCULATE_SITEWIDE_VOTER_METRICS = "CALCULATE_SITEWIDE_VOTER_METRICS"
 GENERATE_VOTER_GUIDES = "GENERATE_VOTER_GUIDES"
+MATCH_POLITICIANS_TO_ORGANIZATIONS = "MATCH_POLITICIANS_TO_ORGANIZATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
+RETRIEVE_FROM_BALLOTPEDIA = "RETRIEVE_FROM_BALLOTPEDIA"
 RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS = "RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS"
 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE"
 UPDATE_TWITTER_DATA_FROM_TWITTER = "UPDATE_TWITTER_DATA_FROM_TWITTER"
@@ -661,7 +663,9 @@ KIND_OF_PROCESS_CHOICES = (
     (CALCULATE_ORGANIZATION_DAILY_METRICS,  'Organization specific daily metrics'),
     (CALCULATE_ORGANIZATION_ELECTION_METRICS,  'Organization specific election metrics'),
     (GENERATE_VOTER_GUIDES,  'Generate voter guides'),
+    (MATCH_POLITICIANS_TO_ORGANIZATIONS,  'Match politicians to organizations'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
+    (RETRIEVE_FROM_BALLOTPEDIA,  'Retrieve Data from Ballotpedia'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
     (SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, 'Search for Candidate Twitter Handles'),
@@ -5003,9 +5007,11 @@ class BatchProcessManager(models.Manager):
                     CALCULATE_ORGANIZATION_DAILY_METRICS,
                     CALCULATE_ORGANIZATION_ELECTION_METRICS,
                     GENERATE_VOTER_GUIDES,
+                    MATCH_POLITICIANS_TO_ORGANIZATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                    RETRIEVE_FROM_BALLOTPEDIA,
                     RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS,
                     SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
                     UPDATE_TWITTER_DATA_FROM_TWITTER,
@@ -5232,12 +5238,14 @@ class BatchProcessManager(models.Manager):
     # CALCULATE_ORGANIZATION_DAILY_METRICS
     # CALCULATE_ORGANIZATION_ELECTION_METRICS
     # GENERATE_VOTER_GUIDES
+    # MATCH_POLITICIANS_TO_ORGANIZATIONS
     # REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
     # REFRESH_BALLOT_ITEMS_FROM_VOTERS
     # RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+    # RETRIEVE_FROM_BALLOTPEDIA
     # SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE
+    @staticmethod
     def count_next_steps(
-            self,
             kind_of_process_list=[],
             is_active=False,
             is_checked_out=False,
@@ -5408,6 +5416,8 @@ class BatchProcessManager(models.Manager):
                         checked_out_expiration_time = 360  # 6 minutes * 60 seconds
                     elif batch_process.kind_of_process == GENERATE_VOTER_GUIDES:
                         checked_out_expiration_time = 600  # 10 minutes * 60 seconds
+                    elif batch_process.kind_of_process == MATCH_POLITICIANS_TO_ORGANIZATIONS:
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process in [
                             REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
@@ -5419,6 +5429,8 @@ class BatchProcessManager(models.Manager):
                             CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
                             CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_SITEWIDE_VOTER_METRICS,
                             CALCULATE_SITEWIDE_DAILY_METRICS]:
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds
+                    elif batch_process.kind_of_process == RETRIEVE_FROM_BALLOTPEDIA:
                         checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process == SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE:
                         checked_out_expiration_time = 300  # 5 minutes * 60 seconds - See SEARCH_TWITTER_TIMED_OUT

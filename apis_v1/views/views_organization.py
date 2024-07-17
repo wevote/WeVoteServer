@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
 
 import wevote_functions.admin
-from apis_v1.controllers import organization_count, organization_follow, organization_follow_ignore, \
+from apis_v1.controllers import organization_count, organization_dislike, organization_follow, \
+    organization_stop_disliking, organization_follow_ignore, \
     organization_stop_following, organization_stop_ignoring
 from config.base import get_environment_variable
 from donate.models import DonationManager
@@ -65,6 +66,24 @@ def organization_count_view(request):
     return organization_count()
 
 
+def organization_dislike_api_view(request):  # organizationDislike
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    organization_id = request.GET.get('organization_id', 0)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
+    user_agent_string = request.headers['user-agent']
+    user_agent_object = get_user_agent(request)
+    return organization_dislike(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        organization_twitter_handle=organization_twitter_handle,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
+
+
 def organization_follow_api_view(request):  # organizationFollow
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
@@ -81,6 +100,23 @@ def organization_follow_api_view(request):  # organizationFollow
         organization_we_vote_id=organization_we_vote_id,
         organization_twitter_handle=organization_twitter_handle,
         organization_follow_based_on_issue=organization_follow_based_on_issue,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
+
+
+def organization_stop_disliking_api_view(request):  # organizationStopDisliking
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    organization_id = request.GET.get('organization_id', 0)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    user_agent_string = request.headers['user-agent']
+    user_agent_object = get_user_agent(request)
+    return organization_stop_disliking(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
 
@@ -89,33 +125,48 @@ def organization_stop_following_api_view(request):  # organizationStopFollowing
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id,
-                                       organization_we_vote_id=organization_we_vote_id,
-                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    return organization_stop_following(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def organization_stop_ignoring_api_view(request):  # organizationStopIgnoring
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_stop_ignoring(voter_device_id=voter_device_id, organization_id=organization_id,
-                                      organization_we_vote_id=organization_we_vote_id,
-                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    return organization_stop_ignoring(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
-                                      organization_we_vote_id=organization_we_vote_id,
-                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    return organization_follow_ignore(
+        voter_device_id=voter_device_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def organization_index_view(request, organization_incoming_domain='', campaign_main=''):  # organizationIndex
@@ -698,10 +749,10 @@ def organizations_followed_retrieve_api_view(request):  # organizationsFollowedR
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     auto_followed_from_twitter_suggestion = request.GET.get('auto_followed_from_twitter_suggestion', False)
-    return organizations_followed_retrieve_for_api(voter_device_id=voter_device_id,
-                                                   maximum_number_to_retrieve=maximum_number_to_retrieve,
-                                                   auto_followed_from_twitter_suggestion=
-                                                   auto_followed_from_twitter_suggestion)
+    return organizations_followed_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        maximum_number_to_retrieve=maximum_number_to_retrieve,
+        auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
 
 
 def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve

@@ -860,7 +860,8 @@ def organizations_found_on_url(url_to_scan, state_code=''):
         results = organization_list_manager.organization_search_find_any_possibilities(
             organization_website=voter_guide_website,
             facebook_page_list=facebook_page_list_modified,
-            twitter_handle_list=twitter_handle_list_modified
+            twitter_handle_list=twitter_handle_list_modified,
+            read_only=True,
         )
 
         if results['organizations_found']:

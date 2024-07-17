@@ -67,7 +67,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
     voter_manager = VoterManager()
     voter_who_submitted_name = ''
     voter_who_submitted_we_vote_id = ''
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_who_submitted_name = voter.get_full_name()
@@ -106,7 +106,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             target_google_civic_election_id = election.google_civic_election_id
             status += "STATE: " + str(election.state_code) + " "
             # Get a list of all voter_guides in last 5 years
-            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
             voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
@@ -121,7 +121,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             national_election = results['election']
             target_google_civic_election_id = national_election.google_civic_election_id
             # Get a list of all voter_guides in last 5 years
-            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.using('readonly').all()
             voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
@@ -140,7 +140,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 target_google_civic_election_id = election.google_civic_election_id
                 status += "STATE: " + str(election.state_code) + " "
                 # Get a list of all voter_guides in last 5 years
-                voter_guide_query = VoterGuide.objects.all()
+                voter_guide_query = VoterGuide.objects.using('readonly').all()
                 voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
                 voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
                 voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
@@ -170,7 +170,8 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             position_list = position_list_manager.retrieve_all_positions_for_election(
                 voter_guide.google_civic_election_id,
                 public_only=True,
-                limit_to_organization_we_vote_ids=limit_to_organization_we_vote_ids)
+                limit_to_organization_we_vote_ids=limit_to_organization_we_vote_ids,
+                read_only=True)
             if len(position_list):
                 for one_position in position_list:
                     if positive_value_exists(one_position.more_info_url):
@@ -238,7 +239,7 @@ def voter_guide_create_view(request):
 
     voter_manager = VoterManager()
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_who_submitted_name = voter.get_full_name()
@@ -478,7 +479,8 @@ def voter_guide_create_view(request):
             # Search for organizations that match
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=organization_name,
-                organization_twitter_handle=organization_twitter_handle
+                organization_twitter_handle=organization_twitter_handle,
+                read_only=True,
             )
 
             if results['organizations_found']:
@@ -792,7 +794,7 @@ def voter_guide_create_process_view(request):
     voter_found = False
     if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -808,7 +810,7 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_who_submitted_we_vote_id) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -824,7 +826,7 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_found) or done_verified:
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_id = voter.id
@@ -2359,7 +2361,7 @@ def voter_guide_possibility_list_process_view(request):
                         voter_manager = VoterManager()
                         generate_if_no_value = True
                         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+                        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
                         if voter_results['voter_found']:
                             voter = voter_results['voter']
                             updates['voter_who_submitted_name'] = voter.get_full_name()
@@ -2519,11 +2521,13 @@ def voter_guide_search_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     # Search for organizations that match
-    organization_email = ''
     organization_list_manager = OrganizationListManager()
     results = organization_list_manager.organization_search_find_any_possibilities(
-        organization_name, organization_twitter_handle, organization_website, organization_email,
-        organization_facebook)
+        organization_name=organization_name,
+        organization_twitter_handle=organization_twitter_handle,
+        organization_website=organization_website,
+        organization_facebook=organization_facebook,
+        read_only=True)
 
     if results['organizations_found']:
         organizations_list = results['organizations_list']

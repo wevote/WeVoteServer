@@ -18,7 +18,6 @@ from voter.models import VoterManager
 from wevote_functions.admin import get_logger
 from wevote_functions.functions import convert_pennies_integer_to_dollars_string, get_voter_device_id
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable_default("STRIPE_SECRET_KEY", "")
@@ -1230,9 +1229,8 @@ def local_datetime_string_from_utc_timestamp(utc_timestamp):
     offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
     utc_datetime = datetime.utcfromtimestamp(utc_timestamp)
     naive_local_datetime = utc_datetime + offset
-    # time_zone = pytz.timezone("America/Los_Angeles")
-    # local_datetime = time_zone.localize(naive_local_datetime)
-    local_datetime = get_timezone_and_datetime_now(datetime_obj=naive_local_datetime)[1]
+    time_zone = pytz.timezone("America/Los_Angeles")
+    local_datetime = time_zone.localize(naive_local_datetime)
     dt_string = local_datetime.strftime('%Y-%m-%d %H:%M:%S%z')
     return dt_string
 

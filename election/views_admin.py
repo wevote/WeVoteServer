@@ -51,7 +51,7 @@ from voter_guide.models import VoterGuide, VoterGuidePossibility, \
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, \
     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date, get_timezone_and_datetime_now, DATE_FORMAT_YMD
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date, generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistoryManager
 
@@ -890,7 +890,7 @@ def election_list_view(request):
 
     # timezone = pytz.timezone("America/Los_Angeles")
     # datetime_now = timezone.localize(datetime.now())
-    timezone, datetime_now = get_timezone_and_datetime_now()
+    timezone, datetime_now = generate_localized_datetime_from_obj()
     if positive_value_exists(show_this_year):
         first_day_of_year_to_show = "{year}-01-01".format(year=show_this_year)
         last_day_of_year_to_show = "{year}-12-31".format(year=show_this_year)
@@ -1345,7 +1345,7 @@ def nationwide_election_list_view(request):
     messages_on_stage = get_messages(request)
     # timezone = pytz.timezone("America/Los_Angeles")
     # datetime_now = timezone.localize(datetime.now())
-    timezone, datetime_now = get_timezone_and_datetime_now()
+    timezone, datetime_now = generate_localized_datetime_from_obj()
     election_manager = ElectionManager()
 
     is_national_election = False
@@ -1911,7 +1911,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # Add election statistics
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        timezone, datetime_now = get_timezone_and_datetime_now()
+        timezone, datetime_now = generate_localized_datetime_from_obj()
         if positive_value_exists(election.election_day_text):
             try:
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
@@ -2184,7 +2184,7 @@ def election_migration_view(request):
     from_election_organization_election_metrics_count = 0
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         organization_election_metrics_results = analytics_action_manager.retrieve_organization_election_metrics_list(
-            from_election_id)
+            from_election_id, read_only=False)
         if organization_election_metrics_results['organization_election_metrics_list_found']:
             from_election_organization_election_metrics_list = \
                 organization_election_metrics_results['organization_election_metrics_list']

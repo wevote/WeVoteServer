@@ -75,6 +75,12 @@ class PollingLocation(models.Model):
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
     polling_location_deleted = models.BooleanField(verbose_name="removed from usage", default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['state', 'polling_location_deleted'],
+                         name='state_and_not_deleted'),
+        ]
+
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
 
@@ -140,6 +146,17 @@ class PollingLocationLogEntry(models.Model):
     state_code = models.CharField(max_length=2, null=True, db_index=True)
     text_for_map_search = models.CharField(max_length=255, null=True, unique=False)
     voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['kind_of_log_entry', 'log_entry_deleted'], name='kind_of_log_entry_and_deleted'),
+            models.Index(fields=['polling_location_we_vote_id', 'kind_of_log_entry'],
+                         name='we_vote_id_and_kind_index'),
+            models.Index(fields=['polling_location_we_vote_id', 'kind_of_log_entry', 'log_entry_deleted'],
+                         name='log_entry_one_location_index'),
+            models.Index(fields=['kind_of_log_entry', 'polling_location_we_vote_id'],
+                         name='kind_and_we_vote_id_index'),
+        ]
 
 
 class PollingLocationManager(models.Manager):
@@ -406,7 +423,7 @@ class PollingLocationManager(models.Manager):
                     update_vote_usa_error_count = positive_value_exists(is_from_vote_usa)
 
             if positive_value_exists(update_ctcl_error_count):
-                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(is_from_ctcl=True)
                 count_query = count_query.filter(kind_of_log_entry__in=[
@@ -418,7 +435,7 @@ class PollingLocationManager(models.Manager):
                 update_values['ctcl_error_count'] = count_query.count()
 
             if positive_value_exists(update_google_civic_error_count):
-                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(is_from_google_civic=True)
                 count_query = count_query.filter(kind_of_log_entry__in=[
@@ -432,7 +449,7 @@ class PollingLocationManager(models.Manager):
                 update_values['google_civic_error_count'] = count_query.count()
 
             if positive_value_exists(update_vote_usa_error_count):
-                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(is_from_vote_usa=True)
                 count_query = count_query.filter(kind_of_log_entry__in=[
@@ -460,7 +477,7 @@ class PollingLocationManager(models.Manager):
                     update_successful_retrieve_count = positive_value_exists(is_successful_retrieve)
 
             if positive_value_exists(update_no_contests_count):
-                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(kind_of_log_entry__in=[
                     KIND_OF_LOG_ENTRY_NO_CONTESTS,
@@ -469,7 +486,7 @@ class PollingLocationManager(models.Manager):
                 update_values['no_contests_count'] = count_query.count()
 
             if positive_value_exists(update_successful_retrieve_count):
-                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(kind_of_log_entry__in=[
                     KIND_OF_LOG_ENTRY_BALLOT_RECEIVED,

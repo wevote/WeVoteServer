@@ -19,7 +19,7 @@ from organization.models import Organization, OrganizationManager, \
 from pledge_to_vote.models import PledgeToVoteManager
 from voter.models import VoterManager
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now, DATE_FORMAT_YMD
+from wevote_functions.functions_date import generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1275,13 +1275,19 @@ class VoterGuideListManager(models.Manager):
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
     @staticmethod
-    def retrieve_voter_guides_for_election(google_civic_election_id_list, exclude_voter_guide_owner_type_list=[]):
+    def retrieve_voter_guides_for_election(
+            google_civic_election_id_list,
+            exclude_voter_guide_owner_type_list=[],
+            read_only=False):
         voter_guide_list = []
         voter_guide_list_found = False
 
         try:
-            # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
-            voter_guide_query = VoterGuide.objects.order_by('display_name')
+            if positive_value_exists(read_only):
+                # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
+                voter_guide_query = VoterGuide.objects.using('readonly').order_by('display_name')
+            else:
+                voter_guide_query = VoterGuide.objects.order_by('display_name')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(
                 google_civic_election_id__in=google_civic_election_id_list)
@@ -1291,9 +1297,9 @@ class VoterGuideListManager(models.Manager):
             voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDE_FOUND'
+                status = 'VOTER_GUIDE_FOUND '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND'
+                status = 'NO_VOTER_GUIDES_FOUND '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -1688,7 +1694,7 @@ class VoterGuideListManager(models.Manager):
                     status += "EXCLUDE_PAST_ELECTION_DAYS "
                     # timezone = pytz.timezone("America/Los_Angeles")
                     # datetime_now = timezone.localize(datetime.now())
-                    datetime_now = get_timezone_and_datetime_now()[1]
+                    datetime_now = generate_localized_datetime_from_obj()[1]
                     two_days = timedelta(days=2)
                     datetime_two_days_ago = datetime_now - two_days
                     earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"

@@ -2061,7 +2061,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     voter_device_link = voter_device_link_results['voter_device_link']
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -3864,7 +3864,8 @@ def voter_retrieve_for_api(  # voterRetrieve
             return json_data
 
     # At this point, we should have a valid voter_id
-    results = voter_manager.retrieve_voter_by_id(voter_id)
+    voter_read_only = True
+    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
 
@@ -3901,6 +3902,12 @@ def voter_retrieve_for_api(  # voterRetrieve
             if positive_value_exists(voter.twitter_screen_name) or positive_value_exists(voter.twitter_id):
                 # If the voter has cached twitter information, delete it now because there isn't a
                 #  twitter_link_to_voter entry
+                # Pull voter object we can save
+                if voter_read_only:
+                    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_read_only = False
                 try:
                     voter.twitter_id = 0
                     voter.twitter_screen_name = ""
@@ -3918,6 +3925,12 @@ def voter_retrieve_for_api(  # voterRetrieve
             status += "VERIFYING_TWITTER_LINK_TO_ORGANIZATION "
             if voter.linked_organization_we_vote_id != twitter_link_to_organization_we_vote_id:
                 # If here there is a mismatch to fix
+                if voter_read_only:
+                    # Pull voter object we can save
+                    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_read_only = False
                 try:
                     voter.linked_organization_we_vote_id = twitter_link_to_organization_we_vote_id
                     voter.save()
@@ -3942,13 +3955,19 @@ def voter_retrieve_for_api(  # voterRetrieve
                 twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
                 if not positive_value_exists(twitter_link_to_voter.twitter_id):
                     if positive_value_exists(voter.twitter_screen_name) or positive_value_exists(voter.twitter_id):
+                        if voter_read_only:
+                            # Pull voter object we can save
+                            results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                            if results['voter_found']:
+                                voter = results['voter']
+                                voter_read_only = False
                         try:
                             voter.twitter_id = 0
                             voter.twitter_screen_name = ""
                             voter.save()
                             status += "VOTER_TWITTER_CLEARED2 "
                         except Exception as e:
-                            status += "UNABLE_TO_CLEAR_TWITTER_SCREEN_NAME2 "
+                            status += "UNABLE_TO_CLEAR_TWITTER_SCREEN_NAME2: " + str(e) + " "
                 else:
                     # If here there is a twitter_link_to_voter to possibly update
                     try:
@@ -3958,6 +3977,12 @@ def voter_retrieve_for_api(  # voterRetrieve
                             status += "VOTER_TWITTER_ID_MATCHES "
                         else:
                             status += "VOTER_TWITTER_ID_DOES_NOT_MATCH_LINKED_TO_VOTER "
+                            if voter_read_only:
+                                # Pull voter object we can save
+                                results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                                if results['voter_found']:
+                                    voter = results['voter']
+                                    voter_read_only = False
                             voter.twitter_id = twitter_link_to_voter_twitter_id
                             value_to_save = True
 
@@ -3966,6 +3991,12 @@ def voter_retrieve_for_api(  # voterRetrieve
                             status += "VOTER_TWITTER_SCREEN_NAME_MATCHES "
                         else:
                             status += "VOTER_TWITTER_SCREEN_NAME_DOES_NOT_MATCH_LINKED_TO_VOTER "
+                            if voter_read_only:
+                                # Pull voter object we can save
+                                results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                                if results['voter_found']:
+                                    voter = results['voter']
+                                    voter_read_only = False
                             voter.twitter_screen_name = voter_twitter_screen_name
                             value_to_save = True
 
@@ -3973,7 +4004,7 @@ def voter_retrieve_for_api(  # voterRetrieve
                             voter.save()
                             repair_twitter_link_to_voter_caching_now = True
                     except Exception as e:
-                        status += "UNABLE_TO_SAVE_VOTER_TWITTER_CACHED_INFO "
+                        status += "UNABLE_TO_SAVE_VOTER_TWITTER_CACHED_INFO: " + str(e) + " "
 
                     twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
                     # Since we know this voter has authenticated for a Twitter account,
@@ -3988,6 +4019,12 @@ def voter_retrieve_for_api(  # voterRetrieve
                         if positive_value_exists(twitter_link_to_organization.organization_we_vote_id):
                             if twitter_link_to_organization.organization_we_vote_id \
                                     != voter.linked_organization_we_vote_id:
+                                if voter_read_only:
+                                    # Pull voter object we can save
+                                    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                                    if results['voter_found']:
+                                        voter = results['voter']
+                                        voter_read_only = False
                                 try:
                                     voter.linked_organization_we_vote_id = \
                                         twitter_link_to_organization.organization_we_vote_id
@@ -4021,6 +4058,12 @@ def voter_retrieve_for_api(  # voterRetrieve
                     # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                     organization = create_results['organization']
                     status += "ORGANIZATION_CREATED "
+                    if voter_read_only:
+                        # Pull voter object we can save
+                        results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                        if results['voter_found']:
+                            voter = results['voter']
+                            voter_read_only = False
                     try:
                         voter.linked_organization_we_vote_id = organization.we_vote_id
                         voter.save()
@@ -4119,6 +4162,12 @@ def voter_retrieve_for_api(  # voterRetrieve
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 organization = create_results['organization']
+                if voter_read_only:
+                    # Pull voter object we can save
+                    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=False)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_read_only = False
                 try:
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()

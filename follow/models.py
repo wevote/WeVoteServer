@@ -12,19 +12,23 @@ from organization.models import OrganizationManager
 import pytz
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import get_timezone_and_datetime_now, DATE_FORMAT_YMD
+from wevote_functions.functions_date import generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 from voter.models import VoterManager
 
 
 FOLLOWING = 'FOLLOWING'
-STOP_FOLLOWING = 'STOP_FOLLOWING'
+FOLLOW_DISLIKE = 'FOLLOW_DISLIKE'
 FOLLOW_IGNORE = 'FOLLOW_IGNORE'
+STOP_DISLIKING = 'STOP_DISLIKING'
+STOP_FOLLOWING = 'STOP_FOLLOWING'
 STOP_IGNORING = 'STOP_IGNORING'
 FOLLOWING_CHOICES = (
     (FOLLOWING,         'Following'),
     (STOP_FOLLOWING,    'Not Following'),
-    (FOLLOW_IGNORE,     'Ignoring'),
-    (STOP_IGNORING,     'Not Ignoring'),
+    (FOLLOW_DISLIKE,     'Disliking'),
+    (STOP_DISLIKING,     'Not Disliking'),
+    (FOLLOW_IGNORE, 'Ignoring'),
+    (STOP_IGNORING, 'Not Ignoring'),
 )
 
 # Kinds of lists of suggested organization
@@ -46,9 +50,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 class FollowCampaignX(models.Model):
     voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
-    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    campaignx_id = models.PositiveIntegerField(null=True, blank=True)
-    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    campaignx_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
 
@@ -112,9 +116,9 @@ class FollowCampaignXManager(models.Manager):
                 # First make sure that issue_id is for a valid issue
                 issue_manager = IssueManager()
                 if positive_value_exists(issue_id):
-                    results = issue_manager.retrieve_issue(issue_id)
+                    results = issue_manager.retrieve_issue(issue_id=issue_id)
                 else:
-                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+                    results = issue_manager.retrieve_issue(issue_we_vote_id=issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
                     follow_campaignx_on_stage = FollowIssue(
@@ -277,14 +281,14 @@ class FollowIssue(models.Model):
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The issue being followed
     issue_id = models.PositiveIntegerField(null=True, blank=True)
 
     # This is used when we want to export the issues that are being following
     issue_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following, not following, or ignoring this issue?
     following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING, db_index=True)
@@ -395,9 +399,9 @@ class FollowIssueManager(models.Manager):
                 # First make sure that issue_id is for a valid issue
                 issue_manager = IssueManager()
                 if positive_value_exists(issue_id):
-                    results = issue_manager.retrieve_issue(issue_id)
+                    results = issue_manager.retrieve_issue(issue_id=issue_id)
                 else:
-                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+                    results = issue_manager.retrieve_issue(issue_we_vote_id=issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
                     follow_issue_on_stage = FollowIssue(
@@ -652,9 +656,8 @@ class FollowMetricsManager(models.Manager):
                 if election_result['election_found']:
                     election = election_result['election']
                     if positive_value_exists(election.election_day_text):
-                        # timezone = pytz.timezone("America/Los_Angeles")
-                        # date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"))   
-                        date_of_election = get_timezone_and_datetime_now(election.election_day_text, "%Y-%m-%d")[1]
+                        timezone = pytz.timezone("America/Los_Angeles")
+                        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                         date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
                         # Find all the follow entries before or on the day of the election
                         count_query = count_query.filter(date_last_changed__lte=date_of_election)
@@ -691,7 +694,7 @@ class FollowMetricsManager(models.Manager):
 
                 # pst_timezone = pytz.timezone("America/Los_Angeles")
                 # date_start_pst = pst_timezone.localize(datetime_start)
-                date_start_pst = get_timezone_and_datetime_now()[1]
+                date_start_pst = generate_localized_datetime_from_obj()[1]
                 date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
                 count_query = count_query.filter(date_last_changed__range=(date_start_pst, date_end_pst))
             elif positive_value_exists(count_through_this_date_as_integer):
@@ -870,13 +873,14 @@ class FollowOrganization(models.Model):
     # The organization being followed
     organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
+    # The organization/endorser following another organization/endorser
+    #  (in some cases, a politician's linked organization entry)
     voter_linked_organization_we_vote_id = models.CharField(
-        verbose_name="organization we vote permanent id",
         max_length=255, null=True, blank=True, unique=False, db_index=True)
 
-    # This is used when we want to export the organizations that a voter is following
-    organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    # The organization/endorser being followed
+    #  (in some cases, a politician's linked organization entry)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following or ignoring this organization?
     following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING, db_index=True)
@@ -897,6 +901,11 @@ class FollowOrganization(models.Model):
 
     def __unicode__(self):
         return self.organization_id
+
+    def is_disliking(self):
+        if self.following_status == FOLLOW_DISLIKE:
+            return True
+        return False
 
     def is_following(self):
         if self.following_status == FOLLOWING:
@@ -920,14 +929,14 @@ class FollowOrganizationManager(models.Manager):
         return "FollowOrganizationManager"
 
     @staticmethod
-    def fetch_number_of_organizations_followed(voter_id):
+    def fetch_number_of_organizations_disliked(voter_id):
         number_of_organizations_followed = 0
 
         try:
             if positive_value_exists(voter_id):
-                follow_organization_query = FollowOrganization.objects.filter(
+                follow_organization_query = FollowOrganization.objects.using('readonly').filter(
                     voter_id=voter_id,
-                    following_status=FOLLOWING
+                    following_status=FOLLOW_DISLIKE,
                 )
                 number_of_organizations_followed = follow_organization_query.count()
         except Exception as e:
@@ -936,11 +945,49 @@ class FollowOrganizationManager(models.Manager):
         return number_of_organizations_followed
 
     @staticmethod
+    def fetch_number_of_organizations_followed(voter_id):
+        number_of_organizations_followed = 0
+
+        try:
+            if positive_value_exists(voter_id):
+                follow_organization_query = FollowOrganization.objects.using('readonly').filter(
+                    voter_id=voter_id,
+                    following_status=FOLLOWING,
+                )
+                number_of_organizations_followed = follow_organization_query.count()
+        except Exception as e:
+            pass
+
+        return number_of_organizations_followed
+
+    @staticmethod
+    def toggle_on_voter_disliking_organization(
+            voter_id=0,
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_linked_organization_we_vote_id=''):
+        following_status = FOLLOW_DISLIKE
+        follow_organization_manager = FollowOrganizationManager()
+        return follow_organization_manager.toggle_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+
+    @staticmethod
+    def toggle_off_voter_disliking_organization(
+            voter_id=0,
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_linked_organization_we_vote_id=''):
+        following_status = STOP_DISLIKING
+        follow_organization_manager = FollowOrganizationManager()
+        return follow_organization_manager.toggle_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+
+    @staticmethod
     def toggle_on_voter_following_organization(
-            voter_id,
-            organization_id,
-            organization_we_vote_id,
-            voter_linked_organization_we_vote_id,
+            voter_id=0,
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_linked_organization_we_vote_id='',
             auto_followed_from_twitter_suggestion=False):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
@@ -950,10 +997,10 @@ class FollowOrganizationManager(models.Manager):
 
     @staticmethod
     def toggle_off_voter_following_organization(
-            voter_id,
-            organization_id,
-            organization_we_vote_id,
-            voter_linked_organization_we_vote_id):
+            voter_id=0,
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_linked_organization_we_vote_id=''):
         following_status = STOP_FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
@@ -961,10 +1008,10 @@ class FollowOrganizationManager(models.Manager):
 
     @staticmethod
     def toggle_ignore_voter_following_organization(
-            voter_id,
-            organization_id,
-            organization_we_vote_id,
-            voter_linked_organization_we_vote_id):
+            voter_id='',
+            organization_id='',
+            organization_we_vote_id='',
+            voter_linked_organization_we_vote_id=''):
         following_status = FOLLOW_IGNORE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
@@ -992,8 +1039,10 @@ class FollowOrganizationManager(models.Manager):
         status = ""
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.retrieve_follow_organization(0, voter_id,
-                                                                           organization_id, organization_we_vote_id)
+        results = follow_organization_manager.retrieve_follow_organization(
+            voter_id=voter_id,
+            organization_id=organization_id,
+            organization_we_vote_id=organization_we_vote_id)
 
         follow_organization_on_stage_found = False
         follow_organization_on_stage_id = 0
@@ -1071,10 +1120,10 @@ class FollowOrganizationManager(models.Manager):
 
     @staticmethod
     def retrieve_follow_organization(
-            follow_organization_id,
-            voter_id,
-            organization_id,
-            organization_we_vote_id,
+            follow_organization_id=0,
+            voter_id=0,
+            organization_id=0,
+            organization_we_vote_id='',
             read_only=False):
         """
         follow_organization_id is the identifier for records stored in this table (it is NOT the organization_id)
@@ -1453,11 +1502,12 @@ class FollowOrganizationList(models.Model):
     def retrieve_follow_organization_by_voter_id_simple_id_array(
             voter_id=0,
             return_we_vote_id=False,
-            auto_followed_from_twitter_suggestion=False):
+            auto_followed_from_twitter_suggestion=False,
+            kind_of_follow=FOLLOWING):
 
         queryset = FollowOrganization.objects.using('readonly').all()
         queryset = queryset.filter(voter_id=voter_id)
-        queryset = queryset.filter(following_status=FOLLOWING)
+        queryset = queryset.filter(following_status=kind_of_follow)
         if auto_followed_from_twitter_suggestion:
             queryset = queryset.filter(
                 auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
@@ -1500,7 +1550,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list_manager = FollowOrganizationList()
         followers_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
-                organization_we_vote_id)
+                organization_we_vote_id, read_only=True)
         followers_list_simple_array = []
         if len(followers_list):
             voter_manager = VoterManager()
@@ -1516,7 +1566,7 @@ class FollowOrganizationList(models.Model):
 
     @staticmethod
     def retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
-            organization_we_vote_id,
+            organization_we_vote_id='',
             return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         """
@@ -1529,7 +1579,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list_manager = FollowOrganizationList()
         followers_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
-                organization_we_vote_id)
+                organization_we_vote_id, read_only=True)
         followers_organization_list_simple_array = []
         if len(followers_organization_list):
             for follow_organization in followers_organization_list:
@@ -1581,15 +1631,19 @@ class FollowOrganizationList(models.Model):
             return follow_organization_list
 
     @staticmethod
-    def retrieve_follow_organization_by_organization_we_vote_id(organization_we_vote_id):
+    def retrieve_follow_organization_by_organization_we_vote_id(organization_we_vote_id, read_only=False):
         # Retrieve a list of follow_organization entries for this organization
         follow_organization_list_found = False
         following_status = FOLLOWING
         follow_organization_list = {}
         try:
-            follow_organization_list = FollowOrganization.objects.all()
-            follow_organization_list = follow_organization_list.filter(organization_we_vote_id=organization_we_vote_id)
-            follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            if positive_value_exists(read_only):
+                queryset = FollowOrganization.objects.using('readonly').all()
+            else:
+                queryset = FollowOrganization.objects.all()
+            queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
+            queryset = queryset.filter(following_status=following_status)
+            follow_organization_list = list(queryset)
             if len(follow_organization_list):
                 follow_organization_list_found = True
         except Exception as e:
@@ -1607,9 +1661,9 @@ class SuggestedIssueToFollow(models.Model):
     This table stores possible suggested issues to follow
     """
     viewer_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     issue_we_vote_id = models.CharField(
-        verbose_name="issue we vote id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="issue we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     # organization_we_vote_id_making_suggestion = models.CharField(
     #    verbose_name="organization we vote id making decision", max_length=255, null=True, blank=True, unique=False)
     # from_twitter = models.BooleanField(verbose_name="from twitter", default=False)
@@ -1628,9 +1682,10 @@ class SuggestedOrganizationToFollow(models.Model):
     This table stores possible suggested organization from twitter ids i follow or organization of my friends follow.
     """
     viewer_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_we_vote_id = models.CharField(
-        verbose_name="organization we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="organization we vote id person 2",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     # organization_we_vote_id_making_suggestion = models.CharField(
     #    verbose_name="organization we vote id making decision", max_length=255, null=True, blank=True, unique=False)
     from_twitter = models.BooleanField(verbose_name="from twitter", default=False)

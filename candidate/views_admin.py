@@ -60,7 +60,7 @@ from wevote_functions.functions import convert_to_int, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, \
-    get_current_year_as_integer, get_timezone_and_datetime_now, DATE_FORMAT_YMD
+    get_current_year_as_integer, generate_localized_datetime_from_obj, DATE_FORMAT_YMD
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -68,7 +68,8 @@ from .controllers import add_twitter_handle_to_next_candidate_spot, analyze_cand
     candidates_import_from_master_server, candidates_import_from_sample_file, \
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
     find_duplicate_candidate, \
-    merge_if_duplicate_candidates, merge_these_two_candidates, \
+    merge_if_duplicate_candidates, merge_these_two_candidates, fetch_ballotpedia_urls_to_retrieve_for_links_count, \
+    fetch_ballotpedia_urls_to_retrieve_for_photos_count, \
     retrieve_candidate_photos, retrieve_next_or_most_recent_office_for_candidate, \
     save_google_search_link_to_candidate_table, save_image_to_candidate_table
 from .models import CandidateCampaign, CandidateListManager, CandidateChangeLog, CandidateManager, \
@@ -744,7 +745,7 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         seo_friendly_path_missing = 0
         update_list = []
         updates_needed = False
@@ -817,7 +818,7 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         # timezone = pytz.timezone("America/Los_Angeles")
         # datetime_now = timezone.localize(datetime.now())
-        datetime_now = get_timezone_and_datetime_now()[1]
+        datetime_now = generate_localized_datetime_from_obj()[1]
         linked_campaignx_we_vote_id_missing = 0
         update_list = []
         updates_needed = False
@@ -1211,43 +1212,16 @@ def candidate_list_view(request):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     # How many candidates with ballotpedia_candidate_url's don't have ballotpedia_photo_url?
-    ballotpedia_urls_without_picture_urls = 0
-    try:
-        count_queryset = CandidateCampaign.objects.using('readonly').all()
-        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
-        count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
-        if positive_value_exists(state_code):
-            count_queryset = count_queryset.filter(state_code__iexact=state_code)
-
-        # Exclude candidates without ballotpedia_candidate_url
-        count_queryset = count_queryset. \
-            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-
-        # Find candidates that don't have a photo (i.e. that are null or '')
-        count_queryset = count_queryset.filter(
-            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-
-        ballotpedia_urls_without_picture_urls = count_queryset.count()
-
-    except Exception as e:
-        logger.error("ERROR Finding Ballotpedia Photo URLs: ", e)
+    ballotpedia_urls_without_picture_urls = fetch_ballotpedia_urls_to_retrieve_for_photos_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+        state_code=state_code,
+    )
 
     # How many candidates with ballotpedia_candidate_url's have never been checked for links we can use?
-    ballotpedia_urls_to_retrieve_for_links = 0
-    try:
-        count_queryset = CandidateCampaign.objects.using('readonly').all()
-        count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
-        count_queryset = count_queryset.exclude(ballotpedia_candidate_links_retrieved=True)
-        # Exclude candidates without ballotpedia_candidate_url
-        count_queryset = count_queryset. \
-            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-        if positive_value_exists(state_code):
-            count_queryset = count_queryset.filter(state_code__iexact=state_code)
-
-        ballotpedia_urls_to_retrieve_for_links = count_queryset.count()
-
-    except Exception as e:
-        logger.error("ERROR Finding Ballotpedia URLs to retrieve links: ", e)
+    ballotpedia_urls_to_retrieve_for_links = fetch_ballotpedia_urls_to_retrieve_for_links_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+        state_code=state_code,
+    )
 
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
@@ -1319,7 +1293,7 @@ def candidate_list_view(request):
             batch_manager = BatchManager()
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            timezone, datetime_now = get_timezone_and_datetime_now()
+            timezone, datetime_now = generate_localized_datetime_from_obj()
             if positive_value_exists(election.election_day_text):
                 date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
@@ -2645,7 +2619,7 @@ def candidate_change_names(changes):
             setattr(candidate, 'candidate_name', change['name_after'])
             # timezone = pytz.timezone("America/Los_Angeles")
             # datetime_now = timezone.localize(datetime.now())
-            datetime_now = get_timezone_and_datetime_now()[1]
+            datetime_now = generate_localized_datetime_from_obj()[1]
             setattr(candidate, 'date_last_changed', datetime_now)
             candidate.save()
             count += 1
@@ -3498,6 +3472,10 @@ def candidate_edit_process_view(request):
                 )
                 if results['success']:
                     candidate_on_stage = results['object_with_photo_fields']
+                    if results['profile_image_default_updated']:
+                        # regenerate_color = True
+                        candidate_on_stage.profile_image_background_color = generate_background(candidate_on_stage)
+                        candidate_on_stage.profile_image_background_color_needed = False
                     if positive_value_exists(results['save_changes']):
                         changes_found_dict['is_photo_added'] = True
 
@@ -3516,7 +3494,10 @@ def candidate_edit_process_view(request):
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
-
+                if positive_value_exists(results['error_message_to_print']):
+                    messages.add_message(request, messages.ERROR, results['error_message_to_print'])
+                if positive_value_exists(results['info_message_to_print']):
+                    messages.add_message(request, messages.INFO, results['info_message_to_print'])
             if (wikipedia_url_changed or not positive_value_exists(candidate_on_stage.wikipedia_photo_url)) \
                     and positive_value_exists(wikipedia_url):
                 # update_candidate_wikipedia_image(candidate_on_stage, request, messages)

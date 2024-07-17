@@ -66,12 +66,12 @@ def get_photo_url_from_facebook_graphapi(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + organize_results['status']
         elif results['photo_url_found']:
             if is_candidate or is_organization:
                 incoming_object_changes = True
@@ -83,12 +83,12 @@ def get_photo_url_from_facebook_graphapi(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + organize_results['status']
         elif not results.get('photo_url_found'):
             if is_candidate or is_organization or is_politician:
                 incoming_object_changes = True
@@ -100,12 +100,12 @@ def get_photo_url_from_facebook_graphapi(
                 #     incoming_object.we_vote_hosted_profile_image_url_large = None
                 #     incoming_object.we_vote_hosted_profile_image_url_medium = None
                 #     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                #     results = organize_object_photo_fields_based_on_image_type_currently_active(
+                #     organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                 #         object_with_photo_fields=incoming_object)
-                #     if results['success']:
-                #         incoming_object = results['object_with_photo_fields']
+                #     if organize_results['success']:
+                #         incoming_object = organize_results['object_with_photo_fields']
                 #     else:
-                #         status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+                #         status += "ORGANIZE_OBJECT_PROBLEM2: " + organize_results['status']
         else:
             status += "FACEBOOK_PHOTO_URL_NOT_FOUND_AND_NOT_SILHOUETTE: " + facebook_url + " "
             status += results['status']
@@ -137,25 +137,29 @@ def get_photo_url_from_facebook_graphapi(
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
             if is_candidate:
-                results = save_image_to_candidate_table(
+                save_results = save_image_to_candidate_table(
                     candidate=incoming_object,
                     image_url=photo_url,
                     source_link=facebook_url,
                     url_is_broken=False,
                     kind_of_source_website=FACEBOOK)
-                if results['success']:
+                if save_results['success']:
                     facebook_photo_saved = True
+                else:
+                    status += save_results['status']
                 # When saving to candidate object, update:
                 # we_vote_hosted_profile_facebook_image_url_tiny
             elif is_organization:
-                results = save_image_to_organization_table(
+                save_results = save_image_to_organization_table(
                     incoming_object,
                     photo_url,
                     facebook_url,
                     False,
                     FACEBOOK)
-                if results['success']:
+                if save_results['success']:
                     facebook_photo_saved = True
+                else:
+                    status += save_results['status']
 
             if facebook_photo_saved:
                 status += "SAVED_FB_IMAGE "
@@ -181,8 +185,12 @@ def get_photo_url_from_facebook_graphapi(
         status += "GET_FACEBOOK_FAILED "
 
         if add_messages:
-            if len(results.get('clean_message')) > 0:
-                messages.add_message(request, messages.ERROR, results.get('clean_message'))
+            try:
+                clean_message = results.get('clean_message')
+            except Exception as e:
+                clean_message = ''
+            if len(clean_message) > 0:
+                messages.add_message(request, messages.ERROR, clean_message)
             else:
                 messages.add_message(
                     request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' + results.get('status'))

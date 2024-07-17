@@ -46,6 +46,7 @@ LINKING_BLOCKED_REASON_CHOICES = (
     (FLAGGED_BY_VOTERS,         'Flagged by voters'),
 )
 
+# If you change the spelling of the following Issue names, please search the codebase and replace all occurrences,
 ACTIVE_ISSUES_DICTIONARY = {
     "wv87issue100": "Make America Great Again (MAGA)",
     "wv02issue63": "Pro-choice",
@@ -148,13 +149,15 @@ class IssueListManager(models.Manager):
     This is a class to make it easy to retrieve lists of Issues
     """
 
-    def fetch_visible_issue_we_vote_ids(self):
+    @staticmethod
+    def fetch_visible_issue_we_vote_ids():
         issue_we_vote_ids_list = []
-        results = self.retrieve_issues()
-        if results['issue_list_found']:
-            issue_list = results['issue_list']
-            for issue in issue_list:
-                issue_we_vote_ids_list.append(issue.we_vote_id)
+        try:
+            queryset = Issue.objects.using('readonly').all()
+            queryset = queryset.filter(hide_issue=False)
+            issue_we_vote_ids_list = queryset.values_list('we_vote_id', flat=True).distinct()
+        except Exception as e:
+            pass
 
         return issue_we_vote_ids_list
 
@@ -351,7 +354,7 @@ class Issue(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_issue_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this issue", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     # Order by 1, 2, 3. Push 0's to the bottom in the same order.
     forced_sort_order = models.PositiveIntegerField(null=True, default=None)
     issue_name = models.CharField(verbose_name="name of the issue",
@@ -404,68 +407,47 @@ class IssueManager(models.Manager):
     def __unicode__(self):
         return "IssueManager"
 
-    @staticmethod
-    def retrieve_issue_from_id(issue_id):
-        issue_manager = IssueManager()
-        return issue_manager.retrieve_issue(issue_id)
+    def retrieve_issue_from_id(self, issue_id):
+        return self.retrieve_issue(issue_id=issue_id)
 
-    @staticmethod
-    def retrieve_issue_from_we_vote_id(we_vote_id):
-        issue_id = 0
-        issue_manager = IssueManager()
-        return issue_manager.retrieve_issue(issue_id, we_vote_id)
+    def retrieve_issue_from_we_vote_id(self, we_vote_id):
+        return self.retrieve_issue(issue_we_vote_id=we_vote_id)
 
-    @staticmethod
-    def fetch_issue_id_from_we_vote_id(we_vote_id):
-        issue_id = 0
-        issue_manager = IssueManager()
-        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+    def fetch_issue_id_from_we_vote_id(self, we_vote_id):
+        results = self.retrieve_issue(issue_we_vote_id=we_vote_id, read_only=True)
         if results['success']:
             return results['issue_id']
         return 0
 
-    @staticmethod
-    def fetch_issue_name_from_we_vote_id(we_vote_id):
-        issue_id = 0
-        issue_manager = IssueManager()
-        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+    def fetch_issue_name_from_we_vote_id(self, we_vote_id):
+        results = self.retrieve_issue(issue_we_vote_id=we_vote_id, read_only=True)
         if results['success']:
             return results['issue_name']
         return ''
 
-    @staticmethod
-    def fetch_issue_we_vote_id_from_id(issue_id):
-        we_vote_id = ''
-        issue_manager = IssueManager()
-        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+    def fetch_issue_we_vote_id_from_id(self, issue_id):
+        results = self.retrieve_issue(issue_id=issue_id, read_only=True)
         if results['success']:
             return results['issue_we_vote_id']
         return ''
 
-    @staticmethod
-    def fetch_issue_from_we_vote_id(we_vote_id):
-        issue_id = 0
-        issue_manager = IssueManager()
-        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+    def fetch_issue_from_we_vote_id(self, we_vote_id):
+        results = self.retrieve_issue(issue_we_vote_id=we_vote_id)
         if results['issue_found']:
             return results['issue']
         return None
 
-    @staticmethod
-    def retrieve_issue_from_issue_name(issue_name):
-        issue_id = 0
-        we_vote_id = ''
-        issue_manager = IssueManager()
-
-        results = issue_manager.retrieve_issue(issue_id, we_vote_id, issue_name)
+    def retrieve_issue_from_issue_name(self, issue_name):
+        results = self.retrieve_issue(issue_name=issue_name)
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
     @staticmethod
     def retrieve_issue(
-            issue_id,
+            issue_id=0,
             issue_we_vote_id=None,
-            issue_name=None):
+            issue_name=None,
+            read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -474,21 +456,30 @@ class IssueManager(models.Manager):
 
         try:
             if positive_value_exists(issue_id):
-                issue_on_stage = Issue.objects.get(id=issue_id)
+                if positive_value_exists(read_only):
+                    issue_on_stage = Issue.objects.using('readonly').get(id=issue_id)
+                else:
+                    issue_on_stage = Issue.objects.get(id=issue_id)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
                 issue_found = True
                 status += "RETRIEVE_ISSUE_FOUND_BY_ID "
             elif positive_value_exists(issue_we_vote_id):
-                issue_on_stage = Issue.objects.get(we_vote_id=issue_we_vote_id)
+                if positive_value_exists(read_only):
+                    issue_on_stage = Issue.objects.using('readonly').get(we_vote_id=issue_we_vote_id)
+                else:
+                    issue_on_stage = Issue.objects.get(we_vote_id=issue_we_vote_id)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
                 issue_found = True
                 status += "RETRIEVE_ISSUE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(issue_name):
-                issue_on_stage = Issue.objects.get(issue_name=issue_name)
+                if positive_value_exists(read_only):
+                    issue_on_stage = Issue.objects.using('readonly').get(issue_name=issue_name)
+                else:
+                    issue_on_stage = Issue.objects.get(issue_name=issue_name)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
                 issue_name = issue_on_stage.issue_name
@@ -690,7 +681,7 @@ class OrganizationLinkToIssue(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Are the organization and the issue linked?
-    link_active = models.BooleanField(verbose_name='', default=True)
+    link_active = models.BooleanField(verbose_name='', default=True, db_index=True)
 
     # AUTO_TAGGED_BY_TEXT, AUTO_TAGGED_BY_HASHTAG, TAGGED_BY_ORGANIZATION, TAGGED_BY_WE_VOTE, NO_REASON
     reason_for_link = models.CharField(max_length=25, choices=LINKING_REASON_CHOICES,
@@ -834,7 +825,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return link_issue_list_count
 
     @staticmethod
-    def fetch_linked_organization_count(issue_we_vote_id):
+    def fetch_linked_organization_count(issue_we_vote_id=''):
         number_of_organizations_following_this_issue = 0
 
         try:
@@ -860,12 +851,10 @@ class OrganizationLinkToIssueList(models.Manager):
             # we decided not to use case-insensitivity in favour of '__in'
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)
-            link_queryset = link_queryset.values('organization_we_vote_id').distinct()
-            organization_link_to_issue_results = list(link_queryset)
-            if len(organization_link_to_issue_results):
+            link_queryset = link_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            organization_we_vote_id_list = list(link_queryset)
+            if len(organization_we_vote_id_list):
                 organization_we_vote_id_list_found = True
-                for one_link in organization_link_to_issue_results:
-                    organization_we_vote_id_list.append(one_link['organization_we_vote_id'])
                 status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED '
             else:
                 status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED '
@@ -893,36 +882,61 @@ class OrganizationLinkToIssueManager(models.Manager):
     def __unicode__(self):
         return "OrganizationLinkToIssueManager"
 
-    def link_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id,
-                                   reason_for_link=NO_REASON):
-        link_active = True
-        link_blocked = False
+    def link_organization_to_issue(
+            self,
+            organization_we_vote_id='',
+            issue_id=0,
+            issue_we_vote_id='',
+            reason_for_link=NO_REASON,
+            issue_count_update_allowed=True):
         if reason_for_link is None:
             reason_for_link = LINKED_BY_WE_VOTE
-        reason_for_block = NO_REASON
-        return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                                      reason_for_link, reason_for_block)
+        return self.toggle_issue_link(
+            organization_we_vote_id=organization_we_vote_id,
+            issue_id=issue_id,
+            issue_we_vote_id=issue_we_vote_id,
+            link_active=True,
+            link_blocked=False,
+            reason_for_link=reason_for_link,
+            reason_for_block=NO_REASON,
+            issue_count_update_allowed=issue_count_update_allowed)
 
-    def unlink_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id,
-                                     reason_for_unlink=NO_REASON):
-        link_active = False
-        link_blocked = False
-        reason_for_link = NO_REASON
-        reason_for_block = NO_REASON
-        return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                                      reason_for_link, reason_for_block)
+    def unlink_organization_to_issue(
+            self,
+            organization_we_vote_id="",
+            issue_id=0,
+            issue_we_vote_id="",
+            issue_count_update_allowed=True,
+            reason_for_unlink=NO_REASON):
+        return self.toggle_issue_link(
+            organization_we_vote_id=organization_we_vote_id,
+            issue_id=issue_id,
+            issue_we_vote_id=issue_we_vote_id,
+            link_active=False,
+            link_blocked=False,
+            reason_for_link=reason_for_unlink,
+            issue_count_update_allowed=issue_count_update_allowed)
 
-    def toggle_issue_link(self, organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                          reason_for_link=NO_REASON, reason_for_block=NO_REASON):
+    def toggle_issue_link(
+            self,
+            organization_we_vote_id="",
+            issue_id=0,
+            issue_we_vote_id="",
+            link_active=True,
+            link_blocked=False,
+            reason_for_link=NO_REASON,
+            reason_for_block=NO_REASON,
+            issue_count_update_allowed=True):
 
         link_issue_on_stage_found = False
         link_issue_on_stage_we_vote_id = 0
         link_issue_on_stage = OrganizationLinkToIssue()
         status = ''
+        success = True
         issue_identifier_exists = positive_value_exists(issue_we_vote_id) or positive_value_exists(issue_id)
         if not positive_value_exists(organization_we_vote_id) and not issue_identifier_exists:
             results = {
-                'success': True if link_issue_on_stage_found else False,
+                'success': False,
                 'status': 'Insufficient inputs to toggle issue link, try passing ids for organization and issue ',
                 'link_issue_found': link_issue_on_stage_found,
                 'issue_we_vote_id': link_issue_on_stage_we_vote_id,
@@ -932,10 +946,11 @@ class OrganizationLinkToIssueManager(models.Manager):
 
         # First make sure that issue_id is for a valid issue
         issue_manager = IssueManager()
+        read_only = not issue_count_update_allowed
         if positive_value_exists(issue_id):
-            results = issue_manager.retrieve_issue(issue_id)
+            results = issue_manager.retrieve_issue(issue_id=issue_id, read_only=read_only)
         else:
-            results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+            results = issue_manager.retrieve_issue(issue_we_vote_id=issue_we_vote_id, read_only=read_only)
         if results['issue_found']:
             issue = results['issue']
             issue_found = True
@@ -945,8 +960,11 @@ class OrganizationLinkToIssueManager(models.Manager):
             issue_found = False
 
         # Does a link_issue entry exist from this organization already?
-        link_issue_id = 0
-        results = self.retrieve_issue_link(link_issue_id, organization_we_vote_id, issue_id, issue_we_vote_id)
+        results = self.retrieve_issue_link(
+            organization_we_vote_id=organization_we_vote_id,
+            issue_id=issue_id,
+            issue_we_vote_id=issue_we_vote_id,
+            read_only=False)
 
         if results['link_issue_found']:
             link_issue_on_stage = results['link_issue']
@@ -969,12 +987,13 @@ class OrganizationLinkToIssueManager(models.Manager):
                 link_issue_on_stage_found = True
                 status += 'UPDATE ' + str(link_active)
             except Exception as e:
-                status += 'FAILED_TO_UPDATE ' + str(link_active)
+                status += 'FAILED_TO_UPDATE ' + str(link_active) + " " + str(e) + " "
+                success = False
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
             logger.warning("link_issue: delete all but one and take it over?")
             status += 'TOGGLE_LINKING MultipleObjectsReturned ' + str(link_active)
-        else:
+        elif results['success']:
             # Create new link_issue entry
             if issue_found:
                 try:
@@ -997,13 +1016,15 @@ class OrganizationLinkToIssueManager(models.Manager):
                     else:
                         status += "ORGANIZATION_LINK_TO_ISSUE_COULD_NOT_BE_CREATED-MISSING_ORGANIZATION "
                 except Exception as e:
-                    status = 'FAILED_TO_UPDATE ' + str(link_active)
+                    status = 'FAILED_TO_UPDATE: ' + str(e) + " "
+                    success = False
                     handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
             else:
                 status += 'ISSUE_NOT_FOUND_ON_CREATE ' + str(link_active)
-
-        if positive_value_exists(link_issue_on_stage_we_vote_id) and issue_found:
+        else:
+            status += 'LINK_ISSUE_RETRIEVE_FAILED ' + str(results['status']) + ' '
+        if positive_value_exists(link_issue_on_stage_we_vote_id) and issue_found and issue_count_update_allowed:
             # If a link issue was saved, update the linked_organization_count
             organization_link_issue_list_manager = OrganizationLinkToIssueList()
             linked_organization_count = organization_link_issue_list_manager.fetch_linked_organization_count(
@@ -1013,10 +1034,10 @@ class OrganizationLinkToIssueManager(models.Manager):
                 issue.save()
                 status += "LINKED_ORGANIZATION_COUNT_UPDATED "
             except Exception as e:
-                pass
-
+                status += 'LINK_COUNT_UPDATE_FAILED: ' + str(e) + " "
+                success = False
         results = {
-            'success': True if link_issue_on_stage_found else False,
+            'success': success,
             'status': status,
             'link_issue_found': link_issue_on_stage_found,
             'issue_we_vote_id': link_issue_on_stage_we_vote_id,
@@ -1026,10 +1047,11 @@ class OrganizationLinkToIssueManager(models.Manager):
 
     @staticmethod
     def retrieve_issue_link(
-            link_issue_id,
-            organization_we_vote_id,
-            issue_id,
-            issue_we_vote_id):
+            link_issue_id=0,
+            organization_we_vote_id='',
+            issue_id=0,
+            issue_we_vote_id='',
+            read_only=False):
         """
         link_issue_id is the identifier for records stored in this table (it is NOT the issue_id)
         """
@@ -1041,21 +1063,34 @@ class OrganizationLinkToIssueManager(models.Manager):
 
         try:
             if positive_value_exists(link_issue_id):
-                link_issue_on_stage = OrganizationLinkToIssue.objects.get(id=link_issue_id)
+                if positive_value_exists(read_only):
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.using('readonly').get(id=link_issue_id)
+                else:
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.get(id=link_issue_id)
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 success = True
                 status = 'LINK_ISSUE_FOUND_WITH_ID'
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_id):
-                link_issue_on_stage = OrganizationLinkToIssue.objects.get(
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                    issue_id=issue_id)
+                if positive_value_exists(read_only):
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.using('readonly').get(
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        issue_id=issue_id)
+                else:
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.get(
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        issue_id=issue_id)
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 success = True
                 status = 'LINK_ISSUE_FOUND_WITH_ORGANIZATION_ID_WE_VOTE_ID_AND_ISSUE_ID'
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_we_vote_id):
-                link_issue_on_stage = OrganizationLinkToIssue.objects.get(
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                    issue_we_vote_id__iexact=issue_we_vote_id)
+                if positive_value_exists(read_only):
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.using('readonly').get(
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        issue_we_vote_id__iexact=issue_we_vote_id)
+                else:
+                    link_issue_on_stage = OrganizationLinkToIssue.objects.get(
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        issue_we_vote_id__iexact=issue_we_vote_id)
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 success = True
                 status = 'LINK_ISSUE_FOUND_WITH_ORGANIZATION_ID_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'

@@ -4,16 +4,16 @@
 
 from django.db import models
 from django.db.models import Q
-from django.utils.timezone import localtime, now
+from django.utils.timezone import now
 from datetime import datetime, timedelta
 from election.models import Election
 from exception.models import print_to_log
 from follow.models import FollowOrganizationList
 from organization.models import Organization
-import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, get_current_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    get_current_date_as_integer
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 ACTION_VOTER_GUIDE_VISIT = 1
@@ -93,10 +93,13 @@ ACTION_NEWS = 74
 ACTION_SHARE_ORGANIZATION = 75
 ACTION_SHARE_ORGANIZATION_ALL_OPINIONS = 76
 ACTION_VIEW_SHARED_ORGANIZATION = 77
-ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 77
+ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 78
+ACTION_ORGANIZATION_FOLLOW_DISLIKE = 79
+ACTION_ORGANIZATION_STOP_DISLIKING = 80
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
+     ACTION_ORGANIZATION_FOLLOW_DISLIKE, ACTION_ORGANIZATION_STOP_DISLIKING,
      ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_FOLLOWING,
      ACTION_ORGANIZATION_STOP_IGNORING, ACTION_VOTER_GUIDE_VISIT]
 
@@ -126,14 +129,14 @@ class AnalyticsAction(models.Model):
     is_signed_in = models.BooleanField(verbose_name='', default=False)
 
     state_code = models.CharField(
-        verbose_name="state_code", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="state_code", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_id = models.PositiveIntegerField(null=True, blank=True)
 
     ballot_item_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -213,7 +216,7 @@ class AnalyticsCountManager(models.Manager):
         """
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
@@ -235,7 +238,7 @@ class AnalyticsCountManager(models.Manager):
 
         voters_who_visited_organization_first_simple_list = []
         try:
-            first_visit_query = AnalyticsAction.objects.using('analytics').all()
+            first_visit_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             first_visit_query = first_visit_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
                                                          Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
             first_visit_query = first_visit_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
@@ -271,7 +274,7 @@ class AnalyticsCountManager(models.Manager):
 
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_POSITION_TAKEN)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
@@ -298,7 +301,7 @@ class AnalyticsCountManager(models.Manager):
 
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
@@ -319,7 +322,7 @@ class AnalyticsCountManager(models.Manager):
 
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_POSITION_TAKEN)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
@@ -339,7 +342,7 @@ class AnalyticsCountManager(models.Manager):
                 organization_we_vote_id, return_voter_we_vote_id)
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
@@ -359,7 +362,7 @@ class AnalyticsCountManager(models.Manager):
             limit_to_authenticated=False):
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
@@ -387,7 +390,7 @@ class AnalyticsCountManager(models.Manager):
         """
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
                                              Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
             count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
@@ -408,7 +411,7 @@ class AnalyticsCountManager(models.Manager):
         """
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(Q(action_constant=ACTION_ORGANIZATION_FOLLOW) |
                                              Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
             if positive_value_exists(organization_we_vote_id):
@@ -429,7 +432,7 @@ class AnalyticsCountManager(models.Manager):
         """
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW)
             if positive_value_exists(organization_we_vote_id):
                 count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
@@ -444,7 +447,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_action_count(voter_we_vote_id):
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
@@ -455,7 +458,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_ballot_visited(voter_we_vote_id, google_civic_election_id=0, organization_we_vote_id=''):
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
             if positive_value_exists(google_civic_election_id):
@@ -471,7 +474,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_welcome_visited(voter_we_vote_id):
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_WELCOME_VISIT)
             count_result = count_query.count()
@@ -483,7 +486,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_days_visited(voter_we_vote_id):
         count_result = None
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.values('date_as_integer').distinct()
             count_result = count_query.count()
@@ -495,7 +498,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_last_action_date(voter_we_vote_id):
         last_action_date = None
         try:
-            fetch_query = AnalyticsAction.objects.using('analytics').all()
+            fetch_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             fetch_query = fetch_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             fetch_query = fetch_query.order_by('-id')
             fetch_query = fetch_query[:1]
@@ -510,7 +513,7 @@ class AnalyticsCountManager(models.Manager):
     def fetch_voter_voter_guides_viewed(voter_we_vote_id):
         count_result = 0
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
             count_query = count_query.values('organization_we_vote_id').distinct()
@@ -526,7 +529,7 @@ class AnalyticsCountManager(models.Manager):
             count_through_this_date_as_integer=0):
         count_result = 0
         try:
-            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
@@ -700,13 +703,17 @@ class AnalyticsManager(models.Manager):
             organization_we_vote_id='',
             action_constant='',
             distinct_for_members=False,
-            state_code=''):
+            state_code='',
+            read_only=False):
         success = True
         status = ""
         analytics_action_list = []
 
         try:
-            list_query = AnalyticsAction.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = AnalyticsAction.objects.using('readonly').all()
+            else:
+                list_query = AnalyticsAction.objects.using('analytics').all()
             if positive_value_exists(voter_we_vote_id):
                 list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             elif len(voter_we_vote_id_list):
@@ -747,14 +754,18 @@ class AnalyticsManager(models.Manager):
             kind_of_process='',
             batch_process_id=0,
             batch_process_analytics_chunk_id=0,
-            analytics_date_as_integer_more_recent_than=0):
+            analytics_date_as_integer_more_recent_than=0,
+            read_only=False):
         success = True
         status = ""
         analytics_processed_list = []
         retrieved_voter_we_vote_id_list = []
 
         try:
-            list_query = AnalyticsProcessed.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = AnalyticsProcessed.objects.using('readonly').all()
+            else:
+                list_query = AnalyticsProcessed.objects.using('analytics').all()
             if positive_value_exists(batch_process_id):
                 list_query = list_query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(batch_process_analytics_chunk_id):
@@ -899,7 +910,7 @@ class AnalyticsManager(models.Manager):
         status = ""
 
         try:
-            analytics_processing_status = AnalyticsProcessingStatus.objects.using('analytics').get(
+            analytics_processing_status = AnalyticsProcessingStatus.objects.using('readonly').get(  # 'analytics'
                 analytics_date_as_integer=analytics_date_as_integer)
             analytics_processing_status_found = True
         except Exception as e:
@@ -954,7 +965,7 @@ class AnalyticsManager(models.Manager):
 
             # Now see if we have analytics on that date
             try:
-                voter_history_query = AnalyticsAction.objects.using('analytics').all()
+                voter_history_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
                 voter_history_query = voter_history_query.filter(date_as_integer=new_analytics_date_as_integer)
                 analytics_count = voter_history_query.count()
                 if positive_value_exists(analytics_count):
@@ -1142,6 +1153,7 @@ class AnalyticsManager(models.Manager):
             
             # timezone = pytz.timezone("America/Los_Angeles")
             # pacific_time_datetime_now = timezone.localize(datetime.now())
+            # pacific_time_datetime_now = generate_localized_datetime_from_obj()[1]
             # pacific_time_date_as_integer = convert_date_to_date_as_integer(pacific_time_datetime_now)
             pacific_time_date_as_integer = get_current_date_as_integer()
 
@@ -1181,13 +1193,16 @@ class AnalyticsManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_organization_election_metrics_list(google_civic_election_id=0):
+    def retrieve_organization_election_metrics_list(google_civic_election_id=0, read_only=False):
         success = False
         status = ""
         organization_election_metrics_list = []
 
         try:
-            list_query = OrganizationElectionMetrics.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                list_query = OrganizationElectionMetrics.objects.using('readonly').all()
+            else:
+                list_query = OrganizationElectionMetrics.objects.using('analytics').all()
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             organization_election_metrics_list = list(list_query)
@@ -1236,7 +1251,7 @@ class AnalyticsManager(models.Manager):
         date_list = []
 
         try:
-            date_list_query = AnalyticsAction.objects.using('analytics').all()
+            date_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             date_list_query = date_list_query.filter(date_as_integer__gte=date_as_integer)
             if positive_value_exists(through_date_as_integer):
                 date_list_query = date_list_query.filter(date_as_integer__lte=through_date_as_integer)
@@ -1266,7 +1281,7 @@ class AnalyticsManager(models.Manager):
         organization_list = []
 
         try:
-            organization_list_query = AnalyticsAction.objects.using('analytics').all()
+            organization_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             organization_list_query = organization_list_query.filter(google_civic_election_id=google_civic_election_id)
             organization_list_query = organization_list_query.values('organization_we_vote_id').distinct()
             organization_list = list(organization_list_query)
@@ -1294,7 +1309,7 @@ class AnalyticsManager(models.Manager):
         voter_list = []
 
         try:
-            voter_list_query = AnalyticsAction.objects.using('analytics').all()
+            voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             voter_list_query = voter_list_query.filter(date_as_integer__gte=date_as_integer)
             voter_list_query = voter_list_query.filter(date_as_integer__lte=through_date_as_integer)
             voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
@@ -1515,7 +1530,7 @@ class AnalyticsManager(models.Manager):
 
     @staticmethod
     def sitewide_voter_metrics_for_this_voter_updated_this_date(voter_we_vote_id, updated_date_integer):
-        updated_on_date_query = SitewideVoterMetrics.objects.using('analytics').filter(
+        updated_on_date_query = SitewideVoterMetrics.objects.using('readonly').filter(  # 'analytics'
             voter_we_vote_id__iexact=voter_we_vote_id,
             last_calculated_date_as_integer=updated_date_integer
         )
@@ -1530,7 +1545,7 @@ class AnalyticsManager(models.Manager):
 
         # Get distinct days
         try:
-            distinct_days_query = AnalyticsAction.objects.using('analytics').all()
+            distinct_days_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             distinct_days_query = distinct_days_query.filter(date_as_integer__gte=date_as_integer)
             distinct_days_query = distinct_days_query.filter(date_as_integer__lte=through_date_as_integer)
             distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
@@ -1555,7 +1570,7 @@ class AnalyticsManager(models.Manager):
 
             voter_list = []
             try:
-                voter_list_query = AnalyticsAction.objects.using('analytics').all()
+                voter_list_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
                 voter_list_query = voter_list_query.filter(date_as_integer=one_date_as_integer)
                 voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
                 # voter_list_query = voter_list_query[:5]  # TEMP limit to 5
@@ -1614,7 +1629,7 @@ class AnalyticsManager(models.Manager):
 
         # Get distinct days
         try:
-            distinct_days_query = AnalyticsAction.objects.using('analytics').all()
+            distinct_days_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             distinct_days_query = distinct_days_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
             distinct_days_list = list(distinct_days_query)
@@ -2042,6 +2057,10 @@ def display_action_constant_human_readable(action_constant):
         return "ORGANIZATION_AUTO_FOLLOW"
     if action_constant == ACTION_ORGANIZATION_FOLLOW:
         return "ORGANIZATION_FOLLOW"
+    if action_constant == ACTION_ORGANIZATION_FOLLOW_DISLIKE:
+        return "ORGANIZATION_FOLLOW_DISLIKE"
+    if action_constant == ACTION_ORGANIZATION_STOP_DISLIKING:
+        return "ORGANIZATION_STOP_DISLIKING"
     if action_constant == ACTION_ORGANIZATION_FOLLOW_IGNORE:
         return "ORGANIZATION_FOLLOW_IGNORE"
     if action_constant == ACTION_ORGANIZATION_STOP_FOLLOWING:
@@ -2140,6 +2159,7 @@ def display_action_constant_human_readable(action_constant):
 
 def fetch_action_constant_number_from_constant_string(action_constant_string):
     action_constant_string = action_constant_string.upper()
+    # Dale 2024-07-03 should this be "==" instead of "in"? Needs deeper look.
     if action_constant_string in 'ACTION_VOTER_GUIDE_VISIT':
         return 1
     if action_constant_string in 'ACTION_VOTER_GUIDE_ENTRY':
@@ -2296,4 +2316,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 77
     if action_constant_string in 'ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS':
         return 78
+    if action_constant_string in 'ACTION_ORGANIZATION_FOLLOW_DISLIKE':
+        return 79
+    if action_constant_string in 'ACTION_ORGANIZATION_STOP_DISLIKING':
+        return 80
     return 0

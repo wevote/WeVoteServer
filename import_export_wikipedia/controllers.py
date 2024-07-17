@@ -118,12 +118,12 @@ def get_photo_url_from_wikipedia(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM1: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM1: " + organize_results['status']
             # elif hasattr(incoming_object, 'ballotpedia_photo_url_is_broken') \
             #         and not incoming_object.ballotpedia_photo_url_is_broken:
             #     incoming_object.ballotpedia_photo_url_is_broken = True
@@ -141,12 +141,12 @@ def get_photo_url_from_wikipedia(
                     incoming_object.we_vote_hosted_profile_image_url_large = None
                     incoming_object.we_vote_hosted_profile_image_url_medium = None
                     incoming_object.we_vote_hosted_profile_image_url_tiny = None
-                    results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    organize_results = organize_object_photo_fields_based_on_image_type_currently_active(
                         object_with_photo_fields=incoming_object)
-                    if results['success']:
-                        incoming_object = results['object_with_photo_fields']
+                    if organize_results['success']:
+                        incoming_object = organize_results['object_with_photo_fields']
                     else:
-                        status += "ORGANIZE_OBJECT_PROBLEM2: " + results['status']
+                        status += "ORGANIZE_OBJECT_PROBLEM2: " + organize_results['status']
         else:
             status += "WIKIPEDIA_PHOTO_URL_NOT_FOUND_ON_PAGE: " + wikipedia_page_url + " "
             status += results['status']
@@ -191,7 +191,7 @@ def get_photo_url_from_wikipedia(
                 messages.add_message(request, messages.INFO, 'Wikipedia photo retrieved.')
             if save_to_database:
                 if is_candidate or is_politician:
-                    results = save_image_to_candidate_table(
+                    save_results = save_image_to_candidate_table(
                         candidate=incoming_object,
                         image_url=photo_url,
                         source_link=wikipedia_page_url,
@@ -200,21 +200,21 @@ def get_photo_url_from_wikipedia(
                         kind_of_source_website=IMAGE_SOURCE_WIKIPEDIA,
                         page_title=wikipedia_page_title)
 
-                    if results['success']:
+                    if save_results['success']:
                         wikipedia_photo_saved = True
                     else:
-                        status += results['status']
+                        status += save_results['status']
                         status += "SAVE_TO_CANDIDATE_TABLE_FAILED [" + \
                                   str(wikipedia_page_url) + ", " + str(photo_url) + "] "
                     # When saving to candidate object, update:
                     # we_vote_hosted_profile_facebook_image_url_tiny
                 else:
-                    results = save_image_to_organization_table(
+                    save_results = save_image_to_organization_table(
                         incoming_object, photo_url, wikipedia_page_url, False, IMAGE_SOURCE_WIKIPEDIA)
-                    if results['success']:
+                    if save_results['success']:
                         wikipedia_photo_saved = True
                     else:
-                        status += results['status']
+                        status += save_results['status']
                         status += "SAVE_TO_ORGANIZATION_TABLE_FAILED [" + \
                                   str(wikipedia_page_url) + ", " + str(photo_url) + "] "
 
@@ -239,8 +239,13 @@ def get_photo_url_from_wikipedia(
         status += results['status']
 
         if add_messages:
-            if len(results.get('clean_message')) > 0:
-                messages.add_message(request, messages.ERROR, results.get('clean_message'))
+            try:
+                clean_message = results.get('clean_message')
+            except Exception as e:
+                clean_message = ''
+
+            if len(clean_message) > 0:
+                messages.add_message(request, messages.ERROR, clean_message)
             else:
                 messages.add_message(
                     request, messages.ERROR, 'Wikipedia photo NOT retrieved (2). status: ' + results.get('status'))

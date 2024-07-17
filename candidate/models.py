@@ -618,7 +618,8 @@ class CandidateListManager(models.Manager):
             if politician_we_vote_id_list and len(politician_we_vote_id_list) > 0:
                 candidate_query = candidate_query.filter(politician_we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
-                candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
+                candidate_query = candidate_query.filter(
+                    Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
             if positive_value_exists(search_string):
                 # This is an "OR" search for each term, but an "AND" search across all search_words
                 for search_word in search_words:
@@ -1948,7 +1949,7 @@ class CandidateListManager(models.Manager):
             if positive_value_exists(len(google_civic_election_id_list)):
                 query = query.filter(google_civic_election_id__in=google_civic_election_id_integer_list)
             if positive_value_exists(state_code):
-                query = query.filter(state_code__iexact=state_code)
+                query = query.filter(Q(state_code__iexact=state_code) | Q(state_code__iexact='na'))
 
             link_list = list(query)
         except Exception as e:
@@ -2522,10 +2523,10 @@ class CandidateCampaign(models.Model):
     # Which office held is this candidate running for?
     office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
-    politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
+    politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, db_index=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
-        verbose_name="we vote politician id", max_length=255, null=True, blank=True, db_index=True)
+        verbose_name="we vote politician id", max_length=255, null=True, db_index=True)
     candidate_analysis_done = models.BooleanField(default=False)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
@@ -2724,7 +2725,7 @@ class CandidateCampaign(models.Model):
     ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     ballotpedia_photo_url = models.TextField(
         verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
-    ballotpedia_photo_url_is_broken = models.BooleanField(default=False)
+    ballotpedia_photo_url_is_broken = models.BooleanField(default=False)  # Perhaps disambiguation needed?
     ballotpedia_photo_url_is_placeholder = models.BooleanField(default=False)
     ballotpedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
@@ -2737,7 +2738,7 @@ class CandidateCampaign(models.Model):
     crowdpac_candidate_id = models.PositiveIntegerField(
         verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True, db_index=True)
 
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
@@ -2755,6 +2756,29 @@ class CandidateCampaign(models.Model):
     do_not_display_on_ballot = models.BooleanField(default=False)
     # Set this for existing candidates once we have created CandidateToOfficeLink (is temporary variable)
     migrated_to_link = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['seo_friendly_path', 'politician_we_vote_id', '-id'],
+                name='candidate_seo_friendly_path1'),
+            models.Index(
+                fields=['politician_we_vote_id', 'seo_friendly_path', '-id'],
+                name='candidate_seo_friendly_path2'),
+            models.Index(
+                fields=['candidate_name', 'politician_we_vote_id',
+                        'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
+                name='candidate_list_for_politician'),
+            models.Index(
+                fields=['politician_we_vote_id', 'candidate_name'],
+                name='list_politician_and_name'),
+            models.Index(
+                fields=['candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
+                name='candidate_list_twitter'),
+            models.Index(
+                fields=['politician_we_vote_id', 'linked_campaignx_we_vote_id', '-id'],
+                name='politician_linked_campaignx'),
+        ]
 
     def election(self):
         try:

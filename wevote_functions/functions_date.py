@@ -83,22 +83,16 @@ DATE_FORMAT_DAY_OF_WEEK_TWO_DIGIT = "%d"                      # 04
 
 
 # parse string into localized date time object
-def parse_date_string(date_string, date_format, timezone_name="America/Los_Angeles"):
-    timezone = pytz.timezone(timezone_name)
-    date_time = datetime.strptime(date_string, date_format)
-    return timezone.localize(date_time)
+# def parse_date_string(date_string, date_format, timezone_name="America/Los_Angeles"):
+#     timezone = pytz.timezone(timezone_name)
+#     date_time = datetime.strptime(date_string, date_format)
+#     return timezone.localize(date_time)
 
 
 # retrieve the current datetime and timezone in the specified timezone
-def get_timezone_and_datetime_now(timezone_name="America/Los_Angeles", datetime_obj=None, datetime_format=None):
+def generate_localized_datetime_from_obj(timezone_name="America/Los_Angeles"):
     timezone = pytz.timezone(timezone_name)
-    if datetime_obj is None:
-        datetime_obj = datetime.now()
-    elif isinstance(datetime_obj, str) and datetime_format:
-        localized_datetime = parse_date_string(datetime_obj, datetime_format, timezone_name)
-        return timezone, localized_datetime
-
-    localized_datetime = timezone.localize(datetime_obj)
+    localized_datetime = timezone.localize(datetime.now())
     return timezone, localized_datetime
 
 
@@ -106,7 +100,7 @@ def get_timezone_and_datetime_now(timezone_name="America/Los_Angeles", datetime_
 #     -import function into file
 #     -replace all instances when searching "pytz.timezone" with "date_today_as_integer = get_current_date_as_integer()"
 def get_current_date_as_integer(timezone_name="America/Los_Angeles"):
-    _, datetime_now = get_timezone_and_datetime_now(timezone_name)
+    _, datetime_now = generate_localized_datetime_from_obj(timezone_name)
     return convert_date_to_date_as_integer(datetime_now)
 
 

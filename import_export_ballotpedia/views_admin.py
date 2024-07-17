@@ -93,56 +93,21 @@ def bulk_retrieve_ballotpedia_photos_view(request):
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
-    candidate_list = []
-    already_retrieved = 0
-    already_stored = 0
-    try:
-        queryset = CandidateCampaign.objects.all()
-        queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
-        queryset = queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
-        # queryset = queryset.filter(ballotpedia_photo_url_is_broken=False)
-        # Don't include candidates that do not have ballotpedia_candidate_url
-        queryset = queryset. \
-            exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-        # Only include candidates that don't have a photo
-        queryset = queryset.filter(
-            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-        if positive_value_exists(state_code):
-            queryset = queryset.filter(state_code__iexact=state_code)
-        if positive_value_exists(limit):
-            candidate_list = queryset[:limit]
-        else:
-            candidate_list = list(queryset)
-        # print(candidate_list)
-        # Run search in ballotpedia candidates
-        for one_candidate in candidate_list:
-            # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
-            #  search Ballotpedia more than once.
-            # request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
-            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-            #     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
-            # request_history_list = list(request_history_query)
-            request_history_list = []
-            if not positive_value_exists(len(request_history_list)):
-                add_messages = False
-                get_results = get_photo_url_from_ballotpedia(
-                    incoming_object=one_candidate,
-                    request=request,
-                    remote_request_history_manager=remote_request_history_manager,
-                    save_to_database=True,
-                    add_messages=add_messages)
-                status += get_results['status']
-            else:
-                logger.info("Skipped URL: " + one_candidate.ballotpedia_candidate_url)
-                already_stored += 1
-    except CandidateCampaign.DoesNotExist:
-        # This is fine, do nothing
-        pass
+    from import_export_ballotpedia.controllers_bulk_retrieve import retrieve_ballotpedia_photos_in_bulk
+    results = retrieve_ballotpedia_photos_in_bulk(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+        limit=limit,
+        state_code=state_code,
+    )
+    already_stored = results['already_stored']
+    already_retrieved = results['already_retrieved']
 
     if positive_value_exists(already_stored):
         status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
     if positive_value_exists(already_retrieved):
         status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+    if not positive_value_exists(already_stored) and not positive_value_exists(already_retrieved):
+        status += "NO_IMAGES_RETRIEVED_FROM_BALLOTPEDIA "
 
     messages.add_message(request, messages.INFO, status)
 
@@ -205,44 +170,26 @@ def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
-    candidate_list = []
-    already_retrieved = 0
-    already_stored = 0
-    try:
-        queryset = CandidateCampaign.objects.all()
-        queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
-        # Don't include candidates that do not have ballotpedia_candidate_url
-        queryset = queryset.exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-        # Only include candidates that don't have a photo
-        queryset = queryset.filter(
-            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
-        if positive_value_exists(state_code):
-            queryset = queryset.filter(state_code__iexact=state_code)
-        if positive_value_exists(limit):
-            candidate_list = queryset[:limit]
-        else:
-            candidate_list = list(queryset)
-        # Run search in ballotpedia candidates
-        for one_candidate in candidate_list:
-            # Check to see if we have already tried to find all of their links from Ballotpedia. We don't want to
-            #  search Ballotpedia more than once.
-            get_results = get_candidate_links_from_ballotpedia(
-                incoming_object=one_candidate,
-                request=request,
-                remote_request_history_manager=remote_request_history_manager,
-                save_to_database=True,
-                add_messages=False)
-            status += get_results['status']
-
-    except CandidateCampaign.DoesNotExist:
-        # This is fine, do nothing
-        pass
+    from import_export_ballotpedia.controllers_bulk_retrieve import retrieve_ballotpedia_links_in_bulk
+    results = retrieve_ballotpedia_links_in_bulk(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+        limit=limit,
+        state_code=state_code,
+    )
+    already_stored = results['already_stored']
+    profiles_retrieved = results['profiles_retrieved']
+    status += results['status']
+    if 'error_message_to_print' in results and positive_value_exists(results['error_message_to_print']):
+        error_message_to_print = results['error_message_to_print']
+        messages.add_message(request, messages.ERROR, error_message_to_print)
+    # else:
+    #     messages.add_message(
+    #         request, messages.ERROR, 'Ballotpedia links NOT retrieved (2). status: ' + results.get('status'))
 
     if positive_value_exists(already_stored):
         status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
-    if positive_value_exists(already_retrieved):
-        status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+    if positive_value_exists(profiles_retrieved):
+        status += "PROFILES_RETRIEVED_TOTAL-(" + str(profiles_retrieved) + ") "
 
     messages.add_message(request, messages.INFO, status)
 

@@ -141,6 +141,9 @@
   "SNOVIO_CLIENT_ID":               "",
   "SNOVIO_CLIENT_SECRET":           "",
 
+  "_comment":                       "Vertex AI name recognition",
+  "GOOGLE_APPLICATION_CREDENTIALS_VERTEX":  "/etc/we-vote-ballot-293de7d4b80d.json",
+
   "_comment":                       "python-social-auth ... Django social sign in ... social_django",
   "SOCIAL_AUTH_APPLE_KEY_ID":       "",
   "SOCIAL_AUTH_APPLE_TEAM_ID":      "",

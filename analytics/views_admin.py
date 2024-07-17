@@ -680,8 +680,8 @@ def analytics_index_view(request):
 
     sitewide_election_metrics_list = []
     try:
-        sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('analytics')\
-            .order_by('-election_day_text')
+        sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('readonly').all()
+        sitewide_election_metrics_query = sitewide_election_metrics_query.order_by('-election_day_text')  # 'analytics'
         sitewide_election_metrics_query = sitewide_election_metrics_query[:3]
         sitewide_election_metrics_list = list(sitewide_election_metrics_query)
     except SitewideElectionMetrics.DoesNotExist:
@@ -690,7 +690,8 @@ def analytics_index_view(request):
 
     sitewide_daily_metrics_list_modified = []
     try:
-        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
+        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('readonly').all()  # 'analytics'
+        sitewide_daily_metrics_query = sitewide_daily_metrics_query.order_by('-date_as_integer')
         sitewide_daily_metrics_query = sitewide_daily_metrics_query[:3]
         sitewide_daily_metrics_list = list(sitewide_daily_metrics_query)
         for one_day in sitewide_daily_metrics_list:
@@ -706,8 +707,8 @@ def analytics_index_view(request):
 
     organization_election_metrics_list = []
     try:
-        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
-            order_by('-followers_visited_ballot')
+        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('readonly').all()  # 'analytics'
+        organization_election_metrics_query = organization_election_metrics_query.order_by('-followers_visited_ballot')
         organization_election_metrics_query = organization_election_metrics_query[:3]
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
@@ -716,7 +717,8 @@ def analytics_index_view(request):
 
     sitewide_voter_metrics_list = []
     try:
-        sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
+        sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('readonly').all()  # 'analytics'
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query.order_by('-last_action_date')
         # Don't return the welcome page bounces
         sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(welcome_visited=1, actions_count=1)
         sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(actions_count__lte=1)
@@ -796,8 +798,8 @@ def organization_analytics_index_view(request):
 
     organization_election_metrics_list = []
     try:
-        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
-            order_by('-election_day_text')
+        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('readonly').all()  # 'analytics'
+        organization_election_metrics_query = organization_election_metrics_query.order_by('-election_day_text')
         organization_election_metrics_query = \
             organization_election_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
         organization_election_metrics_query = organization_election_metrics_query[:3]
@@ -808,8 +810,8 @@ def organization_analytics_index_view(request):
 
     organization_daily_metrics_list = []
     try:
-        organization_daily_metrics_query = \
-            OrganizationDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
+        organization_daily_metrics_query = OrganizationDailyMetrics.objects.using('readonly').all()  # 'analytics'
+        organization_daily_metrics_query = organization_daily_metrics_query.order_by('-date_as_integer')
         organization_daily_metrics_query = \
             organization_daily_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
         organization_daily_metrics_query = organization_daily_metrics_query[:3]
@@ -1478,7 +1480,7 @@ def sitewide_voter_metrics_view(request):
         sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
 
         # Count how many bounces are being removed
-        bounce_query = SitewideVoterMetrics.objects.using('analytics').all()
+        bounce_query = SitewideVoterMetrics.objects.using('readonly').all()  # 'analytics'
         bounce_query = bounce_query.filter(actions_count__lte=1)
         if positive_value_exists(date_as_integer):
             bounce_query = bounce_query.filter(last_action_date__gte=start_date)
