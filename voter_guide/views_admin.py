@@ -708,6 +708,7 @@ def voter_guide_create_process_view(request):
             if results['success']:
                 return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()))
 
+    error_message_to_print = ''
     status = ""
 
     all_done_with_entry = request.POST.get('all_done_with_entry', 0)
@@ -877,6 +878,8 @@ def voter_guide_create_process_view(request):
         organization_twitter_followers_count = results['organization_twitter_followers_count']
         organization_twitter_handle = results['organization_twitter_handle']
         possible_endorsement_list = results['possible_endorsement_list']
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
     else:
         # If here is_list_of_endorsements_for_candidate is true
         from voter_guide.controllers_possibility import process_candidate_being_endorsed_input_form
@@ -1054,6 +1057,9 @@ def voter_guide_create_process_view(request):
             status += results['status']
             messages.add_message(request, messages.ERROR, 'Could not save this suggested voter guide. '
                                                           'STATUS: {status}'.format(status=status))
+
+    if positive_value_exists(error_message_to_print):
+        messages.add_message(request, messages.ERROR, error_message_to_print)
 
     if all_done_with_entry:
         messages.add_message(request, messages.SUCCESS,

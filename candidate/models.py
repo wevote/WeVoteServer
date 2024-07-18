@@ -2901,8 +2901,11 @@ class CandidateCampaign(models.Model):
 
     def display_alternate_names_list(self):
         alternate_names = []
-        if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
-            alternate_names.append(self.ballotpedia_candidate_name)
+        # Dale 2024-07-18 We don't want to include ballotpedia_candidate_name as an alternate name because
+        #  Ballotpedia sometimes includes shortened names in this field, which creates false positives
+        #  i.e. "Michael B. Moore" WV-442
+        # if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
+        #     alternate_names.append(self.ballotpedia_candidate_name)
         if self.google_civic_candidate_name and (self.google_civic_candidate_name != self.display_candidate_name()):
             alternate_names.append(self.google_civic_candidate_name)
         if self.google_civic_candidate_name2 and (self.google_civic_candidate_name2 != self.display_candidate_name()):
