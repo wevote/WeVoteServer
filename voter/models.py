@@ -14,6 +14,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # Pe
 from django.core.validators import RegexValidator
 from django.db import (models, IntegrityError)
 from django.db.models import Q
+from django.db.models.functions import Upper
 from django.utils.timezone import now
 from geopy import get_geocoder_for_service
 from validate_email import validate_email
@@ -3289,10 +3290,10 @@ class Voter(AbstractBaseUser):
     class Meta:
         indexes = [
             models.Index(
-                fields=['linked_organization_we_vote_id'],
+                fields=[Upper('linked_organization_we_vote_id')],
                 name='voter_fetch_voter_by_org_index'),
             models.Index(
-                fields=['linked_organization_we_vote_id', 'we_vote_id'],
+                fields=[Upper('linked_organization_we_vote_id'), Upper('we_vote_id')],
                 name='fetch_voter_by_org2_index'),
             models.Index(
                 fields=['primary_email_we_vote_id', 'primary_sms_we_vote_id', 'twitter_id', 'facebook_id'],
