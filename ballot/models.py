@@ -7,6 +7,7 @@ from datetime import date, datetime
 
 from django.db import models
 from django.db.models import F, Q, Count, FloatField, ExpressionWrapper, Func
+from django.db.models.functions import Upper
 from geopy.exc import GeocoderQuotaExceeded
 from geopy.geocoders import get_geocoder_for_service
 
@@ -1787,7 +1788,7 @@ class BallotReturned(models.Model):
     """
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True,
-        blank=True, unique=True, db_index=True)
+        blank=True, unique=True)
 
     # Either voter_id or polling_location_we_vote_id will be set, but not both.
     # The unique id of the voter for which this ballot was retrieved.
@@ -1835,6 +1836,25 @@ class BallotReturned(models.Model):
 
     date_last_updated = models.DateTimeField(
         verbose_name='date ballot items last retrieved', auto_now=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[Upper('polling_location_we_vote_id'), 'text_for_map_search'],
+                name='polling_location_and_text'),
+            models.Index(
+                fields=[Upper('polling_location_we_vote_id'), 'text_for_map_search', 'id'],
+                name='polling_location_and_text_id'),
+            models.Index(
+                fields=['text_for_map_search', Upper('polling_location_we_vote_id')],
+                name='text_and_polling_location'),
+            models.Index(
+                fields=['text_for_map_search', Upper('polling_location_we_vote_id'), 'id'],
+                name='text_and_polling_location_id'),
+            models.Index(
+                fields=[Upper('we_vote_id')],
+                name='ballot_returned_we_vote_id'),
+        ]
 
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -2654,10 +2674,10 @@ class BallotReturnedManager(models.Manager):
             # If Geocoder is not able to give us a location, look to see if their voter entered their address as
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
-            if 'test' in sys.argv:
-                ballot_returned_query = BallotReturned.objects.all()
-            elif positive_value_exists(read_only):
+            if positive_value_exists(read_only):
                 ballot_returned_query = BallotReturned.objects.using('readonly').all()
+            elif 'test' in sys.argv:
+                ballot_returned_query = BallotReturned.objects.all()
             else:
                 ballot_returned_query = BallotReturned.objects.all()
             # Limit this query to entries stored for map points
@@ -4440,7 +4460,7 @@ def find_best_previously_stored_ballot_returned(
         return error_results
     else:
         find_results = ballot_returned_manager.find_closest_ballot_returned(
-            text_for_map_search, google_civic_election_id)
+            text_for_map_search, google_civic_election_id, read_only=True)
         status += "CALLING-FIND_CLOSEST_BALLOT_RETURNED, status: [["
         status += find_results['status']
         status += "]] "
