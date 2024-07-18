@@ -668,15 +668,16 @@ def polling_location_list_view(request):
             or positive_value_exists(show_vote_usa_errors) or positive_value_exists(show_successful_retrieves):
         polling_location_list_modified = []
         for polling_location in polling_location_list:
-            polling_location.polling_location_log_entry_list = \
-                polling_location_manager.retrieve_polling_location_log_entry_list(
-                    polling_location_we_vote_id=polling_location.we_vote_id,
-                    is_from_ctcl=show_ctcl_errors,
-                    is_from_vote_usa=show_vote_usa_errors,
-                    is_successful_retrieve=show_successful_retrieves,
-                    is_no_contests=show_no_contests,
-                    show_errors=show_ctcl_errors or show_vote_usa_errors,
-                )
+            log_results = polling_location_manager.retrieve_polling_location_log_entry_list(
+                is_from_ctcl=show_ctcl_errors,
+                is_from_vote_usa=show_vote_usa_errors,
+                is_successful_retrieve=show_successful_retrieves,
+                is_no_contests=show_no_contests,
+                polling_location_we_vote_id=polling_location.we_vote_id,
+                read_only=True,
+                show_errors=show_ctcl_errors or show_vote_usa_errors,
+            )
+            polling_location.polling_location_log_entry_list = log_results['polling_location_log_entry_list']
             polling_location.polling_location_log_entry_list_has_error = False
             for log_entry in polling_location.polling_location_log_entry_list:
                 if log_entry.kind_of_log_entry in [
@@ -754,20 +755,22 @@ def polling_location_list_process_view(request):
                                  number_deleted=number_deleted,
                                  polling_location_we_vote_id=clear_errors_for_polling_location_we_vote_id))
     elif recalculate_log_entry_counts:
-        # Update of all of the log counts
+        # Update of all the log counts
         if positive_value_exists(state_code):
             ctcl_errors_update_dict = {}
             no_contests_update_dict = {}
             successful_retrieves_update_dict = {}
             vote_usa_errors_update_dict = {}
-            log_entry_list = polling_location_manager.retrieve_polling_location_log_entry_list(
+            log_results = polling_location_manager.retrieve_polling_location_log_entry_list(
                 is_from_ctcl=True,
                 is_from_vote_usa=True,
                 is_no_contests=True,
                 is_successful_retrieve=True,
+                read_only=True,
                 show_errors=True,
                 state_code=state_code,
             )
+            log_entry_list = log_results['polling_location_log_entry_list']
             for log_entry in log_entry_list:
                 if log_entry.kind_of_log_entry == 'BALLOT_RECEIVED':
                     if log_entry.polling_location_we_vote_id not in successful_retrieves_update_dict:
@@ -1129,16 +1132,18 @@ def polling_location_summary_internal_view(
 
     if positive_value_exists(polling_location_on_stage_found):
         if positive_value_exists(google_civic_election_id):
-            polling_location_on_stage.polling_location_log_entry_list = \
-                polling_location_manager.retrieve_polling_location_log_entry_list(
-                    google_civic_election_id=google_civic_election_id,
-                    polling_location_we_vote_id=polling_location_on_stage.we_vote_id,
-                )
+            log_results = polling_location_manager.retrieve_polling_location_log_entry_list(
+                google_civic_election_id=google_civic_election_id,
+                polling_location_we_vote_id=polling_location_on_stage.we_vote_id,
+                read_only=True,
+            )
+            polling_location_on_stage.polling_location_log_entry_list = log_results['polling_location_log_entry_list']
         else:
-            polling_location_log_entry_list = \
-                polling_location_manager.retrieve_polling_location_log_entry_list(
-                    polling_location_we_vote_id=polling_location_on_stage.we_vote_id,
-                )
+            log_results = polling_location_manager.retrieve_polling_location_log_entry_list(
+                polling_location_we_vote_id=polling_location_on_stage.we_vote_id,
+                read_only=True,
+            )
+            polling_location_log_entry_list = log_results['polling_location_log_entry_list']
             polling_location_log_entry_list_modified = []
             for log_entry in polling_location_log_entry_list:
                 if log_entry.google_civic_election_id in election_dict:
