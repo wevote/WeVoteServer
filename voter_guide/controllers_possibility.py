@@ -887,6 +887,7 @@ def process_organization_endorsing_candidates_input_form(
 ):
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
+    error_message_to_print = ""
     ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
     is_organization_endorsing_candidates = True
     organization_found = False
@@ -949,6 +950,10 @@ def process_organization_endorsing_candidates_input_form(
                     if positive_value_exists(twitter_user.twitter_name):
                         organization_name = twitter_user.twitter_name
                     twitter_user_id = twitter_user.twitter_id
+                else:
+                    error_message_to_print += "Twitter user does not exist: " \
+                                              + organization_twitter_handle + " "
+                    status += "TWITTER_USER_DOES_NOT_EXIST: " + organization_twitter_handle + " "
                 if not one_organization_found and positive_value_exists(twitter_user_id):
                     # organization_name = ""
                     if not positive_value_exists(state_code):
@@ -1227,6 +1232,7 @@ def process_organization_endorsing_candidates_input_form(
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
     results = {
+        'error_message_to_print':               error_message_to_print,
         'status':                               status,
         'success':                              success,
         'organization_name':                    organization_name,
