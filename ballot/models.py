@@ -7,7 +7,6 @@ from datetime import date, datetime
 
 from django.db import models
 from django.db.models import F, Q, Count, FloatField, ExpressionWrapper, Func
-from django.db.models.functions import Upper
 from geopy.exc import GeocoderQuotaExceeded
 from geopy.geocoders import get_geocoder_for_service
 
@@ -1840,19 +1839,19 @@ class BallotReturned(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=[Upper('polling_location_we_vote_id'), 'text_for_map_search'],
+                fields=['polling_location_we_vote_id', 'text_for_map_search'],
                 name='polling_location_and_text'),
             models.Index(
-                fields=[Upper('polling_location_we_vote_id'), 'text_for_map_search', 'id'],
+                fields=['polling_location_we_vote_id', 'text_for_map_search', 'id'],
                 name='polling_location_and_text_id'),
             models.Index(
-                fields=['text_for_map_search', Upper('polling_location_we_vote_id')],
+                fields=['text_for_map_search', 'polling_location_we_vote_id'],
                 name='text_and_polling_location'),
             models.Index(
-                fields=['text_for_map_search', Upper('polling_location_we_vote_id'), 'id'],
+                fields=['text_for_map_search', 'polling_location_we_vote_id', 'id'],
                 name='text_and_polling_location_id'),
             models.Index(
-                fields=[Upper('we_vote_id')],
+                fields=['we_vote_id'],
                 name='ballot_returned_we_vote_id'),
         ]
 
