@@ -401,9 +401,58 @@
             </td>
         {% if is_national_election or show_election_statistics %} {# Last Retrieve / Refresh #}
             <td>
+{#                {% if election.retrieve_date_completed %}#}
+{#                    retrieve: {{ election.retrieve_date_completed }}#}
+{#                {% elif election.retrieve_date_started %}#}
+{#                    <span style="color: lightgray">retrieve start: {{ election.retrieve_date_completed }}</span>#}
+{#                {% endif %}#}
+{##}
+{#                {% if election.retrieve_date_completed or election.retrieve_date_started and election.refresh_date_completed or election.refresh_date_started %}#}
+{#                /#}
+{#                {% endif %}#}
+
+            <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ one_state_code }}" target="_blank">
+                <span style="{% if election.data_getting_stale %}color: red{% endif %}">
+                    {% if one_state_dict.refresh_date_completed %}
+                        {{ one_state_dict.refresh_date_completed }}
+                    {% elif one_state_dict.refresh_date_started %}
+                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                            start: {{ one_state_dict.refresh_date_started }}
+                        </span>
+                    {% elif one_state_dict.retrieve_date_completed %}
+                        {{ one_state_dict.retrieve_date_completed }}
+                    {% elif one_state_dict.retrieve_date_started %}
+                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                            start: {{ one_state_dict.retrieve_date_started }}
+                        </span>
+                    {% endif %}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </span>
+            </a>
             </td>
             <td>
+                {% if one_state_dict.refresh_date_added_to_queue %}
+                <span style="color: darkgray">
+                    {{ one_state_dict.refresh_date_added_to_queue }}
+                </span>
+                {% endif %}
             </td>
+{#            <td>#}
+{#            {% if election.prior_election_in_state and election.prior_election_in_state.election_day_text %}#}
+{#                {{ election.prior_election_in_state_date|date:"N j, Y" }}#}
+{#            {% endif %}#}
+{#            </td>#}
+{#            <td>#}
+{#            {% if election.next_election_in_state and election.next_election_in_state.election_day_text %}#}
+{#                {% if election.next_election_in_state.election_day_text == election.election_day_text %}#}
+{#                <span style="color: darkgray">#}
+{#                    This election#}
+{#                </span>#}
+{#                {% else %}#}
+{#                    {{ election.next_election_in_state_date|date:"N j, Y" }}#}
+{#                {% endif %}#}
+{#            {% endif %}#}
+{#            </td>#}
         {% endif %}
         {# ############### OFFICES ############### #}
             <td align="middle">
