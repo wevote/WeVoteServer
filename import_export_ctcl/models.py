@@ -52,6 +52,8 @@ class CTCLApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class CTCLApiCounterManager(models.Manager):
 
+    # WV-262 converting into static method
+    @staticmethod
     def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
         """
         Create an entry that records that a call to the CTCL Api was made.
@@ -76,6 +78,7 @@ class CTCLApiCounterManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
