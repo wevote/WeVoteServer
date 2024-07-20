@@ -154,7 +154,7 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
     follow_organization_manager = FollowOrganizationManager()
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(from_voter_id)
 
-    to_voter_linked_organization_we_vote_id = \
+    voter_linked_organization_we_vote_id = \
         voter_manager.fetch_linked_organization_we_vote_id_from_local_id(to_voter_id)
 
     for from_follow_entry in from_follow_list:
@@ -187,7 +187,7 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
                 from_follow_entry.pk = None
                 from_follow_entry.voter_id = to_voter_id
                 # We don't currently store follow entries by we_vote_id
-                from_follow_entry.organization_we_vote_id_that_is_following = to_voter_linked_organization_we_vote_id
+                from_follow_entry.organization_we_vote_id_that_is_following = voter_linked_organization_we_vote_id
                 from_follow_entry.save()
                 follow_entries_duplicated += 1
             except Exception as e:
@@ -752,7 +752,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
         return error_results
     voter = voter_results['voter']
     voter_we_vote_id = voter.we_vote_id
-    to_voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     twitter_id_of_me = voter.twitter_id
 
     follow_organization_list = FollowOrganizationList()
@@ -882,7 +882,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 organization_we_vote_id = suggested_organization_to_follow_entry.organization_we_vote_id
                 toggle_on_results = follow_organization_manager.\
                     toggle_on_voter_following_organization(voter_id, 0, organization_we_vote_id,
-                                                           to_voter_linked_organization_we_vote_id,
+                                                           voter_linked_organization_we_vote_id,
                                                            auto_followed_from_twitter_suggestion)
                 status += ' ' + toggle_on_results['status']
                 success = toggle_on_results['success']
