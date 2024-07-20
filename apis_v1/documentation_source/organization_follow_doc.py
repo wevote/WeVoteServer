@@ -84,7 +84,7 @@ def organization_follow_doc_template_values(url_root):
                    '  "organization_we_vote_id": string,\n' \
                    '  "organization_twitter_handle": string,\n' \
                    '  "organization_follow_based_on_issue": boolean,\n' \
-                   '  "voter_linked_organization_we_vote_id": string,\n' \
+                   '  "organization_we_vote_id_that_is_following": string,\n' \
                    '}'
 
     template_values = {

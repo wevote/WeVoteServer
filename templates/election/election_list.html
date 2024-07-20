@@ -327,7 +327,7 @@
 {#                <span style="color: darkgray;">GOAL:</span>#}
 {#                <span style="color: darkgray;">#}
 {#                    find#}
-{#                    {{ election.positions_goal_count|default_if_none:"" }}#}
+{#                    {{ election.positions_goal_count|intcomma }}#}
 {#                    opinions#}
 {#                </span>#}
 {#                </span>#}
@@ -338,7 +338,7 @@
                 <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 <span class="u-no-break">
-                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.public_positions_count|default_if_none:"" }}</span>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.public_positions_count|intcomma }}</span>
                     opinions
                 </span>
                 </a>
@@ -360,7 +360,7 @@
                 <br />
                 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                {{ election.voter_guides_count|default_if_none:"" }} endorsers</a>
+                {{ election.voter_guides_count|intcomma }} endorsers</a>
             {% endif %}
             </td>
         {# ############### BALLOTS RETURNED ############### #}
@@ -548,7 +548,7 @@
                 <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
                    target="_blank">
                 <span class="u-no-break">
-                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.public_positions_count|default_if_none:"" }}</span>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.public_positions_count|intcomma }}</span>
                     opinions
                 </span>
                 </a>
@@ -559,7 +559,7 @@
                 <br />
                 <span class="u-no-break">
                 <span {% if one_state_dict.positions_goal_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
-                    {{ one_state_dict.positions_needed_to_reach_goal|default_if_none:"" }}
+                    {{ one_state_dict.positions_needed_to_reach_goal|intcomma }}
                     more needed
                 </span>
                 </span>
@@ -570,7 +570,7 @@
                 <br />
                 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                {{ one_state_dict.voter_guides_count|default_if_none:"" }} endorsers</a>
+                {{ one_state_dict.voter_guides_count|intcomma }} endorsers</a>
             {% endif %}
             </td>
         {# ############### BALLOTS RETURNED ############### #}

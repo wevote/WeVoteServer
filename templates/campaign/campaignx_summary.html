@@ -52,10 +52,12 @@
             <tr>
                 <th>Supporters:&nbsp;</th>
                 <td> {{ campaignx.supporters_count }}
-        {% if campaignx.supporters_count_minimum_ignored %}
-                    <span style="color: darkgray">(Visible -- Supporters Count Minimum Ignored)</span>
-        {% elif not campaignx.is_supporters_count_minimum_exceeded %}
-                    <span style="color: darkgray">(NOT visible -- too few supporters)</span>
+        {% if not campaignx.linked_politician_we_vote_id %}
+            {% if campaignx.supporters_count_minimum_ignored %}
+                        <span style="color: darkgray">(Visible -- Supporters Count Minimum Ignored)</span>
+            {% elif not campaignx.is_supporters_count_minimum_exceeded %}
+                        <span style="color: darkgray">(NOT visible -- too few supporters)</span>
+            {% endif %}
         {% endif %}
                 </td>
             </tr>

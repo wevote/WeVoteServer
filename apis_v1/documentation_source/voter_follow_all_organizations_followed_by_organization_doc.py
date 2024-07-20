@@ -62,7 +62,7 @@ def voter_follow_all_organizations_followed_by_organization_doc_template_values(
                    '     "voter_device_id": string (88 characters long),\n' \
                    '     "organization_id": integer,\n' \
                    '     "organization_we_vote_id": string,\n' \
-                   '     "voter_linked_organization_we_vote_id": string,\n' \
+                   '     "organization_we_vote_id_that_is_following": string,\n' \
                    '     "organization_follow_based_on_issue": boolean,\n' \
                    '   ],\n' \
                    '  "organization_we_vote_id": integer,\n' \

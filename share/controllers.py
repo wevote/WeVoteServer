@@ -576,7 +576,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                     voter_id,
                     organization_id=0,
                     organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
-                    voter_linked_organization_we_vote_id=viewed_by_organization_we_vote_id,
+                    organization_we_vote_id_that_is_following=viewed_by_organization_we_vote_id,
                     following_status=FOLLOWING)
                 status += following_results['status']
 
