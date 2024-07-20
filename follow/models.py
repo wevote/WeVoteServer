@@ -649,7 +649,7 @@ class FollowMetricsManager(models.Manager):
             count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
             # count_query = count_query.values("voter_id").distinct()
-            count_query = count_query.values("voter_linked_organization_we_vote_id").distinct()
+            count_query = count_query.values("organization_we_vote_id_that_is_following").distinct()
             if positive_value_exists(google_civic_election_id):
                 election_manager = ElectionManager()
                 election_result = election_manager.retrieve_election(google_civic_election_id)
@@ -873,9 +873,9 @@ class FollowOrganization(models.Model):
     # The organization being followed
     organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
-    # The organization/endorser following another organization/endorser
-    #  (in some cases, a politician's linked organization entry)
-    voter_linked_organization_we_vote_id = models.CharField(
+    # The organization/endorser/voter following another organization/endorser
+    #  Was voter_linked_organization_we_vote_id
+    organization_we_vote_id_that_is_following = models.CharField(
         max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The organization/endorser being followed
@@ -965,34 +965,37 @@ class FollowOrganizationManager(models.Manager):
             voter_id=0,
             organization_id=0,
             organization_we_vote_id='',
-            voter_linked_organization_we_vote_id=''):
+            organization_we_vote_id_that_is_following=''):
         following_status = FOLLOW_DISLIKE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status)
 
     @staticmethod
     def toggle_off_voter_disliking_organization(
             voter_id=0,
             organization_id=0,
             organization_we_vote_id='',
-            voter_linked_organization_we_vote_id=''):
+            organization_we_vote_id_that_is_following=''):
         following_status = STOP_DISLIKING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status)
 
     @staticmethod
     def toggle_on_voter_following_organization(
             voter_id=0,
             organization_id=0,
             organization_we_vote_id='',
-            voter_linked_organization_we_vote_id='',
+            organization_we_vote_id_that_is_following='',
             auto_followed_from_twitter_suggestion=False):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status,
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status,
             auto_followed_from_twitter_suggestion)
 
     @staticmethod
@@ -1000,40 +1003,43 @@ class FollowOrganizationManager(models.Manager):
             voter_id=0,
             organization_id=0,
             organization_we_vote_id='',
-            voter_linked_organization_we_vote_id=''):
+            organization_we_vote_id_that_is_following=''):
         following_status = STOP_FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status)
 
     @staticmethod
     def toggle_ignore_voter_following_organization(
             voter_id='',
             organization_id='',
             organization_we_vote_id='',
-            voter_linked_organization_we_vote_id=''):
+            organization_we_vote_id_that_is_following=''):
         following_status = FOLLOW_IGNORE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status)
 
     @staticmethod
     def toggle_off_voter_ignoring_organization(
             voter_id,
             organization_id,
             organization_we_vote_id,
-            voter_linked_organization_we_vote_id):
+            organization_we_vote_id_that_is_following):
         following_status = STOP_FOLLOWING  # STOP_IGNORING (We don't actually store STOP_IGNORING in the database
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, organization_we_vote_id_that_is_following,
+            following_status)
 
     @staticmethod
     def toggle_voter_following_organization(
             voter_id,
             organization_id,
             organization_we_vote_id,
-            voter_linked_organization_we_vote_id,
+            organization_we_vote_id_that_is_following,
             following_status,
             auto_followed_from_twitter_suggestion=False):
         status = ""
@@ -1063,7 +1069,8 @@ class FollowOrganizationManager(models.Manager):
                 else:
                     follow_organization_on_stage.following_status = following_status
                     follow_organization_on_stage.auto_followed_from_twitter_suggestion = False
-                follow_organization_on_stage.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
+                follow_organization_on_stage.organization_we_vote_id_that_is_following = \
+                    organization_we_vote_id_that_is_following
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_organization_on_stage.date_last_changed =
                 follow_organization_on_stage.save()
@@ -1091,7 +1098,7 @@ class FollowOrganizationManager(models.Manager):
                         voter_id=voter_id,
                         organization_id=organization.id,
                         organization_we_vote_id=organization.we_vote_id,
-                        voter_linked_organization_we_vote_id=voter_linked_organization_we_vote_id,
+                        organization_we_vote_id_that_is_following=organization_we_vote_id_that_is_following,
                         following_status=following_status,
                     )
                     if auto_followed_from_twitter_suggestion:
@@ -1114,7 +1121,7 @@ class FollowOrganizationManager(models.Manager):
             'follow_organization_found':            follow_organization_on_stage_found,
             'follow_organization_id':               follow_organization_on_stage_id,
             'follow_organization':                  follow_organization_on_stage,
-            'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
+            'organization_we_vote_id_that_is_following': organization_we_vote_id_that_is_following,
         }
         return results
 
@@ -1451,14 +1458,14 @@ class FollowOrganizationList(models.Model):
     def retrieve_follow_organization_by_own_organization_we_vote_id(
             organization_we_vote_id,
             auto_followed_from_twitter_suggestion=False):
-        # Retrieve a list of followed organizations entries by voter_linked_organization_we_vote_id for voter guides
+        # Retrieve list of followed organizations entries by organization_we_vote_id_that_is_following for voter guides
         follow_organization_list_found = False
         following_status = FOLLOWING
         follow_organization_list = []
         try:
             follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(
-                voter_linked_organization_we_vote_id=organization_we_vote_id)
+                organization_we_vote_id_that_is_following=organization_we_vote_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
             if auto_followed_from_twitter_suggestion:
                 follow_organization_list = follow_organization_list.filter(
@@ -1584,9 +1591,9 @@ class FollowOrganizationList(models.Model):
         if len(followers_organization_list):
             for follow_organization in followers_organization_list:
                 if return_we_vote_id:
-                    if positive_value_exists(follow_organization.voter_linked_organization_we_vote_id):
+                    if positive_value_exists(follow_organization.organization_we_vote_id_that_is_following):
                         followers_organization_list_simple_array.append(
-                            follow_organization.voter_linked_organization_we_vote_id)
+                            follow_organization.organization_we_vote_id_that_is_following)
                 else:
                     followers_organization_list_simple_array.append(follow_organization.organization_id)
         return followers_organization_list_simple_array

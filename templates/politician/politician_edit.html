@@ -1185,6 +1185,7 @@
             <th>Stance</th>
             <th>Election</th>
             <th>Election Date</th>
+            <th>Following?</th>
         </tr>
       </thead>
     {% for politician_position in politician_position_list %}
@@ -1224,6 +1225,7 @@
             </td>
             <td>{{ politician_position.election.google_civic_election_id }}</td>
             <td>{{ politician_position.election.election_day_text }}</td>
+            <td>{{ politician_position.organization_is_following_politician }}</td>
         </tr>
         {% endif %}
         {% endfor %}
@@ -1275,7 +1277,7 @@
     {% endif %}
 
     {% if politician.twitter_profile_banner_url_https %}
-        <img src="{{ politician.twitter_profile_banner_url_https }}"><br />
+        <img src="{{ politician.twitter_profile_banner_url_https }}" width="600px"><br />
         Twitter Banner<br />
     {% endif %}
 {% else %}

@@ -1156,23 +1156,25 @@ def election_list_view(request):
                 election.positions_needed_to_reach_goal = \
                     election.positions_goal_count - election.public_positions_count
 
-            refresh_results = election_refresh_statistics(google_civic_election_id=election.google_civic_election_id, state_code='')
-            data_getting_stale = refresh_results['data_getting_stale']
-            refresh_date_added_to_queue = refresh_results['refresh_date_added_to_queue']
-            refresh_date_completed = refresh_results['refresh_date_completed']
-            refresh_date_started = refresh_results['refresh_date_started']
-            retrieve_date_added_to_queue = refresh_results['retrieve_date_added_to_queue']
-            retrieve_date_completed = refresh_results['retrieve_date_completed']
-            retrieve_date_started = refresh_results['retrieve_date_started']
+            # 2024-07 We don't need this statistic for the overall election -- only state-by-state
+            # refresh_results = election_refresh_statistics(
+            #     google_civic_election_id=election.google_civic_election_id,
+            #     state_code='')
+            # data_getting_stale = refresh_results['data_getting_stale']
+            # refresh_date_added_to_queue = refresh_results['refresh_date_added_to_queue']
+            # refresh_date_completed = refresh_results['refresh_date_completed']
+            # refresh_date_started = refresh_results['refresh_date_started']
+            # retrieve_date_added_to_queue = refresh_results['retrieve_date_added_to_queue']
+            # retrieve_date_completed = refresh_results['retrieve_date_completed']
+            # retrieve_date_started = refresh_results['retrieve_date_started']
 
-            # election_for_one_state = copy.deepcopy(national_election)
-            election.data_getting_stale = data_getting_stale
-            election.refresh_date_added_to_queue = refresh_date_added_to_queue
-            election.refresh_date_completed = refresh_date_completed
-            election.refresh_date_started = refresh_date_started
-            election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
-            election.retrieve_date_completed = retrieve_date_completed
-            election.retrieve_date_started = retrieve_date_started
+            # election.data_getting_stale = data_getting_stale
+            # election.refresh_date_added_to_queue = refresh_date_added_to_queue
+            # election.refresh_date_completed = refresh_date_completed
+            # election.refresh_date_started = refresh_date_started
+            # election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
+            # election.retrieve_date_completed = retrieve_date_completed
+            # election.retrieve_date_started = retrieve_date_started
 
             for state_code_lower in state_code_list_with_offices:
                 # ################################

@@ -1671,7 +1671,8 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         'organization_we_vote_id': organization_we_vote_id,
         'politician_we_vote_id': politician_we_vote_id,
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
-        'voter_linked_organization_we_vote_id': "",
+        'organization_we_vote_id_that_is_following': "",
+        'voter_linked_organization_we_vote_id': "",  # For backward compatibility
     }
 
     if not positive_value_exists(voter_device_id):
@@ -1883,7 +1884,8 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         'organization_we_vote_id': organization_we_vote_id,
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'politician_we_vote_id': politician_we_vote_id,
-        'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
+        'organization_we_vote_id_that_is_following': voter_linked_organization_we_vote_id,
+        'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,  # For backward compat
     }
     return json_data
 

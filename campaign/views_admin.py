@@ -1273,10 +1273,10 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
         from position.models import PositionEntered
         position_query = PositionEntered.objects.using('readonly').all()
         position_query = position_query.filter(politician_we_vote_id__iexact=campaignx.linked_politician_we_vote_id)
-        position_query = position_query.exclude(
-            Q(statement_text__isnull=True) |
-            Q(statement_text__exact='')
-        )
+        # position_query = position_query.exclude(
+        #     Q(statement_text__isnull=True) |
+        #     Q(statement_text__exact='')
+        # )
         position_list = list(position_query[:4])
     else:
         supporters_query = CampaignXSupporter.objects.using('readonly').all()

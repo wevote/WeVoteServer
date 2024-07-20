@@ -75,7 +75,8 @@ def organization_dislike(  # organizationDislike
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': results['voter_device_id'],
-        'voter_linked_organization_we_vote_id': results['voter_linked_organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # For backward compat
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -118,7 +119,8 @@ def organization_stop_disliking(  # organizationStopDisliking
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': results['voter_device_id'],
-        'voter_linked_organization_we_vote_id': results['voter_linked_organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -165,7 +167,8 @@ def organization_follow(  # organizationFollow
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': results['voter_device_id'],
-        'voter_linked_organization_we_vote_id': results['voter_linked_organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -209,7 +212,8 @@ def organization_stop_following(  # organizationStopFollowing
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': results['voter_device_id'],
-        'voter_linked_organization_we_vote_id': results['voter_linked_organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
