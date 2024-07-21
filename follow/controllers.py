@@ -1113,6 +1113,10 @@ def create_followers_from_positions(
         elif one_position.stance == OPPOSE:
             following_status = FOLLOW_DISLIKE
         else:
+            # Do not try to create a FollowOrganization entry without SUPPORT or OPPOSE stance
+            one_position.follow_organization_analysis_complete = True
+            one_position.follow_organization_created = False
+            position_objects_to_mark_as_analysis_complete.append(one_position)
             continue
         is_follow_visible_publicly = not positive_value_exists(friends_only_positions)
 
@@ -1168,11 +1172,11 @@ def create_followers_from_positions(
         try:
             if friends_only_positions:
                 PositionForFriends.objects.bulk_update(
-                    position_objects_to_mark_as_having_follow_organization_created,
+                    combined_list,
                     ['follow_organization_analysis_complete', 'follow_organization_created'])
             else:
                 PositionEntered.objects.bulk_update(
-                    position_objects_to_mark_as_having_follow_organization_created,
+                    combined_list,
                     ['follow_organization_analysis_complete', 'follow_organization_created'])
             info_message_to_print += \
                 "{position_updates_made:,} positions updated, " \
@@ -1193,10 +1197,10 @@ def create_followers_from_positions(
     results = {
         'follow_organization_entries_created':  follow_organization_entries_created,
         'campaignx_we_vote_id_list_to_refresh': campaignx_we_vote_id_list_to_refresh,
-        'error_message_to_print': error_message_to_print,
-        'info_message_to_print': info_message_to_print,
-        'status':   status,
-        'success':  success,
+        'error_message_to_print':   error_message_to_print,
+        'info_message_to_print':    info_message_to_print,
+        'status':                   status,
+        'success':                  success,
     }
     return results
 
@@ -1236,15 +1240,19 @@ def create_follow_organization_from_position(
         if not position_found or not hasattr(position, 'ballot_item_display_name'):
             status += "VALID_POSITION_NOT_FOUND "
             results = {
-                'campaignx_supporter':        campaignx_supporter,
-                'campaignx_supporter_found':  campaignx_supporter_found,
+                'campaignx_supporter':          campaignx_supporter,
+                'campaignx_supporter_found':    campaignx_supporter_found,
                 'status':                       status,
-                'success': False,
+                'success':                      False,
             }
             return results
 
-    # Make sure that the position.stance shows support
-    if position.stance != SUPPORT:
+    # Change the following_status based on position.stance
+    if position.stance in [OPPOSE]:
+        following_status = FOLLOW_DISLIKE
+    elif position.stance in [SUPPORT]:
+        following_status = FOLLOWING
+    else:
         status += "VALID_POSITION_NOT_FOUND "
         results = {
             'success': False,
@@ -1260,11 +1268,11 @@ def create_follow_organization_from_position(
             campaign_supported=True,
             campaignx_we_vote_id=campaignx_we_vote_id,
             date_supported=position.date_entered,
+            following_status=following_status,
             linked_position_we_vote_id=position.we_vote_id,
             organization_we_vote_id=position.organization_we_vote_id,
             supporter_name=position.speaker_display_name,
             supporter_endorsement=position.statement_text,
-            # visibility_blocked_by_we_vote=False,
             visible_to_public=show_to_public,
             voter_we_vote_id=position.voter_we_vote_id,
             we_vote_hosted_profile_image_url_medium=position.speaker_image_url_https_medium,

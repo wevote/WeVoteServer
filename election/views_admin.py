@@ -1191,10 +1191,12 @@ def election_list_view(request):
                 retrieve_date_started = refresh_results['retrieve_date_started']
 
                 election.state_statistics_dict[state_code_lower]['data_getting_stale'] = data_getting_stale
-                election.state_statistics_dict[state_code_lower]['refresh_date_added_to_queue'] = refresh_date_added_to_queue
+                election.state_statistics_dict[state_code_lower]['refresh_date_added_to_queue'] = \
+                    refresh_date_added_to_queue
                 election.state_statistics_dict[state_code_lower]['refresh_date_completed'] = refresh_date_completed
                 election.state_statistics_dict[state_code_lower]['refresh_date_started'] = refresh_date_started
-                election.state_statistics_dict[state_code_lower]['retrieve_date_added_to_queue'] = retrieve_date_added_to_queue
+                election.state_statistics_dict[state_code_lower]['retrieve_date_added_to_queue'] = \
+                    retrieve_date_added_to_queue
                 election.state_statistics_dict[state_code_lower]['retrieve_date_completed'] = retrieve_date_completed
                 election.state_statistics_dict[state_code_lower]['retrieve_date_started'] = retrieve_date_started
 

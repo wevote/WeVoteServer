@@ -30,7 +30,8 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer, DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD
+    convert_we_vote_date_string_to_date_as_integer, get_current_date_as_integer, get_current_year_as_integer, \
+    DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD
 from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
@@ -1852,6 +1853,13 @@ def generate_candidate_dict_from_candidate_object(
     date_last_updated = ''
     if positive_value_exists(candidate.date_last_updated):
         date_last_updated = candidate.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+    date_today_as_integer = get_current_date_as_integer()
+    try:
+        election_is_upcoming = True if positive_value_exists(candidate.candidate_ultimate_election_date) and \
+                                       candidate.candidate_ultimate_election_date > date_today_as_integer else False
+    except Exception as e:
+        election_is_upcoming = False
+        status += f"ERROR_DETERMINING_ELECTION_IS_UPCOMING: {e} "
     candidate_dict = {
         'ballot_guide_official_statement':  candidate.ballot_guide_official_statement,
         'ballot_item_display_name':         candidate.display_candidate_name(),
@@ -1876,6 +1884,7 @@ def generate_candidate_dict_from_candidate_object(
         else candidate.contest_office_name,
         'contest_office_we_vote_id':        office_we_vote_id if positive_value_exists(office_we_vote_id)
         else candidate.contest_office_we_vote_id,
+        'election_is_upcoming':             election_is_upcoming,
         'facebook_url':                     candidate.facebook_url,
         'google_civic_election_id':         google_civic_election_id
         if positive_value_exists(google_civic_election_id) else candidate.google_civic_election_id,
