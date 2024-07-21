@@ -221,10 +221,22 @@
             </a>
             </td>
             <td>
-                {% if election.refresh_date_added_to_queue %}
-                <span style="color: darkgray">
-                    {{ election.refresh_date_added_to_queue }}
-                </span>
+                {% if election.refresh_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        refresh start: {{ election.refresh_date_started }}
+                    </span>
+                {% elif election.refresh_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        refresh added: {{ election.refresh_date_added_to_queue }}
+                    </span>
+                {% elif election.retrieve_date_started %}
+                    <span style="color: darkgray">
+                        retrieve start: {{ election.retrieve_date_started }}
+                    </span>
+                {% elif election.retrieve_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        retrieve added: {{ election.retrieve_date_added_to_queue }}
+                    </span>
                 {% endif %}
             </td>
 {#            <td>#}
@@ -431,10 +443,22 @@
             </a>
             </td>
             <td>
-                {% if one_state_dict.refresh_date_added_to_queue %}
-                <span style="color: darkgray">
-                    {{ one_state_dict.refresh_date_added_to_queue }}
-                </span>
+                {% if one_state_dict.refresh_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        refresh start: {{ one_state_dict.refresh_date_started }}
+                    </span>
+                {% elif one_state_dict.refresh_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        refresh added: {{ one_state_dict.refresh_date_added_to_queue }}
+                    </span>
+                {% elif one_state_dict.retrieve_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        retrieve start: {{ one_state_dict.retrieve_date_started }}
+                    </span>
+                {% elif one_state_dict.retrieve_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        retrieve added: {{ one_state_dict.retrieve_date_added_to_queue }}
+                    </span>
                 {% endif %}
             </td>
 {#            <td>#}
