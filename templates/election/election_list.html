@@ -113,8 +113,8 @@
             <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
             <th>State(s)</th>
         {% if is_national_election or show_election_statistics %}
-            <th>Last Refresh</th>
-            <th>Refresh Added to Queue</th>
+            <th>Last Retrieve Completed</th>
+            <th>Retrieve Added to Queue</th>
 {#            <th>Last Election</th>#}
 {#            <th>Next Election</th>#}
         {% endif %}
@@ -427,23 +427,17 @@
                 <span style="{% if election.data_getting_stale %}color: red{% endif %}">
                     {% if one_state_dict.refresh_date_completed %}
                         {{ one_state_dict.refresh_date_completed }}
-                    {% elif one_state_dict.refresh_date_started %}
-                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
-                            start: {{ one_state_dict.refresh_date_started }}
-                        </span>
                     {% elif one_state_dict.retrieve_date_completed %}
                         {{ one_state_dict.retrieve_date_completed }}
-                    {% elif one_state_dict.retrieve_date_started %}
-                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
-                            start: {{ one_state_dict.retrieve_date_started }}
-                        </span>
                     {% endif %}
                     <span class="glyphicon glyphicon-new-window"></span>
                 </span>
             </a>
             </td>
             <td>
-                {% if one_state_dict.refresh_date_started %}
+                {% if one_state_dict.refresh_date_completed >= one_state_dict.refresh_date_started %}
+{#                    Show nothing#}
+                {% elif one_state_dict.refresh_date_started %}
                     <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
                         refresh start: {{ one_state_dict.refresh_date_started }}
                     </span>
@@ -451,6 +445,9 @@
                     <span style="color: darkgray">
                         refresh added: {{ one_state_dict.refresh_date_added_to_queue }}
                     </span>
+                {% endif %}
+                {% if one_state_dict.retrieve_date_completed >= one_state_dict.retrieve_date_started %}
+{#                    Show nothing#}
                 {% elif one_state_dict.retrieve_date_started %}
                     <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
                         retrieve start: {{ one_state_dict.retrieve_date_started }}
