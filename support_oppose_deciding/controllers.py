@@ -453,42 +453,52 @@ def positions_public_count_for_contest_measure(measure_id, measure_we_vote_id, s
 
 
 def voter_opposing_save(  # voterOpposingSave
-        voter_device_id='',
         candidate_id=0,
         candidate_we_vote_id='',
+        direct_api_call=False,
         measure_id=0,
         measure_we_vote_id='',
         politician_id=0,
         politician_we_vote_id='',
         user_agent_string='',
-        user_agent_object={}):
-    # Get voter_id from the voter_device_id, so we can know who is supporting/opposing
-    results = is_voter_device_id_valid(voter_device_id)
+        user_agent_object={},
+        voter=None,
+        voter_device_id='',
+        voter_id=0):
     status = ''
-    if not results['success']:
-        status += results['status'] + 'VALID_VOTER_DEVICE_ID_MISSING '
-        json_data = {
-            'ballot_item_id':           0,
-            'ballot_item_we_vote_id':   '',
-            'kind_of_ballot_item':      '',
-            'position_we_vote_id':      '',
-            'status': status,
-            'success': False,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    success = True
+    final_results_dict = {
+        'ballot_item_id': 0,
+        'ballot_item_we_vote_id': '',
+        'kind_of_ballot_item': '',
+        'position_we_vote_id': '',
+        'status': status,
+        'success': success,
+        'voter': voter,
+        'voter_device_id': voter_device_id,
+        'voter_id': voter_id,
+    }
+    if hasattr(voter, 'we_vote_id') and positive_value_exists(voter.we_vote_id):
+        voter_id = voter.id
+        final_results_dict['voter_id'] = voter_id
+    else:
+        # Get voter_id from the voter_device_id, so we can know who is supporting/opposing
+        results = is_voter_device_id_valid(voter_device_id)
+        if not results['success']:
+            status += results['status'] + 'VALID_VOTER_DEVICE_ID_MISSING '
+            final_results_dict['status'] = status
+            final_results_dict['success'] = False
+            return final_results_dict
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        status += "VALID_VOTER_ID_MISSING "
-        json_data = {
-            'ballot_item_id':           0,
-            'ballot_item_we_vote_id':   '',
-            'kind_of_ballot_item':      '',
-            'position_we_vote_id':      '',
-            'status': status,
-            'success': False,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        if not positive_value_exists(voter_id):
+            voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if positive_value_exists(voter_id):
+            final_results_dict['voter_id'] = voter_id
+        else:
+            status += "VALID_VOTER_ID_MISSING "
+            final_results_dict['status'] = status
+            final_results_dict['success'] = False
+            return final_results_dict
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
@@ -507,16 +517,12 @@ def voter_opposing_save(  # voterOpposingSave
         # toggle_off_voter_support_for_candidate
         status += "OPPOSING_CANDIDATE " + results['status'] + " "
         success = results['success']
-
-        json_data = {
-            'status':                   status,
-            'success':                  success,
-            'ballot_item_id':           convert_to_int(candidate_id),
-            'ballot_item_we_vote_id':   candidate_we_vote_id,
-            'kind_of_ballot_item':      CANDIDATE,
-            'position_we_vote_id':      results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(candidate_id)
+        final_results_dict['ballot_item_we_vote_id'] = candidate_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = CANDIDATE
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
         contest_measure_manager = ContestMeasureManager()
         # Since we can take in either measure_id or measure_we_vote_id, we need to retrieve the value we don't have
@@ -532,16 +538,12 @@ def voter_opposing_save(  # voterOpposingSave
             user_agent_object)
         status += "OPPOSING_MEASURE " + results['status']
         success = results['success']
-
-        json_data = {
-            'status':                   status,
-            'success':                  success,
-            'ballot_item_id':           convert_to_int(measure_id),
-            'ballot_item_we_vote_id':   measure_we_vote_id,
-            'kind_of_ballot_item':      MEASURE,
-            'position_we_vote_id': results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(measure_id)
+        final_results_dict['ballot_item_we_vote_id'] = measure_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = MEASURE
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     elif positive_value_exists(politician_id) or positive_value_exists(politician_we_vote_id):
         politician_manager = PoliticianManager()
         # Since we can take in either politician_id or politician_we_vote_id, we need to retrieve value we don't have
@@ -559,32 +561,44 @@ def voter_opposing_save(  # voterOpposingSave
         status += "OPPOSING_POLITICIAN " + results['status'] + " "
         success = results['success']
 
-        json_data = {
-            'status': status,
-            'success': success,
-            'ballot_item_id': convert_to_int(politician_id),
-            'ballot_item_we_vote_id': politician_we_vote_id,
-            'kind_of_ballot_item': POLITICIAN,
-            'position_we_vote_id': results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(politician_id)
+        final_results_dict['ballot_item_we_vote_id'] = politician_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = POLITICIAN
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     else:
         status += 'UNABLE_TO_SAVE_OPPOSE-CANDIDATE_ID_MEASURE_ID_AND_POLITICIAN_ID_MISSING '
         success = False
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
+    save_oppose_position = False
+    if positive_value_exists(direct_api_call) and success:
+        if positive_value_exists(politician_we_vote_id):
+            save_oppose_position = True
+    if save_oppose_position:
+        from apis_v1.controllers import organization_dislike
+        follow_results = organization_dislike(
+            direct_api_call=False,
+            # organization_id=organization_id,
+            # organization_we_vote_id=organization_we_vote_id,
+            # organization_twitter_handle=organization_twitter_handle,
+            politician_we_vote_id=politician_we_vote_id,
+            user_agent_string=user_agent_string,
+            user_agent_object=user_agent_object,
+            voter=voter,
+            voter_device_id=voter_device_id,
+            voter_id=voter_id,
+        )
+        status += follow_results['status']
+        final_results_dict['status'] = status
+        final_results_dict['voter'] = voter
+        final_results_dict['voter_id'] = voter_id
 
-    json_data = {
-        'status':                   status,
-        'success':                  success,
-        'ballot_item_id':           0,
-        'ballot_item_we_vote_id':   '',
-        'kind_of_ballot_item':      '',
-        'position_we_vote_id':      '',
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return final_results_dict
 
 
 def voter_stop_opposing_save(  # voterStopOpposingSave
-        voter_device_id='',
         candidate_id=0,
         candidate_we_vote_id='',
         measure_id=0,
@@ -592,7 +606,9 @@ def voter_stop_opposing_save(  # voterStopOpposingSave
         politician_id=0,
         politician_we_vote_id='',
         user_agent_string='',
-        user_agent_object={}):
+        user_agent_object={},
+        voter_device_id='',
+        voter_id=0):
     status = ''
     success = True
     # Get voter_id from the voter_device_id, so we can know who is supporting/opposing
@@ -608,7 +624,8 @@ def voter_stop_opposing_save(  # voterStopOpposingSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
             'status': "VALID_VOTER_ID_MISSING ",
@@ -703,7 +720,6 @@ def voter_stop_opposing_save(  # voterStopOpposingSave
 
 
 def voter_stop_supporting_save(  # voterStopSupportingSave
-        voter_device_id='',
         candidate_id=0,
         candidate_we_vote_id='',
         measure_id=0,
@@ -711,7 +727,9 @@ def voter_stop_supporting_save(  # voterStopSupportingSave
         politician_id=0,
         politician_we_vote_id='',
         user_agent_string='',
-        user_agent_object={}):
+        user_agent_object={},
+        voter_device_id='',
+        voter_id=0):
     status = ''
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
@@ -726,7 +744,8 @@ def voter_stop_supporting_save(  # voterStopSupportingSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
             'status': "VALID_VOTER_ID_MISSING ",
@@ -820,54 +839,69 @@ def voter_stop_supporting_save(  # voterStopSupportingSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_supporting_save_for_api(  # voterSupportingSave
-        voter_device_id='',
+def voter_supporting_save(  # voterSupportingSave
         candidate_id=0,
         candidate_we_vote_id='',
+        direct_api_call=False,
         measure_id=0,
         measure_we_vote_id='',
         politician_id=0,
         politician_we_vote_id='',
         user_agent_string='',
-        user_agent_object=None):
+        user_agent_object=None,
+        voter=None,
+        voter_device_id='',
+        voter_id=0):
     """
     Default to this being a private position
-    :param voter_device_id:
     :param candidate_id:
     :param candidate_we_vote_id:
+    :param direct_api_call:
     :param measure_id:
     :param measure_we_vote_id:
     :param politician_id:
     :param politician_we_vote_id:
     :param user_agent_string:
     :param user_agent_object:
+    :param voter:
+    :param voter_device_id:
+    :param voter_id:
     :return:
     """
     status = ""
-    # Get voter_id from the voter_device_id so we can know who is supporting/opposing
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
-            'success': False,
-            'ballot_item_id':           0,
-            'ballot_item_we_vote_id':   '',
-            'kind_of_ballot_item':      '',
-            'position_we_vote_id':      '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    success = True
+    final_results_dict = {
+        'ballot_item_id': 0,
+        'ballot_item_we_vote_id': '',
+        'kind_of_ballot_item': '',
+        'position_we_vote_id': '',
+        'status': status,
+        'success': success,
+        'voter': voter,
+        'voter_device_id': voter_device_id,
+        'voter_id': voter_id,
+    }
+    if hasattr(voter, 'we_vote_id') and positive_value_exists(voter.we_vote_id):
+        voter_id = voter.id
+        final_results_dict['voter_id'] = voter_id
+    else:
+        # Get voter_id from the voter_device_id so we can know who is supporting/opposing
+        results = is_voter_device_id_valid(voter_device_id)
+        if not results['success']:
+            status += "VALID_VOTER_DEVICE_ID_MISSING "
+            final_results_dict['status'] = status
+            final_results_dict['success'] = False
+            return final_results_dict
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VALID_VOTER_ID_MISSING ",
-            'success': False,
-            'ballot_item_id':           0,
-            'ballot_item_we_vote_id':   '',
-            'kind_of_ballot_item':      '',
-            'position_we_vote_id':      '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        if not positive_value_exists(voter_id):
+            voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if positive_value_exists(voter_id):
+            final_results_dict['voter_id'] = voter_id
+        else:
+            status += "VALID_VOTER_ID_MISSING "
+            final_results_dict['status'] = status
+            final_results_dict['success'] = False
+            return final_results_dict
 
     position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
@@ -883,15 +917,12 @@ def voter_supporting_save_for_api(  # voterSupportingSave
         status += "SUPPORTING_CANDIDATE " + results['status'] + " "
         success = results['success']
 
-        json_data = {
-            'status':                   status,
-            'success':                  success,
-            'ballot_item_id':           convert_to_int(candidate_id),
-            'ballot_item_we_vote_id':   candidate_we_vote_id,
-            'kind_of_ballot_item':      CANDIDATE,
-            'position_we_vote_id':      results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(candidate_id)
+        final_results_dict['ballot_item_we_vote_id'] = candidate_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = CANDIDATE
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
         contest_measure_manager = ContestMeasureManager()
         # Since we can take in either measure_id or measure_we_vote_id, we need to retrieve the value we don't have
@@ -905,15 +936,12 @@ def voter_supporting_save_for_api(  # voterSupportingSave
         status += "SUPPORTING_MEASURE: " + results['status'] + " "
         success = results['success']
 
-        json_data = {
-            'status':                   status,
-            'success':                  success,
-            'ballot_item_id':           convert_to_int(measure_id),
-            'ballot_item_we_vote_id':   measure_we_vote_id,
-            'kind_of_ballot_item':      MEASURE,
-            'position_we_vote_id':      results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(measure_id)
+        final_results_dict['ballot_item_we_vote_id'] = measure_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = MEASURE
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     elif positive_value_exists(politician_id) or positive_value_exists(politician_we_vote_id):
         politician_manager = PoliticianManager()
         # Since we can take in either politician_id or politician_we_vote_id, we need to retrieve value we don't have
@@ -931,25 +959,14 @@ def voter_supporting_save_for_api(  # voterSupportingSave
         status += "SUPPORTING_POLITICIAN: " + results['status'] + " "
         success = results['success']
 
-        json_data = {
-            'status': status,
-            'success': success,
-            'ballot_item_id': convert_to_int(politician_id),
-            'ballot_item_we_vote_id': politician_we_vote_id,
-            'kind_of_ballot_item': POLITICIAN,
-            'position_we_vote_id': results['position_we_vote_id'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['ballot_item_id'] = convert_to_int(politician_id)
+        final_results_dict['ballot_item_we_vote_id'] = politician_we_vote_id
+        final_results_dict['kind_of_ballot_item'] = POLITICIAN
+        final_results_dict['position_we_vote_id'] = results['position_we_vote_id']
+        final_results_dict['status'] = status
+        final_results_dict['success'] = success
     else:
         status += 'UNABLE_TO_SAVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING '
-        success = False
-
-    json_data = {
-        'status': status,
-        'success': success,
-        'ballot_item_id':           0,
-        'ballot_item_we_vote_id':   '',
-        'kind_of_ballot_item':      '',
-        'position_we_vote_id':      '',
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+        final_results_dict['status'] = status
+        final_results_dict['success'] = False
+    return final_results_dict
