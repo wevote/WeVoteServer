@@ -3432,8 +3432,7 @@ def politician_edit_process_view(request):
     # To make sure we have the freshest data, update supporters_count on all objects
     error_message_to_print = ''
     info_message_to_print = ''
-    pigs_can_fly = False
-    if pigs_can_fly and positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+    if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
         from follow.controllers import create_followers_from_positions
         from campaign.controllers import refresh_campaignx_supporters_count_in_all_children
         campaignx_we_vote_id_list_to_refresh = [politician_on_stage.linked_campaignx_we_vote_id]

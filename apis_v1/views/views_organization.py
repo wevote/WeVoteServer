@@ -67,106 +67,211 @@ def organization_count_view(request):
 
 
 def organization_dislike_api_view(request):  # organizationDislike
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_dislike(
-        voter_device_id=voter_device_id,
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_dislike(
+        direct_api_call=True,
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         organization_twitter_handle=organization_twitter_handle,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
-        user_agent_object=user_agent_object)
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+    )
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_follow_api_view(request):  # organizationFollow
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_follow_based_on_issue = request.GET.get('organization_follow_based_on_issue', False)
     organization_follow_based_on_issue = positive_value_exists(organization_follow_based_on_issue)
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_follow(
-        voter_device_id=voter_device_id,
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_follow(
+        direct_api_call=True,
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         organization_twitter_handle=organization_twitter_handle,
         organization_follow_based_on_issue=organization_follow_based_on_issue,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
-        user_agent_object=user_agent_object)
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+    )
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_stop_disliking_api_view(request):  # organizationStopDisliking
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_stop_disliking(
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_stop_disliking(
         voter_device_id=voter_device_id,
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_stop_following_api_view(request):  # organizationStopFollowing
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_stop_following(
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_stop_following(
         voter_device_id=voter_device_id,
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_stop_ignoring_api_view(request):  # organizationStopIgnoring
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_stop_ignoring(
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_stop_ignoring(
         voter_device_id=voter_device_id,
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    status = ''
     user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
-    return organization_follow_ignore(
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = organization_follow_ignore(
         voter_device_id=voter_device_id,
         organization_id=organization_id,
+        organization_twitter_handle=organization_twitter_handle,
         organization_we_vote_id=organization_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'organization_id': results['organization_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_we_vote_id_that_is_following': results['organization_we_vote_id_that_is_following'],
+        'politician_we_vote_id': results['politician_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+        'voter_linked_organization_we_vote_id': results['organization_we_vote_id_that_is_following'],  # Backward compat
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_index_view(request, organization_incoming_domain='', campaign_main=''):  # organizationIndex

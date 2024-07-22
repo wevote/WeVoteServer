@@ -38,7 +38,7 @@ from position.controllers import voter_all_positions_retrieve_for_api, \
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
-    voter_stop_supporting_save, voter_supporting_save_for_api
+    voter_stop_supporting_save, voter_supporting_save
 from voter.controllers import delete_all_voter_information_permanently, \
     voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action_schedule, voter_photo_save_for_api, voter_retrieve_for_api, \
@@ -1911,6 +1911,7 @@ def voter_opposing_save_view(request):  # voterOpposingSave
     measure_we_vote_id = None
     politician_id = 0
     politician_we_vote_id = None
+    status = ''
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1920,7 +1921,7 @@ def voter_opposing_save_view(request):  # voterOpposingSave
     elif kind_of_ballot_item == POLITICIAN:
         politician_id = ballot_item_id
         politician_we_vote_id = ballot_item_we_vote_id
-    return voter_opposing_save(
+    results = voter_opposing_save(
         voter_device_id=voter_device_id,
         candidate_id=candidate_id,
         candidate_we_vote_id=candidate_we_vote_id,
@@ -1930,6 +1931,18 @@ def voter_opposing_save_view(request):  # voterOpposingSave
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'ballot_item_id': results['ballot_item_id'],
+        'ballot_item_we_vote_id': results['ballot_item_we_vote_id'],
+        'kind_of_ballot_item': results['kind_of_ballot_item'],
+        'position_we_vote_id': results['position_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
@@ -2217,6 +2230,7 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     measure_we_vote_id = None
     politician_id = 0
     politician_we_vote_id = None
+    status = ''
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -2226,16 +2240,30 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     elif kind_of_ballot_item == POLITICIAN:
         politician_id = ballot_item_id
         politician_we_vote_id = ballot_item_we_vote_id
-    return voter_supporting_save_for_api(
-        voter_device_id=voter_device_id,
+    results = voter_supporting_save(
         candidate_id=candidate_id,
         candidate_we_vote_id=candidate_we_vote_id,
+        direct_api_call=True,
         measure_id=measure_id,
         measure_we_vote_id=measure_we_vote_id,
         politician_id=politician_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
-        user_agent_object=user_agent_object)
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+    )
+    status += results['status']
+    json_data = {
+        'ballot_item_id': results['ballot_item_id'],
+        'ballot_item_we_vote_id': results['ballot_item_we_vote_id'],
+        'kind_of_ballot_item': results['kind_of_ballot_item'],
+        'position_we_vote_id': results['position_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_bookmark_off_save_view(request):

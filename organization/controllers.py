@@ -1658,45 +1658,55 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
         organization_follow_based_on_issue=None,
         user_agent_object=None,
         user_agent_string='',
-        voter_device_id=None):
+        voter=None,
+        voter_device_id=None,
+        voter_id=0):
     status = ""
     if organization_follow_based_on_issue is None:
         organization_follow_based_on_issue = False
 
-    error_results = {
-        'status': '',
-        'success': False,
-        'voter_device_id': voter_device_id,
+    final_results_dict = {
+        'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
-        'politician_we_vote_id': politician_we_vote_id,
-        'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'organization_we_vote_id_that_is_following': "",
+        'politician_we_vote_id': politician_we_vote_id,
+        'status': '',
+        'success': False,
+        'voter': voter,
+        'voter_device_id': voter_device_id,
+        'voter_id': voter_id,
         'voter_linked_organization_we_vote_id': "",  # For backward compatibility
     }
 
-    if not positive_value_exists(voter_device_id):
-        status += "VALID_VOTER_DEVICE_ID_MISSING "
-        error_results['status'] = status
-        return error_results
+    if hasattr(voter, 'we_vote_id') and positive_value_exists(voter.we_vote_id):
+        voter_we_vote_id = voter.we_vote_id
+        is_signed_in = voter.is_signed_in()
+        voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    else:
+        if not positive_value_exists(voter_device_id):
+            status += "VALID_VOTER_DEVICE_ID_MISSING "
+            final_results_dict['status'] = status
+            return final_results_dict
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        status += "VALID_VOTER_ID_MISSING "
-        error_results['status'] = status
-        return error_results
+        if not positive_value_exists(voter_id):
+            voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_id):
+            status += "VALID_VOTER_ID_MISSING "
+            final_results_dict['status'] = status
+            return final_results_dict
 
-    voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_by_id(voter_id)
-    if not results['voter_found']:
-        status += "VOTER_NOT_FOUND "
-        error_results['status'] = status
-        return error_results
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if not results['voter_found']:
+            status += "VOTER_NOT_FOUND "
+            final_results_dict['status'] = status
+            return final_results_dict
 
-    voter = results['voter']
-    voter_we_vote_id = voter.we_vote_id
-    is_signed_in = voter.is_signed_in()
-    voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+        voter = results['voter']
+        voter_we_vote_id = voter.we_vote_id
+        is_signed_in = voter.is_signed_in()
+        voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     organization_id = convert_to_int(organization_id)
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
@@ -1724,14 +1734,13 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
 
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         status += "VALID_ORGANIZATION_ID_MISSING "
-        error_results['status'] = status
-        return error_results
+        final_results_dict['status'] = status
+        return final_results_dict
 
     is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
     campaign_counts_changed = False
     follow_organization_manager = FollowOrganizationManager()
-    position_list_manager = PositionListManager()
     if follow_kind == FOLLOWING:
         results = follow_organization_manager.toggle_on_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
@@ -1876,18 +1885,20 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
 
         voter_manager.update_organizations_interface_status(voter_we_vote_id, number_of_organizations_followed)
 
-    json_data = {
-        'status': status,
-        'success': success,
-        'voter_device_id': voter_device_id,
+    final_results_dict = {
+        'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
-        'organization_follow_based_on_issue': organization_follow_based_on_issue,
-        'politician_we_vote_id': politician_we_vote_id,
         'organization_we_vote_id_that_is_following': voter_linked_organization_we_vote_id,
+        'politician_we_vote_id': politician_we_vote_id,
+        'status': status,
+        'success': success,
+        'voter': voter,
+        'voter_device_id': voter_device_id,
+        'voter_id': voter_id,
         'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,  # For backward compat
     }
-    return json_data
+    return final_results_dict
 
 
 def convert_organization_to_dictionary(organization):

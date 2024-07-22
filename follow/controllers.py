@@ -945,7 +945,7 @@ def create_followers_from_positions(
     info_message_to_print = ''
     # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
     linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
-    number_to_create = 5  # Should be 100
+    number_to_create = 100
     # key: politician_we_vote_id, value: organization_we_vote_id
     organization_we_vote_id_by_politician_we_vote_id_dict = {}
     organization_we_vote_id_following_politician_list = []

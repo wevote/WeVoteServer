@@ -3610,11 +3610,12 @@ def voter_guides_retrieve_for_api(organization_we_vote_id="", voter_we_vote_id="
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_follow_all_organizations_followed_by_organization_for_api(voter_device_id,
-                                                                    organization_we_vote_id,
-                                                                    maximum_number_to_follow=0,
-                                                                    user_agent_string='', user_agent_object=None):
-    # voterGuidesFollowedByOrganizationRetrieve
+def voter_follow_all_organizations_followed_by_organization_for_api(  # voterGuidesFollowedByOrganizationRetrieve
+        voter_device_id,
+        organization_we_vote_id,
+        maximum_number_to_follow=0,
+        user_agent_string='',
+        user_agent_object=None):
     """
     Retrieve organizations followed by organization_we_vote_id and follow all.
 
@@ -3697,8 +3698,12 @@ def voter_follow_all_organizations_followed_by_organization_for_api(voter_device
         number_added_to_list = 0
         for organization_we_vote_id_followed in organization_we_vote_ids_list_need_to_be_followed:
             organization_follow_result = organization_follow_or_unfollow_or_ignore(
-                voter_device_id, organization_id=0, organization_we_vote_id=organization_we_vote_id_followed,
-                follow_kind=FOLLOWING, user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+                organization_we_vote_id=organization_we_vote_id_followed,
+                follow_kind=FOLLOWING,
+                user_agent_string=user_agent_string,
+                user_agent_object=user_agent_object,
+                voter_device_id=voter_device_id,
+            )
             if not organization_follow_result['success']:
                 success = False
 
