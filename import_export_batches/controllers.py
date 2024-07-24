@@ -111,7 +111,7 @@ def create_batch_row_actions(
         if batch_description is not None:
             batch_description_found = True
         else:
-            batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)  # read_only=False
+            batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)  # read_only=False
             batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -1066,7 +1066,7 @@ def create_batch_row_action_office_held(batch_description, batch_header_map, one
 
         # Check if office_held_name, state_code match exists in BatchRowActionOfficeHeld
         # for this header_id (Duplicate entries in the same data set
-        existing_batch_row_action_office_held_query = BatchRowActionOfficeHeld.objects.all()
+        existing_batch_row_action_office_held_query = BatchRowActionOfficeHeld.objects.all()  # read_only=False
         existing_batch_row_action_office_held_query = existing_batch_row_action_office_held_query.filter(
             batch_header_id=batch_description.batch_header_id, office_held_name__iexact=office_held_name,
             state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
@@ -2490,8 +2490,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.ballotpedia_candidate_summary = ballotpedia_candidate_summary
         if positive_value_exists(vote_usa_ballotpedia_candidate_url):
             batch_row_action_candidate.ballotpedia_candidate_url = vote_usa_ballotpedia_candidate_url
-        else:
+        elif positive_value_exists(ballotpedia_candidate_url):
             batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
+        else:
+            batch_row_action_candidate.ballotpedia_candidate_url = None
         batch_row_action_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
         batch_row_action_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
@@ -3505,7 +3507,7 @@ def import_office_held_data_from_batch_row_actions(batch_header_id, batch_row_id
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -3525,7 +3527,7 @@ def import_office_held_data_from_batch_row_actions(batch_header_id, batch_row_id
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -3544,7 +3546,7 @@ def import_office_held_data_from_batch_row_actions(batch_header_id, batch_row_id
 
     batch_row_action_list_found = False
     try:
-        batch_row_action_list = BatchRowActionOfficeHeld.objects.all()
+        batch_row_action_list = BatchRowActionOfficeHeld.objects.all()  # read_only=False
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
         if positive_value_exists(batch_row_id):
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
@@ -3879,7 +3881,7 @@ def import_contest_office_data_from_batch_row_actions(
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -3899,7 +3901,7 @@ def import_contest_office_data_from_batch_row_actions(
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -4096,7 +4098,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -4116,7 +4118,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -4295,7 +4297,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -4315,7 +4317,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -4575,7 +4577,7 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -4595,7 +4597,7 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -5311,7 +5313,7 @@ def import_update_or_create_office_held_entry(batch_header_id, batch_row_id):
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -5331,7 +5333,7 @@ def import_update_or_create_office_held_entry(batch_header_id, batch_row_id):
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -5350,7 +5352,7 @@ def import_update_or_create_office_held_entry(batch_header_id, batch_row_id):
 
     batch_row_action_list_found = False
     try:
-        batch_row_action_office_held_list = BatchRowActionOfficeHeld.objects.all()
+        batch_row_action_office_held_list = BatchRowActionOfficeHeld.objects.all()  # read_only=False
         batch_row_action_office_held_list = batch_row_action_office_held_list.filter(
             batch_header_id=batch_header_id)
         if positive_value_exists(batch_row_id):
@@ -5399,10 +5401,13 @@ def import_update_or_create_office_held_entry(batch_header_id, batch_row_id):
         office_held_manager = OfficeHeldManager()
         if kind_of_action == IMPORT_CREATE:
             # call create_office_held_row_entry
-            results = office_held_manager.create_office_held_row_entry(office_held_name, state_code,
-                                                                             office_held_description, ctcl_uuid,
-                                                                             office_held_is_partisan,
-                                                                             google_civic_election_id)
+            results = office_held_manager.create_office_held_row_entry(
+                office_held_name,
+                state_code,
+                office_held_description,
+                ctcl_uuid,
+                office_held_is_partisan,
+                google_civic_election_id)
 
             if results['new_office_held_created']:
                 success = True

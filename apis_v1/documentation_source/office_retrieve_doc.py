@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/office_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def office_retrieve_doc_template_values(url_root):
     """
@@ -65,7 +65,7 @@ def office_retrieve_doc_template_values(url_root):
                    '  "google_civic_election_id": integer,\n' \
                    '  "id": integer,\n' \
                    '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '  "maplight_id": string,\n' \
                    '  "number_voting_for": integer,\n' \
                    '  "number_elected": integer,\n' \

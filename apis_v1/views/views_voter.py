@@ -38,7 +38,7 @@ from position.controllers import voter_all_positions_retrieve_for_api, \
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
-    voter_stop_supporting_save, voter_supporting_save_for_api
+    voter_stop_supporting_save, voter_supporting_save
 from voter.controllers import delete_all_voter_information_permanently, \
     voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action_schedule, voter_photo_save_for_api, voter_retrieve_for_api, \
@@ -56,7 +56,7 @@ from voter_guide.controllers import voter_follow_all_organizations_followed_by_o
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -1604,8 +1604,8 @@ def voter_plan_list_retrieve_view(request):  # voterPlanListRetrieve
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),  # what the format constant used to be
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,
@@ -1661,8 +1661,8 @@ def voter_plans_for_voter_retrieve_view(request):  # voterPlansForVoterRetrieve
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,
@@ -1746,8 +1746,8 @@ def voter_plan_save_view(request):  # voterPlanSave
     voter_plan_list = results['voter_plan_list']
     for voter_plan in voter_plan_list:
         voter_plan_dict = {
-            'date_entered':             voter_plan.date_entered.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_last_changed':        voter_plan.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_entered':             voter_plan.date_entered.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_last_changed':        voter_plan.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
             'google_civic_election_id': voter_plan.google_civic_election_id,
             'show_to_public':           voter_plan.show_to_public,
             'state_code':               voter_plan.state_code,
@@ -1911,6 +1911,7 @@ def voter_opposing_save_view(request):  # voterOpposingSave
     measure_we_vote_id = None
     politician_id = 0
     politician_we_vote_id = None
+    status = ''
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1920,7 +1921,7 @@ def voter_opposing_save_view(request):  # voterOpposingSave
     elif kind_of_ballot_item == POLITICIAN:
         politician_id = ballot_item_id
         politician_we_vote_id = ballot_item_we_vote_id
-    return voter_opposing_save(
+    results = voter_opposing_save(
         voter_device_id=voter_device_id,
         candidate_id=candidate_id,
         candidate_we_vote_id=candidate_we_vote_id,
@@ -1930,6 +1931,18 @@ def voter_opposing_save_view(request):  # voterOpposingSave
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
+    status += results['status']
+    json_data = {
+        'ballot_item_id': results['ballot_item_id'],
+        'ballot_item_we_vote_id': results['ballot_item_we_vote_id'],
+        'kind_of_ballot_item': results['kind_of_ballot_item'],
+        'position_we_vote_id': results['position_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
@@ -2217,6 +2230,7 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     measure_we_vote_id = None
     politician_id = 0
     politician_we_vote_id = None
+    status = ''
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -2226,16 +2240,30 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     elif kind_of_ballot_item == POLITICIAN:
         politician_id = ballot_item_id
         politician_we_vote_id = ballot_item_we_vote_id
-    return voter_supporting_save_for_api(
-        voter_device_id=voter_device_id,
+    results = voter_supporting_save(
         candidate_id=candidate_id,
         candidate_we_vote_id=candidate_we_vote_id,
+        direct_api_call=True,
         measure_id=measure_id,
         measure_we_vote_id=measure_we_vote_id,
         politician_id=politician_id,
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
-        user_agent_object=user_agent_object)
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+    )
+    status += results['status']
+    json_data = {
+        'ballot_item_id': results['ballot_item_id'],
+        'ballot_item_we_vote_id': results['ballot_item_we_vote_id'],
+        'kind_of_ballot_item': results['kind_of_ballot_item'],
+        'position_we_vote_id': results['position_we_vote_id'],
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_id': results['voter_id'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_bookmark_off_save_view(request):

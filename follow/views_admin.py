@@ -33,12 +33,13 @@ def repair_follow_organization_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
 
-    # find entries without a voter_linked_organization_we_vote_id
+    # find entries without organization_we_vote_id_that_is_following
     follow_organization_list = []
     try:
         organization_query = FollowOrganization.objects.all()
         organization_query = organization_query.filter(
-            (Q(voter_linked_organization_we_vote_id__isnull=True) | Q(voter_linked_organization_we_vote_id=''))
+            (Q(organization_we_vote_id_that_is_following__isnull=True) |
+             Q(organization_we_vote_id_that_is_following=''))
         )
         follow_organization_list = list(organization_query)
     except Exception as e:
@@ -50,7 +51,7 @@ def repair_follow_organization_view(request):
             voter_manager.fetch_linked_organization_we_vote_id_from_local_id(follow_organization.voter_id)
         if positive_value_exists(voter_linked_organization_we_vote_id):
             try:
-                follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
+                follow_organization.organization_we_vote_id_that_is_following = voter_linked_organization_we_vote_id
                 follow_organization.save()
                 follow_organization_entries_updated += 1
             except Exception as e:

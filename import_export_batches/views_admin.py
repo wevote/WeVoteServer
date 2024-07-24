@@ -1240,7 +1240,7 @@ def batch_action_list_update_or_create_process_view(request):
     voter_device_id = get_voter_api_device_id(request)
     # do for entire batch_rows
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine
@@ -1249,16 +1249,17 @@ def batch_action_list_update_or_create_process_view(request):
 
     if batch_header_map_found:
         try:
-            batch_row_query = BatchRow.objects.all()
+            batch_row_query = BatchRow.objects.using('readonly').all()
             batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
                 batch_row_query = batch_row_query.filter(id=batch_row_id)
             if positive_value_exists(state_code):
                 batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
-
-            batch_row_list = list(batch_row_query)
-            if len(batch_row_list):
-                batch_row_list_found = True
+            batch_row_count = batch_row_query.count()
+            batch_row_list_found = positive_value_exists(batch_row_count)
+            # batch_row_list = list(batch_row_query)
+            # if len(batch_row_list):
+            #     batch_row_list_found = True
         except BatchDescription.DoesNotExist:
             # This is fine
             batch_row_list_found = False
@@ -3486,15 +3487,17 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         # Find polling_location_we_vote_ids already used in this batch_process, which returned a ballot
         polling_location_we_vote_id_list_already_retrieved = []
         if positive_value_exists(batch_process_id):
-            polling_location_log_entry_list = polling_location_manager.retrieve_polling_location_log_entry_list(
+            log_results = polling_location_manager.retrieve_polling_location_log_entry_list(
                 batch_process_id=batch_process_id,
                 is_from_ctcl=use_ctcl,
                 is_from_vote_usa=use_vote_usa,
                 kind_of_log_entry_list=[KIND_OF_LOG_ENTRY_BALLOT_RECEIVED],
+                only_return_polling_location_we_vote_id=True,
+                read_only=True,
             )
-            for one_log_entry in polling_location_log_entry_list:
-                if one_log_entry.polling_location_we_vote_id not in polling_location_we_vote_id_list_already_retrieved:
-                    polling_location_we_vote_id_list_already_retrieved.append(one_log_entry.polling_location_we_vote_id)
+            polling_location_we_vote_id_list_already_retrieved = log_results['polling_location_we_vote_id_list']
+            if not log_results['success']:
+                status += log_results['status']
 
         # For both REFRESH and RETRIEVE, find polling locations/map points which have come up empty
         #  (from this data source) in previous chunks since when this process started

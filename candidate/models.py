@@ -2766,9 +2766,15 @@ class CandidateCampaign(models.Model):
                 fields=['politician_we_vote_id', 'seo_friendly_path', '-id'],
                 name='candidate_seo_friendly_path2'),
             models.Index(
-                fields=['politician_we_vote_id', 'candidate_name',
+                fields=['candidate_name', 'politician_we_vote_id',
                         'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
                 name='candidate_list_for_politician'),
+            models.Index(
+                fields=['politician_we_vote_id', 'candidate_name'],
+                name='list_politician_and_name'),
+            models.Index(
+                fields=['candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
+                name='candidate_list_twitter'),
             models.Index(
                 fields=['politician_we_vote_id', 'linked_campaignx_we_vote_id', '-id'],
                 name='politician_linked_campaignx'),
@@ -2895,8 +2901,11 @@ class CandidateCampaign(models.Model):
 
     def display_alternate_names_list(self):
         alternate_names = []
-        if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
-            alternate_names.append(self.ballotpedia_candidate_name)
+        # Dale 2024-07-18 We don't want to include ballotpedia_candidate_name as an alternate name because
+        #  Ballotpedia sometimes includes shortened names in this field, which creates false positives
+        #  i.e. "Michael B. Moore" WV-442
+        # if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
+        #     alternate_names.append(self.ballotpedia_candidate_name)
         if self.google_civic_candidate_name and (self.google_civic_candidate_name != self.display_candidate_name()):
             alternate_names.append(self.google_civic_candidate_name)
         if self.google_civic_candidate_name2 and (self.google_civic_candidate_name2 != self.display_candidate_name()):
@@ -4607,7 +4616,8 @@ class CandidateManager(models.Manager):
         ballotpedia_candidate_summary = update_values['ballotpedia_candidate_summary'] \
             if 'ballotpedia_candidate_summary' in update_values else ''
         ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
-            if 'ballotpedia_candidate_url' in update_values else ''
+            if 'ballotpedia_candidate_url' in update_values \
+               and positive_value_exists(update_values['ballotpedia_candidate_url']) else None
         ballotpedia_election_id = update_values['ballotpedia_election_id'] \
             if 'ballotpedia_election_id' in update_values else 0
         ballotpedia_image_id = update_values['ballotpedia_image_id'] \
@@ -4827,7 +4837,8 @@ class CandidateManager(models.Manager):
                         update_values['ballotpedia_candidate_summary']
                     values_changed = True
                 if 'ballotpedia_candidate_url' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url']
+                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
+                        if positive_value_exists(update_values['ballotpedia_candidate_url']) else None
                     values_changed = True
                 if 'ballotpedia_election_id' in update_values:
                     existing_candidate_entry.ballotpedia_election_id = \

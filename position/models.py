@@ -29,6 +29,7 @@ from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vo
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 from wevote_settings.models import fetch_next_we_vote_id_position_integer, fetch_site_unique_id_prefix
 
 
@@ -3545,7 +3546,7 @@ class PositionListManager(models.Manager):
                 politician_we_vote_id = position.politician_we_vote_id \
                     if positive_value_exists(position.politician_we_vote_id) else ''
                 try:
-                    date_last_changed = position.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                    date_last_changed = position.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += 'VOTER_POSITION_DATE_LAST_CHANGED_FAILED: ' + str(e) + ' '
                     date_last_changed = ''
@@ -7114,7 +7115,7 @@ class PositionManager(models.Manager):
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_by_id(voter_id)
+                results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
                 organization_id = 0
                 organization_we_vote_id = ""
                 voter_we_vote_id = ""
@@ -7680,7 +7681,7 @@ class PositionManager(models.Manager):
                     # Lookup organization_id based on organization_we_vote_id and update
                     organization_manager = OrganizationManager()
                     organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        organization_we_vote_id)
+                        organization_we_vote_id, read_only=True)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
                         position_on_stage.organization_id = organization.id
@@ -8282,7 +8283,7 @@ class PositionManager(models.Manager):
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+                results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
                 voter_id = 0
                 speaker_type = UNKNOWN
                 twitter_followers_count = 0
@@ -8294,7 +8295,7 @@ class PositionManager(models.Manager):
                     # Look up the organization_id
                     organization_manager = OrganizationManager()
                     organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        organization_we_vote_id)
+                        organization_we_vote_id, read_only=True)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
                         organization_id = organization.id

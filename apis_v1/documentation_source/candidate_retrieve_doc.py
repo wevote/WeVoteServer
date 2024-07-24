@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/candidate_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def candidate_retrieve_doc_template_values(url_root):
     """
@@ -75,7 +75,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "instagram_followers_count": string,\n' \
                    '  "id": integer,\n' \
                    '  "kind_of_ballot_item": string (CANDIDATE),\n' \
-                   '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '  "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '  "maplight_id": integer,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "order_on_ballot": integer,\n' \

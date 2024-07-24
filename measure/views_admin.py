@@ -27,6 +27,7 @@ from position.models import OPPOSE, PositionEntered, PositionListManager, SUPPOR
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_date import DATE_FORMAT_DAY_TWO_DIGIT
 from django.http import HttpResponse
 import json
 
@@ -504,9 +505,9 @@ def measure_list_view(request):
 
                 if positive_value_exists(support_and_oppose_total):
                     percentage_of_oppose_number = one_measure.oppose_count / support_and_oppose_total * 100
-                    one_measure.percentage_of_oppose = "%d" % percentage_of_oppose_number
+                    one_measure.percentage_of_oppose = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_oppose_number # "%d"
                     percentage_of_support_number = one_measure.support_count / support_and_oppose_total * 100
-                    one_measure.percentage_of_support = "%d" % percentage_of_support_number
+                    one_measure.percentage_of_support = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_support_number # "%d"
 
                 measure_list_modified.append(one_measure)
         else:

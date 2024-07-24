@@ -30,7 +30,8 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
-    convert_we_vote_date_string_to_date_as_integer, get_current_year_as_integer
+    convert_we_vote_date_string_to_date_as_integer, get_current_date_as_integer, get_current_year_as_integer, \
+    DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD
 from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
@@ -1786,7 +1787,7 @@ def generate_candidate_dict_from_candidate_object(
 
     withdrawal_date_string = ''
     if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-        withdrawal_date_string = candidate.withdrawal_date.strftime("%Y-%m-%d")
+        withdrawal_date_string = candidate.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
     list_found = False
     office_list_for_candidate = []
     if len(candidate_to_office_link_list_from_multiple_candidates) > 0:
@@ -1851,7 +1852,14 @@ def generate_candidate_dict_from_candidate_object(
     # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
     date_last_updated = ''
     if positive_value_exists(candidate.date_last_updated):
-        date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+        date_last_updated = candidate.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+    date_today_as_integer = get_current_date_as_integer()
+    try:
+        election_is_upcoming = True if positive_value_exists(candidate.candidate_ultimate_election_date) and \
+                                       candidate.candidate_ultimate_election_date > date_today_as_integer else False
+    except Exception as e:
+        election_is_upcoming = False
+        status += f"ERROR_DETERMINING_ELECTION_IS_UPCOMING: {e} "
     candidate_dict = {
         'ballot_guide_official_statement':  candidate.ballot_guide_official_statement,
         'ballot_item_display_name':         candidate.display_candidate_name(),
@@ -1876,6 +1884,7 @@ def generate_candidate_dict_from_candidate_object(
         else candidate.contest_office_name,
         'contest_office_we_vote_id':        office_we_vote_id if positive_value_exists(office_we_vote_id)
         else candidate.contest_office_we_vote_id,
+        'election_is_upcoming':             election_is_upcoming,
         'facebook_url':                     candidate.facebook_url,
         'google_civic_election_id':         google_civic_election_id
         if positive_value_exists(google_civic_election_id) else candidate.google_civic_election_id,
@@ -2459,13 +2468,17 @@ def fetch_ballotpedia_urls_to_retrieve_for_links_count(
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         count_queryset = count_queryset.exclude(ballotpedia_candidate_links_retrieved=True)
-        # Exclude candidates without ballotpedia_candidate_url
+        # Don't include candidates that do not have ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
+        # Only include candidates that don't have a photo
+        count_queryset = count_queryset.filter(
+            Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
         if positive_value_exists(state_code):
             count_queryset = count_queryset.filter(state_code__iexact=state_code)
         ballotpedia_urls_to_retrieve_for_links = count_queryset.count()
@@ -2485,21 +2498,20 @@ def fetch_ballotpedia_urls_to_retrieve_for_photos_count(
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
             year_list=[2024])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
         count_queryset = count_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_placeholder=True)
         count_queryset = count_queryset.exclude(ballotpedia_photo_url_is_broken=True)
-        if positive_value_exists(state_code):
-            count_queryset = count_queryset.filter(state_code__iexact=state_code)
-
-        # Exclude candidates without ballotpedia_candidate_url
+        # Don't include candidates that do not have ballotpedia_candidate_url
         count_queryset = count_queryset. \
             exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
-
-        # Find candidates that don't have a photo (i.e. that are null or '')
+        # Only include candidates that don't have a photo
         count_queryset = count_queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
+        if positive_value_exists(state_code):
+            count_queryset = count_queryset.filter(state_code__iexact=state_code)
 
         ballotpedia_urls_to_retrieve_for_photos = count_queryset.count()
     except Exception as e:

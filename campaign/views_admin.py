@@ -1273,10 +1273,10 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
         from position.models import PositionEntered
         position_query = PositionEntered.objects.using('readonly').all()
         position_query = position_query.filter(politician_we_vote_id__iexact=campaignx.linked_politician_we_vote_id)
-        position_query = position_query.exclude(
-            Q(statement_text__isnull=True) |
-            Q(statement_text__exact='')
-        )
+        # position_query = position_query.exclude(
+        #     Q(statement_text__isnull=True) |
+        #     Q(statement_text__exact='')
+        # )
         position_list = list(position_query[:4])
     else:
         supporters_query = CampaignXSupporter.objects.using('readonly').all()
@@ -1635,10 +1635,9 @@ def campaign_supporters_list_process_view(request):
     campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
     error_message_to_print = ''
     info_message_to_print = ''
-    pigs_can_fly = False
-    if pigs_can_fly and len(politician_we_vote_id_list) > 0:
+    if len(politician_we_vote_id_list) > 0:
         # #############################
-        # Create campaignx_supporters
+        # Create FollowOrganization entries
         #  From PUBLIC positions
         results = create_followers_from_positions(
             friends_only_positions=False,
@@ -1668,7 +1667,9 @@ def campaign_supporters_list_process_view(request):
     if update_campaignx_supporter_count and positive_value_exists(campaignx_we_vote_id):
         campaignx_manager = CampaignXManager()
         supporter_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
-        results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            read_only=False)
         if results['campaignx_found']:
             campaignx = results['campaignx']
             campaignx.supporters_count = supporter_count

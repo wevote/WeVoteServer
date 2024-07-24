@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/voter_guides_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def voter_guides_retrieve_doc_template_values(url_root):
     """
@@ -47,7 +47,7 @@ def voter_guides_retrieve_doc_template_values(url_root):
                    '     "election_day_text": string (YYYY-MM-DD),\n' \
                    '     "google_civic_election_id": integer,\n' \
                    '     "organization_we_vote_id": string (We Vote ID for the org that owns the voter guide),\n' \
-                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '     "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '     "pledge_goal": integer,\n' \
                    '     "pledge_count": integer,\n' \
                    '     "state_code": string,\n' \

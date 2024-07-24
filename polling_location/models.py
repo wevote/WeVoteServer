@@ -150,6 +150,7 @@ class PollingLocationLogEntry(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['kind_of_log_entry', 'log_entry_deleted'], name='kind_of_log_entry_and_deleted'),
+            models.Index(fields=['log_entry_deleted', 'kind_of_log_entry'], name='deleted_and_kind_of_log_entry'),
             models.Index(fields=['polling_location_we_vote_id', 'kind_of_log_entry'],
                          name='we_vote_id_and_kind_index'),
             models.Index(fields=['polling_location_we_vote_id', 'kind_of_log_entry', 'log_entry_deleted'],
@@ -998,10 +999,13 @@ class PollingLocationManager(models.Manager):
             google_civic_election_id=False,
             is_successful_retrieve=False,
             kind_of_log_entry_list=[],
+            only_return_polling_location_we_vote_id=False,
             polling_location_we_vote_id='',
             read_only=True,
             show_errors=False,
             state_code=False):
+        success = True
+        status = ''
         if positive_value_exists(show_errors):
             kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR)
             kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_API_END_POINT_CRASH)
@@ -1013,12 +1017,12 @@ class PollingLocationManager(models.Manager):
 
         polling_location_log_entry_list_found = False
         polling_location_log_entry_list = []
+        polling_location_we_vote_id_list = []
         try:
-            # if positive_value_exists(read_only):
-            #     query = PollingLocationLogEntry.objects.using('readonly').all()
-            # else:
-            #     query = PollingLocationLogEntry.objects.using('analytics').all()
-            query = PollingLocationLogEntry.objects.using('analytics').all()
+            if positive_value_exists(read_only):
+                query = PollingLocationLogEntry.objects.using('readonly').all()  # 'analytics'
+            else:
+                query = PollingLocationLogEntry.objects.using('analytics').all()
             if positive_value_exists(batch_process_id):
                 query = query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(google_civic_election_id):
@@ -1052,17 +1056,27 @@ class PollingLocationManager(models.Manager):
             if positive_value_exists(state_code):
                 query = query.filter(state_code__iexact=state_code)
             query = query.order_by('-id')
-            polling_location_log_entry_list = list(query)
-            if len(polling_location_log_entry_list):
-                polling_location_log_entry_list_found = True
+            if positive_value_exists(only_return_polling_location_we_vote_id):
+                query = query.values_list('polling_location_we_vote_id', flat=True).distinct()
+                polling_location_we_vote_id_list = list(query)
+                status += "POLLING_LOCATION_WE_VOTE_ID_LIST_QUERIED "
+            else:
+                polling_location_log_entry_list = list(query)
+                status += "POLLING_LOCATION_LOG_ENTRY_LIST_QUERIED "
+                if len(polling_location_log_entry_list):
+                    polling_location_log_entry_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
+            status += "RETRIEVE_POLLING_LOCATION_LOG_ENTRY_LIST_ERROR: " + str(e) + " "
 
-        if polling_location_log_entry_list_found:
-            return polling_location_log_entry_list
-        else:
-            polling_location_log_entry_list = []
-            return polling_location_log_entry_list
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'polling_location_log_entry_list':          polling_location_log_entry_list,
+            'polling_location_log_entry_list_found':    polling_location_log_entry_list_found,
+            'polling_location_we_vote_id_list':         polling_location_we_vote_id_list,
+        }
+        return results
 
     @staticmethod
     def retrieve_polling_locations_in_city_or_state(

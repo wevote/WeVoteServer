@@ -60,7 +60,7 @@ from wevote_functions.functions import convert_to_int, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
     extract_state_from_ocd_division_id
 from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, \
-    get_current_year_as_integer, generate_localized_datetime_from_obj
+    get_current_year_as_integer, generate_localized_datetime_from_obj, DATE_FORMAT_YMD, DATE_FORMAT_DAY_TWO_DIGIT
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -1295,10 +1295,10 @@ def candidate_list_view(request):
             # datetime_now = timezone.localize(datetime.now())
             timezone, datetime_now = generate_localized_datetime_from_obj()
             if positive_value_exists(election.election_day_text):
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
 
             # How many offices?
             office_list_query = ContestOffice.objects.using('readonly').all()
@@ -2657,7 +2657,11 @@ def candidate_edit_process_view(request):
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     ballotpedia_candidate_id = request.POST.get('ballotpedia_candidate_id', False)
     ballotpedia_candidate_name = request.POST.get('ballotpedia_candidate_name', False)
+    if positive_value_exists(ballotpedia_candidate_name):
+        ballotpedia_candidate_name = ballotpedia_candidate_name.strip()
     ballotpedia_candidate_url = request.POST.get('ballotpedia_candidate_url', False)
+    if positive_value_exists(ballotpedia_candidate_url):
+        ballotpedia_candidate_url = ballotpedia_candidate_url.strip()
     ballotpedia_candidate_summary = request.POST.get('ballotpedia_candidate_summary', False)
     ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
     ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
@@ -2671,6 +2675,8 @@ def candidate_edit_process_view(request):
     if not positive_value_exists(candidate_id):
         candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
     candidate_name = request.POST.get('candidate_name', False)
+    if positive_value_exists(candidate_name):
+        candidate_name = candidate_name.strip()
     candidate_url = request.POST.get('candidate_url', False)
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     candidate_email = request.POST.get('candidate_email', False)
@@ -2696,8 +2702,14 @@ def candidate_edit_process_view(request):
     do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
     facebook_url = request.POST.get('facebook_url', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    if positive_value_exists(google_civic_candidate_name):
+        google_civic_candidate_name = google_civic_candidate_name.strip()
     google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
+    if positive_value_exists(google_civic_candidate_name2):
+        google_civic_candidate_name2 = google_civic_candidate_name2.strip()
     google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
+    if positive_value_exists(google_civic_candidate_name3):
+        google_civic_candidate_name3 = google_civic_candidate_name3.strip()
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     google_search_image_file = request.POST.get('google_search_image_file', False)
     google_search_link = request.POST.get('google_search_link', False)
@@ -2731,6 +2743,8 @@ def candidate_edit_process_view(request):
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     which_marking = request.POST.get('which_marking')
     wikipedia_url = request.POST.get('wikipedia_url', False)
+    if positive_value_exists(wikipedia_url):
+        wikipedia_url = wikipedia_url.strip()
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
@@ -3189,8 +3203,10 @@ def candidate_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                     ballotpedia_candidate_url_changed = True
-                candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
-                if not positive_value_exists(ballotpedia_candidate_url):
+                if positive_value_exists(ballotpedia_candidate_url):
+                    candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+                else:
+                    candidate_on_stage.ballotpedia_candidate_url = None
                     candidate_on_stage.ballotpedia_photo_url = None
                     candidate_on_stage.ballotpedia_photo_url_is_broken = False
                     candidate_on_stage.ballotpedia_photo_url_is_placeholder = False
@@ -3431,7 +3447,7 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
                 if positive_value_exists(candidate_on_stage.withdrawal_date):
-                    candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
+                    candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
                 else:
                     candidate_withdrawal_date_string = ''
                 change_results = change_tracking(
@@ -3449,7 +3465,7 @@ def candidate_edit_process_view(request):
             if not positive_value_exists(withdrawn_from_election):
                 candidate_on_stage.withdrawal_date = None
             elif positive_value_exists(withdrawal_date):
-                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, "%Y-%m-%d").date()
+                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, DATE_FORMAT_YMD).date() # "%Y-%m-%d"
             else:
                 candidate_on_stage.withdrawal_date = None
 

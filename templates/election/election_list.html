@@ -113,8 +113,8 @@
             <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
             <th>State(s)</th>
         {% if is_national_election or show_election_statistics %}
-            <th>Last Refresh</th>
-            <th>Refresh Added to Queue</th>
+            <th>Last Retrieve Completed</th>
+            <th>Retrieve Added to Queue</th>
 {#            <th>Last Election</th>#}
 {#            <th>Next Election</th>#}
         {% endif %}
@@ -221,10 +221,22 @@
             </a>
             </td>
             <td>
-                {% if election.refresh_date_added_to_queue %}
-                <span style="color: darkgray">
-                    {{ election.refresh_date_added_to_queue }}
-                </span>
+                {% if election.refresh_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        refresh start: {{ election.refresh_date_started }}
+                    </span>
+                {% elif election.refresh_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        refresh added: {{ election.refresh_date_added_to_queue }}
+                    </span>
+                {% elif election.retrieve_date_started %}
+                    <span style="color: darkgray">
+                        retrieve start: {{ election.retrieve_date_started }}
+                    </span>
+                {% elif election.retrieve_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        retrieve added: {{ election.retrieve_date_added_to_queue }}
+                    </span>
                 {% endif %}
             </td>
 {#            <td>#}
@@ -327,7 +339,7 @@
 {#                <span style="color: darkgray;">GOAL:</span>#}
 {#                <span style="color: darkgray;">#}
 {#                    find#}
-{#                    {{ election.positions_goal_count|default_if_none:"" }}#}
+{#                    {{ election.positions_goal_count|intcomma }}#}
 {#                    opinions#}
 {#                </span>#}
 {#                </span>#}
@@ -338,7 +350,7 @@
                 <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 <span class="u-no-break">
-                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.public_positions_count|default_if_none:"" }}</span>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ election.public_positions_count|intcomma }}</span>
                     opinions
                 </span>
                 </a>
@@ -360,7 +372,7 @@
                 <br />
                 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                {{ election.voter_guides_count|default_if_none:"" }} endorsers</a>
+                {{ election.voter_guides_count|intcomma }} endorsers</a>
             {% endif %}
             </td>
         {# ############### BALLOTS RETURNED ############### #}
@@ -401,9 +413,67 @@
             </td>
         {% if is_national_election or show_election_statistics %} {# Last Retrieve / Refresh #}
             <td>
+{#                {% if election.retrieve_date_completed %}#}
+{#                    retrieve: {{ election.retrieve_date_completed }}#}
+{#                {% elif election.retrieve_date_started %}#}
+{#                    <span style="color: lightgray">retrieve start: {{ election.retrieve_date_completed }}</span>#}
+{#                {% endif %}#}
+{##}
+{#                {% if election.retrieve_date_completed or election.retrieve_date_started and election.refresh_date_completed or election.refresh_date_started %}#}
+{#                /#}
+{#                {% endif %}#}
+
+            <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ one_state_code }}" target="_blank">
+                <span style="{% if election.data_getting_stale %}color: red{% endif %}">
+                    {% if one_state_dict.refresh_date_completed %}
+                        {{ one_state_dict.refresh_date_completed }}
+                    {% elif one_state_dict.retrieve_date_completed %}
+                        {{ one_state_dict.retrieve_date_completed }}
+                    {% endif %}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </span>
+            </a>
             </td>
             <td>
+                {% if one_state_dict.refresh_date_completed >= one_state_dict.refresh_date_started %}
+{#                    Show nothing#}
+                {% elif one_state_dict.refresh_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        refresh start: {{ one_state_dict.refresh_date_started }}
+                    </span>
+                {% elif one_state_dict.refresh_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        refresh added: {{ one_state_dict.refresh_date_added_to_queue }}
+                    </span>
+                {% endif %}
+                {% if one_state_dict.retrieve_date_completed >= one_state_dict.retrieve_date_started %}
+{#                    Show nothing#}
+                {% elif one_state_dict.retrieve_date_started %}
+                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                        retrieve start: {{ one_state_dict.retrieve_date_started }}
+                    </span>
+                {% elif one_state_dict.retrieve_date_added_to_queue %}
+                    <span style="color: darkgray">
+                        retrieve added: {{ one_state_dict.retrieve_date_added_to_queue }}
+                    </span>
+                {% endif %}
             </td>
+{#            <td>#}
+{#            {% if election.prior_election_in_state and election.prior_election_in_state.election_day_text %}#}
+{#                {{ election.prior_election_in_state_date|date:"N j, Y" }}#}
+{#            {% endif %}#}
+{#            </td>#}
+{#            <td>#}
+{#            {% if election.next_election_in_state and election.next_election_in_state.election_day_text %}#}
+{#                {% if election.next_election_in_state.election_day_text == election.election_day_text %}#}
+{#                <span style="color: darkgray">#}
+{#                    This election#}
+{#                </span>#}
+{#                {% else %}#}
+{#                    {{ election.next_election_in_state_date|date:"N j, Y" }}#}
+{#                {% endif %}#}
+{#            {% endif %}#}
+{#            </td>#}
         {% endif %}
         {# ############### OFFICES ############### #}
             <td align="middle">
@@ -499,7 +569,7 @@
                 <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}&state_code={{ one_state_code }}"
                    target="_blank">
                 <span class="u-no-break">
-                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.public_positions_count|default_if_none:"" }}</span>
+                    <span style="font-size: 1.2em; font-weight: 500;">{{ one_state_dict.public_positions_count|intcomma }}</span>
                     opinions
                 </span>
                 </a>
@@ -510,7 +580,7 @@
                 <br />
                 <span class="u-no-break">
                 <span {% if one_state_dict.positions_goal_percentage > 33 %}class="font-weight-bold text-danger"{% else %}style="color: darkgray;"{% endif %}>
-                    {{ one_state_dict.positions_needed_to_reach_goal|default_if_none:"" }}
+                    {{ one_state_dict.positions_needed_to_reach_goal|intcomma }}
                     more needed
                 </span>
                 </span>
@@ -521,7 +591,7 @@
                 <br />
                 <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                {{ one_state_dict.voter_guides_count|default_if_none:"" }} endorsers</a>
+                {{ one_state_dict.voter_guides_count|intcomma }} endorsers</a>
             {% endif %}
             </td>
         {# ############### BALLOTS RETURNED ############### #}

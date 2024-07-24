@@ -8,6 +8,7 @@ import json
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -286,7 +287,7 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
         campaign_supporter = supporter_results['campaignx_supporter']
         if campaign_supporter.date_supported:
             try:
-                date_supported = campaign_supporter.date_supported.strftime('%B %d, %Y at %H:%M')
+                date_supported = campaign_supporter.date_supported.strftime(DATE_FORMAT_YMD) # NOW: "%Y-%m-%d" ORIGINAL: "%B %d, %Y at %H:%M"
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
 

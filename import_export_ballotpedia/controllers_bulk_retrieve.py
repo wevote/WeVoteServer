@@ -22,7 +22,7 @@ def retrieve_ballotpedia_links_in_bulk(
     remote_request_history_manager=None,
     state_code='',
 ):
-    already_retrieved = 0
+    profiles_retrieved = 0
     already_stored = 0
     candidate_list = []
     error_message_to_print = ''
@@ -43,12 +43,12 @@ def retrieve_ballotpedia_links_in_bulk(
     try:
         queryset = CandidateCampaign.objects.all()
         queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)  # Candidates for election or this year
+        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
         # Don't include candidates that do not have ballotpedia_candidate_url
         queryset = queryset.exclude(Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url__exact=''))
         # Only include candidates that don't have a photo
         queryset = queryset.filter(
             Q(ballotpedia_photo_url__isnull=True) | Q(ballotpedia_photo_url__iexact=''))
-        queryset = queryset.exclude(ballotpedia_candidate_links_retrieved=True)
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(limit):
@@ -64,14 +64,17 @@ def retrieve_ballotpedia_links_in_bulk(
                 remote_request_history_manager=remote_request_history_manager,
                 save_to_database=True)
             error_message_to_print += get_results['error_message_to_print']
+            profile_retrieved = get_results['profile_retrieved']
             status += get_results['status']
+            if profile_retrieved:
+                profiles_retrieved += 1
 
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing
         pass
 
     results = {
-        'already_retrieved': already_retrieved,
+        'profiles_retrieved': profiles_retrieved,
         'already_stored': already_stored,
         'candidate_list': candidate_list,
         'error_message_to_print': error_message_to_print,
@@ -177,19 +180,25 @@ def retrieve_links_and_photos_from_ballotpedia_batch_process():
         year_list=[2024])
     candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     photo_results = retrieve_ballotpedia_photos_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
         limit=10,
     )
     photos_retrieved = photo_results['photos_retrieved']
-    photos_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_photos_count()
+    status += photo_results['status']
 
+    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count(
+        candidate_we_vote_id_list=candidate_we_vote_id_list,
+    )
     links_results = retrieve_ballotpedia_links_in_bulk(
         candidate_we_vote_id_list=candidate_we_vote_id_list,
-        limit=50,
+        limit=30,
     )
-    profiles_retrieved = links_results['already_retrieved']
-    profiles_to_retrieve = fetch_ballotpedia_urls_to_retrieve_for_links_count()
+    profiles_retrieved = links_results['profiles_retrieved']
+    status += links_results['status']
 
     results = {
         'photos_retrieved': photos_retrieved,

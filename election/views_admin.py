@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import election_remote_retrieve, elections_import_from_master_server
+from .controllers import election_refresh_statistics, election_remote_retrieve, elections_import_from_master_server
 from .models import Election
 from admin_tools.views import redirect_to_sign_in_page
 from analytics.models import AnalyticsManager
@@ -51,7 +51,7 @@ from voter_guide.models import VoterGuide, VoterGuidePossibility, \
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, \
     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date, generate_localized_datetime_from_obj
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date, generate_localized_datetime_from_obj, DATE_FORMAT_YMD, DATE_FORMAT_DAY_TWO_DIGIT
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistoryManager
 
@@ -903,7 +903,7 @@ def election_list_view(request):
     elif not positive_value_exists(show_all_elections):
         two_days = timedelta(days=2)
         datetime_two_days_ago = datetime_now - two_days
-        earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+        earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
         election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
 
     if positive_value_exists(election_search):
@@ -941,7 +941,6 @@ def election_list_view(request):
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_list_manager = CandidateListManager()
-    data_stale_if_older_than = now() - timedelta(days=30)
     state_list = STATE_CODE_MAP
     for election in election_list:
         # Set up state-by-state statistics dict. Reset this for every election
@@ -969,10 +968,10 @@ def election_list_view(request):
 
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass
@@ -983,6 +982,7 @@ def election_list_view(request):
         election.office_count = office_list_query.count()
 
         if positive_value_exists(show_election_statistics):
+            state_code_list_with_offices = []
             google_civic_election_id_list = [election.google_civic_election_id]
             results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
                 google_civic_election_id_list=google_civic_election_id_list,
@@ -1009,6 +1009,9 @@ def election_list_view(request):
             offices_with_candidates_count = 0
             offices_without_candidates_count = 0
             for one_office in office_list:
+                if positive_value_exists(one_office.state_code):
+                    if one_office.state_code.lower() not in state_code_list_with_offices:
+                        state_code_list_with_offices.append(one_office.state_code.lower())
                 results = candidate_list_manager.retrieve_candidate_count_for_office(
                     office_we_vote_id=one_office.we_vote_id)
                 candidate_count_for_office = results['candidate_count']
@@ -1153,114 +1156,49 @@ def election_list_view(request):
                 election.positions_needed_to_reach_goal = \
                     election.positions_goal_count - election.public_positions_count
 
-            # ############################
-            # Figure out the last dates we retrieved data
-            refresh_date_started = None
-            refresh_date_completed = None
-            retrieve_date_started = None
-            retrieve_date_completed = None
-            try:
-                batch_process_queryset = BatchProcess.objects.using('readonly').all()
-                batch_process_queryset = \
-                    batch_process_queryset.filter(google_civic_election_id=election.google_civic_election_id)
-                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
-                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
-                ballot_item_processes = [
-                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
-                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
-                batch_process_queryset = batch_process_queryset.order_by("-id")
+            # 2024-07 We don't need this statistic for the overall election -- only state-by-state
+            # refresh_results = election_refresh_statistics(
+            #     google_civic_election_id=election.google_civic_election_id,
+            #     state_code='')
+            # data_getting_stale = refresh_results['data_getting_stale']
+            # refresh_date_added_to_queue = refresh_results['refresh_date_added_to_queue']
+            # refresh_date_completed = refresh_results['refresh_date_completed']
+            # refresh_date_started = refresh_results['refresh_date_started']
+            # retrieve_date_added_to_queue = refresh_results['retrieve_date_added_to_queue']
+            # retrieve_date_completed = refresh_results['retrieve_date_completed']
+            # retrieve_date_started = refresh_results['retrieve_date_started']
 
-                batch_process_queryset = batch_process_queryset[:3]
-                batch_process_list = list(batch_process_queryset)
+            # election.data_getting_stale = data_getting_stale
+            # election.refresh_date_added_to_queue = refresh_date_added_to_queue
+            # election.refresh_date_completed = refresh_date_completed
+            # election.refresh_date_started = refresh_date_started
+            # election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
+            # election.retrieve_date_completed = retrieve_date_completed
+            # election.retrieve_date_started = retrieve_date_started
 
-                if len(batch_process_list):
-                    for one_batch_process in batch_process_list:
-                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
-                            if not refresh_date_completed and one_batch_process.date_completed:
-                                refresh_date_completed = one_batch_process.date_completed
-                            if not refresh_date_started and one_batch_process.date_started:
-                                refresh_date_started = one_batch_process.date_started
-                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
-                            if not retrieve_date_completed and one_batch_process.date_completed:
-                                retrieve_date_completed = one_batch_process.date_completed
-                            if not retrieve_date_started and one_batch_process.date_started:
-                                retrieve_date_started = one_batch_process.date_started
-                        # if refresh_date_completed and retrieve_date_completed:
-                        #     break  # Break out of this batch_process loop only
-            except BatchProcess.DoesNotExist:
-                # No offices found. Not a problem.
-                batch_process_list = []
-            except Exception as e:
-                pass
+            for state_code_lower in state_code_list_with_offices:
+                # ################################
+                # Calculate for each state
+                refresh_results = election_refresh_statistics(
+                    election.google_civic_election_id,
+                    state_code=state_code_lower)
+                data_getting_stale = refresh_results['data_getting_stale']
+                refresh_date_added_to_queue = refresh_results['refresh_date_added_to_queue']
+                refresh_date_completed = refresh_results['refresh_date_completed']
+                refresh_date_started = refresh_results['refresh_date_started']
+                retrieve_date_added_to_queue = refresh_results['retrieve_date_added_to_queue']
+                retrieve_date_completed = refresh_results['retrieve_date_completed']
+                retrieve_date_started = refresh_results['retrieve_date_started']
 
-            # Upcoming refresh date scheduled?
-            refresh_date_added_to_queue = None
-            retrieve_date_added_to_queue = None
-            try:
-                batch_process_queryset = BatchProcess.objects.using('readonly').all()
-                batch_process_queryset = \
-                    batch_process_queryset.filter(google_civic_election_id=election.google_civic_election_id)
-                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
-                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
-                ballot_item_processes = [
-                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
-                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
-                batch_process_queryset = batch_process_queryset.order_by("-id")
-
-                batch_process_queryset = batch_process_queryset[:3]
-                batch_process_list = list(batch_process_queryset)
-
-                if len(batch_process_list):
-                    for one_batch_process in batch_process_list:
-                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
-                            if not refresh_date_added_to_queue and one_batch_process.date_added_to_queue:
-                                refresh_date_added_to_queue = one_batch_process.date_added_to_queue
-                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
-                            if not retrieve_date_added_to_queue and one_batch_process.date_added_to_queue:
-                                retrieve_date_added_to_queue = one_batch_process.date_added_to_queue
-            except BatchProcess.DoesNotExist:
-                # No offices found. Not a problem.
-                batch_process_list = []
-            except Exception as e:
-                pass
-
-            # election_for_one_state = copy.deepcopy(national_election)
-            election.refresh_date_completed = refresh_date_completed
-            election.refresh_date_started = refresh_date_started
-            election.refresh_date_added_to_queue = refresh_date_added_to_queue
-            election.retrieve_date_completed = retrieve_date_completed
-            election.retrieve_date_started = retrieve_date_started
-            election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
-
-            if refresh_date_completed:
-                most_recent_time = refresh_date_completed
-            elif refresh_date_started:
-                most_recent_time = refresh_date_started
-            elif retrieve_date_completed:
-                most_recent_time = retrieve_date_completed
-            elif retrieve_date_started:
-                most_recent_time = retrieve_date_started
-            else:
-                most_recent_time = None
-
-            if most_recent_time:
-                if refresh_date_completed and refresh_date_completed > most_recent_time:
-                    most_recent_time = refresh_date_completed
-                if refresh_date_started and refresh_date_started > most_recent_time:
-                    most_recent_time = refresh_date_started
-                if retrieve_date_completed and retrieve_date_completed > most_recent_time:
-                    most_recent_time = retrieve_date_completed
-                if retrieve_date_started and retrieve_date_started > most_recent_time:
-                    most_recent_time = retrieve_date_started
-
-                if most_recent_time > data_stale_if_older_than:
-                    election.data_getting_stale = False
-                else:
-                    election.data_getting_stale = True
-            else:
-                election.data_getting_stale = True
+                election.state_statistics_dict[state_code_lower]['data_getting_stale'] = data_getting_stale
+                election.state_statistics_dict[state_code_lower]['refresh_date_added_to_queue'] = \
+                    refresh_date_added_to_queue
+                election.state_statistics_dict[state_code_lower]['refresh_date_completed'] = refresh_date_completed
+                election.state_statistics_dict[state_code_lower]['refresh_date_started'] = refresh_date_started
+                election.state_statistics_dict[state_code_lower]['retrieve_date_added_to_queue'] = \
+                    retrieve_date_added_to_queue
+                election.state_statistics_dict[state_code_lower]['retrieve_date_completed'] = retrieve_date_completed
+                election.state_statistics_dict[state_code_lower]['retrieve_date_started'] = retrieve_date_started
 
         if positive_value_exists(refresh_states):
             if election and positive_value_exists(election.google_civic_election_id) \
@@ -1519,7 +1457,7 @@ def nationwide_election_list_view(request):
         elif not positive_value_exists(show_all_elections):
             two_days = timedelta(days=2)
             datetime_two_days_ago = datetime_now - two_days
-            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
             election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
 
         if positive_value_exists(election_search):
@@ -1554,10 +1492,10 @@ def nationwide_election_list_view(request):
     for election in election_list:
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass
@@ -1914,10 +1852,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         timezone, datetime_now = generate_localized_datetime_from_obj()
         if positive_value_exists(election.election_day_text):
             try:
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
                 if date_of_election > datetime_now:
                     time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
             except Exception as e:
                 # Simply do not create "days_until_election"
                 pass

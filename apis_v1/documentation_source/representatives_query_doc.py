@@ -1,7 +1,7 @@
 # apis_v1/documentation_source/representatives_query.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 
 def representatives_query_doc_template_values(url_root):
     """
@@ -67,7 +67,7 @@ def representatives_query_doc_template_values(url_root):
                    '     "success": boolean,\n' \
                    '     "ballot_item_display_name": string,\n' \
                    '     "kind_of_ballot_item": string,\n' \
-                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
+                   '     "last_updated": string (time in this format ' + DATE_FORMAT_YMD_HMS + '),\n' \
                    '     "office_held_we_vote_id": string,\n' \
                    '     "party": string,\n' \
                    '     "politician_we_vote_id": string,\n' \

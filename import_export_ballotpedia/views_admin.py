@@ -177,7 +177,7 @@ def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
         state_code=state_code,
     )
     already_stored = results['already_stored']
-    already_retrieved = results['already_retrieved']
+    profiles_retrieved = results['profiles_retrieved']
     status += results['status']
     if 'error_message_to_print' in results and positive_value_exists(results['error_message_to_print']):
         error_message_to_print = results['error_message_to_print']
@@ -188,8 +188,8 @@ def bulk_retrieve_candidate_links_from_ballotpedia_view(request):
 
     if positive_value_exists(already_stored):
         status += "ALREADY_STORED_TOTAL-(" + str(already_stored) + ") "
-    if positive_value_exists(already_retrieved):
-        status += "ALREADY_RETRIEVED_TOTAL-(" + str(already_retrieved) + ") "
+    if positive_value_exists(profiles_retrieved):
+        status += "PROFILES_RETRIEVED_TOTAL-(" + str(profiles_retrieved) + ") "
 
     messages.add_message(request, messages.INFO, status)
 

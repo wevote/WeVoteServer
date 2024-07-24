@@ -21,6 +21,7 @@ from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
 from voter.models import VoterDeviceLinkManager, VoterManager, Voter
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 INDIVIDUAL = 'I'  # One person
@@ -575,7 +576,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                     voter_id,
                     organization_id=0,
                     organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
-                    voter_linked_organization_we_vote_id=viewed_by_organization_we_vote_id,
+                    organization_we_vote_id_that_is_following=viewed_by_organization_we_vote_id,
                     following_status=FOLLOWING)
                 status += following_results['status']
 
@@ -691,7 +692,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_tiny) else ''
 
     if positive_value_exists(shared_item.date_first_shared):
-        date_first_shared = shared_item.date_first_shared.strftime('%Y-%m-%d %H:%M:%S')
+        date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
 
     results = {
         'status':                               status,
@@ -1012,7 +1013,7 @@ def shared_item_save_for_api(  # sharedItemSave
     if create_results['shared_item_found']:
         shared_item = create_results['shared_item']
         if positive_value_exists(shared_item.date_first_shared):
-            date_first_shared = shared_item.date_first_shared.strftime('%Y-%m-%d %H:%M:%S')
+            date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
 
         shared_item_code_no_opinions = shared_item.shared_item_code_no_opinions
         url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item_code_no_opinions
@@ -1210,7 +1211,7 @@ def super_share_item_save_for_api(  # superShareItemSave
                 try:
                     if super_share_email_recipient.date_sent_to_email:
                         date_sent_to_email_string = super_share_email_recipient.date_sent_to_email\
-                            .strftime('%Y-%m-%d %H:%M:%S')
+                            .strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     pass
                 email_recipient_dict = {
@@ -1298,7 +1299,7 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
                 super_share_item.date_sent_to_email = activity_notice_seed.date_sent_to_email
                 super_share_item.save()
                 try:
-                    date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                    date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     pass
         else:
