@@ -3227,6 +3227,8 @@ class Organization(models.Model):
     organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
+    # Every Politician has a linked Organization, for published endorsements the Politician has made about others.
+    # This is the master linkage, and we keep a copy in the Politician record too.
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
 
     # Facebook session information

@@ -25,6 +25,7 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
 from analytics.models import AnalyticsManager
 from api_internal_cache.models import ApiInternalCacheManager
 from ballot.models import BallotReturnedListManager
+from campaign.controllers import update_campaignx_entries_from_politician_list
 from candidate.controllers import fetch_ballotpedia_urls_to_retrieve_for_links_count, \
     fetch_ballotpedia_urls_to_retrieve_for_photos_count
 from candidate.models import CandidateListManager
@@ -2730,8 +2731,17 @@ def process_one_match_politicians_to_organizations_batch_process(batch_process):
         state_code='')
 
     status += retrieve_results['status']
+    match_politicians_success = retrieve_results['success']
 
-    if retrieve_results['success']:
+    if match_politicians_success:
+        # Now update the associated CampaignX entries with the new organization_we_vote_id
+        politician_list = retrieve_results['politician_list']
+        campaign_results = update_campaignx_entries_from_politician_list(politician_list=politician_list)
+        status += campaign_results['status']
+        status += campaign_results['info_message_to_print']
+        status += campaign_results['error_message_to_print']
+
+    if match_politicians_success:
         politicians_analyzed = retrieve_results['politicians_analyzed']
         politicians_to_analyze = retrieve_results['organization_might_be_needed_count']
         try:
@@ -2746,7 +2756,9 @@ def process_one_match_politicians_to_organizations_batch_process(batch_process):
             batch_process.date_completed = now()
             batch_process.save()
 
-            status += str(retrieve_results['politician_we_vote_id_update_list']) + " "
+            status += "Updated: " + str(retrieve_results['politician_we_vote_id_update_list']) + " "
+            if len(retrieve_results['politician_we_vote_id_update_failed_list']) > 0:
+                status += "NOT Updated: " + str(retrieve_results['politician_we_vote_id_update_failed_list']) + " "
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
                 kind_of_process=kind_of_process,

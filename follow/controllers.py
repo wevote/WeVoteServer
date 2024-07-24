@@ -933,6 +933,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
 
 def create_followers_from_positions(
         friends_only_positions=False,
+        number_to_create=100,
         politicians_to_follow_we_vote_id_list=[],
         state_code=''):
     # Create default variables needed below
@@ -945,7 +946,6 @@ def create_followers_from_positions(
     info_message_to_print = ''
     # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
     linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
-    number_to_create = 100
     # key: politician_we_vote_id, value: organization_we_vote_id
     organization_we_vote_id_by_politician_we_vote_id_dict = {}
     organization_we_vote_id_following_politician_list = []
@@ -981,7 +981,10 @@ def create_followers_from_positions(
     elif positive_value_exists(state_code):
         position_query = position_query.filter(state_code__iexact=state_code)
     total_to_convert = position_query.count()
-    position_list_to_create_follower = list(position_query[:number_to_create])
+    if positive_value_exists(total_to_convert):
+        position_list_to_create_follower = list(position_query[:number_to_create])
+    else:
+        position_list_to_create_follower = []
     position_objects_to_mark_as_analysis_complete = []  # Move positions over to this for bulk_update
 
     # Assemble we_vote_id lists, so we can retrieve the objects to work with them
@@ -1165,6 +1168,10 @@ def create_followers_from_positions(
                     if positive_value_exists(linked_campaignx_we_vote_id):
                         if linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
                             campaignx_we_vote_id_list_to_refresh.append(linked_campaignx_we_vote_id)
+        else:
+            # The position doesn't contain both organization_we_vote_id and politician_we_vote_id
+            #  TODO: Flag for later?
+            pass
 
     combined_list = list(set(position_objects_to_mark_as_analysis_complete +
                              position_objects_to_mark_as_having_follow_organization_created))

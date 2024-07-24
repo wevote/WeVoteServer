@@ -34,6 +34,7 @@ from wevote_functions.functions import convert_to_int, \
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from django.http import HttpResponse
 import json
+from time import time
 
 UNKNOWN = 'U'
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
@@ -246,6 +247,8 @@ def position_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    create_followers_from_positions_on = \
+        positive_value_exists(request.GET.get('create_followers_from_positions_on', False))
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     position_search = request.GET.get('position_search', '')
@@ -270,21 +273,25 @@ def position_list_view(request):
     # update_campaignx_supporters_count_on = False
     # Added to campaignx object the variable 'supporters_count_to_update_with_bulk_script'
 
-    create_campaignx_supporter_from_positions_on = False
+    # create_followers_from_positions_on passed in as URL variable above
     error_message_to_print = ''
     info_message_to_print = ''
-    if create_campaignx_supporter_from_positions_on:
+    if create_followers_from_positions_on:
         from follow.controllers import create_followers_from_positions
         from campaign.controllers import delete_campaignx_supporters_after_positions_removed, \
             refresh_campaignx_supporters_count_in_all_children, \
             refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list
         campaignx_we_vote_id_list_to_refresh = []
         # #############################
-        # Create campaignx_supporters
+        # Create FollowOrganization entries
         # From PUBLIC positions
+        number_to_create = 100
+        t0 = time()
         results = create_followers_from_positions(
             friends_only_positions=False,
+            number_to_create=number_to_create,
             state_code=state_code)
+        t1 = time()
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
         if positive_value_exists(results['info_message_to_print']):
@@ -294,9 +301,12 @@ def position_list_view(request):
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
         # From FRIENDS_ONLY positions
+        t2 = time()
         results = create_followers_from_positions(
             friends_only_positions=True,
+            number_to_create=number_to_create,
             state_code=state_code)
+        t3 = time()
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
         if positive_value_exists(results['info_message_to_print']):
@@ -305,28 +315,29 @@ def position_list_view(request):
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        # #############################
-        # Delete campaignx_supporters
-        delete_from_friends_only_positions = False
-        results = delete_campaignx_supporters_after_positions_removed(
-            request,
-            friends_only_positions=False,
-            state_code=state_code)
-        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-        if len(campaignx_we_vote_id_list_changed) > 0:
-            campaignx_we_vote_id_list_to_refresh = \
-                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        if not positive_value_exists(results['campaignx_supporter_entries_deleted']):
-            delete_from_friends_only_positions = True
-        if delete_from_friends_only_positions:
-            results = delete_campaignx_supporters_after_positions_removed(
-                request,
-                friends_only_positions=True,
-                state_code=state_code)
-            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-            if len(campaignx_we_vote_id_list_changed) > 0:
-                campaignx_we_vote_id_list_to_refresh = \
-                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # # #############################
+        # # Delete campaignx_supporters
+        # delete_from_friends_only_positions = False
+        # results = delete_campaignx_supporters_after_positions_removed(
+        #     request,
+        #     friends_only_positions=False,
+        #     state_code=state_code)
+        # campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        # if len(campaignx_we_vote_id_list_changed) > 0:
+        #     campaignx_we_vote_id_list_to_refresh = \
+        #         list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # if not positive_value_exists(results['campaignx_supporter_entries_deleted']):
+        #     delete_from_friends_only_positions = True
+        # if delete_from_friends_only_positions:
+        #     results = delete_campaignx_supporters_after_positions_removed(
+        #         request,
+        #         friends_only_positions=True,
+        #         state_code=state_code)
+        #     campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        #     if len(campaignx_we_vote_id_list_changed) > 0:
+        #         campaignx_we_vote_id_list_to_refresh = \
+        #             list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
         # #############################
         # Now refresh the campaignx.supporters count and in all the objects that cache this count
         if len(campaignx_we_vote_id_list_to_refresh) > 0:
@@ -334,6 +345,8 @@ def position_list_view(request):
                 request,
                 campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
             status += results['status']
+            if positive_value_exists(results['error_message_to_print']):
+                error_message_to_print += results['error_message_to_print']
             if positive_value_exists(results['update_message']):
                 update_message += results['update_message']
 
@@ -345,6 +358,13 @@ def position_list_view(request):
             status += results['status']
             if positive_value_exists(results['update_message']):
                 update_message += results['update_message']
+        diff_t0_t1 = t1 - t0
+        diff_t2_t3 = t3 - t2
+        messages.add_message(
+            request, messages.INFO,
+            "t0 -> t1 took {:.6f} seconds, ".format(diff_t0_t1) +
+            "t2 -> t3 took {:.6f} seconds ".format(diff_t2_t3)
+        )
 
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
