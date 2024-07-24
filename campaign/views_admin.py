@@ -17,6 +17,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
 from election.models import ElectionManager
+from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganization, FollowOrganizationManager
 from follow.controllers import create_followers_from_positions
 from organization.models import Organization, OrganizationManager
 from politician.models import Politician, PoliticianManager
@@ -783,6 +784,10 @@ def campaign_list_view(request):
     state_code = request.GET.get('state_code', '')
     status = ''
     success = True
+    update_campaigns_from_politicians = \
+        positive_value_exists(request.GET.get('update_campaigns_from_politicians', False))
+    update_campaigns_that_need_organization = \
+        positive_value_exists(request.GET.get('update_campaigns_that_need_organization', False))
 
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
@@ -848,9 +853,91 @@ def campaign_list_view(request):
                     "".format(e=e,
                               politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))
 
-    update_campaigns_from_politicians_script = False
+    # If a CampaignX entry has a linked_politician_we_vote_id, but no organization_we_vote_id,
+    #  then add organization_we_vote_id to the entry
+    if update_campaigns_that_need_organization:
+        number_to_update = 5000
+        politician_we_vote_id_list = []
+        total_to_update_after = 0
+        update_count = 0
+        try:
+            queryset = CampaignX.objects.all()  # Cannot be 'readonly' because we need to update below.
+            if positive_value_exists(state_code):
+                queryset = queryset.filter(state_code__iexact=state_code)
+            queryset = queryset.exclude(
+                Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
+            # NOTE: IF instead of checking for existing organization_we_vote_id, we use an analysis boolean,
+            #  we could use this script to verify we have stored the correct organization_we_vote_id
+            queryset = queryset.filter(
+                Q(organization_we_vote_id__isnull=True) | Q(organization_we_vote_id=''))
+            total_to_update = queryset.count()
+            total_to_update_after = total_to_update - number_to_update if total_to_update > number_to_update else 0
+            campaignx_list_to_update = list(queryset[:number_to_update])
+            for one_campaignx in campaignx_list_to_update:
+                if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                    if one_campaignx.linked_politician_we_vote_id not in politician_we_vote_id_list:
+                        politician_we_vote_id_list.append(one_campaignx.linked_politician_we_vote_id)
+        except Exception as e:
+            status += "CAMPAIGNX_ORG_LINKS_QUERY_FAILED: " + str(e) + " "
+
+        # Organization table has the master link to politician_we_vote_id, which is why we use that table
+        organization_dict_by_politician_we_vote_id = {}
+        organization_list = []
+        politician_we_vote_ids_not_found_list = []
+        if len(politician_we_vote_id_list) > 0:
+            queryset = Organization.objects.using('readonly').all()
+            queryset = queryset.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+            organization_list = list(queryset)
+        for one_organization in organization_list:
+            organization_dict_by_politician_we_vote_id[one_organization.politician_we_vote_id] = one_organization
+
+        if len(organization_list) == 0:
+            messages.add_message(
+                request, messages.ERROR,
+                "No organizations found by politician_we_vote_id from the Campaigns reviewed. "
+                "politician_we_vote_id_list: {politician_we_vote_id_list}"
+                "".format(politician_we_vote_id_list=politician_we_vote_id_list))
+
+        update_list = []
+        for one_campaignx in campaignx_list_to_update:
+            if one_campaignx.linked_politician_we_vote_id in organization_dict_by_politician_we_vote_id:
+                organization = organization_dict_by_politician_we_vote_id[one_campaignx.linked_politician_we_vote_id]
+                one_campaignx.organization_we_vote_id = organization.we_vote_id
+                update_list.append(one_campaignx)
+                update_count += 1
+            else:
+                politician_we_vote_ids_not_found_list.append(one_campaignx.linked_politician_we_vote_id)
+
+        if len(update_list) > 0:
+            try:
+                CampaignX.objects.bulk_update(update_list, ['organization_we_vote_id'])
+                messages.add_message(
+                    request, messages.INFO,
+                    "{updates_made:,} campaignx entries updated with organization_we_vote_id "
+                    "out of {updates_planned}. "
+                    "{total_to_update_after:,} remaining. "
+                    "politician_we_vote_ids_not_found_list: {politician_we_vote_ids_not_found_list}"
+                    "".format(
+                        politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list,
+                        total_to_update_after=total_to_update_after,
+                        updates_planned=len(campaignx_list_to_update),
+                        updates_made=update_count))
+            except Exception as e:
+                messages.add_message(
+                    request, messages.ERROR,
+                    "ERROR with update_campaigns_that_need_organization: {e} "
+                    "politician_we_vote_ids_not_found_list: {politician_we_vote_ids_not_found_list}"
+                    "".format(e=e,
+                              politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))
+        # else:
+        #     messages.add_message(
+        #         request, messages.ERROR,
+        #         "No updates to be made. "
+        #         "politician_we_vote_id_list: {politician_we_vote_id_list}"
+        #         "".format(politician_we_vote_id_list=politician_we_vote_id_list))
+
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
-    if update_campaigns_from_politicians_script:
+    if update_campaigns_from_politicians:
         campaignx_list = []
         number_to_update = 5000  # Set to 5,000 at a time
         total_to_update_after = 0
@@ -1161,11 +1248,24 @@ def campaign_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    # Calculate the number of CampaignX entries with linked_politician_we_vote_id
+    #  that do NOT have organization_we_vote_id
+    queryset = CampaignX.objects.using('readonly').all()
+    # DALE 2024-07-23 I don't think CampaignX data has state_code in it yet
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    queryset = queryset.exclude(Q(linked_politician_we_vote_id__isnull=True) |
+                                Q(linked_politician_we_vote_id__exact=''))
+    queryset = queryset.filter(Q(organization_we_vote_id__isnull=True) |
+                               Q(organization_we_vote_id__exact=''))
+    campaigns_that_need_organization = queryset.count()
+
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
     else:
         web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
+        'campaigns_that_need_organization':         campaigns_that_need_organization,
         'campaignx_list':                           modified_campaignx_list,
         'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
         'campaignx_search':                         campaignx_search,
@@ -1509,6 +1609,63 @@ def campaign_supporters_list_process_view(request):
     if positive_value_exists(politician_we_vote_id):
         politician_we_vote_id_list.append(politician_we_vote_id)
 
+    # 2024-07-23
+    if positive_value_exists(politician_we_vote_id):
+        # If this CampaignX is linked to a politician, don't work with classic CampaignXSupporters
+        campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
+        error_message_to_print = ''
+        info_message_to_print = ''
+        # #############################
+        # Create FollowOrganization entries
+        #  From PUBLIC positions
+        results = create_followers_from_positions(
+            friends_only_positions=False,
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # From FRIENDS_ONLY positions
+        results = create_followers_from_positions(
+            friends_only_positions=True,
+            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
+        follow_organization_manager = FollowOrganizationManager()
+        supporters_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOWING,
+            organization_we_vote_id_being_followed=campaignx_on_stage.organization_we_vote_id)
+        opposers_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOW_DISLIKE,
+            organization_we_vote_id_being_followed=campaignx_on_stage.organization_we_vote_id)
+        campaignx_on_stage.opposers_count = opposers_count
+        campaignx_on_stage.supporters_count = supporters_count
+        campaignx_on_stage.save()
+
+        if positive_value_exists(results['error_message_to_print']):
+            error_message_to_print += results['error_message_to_print']
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+        messages.add_message(request, messages.INFO, 'CampaignXSupporter linked to Politician -- cannot process.')
+        return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&campaignx_owner_organization_we_vote_id=" +
+                                    str(campaignx_owner_organization_we_vote_id) +
+                                    "&campaignx_search=" + str(campaignx_search) +
+                                    "&state_code=" + str(state_code) +
+                                    "&only_show_supporters_with_endorsements=" +
+                                    str(only_show_supporters_with_endorsements) +
+                                    "&show_supporters_not_visible_to_public=" + str(
+            show_supporters_not_visible_to_public)
+                                    )
+
     supporters_query = CampaignXSupporter.objects.all()
     supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
 
@@ -1635,33 +1792,6 @@ def campaign_supporters_list_process_view(request):
     campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
     error_message_to_print = ''
     info_message_to_print = ''
-    if len(politician_we_vote_id_list) > 0:
-        # #############################
-        # Create FollowOrganization entries
-        #  From PUBLIC positions
-        results = create_followers_from_positions(
-            friends_only_positions=False,
-            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
-        if positive_value_exists(results['error_message_to_print']):
-            error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
-        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-        if len(campaignx_we_vote_id_list_changed) > 0:
-            campaignx_we_vote_id_list_to_refresh = \
-                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        # From FRIENDS_ONLY positions
-        results = create_followers_from_positions(
-            friends_only_positions=True,
-            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
-        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
-        if len(campaignx_we_vote_id_list_changed) > 0:
-            campaignx_we_vote_id_list_to_refresh = \
-                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
-        if positive_value_exists(results['error_message_to_print']):
-            error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
 
     # We update here only if we didn't save above
     if update_campaignx_supporter_count and positive_value_exists(campaignx_we_vote_id):

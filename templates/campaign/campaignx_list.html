@@ -16,6 +16,15 @@
                     target="_blank" >
         Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
     </li>
+    <li><a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}&update_campaigns_that_need_organization=1"
+                    target="_blank" >
+        Link Campaigns to Organizations/Endorsers ({{ campaigns_that_need_organization|intcomma }} to update) <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
+    </li>
+    <li><a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}&update_campaigns_from_politicians=1"
+                    target="_blank" >
+        Update Campaigns with Politician data (older than 6 months) <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+    </li>
+
 {% if show_ocd_id_state_mismatch %}
     <li>
         <a href="{% url 'campaign:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
@@ -180,11 +189,19 @@
                         {{ campaignx.linked_politician_we_vote_id|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span>
                     </a>
                     ({{ campaignx.linked_politician_state_code|default_if_none:"" }})
+                    &nbsp;&nbsp;
                 {% else %}
                     {{ campaignx.linked_politician_we_vote_id|default_if_none:"" }}
+                    &nbsp;&nbsp;
                 {% endif %}
                 {% endif %}
                 </span>
+                {% if campaignx.organization_we_vote_id %}
+                <span style="color: darkgray">
+                {{ campaignx.organization_we_vote_id }}
+                &nbsp;&nbsp;
+                </span>
+                {% endif %}
                 <span style="font-size: .95rem; color: gray">
                 {% if campaignx.is_in_team_review_mode %}
                     OWNER-IN-TEAM-REVIEW&nbsp;
