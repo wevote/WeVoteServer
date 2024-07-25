@@ -120,7 +120,7 @@ def pledge_to_vote_with_voter_guide_for_api(voter_device_id, voter_guide_we_vote
     # ...but check to see if the voter is friends with this organization
     friend_manager = FriendManager()
     voter_for_organization_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-        voter_guide.organization_we_vote_id)
+        voter_guide.organization_we_vote_id, read_only=True)
     if voter_for_organization_results['voter_found']:
         voter_for_organization = voter_for_organization_results['voter']
         results = friend_manager.retrieve_current_friend(voter.we_vote_id, voter_for_organization.we_vote_id)
