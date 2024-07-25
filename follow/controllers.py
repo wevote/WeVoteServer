@@ -964,6 +964,7 @@ def create_followers_from_positions(
         position_query = PositionForFriends.objects.all()  # Cannot be readonly, since we bulk_update at the end
     else:
         position_query = PositionEntered.objects.all()  # Cannot be readonly, since we bulk_update at the end
+    # position_query = position_query.filter(position_year=2024)
     position_query = position_query.exclude(follow_organization_analysis_complete=True)
     # We need to handle both SUPPORT and OPPOSE, so no need to restrict to only SUPPORT here
     # position_query = position_query.filter(stance=SUPPORT)
@@ -983,6 +984,10 @@ def create_followers_from_positions(
     total_to_convert = position_query.count()
     if positive_value_exists(total_to_convert):
         position_list_to_create_follower = list(position_query[:number_to_create])
+        # Now zero in on just these politicians (OR fill up politicians_to_follow_we_vote_id_list if it was empty)
+        for one_position in position_list_to_create_follower:
+            if positive_value_exists(one_position.politician_we_vote_id):
+                politicians_to_follow_we_vote_id_list.append(one_position.politician_we_vote_id)
     else:
         position_list_to_create_follower = []
     position_objects_to_mark_as_analysis_complete = []  # Move positions over to this for bulk_update
@@ -1042,9 +1047,12 @@ def create_followers_from_positions(
                 one_politician.linked_campaignx_we_vote_id
             if one_politician.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
                 campaignx_we_vote_id_list_to_refresh.append(one_politician.linked_campaignx_we_vote_id)
+        if positive_value_exists(one_politician.organization_we_vote_id):
+            organization_we_vote_id_by_politician_we_vote_id_dict[one_politician.we_vote_id] = \
+                one_politician.organization_we_vote_id
 
     # Retrieve all the related Organizations in a single query, so we can access get the organization_we_vote_id
-    #  from politician_we_vote_id
+    #  from politician_we_vote_id. Eventually org_we_vote_id will be in the Politician record, but this makes sure.
     expected_organization_count = len(politicians_to_follow_we_vote_id_list)
     organization_count = 0
     organization_list = []
@@ -1067,48 +1075,49 @@ def create_followers_from_positions(
     #  if so, don't try to add a duplicate.
     # Retrieve existing FollowOrganization entries that are related to the organization which is endorsing
     #  this politician, so we can mark them as already processed in the PositionEntered table.
+    position_objects_to_update_later = []
     if len(organization_we_vote_id_following_politician_list) > 0:
         queryset = FollowOrganization.objects.using('readonly').all()
         queryset = queryset.filter(
             organization_we_vote_id_that_is_following__in=organization_we_vote_id_following_politician_list)
-        follow_organizations_already_exist_count = queryset.count()
-        if positive_value_exists(follow_organizations_already_exist_count):
-            existing_follow_organization_entries = list(queryset)
-            position_list_to_create_follower_modified = []
-            # key = organization_we_vote_id endorsing, value = org we_vote_id being endorsed (i.e., Politician)
-            follow_organization_dict_by_endorser = {}
-            for one_follow_organization in existing_follow_organization_entries:
-                follow_organization_dict_by_endorser[
-                    one_follow_organization.organization_we_vote_id_that_is_following] = \
-                    one_follow_organization.organization_we_vote_id
-            for one_position in position_list_to_create_follower:
-                # If we have FollowOrganization entry in existing_follow_organization_entries, then save one_position,
-                #  so we can mark as reviewed
-                follow_organization_entry_for_this_position_already_exists = False
-                organization_we_vote_id_with_opinion = one_position.organization_we_vote_id
-                politician_we_vote_id_being_endorsed = one_position.politician_we_vote_id
-                organization_we_vote_id_being_endorsed = ''
+        existing_follow_organization_entries = list(queryset)
+        position_list_to_create_follower_modified = []
+        # key = organization_we_vote_id endorsing, value = org we_vote_id being endorsed (i.e., Politician)
+        follow_organization_dict_by_endorser = {}
+        for one_follow_organization in existing_follow_organization_entries:
+            follow_organization_dict_by_endorser[
+                one_follow_organization.organization_we_vote_id_that_is_following] = \
+                one_follow_organization.organization_we_vote_id
+        for one_position in position_list_to_create_follower:
+            # If we have FollowOrganization entry in existing_follow_organization_entries, then save one_position,
+            #  so we can mark as reviewed
+            follow_organization_entry_for_this_position_already_exists = False
+            organization_we_vote_id_with_opinion = one_position.organization_we_vote_id
+            politician_we_vote_id_being_endorsed = one_position.politician_we_vote_id
+            organization_we_vote_id_being_endorsed = ''
+            if positive_value_exists(politician_we_vote_id_being_endorsed):
                 if politician_we_vote_id_being_endorsed in organization_we_vote_id_by_politician_we_vote_id_dict:
                     organization_we_vote_id_being_endorsed = \
                         organization_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id_being_endorsed]
-                if positive_value_exists(organization_we_vote_id_with_opinion) and \
-                        positive_value_exists(organization_we_vote_id_being_endorsed):
-                    existing_org_we_vote_id_being_endorsed = \
-                        follow_organization_dict_by_endorser.get(organization_we_vote_id_with_opinion)
-                    if existing_org_we_vote_id_being_endorsed == organization_we_vote_id_being_endorsed:
-                        follow_organization_entry_for_this_position_already_exists = True
-                else:
-                    # Shouldn't be able to get here
-                    pass
-                if follow_organization_entry_for_this_position_already_exists:
-                    one_position.follow_organization_analysis_complete = True
-                    one_position.follow_organization_created = True
-                    position_objects_to_mark_as_having_follow_organization_created.append(one_position)
-                    position_updates_made += 1
-                    position_updates_needed = True
-                else:
-                    position_list_to_create_follower_modified.append(one_position)
-            position_list_to_create_follower = position_list_to_create_follower_modified
+            if positive_value_exists(organization_we_vote_id_with_opinion) and \
+                    positive_value_exists(organization_we_vote_id_being_endorsed):
+                existing_org_we_vote_id_being_endorsed = \
+                    follow_organization_dict_by_endorser.get(organization_we_vote_id_with_opinion)
+                if existing_org_we_vote_id_being_endorsed == organization_we_vote_id_being_endorsed:
+                    follow_organization_entry_for_this_position_already_exists = True
+            else:
+                # Politician probably doesn't have organization linked to it yet
+                position_objects_to_update_later.append(one_position)
+                continue
+            if follow_organization_entry_for_this_position_already_exists:
+                one_position.follow_organization_analysis_complete = True
+                one_position.follow_organization_created = True
+                position_objects_to_mark_as_having_follow_organization_created.append(one_position)
+                position_updates_made += 1
+                position_updates_needed = True
+            else:
+                position_list_to_create_follower_modified.append(one_position)
+        position_list_to_create_follower = position_list_to_create_follower_modified
 
     for one_position in position_list_to_create_follower:
         if one_position.stance == SUPPORT:
@@ -1127,9 +1136,10 @@ def create_followers_from_positions(
         organization_we_vote_id_with_opinion = one_position.organization_we_vote_id
         politician_we_vote_id_being_endorsed = one_position.politician_we_vote_id
         organization_we_vote_id_being_endorsed = ''
-        if politician_we_vote_id_being_endorsed in organization_we_vote_id_by_politician_we_vote_id_dict:
-            organization_we_vote_id_being_endorsed = \
-                organization_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id_being_endorsed]
+        if positive_value_exists(politician_we_vote_id_being_endorsed):
+            if politician_we_vote_id_being_endorsed in organization_we_vote_id_by_politician_we_vote_id_dict:
+                organization_we_vote_id_being_endorsed = \
+                    organization_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id_being_endorsed]
         if positive_value_exists(organization_we_vote_id_with_opinion) and \
                 positive_value_exists(organization_we_vote_id_being_endorsed):
             created = False
@@ -1186,8 +1196,10 @@ def create_followers_from_positions(
                     combined_list,
                     ['follow_organization_analysis_complete', 'follow_organization_created'])
             info_message_to_print += \
-                "{position_updates_made:,} positions updated, " \
-                "".format(position_updates_made=position_updates_made)
+                "{position_updates_made:,} positions updated (sample list: {follow_organization_created_list}, " \
+                "".format(
+                    follow_organization_created_list=position_objects_to_mark_as_having_follow_organization_created[:5],
+                    position_updates_made=position_updates_made)
         except Exception as e:
             error_message_to_print += "ERROR with PositionEntered.objects.bulk_create: {e}, ".format(e=e)
 
