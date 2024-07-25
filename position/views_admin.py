@@ -285,7 +285,7 @@ def position_list_view(request):
         # #############################
         # Create FollowOrganization entries
         # From PUBLIC positions
-        number_to_create = 100
+        number_to_create = 1000
         t0 = time()
         results = create_followers_from_positions(
             friends_only_positions=False,
@@ -342,7 +342,6 @@ def position_list_view(request):
         # Now refresh the campaignx.supporters count and in all the objects that cache this count
         if len(campaignx_we_vote_id_list_to_refresh) > 0:
             results = refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(
-                request,
                 campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
             status += results['status']
             if positive_value_exists(results['error_message_to_print']):

@@ -1170,7 +1170,7 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         return results
 
 
-def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(request, campaignx_we_vote_id_list=[]):
+def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(campaignx_we_vote_id_list=[]):
     error_message_to_print = ''
     status = ''
     success = True
@@ -1187,7 +1187,7 @@ def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(request, ca
         for one_campaignx in campaignx_list:
             changes_found = False
             opposers_count = 0
-            if positive_value_exists(one_campaignx.politician_we_vote_id):
+            if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
                 if positive_value_exists(one_campaignx.organization_we_vote_id):
                     opposers_count = follow_organization_manager.fetch_follow_organization_count(
                         following_status=FOLLOW_DISLIKE,

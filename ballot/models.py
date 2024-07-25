@@ -2028,9 +2028,9 @@ class BallotReturnedManager(models.Manager):
             elif positive_value_exists(ballot_returned_we_vote_id):
                 if positive_value_exists(read_only):
                     ballot_returned = BallotReturned.objects.using('readonly').get(
-                        we_vote_id__iexact=ballot_returned_we_vote_id)
+                        we_vote_id=ballot_returned_we_vote_id)  # Removed '__iexact' for speed
                 else:
-                    ballot_returned = BallotReturned.objects.get(we_vote_id__iexact=ballot_returned_we_vote_id)
+                    ballot_returned = BallotReturned.objects.get(we_vote_id=ballot_returned_we_vote_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
