@@ -187,7 +187,8 @@ class VoterGuideManager(models.Manager):
                 if organization_we_vote_id in voter_we_vote_id_dict:
                     voter_we_vote_id = voter_we_vote_id_dict[organization_we_vote_id]
                 else:
-                    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+                    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                        organization_we_vote_id, read_only=True)
                     if voter_results['voter_found']:
                         try:
                             voter_we_vote_id = voter_results['voter'].we_vote_id
@@ -817,7 +818,7 @@ class VoterGuideManager(models.Manager):
                         voter_guide = refresh_results['voter_guide']
                         if not positive_value_exists(voter_guide.voter_we_vote_id):
                             voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-                                organization.we_vote_id)
+                                organization.we_vote_id, read_only=True)
                             if voter_results['voter_found']:
                                 try:
                                     voter_we_vote_id = voter_results['voter'].we_vote_id

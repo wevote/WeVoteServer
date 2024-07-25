@@ -4311,7 +4311,7 @@ def retrieve_voter_guides_from_friends(
                     if voter_guide_results['voter_guide_found']:
                         one_voter_guide = voter_guide_results['voter_guide']
                 results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-                    one_voter_guide.organization_we_vote_id)
+                    one_voter_guide.organization_we_vote_id, read_only=True)
                 if results['voter_found']:
                     try:
                         one_voter_guide.voter_we_vote_id = results['voter'].we_vote_id
@@ -4449,7 +4449,7 @@ def retrieve_voter_guides_from_shared_items(
                     if voter_guide_results['voter_guide_found']:
                         one_voter_guide = voter_guide_results['voter_guide']
                 results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-                    one_voter_guide.organization_we_vote_id)
+                    one_voter_guide.organization_we_vote_id, read_only=True)
                 if results['voter_found']:
                     try:
                         one_voter_guide.voter_we_vote_id = results['voter'].we_vote_id

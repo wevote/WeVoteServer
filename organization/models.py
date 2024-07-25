@@ -1020,7 +1020,8 @@ class OrganizationManager(models.Manager):
                 # would prevent this voter account from claiming that twitter org with linked_organization_we_vote_id
                 # If found, we want to forcibly move that organization to this voter
                 # Search for another voter that has voter.linked_organization_we_vote_id
-                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id)
+                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    linked_organization_we_vote_id, read_only=False)
                 if voter_results['voter_found']:
                     voter_with_linked_organization_we_vote_id = voter_results['voter']
                     if voter.we_vote_id != voter_with_linked_organization_we_vote_id.we_vote_id:
