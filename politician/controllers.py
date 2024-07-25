@@ -719,6 +719,8 @@ def match_politician_to_organization(
             politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
             politician.politician_has_two_linked_organizations = True
             status += "MULTIPLE_LINKED_ORGS_FOUND "
+            for one_linked_org in linked_organization_list:
+                status += " [" + str(one_linked_org.we_vote_id) + "] "
             results['politician'] = politician
             results['politician_updated'] = True
             results['politician_has_two_linked_organizations'] = True
@@ -728,6 +730,8 @@ def match_politician_to_organization(
             politician.organization_analysis_needed = False
             politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
             status += "ONE_LINKED_ORG_FOUND "
+            for one_linked_org in linked_organization_list:
+                status += " [" + str(one_linked_org.we_vote_id) + "] "
             results['politician'] = politician
             results['politician_updated'] = True
             results['status'] = status
