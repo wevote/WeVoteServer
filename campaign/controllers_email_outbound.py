@@ -495,7 +495,7 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     # campaigns_root_url_verified = transform_campaigns_url('')  # Change to client URL if needed
     web_app_root_url_verified = transform_web_app_url('')  # Change to client URL if needed
 
-    recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
+    recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id, read_only=True)
     if not recipient_voter_results['voter_found']:
         error_results = {
             'status':                               "RECIPIENT_VOTER_NOT_FOUND ",
@@ -551,7 +551,7 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     from campaign.controllers import fetch_sentence_string_from_politician_list
     from campaign.models import CampaignXManager
     campaignx_manager = CampaignXManager()
-    results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
+    results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id, read_only=True)
     campaignx_title = ''
     campaignx_url = web_app_root_url_verified + '/id/' + campaignx_we_vote_id  # Default link
     linked_politician_we_vote_id = ''
@@ -577,7 +577,8 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     # speaker_voter_description = ""
     # speaker_voter_network_details = ""
 
-    politician_list = campaignx_manager.retrieve_campaignx_politician_list(campaignx_we_vote_id=campaignx_we_vote_id)
+    politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+        campaignx_we_vote_id=campaignx_we_vote_id, read_only=True)
     politician_count = len(politician_list)
     if politician_count > 0:
         subject = "You support" + fetch_sentence_string_from_politician_list(
