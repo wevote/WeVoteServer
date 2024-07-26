@@ -1765,6 +1765,9 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 request, messages.ERROR,
                 "Please click 'Update Politician', or 'Match Politician to Endorser', "
                 "to link to Endorser object.")
+        if not positive_value_exists(organization_we_vote_id_linked_to_politician) and \
+                positive_value_exists(politician_on_stage.organization_we_vote_id):
+            organization_we_vote_id_linked_to_politician = politician_on_stage.organization_we_vote_id
 
         # ##################################
         # Attach FollowOrganization information
