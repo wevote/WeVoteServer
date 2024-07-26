@@ -731,6 +731,7 @@ def match_politician_to_organization(
             politician.organization_analysis_needed = False
             politician.organization_manual_intervention_needed = False
             politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
+            politician.politician_has_two_linked_organizations = False
             status += "ONE_LINKED_ORG_FOUND "
             for one_linked_org in linked_organization_list:
                 status += " [" + str(one_linked_org.we_vote_id) + "] "
@@ -979,19 +980,19 @@ def match_politicians_to_organizations(
         politician_data_list = list(queryset[:number_of_politicians_to_match])
         politician_list_count = len(politician_data_list)
         for politician in politician_data_list:
+            add_to_update_list = False
             results = match_politician_to_organization(
                 changed_by_name=changed_by_name,
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 politician=politician)
             if results['politician_updated']:
-                update_list.append(results['politician'])
+                politician = results['politician']
+                add_to_update_list = True
                 politician_we_vote_id_update_list.append(politician.we_vote_id)
             elif results['success']:
                 status += "POLITICIAN_NOT_UPDATED1: " + politician.we_vote_id + " [" + results['status'] + "] "
                 politician = results['politician']
-                politician.organization_manual_intervention_needed = True
-                politician.politician_has_two_linked_organizations = results['politician_has_two_linked_organizations']
-                update_list.append(politician)
+                add_to_update_list = True
                 politician_we_vote_id_update_failed_list.append(politician.we_vote_id)
             else:
                 status += "POLITICIAN_NOT_UPDATED2: " + politician.we_vote_id + " [" + results['status'] + "] "
@@ -1004,6 +1005,11 @@ def match_politicians_to_organizations(
                 1 if results['politician_has_two_possible_organizations'] else 0
             politician_update_count += 1 if results['politician_updated'] else 0
             politicians_analyzed_count += 1
+
+            # If we need to do any politician or organization verification, we could do it here
+
+            if add_to_update_list:
+                update_list.append(politician)
 
         if politician_update_count > 0:
             try:

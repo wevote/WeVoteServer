@@ -305,7 +305,6 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
             politician_error = match_results['politician_error']
             politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
             politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
-
         except Exception as e:
             status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
 
@@ -1745,26 +1744,55 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 path_list = path_list_modified
             path_list = path_list[:3]
 
+        organization_error = ''
+        organization_we_vote_id_linked_to_politician = ''
+        please_update_politician = False
+        if positive_value_exists(politician_on_stage.organization_we_vote_id):
+            organization_we_vote_id_linked_to_politician = politician_on_stage.organization_we_vote_id
+            # ##################################
+            # Make sure organization object still exists
+            try:
+                from organization.models import Organization
+                organization_queryset = Organization.objects.using('readonly').all()
+                organization_by_we_vote_id = organization_queryset.get(
+                    we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
+                    please_update_politician = True
+                    organization_error += " ERROR: Organization politician_we_vote_id doesn't match this politician. "
+            except ObjectDoesNotExist:
+                please_update_politician = True
+                organization_error += " ERROR: Organization not found by organization_we_vote_id. "
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
         # ##################################
-        # Find related organization (endorser)
+        # Find organization(s) connected to this politician by politician_we_vote_id
         try:
             from organization.models import Organization
             organization_queryset = Organization.objects.using('readonly').all()
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            organization_linked_to_politician = organization_queryset.get(
+            organization_queryset = organization_queryset.filter(
                 politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
-            organization_we_vote_id_linked_to_politician = organization_linked_to_politician.we_vote_id
+            organization_linked_to_politician_list = list(organization_queryset)
+            if len(organization_linked_to_politician_list) > 0:
+                if not positive_value_exists(politician_on_stage.organization_we_vote_id):
+                    please_update_politician = True
+                    organization_error += \
+                        "ERROR: Org(s) linked to this Politician, but organization_we_vote_id not saved here: "
+                # Show notice if this happens, but don't trigger printed error just for this
+                for organization in organization_linked_to_politician_list:
+                    organization_error += \
+                        "[{organization_we_vote_id}] ".format(organization_we_vote_id=organization.we_vote_id)
         except ObjectDoesNotExist:
-            organization_we_vote_id_linked_to_politician = ''
+            please_update_politician = True
+            organization_error += "ERROR: Organization not found by politician_we_vote_id. "
         except Exception as e:
-            organization_we_vote_id_linked_to_politician = ''
             status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
-        if not positive_value_exists(organization_we_vote_id_linked_to_politician) or \
-                politician_on_stage.organization_we_vote_id != organization_we_vote_id_linked_to_politician:
+
+        if please_update_politician:
             messages.add_message(
                 request, messages.ERROR,
                 "Please click 'Update Politician', or 'Match Politician to Endorser', "
-                "to link to Endorser object.")
+                "to link to Endorser object. {organization_error}".format(organization_error=organization_error))
         if not positive_value_exists(organization_we_vote_id_linked_to_politician) and \
                 positive_value_exists(politician_on_stage.organization_we_vote_id):
             organization_we_vote_id_linked_to_politician = politician_on_stage.organization_we_vote_id
@@ -2868,17 +2896,36 @@ def politician_edit_process_view(request):
                 politician_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 politician_on_stage.maplight_id = maplight_id
+            if positive_value_exists(politician_on_stage.organization_we_vote_id):
+                # ##################################
+                # Make sure organization object still exists
+                try:
+                    from organization.models import Organization
+                    organization_queryset = Organization.objects.all()  # Cannot be 'readonly'
+                    organization_by_we_vote_id = organization_queryset.get(
+                        we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                    if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
+                        # Since politician is the master link, clear Organization.politician_we_vote_id
+                        organization_by_we_vote_id.politician_we_vote_id = ''
+                        organization_by_we_vote_id.save()
+                except ObjectDoesNotExist:
+                    politician_on_stage.organization_we_vote_id = ''
+                except Exception as e:
+                    status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
             if not positive_value_exists(politician_on_stage.organization_we_vote_id):
                 # ##################################
-                # Find related organization (endorser)
+                # Find Organization that already thinks it is linked to this politician
                 try:
                     from organization.models import Organization
                     organization_queryset = Organization.objects.using('readonly').all()
-                    # As of Aug 2018 we are no longer using PERCENT_RATING
-                    organization_linked_to_politician = organization_queryset.get(
+                    organization_queryset = organization_queryset.filter(
                         politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
-                    if hasattr(organization_linked_to_politician, 'we_vote_id'):
-                        politician_on_stage.organization_we_vote_id = organization_linked_to_politician.we_vote_id
+                    organization_linked_list = list(organization_queryset)
+                    if len(organization_linked_list) > 0:
+                        # Just use the first
+                        politician_on_stage.organization_we_vote_id = organization_linked_list[0].we_vote_id
+                        politician_on_stage.organization_analysis_needed = False
                         politician_on_stage.organization_manual_intervention_needed = False
                 except ObjectDoesNotExist:
                     pass
@@ -3406,7 +3453,8 @@ def politician_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, "Cannot heal Campaignx:" + str(e))
                     heal_linked_campaignx_variables = False
             else:
-                messages.add_message(request, messages.INFO, "Campaignx did not need healing.")
+                # messages.add_message(request, messages.INFO, "Campaignx did not need healing.")
+                pass
         else:
             messages.add_message(request, messages.ERROR, "Campaignx not found for this Politician.")
 
@@ -3503,8 +3551,9 @@ def politician_edit_process_view(request):
             politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
+        if positive_value_exists(results['positions_analyzed_count']):
+            if positive_value_exists(results['info_message_to_print']):
+                info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
@@ -3515,8 +3564,9 @@ def politician_edit_process_view(request):
             politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
+        if positive_value_exists(results['positions_analyzed_count']):
+            if positive_value_exists(results['info_message_to_print']):
+                info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
