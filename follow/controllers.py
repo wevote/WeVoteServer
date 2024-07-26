@@ -1064,9 +1064,16 @@ def create_followers_from_positions(
     for one_organization in organization_list:
         organization_count += 1
         if positive_value_exists(one_organization.politician_we_vote_id):
-            politician_we_vote_ids_not_found.remove(one_organization.politician_we_vote_id)
-            organization_we_vote_id_by_politician_we_vote_id_dict[one_organization.politician_we_vote_id] = \
-                one_organization.we_vote_id
+            if one_organization.politician_we_vote_id in politician_we_vote_ids_not_found:
+                try:
+                    politician_we_vote_ids_not_found.remove(one_organization.politician_we_vote_id)
+                except Exception as e:
+                    pass
+            try:
+                organization_we_vote_id_by_politician_we_vote_id_dict[one_organization.politician_we_vote_id] = \
+                    one_organization.we_vote_id
+            except Exception as e:
+                pass
     if organization_count != expected_organization_count:
         # If here, then 1+ of the politicians doesn't have an organization linked to it.
         error_message_to_print += "ORGANIZATIONS_MISSING_FOR: " + str(politician_we_vote_ids_not_found) + " "
