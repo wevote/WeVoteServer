@@ -707,6 +707,7 @@ def match_politician_to_organization(
         'status': status,
         'success': success,
     }
+    from organization.controllers import create_organization_from_politician
 
     # Search the Organization table to see if there is already an organization linked to this politician
     try:
@@ -728,6 +729,7 @@ def match_politician_to_organization(
             return results
         elif len(linked_organization_list) > 0:
             politician.organization_analysis_needed = False
+            politician.organization_manual_intervention_needed = False
             politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
             status += "ONE_LINKED_ORG_FOUND "
             for one_linked_org in linked_organization_list:
@@ -800,6 +802,8 @@ def match_politician_to_organization(
                     organization.state_served_code = politician.state_code
                 organization.save()
 
+                if len(existing_organization_list) == 1:
+                    politician.organization_manual_intervention_needed = False
                 politician.organization_analysis_needed = False
                 politician.organization_we_vote_id = organization.we_vote_id
                 results['politician'] = politician
@@ -849,6 +853,7 @@ def match_politician_to_organization(
             if positive_value_exists(organization.organization_twitter_handle):
                 try:
                     politician_queryset = Politician.objects.using('readonly').all()
+                    politician_queryset = politician_queryset.exclude(we_vote_id=politician.we_vote_id)
                     politician_queryset = politician_queryset.filter(
                         Q(politician_twitter_handle__iexact=organization.organization_twitter_handle) |
                         Q(politician_twitter_handle2__iexact=organization.organization_twitter_handle) |
@@ -863,10 +868,23 @@ def match_politician_to_organization(
                     status += "FAILED_TO_CHECK_OTHER_POLITICIANS: " + str(e) + " "
                 if other_politician_found_with_same_twitter_as_organization or manual_intervention_needed:
                     status += "CANNOT_LINK_MATCHING_ORGANIZATION_OTHER_POLITICIAN_USING_SAME_TWITTER_HANDLE "
+                    # We create a new organization, and then will merge the duplicate organizations in the future.
                     politician.organization_manual_intervention_needed = True
-                    results['politician'] = politician
-                    results['politician_updated'] = True
+                    create_results = create_organization_from_politician(
+                        changed_by_name=changed_by_name,
+                        changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                        politician=politician)
                     results['status'] = status
+                    results['status'] += create_results['status']
+                    if create_results['organization_found']:
+                        politician.organization_analysis_needed = False
+                        politician.organization_we_vote_id = create_results['organization'].we_vote_id
+                        results['politician'] = politician
+                        results['politician_updated'] = True
+                    else:
+                        results['organization_creation_error'] = True
+                        results['politician'] = politician
+                        results['politician_updated'] = False
                     return results
             # Double-check that this organization doesn't belong to a voter
             manual_intervention_needed = False
@@ -895,6 +913,7 @@ def match_politician_to_organization(
             organization.save()
 
             politician.organization_analysis_needed = False
+            politician.organization_manual_intervention_needed = False
             politician.organization_we_vote_id = organization.we_vote_id
             results['politician'] = politician
             results['politician_updated'] = True
@@ -908,7 +927,6 @@ def match_politician_to_organization(
         return results
 
     # If we haven't exited yet, create an organization for this politician
-    from organization.controllers import create_organization_from_politician
     create_results = create_organization_from_politician(
         changed_by_name=changed_by_name,
         changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
@@ -917,6 +935,7 @@ def match_politician_to_organization(
     results['status'] += create_results['status']
     if create_results['organization_found']:
         politician.organization_analysis_needed = False
+        politician.organization_manual_intervention_needed = False
         politician.organization_we_vote_id = create_results['organization'].we_vote_id
         results['politician'] = politician
         results['politician_updated'] = True

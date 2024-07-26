@@ -359,11 +359,11 @@ def position_list_view(request):
                 update_message += results['update_message']
         diff_t0_t1 = t1 - t0
         diff_t2_t3 = t3 - t2
-        messages.add_message(
-            request, messages.INFO,
-            "t0 -> t1 took {:.6f} seconds, ".format(diff_t0_t1) +
-            "t2 -> t3 took {:.6f} seconds ".format(diff_t2_t3)
-        )
+        # messages.add_message(
+        #     request, messages.INFO,
+        #     "t0 -> t1 took {:.6f} seconds, ".format(diff_t0_t1) +
+        #     "t2 -> t3 took {:.6f} seconds ".format(diff_t2_t3)
+        # )
 
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
@@ -684,10 +684,10 @@ def position_list_view(request):
         google_civic_election_id_list_for_dropdown, read_only=True)
     election_list = results['election_list']
 
-    if positive_value_exists(error_message_to_print):
-        messages.add_message(request, messages.ERROR, error_message_to_print)
     if positive_value_exists(info_message_to_print):
         messages.add_message(request, messages.INFO, info_message_to_print)
+    if positive_value_exists(error_message_to_print):
+        messages.add_message(request, messages.ERROR, error_message_to_print)
 
     template_values = {
         'messages_on_stage':        messages_on_stage,

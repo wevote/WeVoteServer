@@ -309,6 +309,12 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
         except Exception as e:
             status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
 
+        if politician_updated:
+            politician_list = [politician]
+            from campaign.controllers import update_campaignx_entries_from_politician_list
+            campaign_results = update_campaignx_entries_from_politician_list(politician_list=politician_list)
+            status += campaign_results['status']
+
     message_to_print = "match_politician_to_organization:: " \
                        "politician_updated: {politician_updated}. " \
                        "status: {status} ".format(
@@ -1753,6 +1759,12 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         except Exception as e:
             organization_we_vote_id_linked_to_politician = ''
             status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+        if not positive_value_exists(organization_we_vote_id_linked_to_politician) or \
+                politician_on_stage.organization_we_vote_id != organization_we_vote_id_linked_to_politician:
+            messages.add_message(
+                request, messages.ERROR,
+                "Please click 'Update Politician', or 'Match Politician to Endorser', "
+                "to link to Endorser object.")
 
         # ##################################
         # Attach FollowOrganization information
@@ -2853,6 +2865,22 @@ def politician_edit_process_view(request):
                 politician_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 politician_on_stage.maplight_id = maplight_id
+            if not positive_value_exists(politician_on_stage.organization_we_vote_id):
+                # ##################################
+                # Find related organization (endorser)
+                try:
+                    from organization.models import Organization
+                    organization_queryset = Organization.objects.using('readonly').all()
+                    # As of Aug 2018 we are no longer using PERCENT_RATING
+                    organization_linked_to_politician = organization_queryset.get(
+                        politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                    if hasattr(organization_linked_to_politician, 'we_vote_id'):
+                        politician_on_stage.organization_we_vote_id = organization_linked_to_politician.we_vote_id
+                        politician_on_stage.organization_manual_intervention_needed = False
+                except ObjectDoesNotExist:
+                    pass
+                except Exception as e:
+                    status += 'ERROR_RETRIEVING_ORGANIZATION_ATTACHED_TO_POLITICIAN: ' + str(e) + ' '
             if politician_contact_form_url is not False:
                 politician_on_stage.politician_contact_form_url = politician_contact_form_url
             if politician_email is not False:
@@ -3041,10 +3069,10 @@ def politician_edit_process_view(request):
                 politician_on_stage.political_party = political_party
             if state_code is not False:
                 politician_on_stage.state_code = state_code
-            update_to_new_seo_friendly_path = False
             # If new seo_friendly_path is provided, check to make sure it is not already in use
             # If seo_friendly_path is not provided, only create a new one if politician_on_stage.seo_friendly_path
             #  doesn't already exist.
+            update_to_new_seo_friendly_path = False
             if seo_friendly_path is not False:
                 if positive_value_exists(seo_friendly_path):
                     if seo_friendly_path != politician_on_stage.seo_friendly_path:
@@ -3066,6 +3094,25 @@ def politician_edit_process_view(request):
                     # Update linked candidate & representative entries to use this latest seo_friendly_path
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
+
+            # Now generate_seo_friendly_path if there isn't one
+            #  This code is not redundant because of a few rare cases where we can fall-through the logic above.
+            if not positive_value_exists(politician_on_stage.seo_friendly_path):
+                seo_results = politician_manager.generate_seo_friendly_path(
+                    base_pathname_string=politician_on_stage.seo_friendly_path,
+                    politician_name=politician_on_stage.politician_name,
+                    politician_we_vote_id=politician_on_stage.we_vote_id,
+                    state_code=politician_on_stage.state_code)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        politician_on_stage.seo_friendly_path = seo_friendly_path
+                        messages.add_message(request, messages.INFO,
+                                             'Politician saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
 
             # if politician_on_stage.twitter_handle_updates_failing != twitter_handle_updates_failing:
             #     changes_found_dict['is_twitter_handle_removed'] = True
@@ -3140,25 +3187,6 @@ def politician_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, results['error_message_to_print'])
                 if positive_value_exists(results['info_message_to_print']):
                     messages.add_message(request, messages.INFO, results['info_message_to_print'])
-
-            # Now generate_seo_friendly_path if there isn't one
-            if not positive_value_exists(politician_on_stage.seo_friendly_path):
-                seo_results = politician_manager.generate_seo_friendly_path(
-                    base_pathname_string=politician_on_stage.seo_friendly_path,
-                    politician_name=politician_on_stage.politician_name,
-                    politician_we_vote_id=politician_on_stage.we_vote_id,
-                    state_code=politician_on_stage.state_code)
-                if seo_results['success']:
-                    seo_friendly_path = seo_results['seo_friendly_path']
-                    if positive_value_exists(seo_friendly_path):
-                        politician_on_stage.seo_friendly_path = seo_friendly_path
-                        politician_on_stage.save()
-                        messages.add_message(request, messages.INFO,
-                                             'Politician saved with new SEO friendly path.')
-                    else:
-                        status += seo_results['status'] + ' '
-                else:
-                    status += seo_results['status'] + ' '
 
             if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
                 campaignx_results = campaignx_manager.retrieve_campaignx(
