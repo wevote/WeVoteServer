@@ -296,16 +296,16 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 politician=politician)
             status += match_results['status']
-            if match_results['politician_updated']:
+            politician_updated = match_results['politician_updated']
+            if politician_updated:
                 politician = match_results['politician']
                 politician.save()
-                politician_updated = True
             organization_created = match_results['organization_created']
             organization_creation_error = match_results['organization_creation_error']
             politician_error = match_results['politician_error']
             politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
             politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
-            politician_updated = match_results['politician_updated']
+
         except Exception as e:
             status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
 
