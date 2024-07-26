@@ -791,7 +791,7 @@ def match_politician_to_organization(
             # Return the organization with the most Twitter followers if there are multiple choices
             queryset = queryset.order_by('-twitter_followers_count')
             existing_organization_list = list(queryset)
-            if len(existing_organization_list):
+            if len(existing_organization_list) > 0:
                 organization = existing_organization_list[0]
                 status += "ORGANIZATION_FOUND_BY_TWITTER "
                 organization.politician_we_vote_id = politician.we_vote_id
@@ -834,6 +834,7 @@ def match_politician_to_organization(
         organization_list = list(queryset)
         if len(organization_list) > 1:
             organization = organization_list[0]
+            politician.politician_has_two_linked_organizations = True
             results['politician_has_two_linked_organizations'] = True
             organization_possible_match_by_name_found = True
         elif len(organization_list) > 0:
@@ -913,7 +914,7 @@ def match_politician_to_organization(
         changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
         politician=politician)
     results['status'] = status
-    results['status'] = create_results['status']
+    results['status'] += create_results['status']
     if create_results['organization_found']:
         politician.organization_analysis_needed = False
         politician.organization_we_vote_id = create_results['organization'].we_vote_id
@@ -921,6 +922,8 @@ def match_politician_to_organization(
         results['politician_updated'] = True
     else:
         results['organization_creation_error'] = True
+        results['politician'] = politician
+        results['politician_updated'] = False
     return results
 
 
