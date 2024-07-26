@@ -982,6 +982,7 @@ def create_followers_from_positions(
     elif positive_value_exists(state_code):
         position_query = position_query.filter(state_code__iexact=state_code)
     total_to_convert = position_query.count()
+    positions_analyzed_count = total_to_convert
     if positive_value_exists(total_to_convert):
         position_list_to_create_follower = list(position_query[:number_to_create])
         # Now zero in on just these politicians (OR fill up politicians_to_follow_we_vote_id_list if it was empty)
@@ -1234,6 +1235,7 @@ def create_followers_from_positions(
         'campaignx_we_vote_id_list_to_refresh': campaignx_we_vote_id_list_to_refresh,
         'error_message_to_print':   error_message_to_print,
         'info_message_to_print':    info_message_to_print,
+        'positions_analyzed_count': positions_analyzed_count,
         'status':                   status,
         'success':                  success,
     }
