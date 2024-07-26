@@ -1170,6 +1170,9 @@ def campaign_list_view(request):
             new_filter = Q(linked_politician_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(seo_friendly_path__iexact=one_word)
             filters.append(new_filter)
 

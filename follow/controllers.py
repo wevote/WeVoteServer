@@ -1196,9 +1196,8 @@ def create_followers_from_positions(
                     combined_list,
                     ['follow_organization_analysis_complete', 'follow_organization_created'])
             info_message_to_print += \
-                "{position_updates_made:,} positions updated (sample list: {follow_organization_created_list}, " \
+                "{position_updates_made:,} positions updated, " \
                 "".format(
-                    follow_organization_created_list=position_objects_to_mark_as_having_follow_organization_created[:5],
                     position_updates_made=position_updates_made)
         except Exception as e:
             error_message_to_print += "ERROR with PositionEntered.objects.bulk_create: {e}, ".format(e=e)
@@ -1206,6 +1205,16 @@ def create_followers_from_positions(
     info_message_to_print += \
         "{follow_organization_entries_created:,} FollowOrganization entries created, " \
         "".format(follow_organization_entries_created=follow_organization_entries_created)
+
+    counter = 0
+    follow_organization_created_list = []
+    for one_position in position_objects_to_mark_as_having_follow_organization_created:
+        counter += 1
+        if counter < 5:
+            follow_organization_created_list.append(one_position.we_vote_id)
+    info_message_to_print += \
+        "(sample list: {follow_organization_created_list}) " \
+        "".format(follow_organization_created_list=follow_organization_created_list)
 
     total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
     if positive_value_exists(total_to_convert_after):
