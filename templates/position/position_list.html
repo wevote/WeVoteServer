@@ -26,6 +26,8 @@
     &nbsp;&nbsp;&nbsp;
     <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
+    <li><a href="{% url 'position:position_list' %}?politician_we_vote_id_analyzed_on=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
+        Repair Positions missing Politician We Vote Id</a></li>
     <li><a href="{% url 'position:position_list' %}?create_followers_from_positions_on=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
         Create Endorser Followers from Positions</a></li>
 
