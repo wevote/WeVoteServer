@@ -976,6 +976,8 @@ def create_followers_from_politicians(
             if politician_on_stage.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
                 campaignx_we_vote_id_list_to_refresh.append(politician_on_stage.linked_campaignx_we_vote_id)
 
+    info_message_to_print += "POLITICIANS_WITH_ORG_ID_AND_CAMPAIGN: " + str(len(politician_we_vote_id_list)) + " "
+
     # #############################
     # Create FollowOrganization entries
     # From PUBLIC positions
@@ -1108,6 +1110,8 @@ def create_followers_from_positions(
     position_query = position_query.exclude(follow_organization_analysis_complete=True)
     position_query = position_query.exclude(
         Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=''))
+    position_query = position_query.exclude(
+        Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
     # We need to handle both SUPPORT and OPPOSE, so no need to restrict to only SUPPORT here
     # position_query = position_query.filter(stance=SUPPORT)
     # DALE 2024-07-14 We can include positions from prior years
@@ -1336,7 +1340,7 @@ def create_followers_from_positions(
 
     combined_list = list(set(position_objects_to_mark_as_analysis_complete +
                              position_objects_to_mark_as_having_follow_organization_created))
-    if position_updates_needed and len(combined_list) > 0:
+    if len(combined_list) > 0:
         try:
             if friends_only_positions:
                 PositionForFriends.objects.bulk_update(

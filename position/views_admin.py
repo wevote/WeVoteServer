@@ -251,6 +251,8 @@ def position_list_view(request):
         positive_value_exists(request.GET.get('create_followers_from_positions_on', False))
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    politician_we_vote_id_analyzed_on = \
+        positive_value_exists(request.GET.get('politician_we_vote_id_analyzed_on', False))
     position_search = request.GET.get('position_search', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_friends_only = positive_value_exists(request.GET.get('show_friends_only', False))  # wv-103
@@ -272,11 +274,55 @@ def position_list_view(request):
     # ################################################
     # Maintenance script section START
     # ################################################
+    error_message_to_print = ''
+    info_message_to_print = ''
+    number_to_update = 10
+    if politician_we_vote_id_analyzed_on:
+        from politician.models import Politician
+        queryset = PositionEntered.objects.all()
+        queryset = queryset.filter(politician_we_vote_id_analyzed=False)
+        queryset = queryset.exclude(
+            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+        # For now, we ignore Positions incorrectly linked to politician_we_vote_ids that have been deleted/merged.
+        # Only update entries without a politician_we_vote_id
+        queryset = queryset.filter(politician_we_vote_id__isnull=True)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        total_to_convert = queryset.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+
+        # Get 1000 candidate_we_vote_id values
+        candidate_queryset = queryset.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        candidate_we_vote_id_list = list(candidate_queryset[:number_to_update])
+        queryset = queryset.filter(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list)
+
+        position_list_to_convert = list(queryset[:number_to_update])
+
+        info_message_to_print += \
+            "politician_we_vote_id_analyzed_on: {total_to_convert:,} total_to_convert. " \
+            "{total_to_convert_after:,} remaining." \
+            "".format(
+                total_to_convert_after=total_to_convert_after,
+                total_to_convert=total_to_convert)
+
+        update_list = []
+        if len(update_list) > 0:
+            try:
+                updates_made = Politician.objects.bulk_update(update_list, ['linked_politician_we_vote_id'])
+                info_message_to_print += \
+                    "UPDATES MADE: {updates_made:,} politicians updated with new linked_campaignx_we_vote_id. " \
+                    "{total_to_convert_after:,} remaining." \
+                    "".format(
+                        total_to_convert_after=total_to_convert_after,
+                        updates_made=updates_made)
+            except Exception as e:
+                updates_error = True
+                error_message_to_print += \
+                    "ERROR with politician_we_vote_id_analyzed_on: {e} " \
+                    "".format(e=e)
 
     # Added to campaignx object the variable 'supporters_count_to_update_with_bulk_script'
     # create_followers_from_positions_on passed in as URL variable above
-    error_message_to_print = ''
-    info_message_to_print = ''
     if create_followers_from_positions_on:
         from follow.controllers import create_followers_from_positions
         from campaign.controllers import delete_campaignx_supporters_after_positions_removed, \
@@ -286,7 +332,7 @@ def position_list_view(request):
         # #############################
         # Create FollowOrganization entries
         # From PUBLIC positions
-        number_to_create = 1000
+        number_to_create = 2500
         t0 = time()
         results = create_followers_from_positions(
             friends_only_positions=False,

@@ -225,6 +225,7 @@ class PositionEntered(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    politician_we_vote_id_analyzed = models.BooleanField(default=False)
     political_party = models.CharField(verbose_name="political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
@@ -657,6 +658,7 @@ class PositionForFriends(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    politician_we_vote_id_analyzed = models.BooleanField(default=False)
     political_party = models.CharField(verbose_name="candidate political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.

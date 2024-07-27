@@ -43,6 +43,14 @@
                 </td>
             </tr>
         {% endif %}
+            <tr>
+                <th>Organization We Vote ID:&nbsp;</th>
+                <td> {{ campaignx.organization_we_vote_id }}
+                    <a href="{% url 'organization:organization_edit_we_vote_id' campaignx.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                </td>
+            </tr>
         {% if campaignx.in_draft_mode %}
             <tr>
                 <th>IN DRAFT MODE</th>
