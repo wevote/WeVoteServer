@@ -583,6 +583,10 @@ def office_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
+    # ################################################
+    # Maintenance script section START
+    # ################################################
+
     add_election_date_as_integer_to_all_offices = True
     number_to_update = 10000
     if add_election_date_as_integer_to_all_offices:
@@ -648,6 +652,10 @@ def office_list_view(request):
                 "".format(offices_not_updated=offices_not_updated)
         if positive_value_exists(add_election_date_as_integer_to_all_offices_status):
             messages.add_message(request, messages.INFO, add_election_date_as_integer_to_all_offices_status)
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     office_repair_list = []
     try:

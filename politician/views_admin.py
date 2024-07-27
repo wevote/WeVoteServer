@@ -567,12 +567,12 @@ def politician_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    create_followers_on = positive_value_exists(request.GET.get('create_followers_on', False))
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     messages_on_stage = get_messages(request)
-    state_code = request.GET.get('state_code', '')
     organization_manual_intervention_needed = \
         positive_value_exists(request.GET.get('organization_manual_intervention_needed', False))
     politician_search = request.GET.get('politician_search', '')
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     # run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
     run_scripts = True
     show_all = positive_value_exists(request.GET.get('show_all', False))
@@ -580,9 +580,13 @@ def politician_list_view(request):
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
     show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     show_politicians_with_email = positive_value_exists(request.GET.get('show_politicians_with_email', False))
-
+    state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
+
+    # ################################################
+    # Maintenance script section START
+    # ################################################
 
     # When we were preparing to remove the field 'politician_email_address', we wanted to make sure
     # they had all be transferred. This verifies it.
@@ -856,6 +860,18 @@ def politician_list_view(request):
             message_type = messages.ERROR if updates_error else messages.INFO
             messages.add_message(request, message_type, update_campaignx_with_linked_politician_we_vote_id_status)
 
+    if create_followers_on:
+        from follow.controllers import create_followers_from_politicians
+        create_results = create_followers_from_politicians(number_to_create=100, request=request, state_code=state_code)
+        if positive_value_exists(create_results['info_message_to_print']):
+            messages.add_message(request, messages.INFO, create_results['info_message_to_print'])
+        if positive_value_exists(create_results['error_message_to_print']):
+            messages.add_message(request, messages.ERROR, create_results['error_message_to_print'])
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
+
     politician_list = []
     politician_list_count = 0
     try:
@@ -991,6 +1007,15 @@ def politician_list_view(request):
         queryset = queryset.filter(state_code__iexact=state_code)
     organization_might_be_needed_count = queryset.count()
 
+    # ###############################
+    # Count the number of Politicians who need FollowOrganization entries to be generated
+    queryset = Politician.objects.using('readonly').all()
+    queryset = queryset.filter(follow_organization_analysis_complete=False)
+    queryset = queryset.exclude(follow_organization_intervention_needed=True)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    politicians_need_followers_count = queryset.count()
+
     # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
     if show_related_candidates:
         temp_politician_list = []
@@ -1109,6 +1134,7 @@ def politician_list_view(request):
         'messages_on_stage':            messages_on_stage,
         'organization_manual_intervention_needed': organization_manual_intervention_needed,
         'organization_might_be_needed_count':   organization_might_be_needed_count,
+        'politicians_need_followers_count':     politicians_need_followers_count,
         'politician_list':              politician_list,
         'politician_search':            politician_search,
         'show_all':                     show_all,

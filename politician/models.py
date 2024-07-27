@@ -358,6 +358,8 @@ class Politician(models.Model):
     # Every Politician has a linked Organization, for published endorsements the Politician has made about others.
     # This is a cached value. Master link is stored in the "politician_we_vote_id" value in Organization object.
     organization_we_vote_id = models.CharField(max_length=255, null=True)
+    follow_organization_analysis_complete = models.BooleanField(default=False)
+    follow_organization_intervention_needed = models.BooleanField(default=None, null=True)
 
     class Meta:
         ordering = ('last_name',)
