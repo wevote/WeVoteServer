@@ -121,7 +121,7 @@ class CampaignX(models.Model):
     organization_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
-    seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)  # No longer unique
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
     # If this CampaignX has a linked_politician_we_vote_id, then supporters_count comes from Organization followers
