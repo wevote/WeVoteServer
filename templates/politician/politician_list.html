@@ -34,7 +34,10 @@
             <a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a>
         </li>
     {% if organization_might_be_needed_count %}
-        <li><a href="{% url 'politician:match_politicians_to_organizations' %}?state_code={{ state_code }}" >Match Politicians to Organizations{% if organization_might_be_needed_count %} ({{ organization_might_be_needed_count|intcomma }}){% endif %}</a></li>
+        <li><a href="{% url 'politician:match_politicians_to_organizations' %}?state_code={{ state_code }}" >Match Politicians to Endorsers{% if organization_might_be_needed_count %} ({{ organization_might_be_needed_count|intcomma }}){% endif %}</a></li>
+    {% endif %}
+    {% if politicians_need_followers_count %}
+        <li><a href="{% url 'politician:politician_list' %}?create_followers_on=1&state_code={{ state_code }}" >Create FollowOrganization Entries for Politicians{% if politicians_need_followers_count %} ({{ politicians_need_followers_count|intcomma }}){% endif %}</a></li>
     {% endif %}
         <li><a href="{% url 'politician:update_profile_image_background_color' %}" >Update 5,000 Politicians' background colors &#40;may take 10 minutes&#41;</a></li>
     </ul>

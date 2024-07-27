@@ -2,19 +2,21 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import copy
+import robot_detection
+from django.db.models import Q
+
 from .models import FollowOrganization, FollowOrganizationList, FollowOrganizationManager, \
     UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_DISLIKE, FOLLOWING, \
     FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FollowMetricsManager
 from analytics.models import ACTION_ISSUE_FOLLOW, ACTION_ISSUE_FOLLOW_IGNORE, \
     ACTION_ISSUE_STOP_FOLLOWING, AnalyticsManager
-import copy
-from django.http import HttpResponse
+from campaign.controllers import refresh_campaignx_supporters_count_in_all_children
+from campaign.models import CampaignXManager
 from friend.models import FriendManager
-import json
 from organization.models import Organization, OrganizationManager
 from politician.models import Politician
 from position.models import OPPOSE, PositionEntered, PositionForFriends, SUPPORT
-import robot_detection
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -931,6 +933,144 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     return results
 
 
+def create_followers_from_politicians(
+        number_to_create=100,
+        request={},
+        state_code=''):
+    campaignx_manager = CampaignXManager()
+    campaignx_we_vote_id_list_to_refresh = []
+    error_message_to_print = ''
+    info_message_to_print = ''
+    politician_we_vote_id_list = []
+    positions_analyzed_count = 0
+    status = ""
+    success = True
+
+    # Find some Politicians we know have positions
+    queryset = PositionEntered.objects.using('readonly').all()
+    queryset = queryset.exclude(follow_organization_analysis_complete=True)
+    queryset = queryset.exclude(
+        Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=''))
+    queryset = queryset.values_list('politician_we_vote_id', flat=True).distinct()
+    highly_likely_politician_list = list(queryset)
+
+    queryset = Politician.objects.all()  # Cannot be 'readonly' because we update these values below
+    queryset = queryset.filter(follow_organization_analysis_complete=False)
+    queryset = queryset.exclude(follow_organization_intervention_needed=True)
+    queryset = queryset.exclude(
+        Q(linked_campaignx_we_vote_id__isnull=True) | Q(linked_campaignx_we_vote_id=''))
+    queryset = queryset.exclude(
+        Q(organization_we_vote_id__isnull=True) | Q(organization_we_vote_id=''))
+    if positive_value_exists(highly_likely_politician_list):
+        queryset = queryset.filter(we_vote_id__in=highly_likely_politician_list)
+    elif positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    politician_list = list(queryset[:number_to_create])
+
+    for politician_on_stage in politician_list:
+        if politician_on_stage.we_vote_id not in politician_we_vote_id_list:
+            # If an organization hasn't been created for the Politician yet, don't try to update Politician yet
+            if positive_value_exists(politician_on_stage.organization_we_vote_id):
+                politician_we_vote_id_list.append(politician_on_stage.we_vote_id)
+        if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+            if politician_on_stage.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list_to_refresh:
+                campaignx_we_vote_id_list_to_refresh.append(politician_on_stage.linked_campaignx_we_vote_id)
+
+    # #############################
+    # Create FollowOrganization entries
+    # From PUBLIC positions
+    results = create_followers_from_positions(
+        friends_only_positions=False,
+        number_to_create=1000,
+        politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+    positions_analyzed_count += results['positions_analyzed_count']
+    if positive_value_exists(results['error_message_to_print']):
+        error_message_to_print += results['error_message_to_print']
+    if positive_value_exists(results['positions_analyzed_count']):
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+    campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+    if len(campaignx_we_vote_id_list_changed) > 0:
+        campaignx_we_vote_id_list_to_refresh = \
+            list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+    # From FRIENDS_ONLY positions
+    results = create_followers_from_positions(
+        friends_only_positions=True,
+        number_to_create=1000,
+        politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
+    positions_analyzed_count += results['positions_analyzed_count']
+    if positive_value_exists(results['error_message_to_print']):
+        error_message_to_print += results['error_message_to_print']
+    if positive_value_exists(results['positions_analyzed_count']):
+        if positive_value_exists(results['info_message_to_print']):
+            info_message_to_print += results['info_message_to_print']
+    campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+    if len(campaignx_we_vote_id_list_changed) > 0:
+        campaignx_we_vote_id_list_to_refresh = \
+            list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
+    info_message_to_print += \
+        "{positions_analyzed_count:,} positions analyzed, " \
+        "".format(
+            positions_analyzed_count=positions_analyzed_count)
+
+    follow_organization_manager = FollowOrganizationManager()
+    for politician_on_stage in politician_list:
+        supporters_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOWING,
+            organization_we_vote_id_being_followed=politician_on_stage.organization_we_vote_id)
+        opposers_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOW_DISLIKE,
+            organization_we_vote_id_being_followed=politician_on_stage.organization_we_vote_id)
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id,
+            read_only=False)
+        count_refresh_needed = False
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+            if campaignx.opposers_count != opposers_count:
+                count_refresh_needed = True
+            if campaignx.supporters_count != supporters_count:
+                count_refresh_needed = True
+            if count_refresh_needed:
+                campaignx.opposers_count = opposers_count
+                campaignx.supporters_count = supporters_count
+                campaignx.save()
+
+    results = refresh_campaignx_supporters_count_in_all_children(
+        request,
+        campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+    # if positive_value_exists(results['update_message']):
+    #     update_message += results['update_message']
+
+    update_list = []
+    for politician_on_stage in politician_list:
+        politician_on_stage.follow_organization_analysis_complete = True
+        update_list.append(politician_on_stage)
+
+    try:
+        update_count = Politician.objects.bulk_update(
+            update_list,
+            ['follow_organization_analysis_complete', 'follow_organization_intervention_needed'])
+        info_message_to_print += \
+            "{update_count:,} politicians updated, " \
+            "".format(
+                update_count=update_count)
+    except Exception as e:
+        error_message_to_print += "ERROR with Politician.objects.bulk_create: {e}, ".format(e=e)
+
+    results = {
+        # 'campaignx_we_vote_id_list_to_refresh': campaignx_we_vote_id_list_to_refresh,
+        'error_message_to_print':   error_message_to_print,
+        # 'follow_organization_entries_created':  follow_organization_entries_created,
+        'info_message_to_print':    info_message_to_print,
+        'positions_analyzed_count': positions_analyzed_count,
+        'status':                   status,
+        'success':                  success,
+    }
+    return results
+
+
 def create_followers_from_positions(
         friends_only_positions=False,
         number_to_create=100,
@@ -966,6 +1106,8 @@ def create_followers_from_positions(
         position_query = PositionEntered.objects.all()  # Cannot be readonly, since we bulk_update at the end
     # position_query = position_query.filter(position_year=2024)
     position_query = position_query.exclude(follow_organization_analysis_complete=True)
+    position_query = position_query.exclude(
+        Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=''))
     # We need to handle both SUPPORT and OPPOSE, so no need to restrict to only SUPPORT here
     # position_query = position_query.filter(stance=SUPPORT)
     # DALE 2024-07-14 We can include positions from prior years
@@ -1231,9 +1373,9 @@ def create_followers_from_positions(
             "".format(total_to_convert_after=total_to_convert_after)
 
     results = {
-        'follow_organization_entries_created':  follow_organization_entries_created,
         'campaignx_we_vote_id_list_to_refresh': campaignx_we_vote_id_list_to_refresh,
         'error_message_to_print':   error_message_to_print,
+        'follow_organization_entries_created':  follow_organization_entries_created,
         'info_message_to_print':    info_message_to_print,
         'positions_analyzed_count': positions_analyzed_count,
         'status':                   status,

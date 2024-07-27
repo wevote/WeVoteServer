@@ -792,6 +792,11 @@ def campaign_list_view(request):
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
     campaignx_list_to_update = []
+
+    # ################################################
+    # Maintenance script section START
+    # ################################################
+
     clean_campaigns_with_dead_politician_we_vote_id = True
     # If a CampaignX entry has a linked_politician_we_vote_id which no longer exists, remove the seo_friendly_path
     #  so that entry doesn't block the use of that seo_friendly_path
@@ -1046,6 +1051,10 @@ def campaign_list_view(request):
                             request, messages.ERROR,
                             "Second save failed, status: {status} remaining."
                             "".format(status=status))
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     campaignx_we_vote_ids_in_order = []
     if campaignx_owner_organization_we_vote_id:

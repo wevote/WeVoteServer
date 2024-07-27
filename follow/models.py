@@ -934,16 +934,18 @@ class FollowOrganizationManager(models.Manager):
             organization_we_vote_id_being_followed='',
             voter_id=0):
         number_of_organizations_followed = 0
-        # FOLLOW_DISLIKE
+
+        if not positive_value_exists(organization_we_vote_id_being_followed) and not positive_value_exists(voter_id):
+            return number_of_organizations_followed
 
         try:
             queryset = FollowOrganization.objects.using('readonly').filter(
                 following_status=following_status,
             )
-            if positive_value_exists(voter_id):
-                queryset = queryset.filter(voter_id=voter_id)
             if positive_value_exists(organization_we_vote_id_being_followed):
                 queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id_being_followed)
+            if positive_value_exists(voter_id):
+                queryset = queryset.filter(voter_id=voter_id)
             number_of_organizations_followed = queryset.count()
         except Exception as e:
             pass

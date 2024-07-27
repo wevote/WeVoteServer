@@ -449,6 +449,10 @@ def representative_list_view(request):
     show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     state_code = request.GET.get('state_code', '')
 
+    # ################################################
+    # Maintenance script section START
+    # ################################################
+
     # Update representatives who currently don't have seo_friendly_path, with value from linked politician
     number_to_update = 1000
     seo_friendly_path_updates = True
@@ -621,6 +625,10 @@ def representative_list_view(request):
                                  "{updates_made:,} representatives updated with new linked_campaignx_we_vote_id. "
                                  "{total_to_convert_after:,} remaining."
                                  "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     representative_count = 0
     representative_list = []

@@ -269,10 +269,11 @@ def position_list_view(request):
         show_admin_options = True
     # wv-103 end
 
-    # DALE 2024-07-13 We need to update the campaignx.supporters_count and opposers_count
-    # update_campaignx_supporters_count_on = False
-    # Added to campaignx object the variable 'supporters_count_to_update_with_bulk_script'
+    # ################################################
+    # Maintenance script section START
+    # ################################################
 
+    # Added to campaignx object the variable 'supporters_count_to_update_with_bulk_script'
     # create_followers_from_positions_on passed in as URL variable above
     error_message_to_print = ''
     info_message_to_print = ''
@@ -364,6 +365,10 @@ def position_list_view(request):
         #     "t0 -> t1 took {:.6f} seconds, ".format(diff_t0_t1) +
         #     "t2 -> t3 took {:.6f} seconds ".format(diff_t2_t3)
         # )
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
