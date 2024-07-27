@@ -568,6 +568,7 @@ def politician_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     create_followers_on = positive_value_exists(request.GET.get('create_followers_on', False))
+    politicians_to_create_followers_for = convert_to_int(request.GET.get('politicians_to_create_followers_for', 1000))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     messages_on_stage = get_messages(request)
     organization_manual_intervention_needed = \
@@ -862,7 +863,8 @@ def politician_list_view(request):
 
     if create_followers_on:
         from follow.controllers import create_followers_from_politicians
-        create_results = create_followers_from_politicians(number_to_create=100, request=request, state_code=state_code)
+        create_results = create_followers_from_politicians(
+            number_to_create=politicians_to_create_followers_for, request=request, state_code=state_code)
         if positive_value_exists(create_results['info_message_to_print']):
             messages.add_message(request, messages.INFO, create_results['info_message_to_print'])
         if positive_value_exists(create_results['error_message_to_print']):
