@@ -1130,7 +1130,8 @@ def create_followers_from_positions(
         # Now zero in on just these politicians (OR fill up politicians_to_follow_we_vote_id_list if it was empty)
         for one_position in position_list_to_create_follower:
             if positive_value_exists(one_position.politician_we_vote_id):
-                politicians_to_follow_we_vote_id_list.append(one_position.politician_we_vote_id)
+                if one_position.politician_we_vote_id not in politicians_to_follow_we_vote_id_list:
+                    politicians_to_follow_we_vote_id_list.append(one_position.politician_we_vote_id)
     else:
         position_list_to_create_follower = []
     position_objects_to_mark_as_analysis_complete = []  # Move positions over to this for bulk_update

@@ -484,9 +484,13 @@ def position_list_view(request):
     if not positive_value_exists(show_friends_only):  # always run unless Friends only is checked
         public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
         # public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-        public_position_list_query = public_position_list_query.filter(
-            Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
-            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        if positive_value_exists(show_all_elections) and positive_value_exists(position_search):
+            # If we are trying to search all elections, don't restrict
+            pass
+        else:
+            public_position_list_query = public_position_list_query.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         if positive_value_exists(state_code):
             public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
 
@@ -552,11 +556,13 @@ def position_list_view(request):
     # wv-103: only execute this if role=admin and "Friends only" checkbox is checked
     if voter_has_authority(request, admin_authority_required) and positive_value_exists(show_friends_only):
         friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
-        # As of Aug 2018 we are no longer using PERCENT_RATING
-        # friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-        friends_only_position_list_query = friends_only_position_list_query.filter(
-            Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
-            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        if positive_value_exists(show_all_elections) and positive_value_exists(position_search):
+            # If we are trying to search all elections, don't restrict
+            pass
+        else:
+            friends_only_position_list_query = friends_only_position_list_query.filter(
+                Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
+                Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         if positive_value_exists(state_code):
             friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
 
