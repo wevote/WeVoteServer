@@ -1969,12 +1969,13 @@ class PoliticianManager(models.Manager):
 
         try:
             # WV-450: switch to using readonly DB, instead of conditional logic
-            # if positive_value_exists(read_only):
-            #     politician_query = Politician.objects.using('readonly').all()
-            # else:
-            #     politician_query = Politician.objects.all()
+            # politician_query = Politician.objects.using('readonly').all()
 
-            politician_query = Politician.objects.using('readonly').all()
+            if positive_value_exists(read_only):
+                politician_query = Politician.objects.using('readonly').all()
+            else:
+                politician_query = Politician.objects.all()
+
             if len(politician_we_vote_id_list):
                 politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
@@ -2012,7 +2013,7 @@ class PoliticianManager(models.Manager):
             twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[],
-            read_only=False):
+            read_only=True):
         """
 
         :param state_code:
