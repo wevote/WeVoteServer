@@ -14,6 +14,7 @@ class BallotpediaApiCounter(models.Model):
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
 
+
 class BallotpediaApiCounterDailySummary(models.Model):
     date_of_action = models.DateField(verbose_name='date of action', null=False, auto_now=False)
     kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
