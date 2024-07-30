@@ -1358,7 +1358,7 @@ class PoliticianManager(models.Manager):
         politician_search_results_list = []
 
         try:
-            queryset = Politician.objects.all()
+            queryset = Politician.objects.using('readonly').all()
             if name_search_terms is not None:
                 name_search_words = name_search_terms.split()
             else:
