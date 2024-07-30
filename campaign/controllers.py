@@ -16,6 +16,7 @@ from PIL import Image, ImageOps
 import re
 from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response
 from candidate.models import CandidateCampaign
+from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganization, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -1169,7 +1170,8 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         return results
 
 
-def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(request, campaignx_we_vote_id_list=[]):
+def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(campaignx_we_vote_id_list=[]):
+    error_message_to_print = ''
     status = ''
     success = True
     update_message = ''
@@ -1178,32 +1180,54 @@ def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(request, ca
     campaignx_bulk_update_list = []
     campaignx_updates_made = 0
     if len(campaignx_we_vote_id_list) > 0:
+        follow_organization_manager = FollowOrganizationManager()
         queryset = CampaignX.objects.all()  # Cannot be readonly because of bulk_update below
         queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
         campaignx_list = list(queryset)
         for one_campaignx in campaignx_list:
-            supporters_count = campaignx_manager.fetch_campaignx_supporter_count(
-                campaignx_we_vote_id=one_campaignx.we_vote_id)
+            changes_found = False
+            opposers_count = 0
+            if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                if positive_value_exists(one_campaignx.organization_we_vote_id):
+                    opposers_count = follow_organization_manager.fetch_follow_organization_count(
+                        following_status=FOLLOW_DISLIKE,
+                        organization_we_vote_id_being_followed=one_campaignx.organization_we_vote_id)
+
+                    supporters_count = follow_organization_manager.fetch_follow_organization_count(
+                        following_status=FOLLOWING,
+                        organization_we_vote_id_being_followed=one_campaignx.organization_we_vote_id)
+                else:
+                    error_message_to_print += "CAMPAIGNX_MISSING_ORGANIZATION: " + str(one_campaignx.we_vote_id) + " "
+                    continue
+            else:
+                supporters_count = campaignx_manager.fetch_campaignx_supporter_count(
+                    campaignx_we_vote_id=one_campaignx.we_vote_id)
+            if opposers_count != one_campaignx.opposers_count:
+                one_campaignx.opposers_count = opposers_count
+                changes_found = True
             if supporters_count != one_campaignx.supporters_count:
                 one_campaignx.supporters_count = supporters_count
+                changes_found = True
+            if changes_found:
                 campaignx_bulk_update_list.append(one_campaignx)
                 campaignx_entries_need_to_be_updated = True
                 campaignx_updates_made += 1
     if campaignx_entries_need_to_be_updated:
         try:
-            CampaignX.objects.bulk_update(campaignx_bulk_update_list, ['supporters_count'])
+            CampaignX.objects.bulk_update(campaignx_bulk_update_list, ['opposers_count', 'supporters_count'])
             update_message += \
                 "{campaignx_updates_made:,} CampaignX entries updated with fresh supporters_count, " \
                 "".format(campaignx_updates_made=campaignx_updates_made)
         except Exception as e:
-            messages.add_message(request, messages.ERROR,
-                                 "ERROR with CampaignX.objects.bulk_update: {e}, "
-                                 "".format(e=e))
+            status += "ERROR with CampaignX.objects.bulk_update: {e}, ".format(e=e)
+            error_message_to_print += "ERROR with CampaignX.objects.bulk_update: {e}, ".format(e=e)
+            success = False
 
     results = {
-        'status':           status,
-        'success':          success,
-        'update_message':   update_message,
+        'error_message_to_print':   error_message_to_print,
+        'status':                   status,
+        'success':                  success,
+        'update_message':           update_message,
     }
     return results
 
@@ -2785,6 +2809,16 @@ def update_campaignx_from_politician(campaignx, politician):
     status = ''
     success = True
     save_changes = True
+    fields_updated = [
+        'organization_we_vote_id',
+        'profile_image_background_color',
+        'seo_friendly_path',
+        'we_vote_hosted_campaign_photo_large_url', 'we_vote_hosted_campaign_photo_medium_url',
+        'we_vote_hosted_campaign_photo_small_url',
+        'we_vote_hosted_profile_image_url_large', 'we_vote_hosted_profile_image_url_medium',
+        'we_vote_hosted_profile_image_url_tiny',
+    ]
+    campaignx.organization_we_vote_id = politician.organization_we_vote_id
     # We want to match the campaignx profile images to whatever is in the politician (even None)
     campaignx.we_vote_hosted_profile_image_url_large = politician.we_vote_hosted_profile_image_url_large
     campaignx.we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
@@ -2807,10 +2841,70 @@ def update_campaignx_from_politician(campaignx, politician):
     #     save_changes = True
 
     results = {
-        'success':      success,
-        'status':       status,
-        'campaignx':    campaignx,
-        'save_changes': save_changes,
+        'campaignx':        campaignx,
+        'fields_updated':   fields_updated,
+        'save_changes':     save_changes,
+        'success':          success,
+        'status':           status,
+    }
+    return results
+
+
+def update_campaignx_entries_from_politician_list(politician_list):
+    error_message_to_print = ''
+    info_message_to_print = ''
+    status = ""
+    success = True
+
+    campaignx_we_vote_id_list = []
+    for politician in politician_list:
+        if positive_value_exists(politician.linked_campaignx_we_vote_id) and \
+                politician.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list:
+            campaignx_we_vote_id_list.append(politician.linked_campaignx_we_vote_id)
+    if len(campaignx_we_vote_id_list) > 0:
+        campaignx_list = []
+        try:
+            queryset = CampaignX.objects.filter(we_vote_id__in=campaignx_we_vote_id_list)  # Cannot be 'readonly'
+            campaignx_list = list(queryset)
+        except Exception as e:
+            status += "ERROR with CampaignX.objects.filter: {e}, ".format(e=e)
+            success = False
+
+        # Create dict
+        campaignx_dict = {campaignx.we_vote_id: campaignx for campaignx in campaignx_list}
+
+        # Update all entries in the database
+        campaignx_bulk_update_list = []
+        fields_updated = []
+        for politician in politician_list:
+            campaignx = campaignx_dict.get(politician.linked_campaignx_we_vote_id, None)
+            if campaignx:
+                results = update_campaignx_from_politician(campaignx, politician)
+                if not results['success']:
+                    status += results['status'] + " "
+                else:
+                    save_changes = results['save_changes']
+                    if save_changes:
+                        campaignx_bulk_update_list.append(results['campaignx'])
+                        fields_updated = results['fields_updated']  # Doesn't need to be set again-and-again
+
+        if len(campaignx_bulk_update_list) > 0:
+            try:
+                CampaignX.objects.bulk_update(campaignx_bulk_update_list, fields_updated)
+                info_message_to_print = \
+                    "{campaignx_updates_made:,} CampaignX entries updated with data from politician. " \
+                    "".format(campaignx_updates_made=len(campaignx_bulk_update_list))
+            except Exception as e:
+                status += "ERROR_WITH_CampaignX.objects.bulk_update: {e}, ".format(e=e)
+                success = False
+        else:
+            status += "NO_CAMPAIGNX_ENTRIES_TO_UPDATE "
+
+    results = {
+        'error_message_to_print':   error_message_to_print,
+        'info_message_to_print':    info_message_to_print,
+        'success':                  success,
+        'status':                   status,
     }
     return results
 

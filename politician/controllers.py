@@ -175,8 +175,8 @@ def fetch_number_of_politicians_to_match_to_organizations():
     try:
         # Count the number of Politicians who need an organization to be generated
         queryset = Politician.objects.using('readonly').all()
-        queryset = queryset.filter(organization_might_be_needed=True)
-        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+        queryset = queryset.filter(organization_analysis_needed=True)
+        queryset = queryset.exclude(organization_manual_intervention_needed=True)
         organization_might_be_needed_count = queryset.count()
         return organization_might_be_needed_count
     except Exception as e:
@@ -707,6 +707,7 @@ def match_politician_to_organization(
         'status': status,
         'success': success,
     }
+    from organization.controllers import create_organization_from_politician
 
     # Search the Organization table to see if there is already an organization linked to this politician
     try:
@@ -714,20 +715,28 @@ def match_politician_to_organization(
         queryset = queryset.filter(politician_we_vote_id__iexact=politician.we_vote_id)
         linked_organization_list = list(queryset)
         if len(linked_organization_list) > 1:
+            politician.organization_analysis_needed = False
+            politician.organization_manual_intervention_needed = True
+            politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
+            politician.politician_has_two_linked_organizations = True
             status += "MULTIPLE_LINKED_ORGS_FOUND "
-            if positive_value_exists(politician.organization_might_be_needed):
-                politician.organization_might_be_needed = False
-                results['politician'] = politician
-                results['politician_updated'] = True
+            for one_linked_org in linked_organization_list:
+                status += " [" + str(one_linked_org.we_vote_id) + "] "
+            results['politician'] = politician
+            results['politician_updated'] = True
             results['politician_has_two_linked_organizations'] = True
             results['status'] = status
             return results
         elif len(linked_organization_list) > 0:
+            politician.organization_analysis_needed = False
+            politician.organization_manual_intervention_needed = False
+            politician.organization_we_vote_id = linked_organization_list[0].we_vote_id  # Link first one
+            politician.politician_has_two_linked_organizations = False
             status += "ONE_LINKED_ORG_FOUND "
-            if positive_value_exists(politician.organization_might_be_needed):
-                politician.organization_might_be_needed = False
-                results['politician'] = politician
-                results['politician_updated'] = True
+            for one_linked_org in linked_organization_list:
+                status += " [" + str(one_linked_org.we_vote_id) + "] "
+            results['politician'] = politician
+            results['politician_updated'] = True
             results['status'] = status
             return results
     except Exception as e:
@@ -742,7 +751,7 @@ def match_politician_to_organization(
         # See if we can find an organization that matches the primary Twitter handle for this politician
         #  that isn't already connected to another politician
         at_least_one_politician_twitter_handle_found = False
-        queryset = Organization.objects.all()
+        queryset = Organization.objects.all()  # Cannot be 'readonly' because we save link to Politician below
         queryset = queryset.filter(
             Q(politician_we_vote_id__isnull=True) |
             Q(politician_we_vote_id__iexact=''))
@@ -785,7 +794,7 @@ def match_politician_to_organization(
             # Return the organization with the most Twitter followers if there are multiple choices
             queryset = queryset.order_by('-twitter_followers_count')
             existing_organization_list = list(queryset)
-            if len(existing_organization_list):
+            if len(existing_organization_list) > 0:
                 organization = existing_organization_list[0]
                 status += "ORGANIZATION_FOUND_BY_TWITTER "
                 organization.politician_we_vote_id = politician.we_vote_id
@@ -794,10 +803,12 @@ def match_politician_to_organization(
                     organization.state_served_code = politician.state_code
                 organization.save()
 
-                if positive_value_exists(politician.organization_might_be_needed):
-                    politician.organization_might_be_needed = False
-                    results['politician'] = politician
-                    results['politician_updated'] = True
+                if len(existing_organization_list) == 1:
+                    politician.organization_manual_intervention_needed = False
+                politician.organization_analysis_needed = False
+                politician.organization_we_vote_id = organization.we_vote_id
+                results['politician'] = politician
+                results['politician_updated'] = True
                 results['status'] = status
                 return results
     except Exception as e:
@@ -808,112 +819,133 @@ def match_politician_to_organization(
         return results
 
     # If still here, find an organization with a name that matches this politician
-    organization_possible_match_by_name_found = False
-    try:
-        queryset = Organization.objects.all()
-        queryset = queryset.filter(
-            Q(politician_we_vote_id__isnull=True) |
-            Q(politician_we_vote_id__iexact=''))
-        queryset = queryset.filter(organization_name__iexact=politician.politician_name)
-        if positive_value_exists(politician.state_code):
-            # If the politician has a state code, only match to an existing organization by name if
-            #  1) the organization doesn't have a state code, or
-            #  2) the organization's state code matches the politician's state code, or
-            politician_state_code_lower = politician.state_code.lower()
+    use_name_match = False
+    if use_name_match:
+        organization_possible_match_by_name_found = False
+        try:
+            queryset = Organization.objects.all()
             queryset = queryset.filter(
-                Q(state_served_code__iexact=politician_state_code_lower) |
-                Q(state_served_code__iexact='') |
-                Q(state_served_code__isnull=True))
-        queryset = queryset.order_by('-twitter_followers_count')
-        organization_list = list(queryset)
-        if len(organization_list) > 1:
-            organization = organization_list[0]
-            results['politician_has_two_linked_organizations'] = True
-            organization_possible_match_by_name_found = True
-        elif len(organization_list) > 0:
-            organization = organization_list[0]
-            organization_possible_match_by_name_found = True
-        else:
-            organization = None
-        # Double-check that this organization doesn't have another politician that might be better fit
-        if organization_possible_match_by_name_found:
-            manual_intervention_needed = False
-            other_politician_found_with_same_twitter_as_organization = False
-            if positive_value_exists(organization.organization_twitter_handle):
+                Q(politician_we_vote_id__isnull=True) |
+                Q(politician_we_vote_id__iexact=''))
+            queryset = queryset.filter(organization_name__iexact=politician.politician_name)
+            if positive_value_exists(politician.state_code):
+                # If the politician has a state code, only match to an existing organization by name if
+                #  1) the organization doesn't have a state code, or
+                #  2) the organization's state code matches the politician's state code, or
+                politician_state_code_lower = politician.state_code.lower()
+                queryset = queryset.filter(
+                    Q(state_served_code__iexact=politician_state_code_lower) |
+                    Q(state_served_code__iexact='') |
+                    Q(state_served_code__isnull=True))
+            queryset = queryset.order_by('-twitter_followers_count')
+            organization_list = list(queryset)
+            if len(organization_list) > 1:
+                organization = organization_list[0]
+                politician.politician_has_two_linked_organizations = True
+                results['politician_has_two_linked_organizations'] = True
+                organization_possible_match_by_name_found = True
+            elif len(organization_list) > 0:
+                organization = organization_list[0]
+                organization_possible_match_by_name_found = True
+            else:
+                organization = None
+            # Double-check that this organization doesn't have another politician that might be better fit
+            if organization_possible_match_by_name_found:
+                manual_intervention_needed = False
+                other_politician_found_with_same_twitter_as_organization = False
+                if positive_value_exists(organization.organization_twitter_handle):
+                    try:
+                        politician_queryset = Politician.objects.using('readonly').all()
+                        politician_queryset = politician_queryset.exclude(we_vote_id=politician.we_vote_id)
+                        politician_queryset = politician_queryset.filter(
+                            Q(politician_twitter_handle__iexact=organization.organization_twitter_handle) |
+                            Q(politician_twitter_handle2__iexact=organization.organization_twitter_handle) |
+                            Q(politician_twitter_handle3__iexact=organization.organization_twitter_handle) |
+                            Q(politician_twitter_handle4__iexact=organization.organization_twitter_handle) |
+                            Q(politician_twitter_handle5__iexact=organization.organization_twitter_handle)
+                        )
+                        other_politician_found_with_same_twitter_as_organization = \
+                            positive_value_exists(politician_queryset.count())
+                    except Exception as e:
+                        manual_intervention_needed = True
+                        status += "FAILED_TO_CHECK_OTHER_POLITICIANS: " + str(e) + " "
+                    if other_politician_found_with_same_twitter_as_organization or manual_intervention_needed:
+                        status += "CANNOT_LINK_MATCHING_ORGANIZATION_OTHER_POLITICIAN_USING_SAME_TWITTER_HANDLE "
+                        # We create a new organization, and then will merge the duplicate organizations in the future.
+                        politician.organization_manual_intervention_needed = True
+                        create_results = create_organization_from_politician(
+                            changed_by_name=changed_by_name,
+                            changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                            politician=politician)
+                        results['status'] = status
+                        results['status'] += create_results['status']
+                        if create_results['organization_found']:
+                            politician.organization_analysis_needed = False
+                            politician.organization_we_vote_id = create_results['organization'].we_vote_id
+                            results['politician'] = politician
+                            results['politician_updated'] = True
+                        else:
+                            results['organization_creation_error'] = True
+                            results['politician'] = politician
+                            results['politician_updated'] = False
+                        return results
+                # Double-check that this organization doesn't belong to a voter
+                manual_intervention_needed = False
+                organization_owned_by_voter = False
                 try:
-                    politician_queryset = Politician.objects.using('readonly').all()
-                    politician_queryset = politician_queryset.filter(
-                        Q(politician_twitter_handle__iexact=organization.organization_twitter_handle) |
-                        Q(politician_twitter_handle2__iexact=organization.organization_twitter_handle) |
-                        Q(politician_twitter_handle3__iexact=organization.organization_twitter_handle) |
-                        Q(politician_twitter_handle4__iexact=organization.organization_twitter_handle) |
-                        Q(politician_twitter_handle5__iexact=organization.organization_twitter_handle)
-                    )
-                    other_politician_found_with_same_twitter_as_organization = \
-                        positive_value_exists(politician_queryset.count())
+                    voter_queryset = Voter.objects.using('readonly').all()
+                    voter_queryset = voter_queryset.filter(
+                        linked_organization_we_vote_id=organization.we_vote_id)
+                    organization_owned_by_voter = positive_value_exists(voter_queryset.count())
                 except Exception as e:
                     manual_intervention_needed = True
-                    status += "FAILED_TO_CHECK_OTHER_POLITICIANS: " + str(e) + " "
-                if other_politician_found_with_same_twitter_as_organization or manual_intervention_needed:
-                    status += "CANNOT_LINK_MATCHING_ORGANIZATION_OTHER_POLITICIAN_USING_SAME_TWITTER_HANDLE "
-                    politician.organization_and_manual_intervention_needed = True
+                    status += "FAILED_TO_CHECK_VOTER: " + str(e) + " "
+                if organization_owned_by_voter or manual_intervention_needed:
+                    status += "CANNOT_LINK_MATCHING_ORGANIZATION_OTHER_POLITICIAN_IN_USE_BY_OTHER_VOTER "
+                    politician.organization_manual_intervention_needed = True
                     results['politician'] = politician
                     results['politician_updated'] = True
                     results['status'] = status
                     return results
-            # Double-check that this organization doesn't belong to a voter
-            manual_intervention_needed = False
-            organization_owned_by_voter = False
-            try:
-                voter_queryset = Voter.objects.using('readonly').all()
-                voter_queryset = voter_queryset.filter(
-                    linked_organization_we_vote_id=organization.we_vote_id)
-                organization_owned_by_voter = positive_value_exists(voter_queryset.count())
-            except Exception as e:
-                manual_intervention_needed = True
-                status += "FAILED_TO_CHECK_VOTER: " + str(e) + " "
-            if organization_owned_by_voter or manual_intervention_needed:
-                status += "CANNOT_LINK_MATCHING_ORGANIZATION_OTHER_POLITICIAN_IN_USE_BY_OTHER_VOTER "
-                politician.organization_and_manual_intervention_needed = True
+                # Now we are confident enough that this organization should be linked to this politician
+                status += "ORGANIZATION_FOUND_BY_NAME "
+                organization.politician_we_vote_id = politician.we_vote_id
+                if not positive_value_exists(organization.state_served_code) and \
+                        positive_value_exists(politician.state_code):
+                    organization.state_served_code = politician.state_code
+                organization.save()
+
+                politician.organization_analysis_needed = False
+                politician.organization_manual_intervention_needed = False
+                politician.organization_we_vote_id = organization.we_vote_id
                 results['politician'] = politician
                 results['politician_updated'] = True
                 results['status'] = status
                 return results
-            # Now we are confident enough that this organization should be linked to this politician
-            status += "ORGANIZATION_FOUND_BY_NAME "
-            organization.politician_we_vote_id = politician.we_vote_id
-            if not positive_value_exists(organization.state_served_code) and \
-                    positive_value_exists(politician.state_code):
-                organization.state_served_code = politician.state_code
-            organization.save()
-
-            if positive_value_exists(politician.organization_might_be_needed):
-                politician.organization_might_be_needed = False
-                results['politician'] = politician
-                results['politician_updated'] = True
+        except Exception as e:
+            status += "FAILED_MATCHING_BY_NAME: " + str(e) + " "
+            results['politician_error'] = True
             results['status'] = status
+            results['success'] = False
             return results
-    except Exception as e:
-        status += "FAILED_MATCHING_BY_NAME: " + str(e) + " "
-        results['politician_error'] = True
-        results['status'] = status
-        results['success'] = False
-        return results
 
     # If we haven't exited yet, create an organization for this politician
-    from organization.controllers import create_organization_from_politician
     create_results = create_organization_from_politician(
         changed_by_name=changed_by_name,
         changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
         politician=politician)
     results['status'] = status
-    results['status'] = create_results['status']
+    results['status'] += create_results['status']
     if create_results['organization_found']:
-        politician.organization_might_be_needed = False
+        politician.organization_analysis_needed = False
+        politician.organization_manual_intervention_needed = False
+        politician.organization_we_vote_id = create_results['organization'].we_vote_id
         results['politician'] = politician
         results['politician_updated'] = True
     else:
         results['organization_creation_error'] = True
+        results['politician'] = politician
+        results['politician_updated'] = False
     return results
 
 
@@ -926,12 +958,14 @@ def match_politicians_to_organizations(
     organization_might_be_needed_count = 0
     organizations_created_count = 0
     organization_creation_errors_count = 0
+    politician_data_list = []
     politician_error_count = 0
     politician_has_two_linked_organizations = 0
     politician_has_two_possible_organizations = 0
     politician_list_count = 0
     politician_update_count = 0
     politician_we_vote_id_update_list = []
+    politician_we_vote_id_update_failed_list = []
     politicians_analyzed_count = 0
     status = ''
     success = True
@@ -939,22 +973,32 @@ def match_politicians_to_organizations(
 
     try:
         queryset = Politician.objects.all()
-        queryset = queryset.filter(organization_might_be_needed=True)
-        queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+        queryset = queryset.filter(organization_analysis_needed=True)
+        queryset = queryset.exclude(organization_manual_intervention_needed=True)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
         organization_might_be_needed_count = queryset.count()
         queryset = queryset.order_by('-politician_ultimate_election_date')
         politician_data_list = list(queryset[:number_of_politicians_to_match])
         politician_list_count = len(politician_data_list)
         for politician in politician_data_list:
+            add_to_update_list = False
             results = match_politician_to_organization(
                 changed_by_name=changed_by_name,
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 politician=politician)
             if results['politician_updated']:
-                update_list.append(results['politician'])
+                politician = results['politician']
+                add_to_update_list = True
                 politician_we_vote_id_update_list.append(politician.we_vote_id)
+            elif results['success']:
+                status += "POLITICIAN_NOT_UPDATED1: " + politician.we_vote_id + " [" + results['status'] + "] "
+                politician = results['politician']
+                add_to_update_list = True
+                politician_we_vote_id_update_failed_list.append(politician.we_vote_id)
             else:
-                pass
+                status += "POLITICIAN_NOT_UPDATED2: " + politician.we_vote_id + " [" + results['status'] + "] "
+                politician_we_vote_id_update_failed_list.append(politician.we_vote_id)
             organizations_created_count += 1 if results['organization_created'] else 0
             organization_creation_errors_count += 1 if results['organization_creation_error'] else 0
             politician_error_count += 1 if results['politician_error'] else 0
@@ -964,9 +1008,16 @@ def match_politicians_to_organizations(
             politician_update_count += 1 if results['politician_updated'] else 0
             politicians_analyzed_count += 1
 
+            # If we need to do any politician or organization verification, we could do it here
+
+            if add_to_update_list:
+                update_list.append(politician)
+
         if politician_update_count > 0:
             try:
-                Politician.objects.bulk_update(update_list, ['organization_might_be_needed'])
+                Politician.objects.bulk_update(update_list, [
+                    'organization_analysis_needed', 'organization_manual_intervention_needed',
+                    'organization_we_vote_id', 'politician_has_two_linked_organizations'])
             except Exception as e:
                 status += "FAILED_TO_BULK_UPDATE_POLITICIANS: " + str(e) + " "
                 politician_update_count = 0
@@ -982,9 +1033,11 @@ def match_politicians_to_organizations(
         'politician_error_count': politician_error_count,
         'politician_has_two_linked_organizations': politician_has_two_linked_organizations,
         'politician_has_two_possible_organizations': politician_has_two_possible_organizations,
+        'politician_list': politician_data_list,
         'politician_list_count': politician_list_count,
         'politician_update_count': politician_update_count,
         'politician_we_vote_id_update_list': politician_we_vote_id_update_list,
+        'politician_we_vote_id_update_failed_list': politician_we_vote_id_update_failed_list,
         'politicians_analyzed': politicians_analyzed_count,
         'status': status,
         'success': success,

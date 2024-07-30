@@ -1020,7 +1020,8 @@ class OrganizationManager(models.Manager):
                 # would prevent this voter account from claiming that twitter org with linked_organization_we_vote_id
                 # If found, we want to forcibly move that organization to this voter
                 # Search for another voter that has voter.linked_organization_we_vote_id
-                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id)
+                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    linked_organization_we_vote_id, read_only=False)
                 if voter_results['voter_found']:
                     voter_with_linked_organization_we_vote_id = voter_results['voter']
                     if voter.we_vote_id != voter_with_linked_organization_we_vote_id.we_vote_id:
@@ -3227,7 +3228,9 @@ class Organization(models.Model):
     organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
-    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    # Every Politician has a linked Organization, for published endorsements the Politician has made about others.
+    # This is the master linkage, and we keep a copy in the Politician record too.
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
 
     # Facebook session information
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
@@ -3324,9 +3327,9 @@ class Organization(models.Model):
     chosen_domain_type_is_campaign = models.BooleanField(default=False)
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
-        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True, db_index=True)
-    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Alternate ex/ www
-    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Another alternate
+        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
+    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True)  # Alternate ex/ www
+    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True)  # Another alternate
     chosen_favicon_url_https = models.TextField(
         verbose_name='url of client favicon', blank=True, null=True)
     chosen_google_analytics_tracking_id = models.CharField(max_length=255, null=True, blank=True)
@@ -3374,8 +3377,14 @@ class Organization(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=['politician_we_vote_id', 'state_served_code', 'organization_name', '-twitter_followers_count'],
+                fields=['politician_we_vote_id', 'organization_name'],
+                name='orgs_by_politician'),
+            models.Index(
+                fields=['politician_we_vote_id', 'state_served_code', 'organization_name'],
                 name='organization_politicians_match'),
+            models.Index(
+                fields=['politician_we_vote_id', 'state_served_code', 'organization_name', '-twitter_followers_count'],
+                name='organization_politicians_sort'),
             models.Index(
                 fields=['chosen_domain_string', 'chosen_domain_string2',
                         'chosen_domain_string3', 'chosen_subdomain_string'],

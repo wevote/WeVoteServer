@@ -211,7 +211,7 @@ class PositionEntered(models.Model):
                                                    null=True, blank=True, db_index=True)
     candidate_campaign_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the candidate", max_length=255, null=True,
-        blank=True, unique=False, db_index=True)
+        blank=True, unique=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
@@ -225,6 +225,7 @@ class PositionEntered(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    politician_we_vote_id_analyzed = models.BooleanField(default=False)
     political_party = models.CharField(verbose_name="political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
@@ -271,6 +272,9 @@ class PositionEntered(models.Model):
 
     class Meta:
         indexes = [
+            models.Index(
+                fields=['candidate_campaign_we_vote_id'],
+                name='candidate_we_vote_id'),
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
                 name='positions_for_candidate_voter'),
@@ -643,7 +647,7 @@ class PositionForFriends(models.Model):
                                                    null=True, blank=True, db_index=True)
     candidate_campaign_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the candidate", max_length=255, null=True,
-        blank=True, unique=False, db_index=True)
+        blank=True, unique=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_candidate_name = models.CharField(
@@ -654,6 +658,7 @@ class PositionForFriends(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    politician_we_vote_id_analyzed = models.BooleanField(default=False)
     political_party = models.CharField(verbose_name="candidate political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
@@ -704,6 +709,9 @@ class PositionForFriends(models.Model):
 
     class Meta:
         indexes = [
+            models.Index(
+                fields=['candidate_campaign_we_vote_id'],
+                name='friends_candidate_we_vote_id'),
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
                 name='friends_positions_candidate'),
@@ -3654,14 +3662,26 @@ class PositionListManager(models.Manager):
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
                 position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
-            if positive_value_exists(limit_to_organization_we_vote_ids) and len(limit_to_organization_we_vote_ids):
-                position_list_query = position_list_query.filter(
-                    organization_we_vote_id__in=limit_to_organization_we_vote_ids)
+            # Instead of limiting the database query (which is creating some slow queries), we retrieve
+            #  all positions and then filter below based on the organization_we_vote_id
+            # if positive_value_exists(limit_to_organization_we_vote_ids) and len(limit_to_organization_we_vote_ids):
+            #     position_list_query = position_list_query.filter(
+            #         organization_we_vote_id__in=limit_to_organization_we_vote_ids)
             position_list = list(position_list_query)
             if len(position_list):
                 position_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
+
+        if position_list_found and \
+                positive_value_exists(limit_to_organization_we_vote_ids) and len(limit_to_organization_we_vote_ids) > 0:
+            # Filter down the position_list to only include positions for the organizations we want to show
+            position_list = [position for position in position_list \
+                             if position.organization_we_vote_id in limit_to_organization_we_vote_ids]
+            if len(position_list):
+                position_list_found = True
+            else:
+                position_list_found = False
 
         if position_list_found:
             return position_list

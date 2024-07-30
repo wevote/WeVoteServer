@@ -30,7 +30,7 @@ from config.base import get_environment_variable
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
-from follow.models import FollowOrganization
+from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganization, FollowOrganizationManager
 from image.controllers import create_resized_images, organize_object_photo_fields_based_on_image_type_currently_active
 from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
@@ -296,18 +296,23 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 politician=politician)
             status += match_results['status']
-            if match_results['politician_updated']:
+            politician_updated = match_results['politician_updated']
+            if politician_updated:
                 politician = match_results['politician']
                 politician.save()
-                politician_updated = True
             organization_created = match_results['organization_created']
             organization_creation_error = match_results['organization_creation_error']
             politician_error = match_results['politician_error']
             politician_has_two_linked_organizations = match_results['politician_has_two_linked_organizations']
             politician_has_two_possible_organizations = match_results['politician_has_two_possible_organizations']
-            politician_updated = match_results['politician_updated']
         except Exception as e:
             status += "MATCH_POLITICIAN_TO_ORGANIZATION_ERROR: " + str(e) + " "
+
+        if politician_updated:
+            politician_list = [politician]
+            from campaign.controllers import update_campaignx_entries_from_politician_list
+            campaign_results = update_campaignx_entries_from_politician_list(politician_list=politician_list)
+            status += campaign_results['status']
 
     message_to_print = "match_politician_to_organization:: " \
                        "politician_updated: {politician_updated}. " \
@@ -562,10 +567,13 @@ def politician_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
-    state_code = request.GET.get('state_code', '')
-    politician_search = request.GET.get('politician_search', '')
+    create_followers_on = positive_value_exists(request.GET.get('create_followers_on', False))
+    politicians_to_create_followers_for = convert_to_int(request.GET.get('politicians_to_create_followers_for', 1000))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    messages_on_stage = get_messages(request)
+    organization_manual_intervention_needed = \
+        positive_value_exists(request.GET.get('organization_manual_intervention_needed', False))
+    politician_search = request.GET.get('politician_search', '')
     # run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
     run_scripts = True
     show_all = positive_value_exists(request.GET.get('show_all', False))
@@ -573,9 +581,13 @@ def politician_list_view(request):
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
     show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     show_politicians_with_email = positive_value_exists(request.GET.get('show_politicians_with_email', False))
-
+    state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
+
+    # ################################################
+    # Maintenance script section START
+    # ################################################
 
     # When we were preparing to remove the field 'politician_email_address', we wanted to make sure
     # they had all be transferred. This verifies it.
@@ -849,6 +861,19 @@ def politician_list_view(request):
             message_type = messages.ERROR if updates_error else messages.INFO
             messages.add_message(request, message_type, update_campaignx_with_linked_politician_we_vote_id_status)
 
+    if create_followers_on:
+        from follow.controllers import create_followers_from_politicians
+        create_results = create_followers_from_politicians(
+            number_to_create=politicians_to_create_followers_for, request=request, state_code=state_code)
+        if positive_value_exists(create_results['info_message_to_print']):
+            messages.add_message(request, messages.INFO, create_results['info_message_to_print'])
+        if positive_value_exists(create_results['error_message_to_print']):
+            messages.add_message(request, messages.ERROR, create_results['error_message_to_print'])
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
+
     politician_list = []
     politician_list_count = 0
     try:
@@ -883,6 +908,9 @@ def politician_list_view(request):
             )
         if positive_value_exists(show_ocd_id_state_mismatch):
             politician_query = politician_query.filter(ocd_id_state_mismatch_found=True)
+
+        if positive_value_exists(organization_manual_intervention_needed):
+            politician_query = politician_query.filter(organization_manual_intervention_needed=True)
 
         if positive_value_exists(politician_search):
             search_words = politician_search.split()
@@ -975,11 +1003,20 @@ def politician_list_view(request):
     # ###############################
     # Count the number of Politicians who need an organization to be generated
     queryset = Politician.objects.using('readonly').all()
-    queryset = queryset.filter(organization_might_be_needed=True)
-    queryset = queryset.exclude(organization_and_manual_intervention_needed=True)
+    queryset = queryset.filter(organization_analysis_needed=True)
+    queryset = queryset.exclude(organization_manual_intervention_needed=True)
     if positive_value_exists(state_code):
         queryset = queryset.filter(state_code__iexact=state_code)
     organization_might_be_needed_count = queryset.count()
+
+    # ###############################
+    # Count the number of Politicians who need FollowOrganization entries to be generated
+    queryset = Politician.objects.using('readonly').all()
+    queryset = queryset.filter(follow_organization_analysis_complete=False)
+    queryset = queryset.exclude(follow_organization_intervention_needed=True)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    politicians_need_followers_count = queryset.count()
 
     # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
     if show_related_candidates:
@@ -1055,7 +1092,10 @@ def politician_list_view(request):
             one_politician.related_candidate_list_count = related_candidate_list_count
             temp_politician_list.append(one_politician)
 
-        politician_list = temp_politician_list
+        # Reorder by related_candidate_list_count
+        temp_politician_list_ordered = \
+            sorted(temp_politician_list, key=lambda x: x.related_candidate_list_count, reverse=True)
+        politician_list = temp_politician_list_ordered
 
     # Now find all representative ids related to this politician
     temp_politician_list = []
@@ -1094,7 +1134,9 @@ def politician_list_view(request):
         'election_list':                election_list,
         'google_civic_election_id':     google_civic_election_id,
         'messages_on_stage':            messages_on_stage,
+        'organization_manual_intervention_needed': organization_manual_intervention_needed,
         'organization_might_be_needed_count':   organization_might_be_needed_count,
+        'politicians_need_followers_count':     politicians_need_followers_count,
         'politician_list':              politician_list,
         'politician_search':            politician_search,
         'show_all':                     show_all,
@@ -1730,20 +1772,58 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 path_list = path_list_modified
             path_list = path_list[:3]
 
+        organization_error = ''
+        organization_we_vote_id_linked_to_politician = ''
+        please_update_politician = False
+        if positive_value_exists(politician_on_stage.organization_we_vote_id):
+            organization_we_vote_id_linked_to_politician = politician_on_stage.organization_we_vote_id
+            # ##################################
+            # Make sure organization object still exists
+            try:
+                from organization.models import Organization
+                organization_queryset = Organization.objects.using('readonly').all()
+                organization_by_we_vote_id = organization_queryset.get(
+                    we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
+                    please_update_politician = True
+                    organization_error += " ERROR: Organization politician_we_vote_id doesn't match this politician. "
+            except ObjectDoesNotExist:
+                please_update_politician = True
+                organization_error += " ERROR: Organization not found by organization_we_vote_id. "
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
         # ##################################
-        # Find related organization (endorser)
+        # Find organization(s) connected to this politician by politician_we_vote_id
         try:
             from organization.models import Organization
             organization_queryset = Organization.objects.using('readonly').all()
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            organization_linked_to_politician = organization_queryset.get(
+            organization_queryset = organization_queryset.filter(
                 politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
-            organization_we_vote_id_linked_to_politician = organization_linked_to_politician.we_vote_id
+            organization_linked_to_politician_list = list(organization_queryset)
+            if len(organization_linked_to_politician_list) > 0:
+                if not positive_value_exists(politician_on_stage.organization_we_vote_id):
+                    please_update_politician = True
+                    organization_error += \
+                        "ERROR: Org(s) linked to this Politician, but organization_we_vote_id not saved here: "
+                # Show notice if this happens, but don't trigger printed error just for this
+                for organization in organization_linked_to_politician_list:
+                    organization_error += \
+                        "[{organization_we_vote_id}] ".format(organization_we_vote_id=organization.we_vote_id)
         except ObjectDoesNotExist:
-            organization_we_vote_id_linked_to_politician = ''
+            please_update_politician = True
+            organization_error += "ERROR: Organization not found by politician_we_vote_id. "
         except Exception as e:
-            organization_we_vote_id_linked_to_politician = ''
             status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
+        if please_update_politician:
+            messages.add_message(
+                request, messages.ERROR,
+                "Please click 'Update Politician', or 'Match Politician to Endorser', "
+                "to link to Endorser object. {organization_error}".format(organization_error=organization_error))
+        if not positive_value_exists(organization_we_vote_id_linked_to_politician) and \
+                positive_value_exists(politician_on_stage.organization_we_vote_id):
+            organization_we_vote_id_linked_to_politician = politician_on_stage.organization_we_vote_id
 
         # ##################################
         # Attach FollowOrganization information
@@ -2844,6 +2924,41 @@ def politician_edit_process_view(request):
                 politician_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 politician_on_stage.maplight_id = maplight_id
+            if positive_value_exists(politician_on_stage.organization_we_vote_id):
+                # ##################################
+                # Make sure organization object still exists
+                try:
+                    from organization.models import Organization
+                    organization_queryset = Organization.objects.all()  # Cannot be 'readonly'
+                    organization_by_we_vote_id = organization_queryset.get(
+                        we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                    if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
+                        # Since politician is the master link, clear Organization.politician_we_vote_id
+                        organization_by_we_vote_id.politician_we_vote_id = ''
+                        organization_by_we_vote_id.save()
+                except ObjectDoesNotExist:
+                    politician_on_stage.organization_we_vote_id = ''
+                except Exception as e:
+                    status += 'ERROR_RETRIEVING_FROM_ORGANIZATION: ' + str(e) + ' '
+
+            if not positive_value_exists(politician_on_stage.organization_we_vote_id):
+                # ##################################
+                # Find Organization that already thinks it is linked to this politician
+                try:
+                    from organization.models import Organization
+                    organization_queryset = Organization.objects.using('readonly').all()
+                    organization_queryset = organization_queryset.filter(
+                        politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                    organization_linked_list = list(organization_queryset)
+                    if len(organization_linked_list) > 0:
+                        # Just use the first
+                        politician_on_stage.organization_we_vote_id = organization_linked_list[0].we_vote_id
+                        politician_on_stage.organization_analysis_needed = False
+                        politician_on_stage.organization_manual_intervention_needed = False
+                except ObjectDoesNotExist:
+                    pass
+                except Exception as e:
+                    status += 'ERROR_RETRIEVING_ORGANIZATION_ATTACHED_TO_POLITICIAN: ' + str(e) + ' '
             if politician_contact_form_url is not False:
                 politician_on_stage.politician_contact_form_url = politician_contact_form_url
             if politician_email is not False:
@@ -3032,7 +3147,17 @@ def politician_edit_process_view(request):
                 politician_on_stage.political_party = political_party
             if state_code is not False:
                 politician_on_stage.state_code = state_code
+            # If new seo_friendly_path is provided, check to make sure it is not already in use
+            # If seo_friendly_path is not provided, only create a new one if politician_on_stage.seo_friendly_path
+            #  doesn't already exist.
+            update_to_new_seo_friendly_path = False
             if seo_friendly_path is not False:
+                if positive_value_exists(seo_friendly_path):
+                    if seo_friendly_path != politician_on_stage.seo_friendly_path:
+                        update_to_new_seo_friendly_path = True
+            elif not positive_value_exists(politician_on_stage.seo_friendly_path):
+                update_to_new_seo_friendly_path = True
+            if update_to_new_seo_friendly_path:
                 # If path isn't passed in, create one. If provided, verify it is unique.
                 seo_results = politician_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
@@ -3047,6 +3172,25 @@ def politician_edit_process_view(request):
                     # Update linked candidate & representative entries to use this latest seo_friendly_path
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
+
+            # Now generate_seo_friendly_path if there isn't one
+            #  This code is not redundant because of a few rare cases where we can fall-through the logic above.
+            if not positive_value_exists(politician_on_stage.seo_friendly_path):
+                seo_results = politician_manager.generate_seo_friendly_path(
+                    base_pathname_string=politician_on_stage.seo_friendly_path,
+                    politician_name=politician_on_stage.politician_name,
+                    politician_we_vote_id=politician_on_stage.we_vote_id,
+                    state_code=politician_on_stage.state_code)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        politician_on_stage.seo_friendly_path = seo_friendly_path
+                        messages.add_message(request, messages.INFO,
+                                             'Politician saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
 
             # if politician_on_stage.twitter_handle_updates_failing != twitter_handle_updates_failing:
             #     changes_found_dict['is_twitter_handle_removed'] = True
@@ -3110,9 +3254,9 @@ def politician_edit_process_view(request):
             vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
             politician_id = politician_on_stage.id
 
-            if (ballotpedia_politician_url_changed \
-                or not positive_value_exists(politician_on_stage.ballotpedia_photo_url)) \
-                    and positive_value_exists(ballotpedia_politician_url):
+            update_ballotpedia_politician_url = ballotpedia_politician_url_changed or \
+                    not positive_value_exists(politician_on_stage.ballotpedia_photo_url)
+            if update_ballotpedia_politician_url and positive_value_exists(ballotpedia_politician_url):
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=politician_on_stage,
                     save_to_database=True,
@@ -3121,25 +3265,6 @@ def politician_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, results['error_message_to_print'])
                 if positive_value_exists(results['info_message_to_print']):
                     messages.add_message(request, messages.INFO, results['info_message_to_print'])
-
-            # Now generate_seo_friendly_path if there isn't one
-            if not positive_value_exists(politician_on_stage.seo_friendly_path):
-                seo_results = politician_manager.generate_seo_friendly_path(
-                    base_pathname_string=politician_on_stage.seo_friendly_path,
-                    politician_name=politician_on_stage.politician_name,
-                    politician_we_vote_id=politician_on_stage.we_vote_id,
-                    state_code=politician_on_stage.state_code)
-                if seo_results['success']:
-                    seo_friendly_path = seo_results['seo_friendly_path']
-                    if positive_value_exists(seo_friendly_path):
-                        politician_on_stage.seo_friendly_path = seo_friendly_path
-                        politician_on_stage.save()
-                        messages.add_message(request, messages.INFO,
-                                             'Politician saved with new SEO friendly path.')
-                    else:
-                        status += seo_results['status'] + ' '
-                else:
-                    status += seo_results['status'] + ' '
 
             if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
                 campaignx_results = campaignx_manager.retrieve_campaignx(
@@ -3311,7 +3436,7 @@ def politician_edit_process_view(request):
     # Update Linked CampaignXs with seo_friendly_path
     if success and positive_value_exists(politician_on_stage.we_vote_id) and \
             positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
-        heal_linked_campaignx_variables = True
+        heal_linked_campaignx_variables = False
         campaignx_manager = CampaignXManager()
         campaignx_results = campaignx_manager.retrieve_campaignx(
             campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id,
@@ -3322,20 +3447,15 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.ERROR, status)
         elif campaignx_results['campaignx_found']:
             campaignx = campaignx_results['campaignx']
-            if positive_value_exists(campaignx.linked_politician_we_vote_id) \
-                    and campaignx.linked_politician_we_vote_id != politician_on_stage.we_vote_id:
-                heal_linked_campaignx_variables = False
-            if heal_linked_campaignx_variables and not positive_value_exists(campaignx.linked_politician_we_vote_id):
+            if not positive_value_exists(campaignx.linked_politician_we_vote_id):
                 campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
-                try:
-                    campaignx.save()
-                    messages.add_message(request, messages.INFO, "Campaignx updated with linked_politician_we_vote_id.")
-                except Exception as e:
-                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked_politician_we_vote_id:"
-                                                                  "" + str(e))
-                    heal_linked_campaignx_variables = False
-            if heal_linked_campaignx_variables and positive_value_exists(politician_on_stage.seo_friendly_path) \
+                heal_linked_campaignx_variables = True
+            elif campaignx.linked_politician_we_vote_id != politician_on_stage.we_vote_id:
+                campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
+                heal_linked_campaignx_variables = True
+            if positive_value_exists(politician_on_stage.seo_friendly_path) \
                     and campaignx.seo_friendly_path != politician_on_stage.seo_friendly_path:
+                heal_linked_campaignx_variables = True
                 # Consider saving politician_on_stage.seo_friendly_path into CampaignXSEOFriendlyPath,
                 #  so we can maintain connection to this campaignx if the politician_on_stage.seo_friendly_path changes
                 # The problem with doing that, is that when we relegate this campaignx to the past, we will have
@@ -3343,14 +3463,28 @@ def politician_edit_process_view(request):
                 # When we unlink campaigns by removing linked_politician_we_vote_id from CampaignX, we will want to
                 #  generate a new seo_friendly_path for that historical campaignx.
                 campaignx.seo_friendly_path = politician_on_stage.seo_friendly_path
+            if positive_value_exists(politician_on_stage.organization_we_vote_id):
+                if not positive_value_exists(campaignx.organization_we_vote_id):
+                    campaignx.organization_we_vote_id = politician_on_stage.organization_we_vote_id
+                    heal_linked_campaignx_variables = True
+                elif campaignx.organization_we_vote_id != politician_on_stage.organization_we_vote_id:
+                    campaignx.organization_we_vote_id = politician_on_stage.organization_we_vote_id
+                    heal_linked_campaignx_variables = True
+            if heal_linked_campaignx_variables:
                 try:
                     campaignx.save()
-                    messages.add_message(request, messages.INFO, "Campaignx updated with seo_friendly_path.")
+                    messages.add_message(request, messages.INFO,
+                                         "Campaignx updated with seo_friendly_path, "
+                                         "linked_politician_we_vote_id, or "
+                                         "organization_we_vote_id.")
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx seo_friendly_path:" + str(e))
+                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx:" + str(e))
                     heal_linked_campaignx_variables = False
-            if not heal_linked_campaignx_variables:
-                messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked variables.")
+            else:
+                # messages.add_message(request, messages.INFO, "Campaignx did not need healing.")
+                pass
+        else:
+            messages.add_message(request, messages.ERROR, "Campaignx not found for this Politician.")
 
     # Update Linked Candidates with seo_friendly_path, and
     if success and positive_value_exists(politician_we_vote_id):
@@ -3445,8 +3579,9 @@ def politician_edit_process_view(request):
             politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
+        if positive_value_exists(results['positions_analyzed_count']):
+            if positive_value_exists(results['info_message_to_print']):
+                info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
@@ -3457,29 +3592,42 @@ def politician_edit_process_view(request):
             politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
+        if positive_value_exists(results['positions_analyzed_count']):
+            if positive_value_exists(results['info_message_to_print']):
+                info_message_to_print += results['info_message_to_print']
         campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
         if len(campaignx_we_vote_id_list_changed) > 0:
             campaignx_we_vote_id_list_to_refresh = \
                 list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
 
-        campaignx_manager = CampaignXManager()
-        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(
-            politician_on_stage.linked_campaignx_we_vote_id)
+        follow_organization_manager = FollowOrganizationManager()
+        supporters_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOWING,
+            organization_we_vote_id_being_followed=politician_on_stage.organization_we_vote_id)
+        opposers_count = follow_organization_manager.fetch_follow_organization_count(
+            following_status=FOLLOW_DISLIKE,
+            organization_we_vote_id_being_followed=politician_on_stage.organization_we_vote_id)
         results = campaignx_manager.retrieve_campaignx(
             campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id,
             read_only=False)
+        count_refresh_needed = False
         if results['campaignx_found']:
             campaignx = results['campaignx']
-            campaignx.supporters_count = supporter_count
-            campaignx.save()
+            if campaignx.opposers_count != opposers_count:
+                count_refresh_needed = True
+            if campaignx.supporters_count != supporters_count:
+                count_refresh_needed = True
+            if count_refresh_needed:
+                campaignx.opposers_count = opposers_count
+                campaignx.supporters_count = supporters_count
+                campaignx.save()
 
-        results = refresh_campaignx_supporters_count_in_all_children(
-            request,
-            campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
-        if positive_value_exists(results['update_message']):
-            update_message += results['update_message']
+        if count_refresh_needed:
+            results = refresh_campaignx_supporters_count_in_all_children(
+                request,
+                campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+            if positive_value_exists(results['update_message']):
+                update_message += results['update_message']
 
     # ##################################################
     # Change log and volunteer scoring

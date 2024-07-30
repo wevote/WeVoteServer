@@ -929,32 +929,24 @@ class FollowOrganizationManager(models.Manager):
         return "FollowOrganizationManager"
 
     @staticmethod
-    def fetch_number_of_organizations_disliked(voter_id):
+    def fetch_follow_organization_count(
+            following_status=FOLLOWING,
+            organization_we_vote_id_being_followed='',
+            voter_id=0):
         number_of_organizations_followed = 0
 
-        try:
-            if positive_value_exists(voter_id):
-                follow_organization_query = FollowOrganization.objects.using('readonly').filter(
-                    voter_id=voter_id,
-                    following_status=FOLLOW_DISLIKE,
-                )
-                number_of_organizations_followed = follow_organization_query.count()
-        except Exception as e:
-            pass
-
-        return number_of_organizations_followed
-
-    @staticmethod
-    def fetch_number_of_organizations_followed(voter_id):
-        number_of_organizations_followed = 0
+        if not positive_value_exists(organization_we_vote_id_being_followed) and not positive_value_exists(voter_id):
+            return number_of_organizations_followed
 
         try:
+            queryset = FollowOrganization.objects.using('readonly').filter(
+                following_status=following_status,
+            )
+            if positive_value_exists(organization_we_vote_id_being_followed):
+                queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id_being_followed)
             if positive_value_exists(voter_id):
-                follow_organization_query = FollowOrganization.objects.using('readonly').filter(
-                    voter_id=voter_id,
-                    following_status=FOLLOWING,
-                )
-                number_of_organizations_followed = follow_organization_query.count()
+                queryset = queryset.filter(voter_id=voter_id)
+            number_of_organizations_followed = queryset.count()
         except Exception as e:
             pass
 

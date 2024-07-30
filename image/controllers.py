@@ -1628,7 +1628,8 @@ def delete_cached_images_for_organization(organization):
 
         # Reset Voter with original image details
         voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization.we_vote_id)
+        voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+            organization.we_vote_id, read_only=False)
         voter = voter_results['voter']
         if voter_results['voter_found']:
             reset_voter_image_results = voter_manager.reset_voter_image_details(

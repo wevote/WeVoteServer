@@ -128,7 +128,7 @@ class VoterManager(BaseUserManager):
         status = ""
         success = True
         collision_results = self.retrieve_voter_by_organization_we_vote_id(
-            organization_we_vote_id)
+            organization_we_vote_id, read_only=False)
         if collision_results['voter_found']:
             collision_voter = collision_results['voter']
             if collision_voter.we_vote_id != current_voter_we_vote_id:
@@ -1241,10 +1241,13 @@ class VoterManager(BaseUserManager):
         if not positive_value_exists(linked_organization_we_vote_id):
             return None
         try:
-            queryset = Voter.objects.using('readonly').filter(
-                linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
-            we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
-            return we_vote_id_list[0] if we_vote_id_list else None
+            # This way of retrieving the voter_we_vote_id has led to some very slow queries
+            # queryset = Voter.objects.using('readonly').filter(
+            #     linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            # we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
+            # return we_vote_id_list[0] if we_vote_id_list else None
+            voter = Voter.objects.using('readonly').get(linked_organization_we_vote_id=linked_organization_we_vote_id)
+            return voter.we_vote_id
         except Exception as e:
             pass
         return None
@@ -1648,10 +1651,8 @@ class VoterManager(BaseUserManager):
 
     @staticmethod
     def retrieve_voter_by_organization_we_vote_id(organization_we_vote_id, read_only=False):
-        voter_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, organization_we_vote_id=organization_we_vote_id,
-                                            read_only=read_only)
+        return voter_manager.retrieve_voter(organization_we_vote_id=organization_we_vote_id, read_only=read_only)
 
     @staticmethod
     def retrieve_voter_by_primary_email_we_vote_id(primary_email_we_vote_id, read_only=False):
@@ -1777,10 +1778,10 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(organization_we_vote_id):
                 if read_only:
                     voter_on_stage = Voter.objects.using('readonly').get(
-                        linked_organization_we_vote_id__iexact=organization_we_vote_id)
+                        linked_organization_we_vote_id=organization_we_vote_id)
                 else:
                     voter_on_stage = Voter.objects.get(
-                        linked_organization_we_vote_id__iexact=organization_we_vote_id)
+                        linked_organization_we_vote_id=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 voter_found = True
@@ -2611,9 +2612,10 @@ class VoterManager(BaseUserManager):
         :return:
         """
         value_changed = False
-        voter_results = self.retrieve_voter_by_we_vote_id(voter.we_vote_id)
-        voter = voter_results['voter']
-        if voter_results['voter_found']:
+        # voter_results = self.retrieve_voter_by_we_vote_id(voter.we_vote_id)
+        # voter = voter_results['voter']
+        # if voter_results['voter_found']:
+        if hasattr(voter, 'twitter_profile_image_url_https'):
             if positive_value_exists(twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_profile_image_url_https
                 voter.we_vote_hosted_profile_twitter_image_url_large = None

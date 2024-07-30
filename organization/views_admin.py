@@ -557,6 +557,9 @@ def organization_list_view(request):
             new_filter = Q(organization_website__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(politician_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(twitter_description__icontains=one_word)
             filters.append(new_filter)
 

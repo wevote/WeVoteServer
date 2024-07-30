@@ -477,6 +477,10 @@ def candidate_list_view(request):
             google_civic_election_id_list=[google_civic_election_id])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+    # ################################################
+    # Maintenance script section START
+    # ################################################
+
     # If we are looking at one specific election, find all the candidates under that election and make sure each
     #  candidate entry has a value for candidate_ultimate_election_date. Note this won't update candidates
     #  who have the general election as their ultimate_election_date, if they lost in the primary. That will require
@@ -870,6 +874,10 @@ def candidate_list_view(request):
             campaignx_we_vote_id_updates_status = \
                 "SCRIPT campaignx_we_vote_id_updates: " + campaignx_we_vote_id_updates_status + " "
             messages.add_message(request, messages.INFO, campaignx_we_vote_id_updates_status)
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     google_civic_election_id_list_generated = False
     show_this_year_of_candidates_restriction = False

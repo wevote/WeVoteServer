@@ -1881,7 +1881,7 @@ def organization_follow_or_unfollow_or_ignore(  # organizationFollow organizatio
 
     if positive_value_exists(voter_id):
         number_of_organizations_followed = \
-            follow_organization_manager.fetch_number_of_organizations_followed(voter_id)
+            follow_organization_manager.fetch_follow_organization_count(voter_id=voter_id)
 
         voter_manager.update_organizations_interface_status(voter_we_vote_id, number_of_organizations_followed)
 
