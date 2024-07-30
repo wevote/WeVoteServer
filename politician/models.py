@@ -1968,10 +1968,13 @@ class PoliticianManager(models.Manager):
         politician_list_found = False
 
         try:
-            if positive_value_exists(read_only):
-                politician_query = Politician.objects.using('readonly').all()
-            else:
-                politician_query = Politician.objects.all()
+            # WV-450: switch to using readonly DB, instead of conditional logic
+            # if positive_value_exists(read_only):
+            #     politician_query = Politician.objects.using('readonly').all()
+            # else:
+            #     politician_query = Politician.objects.all()
+
+            politician_query = Politician.objects.using('readonly').all()
             if len(politician_we_vote_id_list):
                 politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
