@@ -970,7 +970,7 @@ class CandidateListManager(models.Manager):
             return results
 
         try:
-            if positive_value_exists(state_code) and (state_code == 'na' or state_code == 'NA'):
+            if positive_value_exists(state_code) and state_code.lower() == 'na':
                 results = self.retrieve_candidate_we_vote_id_list_from_election_list(
                     google_civic_election_id_list=google_civic_election_id_list)
             else:
