@@ -41,7 +41,12 @@ class BallotpediaApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class BallotpediaApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, google_civic_election_id=0, ballotpedia_election_id=0):
+    @staticmethod
+    def create_counter_entry(
+            kind_of_action,
+            google_civic_election_id=0,
+            ballotpedia_election_id=0
+    ):
         """
         Create an entry that records that a call to the Ballotpedia Api was made.
         """
@@ -64,10 +69,16 @@ class BallotpediaApiCounterManager(models.Manager):
             'success':                  success,
             'status':                   status,
         }
+
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, ballotpedia_election_id=0,
-                                 days_to_display=30):
+    @staticmethod
+    def retrieve_daily_summaries(
+            kind_of_action='',
+            google_civic_election_id=0,
+            ballotpedia_election_id=0,
+            days_to_display=30
+    ):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
