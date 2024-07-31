@@ -45,10 +45,13 @@
         {% endif %}
             <tr>
                 <th>Organization We Vote ID:&nbsp;</th>
-                <td> {{ campaignx.organization_we_vote_id }}
+                <td>
+                    {{ campaignx.organization_we_vote_id }}
+                    {% if campaignx.organization_we_vote_id %}
                     <a href="{% url 'organization:organization_edit_we_vote_id' campaignx.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span>
                     </a>
+                    {% endif %}
                 </td>
             </tr>
         {% if campaignx.in_draft_mode %}

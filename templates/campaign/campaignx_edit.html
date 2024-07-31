@@ -54,7 +54,7 @@
                 <input type="checkbox" name="ocd_id_state_mismatch_resolved" id="ocd_id_state_mismatch_resolved_id" value="1"
                     {% if campaignx.ocd_id_state_mismatch_resolved %}checked{% endif %} />&nbsp;OCD ID Issue Resolved
             {% endif %}
-            {% if campaignx.linked_politician_we_vote_id %}
+            {% if campaignx and campaignx.linked_politician_we_vote_id %}
                 <br />
                 <span style="color: darkgray;">
                     This campaign ('{{ campaignx.campaign_title }}') was generated for this politician (state_code: {{ politician_state_code }}):
@@ -72,10 +72,12 @@
 <div class="form-group">
     <label for="linked_politician_we_vote_id_id" class="col-sm-3 control-label">
         Politician WeVote ID
+        {% if campaignx and campaignx.linked_politician_we_vote_id %}
         <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
            target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
         </a>
+        {% endif %}
     </label>
     <div class="col-sm-8">
         <input type="text" name="linked_politician_we_vote_id" id="linked_politician_we_vote_id_id" class="form-control"
