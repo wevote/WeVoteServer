@@ -6,9 +6,9 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "candidate/loading_banner.html" %}
 
 <h1>Candidates</h1>
-
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
         Import New Candidates <span class="glyphicon glyphicon-new-window"></span></a>
@@ -807,44 +807,56 @@
       x.style.display = "block";
     }
     function showAllStates(currentFormId) {
+        displayLoadingBanner();
         const currentForm = document.getElementById(currentFormId);
         currentForm.state_code.value = '';
         currentForm.submit();
     }
     $(function() {
         $('#exclude_candidate_analysis_done_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
-    $(function() {
-        $('#google_civic_election_id').change(function() {
-            this.form.submit();
-        });
+
+function displayLoadingBanner() {
+    document.getElementById('CandidateFilterPopupMessage').style.display = 'block';
+}
+$(function() {
+    $('#google_civic_election_id').change(function() {
+           displayLoadingBanner();
+           this.form.submit();
     });
+});
     $(function() {
         $('#review_mode_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#federal_or_state_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#hide_candidates_with_links_id').change(function() {
+            displayLoadingBanner();
             this.form.hide_candidates_with_photos_id.value = '0';
             this.form.submit();
         });
     });
     $(function() {
         $('#hide_candidates_with_photos_id').change(function() {
+            displayLoadingBanner();
             this.form.hide_candidates_with_links_id.value = '0';
             this.form.submit();
         });
     });
     $(function() {
         $('#no_supporters_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
@@ -866,36 +878,43 @@
         $('#show_candidates_without_twitter_id').change(function() {
             {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
             {#this.form.show_candidates_with_twitter_options_id.value = '0';#}
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#show_election_statistics_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#show_marquee_or_battleground_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#show_this_year_of_candidates_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#state_code_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
     $(function() {
         $('#show_candidates_with_email_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
     });
