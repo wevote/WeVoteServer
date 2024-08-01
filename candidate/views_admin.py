@@ -99,9 +99,14 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
     if positive_value_exists(google_civic_election_id):
         candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
-        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-            google_civic_election_id_list=google_civic_election_id_list,
-            limit_to_this_state_code=state_code)
+        # if state code is na, don't filter by state code of office link, get all candidates for that election
+        if positive_value_exists(state_code) and state_code.lower() == 'na':
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list)
+        else:
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     elif positive_value_exists(state_code):
         current_year = get_current_year_as_integer()
@@ -116,6 +121,9 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         queryset = CandidateCampaign.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             queryset = queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+            # with na state code, filter by candidate's state code from the previously fetched full election data
+            if positive_value_exists(state_code) and state_code.lower() == 'na':
+                queryset = queryset.filter(state_code__iexact=state_code)
         elif positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
             queryset = queryset.filter(candidate_year=current_year)
@@ -901,9 +909,13 @@ def candidate_list_view(request):
             limit_to_this_state_code=state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     elif google_civic_election_id_list_generated:
-        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-            google_civic_election_id_list=google_civic_election_id_list,
-            limit_to_this_state_code=state_code)
+        if positive_value_exists(state_code) and state_code.lower() == 'na':
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list)
+        else:
+            results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     for one_state_code, one_state_name in state_list.items():
