@@ -1951,6 +1951,7 @@ class PoliticianManager(models.Manager):
 #             politician_entry.delete()
 
     @staticmethod
+    # Cannot be readonly because method being used in other methods to read & write.
     def retrieve_politician_list(
             limit_to_this_state_code="",
             politician_we_vote_id_list=[],
@@ -1968,9 +1969,6 @@ class PoliticianManager(models.Manager):
         politician_list_found = False
 
         try:
-            # WV-450: switch to using readonly DB, instead of conditional logic
-            # politician_query = Politician.objects.using('readonly').all()
-
             if positive_value_exists(read_only):
                 politician_query = Politician.objects.using('readonly').all()
             else:
