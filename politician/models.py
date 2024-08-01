@@ -1954,7 +1954,7 @@ class PoliticianManager(models.Manager):
     def retrieve_politician_list(
             limit_to_this_state_code="",
             politician_we_vote_id_list=[],
-            read_only=True,
+            read_only=False,
     ):
         """
 
