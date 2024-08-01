@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from analytics.controllers import save_analytics_action_for_api
-from analytics.models import ACTION_BALLOT_VISIT, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS, AnalyticsAction
+from analytics.models import ACTION_BALLOT_VISIT, ACTION_ELECTIONS, ACTION_POLITICIAN_PAGE_VISIT, \
+    ACTION_VOTER_GUIDE_VISIT, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS, AnalyticsAction
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
@@ -30,7 +31,9 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
     show_this_year_of_analytics = convert_to_int(request.GET.get('show_this_year_of_analytics', 0))
     status = ''
     success = True
-    analytics_action_code_list = [ACTION_BALLOT_VISIT]
+    # Visits to pages that show ballot data
+    analytics_action_code_list = [
+        ACTION_BALLOT_VISIT, ACTION_ELECTIONS, ACTION_POLITICIAN_PAGE_VISIT, ACTION_VOTER_GUIDE_VISIT]
 
     analytics_queryset = AnalyticsAction.objects.using('readonly').all()
     analytics_queryset = analytics_queryset.filter(action_constant__in=analytics_action_code_list)

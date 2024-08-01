@@ -2275,7 +2275,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         if vote_smart_turned_on:
             try:
                 vote_smart_candidate_id = candidate_on_stage.vote_smart_id
-                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list_query = VoteSmartRatingOneCandidate.objects.using('readonly').order_by('-timeSpan')  # Desc order
                 rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
             except VotesmartApiError as error_instance:
                 # Catch the error message coming back from Vote Smart and pass it in the status
@@ -2291,10 +2291,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         if positive_value_exists(politician_we_vote_id):
             from politician.models import PoliticianSEOFriendlyPath
             try:
-                path_query = PoliticianSEOFriendlyPath.objects.all()
+                path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
                 path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
                 path_count = path_query.count()
-                path_list = list(path_query[:4])
+                path_list = list(path_query[:3])
             except Exception as e:
                 status += 'ERROR_RETRIEVING_FROM_PoliticianSEOFriendlyPath: ' + str(e) + ' '
 
@@ -2308,7 +2308,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
         # Working with We Vote Positions
         try:
-            candidate_position_query = PositionEntered.objects.order_by('stance')
+            candidate_position_query = PositionEntered.objects.using('readonly').order_by('stance')
             # As of Aug 2018 we are no longer using PERCENT_RATING
             candidate_position_query = candidate_position_query.exclude(stance__iexact='PERCENT_RATING')
             candidate_position_query = candidate_position_query.filter(candidate_campaign_id=candidate_id)
@@ -2339,7 +2339,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
         twitter_link_possibility_list = []
         try:
-            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('not_a_match', '-likelihood_score')
+            twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly')\
+                .order_by('not_a_match', '-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             if positive_value_exists(show_all_twitter_search_results):
@@ -2352,7 +2353,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         google_search_possibility_list = []
         google_search_possibility_total_count = 0
         try:
-            google_search_possibility_query = GoogleSearchUser.objects.filter(
+            google_search_possibility_query = GoogleSearchUser.objects.using('readonly').filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             google_search_possibility_query = google_search_possibility_query.filter(likelihood_score__gte=0)
             google_search_possibility_query = google_search_possibility_query.order_by(
