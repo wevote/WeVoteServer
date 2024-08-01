@@ -21,6 +21,7 @@ from import_export_batches.models import AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_
     CALCULATE_SITEWIDE_VOTER_METRICS
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+from politician.models import Politician
 from position.models import PositionMetricsManager
 from share.models import ShareManager
 from voter.models import VoterManager, VoterMetricsManager
@@ -800,10 +801,24 @@ def process_sitewide_voter_metrics(batch_process, batch_process_analytics_chunk)
     return results
 
 
-def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                                  organization_we_vote_id, organization_id, google_civic_election_id,
-                                  user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-                                  ballot_item_we_vote_id=None, voter_device_id=None):  # saveAnalyticsAction
+def save_analytics_action_for_api(  # saveAnalyticsAction
+        action_constant=0,
+        voter_we_vote_id='',
+        voter_id=0,
+        is_signed_in=False,
+        state_code='',
+        organization_we_vote_id='',
+        organization_id=0,
+        google_civic_election_id=0,
+        user_agent_string='',
+        is_bot=False,
+        is_mobile=False,
+        is_desktop=False,
+        is_tablet=False,
+        ballot_item_we_vote_id=None,
+        politician_we_vote_id=None,
+        seo_friendly_path='',
+        voter_device_id=None):
     analytics_manager = AnalyticsManager()
     success = True
     status = "SAVE_ANALYTICS_ACTION "
@@ -846,6 +861,7 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
             'google_civic_election_id': google_civic_election_id,
             'organization_we_vote_id':  organization_we_vote_id,
             'organization_id':          organization_id,
+            'politician_we_vote_id':    politician_we_vote_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'date_as_integer':          date_as_integer,
             'user_agent':               user_agent_string,
@@ -856,12 +872,33 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
         }
         return results
 
+    if positive_value_exists(seo_friendly_path) and not positive_value_exists(politician_we_vote_id):
+        # Look up the politician_we_vote_id based on the seo_friendly_path
+        try:
+            queryset = Politician.objects.using('readonly').filter(seo_friendly_path=seo_friendly_path)
+            one_politician = queryset.first()
+            politician_we_vote_id = one_politician.we_vote_id
+        except Exception as e:
+            politician_we_vote_id = None
+            status += "POLITICIAN_NOT_FOUND-FROM_SEO_FRIENDLY_PATH: " + str(e) + " "
+
     save_results = analytics_manager.save_action(
-            action_constant,
-            voter_we_vote_id, voter_id, is_signed_in, state_code,
-            organization_we_vote_id, organization_id, google_civic_election_id,
-            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-            ballot_item_we_vote_id, voter_device_id)
+        action_constant,
+        voter_we_vote_id,
+        voter_id,
+        is_signed_in,
+        state_code,
+        organization_we_vote_id,
+        organization_id,
+        google_civic_election_id,
+        user_agent_string,
+        is_bot,
+        is_mobile,
+        is_desktop,
+        is_tablet,
+        ballot_item_we_vote_id,
+        voter_device_id,
+        politician_we_vote_id=politician_we_vote_id)
     if save_results['action_saved']:
         action = save_results['action']
         date_as_integer = action.date_as_integer
@@ -881,6 +918,7 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
         'google_civic_election_id': google_civic_election_id,
         'organization_we_vote_id':  organization_we_vote_id,
         'organization_id':          organization_id,
+        'politician_we_vote_id':    politician_we_vote_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'date_as_integer':          date_as_integer,
         'user_agent':               user_agent_string,

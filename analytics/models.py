@@ -96,6 +96,7 @@ ACTION_VIEW_SHARED_ORGANIZATION = 77
 ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 78
 ACTION_ORGANIZATION_FOLLOW_DISLIKE = 79
 ACTION_ORGANIZATION_STOP_DISLIKING = 80
+ACTION_POLITICIAN_PAGE_VISIT = 81
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -134,7 +135,7 @@ class AnalyticsAction(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_id = models.PositiveIntegerField(null=True, blank=True)
-
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     ballot_item_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
@@ -562,12 +563,13 @@ class AnalyticsManager(models.Manager):
             is_desktop,
             is_tablet,
             ballot_item_we_vote_id="",
-            voter_device_id=None):
+            voter_device_id=None,
+            politician_we_vote_id=None):
         """
         Create AnalyticsAction data
         """
         success = True
-        status = "ACTION_CONSTANT:" + display_action_constant_human_readable(action_constant) + " "
+        status = "ACTION_CONSTANT_TYPE1: " + display_action_constant_human_readable(action_constant) + " "
         action_saved = False
         action = AnalyticsAction()
         missing_required_variable = False
@@ -600,6 +602,7 @@ class AnalyticsManager(models.Manager):
                 state_code=state_code,
                 organization_we_vote_id=organization_we_vote_id,
                 organization_id=organization_id,
+                politician_we_vote_id=politician_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
                 user_agent=user_agent_string,
@@ -638,12 +641,13 @@ class AnalyticsManager(models.Manager):
             is_desktop,
             is_tablet,
             ballot_item_we_vote_id,
-            voter_device_id=None):
+            voter_device_id=None,
+            politician_we_vote_id=None):
         """
         Create AnalyticsAction data
         """
         success = True
-        status = "ACTION_CONSTANT:" + display_action_constant_human_readable(action_constant) + " "
+        status = "ACTION_CONSTANT_TYPE2: " + display_action_constant_human_readable(action_constant) + " "
         action_saved = False
         action = AnalyticsAction()
         missing_required_variable = False
@@ -672,6 +676,7 @@ class AnalyticsManager(models.Manager):
                 is_signed_in=is_signed_in,
                 state_code=state_code,
                 organization_we_vote_id=organization_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
                 user_agent=user_agent_string,
@@ -1333,11 +1338,24 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_action(self, action_constant="",
-                    voter_we_vote_id="", voter_id=0, is_signed_in=False, state_code="",
-                    organization_we_vote_id="", organization_id=0, google_civic_election_id=0,
-                    user_agent_string="", is_bot=False, is_mobile=False, is_desktop=False, is_tablet=False,
-                    ballot_item_we_vote_id="", voter_device_id=None):
+    def save_action(
+            self,
+            action_constant="",
+            voter_we_vote_id="",
+            voter_id=0,
+            is_signed_in=False,
+            state_code="",
+            organization_we_vote_id="",
+            organization_id=0,
+            google_civic_election_id=0,
+            user_agent_string="",
+            is_bot=False,
+            is_mobile=False,
+            is_desktop=False,
+            is_tablet=False,
+            ballot_item_we_vote_id="",
+            voter_device_id=None,
+            politician_we_vote_id=""):
         # If a voter_device_id is passed in, it is because this action may be coming from
         #  https://analytics.wevoteusa.org and hasn't been authenticated yet
         # Confirm that we have a valid voter_device_id. If not, store the action with the voter_device_id so we can
@@ -1352,12 +1370,14 @@ class AnalyticsManager(models.Manager):
             return self.create_action_type1(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                             organization_we_vote_id, organization_id, google_civic_election_id,
                                             user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-                                            ballot_item_we_vote_id, voter_device_id)
+                                            ballot_item_we_vote_id, voter_device_id,
+                                            politician_we_vote_id=politician_we_vote_id)
         else:
             return self.create_action_type2(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                             organization_we_vote_id, google_civic_election_id,
                                             user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-                                            ballot_item_we_vote_id, voter_device_id)
+                                            ballot_item_we_vote_id, voter_device_id,
+                                            politician_we_vote_id=politician_we_vote_id)
 
     @staticmethod
     def save_organization_daily_metrics_values(organization_daily_metrics_values):
@@ -2067,6 +2087,8 @@ def display_action_constant_human_readable(action_constant):
         return "ORGANIZATION_STOP_FOLLOWING"
     if action_constant == ACTION_ORGANIZATION_STOP_IGNORING:
         return "ORGANIZATION_STOP_IGNORING"
+    if action_constant == ACTION_POLITICIAN_PAGE_VISIT:
+        return "POLITICIAN_PAGE_VISIT"
     if action_constant == ACTION_POSITION_TAKEN:
         return "POSITION_TAKEN"
     if action_constant == ACTION_READY_VISIT:
@@ -2154,7 +2176,7 @@ def display_action_constant_human_readable(action_constant):
     if action_constant == ACTION_WELCOME_VISIT:
         return "WELCOME_VISIT"
 
-    return "ACTION_CONSTANT:" + str(action_constant)
+    return "ACTION_CONSTANT_STRING:" + str(action_constant)
 
 
 def fetch_action_constant_number_from_constant_string(action_constant_string):

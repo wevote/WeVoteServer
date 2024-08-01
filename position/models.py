@@ -482,10 +482,13 @@ class PositionEntered(models.Model):
         return election
 
     def organization(self):
-        if not self.organization_id:
+        if not self.organization_id and not self.organization_we_vote_id:
             return
         try:
-            organization = Organization.objects.using('readonly').get(id=self.organization_id)
+            if positive_value_exists(self.organization_id):
+                organization = Organization.objects.using('readonly').get(id=self.organization_id)
+            elif positive_value_exists(self.organization_we_vote_id):
+                organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             logger.error("position.organization Found multiple")
