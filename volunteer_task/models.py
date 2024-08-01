@@ -65,7 +65,7 @@ class VolunteerTaskManager(models.Manager):
         Create VolunteerTaskCompleted data
         """
         success = True
-        status = "ACTION_CONSTANT:" + display_action_constant_human_readable(action_constant) + " "
+        status = "VOLUNTEER_TASK_ACTION_CONSTANT: " + display_action_constant_human_readable(action_constant) + " "
         action_saved = False
         action = VolunteerTaskCompleted()
         missing_required_variable = False
@@ -240,4 +240,4 @@ def display_action_constant_human_readable(action_constant):
     if action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
         return "VOTER_GUIDE_POSSIBILITY_CREATED"
 
-    return "VOLUNTEER_ACTION_CONSTANT:" + str(action_constant)
+    return "VOLUNTEER_ACTION_CONSTANT: " + str(action_constant)

@@ -965,6 +965,9 @@ th, td {
                 {% if candidate_position.organization_id %}
                 <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
                 {{ candidate_position.organization.organization_name }} (edit position)</a>
+                {% elif candidate_position.organization_we_vote_id %}
+                <a href="{% url 'organization:organization_we_vote_id_position_edit' candidate_position.organization_we_vote_id candidate_position.we_vote_id %}">
+                {{ candidate_position.organization.organization_name }} (edit position)</a>
                 {% else %}
                     (not an org)
                 {% endif %}
