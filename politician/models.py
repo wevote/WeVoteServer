@@ -1358,7 +1358,7 @@ class PoliticianManager(models.Manager):
         politician_search_results_list = []
 
         try:
-            queryset = Politician.objects.all()
+            queryset = Politician.objects.using('readonly').all()
             if name_search_terms is not None:
                 name_search_words = name_search_terms.split()
             else:
@@ -1951,6 +1951,7 @@ class PoliticianManager(models.Manager):
 #             politician_entry.delete()
 
     @staticmethod
+    # Cannot be readonly because method being used in other methods to read & write.
     def retrieve_politician_list(
             limit_to_this_state_code="",
             politician_we_vote_id_list=[],
@@ -1972,6 +1973,7 @@ class PoliticianManager(models.Manager):
                 politician_query = Politician.objects.using('readonly').all()
             else:
                 politician_query = Politician.objects.all()
+
             if len(politician_we_vote_id_list):
                 politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
@@ -2009,7 +2011,7 @@ class PoliticianManager(models.Manager):
             twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[],
-            read_only=False):
+            read_only=True):
         """
 
         :param state_code:
