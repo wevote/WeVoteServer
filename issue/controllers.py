@@ -523,7 +523,7 @@ def issue_organizations_retrieve_for_api(issue_we_vote_id=''):  # issueOrganizat
     organization_list_found = False
     from organization.models import Organization
     try:
-        organization_queryset = Organization.objects.all()
+        organization_queryset = Organization.objects.using('readonly').all()
         organization_queryset = organization_queryset.filter(we_vote_id__in=complete_organization_we_vote_id_list)
         organization_queryset = organization_queryset.order_by('-twitter_followers_count')
         organization_list = list(organization_queryset)

@@ -379,7 +379,8 @@ def get_and_save_facebook_photo_view(request):
                                     )
 
     try:
-        query = CandidateCampaign.objects.all() if is_candidate else Organization.objects.all()
+        query = CandidateCampaign.objects.all() if is_candidate else Organization.objects.all()  # Cannot be
+        # 'readonly' because we save facebook URL and Profile image information below
 
         query = query.filter(we_vote_id__iexact=we_vote_id)
         entity_list = list(query)

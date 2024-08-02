@@ -1796,7 +1796,7 @@ def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0)
         list(set(organization_we_vote_id_list_to_include) - set(organization_we_vote_id_list_to_exclude))
 
     try:
-        organization_queryset = Organization.objects.all()
+        organization_queryset = Organization.objects.using('readonly').all()
         organization_queryset = organization_queryset.filter(we_vote_id__in=organization_we_vote_id_list)
         organization_queryset = organization_queryset.exclude(organization_twitter_updates_failing=True)
         # Limit this search to non-individuals
@@ -2198,7 +2198,7 @@ def scrape_and_save_social_media_from_all_organizations(state_code='', force_ret
     twitter_handles_found = 0
 
     organization_manager = OrganizationManager()
-    organization_list_query = Organization.objects.order_by('organization_name')
+    organization_list_query = Organization.objects.order_by('organization_name')  # Cannot be readonly
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code=state_code)
 
@@ -2241,7 +2241,7 @@ def refresh_twitter_data_for_organizations(state_code='', google_civic_election_
     number_of_twitter_accounts_queried = 0
     number_of_organizations_updated = 0
 
-    organization_list_query = Organization.objects.order_by('organization_name')
+    organization_list_query = Organization.objects.using('readonly').order_by('organization_name')
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code=state_code)
 

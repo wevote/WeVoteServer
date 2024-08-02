@@ -2463,7 +2463,7 @@ def organization_position_new_view(request, organization_id):
     organization_on_stage_found = False
     organization_on_stage = Organization()
     try:
-        organization_on_stage = Organization.objects.get(id=organization_id)
+        organization_on_stage = Organization.objects.using('readonly').get(id=organization_id)
         organization_on_stage_found = True
     except Organization.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -2693,9 +2693,9 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
     organization_on_stage_found = False
     try:
         if positive_value_exists(organization_id):
-            organization_on_stage = Organization.objects.get(id=organization_id)
+            organization_on_stage = Organization.objects.using('readonly').get(id=organization_id)
         else:
-            organization_on_stage = Organization.objects.get(we_vote_id=organization_we_vote_id)
+            organization_on_stage = Organization.objects.using('readonly').get(we_vote_id=organization_we_vote_id)
         organization_on_stage_found = True
     except Organization.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)

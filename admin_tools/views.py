@@ -276,7 +276,7 @@ def data_cleanup_organization_analysis_view(request):
             for item in organization_filters:
                 final_organization_filters |= item
 
-            organization_list_with_duplicate_twitter = Organization.objects.all()
+            organization_list_with_duplicate_twitter = Organization.objects.using('readonly').all()
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.filter(
                 final_organization_filters)
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.exclude(
@@ -360,7 +360,7 @@ def data_cleanup_organization_list_analysis_view(request):
 
     create_twitter_link_to_organization = request.GET.get('create_twitter_link_to_organization', False)
 
-    organization_list = Organization.objects.all()
+    organization_list = Organization.objects.using('readonly').all()
 
     # Goal: Create TwitterLinkToOrganization
     # Goal: Look for opportunities to link Voters with Orgs

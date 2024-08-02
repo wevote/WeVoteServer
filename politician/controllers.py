@@ -823,7 +823,7 @@ def match_politician_to_organization(
     if use_name_match:
         organization_possible_match_by_name_found = False
         try:
-            queryset = Organization.objects.all()
+            queryset = Organization.objects.all()  # Cannot be 'readonly'
             queryset = queryset.filter(
                 Q(politician_we_vote_id__isnull=True) |
                 Q(politician_we_vote_id__iexact=''))

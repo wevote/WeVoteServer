@@ -2654,7 +2654,7 @@ class OrganizationListManager(models.Manager):
                 # - organization.twitter_user_id
                 # - organization.organization_twitter_handle
                 try:
-                    organization_queryset = Organization.objects.all()
+                    organization_queryset = Organization.objects.all()  # Cannot be Readonly
 
                     # We want to find organizations with *any* of these values
                     new_filter = Q(twitter_user_id=twitter_user_id)
@@ -2995,7 +2995,7 @@ class OrganizationListManager(models.Manager):
 
         if positive_value_exists(organization_name):
             try:
-                organization_queryset = Organization.objects.all()
+                organization_queryset = Organization.objects.using('readonly').all()
                 organization_queryset = organization_queryset.filter(
                     organization_name__iexact=organization_name)
 

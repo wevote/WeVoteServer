@@ -987,7 +987,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                 for item in org_twitter_filters:
                     final_filters |= item
 
-            organization_list_with_duplicate_twitter = Organization.objects.all()
+            organization_list_with_duplicate_twitter = Organization.objects.using('readonly').all()
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.filter(final_filters)
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.exclude(
                 we_vote_id=voter_on_stage.linked_organization_we_vote_id)
@@ -1005,7 +1005,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         # ####################################
         # Find the voter that has this organization as their linked_organization_we_vote_id
         linked_organization_we_vote_id_list_updated = []
-        linked_organization_we_vote_id_list = Organization.objects.all()
+        linked_organization_we_vote_id_list = Organization.objects.using('readonly').all()
         linked_organization_we_vote_id_list = linked_organization_we_vote_id_list.filter(
             we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
 
