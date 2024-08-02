@@ -382,6 +382,13 @@ class Issue(models.Model):
     we_vote_hosted_image_url_tiny = models.URLField(
         verbose_name='we vote hosted tiny image url', blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['hide_issue', 'we_vote_id'],
+                name='hide_issue_we_vote_id'),
+        ]
+
     # We override the save function, so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
@@ -699,6 +706,16 @@ class OrganizationLinkToIssue(models.Model):
 
     def __unicode__(self):
         return self.issue_we_vote_id
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['organization_we_vote_id', 'link_active'],
+                name='organization_and_link_active'),
+            models.Index(
+                fields=['issue_we_vote_id', 'organization_we_vote_id', 'link_active'],
+                name='issue_org_link_active'),
+        ]
 
     def is_linked(self):
         if self.link_active:
