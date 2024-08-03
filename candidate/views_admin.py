@@ -3394,7 +3394,13 @@ def candidate_edit_process_view(request):
                     messages.add_message(request, messages.ERROR,
                                          'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if state_code is not False:
-                candidate_on_stage.state_code = state_code
+                try:
+                    state_code_filtered = str(state_code)
+                    state_code_filtered = state_code_filtered[:2]
+                    candidate_on_stage.state_code = state_code_filtered
+                except Exception as e:
+                    state_code_filtered = None
+                    status += "PROBLEM_WITH_STATE_CODE: " + str(e) + " "
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
 
