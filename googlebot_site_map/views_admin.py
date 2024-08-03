@@ -21,6 +21,7 @@ from wevote_functions.functions_date import DATE_FORMAT_YMD
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
 def log_request(request):
     ip = get_ip_from_headers(request)
     user_agent = request.headers['user-agent']
@@ -63,11 +64,13 @@ def get_googlebot_map_file_body(request):
     num = int(map_num_result[0])
     https_root = "https://wevote.us/"
     map_text = ''
-    queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
-    politician_list = list(queryset)
     if num == 0:
         for u in supplemental_urls.crawlable_urls:
             map_text += u + '<br>'
+
+    # Retrieve Politicians, 40,000 at a time
+    queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
+    politician_list = list(queryset)
     for pol in politician_list:
         map_text += https_root + pol.seo_friendly_path + '/-/<br>'
 
@@ -88,13 +91,15 @@ def get_googlebot_map_xml_body(request):
     num = int(map_num_result[0])
     https_root = "https://wevote.us/"
     dt = datetime.date.today()
-    lastmod = dt.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
+    lastmod = dt.strftime(DATE_FORMAT_YMD)  # "%Y-%m-%d"
     map_xml = ''
-    queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
-    politician_list = list(queryset)
     if num == 0:
         for loc in supplemental_urls.crawlable_urls:
             map_xml += xml_chunk(loc, lastmod)
+
+    # Retrieve Politicians, 40,000 at a time
+    queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
+    politician_list = list(queryset)
     for pol in politician_list:
         map_xml += xml_chunk(https_root + pol.seo_friendly_path + "/-/", lastmod)
 
@@ -132,6 +137,7 @@ def googlebot_site_map_list_view(request):
         # 'request_details':      format_prepared_request(request),
     }
     return render(request, 'googlebot_stats/googlebot_stats.html', template_values)
+
 
 def fetch_graph_data():
     dates = []
