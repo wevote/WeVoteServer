@@ -2963,6 +2963,7 @@ def candidate_edit_process_view(request):
             election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(this_election.election_day_text)
             if election_day_as_integer > latest_election_date:
                 candidate_ultimate_election_date = election_day_as_integer
+                latest_election_date = election_day_as_integer
                 election_day_as_string = str(election_day_as_integer)
                 year = election_day_as_string[:4]
                 if year and not positive_value_exists(candidate_year):
