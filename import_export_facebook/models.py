@@ -168,7 +168,8 @@ class FacebookManager(models.Manager):
     def __unicode__(self):
         return "FacebookManager"
 
-    def create_facebook_link_to_voter(self, facebook_user_id, voter_we_vote_id):
+    @staticmethod
+    def create_facebook_link_to_voter(facebook_user_id, voter_we_vote_id):
         create_new_facebook_link = True
         facebook_link_to_voter = None
         facebook_link_to_voter_saved = False
@@ -244,7 +245,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def delete_facebook_link_to_voter(self, voter_we_vote_id):
+    @staticmethod
+    def delete_facebook_link_to_voter(voter_we_vote_id):
         success = False
         facebook_user_id = ""
 
@@ -265,12 +267,21 @@ class FacebookManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_facebook_auth_response(
-            self, voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
+            voter_device_id,
+            facebook_access_token,
+            facebook_user_id,
+            facebook_expires_in,
             facebook_signed_request,
-            facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-            facebook_profile_image_url_https, facebook_background_image_url_https,
-            facebook_background_image_offset_x, facebook_background_image_offset_y):
+            facebook_email,
+            facebook_first_name,
+            facebook_middle_name,
+            facebook_last_name,
+            facebook_profile_image_url_https,
+            facebook_background_image_url_https,
+            facebook_background_image_offset_x,
+            facebook_background_image_offset_y):
         """
 
         :param voter_device_id:
@@ -346,13 +357,13 @@ class FacebookManager(models.Manager):
         }
         return results
 
-
-    def retrieve_facebook_auth_response_by_id(self, facebook_auth_response_id, read_only=False):
+    @staticmethod
+    def retrieve_facebook_auth_response_by_id(facebook_auth_response_id, read_only=False):
         facebook_auth_response_on_stage = FacebookAuthResponse.objects.get(id=facebook_auth_response_id)
         return facebook_auth_response_on_stage
 
-
-    def delete_facebook_auth_responses(self, facebook_user_id):
+    @staticmethod
+    def delete_facebook_auth_responses(facebook_user_id):
         """
         Delete all facebookauthresponse rows that have this facebook_user_id
         :param facebook_user_id:
@@ -384,7 +395,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def update_or_create_facebook_friends_using_we_vote(self, facebook_id_of_me, facebook_id_of_my_friend):
+    @staticmethod
+    def update_or_create_facebook_friends_using_we_vote(facebook_id_of_me, facebook_id_of_my_friend):
         """
         We use this subroutine to create or update FacebookFriendsUsingWeVote table with my friends facebook id.
         :param facebook_id_of_me:
@@ -418,12 +430,21 @@ class FacebookManager(models.Manager):
             }
         return results
 
-    def update_or_create_facebook_user(self, facebook_user_id, facebook_user_first_name, facebook_user_middle_name,
-                                       facebook_user_last_name, facebook_user_name=None, facebook_user_location_id=None,
-                                       facebook_user_location_name=None, facebook_user_gender=None,
-                                       facebook_user_birthday=None, facebook_profile_image_url_https=None,
-                                       facebook_background_image_url_https=None, facebook_user_about=None,
-                                       facebook_user_is_verified=False, facebook_user_friend_total_count=None,
+    @staticmethod
+    def update_or_create_facebook_user(facebook_user_id,
+                                       facebook_user_first_name,
+                                       facebook_user_middle_name,
+                                       facebook_user_last_name,
+                                       facebook_user_name=None,
+                                       facebook_user_location_id=None,
+                                       facebook_user_location_name=None,
+                                       facebook_user_gender=None,
+                                       facebook_user_birthday=None,
+                                       facebook_profile_image_url_https=None,
+                                       facebook_background_image_url_https=None,
+                                       facebook_user_about=None,
+                                       facebook_user_is_verified=False,
+                                       facebook_user_friend_total_count=None,
                                        we_vote_hosted_profile_image_url_large=None,
                                        we_vote_hosted_profile_image_url_medium=None,
                                        we_vote_hosted_profile_image_url_tiny=None,
@@ -494,7 +515,8 @@ class FacebookManager(models.Manager):
             }
         return results
 
-    def delete_facebook_users(self, facebook_user_id):
+    @staticmethod
+    def delete_facebook_users(facebook_user_id):
         """
         We use this subroutine to delete FacebookUser table row(s) with a specific facebook_user_id value.
         :param facebook_user_id:
@@ -573,7 +595,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def update_facebook_user_details(self, facebook_user,
+    @staticmethod
+    def update_facebook_user_details(facebook_user,
                                      cached_facebook_profile_image_url_https=False,
                                      cached_facebook_background_image_url_https=False,
                                      we_vote_hosted_profile_image_url_large=False,
@@ -626,7 +649,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def retrieve_facebook_auth_response(self, voter_device_id):
+    @staticmethod
+    def retrieve_facebook_auth_response(voter_device_id):
         """
 
         :param voter_device_id:
@@ -667,7 +691,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def retrieve_facebook_auth_response_from_facebook_id(self, facebook_user_id):
+    @staticmethod
+    def retrieve_facebook_auth_response_from_facebook_id(facebook_user_id):
         """
         Retrieve facebook auth response from facebook user id
         :param facebook_user_id:
@@ -731,8 +756,8 @@ class FacebookManager(models.Manager):
         return self.retrieve_facebook_link_to_voter(
             facebook_user_id, voter_we_vote_id, facebook_secret_key, read_only=read_only)
 
+    @staticmethod
     def retrieve_facebook_link_to_voter(
-            self,
             facebook_user_id=0,
             voter_we_vote_id='',
             facebook_secret_key='',
@@ -812,7 +837,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def extract_facebook_details_data(self, facebook_friend_api_details_entry):
+    @staticmethod
+    def extract_facebook_details_data(facebook_friend_api_details_entry):
         """
         Extracting facebook friend details with required fields
         :param facebook_friend_api_details_entry:
@@ -862,7 +888,8 @@ class FacebookManager(models.Manager):
                                                              keys() else "")
         return facebook_friend_dict
 
-    def retrieve_facebook_friends_from_facebook(self, facebook_candidate_url):
+    @staticmethod
+    def retrieve_facebook_friends_from_facebook(facebook_candidate_url):
         success = False
         status = ''
         facebook_friends_list_found = False
@@ -1072,7 +1099,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def retrieve_facebook_friends_using_we_vote_list(self, facebook_id_of_me):
+    @staticmethod
+    def retrieve_facebook_friends_using_we_vote_list(facebook_id_of_me):
         """
         Reterive my friends facebook ids from FacebookFriendsUsingWeVote table.
         :param facebook_id_of_me:
@@ -1126,7 +1154,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def extract_facebook_user_details(self, facebook_user_api_details):
+    @staticmethod
+    def extract_facebook_user_details(facebook_user_api_details):
         """
         Extracting facebook user details with required fields
         :param facebook_user_api_details:
@@ -1240,7 +1269,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def retrieve_facebook_user_by_facebook_user_id(self, facebook_user_id):
+    @staticmethod
+    def retrieve_facebook_user_by_facebook_user_id(facebook_user_id):
         """
         Retrieve facebook user from FacebookUser table.
         :param facebook_user_id:
@@ -1274,7 +1304,8 @@ class FacebookManager(models.Manager):
         }
         return results
 
-    def remove_my_facebook_entry_from_suggested_friends_list(self, facebook_suggested_friends_list, facebook_id_of_me):
+    @staticmethod
+    def remove_my_facebook_entry_from_suggested_friends_list(facebook_suggested_friends_list, facebook_id_of_me):
         """
         Facebook graph API method for friends friend return own user entry thats why removing it from
         suggested friend list
