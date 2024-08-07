@@ -1,0 +1,44 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update && apt install -y build-essential libpq-dev zlib1g-dev \
+  libffi-dev libjpeg-dev libbz2-dev libssl-dev libgdbm-dev liblzma-dev \
+  libmagic-dev git wget postgresql-client-12
+
+# build and install python
+ENV PYTHON_VERSION 3.11.4
+RUN cd /tmp && wget -q https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz && \
+	tar -xzf Python-$PYTHON_VERSION.tgz && \
+	cd Python-$PYTHON_VERSION && \
+	./configure --prefix=/usr/local && \
+	make -j $(nproc) && \
+	make install && \
+	cd .. && \
+	rm -rf Python-$PYTHON_VERSION* && \
+	ln -s /usr/local/bin/python3 /usr/local/bin/python && \
+	python -m pip install --upgrade pip setuptools wheel
+
+# install pdf2html
+RUN if [ $(uname -m) = "aarch64" ]; then \
+	wget -O /tmp/pdf2html.deb https://wevote-packages.s3.us-west-2.amazonaws.com/pdf2htmlEX-0.18.8.rc2-master-20230113-ubuntu-20.04-aarch64.deb \
+	&& apt install -y /tmp/pdf2html.deb && rm -f /tmp/pdf2html.deb; \
+	fi
+
+RUN if [ $(uname -m) = "x86_64" ]; then \
+	wget -q -O /tmp/pdf2html.deb https://wevote-packages.s3.us-west-2.amazonaws.com/pdf2htmlEX-0.18.8.rc1-master-20200630-Ubuntu-focal-x86_64.deb \
+	&& apt install -y /tmp/pdf2html.deb && rm -f /tmp/pdf2html.deb; \
+	fi
+
+# setup runtime user account
+RUN useradd wevote && mkdir -p /wevote /var/log/wevote && chown wevote.wevote /wevote /var/log/wevote
+
+# install python dependencies
+COPY requirements.txt /tmp/
+RUN python -m pip install -r /tmp/requirements.txt --no-cache-dir
+
+EXPOSE 8000
+WORKDIR /wevote
+CMD ["/wevote/docker/entrypoint_api_server.sh"]
+
+
