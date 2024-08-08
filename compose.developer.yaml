@@ -1,0 +1,87 @@
+name: wevote
+
+services:
+  db:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.db
+      tags:
+        - "${COMPOSE_PROJECT_NAME}-db:latest"
+    container_name: "${COMPOSE_PROJECT_NAME}-db"
+    environment:
+      POSTGRES_DB: WeVoteServerDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ${COMPOSE_PROJECT_NAME}
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+    user: postgres
+    volumes:
+      - "${COMPOSE_PROJECT_NAME}-postgres-data:/var/lib/postgresql/data"
+    
+  localstack:
+    container_name: "${COMPOSE_PROJECT_NAME}-localstack"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    image: localstack/localstack
+    networks:
+      - ${COMPOSE_PROJECT_NAME}
+    ports:
+      - "127.0.0.1:4566:4566"
+    profiles:
+      - optional
+    volumes:
+      - "${COMPOSE_PROJECT_NAME}-localstack:/var/lib/localstack"
+      - /var/run/docker.sock:/var/run/docker.sock
+  
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.api
+      tags:
+        - "${COMPOSE_PROJECT_NAME}-api:latest"
+    container_name: "${COMPOSE_PROJECT_NAME}-api"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      DATABASE_HOST: "${COMPOSE_PROJECT_NAME}-db"
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secret}
+      DATABASE_PORT: "5432"
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-dev@test.com}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-secret}
+    env_file: .env
+    networks:
+      - ${COMPOSE_PROJECT_NAME}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - "./:/${COMPOSE_PROJECT_NAME}"
+    working_dir: "/${COMPOSE_PROJECT_NAME}"
+
+networks:
+  wevote:
+    ipam:
+      config:
+        - subnet: "172.27.0.0/16"
+          gateway: "172.27.0.1"
+    name: ${COMPOSE_PROJECT_NAME}
+
+volumes:
+  wevote-localstack:
+    name: "${COMPOSE_PROJECT_NAME}-localstack"
+  wevote-postgres-data:
+    name: "${COMPOSE_PROJECT_NAME}-postgres-data"

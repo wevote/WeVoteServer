@@ -1,12 +1,12 @@
 ## A Cheat sheet, containing some commands that might help you out
 Feel free to add to this!
 
-####Stopping postgres loaded by brew, and not setup as a daemon
+#### Stopping postgres loaded by brew, and not setup as a daemon
 ```
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:WeVoteServer stevepodell$ pg_ctl -D /usr/local/var/postgres11.1_1 stop -s -m fast
 ```
 
-####Starting postgres loaded by brew, and not setup as a daemon
+#### Starting postgres loaded by brew, and not setup as a daemon
 ```
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:WeVoteServer stevepodell$ "/Applications/Postgres.app/Contents/Versions/9.6/bin/psql" -p5433 -d "postgres"
 or
