@@ -6,6 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/loading_banner.html" %}
 
 <h1>Politicians</h1>
 
@@ -67,7 +68,7 @@
          clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
-    <input type="submit" value="Search for Politician" />
+    <input id="politician_search_submit" type="submit" value="Search for Politician" />
     &nbsp;&nbsp;
     <label for="show_politicians_with_email_id">
       <input type="checkbox" name="show_politicians_with_email" id="show_politicians_with_email_id" value="1"
@@ -236,38 +237,54 @@
 {% endif %}
 
     <script>
+        function displayLoadingBanner() {
+            document.getElementById('CandidateFilterPopupMessage').style.display = 'block';
+        }
         $(function() {
             $('#organization_manual_intervention_needed_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_all_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_battleground_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_politicians_with_email_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_related_candidates_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
        $(function() {
             $('#show_ocd_id_state_mismatch_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
         $(function() {
             $('#state_code_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#politician_search_submit').click(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });
