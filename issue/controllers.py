@@ -832,6 +832,9 @@ def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetriev
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     for issue in issue_list:
+        # Exclude Political Party Issues due to speed concerns
+        if issue.we_vote_id in ['wv02issue94', 'wv02issue95', 'wv02issue96','wv02issue97']:
+            continue
         all_issue_we_vote_ids.append(issue.we_vote_id)
 
     if not positive_value_exists(google_civic_election_id):
