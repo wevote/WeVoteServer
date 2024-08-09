@@ -206,7 +206,7 @@ def issue_list_view(request):
             for one_organization_link_to_issue in organization_link_to_issue_list:
                 if one_organization_link_to_issue.organization_we_vote_id not in organization_we_vote_ids_to_retrieve:
                     organization_we_vote_ids_to_retrieve\
-                        .append(one_organization_link_to_issue.organization_we_vote_vote_id)
+                        .append(one_organization_link_to_issue.organization_we_vote_id)
             organizations_retrieved_dict = {}
             if len(organization_we_vote_ids_to_retrieve) > 0:
                 from organization.models import Organization
