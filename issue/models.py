@@ -858,8 +858,12 @@ class OrganizationLinkToIssueList(models.Manager):
         return number_of_organizations_following_this_issue
 
     @staticmethod
-    def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list):
+    def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(
+            issue_we_vote_id_list=[],
+            retrieve_objects=False):
         success = True
+        organization_link_to_issue_list = []
+        organization_link_to_issue_list_found = False
         organization_we_vote_id_list = []
         organization_we_vote_id_list_found = False
         link_active = True
@@ -868,13 +872,21 @@ class OrganizationLinkToIssueList(models.Manager):
             # we decided not to use case-insensitivity in favour of '__in'
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)
-            link_queryset = link_queryset.values_list('organization_we_vote_id', flat=True).distinct()
-            organization_we_vote_id_list = list(link_queryset)
-            if len(organization_we_vote_id_list):
-                organization_we_vote_id_list_found = True
-                status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED '
+            if positive_value_exists(retrieve_objects):
+                organization_link_to_issue_list = list(link_queryset)
+                if len(organization_link_to_issue_list):
+                    organization_link_to_issue_list_found = True
+                    status = 'ORGANIZATION_LINK_LIST_RETRIEVED '
+                else:
+                    status = 'NO_ORGANIZATION_LINK_LIST_RETRIEVED '
             else:
-                status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED '
+                link_queryset = link_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+                organization_we_vote_id_list = list(link_queryset)
+                if len(organization_we_vote_id_list):
+                    organization_we_vote_id_list_found = True
+                    status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED '
+                else:
+                    status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED '
         except Issue.DoesNotExist:
             # No issues found. Not a problem.
             status = 'NO_ORGANIZATION_WE_VOTE_IDS_DO_NOT_EXIST '
@@ -888,6 +900,8 @@ class OrganizationLinkToIssueList(models.Manager):
         results = {
             'success': success,
             'status': status,
+            'organization_link_to_issue_list': organization_link_to_issue_list,
+            'organization_link_to_issue_list_found': organization_link_to_issue_list_found,
             'organization_we_vote_id_list_found': organization_we_vote_id_list_found,
             'organization_we_vote_id_list': organization_we_vote_id_list,
         }

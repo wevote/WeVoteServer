@@ -1031,21 +1031,18 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
     organization_we_vote_ids_for_all_issues = []
 
     cached_issue_we_vote_ids_under_each_organization = {}  # key organization_we_vote_id, value list issue_we_vote_ids
-    organizations_included_by_issue_list = {}  # key is issue_we_vote_id, value is list of organizations
     issue_we_vote_id_list_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids
     oppose_issue_we_vote_id_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids opposing
     support_issue_we_vote_id_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids supporting
 
     organization_link_to_issue_list = OrganizationLinkToIssueList()
-    # By issue, return a list of organization_we_vote_ids tagged with that issue
-    for issue_we_vote_id in all_issue_we_vote_ids:
-        one_issue_list = [issue_we_vote_id]
-        organization_we_vote_id_list = \
-            organization_link_to_issue_list.fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(one_issue_list)
-        organizations_included_by_issue_list[issue_we_vote_id] = organization_we_vote_id_list
-        for organization_we_vote_id in organization_we_vote_id_list:
-            if organization_we_vote_id not in organization_we_vote_ids_for_all_issues:
-                organization_we_vote_ids_for_all_issues.append(organization_we_vote_id)
+    # Return a list of organization_we_vote_ids
+    organization_we_vote_id_list = \
+        organization_link_to_issue_list.fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(
+            all_issue_we_vote_ids)
+    for organization_we_vote_id in organization_we_vote_id_list:
+        if organization_we_vote_id not in organization_we_vote_ids_for_all_issues:
+            organization_we_vote_ids_for_all_issues.append(organization_we_vote_id)
 
     # Retrieve public positions for this election from every group linked to an issue the voter is following
     # (We sort them below)
