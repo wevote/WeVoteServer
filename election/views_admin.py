@@ -1875,7 +1875,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                 election.batches_not_processed_batch_set_id = results['batch_set_id']
 
         # How many offices?
-        office_list_query = ContestOffice.objects.all()
+        office_list_query = ContestOffice.objects.using('readonly').all()
         office_list_query = office_list_query.filter(google_civic_election_id=google_civic_election_id)
         if is_national_election and positive_value_exists(state_code):
             office_list_query = office_list_query.filter(state_code__iexact=state_code)

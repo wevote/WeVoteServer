@@ -208,7 +208,7 @@ def offices_copy_to_another_election_view(request):
 
     # Whether we are just displaying some offices, or actually doing the conversion, we want to retrieve
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.using('readonly').all()
 
         if show_offices_with_zero_candidates_in_to_election:
             office_queryset = office_queryset.filter(google_civic_election_id=to_google_civic_election_id)
@@ -601,7 +601,7 @@ def office_list_view(request):
                 election_day_text_by_election_id_dict[one_election.google_civic_election_id] = \
                     convert_we_vote_date_string_to_date_as_integer(one_election.election_day_text)
         # Now get ContestOffice objects we want to update
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.using('readonly').all()
         office_queryset = office_queryset.filter(
             Q(election_date_as_integer__isnull=True) |
             Q(election_date_as_integer=0)
@@ -659,7 +659,7 @@ def office_list_view(request):
 
     office_repair_list = []
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -1394,9 +1394,9 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     try:
         if positive_value_exists(office_id):
-            contest_office = ContestOffice.objects.get(id=office_id)
+            contest_office = ContestOffice.objects.using('readonly').get(id=office_id)
         else:
-            contest_office = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            contest_office = ContestOffice.objects.using('readonly').get(we_vote_id=contest_office_we_vote_id)
         contest_office_found = True
         contest_office_we_vote_id = contest_office.we_vote_id
         google_civic_election_id = contest_office.google_civic_election_id

@@ -1451,7 +1451,7 @@ class ContestOfficeListManager(models.Manager):
         office_manager = ContestOfficeManager()
 
         try:
-            office_queryset = ContestOffice.objects.all()
+            office_queryset = ContestOffice.objects.using('readonly').all()
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             office_queryset = office_queryset.filter(office_name__iexact=office_name)  # Case doesn't matter
             if positive_value_exists(state_code):

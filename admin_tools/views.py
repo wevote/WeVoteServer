@@ -1554,7 +1554,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many ContestOffices
-        contest_office_query = ContestOffice.objects.all()
+        contest_office_query = ContestOffice.objects.using('readonly').all()
         contest_office_query = contest_office_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         one_election.number_of_offices = contest_office_query.count()
