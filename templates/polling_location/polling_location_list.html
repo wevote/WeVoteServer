@@ -5,7 +5,7 @@
 
 {% block js %}
     <script>
-        $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
+        $.getScript("https://wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
             $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
         });
     </script>
@@ -114,10 +114,16 @@
 
     {% if source_code_list %}
         {% for source_code in source_code_list %}
-            {% if source_code %}
+            {% if source_code == "POST_OFFICE_LAT_LONG" %}
                 <label for="show_{{source_code}}_id">
                     <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
-                        {% if source_code in selected_types %}checked{% endif %} /> {{ source_code }}
+                        {% if source_code in selected_types %}checked{% endif %} /> post office
+                </label>
+                &nbsp;&nbsp;&nbsp;
+            {% else %}
+                <label for="show_{{source_code}}_id">
+                    <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
+                        {% if source_code in selected_types %}checked{% endif %} /> public school
                 </label>
                 &nbsp;&nbsp;&nbsp;
             {% endif %}
