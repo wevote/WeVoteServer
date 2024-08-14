@@ -793,18 +793,19 @@ def office_list_view(request):
 
     messages.add_message(request, messages.INFO, status_print_list)
 
-    if office_list_found and fix_office_district_ids:
-        # Do some data clean up
-        office_list = updated_office_list
-        updated_office_list = []
-        for office in office_list:
-            if not positive_value_exists(office.district_id):
-                if office.vote_usa_office_id and office.vote_usa_office_id.startswith('VAStateHouse'):
-                    calculated_district_id = office.vote_usa_office_id.replace('VAStateHouse', '')
-                    office.district_id = calculated_district_id
-                    office.ballotpedia_race_office_level = 'State'
-                    office.save()
-            updated_office_list.append(office)
+    # This code needs to be moved to a maintenance script
+    # if office_list_found and fix_office_district_ids:
+    #     # Do some data clean up
+    #     office_list = updated_office_list
+    #     updated_office_list = []
+    #     for office in office_list:
+    #         if not positive_value_exists(office.district_id):
+    #             if office.vote_usa_office_id and office.vote_usa_office_id.startswith('VAStateHouse'):
+    #                 calculated_district_id = office.vote_usa_office_id.replace('VAStateHouse', '')
+    #                 office.district_id = calculated_district_id
+    #                 office.ballotpedia_race_office_level = 'State'
+    #                 office.save()
+    #         updated_office_list.append(office)
 
     office_repair_success = True
 
