@@ -5,7 +5,7 @@
 
 {% block js %}
     <script>
-        $.getScript("https://wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
+        $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
             $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
         });
     </script>
