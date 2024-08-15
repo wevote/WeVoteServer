@@ -489,6 +489,8 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    polling_location_source_codes = ["PUBLIC_SCHOOLS", "POST_OFFICE_LAT_LONG"] # added here for the map toggle
+
     template_values = {
         'geo_center_lat': STATE_GEOGRAPHIC_CENTER.get(state_code)[0],
         'geo_center_lng': STATE_GEOGRAPHIC_CENTER.get(state_code)[1],
@@ -499,6 +501,7 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
         'icon_url_base': 'https://maps.google.com/mapfiles/kml/shapes/placemark_circle_highlight.png',
         'icon_scale_base': 25,                # 25 percent of full size
         'google_maps_api_key': GOOGLE_MAPS_API_KEY,
+        'source_code_list': polling_location_source_codes,
     }
 
     return render(request, 'polling_location/polling_location_visualize.html', template_values)
@@ -712,6 +715,7 @@ def polling_location_list_view(request):
         'source_code_list':         polling_location_source_codes,
         'google_maps_api_key':      GOOGLE_MAPS_API_KEY,
     }
+    
     return render(request, 'polling_location/polling_location_list.html', template_values)
 
 

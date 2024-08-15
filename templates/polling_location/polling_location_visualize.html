@@ -29,5 +29,6 @@
     <input type="hidden" id="icon_scale_base" value="{{ icon_scale_base }}">
     <input type="hidden" id="state_code" value="{{ state_code }}">
     <input type="hidden" id="state_list" value="{{ state_list }}">
+    <input type="hidden" id="source_code_list" value="{{ source_code_list|safe }}"> <!-- added hidden input with source_code_list. added safe to render without encoding -->
   </div>
 {% endblock %}
