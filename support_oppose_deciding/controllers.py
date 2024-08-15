@@ -912,8 +912,11 @@ def voter_supporting_save(  # voterSupportingSave
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_manager.fetch_candidate_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_on_voter_support_for_candidate(voter_id, candidate_id,
-                                                                         user_agent_string, user_agent_object)
+        results = position_manager.toggle_on_voter_support_for_candidate(
+            voter_id,
+            candidate_id,
+            user_agent_string,
+            user_agent_object)
         status += "SUPPORTING_CANDIDATE " + results['status'] + " "
         success = results['success']
 
@@ -966,7 +969,7 @@ def voter_supporting_save(  # voterSupportingSave
         final_results_dict['status'] = status
         final_results_dict['success'] = success
     else:
-        status += 'UNABLE_TO_SAVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING '
+        status += 'UNABLE_TO_SAVE-CANDIDATE_POLITICIAN_AND_MEASURE_ID_MISSING '
         final_results_dict['status'] = status
         final_results_dict['success'] = False
     return final_results_dict

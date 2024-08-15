@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
 
 import wevote_functions.admin
-from apis_v1.controllers import voter_count
+from apis_v1.controllers import organization_follow, voter_count
 from apis_v1.views import views_voter_utils
 from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_items_retrieve_for_api, \
     voter_ballot_list_retrieve_for_api
@@ -32,7 +32,7 @@ from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_f
     voter_facebook_sign_in_save_auth_for_api, voter_facebook_save_to_current_account_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import voter_twitter_save_to_current_account_for_api
-from organization.models import OrganizationManager
+from organization.models import Organization, OrganizationManager
 from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
@@ -2231,6 +2231,18 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     politician_id = 0
     politician_we_vote_id = None
     status = ''
+
+    # Get voter object from voter_device_id
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_is_signed_in = voter.is_signed_in()
+    else:
+        voter = None
+        status += results['status']
+        voter_is_signed_in = False
+
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -2250,9 +2262,70 @@ def voter_supporting_save_view(request):  # voterSupportingSave
         politician_we_vote_id=politician_we_vote_id,
         user_agent_string=user_agent_string,
         user_agent_object=user_agent_object,
+        voter=voter,
         voter_device_id=voter_device_id,
     )
     status += results['status']
+
+    # Collect the variables needed by organization_follow
+    organization_id = 0
+    organization_we_vote_id = None
+    if voter_is_signed_in:
+        # Unfortunately there isn't a simple way to get organization ids from voter_supporting_save
+        if not positive_value_exists(politician_we_vote_id):
+            if positive_value_exists(politician_id):
+                try:
+                    from politician.models import Politician
+                    politician = Politician.objects.using('readonly').get(id=politician_id)
+                    politician_we_vote_id = politician.we_vote_id
+                except Exception:
+                    pass
+        if not positive_value_exists(politician_we_vote_id):
+            if positive_value_exists(candidate_we_vote_id):
+                try:
+                    from candidate.models import CandidateCampaign
+                    candidate = CandidateCampaign.objects.using('readonly').get(we_vote_id=candidate_we_vote_id)
+                    politician_we_vote_id = candidate.politician_we_vote_id
+                except Exception:
+                    pass
+        if not positive_value_exists(politician_we_vote_id):
+            if positive_value_exists(candidate_id):
+                try:
+                    from candidate.models import CandidateCampaign
+                    candidate = CandidateCampaign.objects.using('readonly').get(id=candidate_id)
+                    politician_we_vote_id = candidate.politician_we_vote_id
+                except Exception:
+                    pass
+        if positive_value_exists(politician_we_vote_id):
+            try:
+                queryset = Organization.objects.using('readonly').filter(politician_we_vote_id=politician_we_vote_id)
+                organization_list = list(queryset)
+                if len(organization_list) > 0:
+                    organization = organization_list[0]
+                    organization_id = organization.id
+                    organization_we_vote_id = organization.we_vote_id
+            except Exception as e:
+                pass
+
+    politician_organization_can_be_followed = \
+        voter_is_signed_in and \
+        positive_value_exists(politician_we_vote_id) and \
+        (positive_value_exists(organization_id) and positive_value_exists(organization_we_vote_id))
+    if politician_organization_can_be_followed:
+        # Now follow the organization
+        org_results = organization_follow(
+            direct_api_call=True,  # True?
+            organization_id=organization_id,
+            organization_we_vote_id=organization_we_vote_id,
+            # organization_twitter_handle=organization_twitter_handle,
+            # organization_follow_based_on_issue=organization_follow_based_on_issue,
+            politician_we_vote_id=politician_we_vote_id,
+            user_agent_string=user_agent_string,
+            user_agent_object=user_agent_object,
+            voter_device_id=voter_device_id,
+        )
+        status += org_results['status']
+
     json_data = {
         'ballot_item_id': results['ballot_item_id'],
         'ballot_item_we_vote_id': results['ballot_item_we_vote_id'],
