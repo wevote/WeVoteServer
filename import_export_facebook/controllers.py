@@ -362,35 +362,44 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
     t0 = time()
     status = ''
 
-    # print('----------- INSIDE SQS PROCESS caching_facebook_images_for_retrieve_process 369  facebook_auth_response_id ', facebook_auth_response_id)
+    # print('----------- INSIDE SQS PROCESS caching_facebook_images_for_retrieve_process 368  '
+    #       'facebook_auth_response_id ', facebook_auth_response_id)
     facebook_manager = FacebookManager()
-    facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
-    voter = Voter.objects.get(we_vote_id=voter_we_vote_id)  # Voter existed immediately before the call, so safe
-    if LOG_OAUTH:
-        logger.error('(Ok) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
+    try:
+        facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
+        status += "FACEBOOK_AUTH_RESPONSE_RETRIEVED "
+    except Exception as e:
+        facebook_auth_response = None
+        status += "FACEBOOK_AUTH_RESPONSE_FAILED: " + str(e) + " "
+        if LOG_OAUTH:
+            logger.error('(Fail) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
 
-    results = voter_cache_facebook_images_process(voter.id, facebook_auth_response_id, True)
+    if facebook_auth_response:
+        # Voter existed immediately before the call, so safe
+        voter = Voter.objects.using('readonly').get(we_vote_id=voter_we_vote_id)
+        if LOG_OAUTH:
+            logger.error('(Ok) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
+        results = voter_cache_facebook_images_process(voter.id, facebook_auth_response_id, True)
+        # status += results['status']  # status not being returned
+        facebook_user_results = facebook_manager.update_or_create_facebook_user(
+            facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
+            facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
+            facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+            facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
+            we_vote_hosted_profile_image_url_large=results['we_vote_hosted_profile_image_url_large'],
+            we_vote_hosted_profile_image_url_medium=results['we_vote_hosted_profile_image_url_medium'],
+            we_vote_hosted_profile_image_url_tiny=results['we_vote_hosted_profile_image_url_tiny'],
+            facebook_email=facebook_auth_response.facebook_email)
+        status += facebook_user_results['status']
 
-    facebook_manager = FacebookManager()
-    facebook_user_results = facebook_manager.update_or_create_facebook_user(
-        facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
-        facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
-        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
-        we_vote_hosted_profile_image_url_large=results['we_vote_hosted_profile_image_url_large'],
-        we_vote_hosted_profile_image_url_medium=results['we_vote_hosted_profile_image_url_medium'],
-        we_vote_hosted_profile_image_url_tiny=results['we_vote_hosted_profile_image_url_tiny'],
-        facebook_email=facebook_auth_response.facebook_email)
-    status += facebook_user_results['status']
-
-    update_organization_facebook_images(facebook_auth_response.facebook_user_id,
-                                        facebook_auth_response.facebook_profile_image_url_https,
-                                        facebook_auth_response.facebook_background_image_url_https)
-    dtc = time() - t0
-    logger.error(
-        '(Ok) SQS Processing the facebook images for a RETRIEVE for voter %s %s (%s) took %.3f seconds' %
-        (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-         voter_we_vote_id, dtc))
+        update_organization_facebook_images(facebook_auth_response.facebook_user_id,
+                                            facebook_auth_response.facebook_profile_image_url_https,
+                                            facebook_auth_response.facebook_background_image_url_https)
+        dtc = time() - t0
+        logger.error(
+            '(Ok) SQS Processing the facebook images for a RETRIEVE for voter %s %s (%s) took %.3f seconds' %
+            (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+             voter_we_vote_id, dtc))
     logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
 
 
