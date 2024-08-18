@@ -2822,7 +2822,8 @@ class CandidateCampaign(models.Model):
         :return:
         """
         try:
-            office_list = ContestOffice.objects.filter(we_vote_id__in=self.contest_office_we_vote_id_list)
+            office_list = ContestOffice.objects.using('readonly')\
+                .filter(we_vote_id__in=self.contest_office_we_vote_id_list)
         except Exception as e:
             logger.error("CandidateCampaign.office_list no objects, we_vote_id: " +
                          str(self.we_vote_id) + " " + str(e))

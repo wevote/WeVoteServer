@@ -1585,7 +1585,7 @@ def candidate_new_search_view(request):
     if google_civic_election_id:
         # These are the Offices already entered for this election
         try:
-            office_queryset = ContestOffice.objects.order_by('office_name')
+            office_queryset = ContestOffice.objects.using('readonly').order_by('office_name')
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             contest_office_list = list(office_queryset)
 
@@ -1976,7 +1976,7 @@ def candidate_new_view(request):
     if not no_office:
         # These are the Offices already entered for this election
         try:
-            office_queryset = ContestOffice.objects.order_by('office_name')
+            office_queryset = ContestOffice.objects.using('readonly').order_by('office_name')
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             contest_office_list = list(office_queryset)
 

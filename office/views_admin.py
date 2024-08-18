@@ -208,7 +208,7 @@ def offices_copy_to_another_election_view(request):
 
     # Whether we are just displaying some offices, or actually doing the conversion, we want to retrieve
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all() # Cannot be read only
 
         if show_offices_with_zero_candidates_in_to_election:
             office_queryset = office_queryset.filter(google_civic_election_id=to_google_civic_election_id)
@@ -601,7 +601,7 @@ def office_list_view(request):
                 election_day_text_by_election_id_dict[one_election.google_civic_election_id] = \
                     convert_we_vote_date_string_to_date_as_integer(one_election.election_day_text)
         # Now get ContestOffice objects we want to update
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all() # Cannot be readonly
         office_queryset = office_queryset.filter(
             Q(election_date_as_integer__isnull=True) |
             Q(election_date_as_integer=0)
@@ -659,7 +659,7 @@ def office_list_view(request):
 
     office_repair_list = []
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -793,19 +793,18 @@ def office_list_view(request):
 
     messages.add_message(request, messages.INFO, status_print_list)
 
-    # This code needs to be moved to a maintenance script
-    # if office_list_found and fix_office_district_ids:
-    #     # Do some data clean up
-    #     office_list = updated_office_list
-    #     updated_office_list = []
-    #     for office in office_list:
-    #         if not positive_value_exists(office.district_id):
-    #             if office.vote_usa_office_id and office.vote_usa_office_id.startswith('VAStateHouse'):
-    #                 calculated_district_id = office.vote_usa_office_id.replace('VAStateHouse', '')
-    #                 office.district_id = calculated_district_id
-    #                 office.ballotpedia_race_office_level = 'State'
-    #                 office.save()
-    #         updated_office_list.append(office)
+    if office_list_found and fix_office_district_ids:
+        # Do some data clean up
+        office_list = updated_office_list
+        updated_office_list = []
+        for office in office_list:
+            if not positive_value_exists(office.district_id):
+                if office.vote_usa_office_id and office.vote_usa_office_id.startswith('VAStateHouse'):
+                    calculated_district_id = office.vote_usa_office_id.replace('VAStateHouse', '')
+                    office.district_id = calculated_district_id
+                    office.ballotpedia_race_office_level = 'State'
+                    office.save()
+            updated_office_list.append(office)
 
     office_repair_success = True
 
@@ -907,7 +906,7 @@ def office_list_process_view(request):
         for organization_we_vote_id in select_for_marking_office_we_vote_ids:
             try:
                 contest_office_on_stage = ContestOffice.objects.get(
-                    we_vote_id__iexact=organization_we_vote_id)
+                    we_vote_id__iexact=organization_we_vote_id) # Cannot be readonly
                 if which_marking == "is_battleground_race":
                     contest_office_on_stage.is_battleground_race = True
                 contest_office_on_stage.save()
@@ -1087,9 +1086,9 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
     office_on_stage_found = False
     try:
         if positive_value_exists(office_id):
-            office_on_stage = ContestOffice.objects.get(id=office_id)
+            office_on_stage = ContestOffice.objects.using('readonly').get(id=office_id)
         else:
-            office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            office_on_stage = ContestOffice.objects.using('readonly').get(we_vote_id=contest_office_we_vote_id)
         office_on_stage_found = True
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1242,7 +1241,7 @@ def office_edit_process_view(request):
     office_on_stage_found = False
     office_on_stage = None
     try:
-        office_query = ContestOffice.objects.filter(id=office_id)
+        office_query = ContestOffice.objects.filter(id=office_id) # Cannot be readonly
         if len(office_query):
             office_on_stage = office_query[0]
             office_on_stage_found = True
@@ -1395,9 +1394,9 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     try:
         if positive_value_exists(office_id):
-            contest_office = ContestOffice.objects.get(id=office_id)
+            contest_office = ContestOffice.objects.using('readonly').get(id=office_id)
         else:
-            contest_office = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            contest_office = ContestOffice.objects.using('readonly').get(we_vote_id=contest_office_we_vote_id)
         contest_office_found = True
         contest_office_we_vote_id = contest_office.we_vote_id
         google_civic_election_id = contest_office.google_civic_election_id
@@ -1555,7 +1554,7 @@ def office_summary_merge_with_other_office_process_view(
 
     office_search_results_list = []
     if positive_value_exists(office_search):
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all() # Cannot be readonly
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         office_queryset = office_queryset.exclude(we_vote_id__iexact=contest_office_we_vote_id)
 
@@ -1881,7 +1880,7 @@ def office_delete_process_view(request):
     office_on_stage = ContestOffice()
     office_on_stage_we_vote_id = ''
     try:
-        office_on_stage = ContestOffice.objects.get(id=office_id)
+        office_on_stage = ContestOffice.objects.get(id=office_id) # Cannot be readonly
         office_on_stage_found = True
         google_civic_election_id = office_on_stage.google_civic_election_id
         office_on_stage_we_vote_id = office_on_stage.we_vote_id
@@ -2000,7 +1999,7 @@ def find_and_merge_duplicate_offices_view(request):
 
     try:
         # We sort by ID so that the entry which was saved first becomes the "master"
-        contest_office_query = ContestOffice.objects.order_by('id')
+        contest_office_query = ContestOffice.objects.order_by('id') # Cannot be readonly
         contest_office_query = contest_office_query.filter(google_civic_election_id=google_civic_election_id)
         contest_office_list = list(contest_office_query)
     except ContestOffice.DoesNotExist:

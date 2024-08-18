@@ -499,7 +499,7 @@ class ContestOfficeManager(models.Manager):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         ctcl_uuid__exact=ctcl_uuid,
-                        defaults=updated_contest_office_values)
+                        defaults=updated_contest_office_values) # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
                     success = True
@@ -520,7 +520,7 @@ class ContestOfficeManager(models.Manager):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         maplight_id__exact=maplight_id,
-                        defaults=updated_contest_office_values)
+                        defaults=updated_contest_office_values) # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
                     success = True
@@ -542,7 +542,7 @@ class ContestOfficeManager(models.Manager):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         ballotpedia_race_id=ballotpedia_race_id,
-                        defaults=updated_contest_office_values)
+                        defaults=updated_contest_office_values) # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
                     success = True
@@ -560,7 +560,7 @@ class ContestOfficeManager(models.Manager):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         vote_usa_office_id__iexact=vote_usa_office_id,
-                        defaults=updated_contest_office_values)
+                        defaults=updated_contest_office_values) # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
                     success = True
@@ -581,7 +581,7 @@ class ContestOfficeManager(models.Manager):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         we_vote_id__iexact=office_we_vote_id,
-                        defaults=updated_contest_office_values)
+                        defaults=updated_contest_office_values) # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
                     success = True
@@ -617,7 +617,7 @@ class ContestOfficeManager(models.Manager):
                         google_civic_election_id__exact=google_civic_election_id,
                         district_id__exact=district_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
-                    )
+                    ) # Cannot be readonly
                 else:
                     contest_office_on_stage = ContestOffice.objects.get(
                         Q(google_civic_office_name__iexact=office_name) |
@@ -627,7 +627,7 @@ class ContestOfficeManager(models.Manager):
                         Q(google_civic_office_name5__iexact=office_name),
                         google_civic_election_id__exact=google_civic_election_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
-                    )
+                    ) # Cannot be readonly
                 contest_office_found = True
                 success = True
                 status += 'MATCHING_CONTEST_OFFICE_FOUND '
@@ -652,13 +652,13 @@ class ContestOfficeManager(models.Manager):
                         office_name__iexact=office_name,
                         district_id__exact=district_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
-                    )
+                    ) # Cannot be readonly
                 else:
                     contest_office_on_stage = ContestOffice.objects.get(
                         google_civic_election_id__exact=google_civic_election_id,
                         office_name__iexact=office_name,
                         state_code__iexact=updated_contest_office_values['state_code'],
-                    )
+                    ) # Cannot be readonly
                 contest_office_found = True
                 success = True
                 status += 'CONTEST_OFFICE_SAVED '
@@ -741,7 +741,7 @@ class ContestOfficeManager(models.Manager):
                 contest_office_on_stage = ContestOffice.objects.create(
                     google_civic_election_id=google_civic_election_id,
                     office_name=office_name,
-                    district_id=district_id)
+                    district_id=district_id) # Cannot be readonly
                 if positive_value_exists(contest_office_on_stage.id):
                     for key, value in updated_contest_office_values.items():
                         if hasattr(contest_office_on_stage, key):
@@ -1054,7 +1054,7 @@ class ContestOfficeManager(models.Manager):
                 number_voting_for=contest_office_votes_allowed,
                 number_elected=contest_office_number_elected,
                 google_civic_election_id=google_civic_election_id,
-                state_code=state_code)
+                state_code=state_code) # Cannot be readonly
             if new_contest_office:
                 success = True
                 status += "CONTEST_OFFICE_CREATED "
@@ -1156,10 +1156,10 @@ class ContestOfficeManager(models.Manager):
 
         try:
             if positive_value_exists(contest_office_we_vote_id):
-                existing_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
+                existing_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id) # Cannot be readonly
                 contest_office_found = True
             elif positive_value_exists(ctcl_uuid):
-                existing_office_entry = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
+                existing_office_entry = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid) # Cannot be readonly
                 contest_office_found = True
 
             if contest_office_found:
@@ -1437,7 +1437,8 @@ class ContestOfficeListManager(models.Manager):
             google_civic_election_id,
             state_code,
             office_name,
-            we_vote_id_from_master=''):
+            we_vote_id_from_master='',
+            read_only=False):
         """
         Find offices that match another office in all critical fields other than we_vote_id_from_master
         :param google_civic_election_id:
@@ -1451,7 +1452,10 @@ class ContestOfficeListManager(models.Manager):
         office_manager = ContestOfficeManager()
 
         try:
-            office_queryset = ContestOffice.objects.all()
+            if positive_value_exists(read_only):
+                office_queryset = ContestOffice.objects.using('readonly').all()
+            else:
+                office_queryset = ContestOffice.objects.all()
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             office_queryset = office_queryset.filter(office_name__iexact=office_name)  # Case doesn't matter
             if positive_value_exists(state_code):

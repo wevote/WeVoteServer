@@ -355,7 +355,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
 
         # Get a list of offices for this election so we can create drop downs
         try:
-            contest_office_list = ContestOffice.objects.order_by('office_name')
+            contest_office_list = ContestOffice.objects.order_by('office_name') # Cannot be readonly
             contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
         except Exception as e:
             contest_office_list = []

@@ -179,7 +179,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         #     state_code = "CA"  # TODO DALE Temp for 2016
 
     try:
-        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_count_query = PollingLocation.objects.using('readonly').all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
         polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
         # If Google wasn't able to return ballot data in the past ignore that map point
@@ -1897,14 +1897,14 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         election.offices_without_candidates_count = offices_without_candidates_count
 
         # How many candidates?
-        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = CandidateCampaign.objects.using('readonly').all()
         candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
         if is_national_election and positive_value_exists(state_code):
             candidate_list_query = candidate_list_query.filter(state_code__iexact=state_code)
         election.candidate_count = candidate_list_query.count()
 
         # How many without photos?
-        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = CandidateCampaign.objects.using('readonly').all()
         candidate_list_query = candidate_list_query.filter(we_vote_id__in=candidate_we_vote_id_list)
         if is_national_election and positive_value_exists(state_code):
             candidate_list_query = candidate_list_query.filter(state_code__iexact=state_code)
@@ -1917,7 +1917,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                 100 * (election.candidates_without_photo_count / election.candidate_count)
 
         # How many measures?
-        measure_list_query = ContestMeasure.objects.all()
+        measure_list_query = ContestMeasure.objects.using('readonly').all()
         measure_list_query = measure_list_query.filter(google_civic_election_id=google_civic_election_id)
         if is_national_election and positive_value_exists(state_code):
             measure_list_query = measure_list_query.filter(state_code__iexact=state_code)
@@ -1932,7 +1932,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         election.voter_guides_count = voter_guide_query.count()
 
         # Number of Public Positions
-        position_query = PositionEntered.objects.all()
+        position_query = PositionEntered.objects.using('readonly').all()
         # Catch both candidates and measures (which have google_civic_election_id in the Positions table)
         position_query = position_query.filter(
             Q(google_civic_election_id=election.google_civic_election_id) |
@@ -2413,14 +2413,15 @@ def election_migration_view(request):
     from_election_office_count = 0
     try:
         if positive_value_exists(from_state_code):
-            contest_office_query = ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
+            contest_office_query = ContestOffice.objects\
+                .using('readonly').filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code)
             from_election_office_count = contest_office_query.count()
             contest_office_query = contest_office_query.values_list('we_vote_id', flat=True).distinct()
             contest_office_we_vote_ids_migrated = list(contest_office_query)
         else:
             contest_office_query = \
-                ContestOffice.objects.filter(google_civic_election_id=from_election_id)
+                ContestOffice.objects.using('readonly').filter(google_civic_election_id=from_election_id)
             from_election_office_count = contest_office_query.count()
             contest_office_query = contest_office_query.values_list('we_vote_id', flat=True).distinct()
             contest_office_we_vote_ids_migrated = list(contest_office_query)
@@ -2428,10 +2429,10 @@ def election_migration_view(request):
             if positive_value_exists(from_state_code):
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
                     .filter(state_code__iexact=from_state_code)\
-                    .update(google_civic_election_id=to_election_id)
+                    .update(google_civic_election_id=to_election_id) # Cannot be readonly
             else:
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
-                    .update(google_civic_election_id=to_election_id)
+                    .update(google_civic_election_id=to_election_id) # Cannot be readonly
             status += 'OFFICES_UPDATED '
     except Exception as e:
         error = True
@@ -2450,11 +2451,13 @@ def election_migration_view(request):
     try:
         if positive_value_exists(from_state_code):
             from_election_hosted_office_count = ContestOffice.objects\
+                .using('readonly')\
                 .filter(we_vote_id__in=office_visiting_list_we_vote_ids)\
                 .filter(state_code__iexact=from_state_code).count()
         else:
             from_election_hosted_office_count = \
-                ContestOffice.objects.filter(we_vote_id__in=office_visiting_list_we_vote_ids).count()
+                ContestOffice.objects.using('readonly')\
+                    .filter(we_vote_id__in=office_visiting_list_we_vote_ids).count()
     except Exception as e:
         error = True
         status += 'FAILED_TO_COUNT_HOSTED_OFFICES ' + str(e) + ' '

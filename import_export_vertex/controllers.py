@@ -25,8 +25,16 @@ def ask_google_vertex_a_question(question, text_to_search):
     success = True
     t0 = time()
     try:
-        credentials = service_account.Credentials.from_service_account_file(
-                get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS_VERTEX"))
+        vertex_credentials = get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS_VERTEX")
+    except Exception as error_message:
+        vertex_credentials = ""
+        status += "VERTEX_ERROR: {error_message} ".format(error_message=error_message)
+    if not positive_value_exists(vertex_credentials):
+        status += "GOOGLE_APPLICATION_CREDENTIALS_VERTEX (pointing to JSON credentials file) is missing."
+
+    try:
+        credentials = service_account.Credentials.from_service_account_file(vertex_credentials)
+
         # os.environ["SERVICE_ACCOUNT_ID"] = 'vertexai-name-of-people@we-vote-ballot.iam.gserviceaccount.com'
         vertexai.init(
             credentials=credentials,
@@ -77,6 +85,7 @@ def ask_google_vertex_a_question(question, text_to_search):
         # performance += "total took {:.6f} seconds ".format(t3-t0)
         # print(performance)
         # status += performance
+
     except Exception as error_message:
         print(f"Error response from Vertex Model: {error_message}")
         status += "VERTEX_ERROR: {error_message} ".format(error_message=error_message)
