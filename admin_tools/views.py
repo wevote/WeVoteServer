@@ -1100,7 +1100,7 @@ def data_cleanup_voter_hanging_data_process_view(request):
 
     # Go through all of the verified email addresses in the EmailAddress table and make sure the
     # cached information is up-to-date in the voter table
-    email_address_verified_list = EmailAddress.objects.all()
+    email_address_verified_list = EmailAddress.objects.using('readonly').all()
     email_address_verified_list = email_address_verified_list.filter(email_ownership_is_verified=True)
     for one_email in email_address_verified_list:
         if positive_value_exists(one_email.voter_we_vote_id):
@@ -1757,12 +1757,12 @@ def login_we_vote(request):
         # Retrieve user email address (as entered when account created) to avoid issue from WV-284
         # Login Admin login page email field being case-sensitive
         # Maybe in future can be dealt with by making emails in db all lowercase and lower-casing new user emails
-        user_obj = Voter.objects.filter(email__iexact=input_username).first()
+        user_obj = Voter.objects.using('readonly').filter(email__iexact=input_username).first()
         if user_obj:
             username = user_obj.email
         else:
             # Find the voter based on authenticated emails
-            queryset = EmailAddress.objects.filter(normalized_email_address__iexact=input_username)
+            queryset = EmailAddress.objects.using('readonly').filter(normalized_email_address__iexact=input_username)
             queryset = queryset.filter(email_ownership_is_verified=True)
             email_address_obj = queryset.first()
             if email_address_obj:

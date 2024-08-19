@@ -557,7 +557,8 @@ def notice_friend_endorsements_send(
     recipient_email = ""
     recipient_email_subscription_secret_key = ""
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            recipient_voter_we_vote_id, read_only=True)
         success = results['success']
         if results['email_address_object_found']:
             recipient_email_object = results['email_address_object']
@@ -583,7 +584,7 @@ def notice_friend_endorsements_send(
     speaker_voter_email = ""
     speaker_voter_we_vote_id = speaker_voter.we_vote_id
     if speaker_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(speaker_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(speaker_voter_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             speaker_voter_email_object = results['email_address_object']
             speaker_voter_email = speaker_voter_email_object.normalized_email_address
@@ -895,7 +896,8 @@ def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
     recipient_email = ""
     recipient_email_subscription_secret_key = ""
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            recipient_voter_we_vote_id, read_only=True)
         success = results['success']
         if results['email_address_object_found']:
             recipient_email_object = results['email_address_object']
