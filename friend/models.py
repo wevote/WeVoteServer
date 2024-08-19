@@ -1276,7 +1276,7 @@ class FriendManager(models.Manager):
         friend_invitation_from_voter_list_found = False
         try:
             # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
-            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.using('readonly').all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
@@ -1309,7 +1309,7 @@ class FriendManager(models.Manager):
         friend_invitation_from_email_list = []
         try:
             # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
-            friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
+            friend_invitation_email_queryset = FriendInvitationEmailLink.objects.using('readonly').all()
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
                 sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(invitation_status=ACCEPTED)
@@ -1354,7 +1354,7 @@ class FriendManager(models.Manager):
         friend_invitation_to_voter_list_found = False
         try:
             # Find invitations that I received, including ones that I have ignored.
-            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.using('readonly').all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
@@ -1395,7 +1395,7 @@ class FriendManager(models.Manager):
             # First, find the verified email for viewer_voter_we_vote_id. # TODO DALE
             email_manager = EmailManager()
             filters = []
-            email_results = email_manager.retrieve_voter_email_address_list(viewer_voter_we_vote_id)
+            email_results = email_manager.retrieve_voter_email_address_list(viewer_voter_we_vote_id, read_only=True)
             if email_results['email_address_list_found']:
                 email_address_list = email_results['email_address_list']
 
@@ -1421,14 +1421,14 @@ class FriendManager(models.Manager):
         if viewer_voter_emails_found and len(final_filters):
             try:
                 # Find invitations that were sent to one of my email addresses
-                friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
+                friend_invitation_email_queryset = FriendInvitationEmailLink.objects.using('readonly').all()
                 friend_invitation_email_queryset = friend_invitation_email_queryset.filter(final_filters)
                 friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
                     Q(invitation_status=ACCEPTED) |
                     Q(invitation_status=IGNORED))
                 friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
                 friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
-                friend_invitation_to_email_list = friend_invitation_email_queryset
+                friend_invitation_to_email_list = list(friend_invitation_email_queryset)
                 success = True
 
                 if len(friend_invitation_to_email_list):
@@ -1580,7 +1580,7 @@ class FriendManager(models.Manager):
                 for friend_invitation_email_link_object in friend_list_email:
                     is_new_invitation = True
                     email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-                        "", friend_invitation_email_link_object.recipient_voter_email)
+                        "", friend_invitation_email_link_object.recipient_voter_email, read_only=True)
                     if email_results['email_address_object_found']:
                         email_address_object = email_results['email_address_object']
                         # We create a new attribute on this object (that normally doesn't exist)

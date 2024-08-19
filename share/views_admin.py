@@ -122,19 +122,19 @@ def shared_item_list_view(request):
 
     if positive_value_exists(shared_item_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
             normalized_email_address__icontains=shared_item_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
             normalized_sms_phone_number__icontains=shared_item_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
         # Now search SharedItem object
-        shared_item_query = SharedItem.objects.all()
+        shared_item_query = SharedItem.objects.using('readonly').all()
         search_words = shared_item_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
@@ -393,13 +393,13 @@ def voter_who_shares_summary_list_view(request):
 
     if positive_value_exists(voter_summary_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
             normalized_email_address__icontains=voter_summary_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
             normalized_sms_phone_number__icontains=voter_summary_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)

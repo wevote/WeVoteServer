@@ -250,7 +250,8 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
         # Start by retrieving checking EmailAddress table (in one query) for all entries we currently have in our db
         email_addresses_found_list = []
         try:
-            queryset = EmailAddress.objects.filter(normalized_email_address__in=email_addresses_returned_list)
+            queryset = EmailAddress.objects.using('readonly')\
+                .filter(normalized_email_address__in=email_addresses_returned_list)
             queryset = queryset.filter(email_ownership_is_verified=True)
             email_addresses_found_list = list(queryset)
         except Exception as e:
@@ -258,7 +259,7 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
 
         for email_address_object in email_addresses_found_list:
             # Retrieve the voter to see if there is data to use in the VoterContactEmail table
-            results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id, read_only=True)
             if results['voter_found']:
                 voter = results['voter']
                 voter_data_found = positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) or \
@@ -1739,7 +1740,7 @@ def voter_email_address_save_for_api(
     # Is this email already verified by another account?
     temp_voter_we_vote_id = ""
     find_verified_email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-        temp_voter_we_vote_id, text_for_email_address)
+        temp_voter_we_vote_id, text_for_email_address, read_only=True)
     if find_verified_email_results['email_address_object_found']:
         verified_email_address_object = find_verified_email_results['email_address_object']
         verified_email_address_we_vote_id = verified_email_address_object.we_vote_id
@@ -2316,7 +2317,8 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
     # Is this email already verified by any account?
     find_verified_email_results = email_manager.retrieve_primary_email_with_ownership_verified(
         voter_we_vote_id='',
-        normalized_email_address=text_for_email_address)
+        normalized_email_address=text_for_email_address,
+        read_only=True)
     if not find_verified_email_results['success']:
         status += "PROBLEM_RETRIEVING_EMAIL: " + find_verified_email_results['status'] + " "
         error_results['status'] = status

@@ -115,7 +115,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         facebook_email_address_verified = False
         temp_voter_we_vote_id = ""
         email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email, read_only=False)
         if email_results['email_address_object_found']:
             # If here, then it turns out the facebook_email is verified, and we can
             #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
@@ -126,7 +126,8 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             email_address_object_we_vote_id = ""
             email_retrieve_results = email_manager.retrieve_email_address_object(
                 facebook_auth_response.facebook_email, email_address_object_we_vote_id,
-                voter.we_vote_id)
+                voter.we_vote_id,
+                read_only=False)
             if email_retrieve_results['email_address_object_found']:
                 email_address_object = email_retrieve_results['email_address_object']
                 email_address_object = email_manager.update_email_address_object_as_verified(
@@ -573,7 +574,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         email_manager = EmailManager()
         temp_voter_we_vote_id = ""
         email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email, read_only=True)
         if email_results['email_address_object_found']:
             status += "FACEBOOK_EMAIL_FOUND_IN_DATABASE "
             # See if we need to heal the data - look in the email table for any records with a facebook_email
