@@ -2429,10 +2429,10 @@ def election_migration_view(request):
             if positive_value_exists(from_state_code):
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
                     .filter(state_code__iexact=from_state_code)\
-                    .update(google_civic_election_id=to_election_id) # Cannot be readonly
+                    .update(google_civic_election_id=to_election_id)  # Cannot be readonly
             else:
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
-                    .update(google_civic_election_id=to_election_id) # Cannot be readonly
+                    .update(google_civic_election_id=to_election_id)  # Cannot be readonly
             status += 'OFFICES_UPDATED '
     except Exception as e:
         error = True
