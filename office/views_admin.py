@@ -208,7 +208,7 @@ def offices_copy_to_another_election_view(request):
 
     # Whether we are just displaying some offices, or actually doing the conversion, we want to retrieve
     try:
-        office_queryset = ContestOffice.objects.all() # Cannot be read only
+        office_queryset = ContestOffice.objects.all()  # Cannot be read only
 
         if show_offices_with_zero_candidates_in_to_election:
             office_queryset = office_queryset.filter(google_civic_election_id=to_google_civic_election_id)
