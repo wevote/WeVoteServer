@@ -67,6 +67,7 @@ WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
     '*.travis-ci.org',
     'blank',
     'platform.twitter.com',
+    'platform.x.com',
     's7.addthis.com',
     'vars.hotjar.com',
     'regex101.com',

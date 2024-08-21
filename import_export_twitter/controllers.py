@@ -2402,7 +2402,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
                     candidate_save_needed = True
                 if positive_value_exists(candidate.candidate_twitter_handle) \
                         and not positive_value_exists(candidate.twitter_url):
-                    candidate.twitter_url = 'https://twitter.com/' + candidate.candidate_twitter_handle
+                    candidate.twitter_url = 'https://x.com/' + candidate.candidate_twitter_handle
                     # logger.info(
                     #     'refresh_twitter_candidate_details_for_election, twitter_url set to ' + candidate.twitter_url)
                     candidate_save_needed = True
@@ -2639,7 +2639,11 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
             continue
         # Only proceed if we don't already have a twitter_handle
         if not positive_value_exists(candidate.candidate_twitter_handle):
-            candidate.candidate_twitter_handle = candidate.twitter_url.replace("https://twitter.com/", "")
+            handle_without_url = candidate.twitter_url.replace("https://twitter.com/", "")
+            handle_without_url = handle_without_url.replace("https://x.com/", "")
+            if handle_without_url in ['http', 'http://', 'https', 'https://']:
+                handle_without_url = ''
+            candidate.candidate_twitter_handle = handle_without_url
             candidate.save()
             twitter_handles_transferred += 1
 

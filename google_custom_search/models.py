@@ -35,7 +35,12 @@ URL_PATTERNS_TO_IGNORE = [
     r"^https?://twitter.com/\w+/status",
     r"^https?://help.twitter.com/",
     r"^https?://mobile.twitter.com/login",
-    r"^https?://mobile.twitter.com/\w+/status"
+    r"^https?://mobile.twitter.com/\w+/status",
+    r"^https?://x.com/login",
+    r"^https?://x.com/\w+/status",
+    r"^https?://help.x.com/",
+    r"^https?://mobile.x.com/login",
+    r"^https?://mobile.x.com/\w+/status"
 ]
 
 URL_PATTERNS_TO_IGNORE = [compile(pattern) for pattern in URL_PATTERNS_TO_IGNORE]

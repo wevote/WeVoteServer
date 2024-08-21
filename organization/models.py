@@ -83,6 +83,7 @@ ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER = [
     'secure.actblue.com', 'secure.anedot.com', 'secure.ngpvan.com', 'secure.winred.com',
     't.co', 't.me', 'tinyurl.com', 'twitter.com',
     'wix.com', 'wixsite.com', 'wordpress.com', 'www.',
+    'x.com',
     'yahoo.com', 'youtube.com',
 ]
 
@@ -3560,7 +3561,7 @@ class Organization(models.Model):
 
     def generate_twitter_link(self):
         if self.organization_twitter_handle:
-            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)
+            return "https://x.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)
         else:
             return ''
 
