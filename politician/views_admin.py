@@ -1352,7 +1352,7 @@ def politician_new_view(request):
 
     # These are the Offices already entered for this election
     try:
-        contest_office_list = ContestOffice.objects.order_by('office_name')
+        contest_office_list = ContestOffice.objects.using('readonly').order_by('office_name')
         contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)

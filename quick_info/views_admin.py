@@ -137,7 +137,7 @@ def quick_info_new_view(request):
         # When in the other state (unique entry for this ballot item), we cache the quick_info_master_we_vote_id value
         # in a hidden field
 
-    contest_office_options = ContestOffice.objects.order_by('office_name')
+    contest_office_options = ContestOffice.objects.using('readonly').order_by('office_name')
     if positive_value_exists(google_civic_election_id):
         contest_office_options = contest_office_options.filter(google_civic_election_id=google_civic_election_id)
 
@@ -292,7 +292,7 @@ def quick_info_edit_view(request, quick_info_id):
     else:
         election_found = False
 
-    contest_office_options = ContestOffice.objects.order_by('office_name')
+    contest_office_options = ContestOffice.objects.using('readonly').order_by('office_name')
     if positive_value_exists(quick_info.google_civic_election_id):
         contest_office_options = contest_office_options.filter(
             google_civic_election_id=quick_info.google_civic_election_id)
