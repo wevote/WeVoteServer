@@ -1262,7 +1262,8 @@ class PollingLocationManager(models.Manager):
             return results
 
         try:
-            polling_location_queryset = PollingLocation.objects.all()
+            polling_location_queryset = PollingLocation.objects.using(
+                'read_only').all()
             location_id_and_state_used = False
             location_name_and_state_used = False
 

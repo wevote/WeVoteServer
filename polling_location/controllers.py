@@ -42,7 +42,6 @@ POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_UR
 #
 #     return import_results
 
-
 def filter_polling_locations_structured_json_for_local_duplicates(structured_json):
     """
     With this function, we remove polling_locations that seem to be duplicates, but have different we_vote_id's.
@@ -63,7 +62,6 @@ def filter_polling_locations_structured_json_for_local_duplicates(structured_jso
 
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
-
         results = polling_location_manager.retrieve_possible_duplicate_polling_locations(
             polling_location_id, state, location_name, line1, zip_long,
             we_vote_id_from_master)
@@ -162,7 +160,6 @@ def polling_locations_import_from_structured_json(structured_json):
     }
     return polling_locations_results
 
-
 def import_and_save_all_polling_locations_data(state_code=''):
     # In most states we can visit this URL (example is 'va' or virginia):
     # https://data.votinginfoproject.org/feeds/va/?order=D
@@ -184,7 +181,6 @@ def import_and_save_all_polling_locations_data(state_code=''):
 
     return merge_polling_location_results(*all_results)
 
-
 def merge_polling_location_results(*dict_args):
     results = {
         'updated':          0,
@@ -205,7 +201,6 @@ def import_and_save_polling_location_data(xml_file_location):
     polling_locations_list = retrieve_polling_locations_data_from_xml(xml_file_location)
     results = save_polling_locations_from_list(polling_locations_list)
     return results
-
 
 def retrieve_polling_locations_data_from_xml(xml_file_location):
     # We parse the XML file, which can be quite large
