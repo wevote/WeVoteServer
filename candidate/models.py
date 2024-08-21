@@ -2883,7 +2883,7 @@ class CandidateCampaign(models.Model):
 
     def generate_twitter_link(self):
         if self.candidate_twitter_handle:
-            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.candidate_twitter_handle)
+            return "https://x.com/{twitter_handle}".format(twitter_handle=self.candidate_twitter_handle)
         else:
             return ''
 
