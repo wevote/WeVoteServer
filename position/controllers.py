@@ -220,7 +220,7 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
             final_organization_filters |= item
 
         # Finally, retrieve all of the organizations from any of these positions
-        organization_list_query = Organization.objects.all()
+        organization_list_query = Organization.objects.using('readonly').all()
         organization_list_query = organization_list_query.filter(final_organization_filters)
 
         for organization in organization_list_query:
