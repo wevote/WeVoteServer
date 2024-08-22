@@ -3746,7 +3746,7 @@ def candidate_edit_process_view(request):
             politician_manager = PoliticianManager()
             results = politician_manager.retrieve_politician(
                 politician_we_vote_id=candidate_on_stage.politician_we_vote_id,
-                read_only=True)
+                read_only=False)
             if results['politician_found']:
                 politician = results['politician']
                 if positive_value_exists(politician.id) and candidate_on_stage.politician_id != politician.id:
