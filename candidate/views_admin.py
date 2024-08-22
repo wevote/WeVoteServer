@@ -2811,7 +2811,7 @@ def candidate_edit_process_view(request):
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
-    candidate_on_stage = CandidateCampaign()
+    candidate_on_stage = None
     election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
     state_code_from_candidate = ''
@@ -3764,9 +3764,12 @@ def candidate_edit_process_view(request):
                 if results['success']:
                     save_changes = results['save_changes']
                     if positive_value_exists(save_changes):
-                        politician = results['politician']
-                        politician.save()
-
+                        try:
+                            politician = results['politician']
+                            politician.save()
+                        except Exception as e:
+                            messages.add_message(request, messages.ERROR,
+                                                 'Could not save politician with refreshed data:' + str(e))
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  'Could not save candidate with refreshed politician data:' + str(e))
