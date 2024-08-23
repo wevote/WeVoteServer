@@ -6,7 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
-
+{% include "admin_tools/loading_banner.html" %}
 <h1>Elected Representatives</h1>
 
 <br/>
@@ -186,38 +186,48 @@
 {% endif %}
 
     <script>
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display ='block';
+        }
         $(function() {
             $('#missing_politician_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_all_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_battleground_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_representatives_with_email_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_this_year_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#show_ocd_id_state_mismatch_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
         $(function() {
             $('#state_code_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
         });
