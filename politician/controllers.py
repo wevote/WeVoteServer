@@ -700,6 +700,7 @@ def match_politician_to_organization(
     results = {
         'organization_created': False,
         'organization_creation_error': False,
+        'politician': politician,
         'politician_error': False,
         'politician_has_two_linked_organizations': False,
         'politician_has_two_possible_organizations': False,
