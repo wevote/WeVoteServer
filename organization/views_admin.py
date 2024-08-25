@@ -2213,7 +2213,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         is_analytics_admin = True
 
     try:
-        public_position_query = PositionEntered.objects.using('readonly').all()
+        public_position_query = PositionEntered.objects.all()  # Cannot be readonly. We do healing below.
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
@@ -2230,7 +2230,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         public_position_list = list(public_position_list)
 
         if is_analytics_admin:
-            friends_only_position_query = PositionForFriends.objects.using('readonly').all()
+            friends_only_position_query = PositionForFriends.objects.all()  # Cannot be readonly. We do healing below.
             # As of Aug 2018 we are no longer using PERCENT_RATING
             friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
