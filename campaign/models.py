@@ -518,6 +518,7 @@ class CampaignXManager(models.Manager):
                     campaignx_politician.delete()
                 except Exception as e:
                     status += "DELETE_FAILED: " + str(e) + ' '
+                    success = False
 
         results = {
             'status':                       status,
@@ -2029,6 +2030,7 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_title(campaignx_we_vote_id='', read_only=False):
         if campaignx_we_vote_id is None or len(campaignx_we_vote_id) == 0:
             return ''

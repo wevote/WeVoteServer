@@ -1,0 +1,212 @@
+{# templates/challenge/challenge_duplicates_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Duplicate Challenge Entries{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Duplicate Challenge Entries</h1>
+
+    <ul>
+        <li>
+            <a href="{% url 'challenge:find_and_merge_duplicate_challenges' %}?state_code={{ state_code }}">
+            Find and merge duplicate challenges</a> (about 1 minute)
+        </li>
+    {% if state_code %}
+        <li>
+{#            <a href="{% url 'challenge:delete_all_duplicates' %}?state_code={{ state_code }}">#}
+{#            Delete all duplicate challenge data for this state</a>#}
+        </li>
+    {% endif %}
+    </ul>
+
+<br /><br />
+
+<form name="state_code_form" method="get" action="{% url 'challenge:duplicates_list' %}">
+    {% csrf_token %}
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'challenge:duplicates_list' %}?challenge_search={{ challenge_search }}&show_all={{ show_all }}&show_challenges_with_email={{ show_challenges_with_email }}">
+            show all states</a>&nbsp;&nbsp;&nbsp;
+        {% endif %}
+    {% endif %}{# End of if state_list #}
+
+    {% if challenge_search %}
+    <a href="{% url 'challenge:duplicates_list' %}?state_code={{ state_code }}&show_all={{ show_all }}&show_challenges_with_email={{ show_challenges_with_email }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="challenge_search" id="challenge_search_id" value="{{ challenge_search }}" />
+    <input type="submit" value="Search for Challenge" />
+</form>
+
+{% if duplicates_list %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Challenge 1 Name</th>
+            <th>ID - We Vote ID</th>
+            <th>Twitter Handle</th>
+            <th>&nbsp;</th>
+            <th>Challenge 2 Name</th>
+            <th>ID - We Vote ID</th>
+            <th>Twitter Handle</th>
+        </tr>
+      </thead>
+    {% for possible_duplicate in duplicates_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                <a href="{% url 'challenge:compare_two_challenges_for_merge' %}?challenge1_we_vote_id={{ possible_duplicate.challenge1_we_vote_id }}&challenge2_we_vote_id={{ possible_duplicate.challenge2_we_vote_id }}&state_code={{ state_code }}"
+                   class="u-no-break btn btn-primary"
+                   target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <br />
+                <a href="{% url 'challenge:not_duplicates' %}?challenge1_we_vote_id={{ possible_duplicate.challenge1_we_vote_id }}&challenge2_we_vote_id={{ possible_duplicate.challenge2_we_vote_id }}&state_code={{ state_code }}"
+                   class="u-no-break btn btn-light">mark as not duplicates</a>
+            </td>
+        {% if possible_duplicate.challenge1 %}
+            <td style="border-left: 1px solid #cdd0d4;">
+                {% if possible_duplicate.challenge1.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'challenge:challenge_edit' possible_duplicate.challenge1.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    <img src='{{ possible_duplicate.challenge1.we_vote_hosted_profile_image_url_medium }}' height="64px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'challenge:challenge_edit' possible_duplicate.challenge1.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{% if possible_duplicate.challenge1.challenge_title %}{{ possible_duplicate.challenge1.challenge_title }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <span style="color: #999">{{ possible_duplicate.challenge1.seo_friendly_path }}&nbsp;</span>
+                {% if possible_duplicate.challenge1.seo_friendly_path_list %}
+                    {% for seo_friendly_path in possible_duplicate.challenge1.seo_friendly_path_list %}
+                        <br />
+                        <span style="color: #999">{{ seo_friendly_path }}&nbsp;</span>
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td>
+                {{ possible_duplicate.challenge1.id }} - {{ possible_duplicate.challenge1.we_vote_id }}
+                {% if possible_duplicate.challenge1.politician_we_vote_id %}
+                    - {{ possible_duplicate.challenge1.politician_we_vote_id }}
+                    <br />
+                    <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=possible_duplicate.challenge1.politician_we_vote_id %}"
+                       target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+            </td>
+            <td>
+            {% if possible_duplicate.challenge1.politician %}
+                {% if possible_duplicate.challenge1.politician.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.challenge1.politician.politician_twitter_handle }}"
+                    target="_blank">{{ possible_duplicate.challenge1.politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ possible_duplicate.challenge1.politician.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if possible_duplicate.challenge1.politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge1.politician.politician_twitter_handle2 }}"
+                    target="_blank">{{ possible_duplicate.challenge1.politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge1.politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge1.politician.politician_twitter_handle3 }}"
+                    target="_blank">{{ possible_duplicate.challenge1.politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge1.politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge1.politician.politician_twitter_handle4 }}"
+                    target="_blank">{{ possible_duplicate.challenge1.politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge1.politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge1.politician.politician_twitter_handle5 }}"
+                    target="_blank">{{ possible_duplicate.challenge1.politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            {% endif %}
+            </td>
+        {% endif %}
+        {% if possible_duplicate.challenge2 %}
+            <td style="border-left: 1px solid #cdd0d4;">
+                {% if possible_duplicate.challenge2.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'challenge:challenge_edit' possible_duplicate.challenge2.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    <img src='{{ possible_duplicate.challenge2.we_vote_hosted_profile_image_url_medium }}' height="64px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'challenge:challenge_edit' possible_duplicate.challenge2.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ possible_duplicate.challenge2.challenge_title }} <span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <span style="color: #999">{{ possible_duplicate.challenge2.seo_friendly_path }}&nbsp;</span>
+                {% if possible_duplicate.challenge2.seo_friendly_path_list %}
+                    {% for seo_friendly_path in possible_duplicate.challenge2.seo_friendly_path_list %}
+                        <br />
+                        <span style="color: #999">{{ seo_friendly_path }}&nbsp;</span>
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td>
+                {{ possible_duplicate.challenge2.id }} - {{ possible_duplicate.challenge2.we_vote_id }}
+                {% if possible_duplicate.challenge2.politician_we_vote_id %}
+                    - {{ possible_duplicate.challenge2.politician_we_vote_id }}
+                    <br />
+                    <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=possible_duplicate.challenge2.politician_we_vote_id %}"
+                       target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                {% if possible_duplicate.challenge2.vote_usa_politician_id %}
+                    <br />{{ possible_duplicate.challenge2.vote_usa_politician_id|default_if_none:"" }}
+                {% endif %}
+                {% if possible_duplicate.challenge2.vote_smart_id %}
+                    <br />VS: {{ possible_duplicate.challenge2.vote_smart_id|default_if_none:"" }}
+                {% endif %}
+            </td>
+            <td>
+            {% if possible_duplicate.challenge2.politician %}
+                {% if possible_duplicate.challenge2.politician.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.challenge2.politician.politician_twitter_handle }}"
+                    target="_blank">{{ possible_duplicate.challenge2.politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ possible_duplicate.challenge2.politician.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if possible_duplicate.challenge2.politician.politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge2.politician.politician_twitter_handle2 }}"
+                    target="_blank">{{ possible_duplicate.challenge2.politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge2.politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge2.politician.politician_twitter_handle3 }}"
+                    target="_blank">{{ possible_duplicate.challenge2.politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge2.politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge2.politician.politician_twitter_handle4 }}"
+                    target="_blank">{{ possible_duplicate.challenge2.politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.challenge2.politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.challenge2.politician.politician_twitter_handle5 }}"
+                    target="_blank">{{ possible_duplicate.challenge2.politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            {% endif %}
+            </td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no duplicates found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#show_all_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_challenges_with_email_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_related_candidates_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

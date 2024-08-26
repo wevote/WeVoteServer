@@ -1,0 +1,349 @@
+{# templates/challenge/challenge_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Challenges{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+{% include "admin_tools/loading_banner.html" %}
+
+<h1>Challenges</h1>
+<!--
+<ul>
+    <li><a href="{% url 'challenge:find_and_merge_duplicate_challenges' %}?state_code={{ state_code }}"
+                    target="_blank" >
+        Find and Merge Duplicate Challenge Entries <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+        <a href="{% url 'challenge:duplicates_list' %}?state_code={{ state_code }}"
+                    target="_blank" >
+        Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+    </li>
+    <li><a href="{% url 'challenge:challenge_list' %}?state_code={{ state_code }}&update_challenges_that_need_organization=1"
+                    target="_blank" >
+        Link Challenges to Organizations/Endorsers ({{ challenges_that_need_organization|intcomma }} to update) <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
+    </li>
+    <li><a href="{% url 'challenge:challenge_list' %}?state_code={{ state_code }}&update_challenges_from_politicians=1"
+                    target="_blank" >
+        Update Challenges with Politician data (older than 6 months) <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+    </li>
+
+</ul>
+//-->
+<form name="state_code_form" method="get" action="{% url 'challenge:challenge_list' %}">
+    {% csrf_token %}
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
+
+{#{% if state_list %}#}
+{#    <select id="state_code_id" name="state_code">#}
+{#        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>#}
+{#        {% if '' == state_code %}#}
+{#            -- Filter by State Served --#}
+{#        {% else %}#}
+{#            -- Show All States Served --#}
+{#        {% endif %}#}
+{#        </option>#}
+{#    {% for key, state in state_list %}#}
+{#        <option value="{{ key }}"#}
+{#                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>#}
+{#            {{ state }}</option>#}
+{#    {% endfor %}#}
+{#    </select>#}
+{#{% endif %}{# End of if state_list #}
+
+    {#  #}
+    <label for="show_challenges_in_draft_id">
+      <input type="checkbox" name="show_challenges_in_draft" id="show_challenges_in_draft_id" value="1"
+             {% if show_challenges_in_draft %}checked{% endif %} /> In Draft Mode
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_blocked_challenges_id">
+      <input type="checkbox" name="show_blocked_challenges" id="show_blocked_challenges_id" value="1"
+             {% if show_blocked_challenges %}checked{% endif %} /> Blocked
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="hide_challenges_not_visible_yet_id">
+      <input type="checkbox" name="hide_challenges_not_visible_yet" id="hide_challenges_not_visible_yet_id" value="1"
+             {% if hide_challenges_not_visible_yet %}checked{% endif %} /> Hide "Not Visible Yet"
+    </label>
+
+    {#  #}
+<!--
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_challenges_linked_to_politicians_id">
+      <input type="checkbox" name="show_challenges_linked_to_politicians" id="show_challenges_linked_to_politicians_id" value="1"
+             {% if show_challenges_linked_to_politicians %}checked{% endif %} /> Challenges Linked to Politician
+    </label>
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="include_challenges_from_prior_elections_id">
+      <input type="checkbox" name="include_challenges_from_prior_elections" id="include_challenges_from_prior_elections_id" value="1"
+             {% if include_challenges_from_prior_elections %}checked{% endif %} /> Include Prior Elections
+    </label>
+//-->
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <select id="challenge_owner_organization_we_vote_id_id" name="challenge_owner_organization_we_vote_id">
+        <option value="" {% if '' == challenge_owner_organization_we_vote_id %} selected="selected"{% endif %}>
+            -- Filter by Client --</option>
+    {% for client_organization in client_organization_list %}
+        <option value="{{ client_organization.we_vote_id }}"
+                {% if client_organization.we_vote_id|slugify == challenge_owner_organization_we_vote_id|slugify %} selected="selected"{% endif %}>
+            {{ client_organization.organization_name }}</option>
+    {% endfor %}
+    </select>
+
+    <br />
+
+{% if challenge_search %}
+    <a href="{% url 'challenge:challenge_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="challenge_search" id="challenge_search_id" value="{{ challenge_search }}" />
+    <input type="submit" id="challenge_search_submit" value="Search for Challenge" />
+
+
+
+{% if challenge_list %}
+    <div class="form-group pull-right">
+        <div class="col-xs-1">
+            <input type="submit" name="save_changes" value="Save Changes" class="btn btn-primary" />
+        </div>
+    </div>
+    <table class="table">
+    {% for challenge in challenge_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>
+              <a href="{% url 'challenge:challenge_list' %}?sort_by=challenge&state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}">
+              {% if sort_by == "challenge" %}<strong>Challenge</strong>{% else %}Challenge{% endif %}
+              </a>
+            </th>
+            <th>Owner(s)</th>
+        {% if challenge_owner_organization_we_vote_id %}
+            <th>Order</th>
+        {% endif %}
+            <th>
+              {% if sort_by == "supporters_count" %}
+                  <a href="{% url 'challenge:challenge_list' %}?state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}&show_challenges_without_email={{ show_challenges_without_email }}&show_challenges_to_be_analyzed={{ show_challenges_to_be_analyzed }}" class="u-no-break">
+                  Supporters&nbsp;<span class="glyphicon glyphicon-triangle-bottom"></span>
+                  </a>
+              {% else %}
+              <a href="{% url 'challenge:challenge_list' %}?sort_by=supporters_count&state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}&show_challenges_without_email={{ show_challenges_without_email }}&show_challenges_to_be_analyzed={{ show_challenges_to_be_analyzed }}">
+                  Supporters
+                  </a>
+              {% endif %}
+            </th>
+            <th style="min-width: 90px">Chipped In</th>
+            <th>Description</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if challenge.we_vote_hosted_challenge_photo_large_url or challenge.we_vote_hosted_profile_image_url_large %}
+                <a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">
+                {% if challenge.we_vote_hosted_challenge_photo_large_url %}
+                    <img src="{{ challenge.we_vote_hosted_challenge_photo_large_url }}" width="128px" />
+                {% elif challenge.we_vote_hosted_profile_image_url_large %}
+                    <img src="{{ challenge.we_vote_hosted_profile_image_url_large }}" width="128px" />
+                {% endif %}
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <span class="u-no-break">
+                    <a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">
+                        <strong>{{ challenge.challenge_title }}</strong>&nbsp;
+                    </a>
+                {% if challenge.seo_friendly_path %}
+                    <br />
+                    <a href="{{ web_app_root_url }}/c/{{ challenge.seo_friendly_path }}"
+                       target="_blank">/{{ challenge.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                </span><br />
+                <span style="color: darkgray">
+                    {{ challenge.we_vote_id }}&nbsp;&nbsp;
+                {% if challenge.politician_we_vote_id %}
+                    {{ challenge.politician_we_vote_id|default_if_none:"" }}
+                    &nbsp;&nbsp;
+                {% endif %}
+                </span>
+                {% if challenge.organization_we_vote_id %}
+                <span style="color: darkgray">
+                {{ challenge.organization_we_vote_id }}
+                &nbsp;&nbsp;
+                </span>
+                {% endif %}
+                <span style="font-size: .95rem; color: gray">
+                {% if challenge.is_in_team_review_mode %}
+                    OWNER-IN-TEAM-REVIEW&nbsp;
+                {% endif %}
+                {% if not challenge.is_ok_to_promote_on_we_vote %}
+                    OWNER-NO-PROMOTE&nbsp;
+                {% endif %}
+                {% if challenge.is_not_promoted_by_we_vote %}
+                    WE-VOTE-NO-PROMOTE&nbsp;
+                {% endif %}
+                </span>
+
+                <span style="color: red; font-weight: 800;">
+                {% if challenge.is_blocked_by_we_vote %}
+                    BLOCKED&nbsp;
+                {% endif %}
+                </span>
+
+                <br />
+                (<a href="{% url 'challenge:challenge_edit' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">edit</a>)
+            </td>
+            <td>
+                <a href="{% url 'challenge:challenge_edit_owners' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
+            {% for challenge_owner in challenge.challenge_owner_list %}
+                {% if challenge_owner.organization_name %}
+                    <span class="u-no-break">{{ challenge_owner.organization_name }}</span><br />
+                {% else %}
+                    {{ challenge_owner.organization_we_vote_id }}<br />
+                {% endif %}
+            {% endfor %}
+                </a>
+            </td>
+        {% if challenge_owner_organization_we_vote_id %}
+            <td>
+            {% for challenge_owner in challenge.challenge_owner_list %}
+                {% if challenge_owner.organization_we_vote_id == challenge_owner_organization_we_vote_id %}
+                    <input type="hidden" name="{{ challenge.we_vote_id }}_order_changed" id="{{ challenge.we_vote_id }}_order_changed_id" value="0">
+                    <input type="text" name="{{ challenge.we_vote_id }}_order_in_list"
+                           maxlength="100"
+                           onChange="if (document.getElementById(`{{ challenge.we_vote_id }}_order_changed_id`)) { document.getElementById(`{{ challenge.we_vote_id }}_order_changed_id`).value = 1; }"
+                           size="3"
+                           value="{{ challenge_owner.order_in_list|default_if_none:"" }}" /><br />
+                {% else %}
+                    <br />
+                {% endif %}
+            {% endfor %}
+            </td>
+        {% endif %}
+            <td style="text-align: right">{% if challenge.supporters_count %}
+                <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
+                    {{ challenge.supporters_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
+                </a>
+                {% if challenge.supporters_count_minimum_ignored and challenge.supporters_count < 5 %}
+                    <br />
+                    <span style="font-size: 1.rem;">
+                    (Visible)
+                    </span>
+                {% elif not challenge.is_supporters_count_minimum_exceeded %}
+                    <br />
+                    <span style="font-size: .95rem; color: gray">
+                    (NOT&nbsp;Visible)
+                    </span>
+                {% endif %}
+            {% endif %}</td>
+            <td style="text-align: right">
+            {% if challenge.chip_in_total != 'none' %}
+                <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?only_show_supporters_with_endorsements=0&show_supporters_not_visible_to_public=1" target="_blank">
+                    {{ challenge.chip_in_total }}
+                    <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
+                </a>
+            {% endif %}
+            </td>
+            <td>
+                {{ challenge.challenge_description|default_if_none:""|truncatechars:250 }}
+                {% if challenge.date_challenge_started %}
+                    <span class="u-no-break" style="color: darkgray">(Started: {{ challenge.date_challenge_started }})</span>
+                {% endif %}
+                {% if challenge.final_election_date_as_integer %}
+                    <span class="u-no-break" style="color: gray">
+                    (Final election: {{ challenge.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > challenge.final_election_date_as_integer %}-EXPIRED{% endif %})
+                    </span>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% if not show_all and not show_more %}
+    <a href="{% url 'challenge:challenge_list' %}?google_civic_election_id={{ google_civic_election_id }}&challenge_search={{ challenge_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&challenge_type_filter={{ challenge_type_filter }}&sort_by={{ sort_by }}&show_more=1">
+        show more</a>
+    {% endif %}
+    {% if show_more %}
+    <a href="{% url 'challenge:challenge_list' %}?google_civic_election_id={{ google_civic_election_id }}&challenge_search={{ challenge_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&challenge_type_filter={{ challenge_type_filter }}&sort_by={{ sort_by }}&show_all=1">
+        show all</a>
+    {% endif %}
+    {% if show_all or show_more %}
+    &nbsp;&nbsp;&nbsp;
+      (<a href="{% url 'challenge:challenge_list' %}?google_civic_election_id={{ google_civic_election_id }}&challenge_search={{ challenge_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&challenge_type_filter={{ challenge_type_filter }}&sort_by={{ sort_by }}">
+        show fewer</a>)
+    {% endif %}
+
+    <p></p>
+
+{% else %}
+    <p>(no challenges found with current filters)</p>
+{% endif %}
+
+</form>
+
+    <p></p>
+
+    <script>
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
+        $(function() {
+            $('#limit_to_opinions_in_this_year_id').change(function() {
+                this.form.submit();
+            });
+            $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#challenge_owner_organization_we_vote_id_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#challenge_type_filter_id').change(function() {
+                this.form.submit();
+            });
+            $('#hide_challenges_not_visible_yet_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#include_challenges_from_prior_elections_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#show_blocked_challenges_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#show_challenges_in_draft_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#show_challenges_linked_to_politicians_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+            $(function() {
+                $('#challenge_search_submit').click(function() {
+                    displayLoadingBanner();
+                    this.form.submit();
+                });
+        });
+        });
+    </script>
+
+{% endblock %}

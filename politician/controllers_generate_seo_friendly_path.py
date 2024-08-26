@@ -30,7 +30,10 @@ def generate_seo_friendly_path_generic(
         base_pathname_string=None,
         campaignx_title='',
         campaignx_we_vote_id='',
+        challenge_title='',
+        challenge_we_vote_id='',
         for_campaign=False,
+        for_challenge=False,
         for_politician=False,
         politician_name=None,
         politician_we_vote_id='',
@@ -41,6 +44,7 @@ def generate_seo_friendly_path_generic(
     """
     final_pathname_string = ''
     for_campaign = positive_value_exists(for_campaign)
+    for_challenge = positive_value_exists(for_challenge)
     for_politician = positive_value_exists(for_politician)
     pathname_modifier = None
     seo_friendly_path_created = False
@@ -57,6 +61,14 @@ def generate_seo_friendly_path_generic(
         if not campaignx_title:
             required_variable_missing = True
             status += "MISSING_CAMPAIGN_TITLE "
+    elif for_challenge:
+        if not positive_value_exists(challenge_we_vote_id):
+            required_variable_missing = True
+            status += "MISSING_CHALLENGE_WE_VOTE_ID "
+
+        if not challenge_title:
+            required_variable_missing = True
+            status += "MISSING_CHALLENGE_TITLE "
     elif for_politician:
         if not positive_value_exists(politician_we_vote_id):
             required_variable_missing = True
@@ -67,7 +79,7 @@ def generate_seo_friendly_path_generic(
             status += "MISSING_POLITICIAN_NAME "
     else:
         required_variable_missing = True
-        status += "MISSING_CAMPAIGN_OR_POLITICIAN "
+        status += "MISSING_CAMPAIGN_CHALLENGE_OR_POLITICIAN "
 
     if required_variable_missing:
         results = {
@@ -89,6 +101,8 @@ def generate_seo_friendly_path_generic(
                 base_pathname_string = base_pathname_string[:base_pathname_string_max_length]
         elif positive_value_exists(campaignx_title):
             base_pathname_string = slugify(campaignx_title)
+        elif positive_value_exists(challenge_title):
+            base_pathname_string = slugify(challenge_title)
         elif positive_value_exists(politician_name):
             # If one wasn't passed in, generate the ideal path given politician_name
             if positive_value_exists(state_code):
@@ -127,12 +141,19 @@ def generate_seo_friendly_path_generic(
         return results
 
     from campaign.models import CampaignX, CampaignXSEOFriendlyPath
+    from challenge.models import Challenge, ChallengeSEOFriendlyPath
     try:
         match_count = 0
         if for_campaign:
             # Is that path already stored for this campaign?
             path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
             path_query = path_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+        elif for_challenge:
+            # Is that path already stored for this challenge?
+            path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(challenge_we_vote_id=campaignx_we_vote_id)
             path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
             match_count = path_query.count()
         elif for_politician:
@@ -144,6 +165,8 @@ def generate_seo_friendly_path_generic(
         if positive_value_exists(match_count):
             if for_campaign:
                 status += "PATHNAME_FOUND-OWNED_BY_THIS_CAMPAIGNX "
+            elif for_challenge:
+                status += "PATHNAME_FOUND-OWNED_BY_THIS_CHALLENGE "
             elif for_politician:
                 status += "PATHNAME_FOUND-OWNED_BY_THIS_POLITICIAN "
             results = {
@@ -203,6 +226,41 @@ def generate_seo_friendly_path_generic(
                 path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
                 path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
                 match_count = path_query.count()
+        elif for_challenge:
+            # Is it being used by any challenge?
+            path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+            challenge_deleted = False
+            if positive_value_exists(match_count):
+                # See if the other challenge object still exists
+                challenge_path_list = list(path_query)
+                for challenge_path in challenge_path_list:
+                    if positive_value_exists(challenge_path.challenge_we_vote_id):
+                        try:
+                            challenge_exists = Challenge.objects.using('readonly').filter(
+                                we_vote_id=challenge_path.challenge_we_vote_id).exists()
+                            if not challenge_exists:
+                                ChallengeSEOFriendlyPath.objects \
+                                    .filter(challenge_we_vote_id=challenge_path.challenge_we_vote_id).delete()
+                                challenge_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_CHALLENGE_SEO_FRIENDLY_PATH_BY_WE_VOTE_ID:' + str(
+                                e) + ' '
+                            break
+                    elif positive_value_exists(challenge_path.id):
+                        # Delete the entry
+                        try:
+                            ChallengeSEOFriendlyPath.objects.filter(id=challenge_path.id).delete()
+                            challenge_deleted = True
+                        except Exception as e:
+                            status += 'PROBLEM_DELETING_CHALLENGE_SEO_FRIENDLY_PATH_BY_ID:' + str(e) + ' '
+                    else:
+                        status += "CANNOT_DELETE_SEO_FRIENDLY_PATH_ENTRY_WITH_NO_ID "
+            if challenge_deleted:
+                path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+                match_count = path_query.count()
         elif for_politician:
             # Is it being used by any politician?
             path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
@@ -241,6 +299,8 @@ def generate_seo_friendly_path_generic(
             owned_by_another = True
             if for_campaign:
                 status += "PATHNAME_FOUND-OWNED_BY_ANOTHER_CAMPAIGNX "
+            elif for_challenge:
+                status += "PATHNAME_FOUND-OWNED_BY_ANOTHER_CHALLENGE "
             elif for_politician:
                 status += "PATHNAME_FOUND-OWNED_BY_ANOTHER_POLITICIAN "
     except Exception as e:
@@ -263,6 +323,10 @@ def generate_seo_friendly_path_generic(
                 path_query = CampaignX.objects.using('readonly').all()
                 path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
                 match_count = path_query.count()
+            elif for_challenge:
+                path_query = Challenge.objects.using('readonly').all()
+                path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
+                match_count = path_query.count()
             elif for_politician:
                 path_query = Politician.objects.using('readonly').all()
                 path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
@@ -271,6 +335,8 @@ def generate_seo_friendly_path_generic(
                 owned_by_another = True
                 if for_campaign:
                     status += "PATHNAME_FOUND_IN_ANOTHER_CAMPAIGNX "
+                elif for_challenge:
+                    status += "PATHNAME_FOUND_IN_ANOTHER_CHALLENGE "
                 elif for_politician:
                     status += "PATHNAME_FOUND_IN_ANOTHER_POLITICIAN "
         except Exception as e:
@@ -325,6 +391,10 @@ def generate_seo_friendly_path_generic(
                         path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
                         path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
                         match_count = path_query.count()
+                    elif for_challenge:
+                        path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                        path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
+                        match_count = path_query.count()
                     elif for_politician:
                         path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
                         path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
@@ -334,6 +404,11 @@ def generate_seo_friendly_path_generic(
                             if for_campaign:
                                 path_query = CampaignX.objects.using('readonly').all()
                                 path_query = path_query.filter(seo_friendly_path__iexact=final_pathname_string_to_test)
+                                match_count = path_query.count()
+                            elif for_challenge:
+                                path_query = Challenge.objects.using('readonly').all()
+                                path_query = path_query.filter(
+                                    seo_friendly_path__iexact=final_pathname_string_to_test)
                                 match_count = path_query.count()
                             elif for_politician:
                                 path_query = Politician.objects.using('readonly').all()
@@ -407,6 +482,18 @@ def generate_seo_friendly_path_generic(
             seo_friendly_path_found = True
             success = True
             status += "CAMPAIGNX_SEO_FRIENDLY_PATH_CREATED "
+        elif for_challenge:
+            challenge_seo_friendly_path = ChallengeSEOFriendlyPath.objects.create(
+                base_pathname_string=base_pathname_string,
+                challenge_title=challenge_title,
+                challenge_we_vote_id=challenge_we_vote_id,
+                final_pathname_string=final_pathname_string,
+                pathname_modifier=pathname_modifier,
+            )
+            seo_friendly_path_created = True
+            seo_friendly_path_found = True
+            success = True
+            status += "CHALLENGE_SEO_FRIENDLY_PATH_CREATED "
         elif for_politician:
             politician_seo_friendly_path = PoliticianSEOFriendlyPath.objects.create(
                 base_pathname_string=base_pathname_string,

@@ -3480,6 +3480,8 @@ def create_resized_images(
         campaignx_photo_url_https=None,
         campaignx_we_vote_id=None,
         candidate_we_vote_id=None,
+        challenge_photo_url_https=None,  # TODO: Implement this
+        challenge_we_vote_id=None,       # TODO: Implement this
         facebook_background_image_url_https=None,
         facebook_profile_image_url_https=None,
         linkedin_profile_image_url=None,
@@ -3507,6 +3509,8 @@ def create_resized_images(
     :param campaignx_photo_url_https:
     :param campaignx_we_vote_id:
     :param candidate_we_vote_id:
+    :param challenge_photo_url_https:
+    :param challenge_we_vote_id:
     :param facebook_background_image_url_https:
     :param facebook_profile_image_url_https:
     :param linkedin_profile_image_url:

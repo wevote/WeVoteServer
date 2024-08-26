@@ -1,0 +1,131 @@
+{# templates/challenge/challenges_edit_politicians.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if challenge %}{{ challenge.challenge_title }}{% endif %}: Politician(s) Supported by This Challenge{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<style>
+span.nobr { white-space: nowrap; }
+</style>
+
+{% if not challenge or not challenge.we_vote_id %}
+  This page requires a valid challenge.
+{% else %}
+<a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+>
+    &lt; Back to Challenge Summary
+</a>
+
+
+<h1>{{ challenge.challenge_title }}: Politician(s) Supported by This Challenge</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+
+<form action="{% url "challenge:challenge_edit_politicians_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+<input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
+<input type="hidden" name="challenge_search" value="{% if challenge_search %}{{ challenge_search }}{% endif %}">
+<input type="hidden" name="challenge_we_vote_id" value="{{ challenge.we_vote_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+
+<p>These are the politicians this challenge is supporting.</p>
+
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Add New Politician:
+    </label>
+    <div class="col-sm-8">
+        <table id="challenge_politician_add">
+            <thead>
+                <tr>
+                    <th>Politician We Vote Id</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="politician_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="col-8">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Challenge Politicians</th>
+            <th>State Code</th>
+            <th>Delete Politician</th>
+        </tr>
+    </thead>
+    {% for challenge_politician in challenge_politician_list %}
+    <tr>
+        <td>
+            {% if challenge_politician.we_vote_hosted_profile_image_url_tiny %}
+                <img src="{{ challenge_politician.we_vote_hosted_profile_image_url_tiny }}" />
+            {% endif %}
+            {{ challenge_politician.politician_name }}&nbsp;&nbsp;
+        {% if challenge_politician.politician_we_vote_id %}
+            <span style="color: darkgray">
+            {{ challenge_politician.politician_we_vote_id }}
+            </span>
+            <a href="{% url 'politician:politician_we_vote_id_edit' challenge_politician.politician_we_vote_id %}"
+               target="_blank">
+                view
+                <span class="glyphicon glyphicon-new-window"></span></a>
+        {% else %}
+            <span style="color: darkgray">not&nbsp;linked</span>
+        {% endif %}
+        </td>
+        <td>
+            {% if challenge_politician.state_code %}
+                {{ challenge_politician.state_code }}&nbsp;&nbsp;
+            {% endif %}
+        </td>
+        <td>
+            <input type="checkbox"
+                   name="delete_challenge_politician_{{ challenge_politician.id }}"
+                   id="delete_challenge_politician_{{ challenge_politician.id }}_id"
+                   value=1
+            />
+            delete
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Politician(s)</button>
+    </div>
+</div>
+
+</form>
+
+<br />
+<br />
+Politician List Serialized (For Reference Only)
+    <textarea
+        class="form-control animated"
+        disabled
+        id="politician_starter_list_serialized_id"
+        name="politician_starter_list_serialized"
+        rows="2">{{ challenge.politician_starter_list_serialized|default_if_none:"" }}</textarea>
+
+{% endif %}
+  <br />
+  <br />
+{% endblock %}
