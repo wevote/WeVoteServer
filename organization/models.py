@@ -3634,10 +3634,13 @@ class OrganizationTeamMember(models.Model):
 
     organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     can_edit_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_edit_challenge_owned_by_organization = models.BooleanField(default=True)
     can_edit_organization = models.BooleanField(default=True)
     can_manage_team_members = models.BooleanField(default=False)
     can_moderate_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_moderate_challenge_owned_by_organization = models.BooleanField(default=True)
     can_send_updates_for_campaignx_owned_by_organization = models.BooleanField(default=False)
+    can_send_updates_for_challenge_owned_by_organization = models.BooleanField(default=True)
     team_member_name = models.CharField(max_length=255, null=False, blank=False)
     team_member_organization_we_vote_id = models.CharField(
         max_length=255, null=True, blank=True, unique=False, db_index=True)

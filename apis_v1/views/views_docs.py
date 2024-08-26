@@ -14,9 +14,14 @@ from apis_v1.documentation_source import \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
     campaign_follow_doc, campaign_news_item_save_doc, campaign_retrieve_doc, campaign_save_doc, \
     campaign_supporter_retrieve_doc, campaign_supporter_save_doc, \
-    campaign_list_retrieve_doc, candidate_retrieve_doc, \
+    campaign_list_retrieve_doc, \
+    candidate_retrieve_doc, \
     candidates_query_doc, candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
-    candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, \
+    candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, \
+    challenge_follow_doc, challenge_news_item_save_doc, challenge_retrieve_doc, challenge_save_doc, \
+    challenge_supporter_retrieve_doc, challenge_supporter_save_doc, \
+    challenge_list_retrieve_doc, \
+    device_id_generate_doc, \
     device_store_firebase_fcm_token_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
     fast_load_status_retrieve_doc, \
@@ -370,6 +375,76 @@ def candidate_to_office_link_sync_out_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = \
         candidate_to_office_link_sync_out_doc.candidate_to_office_link_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_follow_doc_view(request):
+    """
+    Show documentation about challengeFollow
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_follow_doc.challenge_follow_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_list_retrieve_doc_view(request):
+    """
+    Show documentation about challengeListRetrieve (No CDN)
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_list_retrieve_doc.challenge_list_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_news_item_save_doc_view(request):
+    """
+    Show documentation about challengeNewsItemSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_news_item_save_doc.challenge_news_item_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_retrieve_doc_view(request):
+    """
+    Show documentation about challengeRetrieve (CDN) & challengeRetrieveAsOwner (No CDN)
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_retrieve_doc.challenge_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_save_doc_view(request):
+    """
+    Show documentation about challengeSave & challengeStartSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_save_doc.challenge_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_supporter_retrieve_doc_view(request):
+    """
+    Show documentation about challengeSupporterRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_supporter_retrieve_doc.challenge_supporter_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_supporter_save_doc_view(request):
+    """
+    Show documentation about challengeSupporterSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_supporter_save_doc.challenge_supporter_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -1059,6 +1134,7 @@ def retrieve_sql_tables_row_count_doc_view(request):
     template_values = retrieve_issues_to_follow_doc. \
         retrieve_issues_to_follow_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
+
 
 def save_analytics_action_doc_view(request):
     """
