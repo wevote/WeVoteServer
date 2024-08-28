@@ -26,12 +26,12 @@ logger = wevote_functions.admin.get_logger(__name__)
 CTCL_API_KEY = get_environment_variable("CTCL_API_KEY")
 CTCL_ELECTION_QUERY_URL = "https://api.ballotinfo.org/elections"
 CTCL_SAMPLE_XML_FILE = "import_export_ctcl/import_data/GoogleCivic.Sample.xml"
-CTCL_VOTER_INFO_URL = "http://api.ballotinfo.org/voterinfo"
+CTCL_VOTER_INFO_URL = "https://api.ballotinfo.org/voterinfo"
 CTCL_API_VOTER_INFO_QUERY_TYPE = "voterinfo"
 
 
 HEADERS_FOR_CTCL_API_CALL = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept': 'text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'en-US,en;q=0.5',
     'Connection': 'keep-alive',
@@ -417,7 +417,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
     except Exception as e:
         one_ballot_json = {}
         success = False
-        status += 'CTCL_API_END_POINT_CRASH: ' + str(e) + ' '
+        status += 'CTCL_API_END_POINT_CRASH1: ' + str(e) + ' '
 
     try:
         # Use CTCL API call counter to track the number of queries we are doing each day
@@ -656,13 +656,14 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             if positive_value_exists(response.url):
                 status += str(response.url) + ' '
             if len(response.text) >= 2:
-                one_ballot_json = json.loads(response.text)
+                # one_ballot_json = json.loads(response.text)
+                one_ballot_json = response.json()
                 one_ballot_json_found = True
             else:
                 status += "NO_RESULT_FOR: " + str(text_for_map_search) + " "
         except Exception as e:
             success = False
-            status += 'CTCL_API_END_POINT_CRASH: ' + str(e) + ' '
+            status += 'CTCL_API_END_POINT_CRASH2: ' + str(e) + ' '
             log_entry_message = status
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,
