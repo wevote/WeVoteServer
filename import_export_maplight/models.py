@@ -108,8 +108,6 @@ class MapLightCandidate(models.Model):
         verbose_name='display name', max_length=255, null=False, blank=False, unique=False)  # "Jerry Brown"
     first_name = models.CharField(
         verbose_name='first name', max_length=255, null=False, blank=True, unique=False)
-    models.CharField(
-        verbose_name='display name', max_length=255, null=False, blank=False, unique=False)
     gender = models.CharField(
         verbose_name='gender', max_length=1, null=False, blank=False, default='U', unique=False)  # "M"
     last_funding_update = models.DateField(
