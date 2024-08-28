@@ -732,7 +732,7 @@ def voter_edit_process_view(request):
             team_we_vote_id = volunteer_team.we_vote_id
             if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
                 try:
-                    number_deleted, details = VolunteerTeamMember.objects.using('readonly') \
+                    number_deleted, details = VolunteerTeamMember.objects \
                         .filter(
                             team_we_vote_id__iexact=team_we_vote_id,
                             voter_we_vote_id__iexact=voter_we_vote_id,
@@ -742,9 +742,9 @@ def voter_edit_process_view(request):
                                          "Deleted VolunteerTeamMember ({number_deleted})."
                                          .format(number_deleted=number_deleted))
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership1: ' + str(e))
             else:
-                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership1.')
         # Add this voter to the team
         add_variable_name = "add_volunteer_team_member_" + str(volunteer_team.id)
         add_voter_to_team = positive_value_exists(request.POST.get(add_variable_name, False))
@@ -775,9 +775,9 @@ def voter_edit_process_view(request):
                                 voter_we_vote_id=voter_we_vote_id)
                     messages.add_message(request, messages.INFO, message)
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership2: ' + str(e))
             else:
-                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership2.')
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)) +
                                 "?voter_invitation_password=" + password_text)
