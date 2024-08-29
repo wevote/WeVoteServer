@@ -31,15 +31,20 @@ CTCL_API_VOTER_INFO_QUERY_TYPE = "voterinfo"
 
 
 HEADERS_FOR_CTCL_API_CALL = {
-    'Accept': 'text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Connection': 'keep-alive',
-    'Host': 'api.ballotinfo.org',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
+    'Accept': 'text/html, application/json, application/xhtml+xml, application/xml;q=0.9',
+    'User-Agent': 'Mozilla/5.0',
 }
+
+# HEADERS_FOR_CTCL_API_CALL = {
+#     'Accept': 'text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+#     'Accept-Encoding': 'gzip, deflate, br',
+#     'Accept-Language': 'en-US,en;q=0.5',
+#     'Connection': 'keep-alive',
+#     'Host': 'api.ballotinfo.org',
+#     'Upgrade-Insecure-Requests': '1',
+#     'User-Agent':
+#         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
+# }
 
 PRESIDENTIAL_CANDIDATES_JSON_LIST = [
     {
