@@ -29,7 +29,15 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     voter_api_device_id = get_voter_api_device_id(request)
 
     # print("retrieveSQLTables voter_api_device_id: ", voter_api_device_id)
-    json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
+    # DALE 2024-08-30 TURNING OFF DUE TO SERVER OVERLOAD
+    # json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
+    status = ''
+    status += "Retrieving SQL tables: " + table_name + " " + start + " " + end + "TURNED OFF DUE TO SERVER OVERLOAD "
+    json_data = {
+        'success': False,
+        'status': status,
+    }
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
