@@ -31,8 +31,11 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     # print("retrieveSQLTables voter_api_device_id: ", voter_api_device_id)
     # DALE 2024-08-30 TURNING OFF DUE TO SERVER OVERLOAD
     # json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
+
+    # Temporary solution
     status = ''
-    status += "Retrieving SQL tables: " + table_name + " " + start + " " + end + "TURNED OFF DUE TO SERVER OVERLOAD "
+    status += "Retrieving SQL tables: " + table_name + " " + start + " " + end + ""
+    status += "TURNED OFF DUE TO SERVER OVERLOAD Please contact Dale for more information. "
     json_data = {
         'success': False,
         'status': status,
