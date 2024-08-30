@@ -7,8 +7,6 @@ import json
 import os
 import time
 from datetime import datetime, timezone
-import sys
-import logging
 
 import sqlalchemy as sa
 from sqlalchemy.engine.reflection import Inspector
@@ -24,17 +22,6 @@ from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, BrokenPipeError):
-        logging.error("Unhandled broken pipe error", exc_info=(exc_type, exc_value, exc_traceback))
-    else:
-        # For other exceptions, you might want to log or handle them differently
-        logging.error("Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback))
-
-
-# Set global exception handler
-sys.excepthook = handle_exception
 
 # This api will only return the data from the following tables
 
@@ -89,7 +76,7 @@ def fetch_data_from_api(url, params, max_retries=10):
     for attempt in range(max_retries):
         print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
         try:
-            print("Waiting for response...")
+            # print("Waiting for response...")
             response = requests.get(url, params=params, verify=True, timeout=5)
             if response.status_code == 200:
                 return response.json()
@@ -134,40 +121,8 @@ def convert_df_col_types(df_col_types):
 
     return new_dict
 
-
-def psql_insert_copy(table, conn, keys, data_iter):
-    """
-    Execute SQL statement inserting data
-
-    Parameters
-    ----------
-    table : pandas.io.sql.SQLTable
-    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-    keys : list of str
-        Column names
-    data_iter : Iterable that iterates the values to be inserted
-    """
-    # gets a DBAPI connection that can provide a cursor
-    dbapi_conn = conn.connection
-    data_list = [list(row) for row in data_iter]
-    with dbapi_conn.cursor() as cur:
-        s_buf = StringIO()
-        writer = csv.writer(s_buf)
-        writer.writerows(data_list)
-        s_buf.seek(0)
-
-        columns = ', '.join('"{}"'.format(k) for k in keys)
-        if table.schema:
-            table_name = '{}.{}'.format(table.schema, table.name)
-        else:
-            table_name = table.name
-
-        sql = f"COPY {table_name} ({columns}) FROM STDIN WITH NULL AS '' CSV"
-        cur.copy_expert(sql=sql, file=s_buf)
-
-
 def process_table_data(table_name, data, start_line):
-    print("Processing data from API...")
+    # print("Processing data from API...")
     split_data = data.splitlines(keepends=True)
     first_len = len(split_data[0].split("|"))
     lines = [line.split("|") for line in split_data if len(line.split("|")) == first_len]
@@ -176,21 +131,26 @@ def process_table_data(table_name, data, start_line):
     df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
     engine = connect_to_db()
-    meta = sa.MetaData()
-    table = sa.Table(table_name, meta, autoload_with=engine)
-
     inspector = Inspector.from_engine(engine)
-    unique_constraints = inspector.get_unique_constraints(table_name)
-    # Retrieve the column information
-    columns = inspector.get_columns(table_name)
-    # Filter out columns that have a NOT NULL constraint
-    not_null_columns = [col['name'] for col in columns if not col['nullable']]
 
-    columns = table.c
-    col_dict = {column.name: str(column.type) for column in columns}
+    # retrieve constraints
+    unique_constraints = inspector.get_unique_constraints(table_name)
+    foreign_keys = inspector.get_foreign_keys(table_name)
+    fk_cols = [col['constrained_columns'][0] for col in foreign_keys]
+
+    # Retrieve column information
+    columns = inspector.get_columns(table_name)
+    not_null_columns = []
+    col_dict = {}
+    for col in columns:
+        if not col['nullable']:
+            not_null_columns.append(col['name'])
+        col_dict[col['name']] = str(col['type'])
+
     converted_col_types = convert_df_col_types(col_dict)
-    print("Cleaning data from API...")
-    df_cleaned = clean_df(df, table_name, col_dict, unique_constraints, not_null_columns)
+    # print("Cleaning data from API...")
+    df_cleaned = clean_df(df, table_name, col_dict, unique_constraints, not_null_columns, fk_cols)
+
     try:
         with engine.connect() as conn:
             # Truncate the table
@@ -207,19 +167,10 @@ def process_table_data(table_name, data, start_line):
         print(f'FAILED_TABLE_TRUNCATE: {table_name} -- {str(e)}')
 
     try:
-        with engine.connect() as conn:
-            # Write cleaned DataFrame to the PostgresSQL table
-            print('Writing cleaned data to table...')
-            if table_name == "position_positionentered":
-                conn.execute(sa.text(f"""
-                ALTER TABLE {table_name} 
-                ALTER CONSTRAINT position_positionent_twitter_user_entered_6c22de6d_fk_twitter_t 
-                DEFERRABLE INITIALLY DEFERRED"""
-                                     ))
-            # conn.execute(sa.text(f"SET session_replication_role = replica;"))
-            df_cleaned.to_sql(table_name, engine, if_exists='append', index=False, dtype=converted_col_types)
-            # conn.execute(sa.text(f"SET session_replication_role = origin;"))
-            print(f"Successfully inserted data into {table_name}")
+        # Write cleaned DataFrame to the PostgresSQL table
+        # print('Writing cleaned data to table...')
+        df_cleaned.to_sql(table_name, engine, if_exists='append', index=False, dtype=converted_col_types)
+        # print(f"Successfully inserted data into {table_name}")
     except Exception as e:
         print(f"FAILED_TABLE_INSERT: {table_name} -- {str(e)}")
     return len(df_cleaned)
@@ -235,7 +186,7 @@ def retrieve_sql_files_from_master_server(request):
     t0 = time.time()
     engine = connect_to_db()
     print(
-        'Saving off a copy of your local db (an an emergency fallback, that will almost never be needed) in '
+        '\nSaving off a copy of your local db (an an emergency fallback, that will almost never be needed) in '
         '\'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
     # save_off_database()
     dt = time.time() - t0
@@ -257,10 +208,11 @@ def retrieve_sql_files_from_master_server(request):
         start = 0
         end = chunk_size - 1
         structured_json = {}
-
+        chunk_start_time = time.time()
         # filling table with 500,000 line chunks
-        while end < 20000000:
-            print(f"Processing chunk from {start} to {end} for table {table_name}")
+        while end < 30000000:
+            chunk_start_time = time.time()
+            print(f"\nProcessing chunk from {start} to {end} for table {table_name}")
             try:
                 url = f'{host}/apis/v1/retrieveSQLTables/'
                 params = {'table_name': table_name, 'start': start, 'end': end,
@@ -277,24 +229,26 @@ def retrieve_sql_files_from_master_server(request):
                 data = structured_json['files'].get(table_name, "")
                 lines_count = process_table_data(table_name, data, start)
                 print(f'{lines_count} lines in table {table_name}')
-                if lines_count == 0 or end - lines_count > 0:
+                if lines_count == 0:
+                    print("moving to next table")
                     break
             except Exception as e:
                 print(f"TABLE_PROCESSING_ERROR: {table_name} -- {str(e)}")
 
             start += chunk_size
             end += chunk_size
+            chunk_end_time = time.time()
+            minutes = (chunk_end_time-chunk_start_time) / 60
+            print(f"Chunk took {minutes:.1f} minutes")
 
         with engine.connect() as conn:
             try:
                 query = sa.text(f"""SELECT setval('{table_name}_id_seq', (SELECT MAX(id) FROM "{table_name}"))""")
                 result = conn.execute(query)
                 sequence_val = result.fetchone()[0]
-                # print(f"... SQL executed: {query} and returned {sequence_val}")
                 if sequence_val is not None:
                     query = sa.text(f"ALTER SEQUENCE {table_name}_id_seq RESTART WITH {int(sequence_val) + 1}")
                     conn.execute(query)
-                    # print(f"... SQL executed: {query}")
                 # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
             except Exception as e:
                 print(f'...FAILED_SEQUENCE_RESET: {table_name} -- {str(e)}')
@@ -313,29 +267,65 @@ def is_table_empty(table_name, engine):
     return count == 0
 
 
-def clean_df(df, table_name, col_dict, unique_constraints, not_null_columns):
+def clean_df(df, table_name, col_dict, unique_constraints, not_null_columns, fk_cols):
     """
     Runs on the Master server
     """
     df.replace('\\N', pd.NA, inplace=True)
-    df.replace(['\n', ','], ' ', inplace=True)
-    df.replace(to_replace=r'[^0-9a-zA-Z\. _]', value="", regex=True)
+    df.replace(['\n', ','], ' ', inplace=True)  # remove newline chars
+    df.replace(to_replace=r'[^0-9a-zA-Z\. _]', value="", regex=True)  # remove any non-valid chars
 
     # Remove leading and trailing whitespaces in each cell of df
     df = strip_whitespace(df)
 
+    # boolean_cols = []
+    boolean_map = {
+        'True': 1, 'False': 0,
+        't': 1, 'f': 0,
+        '1': 1, '0': 0,
+        'yes': 1, 'no': 0
+    }
+    # timestamp_cols = []
+    # int_cols = []
+    for col, dtype in col_dict.items():
+        match dtype:
+            case "BOOLEAN":
+                if col in df.columns:
+                    df[col].replace(r'^\s*$', pd.NA, regex=True, inplace=True)
+                    df[col].replace(boolean_map, inplace=True)
+                    df[col] = df[col].fillna(False).astype(bool)  # Convert remaining NaNs to False
+                else:
+                    print(f"Column {col} is not present in the dataframe")
+                # boolean_cols.append(col)
+            case "TIMESTAMP":
+                # timestamp_cols.append(col
+                if col in not_null_columns:
+                    df[col].replace(['', pd.NA, 'null'], datetime.now(timezone.utc), inplace=True)
+                df[col] = pd.to_datetime(df[col], errors='coerce')  # convert cols to datetime
+                df[col].fillna(datetime.now(timezone.utc),
+                               inplace=True)  # Fill any NaT values that were created by conversion
+                if df[col].dt.tz is None:  # Convert to UTC timezone if not timezone specified
+                    df[col] = df[col].dt.tz_localize('UTC', ambiguous='NaT', nonexistent='NaT')
+                else:
+                    df[col] = df[col].dt.tz_convert('UTC')
+            case "INTEGER" | "BIGINT":
+                if col not in fk_cols:
+                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
+                # int_cols.append(col)
+
     # cleaning bool columns
-    boolean_columns = [col for col, dtype in col_dict.items() if 'BOOLEAN' == dtype]
-    df = clean_bool_cols(df, boolean_columns)
+    # boolean_columns = [col for col, dtype in col_dict.items() if 'BOOLEAN' == dtype]
+    # df = clean_bool_cols(df, boolean_cols)
 
     # cleaning timestamp columns
-    timestamp_columns = [col for col, dtype in col_dict.items() if 'TIMESTAMP' == dtype]
-    df = clean_timestamp_cols(df, timestamp_columns, not_null_columns)
+    # timestamp_columns = [col for col, dtype in col_dict.items() if 'TIMESTAMP' == dtype]
+    # df = clean_timestamp_cols(df, timestamp_cols, not_null_columns)
 
     # cleaning int columns
-    int_columns = [col for col, dtype in col_dict.items() if 'INTEGER' == dtype or 'BIGINT' == dtype]
-    for col in int_columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
+    # int_columns = [col for col, dtype in col_dict.items() if 'INTEGER' == dtype or 'BIGINT' == dtype]
+    # for col in int_cols:
+    #     if col not in fk_cols:
+    #         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
 
     # add any column to this list if you know it doesn't have ids
     dummy_cols = {'ballotpedia_election_id', 'bioguide_id', 'thomas_id', 'lis_id', 'govtrack_id', 'fec_id',
