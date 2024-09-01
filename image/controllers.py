@@ -1941,8 +1941,10 @@ def cache_and_create_resized_images_for_voter(voter_id):
 def cache_image_object_to_aws(
         python_image_library_image=None,
         campaignx_we_vote_id=None,
+        challenge_we_vote_id=None,
         kind_of_image_original=False,
         kind_of_image_campaignx_photo=False,
+        kind_of_image_challenge_photo=False,
         kind_of_image_organization_uploaded_profile=False,
         kind_of_image_politician_uploaded_profile=False,
         organization_we_vote_id=None,
@@ -1951,8 +1953,10 @@ def cache_image_object_to_aws(
     Cache master images to AWS.
     :param python_image_library_image:
     :param campaignx_we_vote_id:
+    :param challenge_we_vote_id:
     :param kind_of_image_original:
     :param kind_of_image_campaignx_photo:
+    :param kind_of_image_challenge_photo:
     :param kind_of_image_organization_uploaded_profile:
     :param kind_of_image_politician_uploaded_profile:
     :param organization_we_vote_id:
@@ -1976,6 +1980,15 @@ def cache_image_object_to_aws(
         create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
             campaignx_we_vote_id=campaignx_we_vote_id,
             kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+            kind_of_image_original=kind_of_image_original)
+        we_vote_image = create_we_vote_image_results['we_vote_image']
+        we_vote_image_created = True
+        we_vote_image_saved = create_we_vote_image_results['we_vote_image_saved']
+    elif positive_value_exists(kind_of_image_challenge_photo):
+        # Temp: Store as a campaignx photo
+        create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
+            campaignx_we_vote_id=challenge_we_vote_id,
+            kind_of_image_campaignx_photo=kind_of_image_challenge_photo,
             kind_of_image_original=kind_of_image_original)
         we_vote_image = create_we_vote_image_results['we_vote_image']
         we_vote_image_created = True
@@ -2037,26 +2050,37 @@ def cache_image_object_to_aws(
     image_format = analyze_source_images_results['image_format']
 
     # Get today's cached images and their versions so that image version can be calculated
+    todays_cached_we_vote_image_list = []
     if positive_value_exists(kind_of_image_campaignx_photo):
         cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
             campaignx_we_vote_id=campaignx_we_vote_id,
             kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
             kind_of_image_original=kind_of_image_original)
+        todays_cached_we_vote_image_list = cached_todays_we_vote_image_list_results['we_vote_image_list']
+    elif positive_value_exists(kind_of_image_challenge_photo):
+        # Temp: Store as a campaignx photo
+        cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
+            campaignx_we_vote_id=challenge_we_vote_id,
+            kind_of_image_campaignx_photo=kind_of_image_challenge_photo,
+            kind_of_image_original=kind_of_image_original)
+        todays_cached_we_vote_image_list = cached_todays_we_vote_image_list_results['we_vote_image_list']
     elif positive_value_exists(kind_of_image_organization_uploaded_profile):
         cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
             organization_we_vote_id=organization_we_vote_id,
             kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
             kind_of_image_original=kind_of_image_original)
+        todays_cached_we_vote_image_list = cached_todays_we_vote_image_list_results['we_vote_image_list']
     elif positive_value_exists(kind_of_image_politician_uploaded_profile):
         cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
             politician_we_vote_id=politician_we_vote_id,
             kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
             kind_of_image_original=kind_of_image_original)
+        todays_cached_we_vote_image_list = cached_todays_we_vote_image_list_results['we_vote_image_list']
     else:
         status += "MISSING_KIND_OF_IMAGE_TODAY_CACHED_IMAGES "
         we_vote_image_saved = False
 
-    for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
+    for cached_we_vote_image in todays_cached_we_vote_image_list:
         if cached_we_vote_image.same_day_image_version:
             image_versions.append(cached_we_vote_image.same_day_image_version)
 
@@ -2070,6 +2094,9 @@ def cache_image_object_to_aws(
                                                    we_vote_image.date_image_saved.day,
                                                    year=we_vote_image.date_image_saved.year)
     if kind_of_image_campaignx_photo:
+        image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
+    elif kind_of_image_challenge_photo:
+        # Temp: Store as a campaignx photo
         image_type = CAMPAIGNX_PHOTO_IMAGE_NAME
     elif kind_of_image_organization_uploaded_profile:
         image_type = ORGANIZATION_UPLOADED_PROFILE_IMAGE_NAME
@@ -2098,6 +2125,8 @@ def cache_image_object_to_aws(
 
     if kind_of_image_campaignx_photo:
         we_vote_image_file_location = campaignx_we_vote_id + "/" + we_vote_image_file_name
+    elif kind_of_image_challenge_photo:
+        we_vote_image_file_location = challenge_we_vote_id + "/" + we_vote_image_file_name
     elif kind_of_image_organization_uploaded_profile:
         we_vote_image_file_location = organization_we_vote_id + "/" + we_vote_image_file_name
     elif kind_of_image_politician_uploaded_profile:
@@ -2177,6 +2206,17 @@ def cache_image_object_to_aws(
             image_url_valid=image_url_valid)
         status += " " + save_source_info_results['status']
         successful_save = save_source_info_results['success']
+    elif kind_of_image_challenge_photo:
+        # Temp: Store as a campaignx photo
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_campaignx_info(
+            we_vote_image=we_vote_image,
+            image_width=analyze_source_images_results['image_width'],
+            image_height=analyze_source_images_results['image_height'],
+            image_url_https=we_vote_image.we_vote_image_url,
+            same_day_image_version=same_day_image_version,
+            image_url_valid=image_url_valid)
+        status += " " + save_source_info_results['status']
+        successful_save = save_source_info_results['success']
     elif kind_of_image_organization_uploaded_profile:
         save_source_info_results = we_vote_image_manager.save_we_vote_image_organization_uploaded_profile_info(
             we_vote_image=we_vote_image,
@@ -2214,10 +2254,17 @@ def cache_image_object_to_aws(
         return error_results
 
     # set active version False for other master images for same campaignx
+    # Temp: Store challenge photo as a campaignx photo
+    campaignx_we_vote_id_merged = campaignx_we_vote_id
+    if positive_value_exists(challenge_we_vote_id):
+        campaignx_we_vote_id_merged = challenge_we_vote_id
+    kind_of_image_campaignx_photo_merged = kind_of_image_campaignx_photo
+    if positive_value_exists(kind_of_image_challenge_photo):
+        kind_of_image_campaignx_photo_merged = kind_of_image_challenge_photo
     set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaignx_we_vote_id=campaignx_we_vote_id_merged,
         image_url_https=we_vote_image.we_vote_image_url,
-        kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
+        kind_of_image_campaignx_photo=kind_of_image_campaignx_photo_merged,
         kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
         kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
         organization_we_vote_id=organization_we_vote_id,

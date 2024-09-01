@@ -574,7 +574,7 @@ class ChallengeManager(models.Manager):
                         status += '(NUMBER_FOUND: ' + str(len(draft_challenge_list)) + ') '
                 else:
                     challenge_found = False
-                    status += 'RETRIEVE_CHALLENGE_AS_OWNER-VOTER_WE_VOTE_ID-NOT_FOUND '
+                    status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_USING_VOTER_WE_VOTE_ID '
                 success = True
             else:
                 status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND-MISSING_VARIABLES '
