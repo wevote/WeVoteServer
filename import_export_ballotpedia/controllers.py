@@ -517,22 +517,23 @@ def get_ballotpedia_photo_url_from_ballotpedia_candidate_url_page(ballotpedia_ca
     success = True
     try:
         soup = get_parsed_html(ballotpedia_candidate_url)
-        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
-            if photo_url_found:
-                continue
-            photo_url = img.get('src')  # Use get() method to safely retrieve attributes
-            if photo_url:
-                try:
-                    print(img['alt'], photo_url)
-                    is_silhouette = SILHOUETTE_PLACEHOLDER_IMAGE_NAME in photo_url
-                    if is_silhouette:
-                        status += "SILHOUETTE_PLACEHOLDER_FOUND "
-                    else:
-                        photo_url_found = True
-                except Exception as e:
-                    status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
-                    success = False
-                    status += ("Image URL not found for:", img['alt'])
+        if soup:
+            for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
+                if photo_url_found:
+                    continue
+                photo_url = img.get('src')  # Use get() method to safely retrieve attributes
+                if photo_url:
+                    try:
+                        print(img['alt'], photo_url)
+                        is_silhouette = SILHOUETTE_PLACEHOLDER_IMAGE_NAME in photo_url
+                        if is_silhouette:
+                            status += "SILHOUETTE_PLACEHOLDER_FOUND "
+                        else:
+                            photo_url_found = True
+                    except Exception as e:
+                        status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_PHOTO_URL: " + str(e) + " "
+                        success = False
+                        status += ("Image URL not found for:", img['alt'])
         if not photo_url_found and not is_silhouette:
             is_broken = True
     except Exception as e:
@@ -775,17 +776,18 @@ def get_candidate_links_from_ballotpedia_candidate_url_page(ballotpedia_candidat
         soup = get_parsed_html(ballotpedia_candidate_url)
         candidate_name = ballotpedia_candidate_url.split(".org/")[-1].replace("_", " ")
 
-        count = 1
-        for candidate_links in soup.find_all('div', class_='widget-row value-only white'):
-            p_tag = candidate_links.find('p')
-            link_name = p_tag.text.strip()
-            candidate_link = p_tag.find('a').get('href')
-            if positive_value_exists(candidate_link):
-                candidate_links_list.append(candidate_link)
-                if not positive_value_exists(link_name):
-                    link_name = "unknown" + str(count)
-                    count += 1
-                candidate_links_dict[link_name] = candidate_link
+        if soup:
+            count = 1
+            for candidate_links in soup.find_all('div', class_='widget-row value-only white'):
+                p_tag = candidate_links.find('p')
+                link_name = p_tag.text.strip()
+                candidate_link = p_tag.find('a').get('href')
+                if positive_value_exists(candidate_link):
+                    candidate_links_list.append(candidate_link)
+                    if not positive_value_exists(link_name):
+                        link_name = "unknown" + str(count)
+                        count += 1
+                    candidate_links_dict[link_name] = candidate_link
         candidate_links_found = len(candidate_links_list) > 0
     except Exception as e:
         status += "ERROR_TRYING_TO_GET_BALLOTPEDIA_CANDIDATE_LINK, " + ballotpedia_candidate_url + ": " + str(e) + " "

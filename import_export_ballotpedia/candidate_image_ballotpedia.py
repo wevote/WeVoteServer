@@ -32,13 +32,14 @@ def get_state_elections_url(url):
 
     soup = get_parsed_html(ballotpedia_page)
     state_elections_info = set()
-    for state in states:
+    if soup:
+        for state in states:
 
-        tags = soup.find_all('a', href=re.compile('(?i){}.*elections,_2022'.format(state)))
-        links = [requests.compat.urljoin(ballotpedia_page, tag.attrs['href']) for tag in tags]
+            tags = soup.find_all('a', href=re.compile('(?i){}.*elections,_2022'.format(state)))
+            links = [requests.compat.urljoin(ballotpedia_page, tag.attrs['href']) for tag in tags]
 
-        for link in links:
-            state_elections_info.add((link, state))
+            for link in links:
+                state_elections_info.add((link, state))
     return state_elections_info
 
 
@@ -47,13 +48,14 @@ def get_candidate_urls_page(url):
     candidate_urls = []
     try:
         soup = get_parsed_html(url)
-        # Find all the HTML elements that contain the candidate names
-        candidate_elements = soup.find_all("span", class_="candidate")
-        # Extract the candidate names and construct the candidate URLs
-        for element in candidate_elements:
-            anchor_element = element.find("a")
-            if anchor_element:
-                candidate_urls.append(anchor_element['href'])
+        if soup:
+            # Find all the HTML elements that contain the candidate names
+            candidate_elements = soup.find_all("span", class_="candidate")
+            # Extract the candidate names and construct the candidate URLs
+            for element in candidate_elements:
+                anchor_element = element.find("a")
+                if anchor_element:
+                    candidate_urls.append(anchor_element['href'])
     except Exception as e:
         print("Candidate URL not found for:" + url + " Error: " + str(e))
 
@@ -64,10 +66,11 @@ def get_candidate_urls_page(url):
 def get_candidate_urls_table(url):
     candidate_urls = []
     soup = get_parsed_html(url)
-    candidate_elements = soup.find_all('td', class_='votebox-results-cell--text')
-    for element in candidate_elements:
-        candidate_link = element.find('a')['href']
-        candidate_urls.append(candidate_link)
+    if soup:
+        candidate_elements = soup.find_all('td', class_='votebox-results-cell--text')
+        for element in candidate_elements:
+            candidate_link = element.find('a')['href']
+            candidate_urls.append(candidate_link)
     return candidate_urls
 
 
@@ -75,12 +78,15 @@ def get_candidate_urls_table(url):
 def print_ballotpedia_photo_url_from_ballotpedia_candidate_urls(candidate_urls):
     for url in candidate_urls:
         soup = get_parsed_html(url)
-        for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
-            img_url = img.get('src')  # Use get() method to safely retrieve attributes
-            if img_url:
-                print(img['alt'], img_url)
-            else:
-                print("Image URL not found for:", img['alt'])
+        if soup:
+            for img in soup.find_all(class_=IMG_CLASS_NAME_WE_ARE_SEEKING):
+                img_url = img.get('src')  # Use get() method to safely retrieve attributes
+                if img_url:
+                    print(img['alt'], img_url)
+                else:
+                    print("Image URL not found for:", img['alt'])
+        else:
+            print("Failed to retrieve HTML content for:", url)
 
 
 def get_page_name(url):

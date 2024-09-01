@@ -351,7 +351,7 @@ class PollingLocationManager(models.Manager):
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
                     polling_location, polling_location_created = PollingLocation.objects.update_or_create(
-                        we_vote_id__iexact=we_vote_id, defaults=updated_values)
+                        we_vote_id=we_vote_id, defaults=updated_values)
                 else:
                     polling_location = PollingLocation.objects.create(
                         polling_location_id=polling_location_id,
@@ -525,7 +525,7 @@ class PollingLocationManager(models.Manager):
         success = True
         status = ''
         try:
-            polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
+            polling_location = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
             polling_location_found = True
         except Exception as e:
             status += "POLLING_LOCATION_GET: " + str(e) + ' '
@@ -950,9 +950,9 @@ class PollingLocationManager(models.Manager):
             elif positive_value_exists(polling_location_we_vote_id):
                 if read_only:
                     polling_location = PollingLocation.objects.using('readonly')\
-                        .get(we_vote_id__iexact=polling_location_we_vote_id)
+                        .get(we_vote_id=polling_location_we_vote_id)
                 else:
-                    polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
                 polling_location_found = True if polling_location.id else False
             else:
                 polling_location_found = False
@@ -1176,7 +1176,7 @@ class PollingLocationManager(models.Manager):
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                polling_location_queryset = polling_location_queryset.exclude(we_vote_id__iexact=we_vote_id_from_master)
+                polling_location_queryset = polling_location_queryset.exclude(we_vote_id=we_vote_id_from_master)
 
             if positive_value_exists(polling_location_id):
                 # This is not the built-in id, but an external ID
