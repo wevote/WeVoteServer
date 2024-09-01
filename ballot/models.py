@@ -111,17 +111,23 @@ class BallotItem(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_office_we_vote_id'],
-                name='election_poll_office_index'),
+                fields=['contest_office_we_vote_id', 'polling_location_we_vote_id', 'google_civic_election_id'],
+                name='office_poll_election_index'),
+            # models.Index(
+            #     fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_office_we_vote_id'],
+            #     name='election_poll_office_index'),
+            # models.Index(
+            #     fields=['polling_location_we_vote_id', 'contest_office_we_vote_id', 'google_civic_election_id'],
+            #     name='poll_office_election_index'),
             models.Index(
-                fields=['polling_location_we_vote_id', 'contest_office_we_vote_id', 'google_civic_election_id'],
-                name='poll_office_election_index'),
-            models.Index(
-                fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_measure_we_vote_id'],
-                name='election_poll_measure_index'),
-            models.Index(
-                fields=['polling_location_we_vote_id', 'contest_measure_we_vote_id', 'google_civic_election_id'],
-                name='poll_measure_election_index'),
+                fields=['contest_measure_we_vote_id', 'polling_location_we_vote_id', 'google_civic_election_id'],
+                name='measure_poll_election_index'),
+            # models.Index(
+            #     fields=['google_civic_election_id', 'polling_location_we_vote_id', 'contest_measure_we_vote_id'],
+            #     name='election_poll_measure_index'),
+            # models.Index(
+            #     fields=['polling_location_we_vote_id', 'contest_measure_we_vote_id', 'google_civic_election_id'],
+            #     name='poll_measure_election_index'),
         ]
 
     def is_contest_office(self):

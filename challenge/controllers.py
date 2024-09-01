@@ -580,9 +580,9 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             except Exception as e:
                 status += "COULD_NOT_UPDATE_ORGANIZATION_FROM_VOTER: " + str(e) + " "
 
-        # To publish a challenge, voter must be signed in with an email address
-        if not voter.signed_in_with_email():
-            status += "MUST_BE_SIGNED_IN_WITH_EMAIL_TO_PUBLISH "
+        # To publish a challenge, voter must be signed in
+        if not voter.is_signed_in():
+            status += "MUST_BE_SIGNED_IN_TO_PUBLISH "
             results = challenge_error_dict
             results['status'] = status
             return results
@@ -686,9 +686,10 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
                         photo_results['we_vote_hosted_challenge_photo_original_url']
 
                     # Now we want to resize to a large version
+                    # Temp: Store as a campaignx photo
                     create_resized_image_results = create_resized_images(
-                        challenge_we_vote_id=challenge_we_vote_id,
-                        challenge_photo_url_https=challenge.we_vote_hosted_challenge_photo_original_url)
+                        campaignx_we_vote_id=challenge_we_vote_id,
+                        campaignx_photo_url_https=challenge.we_vote_hosted_challenge_photo_original_url)
                     challenge.we_vote_hosted_challenge_photo_large_url = \
                         create_resized_image_results['cached_resized_image_url_large']
                     challenge.we_vote_hosted_challenge_photo_medium_url = \
@@ -1900,7 +1901,7 @@ def generate_challenge_dict_from_challenge_object(
         'is_supporters_count_minimum_exceeded': challenge.is_supporters_count_minimum_exceeded(),
         'latest_challenge_supporter_endorsement_list':  latest_challenge_supporter_endorsement_list,
         'latest_challenge_supporter_list':  latest_challenge_supporter_list,
-        'politician_we_vote_id':     challenge.politician_we_vote_id,
+        'politician_we_vote_id':            challenge.politician_we_vote_id,
         'opposers_count':                   challenge.opposers_count,
         'order_in_list':                    order_in_list,
         'profile_image_background_color':   challenge.profile_image_background_color,
