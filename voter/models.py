@@ -691,8 +691,9 @@ class VoterManager(BaseUserManager):
             voter_id = voter.id
             voter_created = True
         except IntegrityError as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            logger.error("create_voter IntegrityError exception (#1): " + str(e))
+            error_message = "create_voter IntegrityError exception (#1): " + str(e)
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+            logger.error(error_message)
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
                 # by calling 'fetch_next_we_vote_id_voter_integer'
@@ -702,15 +703,18 @@ class VoterManager(BaseUserManager):
                 voter_id = voter.id
                 voter_created = True
             except IntegrityError as e:
-                handle_record_not_saved_exception(e, logger=logger)
-                logger.error("create_voter IntegrityError exception (#2): " + str(e))
+                error_message = "create_voter IntegrityError exception (#2): " + str(e)
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+                logger.error(error_message)
             except Exception as e:
-                handle_record_not_saved_exception(e, logger=logger)
-                logger.error("create_voter general exception (#1): " + str(e))
+                error_message = "create_voter general exception ERROR (#2): " + str(e)
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+                logger.error(error_message)
 
         except Exception as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            logger.error("create_voter general exception (#2): " + str(e))
+            error_message = "create_voter general exception ERROR (#1): " + str(e)
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+            logger.error(error_message)
 
         results = {
             'email_not_valid':      email_not_valid,

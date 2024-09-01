@@ -713,8 +713,8 @@ class OrganizationLinkToIssue(models.Model):
                 fields=['organization_we_vote_id', 'link_active'],
                 name='organization_and_link_active'),
             models.Index(
-                fields=['issue_we_vote_id', 'organization_we_vote_id', 'link_active'],
-                name='issue_org_link_active'),
+                fields=['organization_we_vote_id', 'issue_we_vote_id', 'link_active'],
+                name='org_issue_link_active'),
         ]
 
     def is_linked(self):
@@ -748,7 +748,8 @@ class OrganizationLinkToIssueList(models.Manager):
                 link_issue_query = OrganizationLinkToIssue.objects.using('readonly').all()
             else:
                 link_issue_query = OrganizationLinkToIssue.objects.all()
-            link_issue_query = link_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            # 2024-09-01 Removed __iexact
+            link_issue_query = link_issue_query.filter(organization_we_vote_id=organization_we_vote_id)
             link_issue_query = link_issue_query.filter(link_active=link_active)
             link_issue_list = list(link_issue_query)
             if len(link_issue_list):
@@ -783,7 +784,8 @@ class OrganizationLinkToIssueList(models.Manager):
                 link_issue_query = OrganizationLinkToIssue.objects.using('readonly').all()
             else:
                 link_issue_query = OrganizationLinkToIssue.objects.all()
-            link_issue_query = link_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            # 2024-09-01 Removed __iexact
+            link_issue_query = link_issue_query.filter(organization_we_vote_id=organization_we_vote_id)
             link_issue_query = link_issue_query.filter(link_blocked=link_blocked)
             link_issue_list = list(link_issue_query)
             if len(link_issue_list):
@@ -817,7 +819,8 @@ class OrganizationLinkToIssueList(models.Manager):
         link_issue_list_count = 0
         try:
             link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
-            link_issue_list = link_issue_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            # 2024-09-01 Removed __iexact
+            link_issue_list = link_issue_list.filter(organization_we_vote_id=organization_we_vote_id)
             link_issue_list = link_issue_list.filter(link_active=True)
             link_issue_list_count = link_issue_list.count()
 
@@ -832,7 +835,8 @@ class OrganizationLinkToIssueList(models.Manager):
         link_issue_list_count = 0
         try:
             link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
-            link_issue_list = link_issue_list.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+            # 2024-09-01 Removed __iexact
+            link_issue_list = link_issue_list.filter(issue_we_vote_id=issue_we_vote_id)
             link_issue_list = link_issue_list.filter(link_active=link_active)
             link_issue_list_count = link_issue_list.count()
 
@@ -848,7 +852,7 @@ class OrganizationLinkToIssueList(models.Manager):
         try:
             if positive_value_exists(issue_we_vote_id):
                 organization_link_to_issue_query = OrganizationLinkToIssue.objects.using('readonly').filter(
-                    issue_we_vote_id__iexact=issue_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id,  # 2024-09-01 Removed __iexact
                     link_active=True
                 )
                 number_of_organizations_following_this_issue = organization_link_to_issue_query.count()
@@ -1104,11 +1108,11 @@ class OrganizationLinkToIssueManager(models.Manager):
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_id):
                 if positive_value_exists(read_only):
                     link_issue_on_stage = OrganizationLinkToIssue.objects.using('readonly').get(
-                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        organization_we_vote_id=organization_we_vote_id,  # 2024-09-01 Removed __iexact
                         issue_id=issue_id)
                 else:
                     link_issue_on_stage = OrganizationLinkToIssue.objects.get(
-                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        organization_we_vote_id=organization_we_vote_id,  # 2024-09-01 Removed __iexact
                         issue_id=issue_id)
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 success = True
@@ -1116,12 +1120,12 @@ class OrganizationLinkToIssueManager(models.Manager):
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 if positive_value_exists(read_only):
                     link_issue_on_stage = OrganizationLinkToIssue.objects.using('readonly').get(
-                        organization_we_vote_id__iexact=organization_we_vote_id,
-                        issue_we_vote_id__iexact=issue_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id,  # 2024-09-01 Removed __iexact
+                        issue_we_vote_id=issue_we_vote_id)  # 2024-09-01 Removed __iexact
                 else:
                     link_issue_on_stage = OrganizationLinkToIssue.objects.get(
-                        organization_we_vote_id__iexact=organization_we_vote_id,
-                        issue_we_vote_id__iexact=issue_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id,  # 2024-09-01 Removed __iexact
+                        issue_we_vote_id=issue_we_vote_id)  # 2024-09-01 Removed __iexact
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 success = True
                 status = 'LINK_ISSUE_FOUND_WITH_ORGANIZATION_ID_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
