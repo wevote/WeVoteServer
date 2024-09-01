@@ -160,6 +160,16 @@ class AnalyticsAction(models.Model):
     is_desktop = models.BooleanField(verbose_name="request came from desktop device", default=False)
     is_tablet = models.BooleanField(verbose_name="request came from tablet device", default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'action_constant'],
+                name='election_action_constant'),
+            models.Index(
+                fields=['voter_we_vote_id', 'action_constant'],
+                name='voter_action_constant'),
+        ]
+
     # We override the save function to auto-generate date_as_integer
     def save(self, *args, **kwargs):
         if self.date_as_integer:
