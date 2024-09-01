@@ -168,6 +168,18 @@ class AnalyticsAction(models.Model):
             models.Index(
                 fields=['voter_we_vote_id', 'action_constant'],
                 name='voter_action_constant'),
+            models.Index(
+                fields=['voter_we_vote_id', 'date_as_integer'],
+                name='voter_date'),
+            models.Index(
+                fields=['voter_we_vote_id'],
+                name='voter_index'),
+            models.Index(
+                fields=['date_as_integer'],
+                name='date_as_integer_index'),
+            models.Index(
+                fields=['date_as_integer', 'is_signed_in'],
+                name='date_as_integer_signed_in'),
         ]
 
     # We override the save function to auto-generate date_as_integer

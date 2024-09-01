@@ -1335,7 +1335,7 @@ class WeVoteImageManager(models.Manager):
         try:
             we_vote_image_queryset = WeVoteImage.objects.all()
             we_vote_image_queryset = we_vote_image_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 facebook_profile_image_url_https__iexact=facebook_profile_image_url_https,
             )
             we_vote_image_queryset = we_vote_image_queryset.order_by('id')
@@ -1393,12 +1393,12 @@ class WeVoteImageManager(models.Manager):
         try:
             we_vote_image_queryset = WeVoteImage.objects.all()
             we_vote_image_queryset = we_vote_image_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
-                organization_we_vote_id__iexact=organization_we_vote_id,
-                politician_we_vote_id__iexact=politician_we_vote_id,
-                representative_we_vote_id__iexact=representative_we_vote_id,
-                issue_we_vote_id__iexact=issue_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
+                representative_we_vote_id=representative_we_vote_id,
+                issue_we_vote_id=issue_we_vote_id,
             )
             we_vote_image_list = we_vote_image_queryset
 
@@ -1580,12 +1580,12 @@ class WeVoteImageManager(models.Manager):
             we_vote_image_on_stage_query = WeVoteImage.objects.filter(
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
                 campaignx_photo_url_https__iexact=campaignx_photo_url_https,
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 facebook_background_image_url_https__iexact=facebook_background_image_url_https,
                 facebook_profile_image_url_https__iexact=facebook_profile_image_url_https,
                 issue_image_url_https__iexact=issue_image_url_https,
-                issue_we_vote_id__iexact=issue_we_vote_id,
+                issue_we_vote_id=issue_we_vote_id,
                 kind_of_image_original=kind_of_image_original,
                 kind_of_image_large=kind_of_image_large,
                 kind_of_image_medium=kind_of_image_medium,
@@ -1593,19 +1593,19 @@ class WeVoteImageManager(models.Manager):
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 maplight_image_url_https__iexact=maplight_image_url_https,
                 organization_uploaded_profile_image_url_https=organization_uploaded_profile_image_url_https,
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl=photo_url_from_ctcl,
                 photo_url_from_vote_usa=photo_url_from_vote_usa,
                 politician_uploaded_profile_image_url_https=politician_uploaded_profile_image_url_https,
-                politician_we_vote_id__iexact=politician_we_vote_id,
-                representative_we_vote_id__iexact=representative_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
+                representative_we_vote_id=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
                 twitter_profile_image_url_https__iexact=twitter_profile_image_url_https,
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 voter_uploaded_profile_image_url_https__iexact=voter_uploaded_profile_image_url_https,
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
             ).order_by('-date_image_saved')
             we_vote_image_on_stage_list = list(we_vote_image_on_stage_query)
@@ -1734,28 +1734,28 @@ class WeVoteImageManager(models.Manager):
             we_vote_image_queryset = we_vote_image_queryset.filter(
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
                 campaignx_photo_url_https__iexact=campaignx_photo_url_https,
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 facebook_profile_image_url_https__iexact=facebook_profile_image_url_https,
                 facebook_background_image_url_https__iexact=facebook_background_image_url_https,
                 issue_image_url_https__iexact=issue_image_url_https,
-                issue_we_vote_id__iexact=issue_we_vote_id,
+                issue_we_vote_id=issue_we_vote_id,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 maplight_image_url_https__iexact=maplight_image_url_https,
                 organization_uploaded_profile_image_url_https=organization_uploaded_profile_image_url_https,
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl__iexact=photo_url_from_ctcl,
                 photo_url_from_vote_usa__iexact=photo_url_from_vote_usa,
                 politician_uploaded_profile_image_url_https=politician_uploaded_profile_image_url_https,
-                politician_we_vote_id__iexact=politician_we_vote_id,
-                representative_we_vote_id__iexact=representative_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
+                representative_we_vote_id=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
                 twitter_profile_image_url_https__iexact=twitter_profile_image_url_https,
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 voter_uploaded_profile_image_url_https__iexact=voter_uploaded_profile_image_url_https,
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
             )
             we_vote_image_list = we_vote_image_queryset
@@ -1861,7 +1861,7 @@ class WeVoteImageManager(models.Manager):
             if kind_of_image_facebook_profile:
                 image_query = WeVoteImage.objects.all()
                 image_query = image_query.filter(
-                    candidate_we_vote_id__iexact=candidate_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id,
                     kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                     is_active_version=is_active_version,
                     kind_of_image_original=kind_of_image_original,
@@ -1874,10 +1874,10 @@ class WeVoteImageManager(models.Manager):
                     we_vote_image_on_stage = image_query_list[0]
             else:
                 we_vote_image_on_stage = WeVoteImage.objects.get(
-                    campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                    candidate_we_vote_id__iexact=candidate_we_vote_id,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id,
                     is_active_version=is_active_version,
-                    issue_we_vote_id__iexact=issue_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id,
                     kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
                     kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                     kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
@@ -1900,10 +1900,10 @@ class WeVoteImageManager(models.Manager):
                     kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                     kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                     kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                    politician_we_vote_id__iexact=politician_we_vote_id,
-                    representative_we_vote_id__iexact=representative_we_vote_id,
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    politician_we_vote_id=politician_we_vote_id,
+                    representative_we_vote_id=representative_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                 )
                 success = True
                 we_vote_image_found = True
@@ -2006,10 +2006,10 @@ class WeVoteImageManager(models.Manager):
         try:
             we_vote_image_queryset = WeVoteImage.objects.all()
             we_vote_image_queryset = we_vote_image_queryset.filter(
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
                 date_image_saved__contains=today_date,
-                issue_we_vote_id__iexact=issue_we_vote_id,
+                issue_we_vote_id=issue_we_vote_id,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
                 kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                 kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
@@ -2035,10 +2035,10 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_large=kind_of_image_large,
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_tiny=kind_of_image_tiny,
-                organization_we_vote_id__iexact=organization_we_vote_id,
-                politician_we_vote_id__iexact=politician_we_vote_id,
-                representative_we_vote_id__iexact=representative_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
+                representative_we_vote_id=representative_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
             )
             we_vote_image_list = list(we_vote_image_queryset)
 
