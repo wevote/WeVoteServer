@@ -4641,10 +4641,10 @@ class VoterAddress(models.Model):
         indexes = [
             models.Index(
                 fields=['voter_id'],
-                name='voter_id_index'),
+                name='voter_id_address'),
             models.Index(
-                fields=['sender_voter_we_vote_id', 'invitation_status', 'deleted'],
-                name='sender_index'),
+                fields=['voter_id', 'address_type'],
+                name='voter_id_type'),
         ]
 
     def get_state_code_from_text_for_map_search(self):
