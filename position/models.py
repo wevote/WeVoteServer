@@ -285,8 +285,8 @@ class PositionEntered(models.Model):
                 fields=['candidate_campaign_we_vote_id', 'google_civic_election_id', 'organization_we_vote_id'],
                 name='positions_for_election_index'),
             models.Index(
-                fields=['organization_we_vote_id', 'candidate_campaign_we_vote_id'],
-                name='positions_for_org_candidate'),
+                fields=['candidate_campaign_we_vote_id', 'google_civic_election_id'],
+                name='cand_and_election_index'),
         ]
         ordering = ('date_entered',)
 
@@ -4977,23 +4977,24 @@ class PositionManager(models.Manager):
                 #     duplicates_found = True if duplicates_count > 1 else False
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_OFFICE_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, contest_office_id=contest_office_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_OFFICE "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, contest_office_id=contest_office_id)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_OFFICE_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id, contest_office_id=contest_office_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_OFFICE "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, contest_office_id=contest_office_id)
+                # If still here, we found an existing position
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(candidate_id):
                 # We no longer care which election a position is attached to. They're attached only to candidate.
                 # if positive_value_exists(google_civic_election_id):
@@ -5006,23 +5007,24 @@ class PositionManager(models.Manager):
                 #     duplicates_found = True if duplicates_count > 1 else False
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_CANDIDATE_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, candidate_campaign_id=candidate_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_CANDIDATE "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, candidate_campaign_id=candidate_id)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_CANDIDATE_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id, candidate_campaign_id=candidate_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_CANDIDATE "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, candidate_campaign_id=candidate_id)
+                # If still here, we found an existing position
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(candidate_we_vote_id):
                 # We no longer care which election a position is attached to. They're attached only to candidate.
                 # if positive_value_exists(google_civic_election_id):
@@ -5036,25 +5038,26 @@ class PositionManager(models.Manager):
                 #     duplicates_found = True if duplicates_count > 1 else False
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_CANDIDATE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id,
-                        candidate_campaign_we_vote_id__iexact=candidate_we_vote_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_CANDIDATE_WE_VOTE_ID "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id,
-                        candidate_campaign_we_vote_id__iexact=candidate_we_vote_id)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_CANDIDATE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id,
+                #         candidate_campaign_we_vote_id__iexact=candidate_we_vote_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_CANDIDATE_WE_VOTE_ID "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id,
+                    candidate_campaign_we_vote_id__iexact=candidate_we_vote_id)
+                # If still here, we found an existing position
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_measure_id):
                 # We no longer care which election a position is attached to. They're attached only to measure.
                 # if positive_value_exists(google_civic_election_id):
@@ -5067,22 +5070,23 @@ class PositionManager(models.Manager):
                 #     duplicates_found = True if duplicates_count > 1 else False
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_MEASURE_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, contest_measure_id=contest_measure_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_MEASURE "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, contest_measure_id=contest_measure_id)
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_MEASURE_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id, contest_measure_id=contest_measure_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_MEASURE "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, contest_measure_id=contest_measure_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_measure_we_vote_id):
                 # We no longer care which election a position is attached to. They're attached only to candidate.
                 # if positive_value_exists(google_civic_election_id):
@@ -5096,59 +5100,62 @@ class PositionManager(models.Manager):
                 #     duplicates_found = True if duplicates_count > 1 else False
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_MEASURE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id,
-                        contest_measure_we_vote_id__iexact=contest_measure_we_vote_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_MEASURE_WE_VOTE_ID "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_MEASURE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id,
+                #         contest_measure_we_vote_id__iexact=contest_measure_we_vote_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_MEASURE_WE_VOTE_ID "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(politician_id):
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_ID_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id,
-                        politician_id=politician_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_ID "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, politician_id=politician_id)
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id,
+                #         politician_id=politician_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_ID "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, politician_id=politician_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(politician_we_vote_id):
-                if positive_value_exists(vote_smart_time_span):
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id,
-                        politician_we_vote_id__iexact=politician_we_vote_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
-                else:
-                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_WE_VOTE_ID "
-                    duplicates_list = duplicates_list_starter.objects.filter(
-                        organization_id=organization_id, politician_we_vote_id__iexact=politician_we_vote_id)
-                    duplicates_count = len(duplicates_list)
-                    duplicates_found = True if duplicates_count > 1 else False
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     duplicates_list = duplicates_list_starter.objects.filter(
+                #         organization_id=organization_id,
+                #         politician_we_vote_id__iexact=politician_we_vote_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     duplicates_count = len(duplicates_list)
+                #     duplicates_found = True if duplicates_count > 1 else False
+                #     success = True
+                # else:
+                status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_WE_VOTE_ID "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    organization_id=organization_id, politician_we_vote_id__iexact=politician_we_vote_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             # ###############################
             # Voter
             elif positive_value_exists(voter_id) and positive_value_exists(contest_office_id):
@@ -5319,21 +5326,22 @@ class PositionManager(models.Manager):
                 #     position_found = True
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_OFFICE_AND_VOTE_SMART_TIME_SPAN "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_office_id=contest_office_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
-                else:
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_OFFICE "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_office_id=contest_office_id)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "RETRIEVE_POSITION_FOUND_WITH_ORG_OFFICE_AND_VOTE_SMART_TIME_SPAN "
+                #     position_on_stage = position_on_stage_starter.objects.get(
+                #         organization_id=organization_id, contest_office_id=contest_office_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     position_found = True
+                #     success = True
+                # else:
+                status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_OFFICE "
+                position_on_stage = position_on_stage_starter.objects.get(
+                    organization_id=organization_id, contest_office_id=contest_office_id)
+                # If still here, we found an existing position
+                position_found = True
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(candidate_id):
                 # We no longer care which election a position is attached to. They're attached only to candidate.
                 # if positive_value_exists(google_civic_election_id):
@@ -5345,21 +5353,22 @@ class PositionManager(models.Manager):
                 #     position_found = True
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_CANDIDATE_AND_VOTE_SMART_TIME_SPAN "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, candidate_campaign_id=candidate_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
-                else:
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, candidate_campaign_id=candidate_id)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "RETRIEVE_POSITION_FOUND_WITH_ORG_CANDIDATE_AND_VOTE_SMART_TIME_SPAN "
+                #     position_on_stage = position_on_stage_starter.objects.get(
+                #         organization_id=organization_id, candidate_campaign_id=candidate_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     position_found = True
+                #     success = True
+                # else:
+                status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE "
+                position_on_stage = position_on_stage_starter.objects.get(
+                    organization_id=organization_id, candidate_campaign_id=candidate_id)
+                # If still here, we found an existing position
+                position_found = True
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(candidate_we_vote_id):
                 # We no longer care which election a position is attached to. They're attached only to candidate.
                 # if positive_value_exists(google_civic_election_id):
@@ -5372,23 +5381,24 @@ class PositionManager(models.Manager):
                 #     position_found = True
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_CANDIDATE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id,
-                        candidate_campaign_we_vote_id__iexact=candidate_we_vote_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
-                else:
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE_WE_VOTE_ID "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id,
-                        candidate_campaign_we_vote_id__iexact=candidate_we_vote_id)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "RETRIEVE_POSITION_FOUND_WITH_ORG_CANDIDATE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     position_on_stage = position_on_stage_starter.objects.get(
+                #         organization_id=organization_id,
+                #         candidate_campaign_we_vote_id__iexact=candidate_we_vote_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     position_found = True
+                #     success = True
+                # else:
+                status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE_WE_VOTE_ID "
+                position_on_stage = position_on_stage_starter.objects.get(
+                    organization_id=organization_id,
+                    candidate_campaign_we_vote_id__iexact=candidate_we_vote_id)
+                # If still here, we found an existing position
+                position_found = True
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_measure_id):
                 # We no longer care which election a position is attached to. They're attached only to measure.
                 # if positive_value_exists(google_civic_election_id):
@@ -5400,20 +5410,21 @@ class PositionManager(models.Manager):
                 #     position_found = True
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_MEASURE_AND_VOTE_SMART_TIME_SPAN "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_measure_id=contest_measure_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
-                else:
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_MEASURE "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_measure_id=contest_measure_id)
-                    position_found = True
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "RETRIEVE_POSITION_FOUND_WITH_ORG_MEASURE_AND_VOTE_SMART_TIME_SPAN "
+                #     position_on_stage = position_on_stage_starter.objects.get(
+                #         organization_id=organization_id, contest_measure_id=contest_measure_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     position_found = True
+                #     success = True
+                # else:
+                status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_MEASURE "
+                position_on_stage = position_on_stage_starter.objects.get(
+                    organization_id=organization_id, contest_measure_id=contest_measure_id)
+                position_found = True
+                success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_measure_we_vote_id):
                 # We no longer care which election a position is attached to. They're attached only to measure.
                 # if positive_value_exists(google_civic_election_id):
@@ -5426,20 +5437,21 @@ class PositionManager(models.Manager):
                 #     position_found = True
                 #     success = True
                 # el
-                if positive_value_exists(vote_smart_time_span):
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_MEASURE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id,
-                        vote_smart_time_span__iexact=vote_smart_time_span)
-                    # If still here, we found an existing position
-                    position_found = True
-                    success = True
-                else:
-                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_MEASURE_WE_VOTE_ID "
-                    position_on_stage = position_on_stage_starter.objects.get(
-                        organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
-                    position_found = True
-                    success = True
+                # 2024 We no longer support voter_smart_time_span
+                # if positive_value_exists(vote_smart_time_span):
+                #     status += "RETRIEVE_POSITION_FOUND_WITH_ORG_MEASURE_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                #     position_on_stage = position_on_stage_starter.objects.get(
+                #         organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id,
+                #         vote_smart_time_span__iexact=vote_smart_time_span)
+                #     # If still here, we found an existing position
+                #     position_found = True
+                #     success = True
+                # else:
+                status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_MEASURE_WE_VOTE_ID "
+                position_on_stage = position_on_stage_starter.objects.get(
+                    organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                position_found = True
+                success = True
             elif positive_value_exists(organization_id) and (
                     positive_value_exists(politician_we_vote_id) or positive_value_exists(politician_id)
             ):
