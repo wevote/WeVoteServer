@@ -75,7 +75,7 @@ class CurrentFriend(models.Model):
         indexes = [
             models.Index(
                 fields=['viewer_voter_we_vote_id', 'viewee_voter_we_vote_id'],
-                name='viewer_viewee_index'),
+                name='curr_viewer_viewee'),
         ]
 
     def fetch_other_organization_we_vote_id(self, one_we_vote_id):
@@ -2596,7 +2596,7 @@ class SuggestedFriend(models.Model):
         indexes = [
             models.Index(
                 fields=['viewer_voter_we_vote_id', 'viewee_voter_we_vote_id'],
-                name='viewer_viewee_index'),
+                name='sugg_viewer_viewee'),
         ]
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):
