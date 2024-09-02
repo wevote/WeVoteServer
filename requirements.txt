@@ -31,7 +31,7 @@ gunicorn==22.0.0
 httplib2==0.22.0
 idna>=3.7 # not directly required, pinned by Snyk to avoid a vulnerability
 nameparser==1.1.3
-nltk~=3.8.2             #recommend engine
+nltk>=3.9               #recommend engine
 numpy~=1.26.2           #recommend engine
 oauth2client==4.1.3
 oauthlib==3.2.2
