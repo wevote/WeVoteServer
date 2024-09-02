@@ -128,6 +128,9 @@ class BallotItem(models.Model):
             # models.Index(
             #     fields=['polling_location_we_vote_id', 'contest_measure_we_vote_id', 'google_civic_election_id'],
             #     name='poll_measure_election_index'),
+            models.Index(
+                fields=['google_civic_election_id', 'state_code'],
+                name='election_state_index'),
         ]
 
     def is_contest_office(self):

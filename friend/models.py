@@ -71,6 +71,13 @@ class CurrentFriend(models.Model):
 
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['viewer_voter_we_vote_id', 'viewee_voter_we_vote_id'],
+                name='viewer_viewee_index'),
+        ]
+
     def fetch_other_organization_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.viewer_voter_we_vote_id:
             return self.viewee_voter_we_vote_id
@@ -181,6 +188,16 @@ class FriendInvitationVoterLink(models.Model):
     mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
 
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['recipient_voter_we_vote_id', 'invitation_status', 'deleted'],
+                name='recipient_index'),
+            models.Index(
+                fields=['sender_voter_we_vote_id', 'invitation_status', 'deleted'],
+                name='sender_index'),
+        ]
 
 
 class FriendManager(models.Manager):
@@ -1656,8 +1673,8 @@ class FriendManager(models.Manager):
         try:
             queryset = CurrentFriend.objects.using('readonly').all()
             queryset = queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             current_friends_list_one = list(queryset.values_list('viewer_voter_we_vote_id', flat=True).distinct())
             current_friends_list_two = list(queryset.values_list('viewee_voter_we_vote_id', flat=True).distinct())
         except Exception as e:
@@ -1667,10 +1684,10 @@ class FriendManager(models.Manager):
 
         try:
             queryset = FriendInvitationVoterLink.objects.using('readonly').all()
-            queryset = queryset.filter(recipient_voter_we_vote_id__iexact=voter_we_vote_id)
+            queryset = queryset.filter(recipient_voter_we_vote_id=voter_we_vote_id)
             queryset = queryset.filter(deleted=False)
-            queryset = queryset.exclude(invitation_status__iexact=ACCEPTED)
-            queryset = queryset.exclude(invitation_status__iexact=IGNORED)
+            queryset = queryset.exclude(invitation_status=ACCEPTED)
+            queryset = queryset.exclude(invitation_status=IGNORED)
             friend_invitation_sender_list = list(queryset.values_list('sender_voter_we_vote_id', flat=True).distinct())
         except Exception as e:
             friend_invitation_sender_list = []
@@ -1678,10 +1695,10 @@ class FriendManager(models.Manager):
 
         try:
             queryset = FriendInvitationVoterLink.objects.using('readonly').all()
-            queryset = queryset.filter(sender_voter_we_vote_id__iexact=voter_we_vote_id)
+            queryset = queryset.filter(sender_voter_we_vote_id=voter_we_vote_id)
             queryset = queryset.filter(deleted=False)
-            queryset = queryset.exclude(invitation_status__iexact=ACCEPTED)
-            queryset = queryset.exclude(invitation_status__iexact=IGNORED)
+            queryset = queryset.exclude(invitation_status=ACCEPTED)
+            queryset = queryset.exclude(invitation_status=IGNORED)
             friend_invitation_recipient_list = \
                 list(queryset.values_list('recipient_voter_we_vote_id', flat=True).distinct())
         except Exception as e:
@@ -1691,8 +1708,8 @@ class FriendManager(models.Manager):
         try:
             queryset = SuggestedFriend.objects.using('readonly').all()
             queryset = queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             suggested_friends_list_one = list(queryset.values_list('viewer_voter_we_vote_id', flat=True).distinct())
             suggested_friends_list_two = list(queryset.values_list('viewee_voter_we_vote_id', flat=True).distinct())
         except Exception as e:
@@ -2574,6 +2591,13 @@ class SuggestedFriend(models.Model):
     mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
 
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['viewer_voter_we_vote_id', 'viewee_voter_we_vote_id'],
+                name='viewer_viewee_index'),
+        ]
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.viewer_voter_we_vote_id:
