@@ -4596,7 +4596,7 @@ class VoterAddress(models.Model):
     MultipleObjectsReturned = None
     objects = None
     voter_id = models.BigIntegerField(
-        verbose_name="voter unique identifier", null=False, blank=False, unique=False, db_index=True)
+        verbose_name="voter unique identifier", null=False, blank=False, unique=False)
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
@@ -4636,6 +4636,16 @@ class VoterAddress(models.Model):
 
     voter_entered_address = models.BooleanField(verbose_name="Did the voter manually enter an address?", default=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['voter_id'],
+                name='voter_id_index'),
+            models.Index(
+                fields=['sender_voter_we_vote_id', 'invitation_status', 'deleted'],
+                name='sender_index'),
+        ]
 
     def get_state_code_from_text_for_map_search(self):
         if positive_value_exists(self.text_for_map_search):

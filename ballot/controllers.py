@@ -1235,6 +1235,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             }
             return json_data
     elif use_office_held_ballot:
+        status += "USING_OFFICE_HELD_BALLOT, google_civic_election_id: " + str(google_civic_election_id) + " "
         from ballot.controllers_ballot_from_offices_held import \
             voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api
         results = voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api(
@@ -1258,6 +1259,9 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                     election_description_text = election.election_name
                     election_day_text = election.election_day_text
 
+            # Brute force override for 2024 elections
+            election_description_text = "2024 General Election"
+            election_day_text = "2024-11-05"  # Displays as "Nov 5th, 2024"
             json_data = {
                 'status':                               status,
                 'success':                              True,
