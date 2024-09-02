@@ -626,19 +626,20 @@ class VoterGuideManager(models.Manager):
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
-            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
-                if read_only:
-                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
-                        vote_smart_time_span=vote_smart_time_span,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
-                else:
-                    voter_guide_on_stage = VoterGuide.objects.get(
-                        vote_smart_time_span=vote_smart_time_span,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
-                voter_guide_on_stage_id = voter_guide_on_stage.id
-                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
-                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
+            # 2024 We no longer support voter_smart_time_span
+            # elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
+            #     status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
+            #     if read_only:
+            #         voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+            #             vote_smart_time_span=vote_smart_time_span,
+            #             organization_we_vote_id__iexact=organization_we_vote_id)
+            #     else:
+            #         voter_guide_on_stage = VoterGuide.objects.get(
+            #             vote_smart_time_span=vote_smart_time_span,
+            #             organization_we_vote_id__iexact=organization_we_vote_id)
+            #     voter_guide_on_stage_id = voter_guide_on_stage.id
+            #     voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
+            #     status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID "  # Set this in case the get fails
                 if read_only:
@@ -1222,6 +1223,11 @@ class VoterGuide(models.Model):
         return self.last_updated
 
     class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'voter_guide_owner_type', '-twitter_followers_count'],
+                name='election_owner_followers'),
+        ]
         ordering = ('last_updated',)
 
     objects = VoterGuideManager()
@@ -1660,8 +1666,8 @@ class VoterGuideListManager(models.Manager):
             else:
                 voter_guide_query = VoterGuide.objects.all()
             # As of August 2018, we no longer want to support Vote Smart ratings voter guides
-            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
             if positive_value_exists(len(organization_we_vote_ids_followed_or_ignored_by_voter)):
                 voter_guide_query = voter_guide_query.exclude(
@@ -1689,7 +1695,7 @@ class VoterGuideListManager(models.Manager):
             else:
                 # If not searching, make sure we do not include individuals. We *do* retrieve PUBLIC_FIGURES
                 status += "NOT_SEARCHING-EXCLUDING_INDIVIDUALS "
-                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type=INDIVIDUAL)  # Removed __iexact
 
                 if not positive_value_exists(len(google_civic_election_id_list)):
                     # We also want to exclude voter guides with election_day_text smaller than today's date
@@ -1699,7 +1705,7 @@ class VoterGuideListManager(models.Manager):
                     datetime_now = generate_localized_datetime_from_obj()[1]
                     two_days = timedelta(days=2)
                     datetime_two_days_ago = datetime_now - two_days
-                    earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
+                    earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD)  # "%Y-%m-%d"
                     voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
                     voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 
@@ -1791,15 +1797,14 @@ class VoterGuideListManager(models.Manager):
         voter_guide_list_found = False
         try:
             voter_guide_query = VoterGuide.objects.all()
-            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-            if not positive_value_exists(show_individuals):
-                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
             if positive_value_exists(google_civic_election_id):
                 voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+            if not positive_value_exists(show_individuals):
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type=INDIVIDUAL)  # Removed __iexact
             if order_by == 'google_civic_election_id':
-                voter_guide_query = voter_guide_query.order_by(
-                    '-vote_smart_time_span', '-google_civic_election_id')
+                voter_guide_query = voter_guide_query.order_by('-google_civic_election_id')  # '-vote_smart_time_span',
             else:
                 voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
 
@@ -1905,8 +1910,9 @@ class VoterGuideListManager(models.Manager):
             voter_guide_query = VoterGuide.objects.all()
             if positive_value_exists(google_civic_election_id):
                 voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
-            elif positive_value_exists(vote_smart_time_span):
-                voter_guide_query = voter_guide_query.filter(vote_smart_time_span__iexact=vote_smart_time_span)
+            # 2024 We no longer support voter_smart_time_span
+            # elif positive_value_exists(vote_smart_time_span):
+            #     voter_guide_query = voter_guide_query.filter(vote_smart_time_span__iexact=vote_smart_time_span)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):

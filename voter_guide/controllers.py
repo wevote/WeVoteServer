@@ -4250,8 +4250,8 @@ def retrieve_voter_guides_from_friends(
         else:
             voter_guide_query = VoterGuide.objects.all()
         # As of August 2018, we no longer want to support Vote Smart ratings voter guides
-        voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+        # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+        # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
         voter_guide_query = voter_guide_query.filter(
             organization_we_vote_id__in=organization_we_vote_ids_from_friends)
@@ -4388,8 +4388,8 @@ def retrieve_voter_guides_from_shared_items(
         else:
             voter_guide_query = VoterGuide.objects.all()
         # As of August 2018, we no longer want to support Vote Smart ratings voter guides
-        voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+        # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+        # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
         voter_guide_query = voter_guide_query.filter(
             organization_we_vote_id__in=shared_by_organization_we_vote_id_list)

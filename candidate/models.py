@@ -2580,7 +2580,7 @@ class CandidateCampaign(models.Model):
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
-    candidate_year = models.PositiveIntegerField(default=None, null=True, db_index=True)
+    candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
     state_code = models.CharField(
         verbose_name="state this candidate serves", max_length=2, null=True, blank=True, db_index=True)
@@ -2764,6 +2764,12 @@ class CandidateCampaign(models.Model):
 
     class Meta:
         indexes = [
+            models.Index(
+                fields=['candidate_year'],
+                name='candidate_year_index'),
+            models.Index(
+                fields=['we_vote_id', 'candidate_year'],
+                name='candidate_id_year'),
             models.Index(
                 fields=['seo_friendly_path', 'politician_we_vote_id', '-id'],
                 name='candidate_seo_friendly_path1'),
