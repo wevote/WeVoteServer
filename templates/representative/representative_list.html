@@ -73,7 +73,7 @@
          clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
-    <input type="submit" value="Search for Representative" />
+    <input  id="representative_search_submit" type="submit" value="Search for Representative" />
     &nbsp;&nbsp;
     <label for="show_representatives_with_email_id">
       <input type="checkbox" name="show_representatives_with_email" id="show_representatives_with_email_id" value="1"
@@ -227,6 +227,12 @@
         });
         $(function() {
             $('#state_code_id').change(function() {
+                displayLoadingBanner()
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#representative_search_submit').click(function() {
                 displayLoadingBanner()
                 this.form.submit();
             });
