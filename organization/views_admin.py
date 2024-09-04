@@ -2030,7 +2030,7 @@ def organization_edit_listed_campaigns_process_view(request):
             status = ""
             # Does it already exist?
             try:
-                CampaignXListedByOrganization.objects.get(
+                CampaignXListedByOrganization.objects.using('readonly').get(
                     campaignx_we_vote_id=campaignx_listed_by_organization_campaignx_we_vote_id,
                     site_owner_organization_we_vote_id=organization_we_vote_id)
                 link_already_exists = True
