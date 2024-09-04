@@ -567,6 +567,8 @@ def office_list_view(request):
     race_office_level = request.GET.get('race_office_level', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
+    show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
+    print("Show Statistics:", show_statistics)
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     state_code = request.GET.get('state_code', '')
 
@@ -785,9 +787,10 @@ def office_list_view(request):
     if office_list_found:
         position_list_manager = PositionListManager()
         for office in office_list:
-            office.candidate_count = fetch_candidate_count_for_office(office.id)
-            office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
-                office.id, office.we_vote_id)
+            if show_statistics:
+                office.candidate_count = fetch_candidate_count_for_office(office.id)
+                office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
+                    office.id, office.we_vote_id)
 
             updated_office_list.append(office)
 
@@ -854,6 +857,7 @@ def office_list_view(request):
         'race_office_level':            race_office_level,
         'show_all_elections':           show_all_elections,
         'show_battleground':            show_battleground,
+        'show_statistics':              show_statistics,
         'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,

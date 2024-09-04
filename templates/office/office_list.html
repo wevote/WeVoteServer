@@ -50,6 +50,10 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
+    <label>
+        <input type="checkbox" name="show_statistics" id="show_statistics_id" value="1"
+               {% if show_statistics %}checked{% endif %} /> Show Statistics
+    </label>
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
@@ -161,8 +165,10 @@
           {% endif %}
             <th>State</th>
             <th>District</th>
+            {% if show_statistics %}
             <th># of Candidates</th>
             <th>Public Positions</th>
+            {% endif %}
             <th>IDs</th>
             <th>Select</th>
         </tr>
@@ -199,8 +205,10 @@
                 {% if office.district_id %}{{ office.district_id|default_if_none:"" }}<br />{% endif %}
                 {% if office.ballotpedia_district_id %}BP: {{ office.ballotpedia_district_id|default_if_none:"" }}<br />{% endif %}
             </td>
+            {% if show_statistics %}
             <td>{{ office.candidate_count }}</td>
             <td>{{ office.positions_count }}</td>
+            {% endif %}
             <td>
                 {% if office.ocd_division_id %}{{ office.ocd_division_id|default_if_none:"" }}<br />{% endif %}
                 {% if office.ballotpedia_race_id %}BP Race Id: {{ office.ballotpedia_race_id|default_if_none:"" }}<br />{% endif %}
@@ -263,6 +271,12 @@
     });
     $(function() {
         $('#state_code_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_statistics_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
