@@ -279,6 +279,9 @@ class PositionEntered(models.Model):
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
                 name='positions_for_candidate_voter'),
             models.Index(
+                fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', '-date_entered'],
+                name='candidate_voter_date_entered'),
+            models.Index(
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
                 name='positions_for_candidate_org'),
             models.Index(
@@ -718,6 +721,9 @@ class PositionForFriends(models.Model):
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', 'stance', '-date_entered'],
                 name='friends_positions_candidate'),
+            models.Index(
+                fields=['candidate_campaign_we_vote_id', 'voter_we_vote_id', '-date_entered'],
+                name='friends_candidate_voter_date'),
             models.Index(
                 fields=['candidate_campaign_we_vote_id', 'organization_we_vote_id'],
                 name='friends_for_candidate_org'),
@@ -1874,7 +1880,7 @@ class PositionListManager(models.Manager):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_id)
             else:
                 position_list_query = position_list_query.filter(
-                    candidate_campaign_we_vote_id__iexact=candidate_we_vote_id)
+                    candidate_campaign_we_vote_id=candidate_we_vote_id)  # Removed __iexact
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             # if stance_we_are_looking_for != ANY_STANCE:
             #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
@@ -1884,7 +1890,7 @@ class PositionListManager(models.Manager):
             #     else:
             #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
-                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)  # Removed __iexact
 
             if positive_value_exists(private_citizens_only):
                 # position_list_query = position_list_query.filter(is_private_citizen=True)
@@ -1896,10 +1902,10 @@ class PositionListManager(models.Manager):
             # Only one of these blocks will be used at a time
             if friends_we_vote_id_list is not False:
                 if type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) > 0:
-                    # Find positions from friends. Look for we_vote_id case insensitive.
+                    # Find positions from friends. Look for we_vote_id case-insensitive.
                     we_vote_id_filter = Q()
                     for we_vote_id in friends_we_vote_id_list:
-                        we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
+                        we_vote_id_filter |= Q(voter_we_vote_id=we_vote_id)  # Removed __iexact
                     position_list_query = position_list_query.filter(we_vote_id_filter)
             if retrieve_public_positions and organizations_followed_we_vote_id_list:
                 if type(organizations_followed_we_vote_id_list) is list \
@@ -1907,7 +1913,7 @@ class PositionListManager(models.Manager):
                     # Find positions from organizations voter follows.
                     we_vote_id_filter = Q()
                     for we_vote_id in organizations_followed_we_vote_id_list:
-                        we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                        we_vote_id_filter |= Q(organization_we_vote_id=we_vote_id)  # Removed __iexact
                     position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)

@@ -4643,6 +4643,9 @@ class VoterAddress(models.Model):
                 fields=['voter_id'],
                 name='voter_id_address'),
             models.Index(
+                fields=['voter_id', '-date_last_changed'],
+                name='voter_id_address_date'),
+            models.Index(
                 fields=['voter_id', 'address_type'],
                 name='voter_id_type'),
         ]

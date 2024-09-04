@@ -137,7 +137,7 @@ class ContestOffice(models.Model):
     objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True,
-        blank=True, unique=True, db_index=True)
+        blank=True, unique=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="name of the office", max_length=255, null=False, blank=False)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
@@ -250,6 +250,13 @@ class ContestOffice(models.Model):
         verbose_name="name of the office held in Spanish", max_length=255, null=True, blank=True, default=None)
     # Which office held does this contest_office lead to?
     office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['we_vote_id'],
+                name='contest_office_id_index'),
+        ]
 
     def get_election_day_text(self):
         if positive_value_exists(self.google_civic_election_id):
@@ -849,9 +856,10 @@ class ContestOfficeManager(models.Manager):
             elif positive_value_exists(contest_office_we_vote_id):
                 if positive_value_exists(read_only):
                     contest_office_on_stage = ContestOffice.objects.using('readonly').get(
-                        we_vote_id__iexact=contest_office_we_vote_id)
+                        we_vote_id=contest_office_we_vote_id)  # Removed __iexact
                 else:
-                    contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        we_vote_id=contest_office_we_vote_id)  # Removed __iexact
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 contest_office_found = True
