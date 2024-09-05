@@ -260,7 +260,7 @@ class OrganizationManager(models.Manager):
                 "hashtag_text": hashtag_text,
             }
             new_organization_link_to_hastag, created = OrganizationLinkToHashtag.objects.update_or_create(
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 hashtag_text__iexact=hashtag_text,
                 defaults=defaults,)
             # NOTE: Hashtags are only significant if there are more than one for a particular issue so I'm not sure
@@ -318,9 +318,9 @@ class OrganizationManager(models.Manager):
                 "voter_we_vote_id":         voter_we_vote_id,
             }
             new_organization_link_to_voter, created = OrganizationMembershipLinkToVoter.objects.update_or_create(
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 external_voter_id=external_voter_id,
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 defaults=defaults,)
             status += "CREATE_ORGANIZATION_LINK_TO_VOTER_SUCCESSFUL "
             success = True

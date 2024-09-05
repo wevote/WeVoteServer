@@ -141,7 +141,7 @@ def delete_apple_user_entries_for_voter(voter_to_delete_we_vote_id):
         return results
 
     apple_users_query = AppleUser.objects.all()
-    apple_users_query = apple_users_query.filter(voter_we_vote_id__iexact=voter_to_delete_we_vote_id)
+    apple_users_query = apple_users_query.filter(voter_we_vote_id=voter_to_delete_we_vote_id)
     apple_users_list = list(apple_users_query)
     for apple_user_link in apple_users_list:
         try:
@@ -199,7 +199,7 @@ def move_apple_user_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_
 
     apple_users_query = AppleUser.objects.all()
     apple_users_query = apple_users_query.filter(
-        voter_we_vote_id__iexact=from_voter_we_vote_id)
+        voter_we_vote_id=from_voter_we_vote_id)
     apple_users_list = list(apple_users_query)
     for apple_user_link in apple_users_list:
         try:

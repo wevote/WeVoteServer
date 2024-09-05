@@ -429,8 +429,8 @@ class ChallengeManager(models.Manager):
 
         try:
             challenge_owner_query = ChallengeOwner.objects.using('readonly').filter(
-                challenge_we_vote_id__iexact=challenge_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                challenge_we_vote_id=challenge_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id)
             voter_is_challenge_owner = positive_value_exists(challenge_owner_query.count())
             status += 'VOTER_IS_CHALLENGE_OWNER '
         except ChallengeOwner as e:
@@ -442,7 +442,7 @@ class ChallengeManager(models.Manager):
             try:
                 # Which teams does this voter belong to, with challenge rights?
                 team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id)
                 team_member_queryset = team_member_queryset.filter(
                     Q(can_edit_challenge_owned_by_organization=True) |
                     Q(can_moderate_challenge_owned_by_organization=True) |
@@ -455,7 +455,7 @@ class ChallengeManager(models.Manager):
             if len(teams_voter_is_on_organization_we_vote_id_list) > 0:
                 try:
                     owner_queryset = ChallengeOwner.objects.using('readonly').filter(
-                        challenge_we_vote_id__iexact=challenge_we_vote_id,
+                        challenge_we_vote_id=challenge_we_vote_id,
                         organization_we_vote_id__in=teams_voter_is_on_organization_we_vote_id_list)
                     voter_is_challenge_owner = positive_value_exists(owner_queryset.count())
                     status += 'VOTER_IS_CHALLENGE_OWNER_AS_TEAM_MEMBER '
@@ -477,8 +477,8 @@ class ChallengeManager(models.Manager):
 
         try:
             queryset = ChallengeSupporter.objects.using('readonly').filter(
-                challenge_we_vote_id__iexact=challenge_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                challenge_we_vote_id=challenge_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id)
             voter_is_challenge_owner = positive_value_exists(queryset.count())
             status += 'VOTER_IS_CHALLENGE_SUPPORTER '
         except ChallengeSupporter as e:
@@ -850,11 +850,11 @@ class ChallengeManager(models.Manager):
             if positive_value_exists(read_only):
                 challenges_are_not_duplicates_list_query = \
                     ChallengesAreNotDuplicates.objects.using('readonly').filter(
-                        challenge1_we_vote_id__iexact=challenge_we_vote_id,
+                        challenge1_we_vote_id=challenge_we_vote_id,
                     )
             else:
                 challenges_are_not_duplicates_list_query = ChallengesAreNotDuplicates.objects.filter(
-                    challenge1_we_vote_id__iexact=challenge_we_vote_id,
+                    challenge1_we_vote_id=challenge_we_vote_id,
                 )
             challenges_are_not_duplicates_list1 = list(challenges_are_not_duplicates_list_query)
             success = True
@@ -872,12 +872,12 @@ class ChallengeManager(models.Manager):
                 if positive_value_exists(read_only):
                     challenges_are_not_duplicates_list_query = \
                         ChallengesAreNotDuplicates.objects.using('readonly').filter(
-                            challenge2_we_vote_id__iexact=challenge_we_vote_id,
+                            challenge2_we_vote_id=challenge_we_vote_id,
                         )
                 else:
                     challenges_are_not_duplicates_list_query = \
                         ChallengesAreNotDuplicates.objects.filter(
-                            challenge2_we_vote_id__iexact=challenge_we_vote_id,
+                            challenge2_we_vote_id=challenge_we_vote_id,
                         )
                 challenges_are_not_duplicates_list2 = list(challenges_are_not_duplicates_list_query)
                 success = True
@@ -1147,7 +1147,7 @@ class ChallengeManager(models.Manager):
             else:
                 if positive_value_exists(including_started_by_voter_we_vote_id):
                     # started_by this voter
-                    new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                    new_filter = Q(started_by_voter_we_vote_id=including_started_by_voter_we_vote_id)
                     filters.append(new_filter)
                     # Voter is owner of the challenge, or on team that owns it
                     voter_owned_challenge_we_vote_ids = challenge_manager.retrieve_voter_owned_challenge_we_vote_ids(
@@ -1250,7 +1250,7 @@ class ChallengeManager(models.Manager):
             if positive_value_exists(including_started_by_voter_we_vote_id):
                 # started_by this voter
                 new_filter = \
-                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                    Q(started_by_voter_we_vote_id=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
                 # Voter is owner of the challenge, or on team that owns it
                 voter_owned_challenge_we_vote_ids = challenge_manager.retrieve_voter_owned_challenge_we_vote_ids(
@@ -2023,9 +2023,9 @@ class ChallengeManager(models.Manager):
             return ''
         try:
             if positive_value_exists(read_only):
-                challenge = Challenge.objects.using('readonly').get(we_vote_id__iexact=challenge_we_vote_id)
+                challenge = Challenge.objects.using('readonly').get(we_vote_id=challenge_we_vote_id)
             else:
-                challenge = Challenge.objects.get(we_vote_id__iexact=challenge_we_vote_id)
+                challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
             return challenge.challenge_title
         except Challenge.DoesNotExist as e:
             # Some test data will throw this, no worries
@@ -2071,7 +2071,7 @@ class ChallengeManager(models.Manager):
 
         try:
             challenge_owner_query = ChallengeOwner.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             challenge_owner_query = challenge_owner_query.values_list('challenge_we_vote_id', flat=True).distinct()
             challenge_owner_challenge_we_vote_ids = list(challenge_owner_query)
         except ChallengeOwner as e:
@@ -2081,7 +2081,7 @@ class ChallengeManager(models.Manager):
         try:
             # Which teams does this voter belong to, with can_send_updates_for_challenge_owned_by_organization rights?
             team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 can_send_updates_for_challenge_owned_by_organization=True
             )
             team_member_queryset = team_member_queryset.values_list('organization_we_vote_id', flat=True).distinct()
@@ -2117,7 +2117,7 @@ class ChallengeManager(models.Manager):
 
         try:
             challenge_owner_query = ChallengeOwner.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             challenge_owner_query = challenge_owner_query.values_list('challenge_we_vote_id', flat=True).distinct()
             challenge_owner_challenge_we_vote_ids = list(challenge_owner_query)
         except ChallengeOwner as e:
@@ -2127,7 +2127,7 @@ class ChallengeManager(models.Manager):
         try:
             # Which teams does this voter belong to, with challenge rights?
             team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             team_member_queryset = team_member_queryset.filter(
                 Q(can_edit_challenge_owned_by_organization=True) |
                 Q(can_moderate_challenge_owned_by_organization=True) |
@@ -2165,7 +2165,7 @@ class ChallengeManager(models.Manager):
 
         try:
             challenge_owner_entries_updated = ChallengeOwner.objects \
-                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .filter(organization_we_vote_id=organization_we_vote_id) \
                 .update(organization_name=organization_name,
                         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
@@ -2192,7 +2192,7 @@ class ChallengeManager(models.Manager):
 
         try:
             challenge_supporter_entries_updated = ChallengeSupporter.objects \
-                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .filter(organization_we_vote_id=organization_we_vote_id) \
                 .update(supporter_name=supporter_name,
                         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
@@ -2221,7 +2221,7 @@ class ChallengeManager(models.Manager):
             if not positive_value_exists(challenge_we_vote_id):
                 try:
                     queryset = Challenge.objects.using('readonly').all()
-                    queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                    queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
                     temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
                     challenge_we_vote_id = temp_list[0]
                 except Exception as e:
@@ -2230,7 +2230,7 @@ class ChallengeManager(models.Manager):
                     return error_results
             try:
                 queryset = Organization.objects.using('readonly').all()
-                queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
                 temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
                 organization_we_vote_id = temp_list[0]
             except Exception as e:
@@ -2240,7 +2240,7 @@ class ChallengeManager(models.Manager):
             try:
                 from follow.models import FOLLOWING, FOLLOW_DISLIKE, FollowOrganization
                 queryset = FollowOrganization.objects.using('readonly').all()
-                queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
                 following_queryset = queryset.filter(following_status=FOLLOWING)
                 supporters_count = following_queryset.count()
                 disliking_queryset = queryset.filter(following_status=FOLLOW_DISLIKE)
@@ -2252,7 +2252,7 @@ class ChallengeManager(models.Manager):
         else:
             try:
                 count_query = ChallengeSupporter.objects.using('readonly').all()
-                count_query = count_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+                count_query = count_query.filter(challenge_we_vote_id=challenge_we_vote_id)
                 count_query = count_query.filter(challenge_supported=True)
                 supporters_count = count_query.count()
             except Exception as e:
@@ -2551,8 +2551,8 @@ class ChallengeManager(models.Manager):
                 }
                 challenges_are_not_duplicates, new_challenges_are_not_duplicates_created = \
                     ChallengesAreNotDuplicates.objects.update_or_create(
-                        challenge1_we_vote_id__iexact=challenge1_we_vote_id,
-                        challenge2_we_vote_id__iexact=challenge2_we_vote_id,
+                        challenge1_we_vote_id=challenge1_we_vote_id,
+                        challenge2_we_vote_id=challenge2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CHALLENGES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "

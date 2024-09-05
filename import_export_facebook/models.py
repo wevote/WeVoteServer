@@ -252,7 +252,7 @@ class FacebookManager(models.Manager):
 
         try:
             facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             facebook_user_id = facebook_link_to_voter.facebook_user_id
             facebook_link_to_voter.delete()
             success = positive_value_exists(facebook_user_id)
@@ -791,11 +791,11 @@ class FacebookManager(models.Manager):
             elif positive_value_exists(voter_we_vote_id):
                 if positive_value_exists(read_only):
                     facebook_link_to_voter = FacebookLinkToVoter.objects.using('readonly').get(
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                     )
                 else:
                     facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                     )
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True

@@ -45,15 +45,15 @@ def current_friends_data_healing_view(request):
                 voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(linked_organization_we_vote_id):
                 viewer_updated = CurrentFriend.objects \
-                    .filter(viewer_voter_we_vote_id__iexact=voter_we_vote_id) \
-                    .exclude(viewer_organization_we_vote_id__iexact=linked_organization_we_vote_id) \
+                    .filter(viewer_voter_we_vote_id=voter_we_vote_id) \
+                    .exclude(viewer_organization_we_vote_id=linked_organization_we_vote_id) \
                     .update(viewer_organization_we_vote_id=linked_organization_we_vote_id)
                 if positive_value_exists(viewer_updated):
                     number_of_linked_org_updates += viewer_updated
 
                 viewee_updated = CurrentFriend.objects \
-                    .filter(viewee_voter_we_vote_id__iexact=voter_we_vote_id) \
-                    .exclude(viewee_organization_we_vote_id__iexact=linked_organization_we_vote_id) \
+                    .filter(viewee_voter_we_vote_id=voter_we_vote_id) \
+                    .exclude(viewee_organization_we_vote_id=linked_organization_we_vote_id) \
                     .update(viewee_organization_we_vote_id=linked_organization_we_vote_id)
                 if positive_value_exists(viewee_updated):
                     number_of_linked_org_updates += viewee_updated

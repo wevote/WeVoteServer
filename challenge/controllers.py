@@ -2110,7 +2110,7 @@ def merge_these_two_challenges(
     challenge1_organization_we_vote_id_list = []
     challenge2_listed_by_organization_to_delete_list = []
     queryset = ChallengeListedByOrganization.objects.all()
-    queryset = queryset.filter(challenge_we_vote_id__iexact=challenge1_we_vote_id)
+    queryset = queryset.filter(challenge_we_vote_id=challenge1_we_vote_id)
     challenge1_listed_by_organization_list = list(queryset)
     for challenge1_listed_by_organization in challenge1_listed_by_organization_list:
         if positive_value_exists(challenge1_listed_by_organization.site_owner_organization_we_vote_id) and \
@@ -2120,7 +2120,7 @@ def merge_these_two_challenges(
                 .append(challenge1_listed_by_organization.site_owner_organization_we_vote_id)
 
     queryset = ChallengeListedByOrganization.objects.all()
-    queryset = queryset.filter(challenge_we_vote_id__iexact=challenge2_we_vote_id)
+    queryset = queryset.filter(challenge_we_vote_id=challenge2_we_vote_id)
     challenge2_listed_by_organization_list = list(queryset)
     for challenge2_listed_by_organization in challenge2_listed_by_organization_list:
         # Is this listed_by_organization already in Challenge 1?
@@ -2140,7 +2140,7 @@ def merge_these_two_challenges(
     # #####################################
     # Merge ChallengeNewsItems
     challenge_news_items_moved = ChallengeNewsItem.objects \
-        .filter(challenge_we_vote_id__iexact=challenge2_we_vote_id) \
+        .filter(challenge_we_vote_id=challenge2_we_vote_id) \
         .update(challenge_we_vote_id=challenge1_we_vote_id)
 
     # ##################################
@@ -2148,7 +2148,7 @@ def merge_these_two_challenges(
     #  so we don't need to check for duplicates.
     from challenge.models import ChallengeSEOFriendlyPath
     challenge_seo_friendly_path_moved = ChallengeSEOFriendlyPath.objects \
-        .filter(challenge_we_vote_id__iexact=challenge2_we_vote_id) \
+        .filter(challenge_we_vote_id=challenge2_we_vote_id) \
         .update(challenge_we_vote_id=challenge1_we_vote_id)
 
     # ##################################
@@ -2156,7 +2156,7 @@ def merge_these_two_challenges(
     try:
         from politician.models import Politician
         linked_challenge_we_vote_id_updated = Politician.objects \
-            .filter(linked_challenge_we_vote_id__iexact=challenge2_we_vote_id) \
+            .filter(linked_challenge_we_vote_id=challenge2_we_vote_id) \
             .update(linked_challenge_we_vote_id=challenge1_we_vote_id)
     except Exception as e:
         status += "POLITICIAN_LINKED_CHALLENGE_WE_VOTE_ID_NOT_UPDATED: " + str(e) + " "
@@ -2234,7 +2234,7 @@ def merge_these_two_challenges(
     challenge1_voter_we_vote_id_list = []
     challenge2_supporters_to_delete_list = []
     queryset = ChallengeSupporter.objects.all()
-    queryset = queryset.filter(challenge_we_vote_id__iexact=challenge1_we_vote_id)
+    queryset = queryset.filter(challenge_we_vote_id=challenge1_we_vote_id)
     challenge1_supporters_list = list(queryset)
     for challenge1_supporter in challenge1_supporters_list:
         if positive_value_exists(challenge1_supporter.organization_we_vote_id) and \
@@ -2245,7 +2245,7 @@ def merge_these_two_challenges(
             challenge1_voter_we_vote_id_list.append(challenge1_supporter.voter_we_vote_id)
 
     queryset = ChallengeSupporter.objects.all()
-    queryset = queryset.filter(challenge_we_vote_id__iexact=challenge2_we_vote_id)
+    queryset = queryset.filter(challenge_we_vote_id=challenge2_we_vote_id)
     challenge2_supporters_list = list(queryset)
     for challenge2_supporter in challenge2_supporters_list:
         # Is this challenge politician already in Challenge 1?
@@ -2341,21 +2341,21 @@ def move_challenge_to_another_organization(
     if positive_value_exists(to_organization_name):
         try:
             challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
         try:
             challenge_supporter_entries_moved += ChallengeSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(supporter_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
         try:
             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(speaker_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2363,26 +2363,26 @@ def move_challenge_to_another_organization(
     else:
         try:
             challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
         try:
             challenge_supporter_entries_moved += ChallengeSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
         try:
             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
 
     try:
         challenge_listed_entries_moved += ChallengeListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
             .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2414,7 +2414,7 @@ def move_challenge_to_another_politician(
     if positive_value_exists(from_politician_we_vote_id):
         try:
             challenges_moved += ChallengePolitician.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:
             status += "FAILED_MOVE_CHALLENGE_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
@@ -2469,7 +2469,7 @@ def move_challenge_to_another_voter(
     # Move based on started_by_voter_we_vote_id
     try:
         challenges_moved += Challenge.objects\
-            .filter(started_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(started_by_voter_we_vote_id=from_voter_we_vote_id)\
             .update(started_by_voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_UPDATE: " + str(e) + " "
@@ -2479,7 +2479,7 @@ def move_challenge_to_another_voter(
     # Move News Item based on voter_we_vote_id
     try:
         challenge_news_item_entries_moved += ChallengeNewsItem.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2489,7 +2489,7 @@ def move_challenge_to_another_voter(
     # Move owners based on voter_we_vote_id
     try:
         challenge_owner_entries_moved += ChallengeOwner.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_OWNER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2499,7 +2499,7 @@ def move_challenge_to_another_voter(
     # Move supporters based on voter_we_vote_id
     try:
         challenge_supporter_entries_moved += ChallengeSupporter.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_SUPPORTER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2510,7 +2510,7 @@ def move_challenge_to_another_voter(
     if positive_value_exists(to_organization_name):
         try:
             challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2518,7 +2518,7 @@ def move_challenge_to_another_voter(
             success = False
         try:
             challenge_supporter_entries_moved += ChallengeSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(supporter_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2526,7 +2526,7 @@ def move_challenge_to_another_voter(
             success = False
         try:
             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(speaker_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2535,21 +2535,21 @@ def move_challenge_to_another_voter(
     else:
         try:
             challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
             success = False
         try:
             challenge_supporter_entries_moved += ChallengeSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
             success = False
         try:
             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2557,7 +2557,7 @@ def move_challenge_to_another_voter(
 
     try:
         challenge_listed_entries_moved += ChallengeListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
             .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-CHALLENGE_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2927,7 +2927,7 @@ def delete_challenge_supporter(voter_to_delete=None):
     
     try:
         number_deleted, details = ChallengeSupporter.objects\
-            .filter(voter_we_vote_id__iexact=voter_to_delete_id, )\
+            .filter(voter_we_vote_id=voter_to_delete_id, )\
             .delete()
         challenge_supporter_deleted += number_deleted
     except Exception as e:

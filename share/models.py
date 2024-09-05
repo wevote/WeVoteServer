@@ -1086,14 +1086,14 @@ class ShareManager(models.Manager):
                 if positive_value_exists(google_civic_election_id):
                     shared_item_queryset = shared_item_queryset.filter(
                         destination_full_url__iexact=destination_full_url,
-                        shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
+                        shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
                         google_civic_election_id=google_civic_election_id,
                         deleted=False
                     )
                 else:
                     shared_item_queryset = shared_item_queryset.filter(
                         destination_full_url__iexact=destination_full_url,
-                        shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
+                        shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
                         deleted=False
                     )
                 # We need the sms that has been verified sms at top of list
@@ -1195,8 +1195,8 @@ class ShareManager(models.Manager):
                 else:
                     shared_permissions_granted_queryset = SharedPermissionsGranted.objects.all()
                 shared_permissions_granted_queryset = shared_permissions_granted_queryset.filter(
-                    shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
-                    shared_to_voter_we_vote_id__iexact=shared_to_voter_we_vote_id,
+                    shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    shared_to_voter_we_vote_id=shared_to_voter_we_vote_id,
                     deleted=False
                 )
                 if positive_value_exists(google_civic_election_id):
@@ -1282,11 +1282,11 @@ class ShareManager(models.Manager):
             )
             if positive_value_exists(shared_by_voter_we_vote_id):
                 shared_permissions_granted_queryset = shared_permissions_granted_queryset.filter(
-                    shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
+                    shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
                 )
             if positive_value_exists(shared_to_voter_we_vote_id):
                 shared_permissions_granted_queryset = shared_permissions_granted_queryset.filter(
-                    shared_to_voter_we_vote_id__iexact=shared_to_voter_we_vote_id,
+                    shared_to_voter_we_vote_id=shared_to_voter_we_vote_id,
                 )
             if positive_value_exists(google_civic_election_id):
                 shared_permissions_granted_queryset = shared_permissions_granted_queryset.filter(
@@ -1414,8 +1414,8 @@ class ShareManager(models.Manager):
                 else:
                     super_share_item_queryset = SuperShareItem.objects.all()
                 super_share_item_queryset = super_share_item_queryset.filter(
-                    shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
-                    campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                    shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
                     in_draft_mode=True
                 )
                 super_share_item_queryset = super_share_item_queryset.order_by('-date_created')

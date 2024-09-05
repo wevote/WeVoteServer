@@ -983,7 +983,7 @@ def move_candidates_to_another_politician(
     if positive_value_exists(from_politician_we_vote_id):
         try:
             candidate_entries_moved += CandidateCampaign.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_id=to_politician_id,
                         politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:

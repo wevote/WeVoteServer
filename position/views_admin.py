@@ -547,22 +547,22 @@ def position_list_view(request):
                 new_filter = Q(state_code__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+                new_filter = Q(candidate_campaign_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+                new_filter = Q(contest_measure_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+                new_filter = Q(contest_office_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(organization_we_vote_id__iexact=one_word)
+                new_filter = Q(organization_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                new_filter = Q(voter_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(google_civic_measure_title__icontains=one_word)
@@ -619,25 +619,25 @@ def position_list_view(request):
                 new_filter = Q(state_code__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+                new_filter = Q(candidate_campaign_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+                new_filter = Q(contest_measure_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # new_filter = Q(contest_office_name__icontains=one_word)
                 # filters.append(new_filter)
                 #
-                # new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+                # new_filter = Q(contest_office_we_vote_id=one_word)
                 # filters.append(new_filter)
 
-                new_filter = Q(organization_we_vote_id__iexact=one_word)
+                new_filter = Q(organization_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                new_filter = Q(voter_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(google_civic_measure_title__icontains=one_word)

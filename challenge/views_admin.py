@@ -1189,19 +1189,19 @@ def challenge_list_view(request):
             new_filter = Q(challenge_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(politician_we_vote_id__iexact=one_word)
+            new_filter = Q(politician_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(seo_friendly_path__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(started_by_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(started_by_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1359,7 +1359,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
         from challenge.models import ChallengeSEOFriendlyPath
         try:
             path_query = ChallengeSEOFriendlyPath.objects.all()
-            path_query = path_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+            path_query = path_query.filter(challenge_we_vote_id=challenge_we_vote_id)
             path_count = path_query.count()
             path_list = list(path_query[:4])
         except Exception as e:
@@ -1396,7 +1396,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
     if positive_value_exists(challenge.politician_we_vote_id):
         from position.models import PositionEntered
         position_query = PositionEntered.objects.using('readonly').all()
-        position_query = position_query.filter(politician_we_vote_id__iexact=challenge.politician_we_vote_id)
+        position_query = position_query.filter(politician_we_vote_id=challenge.politician_we_vote_id)
         # position_query = position_query.exclude(
         #     Q(statement_text__isnull=True) |
         #     Q(statement_text__exact='')
@@ -1404,7 +1404,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
         position_list = list(position_query[:4])
     else:
         supporters_query = ChallengeSupporter.objects.using('readonly').all()
-        supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+        supporters_query = supporters_query.filter(challenge_we_vote_id=challenge_we_vote_id)
         supporters_query = supporters_query.exclude(
             Q(supporter_endorsement__isnull=True) |
             Q(supporter_endorsement__exact='')
@@ -1473,11 +1473,11 @@ def challenge_supporters_list_view(request, challenge_we_vote_id=""):
 
     messages_on_stage = get_messages(request)
 
-    challenge = Challenge.objects.get(we_vote_id__iexact=challenge_we_vote_id)
+    challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
     challenge_title = challenge.challenge_title
 
     supporters_query = ChallengeSupporter.objects.all()
-    supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+    supporters_query = supporters_query.filter(challenge_we_vote_id=challenge_we_vote_id)
 
     if positive_value_exists(only_show_supporters_with_endorsements):
         supporters_query = supporters_query.exclude(
@@ -1520,10 +1520,10 @@ def challenge_supporters_list_view(request, challenge_we_vote_id=""):
             new_filter = Q(supporter_endorsement__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1691,7 +1691,7 @@ def challenge_supporters_list_process_view(request):
                                     )
 
     supporters_query = ChallengeSupporter.objects.all()
-    supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+    supporters_query = supporters_query.filter(challenge_we_vote_id=challenge_we_vote_id)
 
     if positive_value_exists(only_show_supporters_with_endorsements):
         supporters_query = supporters_query.exclude(
@@ -1717,10 +1717,10 @@ def challenge_supporters_list_process_view(request):
             new_filter = Q(supporter_endorsement__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -2297,8 +2297,8 @@ def challenge_not_duplicates_view(request):
         challenge1_we_vote_id, challenge2_we_vote_id)
     if results['success']:
         queryset = ChallengesArePossibleDuplicates.objects.filter(
-            challenge1_we_vote_id__iexact=challenge1_we_vote_id,
-            challenge2_we_vote_id__iexact=challenge2_we_vote_id,
+            challenge1_we_vote_id=challenge1_we_vote_id,
+            challenge2_we_vote_id=challenge2_we_vote_id,
         )
         queryset.delete()
         if positive_value_exists(voter_we_vote_id):

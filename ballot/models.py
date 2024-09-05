@@ -570,7 +570,7 @@ class BallotItemManager(models.Manager):
                     contest_measure_id__exact=contest_measure_id,
                     contest_office_id__exact=contest_office_id,
                     google_civic_election_id__exact=google_civic_election_id,
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
                     defaults=create_values)
                 ballot_item_found = True
             except BallotItem.MultipleObjectsReturned as e:
@@ -1282,7 +1282,7 @@ class BallotItemListManager(models.Manager):
                 ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
             if positive_value_exists(polling_location_we_vote_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location_we_vote_id=polling_location_we_vote_id)
 
             ballot_item_list = list(ballot_item_queryset)
             ballot_item_list_count = len(ballot_item_list)
@@ -1491,7 +1491,7 @@ class BallotItemListManager(models.Manager):
                     voter_id=voter_id)
             elif positive_value_exists(polling_location_we_vote_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location_we_vote_id=polling_location_we_vote_id)
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             return ballot_item_queryset.count()
         except BallotItem.DoesNotExist:
@@ -1732,7 +1732,7 @@ class BallotItemListManager(models.Manager):
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(polling_location_we_vote_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location_we_vote_id=polling_location_we_vote_id)
             else:
                 ballot_item_queryset = ballot_item_queryset.filter(
                     voter_id=voter_id)
@@ -1746,17 +1746,17 @@ class BallotItemListManager(models.Manager):
                 if positive_value_exists(contest_office_we_vote_id):
                     # Ignore entries with contest_office_we_vote_id coming in from master server
                     ballot_item_queryset = ballot_item_queryset.filter(~Q(
-                        contest_office_we_vote_id__iexact=contest_office_we_vote_id))
+                        contest_office_we_vote_id=contest_office_we_vote_id))
                 elif positive_value_exists(contest_measure_we_vote_id):
                     # Ignore entries with contest_measure_we_vote_id coming in from master server
                     ballot_item_queryset = ballot_item_queryset.filter(~Q(
-                        contest_measure_we_vote_id__iexact=contest_measure_we_vote_id))
+                        contest_measure_we_vote_id=contest_measure_we_vote_id))
             elif positive_value_exists(contest_office_we_vote_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+                    contest_office_we_vote_id=contest_office_we_vote_id)
             elif positive_value_exists(contest_measure_we_vote_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
-                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                    contest_measure_we_vote_id=contest_measure_we_vote_id)
 
             ballot_item_list_objects = list(ballot_item_queryset)
             ballot_item_list_count = len(ballot_item_list_objects)
@@ -2165,7 +2165,7 @@ class BallotReturnedManager(models.Manager):
                 status += "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(ballot_returned_we_vote_id):
                 ballot_deleted_count, details = BallotReturned.objects.get(
-                    we_vote_id__iexact=ballot_returned_we_vote_id).delete()
+                    we_vote_id=ballot_returned_we_vote_id).delete()
                 ballot_deleted = positive_value_exists(ballot_deleted_count)
                 status += "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
             elif positive_value_exists(ballot_location_shortcut):
@@ -3295,7 +3295,7 @@ class BallotReturnedListManager(models.Manager):
             ballot_returned_queryset = \
                 ballot_returned_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_returned_queryset = \
-                ballot_returned_queryset.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                ballot_returned_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             ballot_returned_queryset = ballot_returned_queryset.filter(voter_id=voter_id)
 
             ballot_returned_list = list(ballot_returned_queryset)
@@ -3441,13 +3441,13 @@ class BallotReturnedListManager(models.Manager):
                 new_filter = Q(normalized_state__icontains=ballot_returned_search_str)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=ballot_returned_search_str)
+                new_filter = Q(we_vote_id=ballot_returned_search_str)
                 filters.append(new_filter)
 
                 new_filter = Q(voter_id__iexact=ballot_returned_search_str)
                 filters.append(new_filter)
 
-                new_filter = Q(polling_location_we_vote_id__iexact=ballot_returned_search_str)
+                new_filter = Q(polling_location_we_vote_id=ballot_returned_search_str)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -3671,11 +3671,11 @@ class BallotReturnedListManager(models.Manager):
                         and ballot_returned_we_vote_id != to_ballot_returned_we_vote_id:
                     # Find Voter Ballot Saved entries that are copied from this polling_location
                     # number_query = VoterBallotSaved.objects.filter(
-                    #     ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
+                    #     ballot_returned_we_vote_id=ballot_returned_we_vote_id)
                     # number_updated = number_query.count()
 
                     number_updated = VoterBallotSaved.objects.filter(
-                        ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)\
+                        ballot_returned_we_vote_id=ballot_returned_we_vote_id)\
                         .update(ballot_returned_we_vote_id=to_ballot_returned_we_vote_id)
                     total_updated += number_updated
                     # If still here, delete the ballot_returned we are looking at
@@ -3718,7 +3718,7 @@ class BallotReturnedListManager(models.Manager):
 
             # Ignore entries with polling_location_we_vote_id coming in from master server
             ballot_returned_queryset = ballot_returned_queryset.filter(~Q(
-                polling_location_we_vote_id__iexact=polling_location_we_vote_id))
+                polling_location_we_vote_id=polling_location_we_vote_id))
 
             ballot_returned_list_objects = ballot_returned_queryset
 
@@ -4010,7 +4010,7 @@ class VoterBallotSavedManager(models.Manager):
                 status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_GOOGLE_CIVIC "
             elif positive_value_exists(voter_id) and positive_value_exists(ballot_returned_we_vote_id):
                 voter_ballot_saved = VoterBallotSaved.objects.get(
-                    voter_id=voter_id, ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
+                    voter_id=voter_id, ballot_returned_we_vote_id=ballot_returned_we_vote_id)
                 # If still here, we found an existing voter_ballot_saved
                 voter_ballot_saved_id = voter_ballot_saved.id
                 voter_ballot_saved_found = True if positive_value_exists(voter_ballot_saved_id) else False

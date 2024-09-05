@@ -369,13 +369,13 @@ class ActivityManager(models.Manager):
             if positive_value_exists(parent_comment_we_vote_id):
                 queryset = ActivityComment.objects.using('readonly').all()
                 queryset = queryset.filter(
-                    parent_comment_we_vote_id__iexact=parent_comment_we_vote_id,
+                    parent_comment_we_vote_id=parent_comment_we_vote_id,
                     deleted=False
                 )
             else:
-                queryset = ActivityComment.objects.all()
+                queryset = ActivityComment.objects.using('readonly').all()
                 queryset = queryset.filter(
-                    parent_we_vote_id__iexact=parent_we_vote_id,
+                    parent_we_vote_id=parent_we_vote_id,
                     deleted=False
                 )
                 # Don't retrieve entries where there is a value for parent_comment_we_vote_id
@@ -425,13 +425,13 @@ class ActivityManager(models.Manager):
             if positive_value_exists(parent_comment_we_vote_id):
                 queryset = ActivityComment.objects.all()
                 queryset = queryset.filter(
-                    parent_comment_we_vote_id__iexact=parent_comment_we_vote_id,
+                    parent_comment_we_vote_id=parent_comment_we_vote_id,
                     deleted=False
                 )
             else:
                 queryset = ActivityComment.objects.all()
                 queryset = queryset.filter(
-                    parent_we_vote_id__iexact=parent_we_vote_id,
+                    parent_we_vote_id=parent_we_vote_id,
                     deleted=False
                 )
                 # Don't retrieve entries where there is a value for parent_comment_we_vote_id
@@ -489,11 +489,11 @@ class ActivityManager(models.Manager):
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 deleted=False,
                 kind_of_notice=kind_of_notice,
-                recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
             )
             if positive_value_exists(speaker_organization_we_vote_id):
                 query = query.filter(
-                    speaker_organization_we_vote_id__iexact=speaker_organization_we_vote_id,
+                    speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 )
                 activity_notice = query.get()
                 activity_notice_id = activity_notice.id
@@ -502,7 +502,7 @@ class ActivityManager(models.Manager):
                 status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_FOUND_BY_ORG_WE_VOTE_ID "
             elif positive_value_exists(speaker_voter_we_vote_id):
                 query = query.filter(
-                    speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                    speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 )
                 activity_notice = query.get()
                 activity_notice_id = activity_notice.id
@@ -648,7 +648,7 @@ class ActivityManager(models.Manager):
                     date_of_notice__gte=earliest_date_of_notice,
                     deleted=False,
                     kind_of_seed=kind_of_seed,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 )
                 activity_notice_seed_id = activity_notice_seed.id
                 activity_notice_seed_found = True
@@ -699,8 +699,8 @@ class ActivityManager(models.Manager):
                     campaignx_we_vote_id=campaignx_we_vote_id,
                     deleted=False,
                     kind_of_notice=kind_of_notice,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                    speaker_organization_we_vote_id__iexact=speaker_organization_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                    speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 )
                 activity_notice_id = activity_notice.id
                 activity_notice_found = True
@@ -712,8 +712,8 @@ class ActivityManager(models.Manager):
                     campaignx_we_vote_id=campaignx_we_vote_id,
                     deleted=False,
                     kind_of_notice=kind_of_notice,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                    speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                    speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 )
                 activity_notice_id = activity_notice.id
                 activity_notice_found = True
@@ -831,7 +831,7 @@ class ActivityManager(models.Manager):
                     date_of_notice__gte=earliest_date_of_notice,
                     deleted=False,
                     kind_of_seed=kind_of_seed,
-                    speaker_organization_we_vote_id__iexact=speaker_organization_we_vote_id,
+                    speaker_organization_we_vote_id=speaker_organization_we_vote_id,
                 )
                 activity_notice_seed_id = activity_notice_seed.id
                 activity_notice_seed_found = True
@@ -843,7 +843,7 @@ class ActivityManager(models.Manager):
                     date_of_notice__gte=earliest_date_of_notice,
                     deleted=False,
                     kind_of_seed=kind_of_seed,
-                    speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                    speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 )
                 activity_notice_seed_id = activity_notice_seed.id
                 activity_notice_seed_found = True
@@ -896,7 +896,7 @@ class ActivityManager(models.Manager):
         try:
             queryset = ActivityNotice.objects.all()
             queryset = queryset.filter(
-                recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 deleted=False
             )
             queryset = queryset.exclude(
@@ -1257,7 +1257,7 @@ class ActivityManager(models.Manager):
             if activity_notice_clicked and activity_notice_seen:
                 ActivityNotice.objects.all().filter(
                     id__in=activity_notice_id_list,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                     deleted=False
                 ).update(
                     activity_notice_seen=True,
@@ -1265,14 +1265,14 @@ class ActivityManager(models.Manager):
             elif activity_notice_clicked:
                 ActivityNotice.objects.all().filter(
                     id__in=activity_notice_id_list,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                     deleted=False
                 ).update(
                     activity_notice_clicked=True)
             elif activity_notice_seen:
                 ActivityNotice.objects.all().filter(
                     id__in=activity_notice_id_list,
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                     deleted=False
                 ).update(
                     activity_notice_seen=True)
@@ -1550,7 +1550,7 @@ class ActivityManager(models.Manager):
 
         try:
             updated_count = ActivityComment.objects.all().filter(
-                commenter_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                commenter_voter_we_vote_id=speaker_voter_we_vote_id,
                 deleted=False
             ).update(
                 commenter_name=speaker_name)
@@ -1564,7 +1564,7 @@ class ActivityManager(models.Manager):
 
         try:
             updated_count = ActivityNotice.objects.all().filter(
-                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 deleted=False
             ).update(
                 speaker_name=speaker_name)
@@ -1578,12 +1578,12 @@ class ActivityManager(models.Manager):
 
         try:
             updated_seed_count1 = ActivityNoticeSeed.objects.all().filter(
-                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 deleted=False
             ).update(
                 speaker_name=speaker_name)
             updated_seed_count2 = ActivityNoticeSeed.objects.all().filter(
-                recipient_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                recipient_voter_we_vote_id=speaker_voter_we_vote_id,
                 deleted=False
             ).update(
                 recipient_name=speaker_name)
@@ -1598,7 +1598,7 @@ class ActivityManager(models.Manager):
 
         try:
             updated_count = ActivityPost.objects.all().filter(
-                speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 deleted=False
             ).update(
                 speaker_name=speaker_name)

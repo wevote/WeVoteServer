@@ -406,7 +406,7 @@ class ContestMeasureManager(models.Manager):
                 try:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__iexact=we_vote_id,
+                        we_vote_id=we_vote_id,
                         defaults=updated_contest_measure_values)
                     success = True
                     status += 'CONTEST_UPDATE_OR_CREATE_SUCCEEDED '
@@ -834,12 +834,12 @@ class ContestMeasureManager(models.Manager):
             if positive_value_exists(read_only):
                 contest_measures_are_not_duplicates_list_query = \
                     ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                        contest_measure1_we_vote_id=contest_measure_we_vote_id,
                     )
             else:
                 contest_measures_are_not_duplicates_list_query = \
                     ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                        contest_measure1_we_vote_id=contest_measure_we_vote_id,
                     )
             contest_measures_are_not_duplicates_list1 = list(contest_measures_are_not_duplicates_list_query)
             success = True
@@ -857,12 +857,12 @@ class ContestMeasureManager(models.Manager):
                 if positive_value_exists(read_only):
                     contest_measures_are_not_duplicates_list_query = \
                         ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                            contest_measure2_we_vote_id=contest_measure_we_vote_id,
                         )
                 else:
                     contest_measures_are_not_duplicates_list_query = \
                         ContestMeasuresAreNotDuplicates.objects.filter(
-                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                            contest_measure2_we_vote_id=contest_measure_we_vote_id,
                         )
                 contest_measures_are_not_duplicates_list2 = list(contest_measures_are_not_duplicates_list_query)
                 success = True
@@ -1004,7 +1004,7 @@ class ContestMeasureManager(models.Manager):
         existing_measure_entry = ''
 
         try:
-            existing_measure_entry = ContestMeasure.objects.get(we_vote_id__iexact=measure_we_vote_id)
+            existing_measure_entry = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
             if existing_measure_entry:
                 # found the existing entry, update the values
                 existing_measure_entry.measure_title = measure_title
@@ -1691,11 +1691,11 @@ class ContestMeasureListManager(models.Manager):
             measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for contest_measure_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
-            # measure_queryset = measure_queryset.filter(contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+            # measure_queryset = measure_queryset.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                measure_queryset = measure_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                measure_queryset = measure_queryset.filter(~Q(we_vote_id=we_vote_id_from_master))
 
             # We want to find measures with *any* of these values
             if positive_value_exists(measure_title):
@@ -1871,7 +1871,7 @@ class ContestMeasureListManager(models.Manager):
                 contest_measures_are_not_duplicates, new_contest_measures_are_not_duplicates_created = \
                     ContestMeasuresAreNotDuplicates.objects.update_or_create(
                         contest_measure1_we_vote_id__exact=contest_measure1_we_vote_id,
-                        contest_measure2_we_vote_id__iexact=contest_measure2_we_vote_id,
+                        contest_measure2_we_vote_id=contest_measure2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CONTEST_MEASURES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "

@@ -234,11 +234,11 @@ class FriendManager(models.Manager):
 
         try:
             friend_invitation, created = FriendInvitationEmailLink.objects.update_or_create(
-                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                sender_voter_we_vote_id=sender_voter_we_vote_id,
                 recipient_voter_email__iexact=recipient_voter_email,
                 defaults=defaults,
             )
-            # recipient_email_we_vote_id__iexact = recipient_email_we_vote_id,
+            # recipient_email_we_vote_id = recipient_email_we_vote_id,
             friend_invitation_saved = True
             success = True
             status += "FRIEND_INVITATION_EMAIL_LINK_UPDATED_OR_CREATED "
@@ -283,8 +283,8 @@ class FriendManager(models.Manager):
 
         try:
             friend_invitation, created = FriendInvitationVoterLink.objects.update_or_create(
-                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                sender_voter_we_vote_id=sender_voter_we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 defaults=defaults,
             )
             friend_invitation_saved = True
@@ -353,13 +353,13 @@ class FriendManager(models.Manager):
         try:
             if positive_value_exists(read_only):
                 current_friend = CurrentFriend.objects.using('readonly').get(
-                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewer_voter_we_vote_id=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id=recipient_voter_we_vote_id,
                 )
             else:
                 current_friend = CurrentFriend.objects.get(
-                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewer_voter_we_vote_id=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id=recipient_voter_we_vote_id,
                 )
             current_friend_found = True
             success = True
@@ -379,13 +379,13 @@ class FriendManager(models.Manager):
             try:
                 if positive_value_exists(read_only):
                     current_friend = CurrentFriend.objects.using('readonly').get(
-                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                        viewer_voter_we_vote_id=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id=sender_voter_we_vote_id,
                     )
                 else:
                     current_friend = CurrentFriend.objects.get(
-                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                        viewer_voter_we_vote_id=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id=sender_voter_we_vote_id,
                     )
                 current_friend_found = True
                 success = True
@@ -417,13 +417,13 @@ class FriendManager(models.Manager):
         try:
             if positive_value_exists(read_only):
                 suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                    viewer_voter_we_vote_id__iexact=voter_we_vote_id_one,
-                    viewee_voter_we_vote_id__iexact=voter_we_vote_id_two,
+                    viewer_voter_we_vote_id=voter_we_vote_id_one,
+                    viewee_voter_we_vote_id=voter_we_vote_id_two,
                 )
             else:
                 suggested_friend = SuggestedFriend.objects.get(
-                    viewer_voter_we_vote_id__iexact=voter_we_vote_id_one,
-                    viewee_voter_we_vote_id__iexact=voter_we_vote_id_two,
+                    viewer_voter_we_vote_id=voter_we_vote_id_one,
+                    viewee_voter_we_vote_id=voter_we_vote_id_two,
                 )
             suggested_friend_found = True
             success = True
@@ -443,13 +443,13 @@ class FriendManager(models.Manager):
             try:
                 if positive_value_exists(read_only):
                     suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                        viewer_voter_we_vote_id__iexact=voter_we_vote_id_two,
-                        viewee_voter_we_vote_id__iexact=voter_we_vote_id_one,
+                        viewer_voter_we_vote_id=voter_we_vote_id_two,
+                        viewee_voter_we_vote_id=voter_we_vote_id_one,
                     )
                 else:
                     suggested_friend = SuggestedFriend.objects.get(
-                        viewer_voter_we_vote_id__iexact=voter_we_vote_id_two,
-                        viewee_voter_we_vote_id__iexact=voter_we_vote_id_one,
+                        viewer_voter_we_vote_id=voter_we_vote_id_two,
+                        viewee_voter_we_vote_id=voter_we_vote_id_one,
                     )
                 suggested_friend_found = True
                 success = True
@@ -628,8 +628,8 @@ class FriendManager(models.Manager):
         friend_invitation_voter_link = FriendInvitationVoterLink()
         try:
             friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
-                sender_voter_we_vote_id__iexact=sender_voter.we_vote_id,
-                recipient_voter_we_vote_id__iexact=recipient_voter.we_vote_id,
+                sender_voter_we_vote_id=sender_voter.we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter.we_vote_id,
             )
             success = True
             friend_invitation_found = True
@@ -754,7 +754,7 @@ class FriendManager(models.Manager):
         friend_invitation_email_link = FriendInvitationEmailLink()
         try:
             friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
-                sender_voter_we_vote_id__iexact=sender_voter.we_vote_id,
+                sender_voter_we_vote_id=sender_voter.we_vote_id,
                 recipient_voter_email__iexact=recipient_voter_email,
             )
             success = True
@@ -809,8 +809,8 @@ class FriendManager(models.Manager):
         try:
             current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             current_friends_count = current_friend_queryset.count()
         except Exception as e:
             current_friends_count = 0
@@ -837,8 +837,8 @@ class FriendManager(models.Manager):
         try:
             voter_friends_queryset = CurrentFriend.objects.using('readonly').all()
             voter_friends_queryset = voter_friends_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             voter_friends_list = list(voter_friends_queryset)
             for one_friend in voter_friends_list:
                 voter_friends_we_vote_id_list.append(one_friend.fetch_other_voter_we_vote_id(voter_we_vote_id))
@@ -849,8 +849,8 @@ class FriendManager(models.Manager):
         try:
             friend_friends_queryset = CurrentFriend.objects.using('readonly').all()
             friend_friends_queryset = friend_friends_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=friend_voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=friend_voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=friend_voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=friend_voter_we_vote_id))
             friend_friends_list = list(friend_friends_queryset)
             for one_friend in friend_friends_list:
                 friend_friends_we_vote_id_list.append(one_friend.fetch_other_voter_we_vote_id(friend_voter_we_vote_id))
@@ -885,8 +885,8 @@ class FriendManager(models.Manager):
         try:
             suggested_friend_queryset = SuggestedFriend.objects.using('readonly').all()
             suggested_friend_queryset = suggested_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             suggested_friends_count = suggested_friend_queryset.count()
         except Exception as e:
             suggested_friends_count = 0
@@ -917,8 +917,8 @@ class FriendManager(models.Manager):
             else:
                 current_friend_queryset = CurrentFriend.objects.all()
             current_friend_queryset = current_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
             current_friend_list = list(current_friend_queryset)
 
@@ -978,8 +978,8 @@ class FriendManager(models.Manager):
             # editable CurrentFriend objects.
             current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             # We can sort on the client
             # current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
             current_friend_list = list(current_friend_queryset)
@@ -1068,8 +1068,8 @@ class FriendManager(models.Manager):
         try:
             current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
             current_friend_list = current_friend_queryset
 
@@ -1133,7 +1133,7 @@ class FriendManager(models.Manager):
             # Find invitations that I sent.
             friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
-                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+                sender_voter_we_vote_id=sender_voter_we_vote_id)
             friend_invitation_email_link_list = friend_invitation_email_queryset
 
             if len(friend_invitation_email_link_list):
@@ -1187,10 +1187,10 @@ class FriendManager(models.Manager):
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             if positive_value_exists(sender_voter_we_vote_id):
                 friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                    sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+                    sender_voter_we_vote_id=sender_voter_we_vote_id)
             if positive_value_exists(recipient_voter_we_vote_id):
                 friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
+                    recipient_voter_we_vote_id=recipient_voter_we_vote_id)
             friend_invitation_from_voter_list = friend_invitation_voter_queryset
 
             if len(friend_invitation_from_voter_list):
@@ -1295,10 +1295,10 @@ class FriendManager(models.Manager):
             # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.using('readonly').all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+                sender_voter_we_vote_id=viewer_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
-                recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+                recipient_voter_we_vote_id=viewer_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(invitation_status=ACCEPTED)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
@@ -1328,7 +1328,7 @@ class FriendManager(models.Manager):
             # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
             friend_invitation_email_queryset = FriendInvitationEmailLink.objects.using('readonly').all()
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
-                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+                sender_voter_we_vote_id=viewer_voter_we_vote_id)
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(invitation_status=ACCEPTED)
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
             friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
@@ -1373,10 +1373,10 @@ class FriendManager(models.Manager):
             # Find invitations that I received, including ones that I have ignored.
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.using('readonly').all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+                recipient_voter_we_vote_id=viewer_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
-                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+                sender_voter_we_vote_id=viewer_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 Q(invitation_status=ACCEPTED) |
                 Q(invitation_status=IGNORED))
@@ -1537,10 +1537,10 @@ class FriendManager(models.Manager):
         try:
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+                sender_voter_we_vote_id=sender_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
-                recipient_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+                recipient_voter_we_vote_id=sender_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
                 invitation_status__iexact=ACCEPTED)
@@ -1573,7 +1573,7 @@ class FriendManager(models.Manager):
         try:
             friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
-                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+                sender_voter_we_vote_id=sender_voter_we_vote_id)
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
             friend_invitation_email_queryset = friend_invitation_email_queryset.exclude(
                 invitation_status__iexact=ACCEPTED)
@@ -1905,10 +1905,10 @@ class FriendManager(models.Manager):
             else:
                 friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
-                recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id)
             # It is possible through account merging to have an invitation to yourself. We want to exclude these.
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
-                sender_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
+                sender_voter_we_vote_id=recipient_voter_we_vote_id)
             # Exclude accepted invitations, ignored and deleted invitations
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
@@ -2146,12 +2146,12 @@ class FriendManager(models.Manager):
                 queryset = MutualFriend.objects.all()
             if positive_value_exists(first_friend_voter_we_vote_id):
                 queryset = queryset.filter(
-                    Q(viewer_voter_we_vote_id__iexact=first_friend_voter_we_vote_id) |
-                    Q(viewee_voter_we_vote_id__iexact=first_friend_voter_we_vote_id))
+                    Q(viewer_voter_we_vote_id=first_friend_voter_we_vote_id) |
+                    Q(viewee_voter_we_vote_id=first_friend_voter_we_vote_id))
             if positive_value_exists(second_friend_voter_we_vote_id):
                 queryset = queryset.filter(
-                    Q(viewer_voter_we_vote_id__iexact=second_friend_voter_we_vote_id) |
-                    Q(viewee_voter_we_vote_id__iexact=second_friend_voter_we_vote_id))
+                    Q(viewer_voter_we_vote_id=second_friend_voter_we_vote_id) |
+                    Q(viewee_voter_we_vote_id=second_friend_voter_we_vote_id))
             if positive_value_exists(mutual_friend_voter_we_vote_id):
                 queryset = queryset.filter(
                     mutual_friend_voter_we_vote_id=mutual_friend_voter_we_vote_id,
@@ -2254,8 +2254,8 @@ class FriendManager(models.Manager):
             else:
                 suggested_friend_queryset = SuggestedFriend.objects.all()
             suggested_friend_queryset = suggested_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             if positive_value_exists(hide_deleted):
                 suggested_friend_queryset = suggested_friend_queryset.exclude(
                     Q(voter_we_vote_id_deleted_first__iexact=voter_we_vote_id) |
@@ -2321,8 +2321,8 @@ class FriendManager(models.Manager):
         try:
             suggested_friend_queryset = SuggestedFriend.objects.using('readonly').all()
             suggested_friend_queryset = suggested_friend_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+                Q(viewer_voter_we_vote_id=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id=voter_we_vote_id))
             suggested_friend_queryset = suggested_friend_queryset.exclude(
                 Q(voter_we_vote_id_deleted_first__iexact=voter_we_vote_id) |
                 Q(voter_we_vote_id_deleted_second__iexact=voter_we_vote_id))

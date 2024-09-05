@@ -138,16 +138,16 @@ def shared_item_list_view(request):
         search_words = shared_item_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
-            new_filter = Q(campaignx_we_vote_id__iexact=one_word)
+            new_filter = Q(campaignx_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(candidate_we_vote_id__iexact=one_word)
+            new_filter = Q(candidate_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(destination_full_url__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(measure_we_vote_id__iexact=one_word)
+            new_filter = Q(measure_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(other_voter_display_name__icontains=one_word)
@@ -159,7 +159,7 @@ def shared_item_list_view(request):
             new_filter = Q(other_voter_last_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(other_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(other_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             if len(voter_we_vote_ids_with_email) > 0:
@@ -179,7 +179,7 @@ def shared_item_list_view(request):
             new_filter = Q(other_voter_email_address_text__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(office_we_vote_id__iexact=one_word)
+            new_filter = Q(office_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(shared_by_display_name__icontains=one_word)
@@ -191,7 +191,7 @@ def shared_item_list_view(request):
             new_filter = Q(shared_by_last_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(shared_by_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(shared_by_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(shared_message__icontains=one_word)
@@ -418,7 +418,7 @@ def voter_who_shares_summary_list_view(request):
             new_filter = Q(shared_by_display_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query

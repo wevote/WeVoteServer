@@ -284,7 +284,7 @@ def issues_import_from_structured_json(structured_json):
         issue_on_stage_found = False
         try:
             if positive_value_exists(we_vote_id):
-                issue_query = Issue.objects.filter(we_vote_id__iexact=we_vote_id)
+                issue_query = Issue.objects.filter(we_vote_id=we_vote_id)
                 if len(issue_query):
                     issue_on_stage = issue_query[0]
                     issue_on_stage_found = True
@@ -1252,8 +1252,8 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
         organization_link_found = False
         try:
             organization_link_query = OrganizationLinkToIssue.objects.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
-            organization_link_query = organization_link_query.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+                organization_we_vote_id=organization_we_vote_id)
+            organization_link_query = organization_link_query.filter(issue_we_vote_id=issue_we_vote_id)
             if len(organization_link_query):
                 organization_link = organization_link_query[0]
                 organization_link_found = True

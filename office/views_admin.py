@@ -248,7 +248,7 @@ def offices_copy_to_another_election_view(request):
                 new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -744,7 +744,7 @@ def office_list_view(request):
                 new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -905,7 +905,7 @@ def office_list_process_view(request):
         for organization_we_vote_id in select_for_marking_office_we_vote_ids:
             try:
                 contest_office_on_stage = ContestOffice.objects.get(
-                    we_vote_id__iexact=organization_we_vote_id)  # Cannot be readonly
+                    we_vote_id=organization_we_vote_id)  # Cannot be readonly
                 if which_marking == "is_battleground_race":
                     contest_office_on_stage.is_battleground_race = True
                 contest_office_on_stage.save()
@@ -1561,7 +1561,7 @@ def office_summary_merge_with_other_office_process_view(
     if positive_value_exists(office_search):
         office_queryset = ContestOffice.objects.all()  # Cannot be readonly
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
-        office_queryset = office_queryset.exclude(we_vote_id__iexact=contest_office_we_vote_id)
+        office_queryset = office_queryset.exclude(we_vote_id=contest_office_we_vote_id)
 
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
@@ -1578,7 +1578,7 @@ def office_summary_merge_with_other_office_process_view(
             new_filter = Q(vote_usa_office_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(wikipedia_id__iexact=one_word)

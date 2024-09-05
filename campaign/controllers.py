@@ -2114,7 +2114,7 @@ def merge_these_two_campaignx_entries(
     campaignx1_organization_we_vote_id_list = []
     campaignx2_listed_by_organization_to_delete_list = []
     queryset = CampaignXListedByOrganization.objects.all()
-    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx1_we_vote_id)
+    queryset = queryset.filter(campaignx_we_vote_id=campaignx1_we_vote_id)
     campaignx1_listed_by_organization_list = list(queryset)
     for campaignx1_listed_by_organization in campaignx1_listed_by_organization_list:
         if positive_value_exists(campaignx1_listed_by_organization.site_owner_organization_we_vote_id) and \
@@ -2124,7 +2124,7 @@ def merge_these_two_campaignx_entries(
                 .append(campaignx1_listed_by_organization.site_owner_organization_we_vote_id)
 
     queryset = CampaignXListedByOrganization.objects.all()
-    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id)
+    queryset = queryset.filter(campaignx_we_vote_id=campaignx2_we_vote_id)
     campaignx2_listed_by_organization_list = list(queryset)
     for campaignx2_listed_by_organization in campaignx2_listed_by_organization_list:
         # Is this listed_by_organization already in CampaignX 1?
@@ -2144,7 +2144,7 @@ def merge_these_two_campaignx_entries(
     # #####################################
     # Merge CampaignXNewsItems
     campaignx_news_items_moved = CampaignXNewsItem.objects \
-        .filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+        .filter(campaignx_we_vote_id=campaignx2_we_vote_id) \
         .update(campaignx_we_vote_id=campaignx1_we_vote_id)
 
     # ##################################
@@ -2152,7 +2152,7 @@ def merge_these_two_campaignx_entries(
     #  so we don't need to check for duplicates.
     from campaign.models import CampaignXSEOFriendlyPath
     campaignx_seo_friendly_path_moved = CampaignXSEOFriendlyPath.objects \
-        .filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+        .filter(campaignx_we_vote_id=campaignx2_we_vote_id) \
         .update(campaignx_we_vote_id=campaignx1_we_vote_id)
 
     # ##################################
@@ -2160,7 +2160,7 @@ def merge_these_two_campaignx_entries(
     try:
         from politician.models import Politician
         linked_campaignx_we_vote_id_updated = Politician.objects \
-            .filter(linked_campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+            .filter(linked_campaignx_we_vote_id=campaignx2_we_vote_id) \
             .update(linked_campaignx_we_vote_id=campaignx1_we_vote_id)
     except Exception as e:
         status += "POLITICIAN_LINKED_CAMPAIGNX_WE_VOTE_ID_NOT_UPDATED: " + str(e) + " "
@@ -2238,7 +2238,7 @@ def merge_these_two_campaignx_entries(
     campaignx1_voter_we_vote_id_list = []
     campaignx2_supporters_to_delete_list = []
     queryset = CampaignXSupporter.objects.all()
-    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx1_we_vote_id)
+    queryset = queryset.filter(campaignx_we_vote_id=campaignx1_we_vote_id)
     campaignx1_supporters_list = list(queryset)
     for campaignx1_supporter in campaignx1_supporters_list:
         if positive_value_exists(campaignx1_supporter.organization_we_vote_id) and \
@@ -2249,7 +2249,7 @@ def merge_these_two_campaignx_entries(
             campaignx1_voter_we_vote_id_list.append(campaignx1_supporter.voter_we_vote_id)
 
     queryset = CampaignXSupporter.objects.all()
-    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id)
+    queryset = queryset.filter(campaignx_we_vote_id=campaignx2_we_vote_id)
     campaignx2_supporters_list = list(queryset)
     for campaignx2_supporter in campaignx2_supporters_list:
         # Is this campaign politician already in CampaignX 1?
@@ -2345,21 +2345,21 @@ def move_campaignx_to_another_organization(
     if positive_value_exists(to_organization_name):
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(supporter_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(speaker_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2367,26 +2367,26 @@ def move_campaignx_to_another_organization(
     else:
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
 
     try:
         campaignx_listed_entries_moved += CampaignXListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
             .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2418,7 +2418,7 @@ def move_campaignx_to_another_politician(
     if positive_value_exists(from_politician_we_vote_id):
         try:
             campaignx_entries_moved += CampaignXPolitician.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:
             status += "FAILED_MOVE_CAMPAIGNX_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
@@ -2473,7 +2473,7 @@ def move_campaignx_to_another_voter(
     # Move based on started_by_voter_we_vote_id
     try:
         campaignx_entries_moved += CampaignX.objects\
-            .filter(started_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(started_by_voter_we_vote_id=from_voter_we_vote_id)\
             .update(started_by_voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_UPDATE: " + str(e) + " "
@@ -2483,7 +2483,7 @@ def move_campaignx_to_another_voter(
     # Move News Item based on voter_we_vote_id
     try:
         campaignx_news_item_entries_moved += CampaignXNewsItem.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2493,7 +2493,7 @@ def move_campaignx_to_another_voter(
     # Move owners based on voter_we_vote_id
     try:
         campaignx_owner_entries_moved += CampaignXOwner.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2503,7 +2503,7 @@ def move_campaignx_to_another_voter(
     # Move supporters based on voter_we_vote_id
     try:
         campaignx_supporter_entries_moved += CampaignXSupporter.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
@@ -2514,7 +2514,7 @@ def move_campaignx_to_another_voter(
     if positive_value_exists(to_organization_name):
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2522,7 +2522,7 @@ def move_campaignx_to_another_voter(
             success = False
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(supporter_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2530,7 +2530,7 @@ def move_campaignx_to_another_voter(
             success = False
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(speaker_name=to_organization_name,
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
@@ -2539,21 +2539,21 @@ def move_campaignx_to_another_voter(
     else:
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
             success = False
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
             success = False
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2561,7 +2561,7 @@ def move_campaignx_to_another_voter(
 
     try:
         campaignx_listed_entries_moved += CampaignXListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
             .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -2931,7 +2931,7 @@ def delete_campaign_supporter(voter_to_delete=None):
     
     try:
         number_deleted, details = CampaignXSupporter.objects\
-            .filter(voter_we_vote_id__iexact=voter_to_delete_id, )\
+            .filter(voter_we_vote_id=voter_to_delete_id, )\
             .delete()
         campaign_supporter_deleted += number_deleted
     except Exception as e:

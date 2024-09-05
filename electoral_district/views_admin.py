@@ -121,7 +121,7 @@ def electoral_district_list_view(request):
         # Find the electoral_districts this map point is in
         electoral_district_link_query = ElectoralDistrictLinkToPollingLocation.objects.all()
         electoral_district_link_query = electoral_district_link_query.filter(
-            polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            polling_location_we_vote_id=polling_location_we_vote_id)
 
         electoral_district_link_list = list(electoral_district_link_query)
 
@@ -131,7 +131,7 @@ def electoral_district_list_view(request):
         electoral_district_count = 0
         filters = []
         for one_link in electoral_district_link_list:
-            new_filter = Q(we_vote_id__iexact=one_link.electoral_district_we_vote_id)
+            new_filter = Q(we_vote_id=one_link.electoral_district_we_vote_id)
             filters.append(new_filter)
 
         # Add the first query
@@ -181,7 +181,7 @@ def electoral_district_list_view(request):
                 new_filter = Q(state_code__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -241,7 +241,7 @@ def electoral_district_summary_view(request):
     electoral_district_on_stage_found = False
     electoral_district_on_stage = ElectoralDistrict()
     try:
-        electoral_district_on_stage = ElectoralDistrict.objects.get(we_vote_id__iexact=electoral_district_we_vote_id)
+        electoral_district_on_stage = ElectoralDistrict.objects.get(we_vote_id=electoral_district_we_vote_id)
         electoral_district_on_stage_found = True
     except ElectoralDistrict.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
