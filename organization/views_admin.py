@@ -557,13 +557,13 @@ def organization_list_view(request):
             new_filter = Q(organization_website__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(politician_we_vote_id__iexact=one_word)
+            new_filter = Q(politician_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(twitter_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(vote_smart_id__icontains=one_word)
@@ -1023,7 +1023,7 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
     else:
@@ -2171,7 +2171,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         if positive_value_exists(organization_id):
             organization_query = Organization.objects.using('readonly').filter(id=organization_id)
         else:
-            organization_query = Organization.objects.using('readonly').filter(we_vote_id__iexact=organization_we_vote_id)
+            organization_query = Organization.objects.using('readonly').filter(we_vote_id=organization_we_vote_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
@@ -2300,7 +2300,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_search_results_list = []
     if positive_value_exists(organization_search_for_merge) and positive_value_exists(organization_we_vote_id):
         organization_query = Organization.objects.using('readonly').all()
-        organization_query = organization_query.exclude(we_vote_id__iexact=organization_we_vote_id)
+        organization_query = organization_query.exclude(we_vote_id=organization_we_vote_id)
 
         search_words = organization_search_for_merge.split()
         for one_word in search_words:
@@ -2308,7 +2308,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             new_filter = Q(organization_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(organization_description__icontains=one_word)
@@ -2381,7 +2381,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
     else:

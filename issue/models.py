@@ -553,7 +553,7 @@ class IssueManager(models.Manager):
             issue_found = False
             try:
                 issue_on_stage = Issue.objects.get(
-                    we_vote_id__iexact=issue_we_vote_id,
+                    we_vote_id=issue_we_vote_id,
                 )
                 issue_found = True
                 success = True

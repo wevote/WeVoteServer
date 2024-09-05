@@ -221,7 +221,7 @@ class TwitterUserManager(models.Manager):
         status = ""
         tweet_list = []
         try:
-            tweet_list_query = Tweet.objects.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            tweet_list_query = Tweet.objects.filter(organization_we_vote_id=organization_we_vote_id)
             tweet_list_query = tweet_list_query.order_by('date_published').reverse()
             tweet_list = list(tweet_list_query)
             status += "TWEET_FOUND "
@@ -549,10 +549,10 @@ class TwitterUserManager(models.Manager):
             elif positive_value_exists(organization_we_vote_id):
                 if read_only:
                     twitter_link_to_organization = TwitterLinkToOrganization.objects.using('readonly').get(
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
                 else:
                     twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
                 twitter_link_to_organization_id = twitter_link_to_organization.id
                 twitter_link_to_organization_found = True
                 success = True
@@ -696,9 +696,9 @@ class TwitterUserManager(models.Manager):
             elif positive_value_exists(voter_we_vote_id):
                 if read_only:
                     twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(
-                        voter_we_vote_id__iexact=voter_we_vote_id)
+                        voter_we_vote_id=voter_we_vote_id)
                 else:
-                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(voter_we_vote_id__iexact=voter_we_vote_id)
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(voter_we_vote_id=voter_we_vote_id)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "

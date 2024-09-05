@@ -1568,7 +1568,7 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
 
     voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
         Q(voter_guide_possibility_url__contains=net_location) &
-        Q(organization_we_vote_id__iexact=organization_we_vote_id) &
+        Q(organization_we_vote_id=organization_we_vote_id) &
         Q(date_last_changed__range=[startdate, enddate])).order_by('-date_last_changed')
     # leave destination in set     .exclude(id=voter_guide_possibility_id)
     voter_guide_possibility_list = list(voter_guide_possibility_query)

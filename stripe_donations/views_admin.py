@@ -106,8 +106,8 @@ def suspect_charges_list_view(request):
     template_values['page_offset_suspects'] = page_offset_suspects
     template_values['number_of_suspects'] = number_of_suspects
     suspects_query = StripePayments.objects.all().order_by('-created')
-    suspects_query = suspects_query.exclude((Q(voter_we_vote_id__isnull=True) | Q(voter_we_vote_id__iexact="")) &
-        (Q(not_loggedin_voter_we_vote_id__isnull=True) | Q(not_loggedin_voter_we_vote_id__iexact="")))[page_offset_suspects:page_offset_suspects+page_limit]
+    suspects_query = suspects_query.exclude((Q(voter_we_vote_id__isnull=True) | Q(voter_we_vote_id="")) &
+        (Q(not_loggedin_voter_we_vote_id__isnull=True) | Q(not_loggedin_voter_we_vote_id="")))[page_offset_suspects:page_offset_suspects+page_limit]
     template_values['suspects_list'] = list(suspects_query)
     template_values['prev_page_url_suspects'] = None if page_offset_suspects == 0 else \
         server_root + '/stripe_donations/suspects_list?dispute=false&page_offset_suspects=' + str(page_offset_suspects - page_limit)

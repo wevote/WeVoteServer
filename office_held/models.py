@@ -793,7 +793,7 @@ class OfficeHeldManager(models.Manager):
         office_held = None
 
         try:
-            office_held = OfficeHeld.objects.get(we_vote_id__iexact=office_held_we_vote_id)
+            office_held = OfficeHeld.objects.get(we_vote_id=office_held_we_vote_id)
             if office_held:
                 office_held_found = True
                 # found the existing entry, update the values
@@ -1002,7 +1002,7 @@ class OfficeHeldManager(models.Manager):
 
             # Ignore we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                queryset = queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                queryset = queryset.filter(~Q(we_vote_id=we_vote_id_from_master))
 
             office_held_list_objects = queryset
 

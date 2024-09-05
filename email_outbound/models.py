@@ -522,25 +522,25 @@ class EmailManager(models.Manager):
                 if positive_value_exists(voter_we_vote_id):
                     if positive_value_exists(read_only):
                         email_address_object = EmailAddress.objects.using('readonly').get(
-                            we_vote_id__iexact=email_address_object_we_vote_id,
-                            voter_we_vote_id__iexact=voter_we_vote_id,
+                            we_vote_id=email_address_object_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
                             deleted=False
                         )
                     else:
                         email_address_object = EmailAddress.objects.get(
-                            we_vote_id__iexact=email_address_object_we_vote_id,
-                            voter_we_vote_id__iexact=voter_we_vote_id,
+                            we_vote_id=email_address_object_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
                             deleted=False
                         )
                 else:
                     if positive_value_exists(read_only):
                         email_address_object = EmailAddress.objects.using('readonly').get(
-                            we_vote_id__iexact=email_address_object_we_vote_id,
+                            we_vote_id=email_address_object_we_vote_id,
                             deleted=False
                         )
                     else:
                         email_address_object = EmailAddress.objects.get(
-                            we_vote_id__iexact=email_address_object_we_vote_id,
+                            we_vote_id=email_address_object_we_vote_id,
                             deleted=False
                         )
                 email_address_object_id = email_address_object.id
@@ -556,7 +556,7 @@ class EmailManager(models.Manager):
                 if positive_value_exists(voter_we_vote_id):
                     email_address_queryset = email_address_queryset.filter(
                         normalized_email_address__iexact=normalized_email_address,
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                         deleted=False
                     )
                 else:
@@ -759,7 +759,7 @@ class EmailManager(models.Manager):
             else:
                 email_address_queryset = EmailAddress.objects.all()
             email_address_queryset = email_address_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 deleted=False
             )
             email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
@@ -811,7 +811,7 @@ class EmailManager(models.Manager):
                 else:
                     email_address_queryset = EmailAddress.objects.all()
                 email_address_queryset = email_address_queryset.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     email_ownership_is_verified=True,
                     deleted=False
                 )

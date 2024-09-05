@@ -403,12 +403,12 @@ class ContestOfficeManager(models.Manager):
             if positive_value_exists(read_only):
                 contest_offices_are_not_duplicates_list_query = \
                     ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
-                        contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
+                        contest_office1_we_vote_id=contest_office_we_vote_id,
                     )
             else:
                 contest_offices_are_not_duplicates_list_query = \
                     ContestOfficesAreNotDuplicates.objects.filter(
-                        contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
+                        contest_office1_we_vote_id=contest_office_we_vote_id,
                     )
             contest_offices_are_not_duplicates_list1 = list(contest_offices_are_not_duplicates_list_query)
             success = True
@@ -426,12 +426,12 @@ class ContestOfficeManager(models.Manager):
                 if positive_value_exists(read_only):
                     contest_offices_are_not_duplicates_list_query = \
                         ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
-                            contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
+                            contest_office2_we_vote_id=contest_office_we_vote_id,
                         )
                 else:
                     contest_offices_are_not_duplicates_list_query = \
                         ContestOfficesAreNotDuplicates.objects.filter(
-                            contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
+                            contest_office2_we_vote_id=contest_office_we_vote_id,
                         )
                 contest_offices_are_not_duplicates_list2 = list(contest_offices_are_not_duplicates_list_query)
                 success = True
@@ -587,7 +587,7 @@ class ContestOfficeManager(models.Manager):
                 try:
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__iexact=office_we_vote_id,
+                        we_vote_id=office_we_vote_id,
                         defaults=updated_contest_office_values)  # Cannot be readonly
                     contest_office_found = True
                     office_updated = not new_office_created
@@ -800,7 +800,7 @@ class ContestOfficeManager(models.Manager):
                 contest_offices_are_not_duplicates, new_contest_offices_are_not_duplicates_created = \
                     ContestOfficesAreNotDuplicates.objects.update_or_create(
                         contest_office1_we_vote_id__exact=contest_office1_we_vote_id,
-                        contest_office2_we_vote_id__iexact=contest_office2_we_vote_id,
+                        contest_office2_we_vote_id=contest_office2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CONTEST_OFFICES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
@@ -1164,7 +1164,7 @@ class ContestOfficeManager(models.Manager):
 
         try:
             if positive_value_exists(contest_office_we_vote_id):
-                existing_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)  # Cannot be readonly
+                existing_office_entry = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)  # Cannot be readonly
                 contest_office_found = True
             elif positive_value_exists(ctcl_uuid):
                 existing_office_entry = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)  # Cannot be readonly
@@ -1473,7 +1473,7 @@ class ContestOfficeListManager(models.Manager):
 
             # Ignore we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                office_queryset = office_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                office_queryset = office_queryset.filter(~Q(we_vote_id=we_vote_id_from_master))
 
             office_list_objects = office_queryset
 

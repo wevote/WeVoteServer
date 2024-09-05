@@ -55,7 +55,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
     try:
         number_deleted, details = FriendInvitationEmailLink.objects\
-            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(sender_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -67,7 +67,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
     try:
         number_deleted, details = FriendInvitationVoterLink.objects\
-            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(sender_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -78,7 +78,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM RECIPIENT: Invitations sent TO the voter_to_delete from others            
     try:
         number_deleted, details = FriendInvitationVoterLink.objects\
-            .filter(recipient_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(recipient_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -133,7 +133,7 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
     
     try:
         number_deleted, details = CurrentFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_entries_deleted += number_deleted
     except Exception as e:
@@ -186,7 +186,7 @@ def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
             
     try:
         number_deleted, details = SuggestedFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         suggested_friend_entries_deleted += number_deleted
     except Exception as e:
@@ -3203,11 +3203,11 @@ def generate_mutual_friend_preview_list_serialized_for_two_voters(
     #  for both person A and person B, regardless of which one is looking
     queryset = MutualFriend.objects.using('readonly').all()
     queryset = queryset.filter(
-        Q(viewer_voter_we_vote_id__iexact=first_friend_voter_we_vote_id) |
-        Q(viewee_voter_we_vote_id__iexact=first_friend_voter_we_vote_id))
+        Q(viewer_voter_we_vote_id=first_friend_voter_we_vote_id) |
+        Q(viewee_voter_we_vote_id=first_friend_voter_we_vote_id))
     queryset = queryset.filter(
-        Q(viewer_voter_we_vote_id__iexact=second_friend_voter_we_vote_id) |
-        Q(viewee_voter_we_vote_id__iexact=second_friend_voter_we_vote_id))
+        Q(viewer_voter_we_vote_id=second_friend_voter_we_vote_id) |
+        Q(viewee_voter_we_vote_id=second_friend_voter_we_vote_id))
     queryset = queryset.filter(
         Q(mutual_friend_display_name_exists=True) |
         Q(mutual_friend_profile_image_exists=True))
@@ -4213,7 +4213,7 @@ def move_friends_to_another_voter(
 
     try:
         number_deleted, details = CurrentFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=from_voter_we_vote_id, )\
             .delete()
         from_voter_we_vote_id += number_deleted
     except Exception as e:
@@ -4305,7 +4305,7 @@ def move_suggested_friends_to_another_voter(
     
     try:
         number_deleted, details = SuggestedFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=from_voter_we_vote_id, )\
             .delete()
         from_voter_we_vote_id += number_deleted
     except Exception as e:

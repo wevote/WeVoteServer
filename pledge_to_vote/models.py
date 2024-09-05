@@ -71,8 +71,8 @@ class PledgeToVoteManager(models.Manager):
         status = ""
         try:
             pledge_queryset = PledgeToVote.objects.all()
-            pledge_queryset = pledge_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            pledge_queryset = pledge_queryset.filter(voter_guide_we_vote_id__iexact=voter_guide_we_vote_id)
+            pledge_queryset = pledge_queryset.filter(voter_we_vote_id=voter_we_vote_id)
+            pledge_queryset = pledge_queryset.filter(voter_guide_we_vote_id=voter_guide_we_vote_id)
             pledge_list = list(pledge_queryset)
             for one_pledge in pledge_list:
                 one_pledge.delete()
@@ -103,15 +103,15 @@ class PledgeToVoteManager(models.Manager):
         try:
             pledge_queryset = PledgeToVote.objects.using('readonly').all()
             if positive_value_exists(pledge_to_vote_we_vote_id):
-                pledge_queryset = pledge_queryset.filter(we_vote_id__iexact=pledge_to_vote_we_vote_id)
+                pledge_queryset = pledge_queryset.filter(we_vote_id=pledge_to_vote_we_vote_id)
             else:
-                pledge_queryset = pledge_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                pledge_queryset = pledge_queryset.filter(voter_we_vote_id=voter_we_vote_id)
                 if positive_value_exists(voter_guide_we_vote_id):
                     pledge_queryset = pledge_queryset.filter(
-                        voter_guide_we_vote_id__iexact=voter_guide_we_vote_id)
+                        voter_guide_we_vote_id=voter_guide_we_vote_id)
                 else:
                     pledge_queryset = pledge_queryset.filter(
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
             pledge_to_vote = pledge_queryset.get()
             pledge_found = True
             success = True
@@ -176,15 +176,15 @@ class PledgeToVoteManager(models.Manager):
         try:
             pledge_queryset = PledgeToVote.objects.using('readonly').all()
             if positive_value_exists(pledge_to_vote_we_vote_id):
-                pledge_queryset = pledge_queryset.filter(we_vote_id__iexact=pledge_to_vote_we_vote_id)
+                pledge_queryset = pledge_queryset.filter(we_vote_id=pledge_to_vote_we_vote_id)
             else:
-                pledge_queryset = pledge_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                pledge_queryset = pledge_queryset.filter(voter_we_vote_id=voter_we_vote_id)
                 if positive_value_exists(voter_guide_we_vote_id):
                     pledge_queryset = pledge_queryset.filter(
-                        voter_guide_we_vote_id__iexact=voter_guide_we_vote_id)
+                        voter_guide_we_vote_id=voter_guide_we_vote_id)
                 else:
                     pledge_queryset = pledge_queryset.filter(
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
                     pledge_queryset = pledge_queryset.filter(
                         google_civic_election_id__iexact=google_civic_election_id)
             pledge_to_vote = pledge_queryset.get()
@@ -234,7 +234,7 @@ class PledgeToVoteManager(models.Manager):
     #     try:
     #         email_address_queryset = EmailAddress.objects.all()
     #         email_address_queryset = email_address_queryset.filter(
-    #             voter_we_vote_id__iexact=voter_we_vote_id,
+    #             voter_we_vote_id=voter_we_vote_id,
     #             deleted=False
     #         )
     #         email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
@@ -299,10 +299,10 @@ class PledgeToVoteManager(models.Manager):
             pledge_queryset = PledgeToVote.objects.using('readonly').all()
             if positive_value_exists(organization_we_vote_id):
                 pledge_queryset = pledge_queryset.filter(
-                    organization_we_vote_id__iexact=organization_we_vote_id)
+                    organization_we_vote_id=organization_we_vote_id)
             else:
                 pledge_queryset = pledge_queryset.filter(
-                    voter_guide_we_vote_id__iexact=voter_guide_we_vote_id)
+                    voter_guide_we_vote_id=voter_guide_we_vote_id)
             pledge_count = pledge_queryset.count()
             pledge_count_found = True
             success = True
@@ -378,7 +378,7 @@ class PledgeToVoteManager(models.Manager):
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
-                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                list_query = list_query.filter(organization_we_vote_id=organization_we_vote_id)
             pledge_to_vote_list = list(list_query)
             pledge_to_vote_list_found = True
             status += "PLEDGE_TO_VOTE_LIST_FOUND "

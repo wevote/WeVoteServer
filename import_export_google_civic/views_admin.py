@@ -235,7 +235,7 @@ def retrieve_representatives_for_one_address_view(request):
     one_ballot_json_found = False
     if positive_value_exists(polling_location_we_vote_id):
         try:
-            polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
+            polling_location = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Polling location not found. ')

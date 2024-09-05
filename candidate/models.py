@@ -1084,7 +1084,7 @@ class CandidateListManager(models.Manager):
             candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                candidate_query = candidate_query.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                candidate_query = candidate_query.filter(~Q(we_vote_id=we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(google_civic_candidate_name):
@@ -1277,7 +1277,7 @@ class CandidateListManager(models.Manager):
                     filters.append(new_filter)
 
             if positive_value_exists(politician_we_vote_id):
-                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
+                new_filter = Q(politician_we_vote_id=politician_we_vote_id)
                 filters.append(new_filter)
 
             if positive_value_exists(candidate_twitter_handle):
@@ -1734,14 +1734,14 @@ class CandidateListManager(models.Manager):
         try:
             if positive_value_exists(politician_id) and positive_value_exists(politician_we_vote_id):
                 candidate_query = candidate_query.filter(
-                    Q(politician_we_vote_id__iexact=politician_we_vote_id) |
+                    Q(politician_we_vote_id=politician_we_vote_id) |
                     Q(politician_id=politician_id)
                 )
             elif positive_value_exists(politician_id):
                 candidate_query = candidate_query.filter(politician_id=politician_id)
             else:
                 candidate_query = candidate_query.filter(
-                    politician_we_vote_id__iexact=politician_we_vote_id)
+                    politician_we_vote_id=politician_we_vote_id)
 
             position_count = candidate_query.count()
         except Exception as e:
@@ -2417,7 +2417,7 @@ class CandidateListManager(models.Manager):
             elif positive_value_exists(politician_id):
                 candidate_query = candidate_query.filter(politician_id=politician_id)
             else:
-                candidate_query = candidate_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                candidate_query = candidate_query.filter(politician_we_vote_id=politician_we_vote_id)
             candidate_list = list(candidate_query)
             candidate_list_found = len(candidate_list) > 0
         except Exception as e:
@@ -3361,13 +3361,13 @@ class CandidateManager(models.Manager):
         try:
             if positive_value_exists(read_only):
                 candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
-                    candidate1_we_vote_id__iexact=candidate1_we_vote_id,
-                    candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                    candidate1_we_vote_id=candidate1_we_vote_id,
+                    candidate2_we_vote_id=candidate2_we_vote_id,
                 )
             else:
                 candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
-                    candidate1_we_vote_id__iexact=candidate1_we_vote_id,
-                    candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                    candidate1_we_vote_id=candidate1_we_vote_id,
+                    candidate2_we_vote_id=candidate2_we_vote_id,
                 )
             candidates_are_not_duplicates_found = True
             success = True
@@ -3387,13 +3387,13 @@ class CandidateManager(models.Manager):
             try:
                 if positive_value_exists(read_only):
                     candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
-                        candidate1_we_vote_id__iexact=candidate2_we_vote_id,
-                        candidate2_we_vote_id__iexact=candidate1_we_vote_id,
+                        candidate1_we_vote_id=candidate2_we_vote_id,
+                        candidate2_we_vote_id=candidate1_we_vote_id,
                     )
                 else:
                     candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
-                        candidate1_we_vote_id__iexact=candidate2_we_vote_id,
-                        candidate2_we_vote_id__iexact=candidate1_we_vote_id,
+                        candidate1_we_vote_id=candidate2_we_vote_id,
+                        candidate2_we_vote_id=candidate1_we_vote_id,
                     )
                 candidates_are_not_duplicates_found = True
                 success = True
@@ -3432,11 +3432,11 @@ class CandidateManager(models.Manager):
         try:
             if positive_value_exists(read_only):
                 candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.using('readonly').filter(
-                    candidate1_we_vote_id__iexact=candidate_we_vote_id,
+                    candidate1_we_vote_id=candidate_we_vote_id,
                 )
             else:
                 candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
-                    candidate1_we_vote_id__iexact=candidate_we_vote_id,
+                    candidate1_we_vote_id=candidate_we_vote_id,
                 )
             candidates_are_not_duplicates_list1 = list(candidates_are_not_duplicates_list_query)
             success = True
@@ -3454,12 +3454,12 @@ class CandidateManager(models.Manager):
                 if positive_value_exists(read_only):
                     candidates_are_not_duplicates_list_query = \
                         CandidatesAreNotDuplicates.objects.using('readonly').filter(
-                            candidate2_we_vote_id__iexact=candidate_we_vote_id,
+                            candidate2_we_vote_id=candidate_we_vote_id,
                         )
                 else:
                     candidates_are_not_duplicates_list_query = \
                         CandidatesAreNotDuplicates.objects.filter(
-                            candidate2_we_vote_id__iexact=candidate_we_vote_id,
+                            candidate2_we_vote_id=candidate_we_vote_id,
                         )
                 candidates_are_not_duplicates_list2 = list(candidates_are_not_duplicates_list_query)
                 success = True
@@ -3618,8 +3618,8 @@ class CandidateManager(models.Manager):
                 candidate_on_stage, new_candidate_created = \
                     CandidateCampaign.objects.update_or_create(
                         # google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__iexact=candidate_we_vote_id,
-                        # contest_office_we_vote_id__iexact=contest_office_we_vote_id,
+                        we_vote_id=candidate_we_vote_id,
+                        # contest_office_we_vote_id=contest_office_we_vote_id,
                         defaults=updated_candidate_values)
                 candidate_found = True
                 success = True
@@ -3951,7 +3951,7 @@ class CandidateManager(models.Manager):
                 candidates_are_not_duplicates, new_candidates_are_not_duplicates_created = \
                     CandidatesAreNotDuplicates.objects.update_or_create(
                         candidate1_we_vote_id__exact=candidate1_we_vote_id,
-                        candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                        candidate2_we_vote_id=candidate2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CANDIDATES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
@@ -4829,7 +4829,7 @@ class CandidateManager(models.Manager):
         existing_candidate_entry = ''
 
         try:
-            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id__iexact=candidate_we_vote_id)
+            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
             values_changed = False
 
             if existing_candidate_entry:
