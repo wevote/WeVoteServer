@@ -1392,7 +1392,6 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
     status = " MOVE_ANALYTICS_ACTION_DATA"
     success = True
     analytics_action_moved = 0
-    analytics_action_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
@@ -1403,7 +1402,6 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
             'from_voter_we_vote_id':        from_voter_we_vote_id,
             'to_voter_we_vote_id':          to_voter_we_vote_id,
             'analytics_action_moved':       analytics_action_moved,
-            'analytics_action_not_moved':   analytics_action_not_moved,
         }
         return results
 
@@ -1416,34 +1414,16 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
             'from_voter_we_vote_id':        from_voter_we_vote_id,
             'to_voter_we_vote_id':          to_voter_we_vote_id,
             'analytics_action_moved':       analytics_action_moved,
-            'analytics_action_not_moved':   analytics_action_not_moved,
         }
         return results
 
-    analytics_manager = AnalyticsManager()
-    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(
-        from_voter_we_vote_id, read_only=False)
-    if not analytics_action_list_results['success']:
-        status += analytics_action_list_results['status']
+    try:
+        analytics_action_moved = AnalyticsAction.objects.using('analytics').filter(
+            voter_we_vote_id__iexact=from_voter_we_vote_id).update(
+            voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "UNABLE_TO_MOVE_ANALYTICS_ACTIONS: " + str(e) + " "
         success = False
-    if analytics_action_list_results['analytics_action_list_found']:
-        analytics_action_list = analytics_action_list_results['analytics_action_list']
-
-        for analytics_action_object in analytics_action_list:
-            # Change the voter_we_vote_id
-            try:
-                analytics_action_object.voter_we_vote_id = to_voter_we_vote_id
-                analytics_action_object.save()
-                analytics_action_moved += 1
-            except Exception as e:
-                analytics_action_not_moved += 1
-                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION: " + str(e) + " "
-                success = False
-
-        status += " MOVE_ANALYTICS_ACTION, moved: " + str(analytics_action_moved) + \
-                  ", not moved: " + str(analytics_action_not_moved) + " "
-    else:
-        status += " " + analytics_action_list_results['status']
 
     results = {
         'status':                       status,
@@ -1451,7 +1431,6 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
         'from_voter_we_vote_id':        from_voter_we_vote_id,
         'to_voter_we_vote_id':          to_voter_we_vote_id,
         'analytics_action_moved':       analytics_action_moved,
-        'analytics_action_not_moved':   analytics_action_not_moved,
     }
     return results
 
