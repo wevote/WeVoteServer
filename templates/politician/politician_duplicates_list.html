@@ -10,16 +10,16 @@
 <h1>Duplicate Politicians</h1>
 
     <ul>
-        <li>
-            <a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}">
-            Find and merge duplicate politicians</a> (about 1 minute)
-        </li>
     {% if state_code %}
         <li>
             <a href="{% url 'politician:delete_all_duplicates' %}?state_code={{ state_code }}">
             Delete all duplicate politician data for this state</a>
         </li>
     {% endif %}
+        <li>
+            <a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}">
+            Find and merge duplicate politicians</a> (about 3 minutes)
+        </li>
     </ul>
 
 <br /><br />
