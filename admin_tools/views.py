@@ -1061,7 +1061,7 @@ def data_cleanup_voter_hanging_data_process_view(request):
         elif positive_value_exists(one_voter.primary_email_we_vote_id):
             # Is there an EmailAddress entry matching this primary_email_we_vote_id?
             try:
-                verified_email_address = EmailAddress.objects.get(
+                verified_email_address = EmailAddress.objects.using('readonly').get(
                     we_vote_id=one_voter.primary_email_we_vote_id,
                     email_ownership_is_verified=True,
                     # email_permanent_bounce=False,
@@ -1344,7 +1344,7 @@ def data_cleanup_voter_list_analysis_view(request):
         one_linked_voter.positions_count = \
             position_metrics_manager.fetch_positions_count_for_this_voter(one_linked_voter)
 
-        email_address_list = EmailAddress.objects.all()
+        email_address_list = EmailAddress.objects.using('readonly').all()
         email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
         one_linked_voter.linked_emails = email_address_list
 
