@@ -1,0 +1,20 @@
+{# templates/admin_tools/speed_statistics_banner.html #}
+
+<body>
+<div class="alert alert-danger" role="alert" id="SpeedStatistics"
+     style="display: block; padding: 20px;position: fixed; top: 0; left: 0;text-align: center; width: 100%;z-index: 9999;">
+<ul>
+<!--    {% for snapshot in performance_list %}-->
+<!--            <li>Time Difference: {{ snapshot.time_difference }}</li>-->
+<!--        {% endfor %}-->
+ {{performance_dict}}
+    </ul>
+    <span class="close">&times;</span>
+
+</div>
+<script>
+    document.querySelector('.close').addEventListener('click', function() {
+        document.getElementById('SpeedStatistics').style.display = 'none';
+    });
+</script>
+</body>

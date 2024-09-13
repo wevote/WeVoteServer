@@ -6,6 +6,8 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/speed_statistics_banner.html" with performance_dict=speed_test() %}
+
 <style>
 span.wrap_word { word-break: break-word; }
 table, th, td {

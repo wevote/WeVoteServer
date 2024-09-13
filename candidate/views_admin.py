@@ -6,6 +6,7 @@ import json
 import re
 import string
 from datetime import datetime
+from time import time
 
 import pytz
 from django.contrib import messages
@@ -17,6 +18,8 @@ from django.db.models.functions import Length
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.template import loader
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.timezone import localtime, now
 
@@ -2658,6 +2661,28 @@ def candidate_edit_process_view(request):
     :param request:
     :return:
     """
+
+    performance_list = []
+    t10 = time()
+    t22 = time()
+    time_difference1 = t22 - t10
+
+    performance_snapshot = {
+        'time_difference': time_difference1,
+    }
+    performance_list.append(performance_snapshot)
+
+    performance_dict = {
+        'performance_list': performance_list,
+    }
+
+
+
+
+    # return HttpResponse(rendered_template)
+    # print("performance_dict: ", performance_dict)
+    # return render(request, 'admin_tools/speed_statistics_banner.html', performance_dict)
+    # template_speed_test(request, performance_dict)
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -2770,7 +2795,7 @@ def candidate_edit_process_view(request):
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
     youtube_url = request.POST.get('youtube_url', False)
-
+    t0,t1 = 0,0
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                     "&candidate_analysis_done=" + str(candidate_analysis_done) + \
@@ -2917,11 +2942,13 @@ def candidate_edit_process_view(request):
         if positive_value_exists(candidate_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_office_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_election):
+            t0 = time()
             results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
                 state_code=candidate_to_office_link_add_state_code)
+            t1 = time()
             if results['candidate_to_office_link_created']:
                 messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
                 # Now give volunteer credit
@@ -2947,13 +2974,16 @@ def candidate_edit_process_view(request):
             positive_value_exists(candidate_to_office_link_add_office_we_vote_id) or \
             positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id):
         messages.add_message(request, messages.ERROR, 'To add Candidate-to-Office Link, all three variables required.')
+    # return TemplateResponse(request, 'admin_tools/speed_statistics_banner.html', performance_dict)
 
     # ##################################
     # Update "is_battleground_race" based on office data found through the link CandidateToOfficeLink
     # Also update "candidate_ultimate_election_date" and "candidate_year"
+    t2 = time()
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=[candidate_we_vote_id],
         read_only=True)
+    t3 = time()
     candidate_to_office_link_list = results['candidate_to_office_link_list']
     latest_election_date = 0
     latest_office_we_vote_id = ''
@@ -3056,6 +3086,10 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
         else:
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
+    diff_t0_t1 = t1 - t0
+    diff_t2_t3 = t3 - t2
+    print("diff_t0_t1, diff_t2_t3: ", diff_t0_t1, diff_t2_t3)
+    messages.add_message(request, messages.INFO, "diff_t0_t1, diff_t2_t3: ", diff_t0_t1, diff_t2_t3)
 
     # Check to see if there is a duplicate candidate already saved for this election
     existing_candidate_found = False
@@ -3530,18 +3564,20 @@ def candidate_edit_process_view(request):
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
 
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
-
+            t4 = time()
             if (ballotpedia_candidate_url_changed
                 or not positive_value_exists(candidate_on_stage.ballotpedia_photo_url)) \
-                    and positive_value_exists(ballotpedia_candidate_url):
+                and positive_value_exists(ballotpedia_candidate_url) \
+                    and 'ballotpedia.org' in ballotpedia_candidate_url:
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
-                if positive_value_exists(results['error_message_to_print']):
-                    messages.add_message(request, messages.ERROR, results['error_message_to_print'])
-                if positive_value_exists(results['info_message_to_print']):
-                    messages.add_message(request, messages.INFO, results['info_message_to_print'])
+            t5 = time()
+            if positive_value_exists(results['error_message_to_print']):
+                messages.add_message(request, messages.ERROR, results['error_message_to_print'])
+            if positive_value_exists(results['info_message_to_print']):
+                messages.add_message(request, messages.INFO, results['info_message_to_print'])
             if (wikipedia_url_changed or not positive_value_exists(candidate_on_stage.wikipedia_photo_url)) \
                     and positive_value_exists(wikipedia_url):
                 # update_candidate_wikipedia_image(candidate_on_stage, request, messages)
@@ -3549,6 +3585,17 @@ def candidate_edit_process_view(request):
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
+            diff_t4_t5 = t5 - t4
+            diff_t2_t3 = t3 - t2
+            print("diff_t4_t5, diff_t2_t3: ", diff_t4_t5, diff_t2_t3)
+
+
+
+            messages.add_message(
+                request, messages.INFO,
+                "t4 -> t5 took {:.6f} seconds, ".format(diff_t4_t5) +
+                "t2 -> t3 took {:.6f} seconds ".format(diff_t2_t3)
+            )
 
             # # Now add Candidate to Office Link
             # if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) and \
@@ -3620,6 +3667,7 @@ def candidate_edit_process_view(request):
             kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
         else:
             kind_of_log_entry = KIND_OF_LOG_ENTRY_LINK_ADDED
+        t8 = time()
         results = candidate_manager.create_candidate_log_entry(
             candidate_we_vote_id=candidate_we_vote_id,
             change_description=change_description,
@@ -3628,6 +3676,10 @@ def candidate_edit_process_view(request):
             changed_by_voter_we_vote_id=voter_we_vote_id,
             kind_of_log_entry=kind_of_log_entry,
         )
+        t9=time()
+        diff_t8_t9 = t9 - t8
+        print("diff_t8_t9 ", diff_t8_t9)
+
         # Now add to the volunteers scores for doing tasks
         if positive_value_exists(voter_we_vote_id):
             # Give the volunteer who entered this credit
@@ -3781,6 +3833,7 @@ def candidate_edit_process_view(request):
     if google_search_image_file or google_search_link:
         url_variables += "&show_all_google_search_users=1#google_search_users_for_candidate_table"
 
+
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
@@ -3800,6 +3853,8 @@ def candidate_edit_process_view(request):
                                     url_variables)
 
 
+def template_speed_test(request, performance_dict):
+    return render(request, 'admin_tools/speed_statistics_banner.html', performance_dict)
 @login_required
 def candidate_politician_match_view(request):
     """
@@ -4462,7 +4517,6 @@ def render_candidate_merge_form(
         'remove_duplicate_process':                         remove_duplicate_process,
         'state_code':                                       state_code,
     }
-    return render(request, 'candidate/candidate_merge.html', template_values)
 
 
 @login_required
