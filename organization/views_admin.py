@@ -2107,6 +2107,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     # POST
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+    state_code = request.POST.get('state_code', '')
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
 
     # Bulk delete
     select_for_changing_position_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -2217,6 +2220,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
+        if positive_value_exists(state_code):
+            public_position_query = public_position_query.filter(state_code__iexact=state_code)
         if positive_value_exists(show_all_elections):
             # Don't limit to positions for upcoming elections
             pass
@@ -2234,6 +2239,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             # As of Aug 2018 we are no longer using PERCENT_RATING
             friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
+            if positive_value_exists(state_code):
+                friends_only_position_query = friends_only_position_query.filter(state_code__iexact=state_code)
             if positive_value_exists(show_all_elections):
                 # Don't limit to positions for upcoming elections
                 pass
@@ -2407,6 +2414,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'organization_voter':               organization_voter,
         'public_position_count':            public_position_count,
         'show_all_elections':               show_all_elections,
+        'state_code':                       state_code,
+        'state_list':                       sorted_state_list,
         'twitter_handle_mismatch':          twitter_handle_mismatch,
         'twitter_link_to_organization':     twitter_link_to_organization,
         'voter':                            voter,
