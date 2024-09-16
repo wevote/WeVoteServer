@@ -92,6 +92,19 @@ def fetch_data_from_api(url, params, max_retries=10):
     raise Exception("API request failed after maximum retries")
 
 
+def get_table_row_count(params):
+    #  host = 'https://api.wevoteusa.org'
+    host = 'https://steve.ngrok.pro/'
+    try:
+        response = requests.get(host + '/apis/v1/retrieveMaxID', params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"API request failed with status code {response.status_code}")
+    except Exception as e:
+        print(f"ROW_COUNT_ERROR: {str(e)}", )
+
+
 def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
@@ -120,6 +133,9 @@ def retrieve_sql_files_from_master_server(request):
     for table_name in allowable_tables:
         truncate_table(engine, table_name)
 
+        max_id_params = {'table_name': table_name}
+        max_id_response = get_table_row_count(max_id_params)
+        max_id = max_id_response['maxID']
         chunk_size = 10000
         print(f'\nStarting on the {table_name} table, requesting {chunk_size} rows')
         start = 0
@@ -127,40 +143,39 @@ def retrieve_sql_files_from_master_server(request):
         structured_json = {}
         table_start_time = time.time()
         # filling table with 10,000 line chunks
-        while end < 30000000:
-            chunk_start_time = time.time()
-            print(f"\nProcessing chunk from {start} to {end} for table {table_name}")
-            try:
-                url = f'{host}/apis/v1/retrieveSQLTables/'
-                params = {'table_name': table_name, 'start': start, 'end': end,
-                          'voter_api_device_id': voter_api_device_id}
-                structured_json = fetch_data_from_api(url, params)
-            except Exception as e:
-                print(f"FETCH_ERROR: {table_name} -- {str(e)}")
+        if max_id:
+            while end < max_id:
+                chunk_start_time = time.time()
+                print(f"\nProcessing chunk from {start} to {end} of {max_id} for table {table_name}")
+                try:
+                    url = f'{host}/apis/v1/retrieveSQLTables/'
+                    params = {'table_name': table_name, 'start': start, 'end': end,
+                              'voter_api_device_id': voter_api_device_id}
 
-            if not structured_json['success']:
-                print(f"FAILED: Did not receive '{table_name}' from server")
-                break
+                    structured_json = fetch_data_from_api(url, params)
+                except Exception as e:
+                    print(f"FETCH_ERROR: {table_name} -- {str(e)}")
 
-            try:
-                data = structured_json['files'].get(table_name, "")
-                split_data = data.splitlines(keepends=True)
-                if len(split_data) == 1:
+                if not structured_json['success']:
+                    print(f"FAILED: Did not receive '{table_name}' from server")
                     break
-                lines_count = process_table_data(table_name, split_data)
-                if lines_count == 0:
-                    break
-                print(f'{lines_count} lines in chunk')
-            except Exception as e:
-                print(f"TABLE_PROCESSING_ERROR: {table_name} -- {str(e)}")
-            start += chunk_size
-            end += chunk_size
-            print(f"Chunk took {(time.time()-chunk_start_time):.1f}s")
+                try:
+                    data = structured_json['files'].get(table_name, "")
+                    split_data = data.splitlines(keepends=True)
+                    lines_count = process_table_data(table_name, split_data)
+                    print(f'{lines_count} lines in chunk')
+                except Exception as e:
+                    print(f"TABLE_PROCESSING_ERROR: {table_name} -- {str(e)}")
+                start += chunk_size
+                end += chunk_size
+                print(f"Chunk took {(time.time() - chunk_start_time):.1f}s")
 
-        print(f'\n Table took {(time.time() - table_start_time) / 60}')
+            print(f'\n Table took {(time.time() - table_start_time) / 60} min')
 
-        # reset table's id sequence
-        reset_id_seq(engine, table_name)
+            # reset table's id sequence
+            reset_id_seq(engine, table_name)
+        else:
+            print(f"   - {table_name} is empty")
 
     minutes = (time.time() - t0) / 60
     print(f"Total time for all tables: {minutes:.1f} minutes")
@@ -205,6 +220,7 @@ def reset_id_seq(engine, table_name):
             # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
         except Exception as e:
             print(f'...FAILED_SEQUENCE_RESET: {table_name} -- {str(e)}')
+
 
 def process_table_data(table_name, split_data):
     """
@@ -287,7 +303,7 @@ def clean_df(df, col_dict, unique_cols, not_null_columns, fk_cols, start_id):
     """
     df = df.apply(lambda col: col.replace('\\N', pd.NA)
                   .str.replace(r'[\n,]', ' ', regex=True)
-                  .str.replace(r'[^0-9a-zA-Z\. _]', '', regex=True) if col.dtype == 'object' else col)
+                  .str.replace(r'[^0-9a-zA-Z\. _,]', '', regex=True) if col.dtype == 'object' else col)
 
     # Remove leading and trailing whitespaces in each cell of df
     df = strip_whitespace(df)
@@ -314,7 +330,8 @@ def clean_df(df, col_dict, unique_cols, not_null_columns, fk_cols, start_id):
         for col in timestamp_columns:
             if col in not_null_columns:
                 df[col] = df[col].replace(['', pd.NA, 'null'], datetime.now(timezone.utc))
-            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True, format="%Y-%m-%d %H:%M:%S")  # convert cols to datetime
+            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True,
+                                     format="%Y-%m-%d %H:%M:%S")  # convert cols to datetime
             df[col] = df[col].fillna(datetime.now(timezone.utc))  # Fill any NaT values that were created by conversion
             if df[col].dt.tz is None:  # Convert to UTC timezone if not timezone specified
                 df[col] = df[col].dt.tz_localize('UTC', ambiguous='NaT', nonexistent='NaT')
@@ -411,7 +428,6 @@ def get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id):
 
 
 def copy_df_to_postgres(df: pd.DataFrame, conn, table_name):
-
     if df.empty:
         print("DataFrame is empty. Skipping insert.")
         return
@@ -435,3 +451,4 @@ def copy_df_to_postgres(df: pd.DataFrame, conn, table_name):
         finally:
             # Clean up by removing the temporary CSV file
             os.remove(temp_csv_path)
+

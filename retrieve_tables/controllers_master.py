@@ -64,6 +64,29 @@ dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'
 
 
+def get_max_id(table_name):
+    """
+    Returns the maximum id of table to be fetched from the MASTER server
+    Runs on the Master server
+    :return: the number of rows
+    """
+    conn = psycopg2.connect(
+        database=get_environment_variable('DATABASE_NAME_READONLY'),
+        user=get_environment_variable('DATABASE_USER_READONLY'),
+        password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+        host=get_environment_variable('DATABASE_HOST_READONLY'),
+        port=get_environment_variable('DATABASE_PORT_READONLY')
+    )
+
+    with conn.cursor() as cursor:
+        sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        max_id = result[0]
+    conn.close()
+    return max_id
+
+
 def get_total_row_count():
     """
     Returns the total row count of tables to be fetched from the MASTER server
@@ -210,6 +233,11 @@ def check_for_non_ascii(table_name, row):
 
 
 def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
+    """
+    Returns fast load status information for the progress update on the HTML page
+    :param request:
+    :return:
+    """
     initialize = positive_value_exists(request.GET.get('initialize', False))
     voter_api_device_id = get_voter_api_device_id(request)
     is_running = positive_value_exists(request.GET.get('is_running', True))

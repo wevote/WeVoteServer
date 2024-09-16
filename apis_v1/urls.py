@@ -131,6 +131,7 @@ urlpatterns = [
       re_path(r'retrieveSQLTables/', views_retrieve_tables.retrieve_sql_tables, name='retrieveSQLTables'),
       re_path(r'retrieveSQLTablesRowCount/', views_retrieve_tables.retrieve_sql_tables_row_count,
               name='retrieveSQLTablesRowCount'),
+      re_path(r'retrieveMaxID/', views_retrieve_tables.retrieve_max_id, name='retrieveMaxID'),
       re_path(r'^friendInvitationByEmailSend/',
               views_friend.friend_invitation_by_email_send_view, name='friendInvitationByEmailSendView'),
       re_path(r'^friendInvitationByEmailVerify/',
