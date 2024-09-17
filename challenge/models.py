@@ -42,9 +42,9 @@ CHALLENGE_UNIQUE_IDENTIFIERS = [
     'seo_friendly_path',
     'state_code',
     'started_by_voter_we_vote_id',
-    'supporters_count',
-    'supporters_count_minimum_ignored',
-    'supporters_count_victory_goal',
+    'participants_count',
+    'participants_count_minimum_ignored',
+    'participants_count_victory_goal',
     'we_vote_hosted_challenge_photo_large_url',
     'we_vote_hosted_challenge_photo_medium_url',
     'we_vote_hosted_challenge_photo_original_url',
@@ -59,7 +59,7 @@ CHALLENGE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
 ]
 
 FINAL_ELECTION_DATE_COOL_DOWN = 7
-SUPPORTERS_COUNT_MINIMUM_FOR_LISTING = 0  # How many supporters are required before we will show challenge on We Vote
+PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING = 0  # How many participants are required before we will show challenge on We Vote
 
 
 class Challenge(models.Model):
@@ -108,13 +108,13 @@ class Challenge(models.Model):
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
-    # If this Challenge has a politician_we_vote_id, then supporters_count comes from Organization followers
-    supporters_count = models.PositiveIntegerField(default=0)
-    # Updates both supporters_count and opposers_count from the position_list page in position/views_admin.py
-    supporters_count_to_update_with_bulk_script = models.BooleanField(default=True)
-    # How many supporters are required before showing in We Vote lists
-    supporters_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
-    supporters_count_victory_goal = models.PositiveIntegerField(default=0)
+    # If this Challenge has a politician_we_vote_id, then participants_count comes from Organization followers
+    participants_count = models.PositiveIntegerField(default=0)
+    # Updates both participants_count and opposers_count from the position_list page in position/views_admin.py
+    participants_count_to_update_with_bulk_script = models.BooleanField(default=True)
+    # How many participants are required before showing in We Vote lists
+    participants_count_minimum_ignored = models.BooleanField(default=False, db_index=True)
+    participants_count_victory_goal = models.PositiveIntegerField(default=0)
     we_vote_hosted_challenge_photo_original_url = models.TextField(blank=True, null=True)
     # Full sized desktop
     we_vote_hosted_challenge_photo_large_url = models.TextField(blank=True, null=True)
@@ -128,9 +128,9 @@ class Challenge(models.Model):
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_challenge_started = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
 
-    def is_supporters_count_minimum_exceeded(self):
-        if positive_value_exists(self.supporters_count_minimum_ignored) or \
-                self.supporters_count >= SUPPORTERS_COUNT_MINIMUM_FOR_LISTING:
+    def is_participants_count_minimum_exceeded(self):
+        if positive_value_exists(self.participants_count_minimum_ignored) or \
+                self.participants_count >= PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING:
             return True
         return False
 
@@ -302,15 +302,15 @@ class ChallengeManager(models.Manager):
         return 0
 
     @staticmethod
-    def fetch_challenge_supporter_count(challenge_we_vote_id=None):
+    def fetch_challenge_participant_count(challenge_we_vote_id=None):
         status = ""
 
         try:
-            challenge_queryset = ChallengeSupporter.objects.using('readonly').all()
+            challenge_queryset = ChallengeParticipant.objects.using('readonly').all()
             challenge_queryset = challenge_queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
             return challenge_queryset.count()
         except Exception as e:
-            status += "RETRIEVE_CHALLENGE_SUPPORTER_LIST_FAILED: " + str(e) + " "
+            status += "RETRIEVE_CHALLENGE_PARTICIPANT_LIST_FAILED: " + str(e) + " "
 
         return 0
 
@@ -329,18 +329,18 @@ class ChallengeManager(models.Manager):
 
     @staticmethod
     def fetch_next_goal_level(
-            supporters_count=1,
+            participants_count=1,
             tier_size=1000):
         try:
-            supporters_count = convert_to_int(supporters_count)
+            participants_count = convert_to_int(participants_count)
         except Exception as e:
-            supporters_count = 0
+            participants_count = 0
         try:
             tier_size = convert_to_int(tier_size)
         except Exception as e:
             tier_size = 1000
-        return supporters_count if supporters_count % tier_size == 0 \
-            else supporters_count + tier_size - supporters_count % tier_size
+        return participants_count if participants_count % tier_size == 0 \
+            else participants_count + tier_size - participants_count % tier_size
 
     def fetch_challenge_we_vote_id_list_from_owner_organization_we_vote_id(self, organization_we_vote_id):
         owner_list = self.retrieve_challenge_owner_list(
@@ -350,43 +350,43 @@ class ChallengeManager(models.Manager):
             challenge_we_vote_id_list.append(owner.challenge_we_vote_id)
         return challenge_we_vote_id_list
 
-    def fetch_supporters_count_next_goal(
+    def fetch_participants_count_next_goal(
             self,
-            supporters_count=1,
-            supporters_count_victory_goal=0):
+            participants_count=1,
+            participants_count_victory_goal=0):
         try:
-            supporters_count = convert_to_int(supporters_count)
+            participants_count = convert_to_int(participants_count)
         except Exception as e:
-            supporters_count = 0
+            participants_count = 0
         try:
-            supporters_count_victory_goal = convert_to_int(supporters_count_victory_goal)
+            participants_count_victory_goal = convert_to_int(participants_count_victory_goal)
         except Exception as e:
-            supporters_count_victory_goal = 0
-        if supporters_count_victory_goal >= supporters_count:
-            return supporters_count
+            participants_count_victory_goal = 0
+        if participants_count_victory_goal >= participants_count:
+            return participants_count
         try:
-            if supporters_count >= 100000:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=50000)
-            elif supporters_count >= 25000:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=25000)
-            elif supporters_count >= 10000:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=15000)
-            elif supporters_count >= 5000:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=5000)
-            elif supporters_count >= 2500:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=2500)
-            elif supporters_count >= 1000:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=1500)
-            elif supporters_count >= 500:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=500)
-            elif supporters_count >= 250:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=250)
-            elif supporters_count >= 125:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=125)
-            elif supporters_count >= 50:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=50)
-            elif supporters_count >= 10:
-                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=10)
+            if participants_count >= 100000:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=50000)
+            elif participants_count >= 25000:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=25000)
+            elif participants_count >= 10000:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=15000)
+            elif participants_count >= 5000:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=5000)
+            elif participants_count >= 2500:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=2500)
+            elif participants_count >= 1000:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=1500)
+            elif participants_count >= 500:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=500)
+            elif participants_count >= 250:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=250)
+            elif participants_count >= 125:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=125)
+            elif participants_count >= 50:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=50)
+            elif participants_count >= 10:
+                return self.fetch_next_goal_level(participants_count=participants_count, tier_size=10)
             else:
                 return 10
         except Exception as e:
@@ -465,7 +465,7 @@ class ChallengeManager(models.Manager):
         return voter_is_challenge_owner
 
     @staticmethod
-    def is_voter_challenge_supporter(challenge_we_vote_id='', voter_we_vote_id=''):
+    def is_voter_challenge_participant(challenge_we_vote_id='', voter_we_vote_id=''):
         """
 
         :param challenge_we_vote_id:
@@ -476,13 +476,13 @@ class ChallengeManager(models.Manager):
         voter_is_challenge_owner = False
 
         try:
-            queryset = ChallengeSupporter.objects.using('readonly').filter(
+            queryset = ChallengeParticipant.objects.using('readonly').filter(
                 challenge_we_vote_id=challenge_we_vote_id,
                 voter_we_vote_id=voter_we_vote_id)
             voter_is_challenge_owner = positive_value_exists(queryset.count())
-            status += 'VOTER_IS_CHALLENGE_SUPPORTER '
-        except ChallengeSupporter as e:
-            status += 'IS_VOTER_CHALLENGE_SUPPORTER_QUERY_FAILED: ' + str(e) + ' '
+            status += 'VOTER_IS_CHALLENGE_PARTICIPANT '
+        except ChallengeParticipant as e:
+            status += 'IS_VOTER_CHALLENGE_PARTICIPANT_QUERY_FAILED: ' + str(e) + ' '
 
         return voter_is_challenge_owner
 
@@ -526,11 +526,6 @@ class ChallengeManager(models.Manager):
         seo_friendly_path_list = []
         status = ''
         viewer_is_owner = False
-
-        if positive_value_exists(challenge_we_vote_id):
-            viewer_is_owner = challenge_manager.is_voter_challenge_owner(
-                challenge_we_vote_id=challenge_we_vote_id,
-                voter_we_vote_id=voter_we_vote_id)
 
         try:
             if positive_value_exists(challenge_we_vote_id):
@@ -600,6 +595,11 @@ class ChallengeManager(models.Manager):
             success = False
 
         if positive_value_exists(challenge_found):
+            if not viewer_is_owner and positive_value_exists(challenge_we_vote_id):
+                viewer_is_owner = challenge_manager.is_voter_challenge_owner(
+                    challenge_we_vote_id=challenge_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id)
+
             challenge_owner_object_list = challenge_manager.retrieve_challenge_owner_list(
                 challenge_we_vote_id_list=[challenge_we_vote_id], viewer_is_owner=viewer_is_owner)
 
@@ -1088,7 +1088,7 @@ class ChallengeManager(models.Manager):
         success = True
         status = ""
         voter_started_challenge_we_vote_ids = []
-        voter_supported_challenge_we_vote_ids = []
+        challenge_we_vote_ids_where_voter_is_participant = []
 
         try:
             if read_only:
@@ -1162,8 +1162,8 @@ class ChallengeManager(models.Manager):
                       is_not_promoted_by_we_vote=False,
                       is_still_active=True,
                       is_ok_to_promote_on_we_vote=True) & \
-                    (Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
-                     Q(supporters_count_minimum_ignored=True)) & \
+                    (Q(participants_count__gte=PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING) |
+                     Q(participants_count_minimum_ignored=True)) & \
                     (Q(final_election_date_as_integer__isnull=True) |
                      Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
                 filters.append(new_filter)
@@ -1178,7 +1178,7 @@ class ChallengeManager(models.Manager):
 
                 challenge_queryset = challenge_queryset.filter(final_filters)
 
-            challenge_queryset = challenge_queryset.order_by('-supporters_count')
+            challenge_queryset = challenge_queryset.order_by('-participants_count')
             challenge_queryset = challenge_queryset.order_by('-in_draft_mode')
 
             challenge_list = challenge_queryset[:limit]
@@ -1200,7 +1200,7 @@ class ChallengeManager(models.Manager):
             'challenge_list_found':                     challenge_list_found,
             'challenge_list':                           challenge_list_modified,
             'voter_started_challenge_we_vote_ids':      voter_started_challenge_we_vote_ids,
-            'voter_supported_challenge_we_vote_ids':    voter_supported_challenge_we_vote_ids,
+            'challenge_we_vote_ids_where_voter_is_participant':    challenge_we_vote_ids_where_voter_is_participant,
         }
         return results
 
@@ -1218,7 +1218,7 @@ class ChallengeManager(models.Manager):
         challenge_list_modified = []
         challenge_we_vote_ids_in_order = []
         voter_started_challenge_we_vote_ids = []
-        voter_supported_challenge_we_vote_ids = []
+        challenge_we_vote_ids_where_voter_is_participant = []
 
         # Limit the challenges retrieved to the ones approved by the site owner
         if positive_value_exists(site_owner_organization_we_vote_id):
@@ -1281,7 +1281,7 @@ class ChallengeManager(models.Manager):
 
                 challenge_queryset = challenge_queryset.filter(final_filters)
 
-            challenge_queryset = challenge_queryset.order_by('-supporters_count')
+            challenge_queryset = challenge_queryset.order_by('-participants_count')
             challenge_queryset = challenge_queryset.order_by('-in_draft_mode')
 
             challenge_list = challenge_queryset[:limit]
@@ -1325,7 +1325,7 @@ class ChallengeManager(models.Manager):
             'challenge_list_found':                     challenge_list_found,
             'challenge_list':                           challenge_list,
             'voter_started_challenge_we_vote_ids':      voter_started_challenge_we_vote_ids,
-            'voter_supported_challenge_we_vote_ids':    voter_supported_challenge_we_vote_ids,
+            'challenge_we_vote_ids_where_voter_is_participant':    challenge_we_vote_ids_where_voter_is_participant,
         }
         return results
 
@@ -1348,8 +1348,8 @@ class ChallengeManager(models.Manager):
                 is_blocked_by_we_vote=False,
                 is_not_promoted_by_we_vote=False,
                 is_still_active=True)
-            challenge_query = challenge_query.filter(Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
-                                                     Q(supporters_count_minimum_ignored=True))
+            challenge_query = challenge_query.filter(Q(participants_count__gte=PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING) |
+                                                     Q(participants_count_minimum_ignored=True))
             final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
             challenge_query = challenge_query.filter(
                 Q(final_election_date_as_integer__isnull=True) |
@@ -1428,7 +1428,7 @@ class ChallengeManager(models.Manager):
         status = ""
 
         try:
-            challenge_queryset = ChallengeSupporter.objects.using('readonly').all()
+            challenge_queryset = ChallengeParticipant.objects.using('readonly').all()
             challenge_queryset = challenge_queryset.filter(voter_we_vote_id=voter_we_vote_id)
             challenge_queryset = challenge_queryset.values_list('challenge_we_vote_id', flat=True).distinct()
             challenge_we_vote_id_list = list(challenge_queryset)
@@ -1695,10 +1695,10 @@ class ChallengeManager(models.Manager):
                     challenge_politician_query = challenge_politician_query.filter(final_filters)
             searching_for_specific_challenges = \
                 positive_value_exists(challenge_we_vote_id) or positive_value_exists(search_text)
-            # NOTE: ChallengePolitician does not have 'supporters_count' field currently
+            # NOTE: ChallengePolitician does not have 'participants_count' field currently
             # if not searching_for_specific_challenges:
             #     # Do not include challenges in general lists with the following conditions
-            #     challenge_politician_query = challenge_politician_query.exclude(supporters_count__lte=5)
+            #     challenge_politician_query = challenge_politician_query.exclude(participants_count__lte=5)
             challenge_politician_list = list(challenge_politician_query)
             if len(challenge_politician_list):
                 challenge_politician_list_found = True
@@ -1712,58 +1712,58 @@ class ChallengeManager(models.Manager):
             return challenge_politician_list
 
     @staticmethod
-    def repair_challenge_supporter(challenge_we_vote_id='', voter_we_vote_id=''):
-        challenge_supporter = None
-        challenge_supporter_found = False
-        challenge_supporter_repaired = False
+    def repair_challenge_participant(challenge_we_vote_id='', voter_we_vote_id=''):
+        challenge_participant = None
+        challenge_participant_found = False
+        challenge_participant_repaired = False
         status = ''
 
         try:
             if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
-                challenge_supporter_query = ChallengeSupporter.objects.filter(
+                challenge_participant_query = ChallengeParticipant.objects.filter(
                     challenge_we_vote_id=challenge_we_vote_id,
                     voter_we_vote_id=voter_we_vote_id)
-                challenge_supporter_query = challenge_supporter_query.order_by('id')
-                challenge_supporter_list = list(challenge_supporter_query)
-                number_of_challenge_supporters_found = len(challenge_supporter_list)
-                if number_of_challenge_supporters_found == 0:
-                    status += 'REPAIR_CHALLENGE_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
-                    challenge_supporter_found = False
-                elif number_of_challenge_supporters_found == 1:
-                    status += 'REPAIR_CHALLENGE_SUPPORTER_FOUND_ONE_WITH_WE_VOTE_ID '
-                    challenge_supporter_found = True
+                challenge_participant_query = challenge_participant_query.order_by('id')
+                challenge_participant_list = list(challenge_participant_query)
+                number_of_challenge_participants_found = len(challenge_participant_list)
+                if number_of_challenge_participants_found == 0:
+                    status += 'REPAIR_CHALLENGE_PARTICIPANT_FOUND_WITH_WE_VOTE_ID '
+                    challenge_participant_found = False
+                elif number_of_challenge_participants_found == 1:
+                    status += 'REPAIR_CHALLENGE_PARTICIPANT_FOUND_ONE_WITH_WE_VOTE_ID '
+                    challenge_participant_found = True
                 else:
-                    status += 'REPAIR_CHALLENGE_SUPPORTER_FOUND_MULTIPLE_WITH_WE_VOTE_ID '
-                    challenge_supporter_found = True
-                    first_challenge_supporter = challenge_supporter_list[0]
-                    # We want to keep the supporter_endorsement with the most characters
-                    supporter_endorsement_to_keep = first_challenge_supporter.supporter_endorsement
-                    supporter_endorsement_to_keep_length = len(supporter_endorsement_to_keep) \
-                        if positive_value_exists(supporter_endorsement_to_keep) else 0
-                    visible_to_public = first_challenge_supporter.visible_to_public
-                    visibility_blocked_by_we_vote = first_challenge_supporter.visibility_blocked_by_we_vote
+                    status += 'REPAIR_CHALLENGE_PARTICIPANT_FOUND_MULTIPLE_WITH_WE_VOTE_ID '
+                    challenge_participant_found = True
+                    first_challenge_participant = challenge_participant_list[0]
+                    # We want to keep the participant_endorsement with the most characters
+                    participant_endorsement_to_keep = first_challenge_participant.participant_endorsement
+                    participant_endorsement_to_keep_length = len(participant_endorsement_to_keep) \
+                        if positive_value_exists(participant_endorsement_to_keep) else 0
+                    visible_to_public = first_challenge_participant.visible_to_public
+                    visibility_blocked_by_we_vote = first_challenge_participant.visibility_blocked_by_we_vote
 
                     array_index = 1
                     # We set a "safety valve" of 25
-                    while array_index < number_of_challenge_supporters_found and array_index < 25:
-                        challenge_supporter_temp = challenge_supporter_list[array_index]
-                        # We want to keep the supporter_endorsement with the most characters
-                        if supporter_endorsement_to_keep_length < len(challenge_supporter_temp.supporter_endorsement):
-                            supporter_endorsement_to_keep = challenge_supporter_temp.supporter_endorsement
-                            supporter_endorsement_to_keep_length = len(supporter_endorsement_to_keep) \
-                                if positive_value_exists(supporter_endorsement_to_keep) else 0
+                    while array_index < number_of_challenge_participants_found and array_index < 25:
+                        challenge_participant_temp = challenge_participant_list[array_index]
+                        # We want to keep the participant_endorsement with the most characters
+                        if participant_endorsement_to_keep_length < len(challenge_participant_temp.participant_endorsement):
+                            participant_endorsement_to_keep = challenge_participant_temp.participant_endorsement
+                            participant_endorsement_to_keep_length = len(participant_endorsement_to_keep) \
+                                if positive_value_exists(participant_endorsement_to_keep) else 0
                         # If any have visible_to_public true, mark the one to keep as true
                         if not positive_value_exists(visible_to_public):
-                            visible_to_public = challenge_supporter_temp.visible_to_public
+                            visible_to_public = challenge_participant_temp.visible_to_public
                         # If any have visibility_blocked_by_we_vote true, mark the one to keep as true
                         if not positive_value_exists(visibility_blocked_by_we_vote):
-                            visibility_blocked_by_we_vote = challenge_supporter_temp.visibility_blocked_by_we_vote
+                            visibility_blocked_by_we_vote = challenge_participant_temp.visibility_blocked_by_we_vote
                         array_index += 1
 
-                    # Now update first_challenge_supporter with values from while loop
-                    first_challenge_supporter.supporter_endorsement_to_keep = supporter_endorsement_to_keep
-                    first_challenge_supporter.visible_to_public = visible_to_public
-                    first_challenge_supporter.visibility_blocked_by_we_vote = visibility_blocked_by_we_vote
+                    # Now update first_challenge_participant with values from while loop
+                    first_challenge_participant.participant_endorsement_to_keep = participant_endorsement_to_keep
+                    first_challenge_participant.visible_to_public = visible_to_public
+                    first_challenge_participant.visibility_blocked_by_we_vote = visibility_blocked_by_we_vote
 
                     # Look up the organization_we_vote_id for the voter
                     from voter.models import VoterManager
@@ -1772,7 +1772,7 @@ class ChallengeManager(models.Manager):
                     results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
                     if results['voter_found']:
                         voter = results['voter']
-                        first_challenge_supporter.organization_we_vote_id = voter.linked_organization_we_vote_id
+                        first_challenge_participant.organization_we_vote_id = voter.linked_organization_we_vote_id
 
                     # Get the updated organization_name and we_vote_hosted_profile_image_url_tiny
                     if positive_value_exists(linked_organization_we_vote_id):
@@ -1782,123 +1782,123 @@ class ChallengeManager(models.Manager):
                             read_only=True)
                         if results['organization_found']:
                             organization = results['organization']
-                            first_challenge_supporter.supporter_name = organization.organization_name
-                            first_challenge_supporter.we_vote_hosted_profile_image_url_medium = \
+                            first_challenge_participant.participant_name = organization.organization_name
+                            first_challenge_participant.we_vote_hosted_profile_image_url_medium = \
                                 organization.we_vote_hosted_profile_image_url_medium
-                            first_challenge_supporter.we_vote_hosted_profile_image_url_tiny = \
+                            first_challenge_participant.we_vote_hosted_profile_image_url_tiny = \
                                 organization.we_vote_hosted_profile_image_url_tiny
 
-                    # Look up supporter_name and we_vote_hosted_profile_image_url for the voter's organization
+                    # Look up participant_name and we_vote_hosted_profile_image_url for the voter's organization
                     try:
-                        first_challenge_supporter.save()
-                        # Delete all other ChallengeSupporters
+                        first_challenge_participant.save()
+                        # Delete all other ChallengeParticipants
                         array_index = 1
-                        while array_index < number_of_challenge_supporters_found and array_index < 25:
-                            challenge_supporter_temp = challenge_supporter_list[array_index]
-                            challenge_supporter_temp.delete()
+                        while array_index < number_of_challenge_participants_found and array_index < 25:
+                            challenge_participant_temp = challenge_participant_list[array_index]
+                            challenge_participant_temp.delete()
                             array_index += 1
                     except Exception as e:
                         status += "CHALLENGE_COULD_NOT_SAVE_OR_DELETE: " + str(e) + " "
                 success = True
             else:
-                status += 'REPAIR_CHALLENGE_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
+                status += 'REPAIR_CHALLENGE_PARTICIPANT_NOT_FOUND-MISSING_VARIABLES '
                 success = False
         except Exception as e:
-            status += 'REPAIR_CHALLENGE_SUPPORTER_EXCEPTION: ' + str(e) + " "
+            status += 'REPAIR_CHALLENGE_PARTICIPANT_EXCEPTION: ' + str(e) + " "
             success = False
 
         results = {
             'status':                       status,
             'success':                      success,
-            'challenge_supporter':          challenge_supporter,
-            'challenge_supporter_found':    challenge_supporter_found,
-            'challenge_supporter_repaired': challenge_supporter_repaired,
+            'challenge_participant':          challenge_participant,
+            'challenge_participant_found':    challenge_participant_found,
+            'challenge_participant_repaired': challenge_participant_repaired,
         }
         return results
 
-    def retrieve_challenge_supporter(
+    def retrieve_challenge_participant(
             self,
             challenge_we_vote_id='',
             voter_we_vote_id='',
             read_only=False,
             recursion_ok=True):
-        challenge_supporter = None
-        challenge_supporter_found = False
+        challenge_participant = None
+        challenge_participant_found = False
         status = ''
         success = True
 
         try:
             if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
                 if positive_value_exists(read_only):
-                    challenge_supporter_query = ChallengeSupporter.objects.using('readonly').filter(
+                    challenge_participant_query = ChallengeParticipant.objects.using('readonly').filter(
                         challenge_we_vote_id=challenge_we_vote_id,
                         voter_we_vote_id=voter_we_vote_id)
                 else:
-                    challenge_supporter_query = ChallengeSupporter.objects.filter(
+                    challenge_participant_query = ChallengeParticipant.objects.filter(
                         challenge_we_vote_id=challenge_we_vote_id,
                         voter_we_vote_id=voter_we_vote_id)
-                challenge_supporter_list = list(challenge_supporter_query)
-                if len(challenge_supporter_list) > 1:
+                challenge_participant_list = list(challenge_participant_query)
+                if len(challenge_participant_list) > 1:
                     if positive_value_exists(recursion_ok):
-                        repair_results = self.repair_challenge_supporter(
+                        repair_results = self.repair_challenge_participant(
                             challenge_we_vote_id=challenge_we_vote_id,
                             voter_we_vote_id=voter_we_vote_id,
 
                         )
                         status += repair_results['status']
-                        second_retrieve_results = self.retrieve_challenge_supporter(
+                        second_retrieve_results = self.retrieve_challenge_participant(
                             challenge_we_vote_id=challenge_we_vote_id,
                             voter_we_vote_id=voter_we_vote_id,
                             read_only=read_only,
                             recursion_ok=False
                         )
-                        challenge_supporter_found = second_retrieve_results['challenge_supporter_found']
-                        challenge_supporter = second_retrieve_results['challenge_supporter']
+                        challenge_participant_found = second_retrieve_results['challenge_participant_found']
+                        challenge_participant = second_retrieve_results['challenge_participant']
                         success = second_retrieve_results['success']
                         status += second_retrieve_results['status']
                     else:
-                        challenge_supporter = challenge_supporter_list[0]
-                        challenge_supporter_found = True
-                elif len(challenge_supporter_list) == 1:
-                    challenge_supporter = challenge_supporter_list[0]
-                    challenge_supporter_found = True
-                    status += 'CHALLENGE_SUPPORTER_FOUND_WITH_WE_VOTE_ID '
+                        challenge_participant = challenge_participant_list[0]
+                        challenge_participant_found = True
+                elif len(challenge_participant_list) == 1:
+                    challenge_participant = challenge_participant_list[0]
+                    challenge_participant_found = True
+                    status += 'CHALLENGE_PARTICIPANT_FOUND_WITH_WE_VOTE_ID '
                 else:
-                    challenge_supporter_found = False
-                    status += 'CHALLENGE_SUPPORTER_NOT_FOUND_WITH_WE_VOTE_ID '
+                    challenge_participant_found = False
+                    status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_WITH_WE_VOTE_ID '
             else:
-                status += 'CHALLENGE_SUPPORTER_NOT_FOUND-MISSING_VARIABLES '
+                status += 'CHALLENGE_PARTICIPANT_NOT_FOUND-MISSING_VARIABLES '
                 success = False
         except Exception as e:
-            status += 'CHALLENGE_SUPPORTER_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
+            status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
             success = False
 
         results = {
             'status':                       status,
             'success':                      success,
-            'challenge_supporter':          challenge_supporter,
-            'challenge_supporter_found':    challenge_supporter_found,
+            'challenge_participant':          challenge_participant,
+            'challenge_participant_found':    challenge_participant_found,
         }
         return results
 
     @staticmethod
-    def retrieve_challenge_supporter_list(
+    def retrieve_challenge_participant_list(
             challenge_we_vote_id=None,
             voter_we_vote_id=None,
-            require_supporter_endorsement=False,
+            require_participant_endorsement=False,
             require_visible_to_public=True,
             require_not_blocked_by_we_vote=True,
             limit=10,
             read_only=True):
-        supporter_list = []
+        participant_list = []
         success = True
         status = ""
 
         try:
             if read_only:
-                challenge_queryset = ChallengeSupporter.objects.using('readonly').all()
+                challenge_queryset = ChallengeParticipant.objects.using('readonly').all()
             else:
-                challenge_queryset = ChallengeSupporter.objects.all()
+                challenge_queryset = ChallengeParticipant.objects.all()
 
             if positive_value_exists(challenge_we_vote_id):
                 challenge_queryset = challenge_queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
@@ -1908,29 +1908,29 @@ class ChallengeManager(models.Manager):
                 challenge_queryset = challenge_queryset.filter(visible_to_public=True)
             if positive_value_exists(require_not_blocked_by_we_vote):
                 challenge_queryset = challenge_queryset.filter(visibility_blocked_by_we_vote=False)
-            if positive_value_exists(require_supporter_endorsement):
+            if positive_value_exists(require_participant_endorsement):
                 challenge_queryset = challenge_queryset.exclude(
-                    Q(supporter_endorsement__isnull=True) |
-                    Q(supporter_endorsement__exact='')
+                    Q(participant_endorsement__isnull=True) |
+                    Q(participant_endorsement__exact='')
                 )
-            challenge_queryset = challenge_queryset.order_by('-date_supported')
+            challenge_queryset = challenge_queryset.order_by('-date_joined')
 
             if limit > 0:
-                supporter_list = challenge_queryset[:limit]
+                participant_list = challenge_queryset[:limit]
             else:
-                supporter_list = list(challenge_queryset)
-            supporter_list_found = positive_value_exists(len(supporter_list))
-            status += "RETRIEVE_CHALLENGE_SUPPORTER_LIST_SUCCEEDED "
+                participant_list = list(challenge_queryset)
+            participant_list_found = positive_value_exists(len(participant_list))
+            status += "RETRIEVE_CHALLENGE_PARTICIPANT_LIST_SUCCEEDED "
         except Exception as e:
             success = False
-            status += "RETRIEVE_CHALLENGE_SUPPORTER_LIST_FAILED: " + str(e) + " "
-            supporter_list_found = False
+            status += "RETRIEVE_CHALLENGE_PARTICIPANT_LIST_FAILED: " + str(e) + " "
+            participant_list_found = False
 
         results = {
             'success':                                  success,
             'status':                                   status,
-            'supporter_list_found':                     supporter_list_found,
-            'supporter_list':                           supporter_list,
+            'participant_list_found':                     participant_list_found,
+            'participant_list':                           participant_list,
         }
         return results
 
@@ -2181,41 +2181,41 @@ class ChallengeManager(models.Manager):
         return results
 
     @staticmethod
-    def update_challenge_supporters_with_organization_change(
+    def update_challenge_participants_with_organization_change(
             organization_we_vote_id,
-            supporter_name,
+            participant_name,
             we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny):
         status = ''
         success = True
-        challenge_supporter_entries_updated = 0
+        challenge_participant_entries_updated = 0
 
         try:
-            challenge_supporter_entries_updated = ChallengeSupporter.objects \
+            challenge_participant_entries_updated = ChallengeParticipant.objects \
                 .filter(organization_we_vote_id=organization_we_vote_id) \
-                .update(supporter_name=supporter_name,
+                .update(participant_name=participant_name,
                         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-CHALLENGE_SUPPORTER_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
+            status += "FAILED-CHALLENGE_PARTICIPANT_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
             success = False
 
         results = {
             'success': success,
             'status': status,
-            'challenge_supporter_entries_updated': challenge_supporter_entries_updated,
+            'challenge_participant_entries_updated': challenge_participant_entries_updated,
         }
         return results
 
-    def update_challenge_supporters_count(self, challenge_we_vote_id='', politician_we_vote_id=''):
+    def update_challenge_participants_count(self, challenge_we_vote_id='', politician_we_vote_id=''):
         status = ''
         opposers_count = 0
-        supporters_count = 0
+        participants_count = 0
         error_results = {
             'challenge_we_vote_id': challenge_we_vote_id,
             'status': status,
             'success': False,
-            'supporters_count': supporters_count,
+            'participants_count': participants_count,
         }
         if positive_value_exists(politician_we_vote_id):
             if not positive_value_exists(challenge_we_vote_id):
@@ -2242,7 +2242,7 @@ class ChallengeManager(models.Manager):
                 queryset = FollowOrganization.objects.using('readonly').all()
                 queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
                 following_queryset = queryset.filter(following_status=FOLLOWING)
-                supporters_count = following_queryset.count()
+                participants_count = following_queryset.count()
                 disliking_queryset = queryset.filter(following_status=FOLLOW_DISLIKE)
                 opposers_count = disliking_queryset.count()
             except Exception as e:
@@ -2251,18 +2251,17 @@ class ChallengeManager(models.Manager):
                 return error_results
         else:
             try:
-                count_query = ChallengeSupporter.objects.using('readonly').all()
+                count_query = ChallengeParticipant.objects.using('readonly').all()
                 count_query = count_query.filter(challenge_we_vote_id=challenge_we_vote_id)
-                count_query = count_query.filter(challenge_supported=True)
-                supporters_count = count_query.count()
+                participants_count = count_query.count()
             except Exception as e:
-                status += "FAILED_RETRIEVING_CHALLENGE_SUPPORTER_COUNT: " + str(e) + ' '
+                status += "FAILED_RETRIEVING_CHALLENGE_PARTICIPANT_COUNT: " + str(e) + ' '
                 error_results['status'] += status
                 return error_results
 
         update_values = {
             'opposers_count': opposers_count,
-            'supporters_count': supporters_count,
+            'participants_count': participants_count,
         }
         update_results = self.update_or_create_challenge(
             challenge_we_vote_id=challenge_we_vote_id,
@@ -2275,7 +2274,7 @@ class ChallengeManager(models.Manager):
             'challenge_we_vote_id': challenge_we_vote_id,
             'status':               status,
             'success':              success,
-            'supporters_count':     supporters_count,
+            'participants_count':     participants_count,
         }
         return results
 
@@ -2367,7 +2366,7 @@ class ChallengeManager(models.Manager):
                     challenge_title=challenge_title,
                     in_draft_mode=in_draft_mode,
                     started_by_voter_we_vote_id=voter_we_vote_id,
-                    supporters_count=0,
+                    participants_count=0,
                 )
                 challenge_we_vote_id = challenge.we_vote_id
                 challenge_found = True
@@ -2506,9 +2505,9 @@ class ChallengeManager(models.Manager):
                         challenge.politician_starter_list_serialized = \
                             update_values['politician_starter_list_serialized']
                         challenge_changed = True
-                if 'supporters_count' in update_values \
-                        and positive_value_exists(update_values['supporters_count']):
-                    challenge.supporters_count = update_values['supporters_count']
+                if 'participants_count' in update_values \
+                        and positive_value_exists(update_values['participants_count']):
+                    challenge.participants_count = update_values['participants_count']
                     challenge_changed = True
                 if challenge_changed:
                     challenge.save()
@@ -3029,15 +3028,15 @@ class ChallengeManager(models.Manager):
         return results
 
     @staticmethod
-    def update_or_create_challenge_supporter(
+    def update_or_create_challenge_participant(
             challenge_we_vote_id='',
             voter_we_vote_id='',
             organization_we_vote_id='',
             update_values={}):
         status = ""
-        challenge_supporter = None
-        challenge_supporter_changed = False
-        challenge_supporter_created = False
+        challenge_participant = None
+        challenge_participant_changed = False
+        challenge_participant_created = False
         challenge_manager = ChallengeManager()
 
         create_variables_exist = positive_value_exists(challenge_we_vote_id) \
@@ -3048,122 +3047,117 @@ class ChallengeManager(models.Manager):
         if not create_variables_exist and not update_variables_exist:
             status += "COULD_NOT_UPDATE_OR_CREATE: "
             if not create_variables_exist:
-                status += "CREATE_CHALLENGE_SUPPORTER_VARIABLES_MISSING "
+                status += "CREATE_CHALLENGE_PARTICIPANT_VARIABLES_MISSING "
             if not update_variables_exist:
-                status += "UPDATE_CHALLENGE_SUPPORTER_VARIABLES_MISSING "
+                status += "UPDATE_CHALLENGE_PARTICIPANT_VARIABLES_MISSING "
             results = {
                 'success':                      False,
                 'status':                       status,
-                'challenge_supporter':          None,
-                'challenge_supporter_changed':  False,
-                'challenge_supporter_created':  False,
-                'challenge_supporter_found':    False,
+                'challenge_participant':          None,
+                'challenge_participant_changed':  False,
+                'challenge_participant_created':  False,
+                'challenge_participant_found':    False,
                 'challenge_we_vote_id':         '',
                 'voter_we_vote_id':             '',
             }
             return results
 
-        results = challenge_manager.retrieve_challenge_supporter(
+        results = challenge_manager.retrieve_challenge_participant(
             challenge_we_vote_id=challenge_we_vote_id,
             voter_we_vote_id=voter_we_vote_id,
             read_only=False)
-        challenge_supporter_found = results['challenge_supporter_found']
-        if challenge_supporter_found:
-            challenge_supporter = results['challenge_supporter']
+        challenge_participant_found = results['challenge_participant_found']
+        if challenge_participant_found:
+            challenge_participant = results['challenge_participant']
         success = results['success']
         status += results['status']
 
         if not positive_value_exists(success):
             results = {
-                'success':                      success,
-                'status':                       status,
-                'challenge_supporter':          challenge_supporter,
-                'challenge_supporter_changed':  challenge_supporter_changed,
-                'challenge_supporter_created':  challenge_supporter_created,
-                'challenge_supporter_found':    challenge_supporter_found,
-                'challenge_we_vote_id':         challenge_we_vote_id,
-                'voter_we_vote_id':             voter_we_vote_id,
+                'success':                          success,
+                'status':                           status,
+                'challenge_participant':            challenge_participant,
+                'challenge_participant_changed':    challenge_participant_changed,
+                'challenge_participant_created':    challenge_participant_created,
+                'challenge_participant_found':      challenge_participant_found,
+                'challenge_we_vote_id':             challenge_we_vote_id,
+                'voter_we_vote_id':                 voter_we_vote_id,
             }
             return results
 
         organization_manager = OrganizationManager()
-        challenge_supporter_changed = False
-        if not challenge_supporter_found:
+        challenge_participant_changed = False
+        if not challenge_participant_found:
             try:
-                challenge_supporter = ChallengeSupporter.objects.create(
-                    challenge_supported=True,
+                challenge_participant = ChallengeParticipant.objects.create(
                     challenge_we_vote_id=challenge_we_vote_id,
                     organization_we_vote_id=organization_we_vote_id,
                     voter_we_vote_id=voter_we_vote_id,
                 )
-                status += "CHALLENGE_SUPPORTER_CREATED "
-                challenge_supporter_created = True
-                challenge_supporter_found = True
+                status += "CHALLENGE_PARTICIPANT_CREATED "
+                challenge_participant_created = True
+                challenge_participant_found = True
                 success = True
             except Exception as e:
-                challenge_supporter_changed = False
-                challenge_supporter_created = False
-                challenge_supporter = None
+                challenge_participant_changed = False
+                challenge_participant_created = False
+                challenge_participant = None
                 success = False
-                status += "CHALLENGE_SUPPORTER_NOT_CREATED: " + str(e) + " "
+                status += "CHALLENGE_PARTICIPANT_NOT_CREATED: " + str(e) + " "
 
-        if challenge_supporter_found:
-            # Update existing challenge_supporter with changes
+        if challenge_participant_found:
+            # Update existing challenge_participant with changes
             try:
-                # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
+                # Retrieve the participant_name and we_vote_hosted_profile_image_url_tiny from the organization entry
                 organization_results = \
                     organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
                 if organization_results['organization_found']:
                     organization = organization_results['organization']
                     if positive_value_exists(organization.organization_name):
-                        challenge_supporter.supporter_name = organization.organization_name
-                        challenge_supporter_changed = True
+                        challenge_participant.participant_name = organization.organization_name
+                        challenge_participant_changed = True
                     if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
-                        challenge_supporter.we_vote_hosted_profile_image_url_medium = \
+                        challenge_participant.we_vote_hosted_profile_image_url_medium = \
                             organization.we_vote_hosted_profile_image_url_medium
-                        challenge_supporter_changed = True
+                        challenge_participant_changed = True
                     if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
-                        challenge_supporter.we_vote_hosted_profile_image_url_tiny = \
+                        challenge_participant.we_vote_hosted_profile_image_url_tiny = \
                             organization.we_vote_hosted_profile_image_url_tiny
-                        challenge_supporter_changed = True
+                        challenge_participant_changed = True
 
-                if 'challenge_supported_changed' in update_values \
-                        and positive_value_exists(update_values['challenge_supported_changed']):
-                    challenge_supporter.challenge_supported = update_values['challenge_supported']
-                    challenge_supporter_changed = True
                 if 'linked_position_we_vote_id_changed' in update_values \
                         and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
-                    challenge_supporter.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
-                    challenge_supporter_changed = True
-                if 'supporter_endorsement_changed' in update_values \
-                        and positive_value_exists(update_values['supporter_endorsement_changed']):
-                    challenge_supporter.supporter_endorsement = \
-                        update_values['supporter_endorsement']
-                    challenge_supporter_changed = True
+                    challenge_participant.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
+                    challenge_participant_changed = True
+                if 'participant_endorsement_changed' in update_values \
+                        and positive_value_exists(update_values['participant_endorsement_changed']):
+                    challenge_participant.participant_endorsement = \
+                        update_values['participant_endorsement']
+                    challenge_participant_changed = True
                 if 'visible_to_public_changed' in update_values \
                         and positive_value_exists(update_values['visible_to_public_changed']):
-                    challenge_supporter.visible_to_public = update_values['visible_to_public']
-                    challenge_supporter_changed = True
-                if challenge_supporter_changed:
-                    challenge_supporter.save()
-                    status += "CHALLENGE_SUPPORTER_UPDATED "
+                    challenge_participant.visible_to_public = update_values['visible_to_public']
+                    challenge_participant_changed = True
+                if challenge_participant_changed:
+                    challenge_participant.save()
+                    status += "CHALLENGE_PARTICIPANT_UPDATED "
                 else:
-                    status += "CHALLENGE_SUPPORTER_NOT_UPDATED-NO_CHANGES_FOUND "
+                    status += "CHALLENGE_PARTICIPANT_NOT_UPDATED-NO_CHANGES_FOUND "
                 success = True
             except Exception as e:
-                challenge_supporter = None
-                challenge_supporter_changed = False
+                challenge_participant = None
+                challenge_participant_changed = False
                 success = False
-                status += "CHALLENGE_SUPPORTER_NOT_UPDATED: " + str(e) + " "
+                status += "CHALLENGE_PARTICIPANT_NOT_UPDATED: " + str(e) + " "
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'challenge_supporter':          challenge_supporter,
-            'challenge_supporter_changed':  challenge_supporter_changed,
-            'challenge_supporter_created':  challenge_supporter_created,
-            'challenge_supporter_found':    challenge_supporter_found,
-            'challenge_we_vote_id':         challenge_we_vote_id,
+            'success':                          success,
+            'status':                           status,
+            'challenge_participant':            challenge_participant,
+            'challenge_participant_changed':    challenge_participant_changed,
+            'challenge_participant_created':    challenge_participant_created,
+            'challenge_participant_found':      challenge_participant_found,
+            'challenge_we_vote_id':             challenge_we_vote_id,
         }
         return results
 
@@ -3222,23 +3216,22 @@ class ChallengeSEOFriendlyPath(models.Model):
     final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
 
 
-class ChallengeSupporter(models.Model):
+class ChallengeParticipant(models.Model):
     objects = None
 
     def __unicode__(self):
-        return "ChallengeSupporter"
+        return "ChallengeParticipant"
 
-    challenge_supported = models.BooleanField(default=True, db_index=True)
     challenge_we_vote_id = models.CharField(max_length=255, db_index=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
-    date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    date_joined = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
     is_subscribed_by_email = models.BooleanField(default=None, null=True)
     linked_position_we_vote_id = models.CharField(max_length=255, null=True)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
-    supporter_name = models.CharField(max_length=255, null=True)
-    supporter_endorsement = models.TextField(null=True)
+    participant_name = models.CharField(max_length=255, null=True)
+    participant_endorsement = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
-    visible_to_public = models.BooleanField(default=False)
+    visible_to_public = models.BooleanField(default=True)
     voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)

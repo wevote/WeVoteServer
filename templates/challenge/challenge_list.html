@@ -134,13 +134,13 @@
             <th>Order</th>
         {% endif %}
             <th>
-              {% if sort_by == "supporters_count" %}
+              {% if sort_by == "participants_count" %}
                   <a href="{% url 'challenge:challenge_list' %}?state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}&show_challenges_without_email={{ show_challenges_without_email }}&show_challenges_to_be_analyzed={{ show_challenges_to_be_analyzed }}" class="u-no-break">
-                  Supporters&nbsp;<span class="glyphicon glyphicon-triangle-bottom"></span>
+                  Participants&nbsp;<span class="glyphicon glyphicon-triangle-bottom"></span>
                   </a>
               {% else %}
-              <a href="{% url 'challenge:challenge_list' %}?sort_by=supporters_count&state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}&show_challenges_without_email={{ show_challenges_without_email }}&show_challenges_to_be_analyzed={{ show_challenges_to_be_analyzed }}">
-                  Supporters
+              <a href="{% url 'challenge:challenge_list' %}?sort_by=participants_count&state_code={{ state_code }}&challenge_type_filter={{ challenge_type_filter }}&challenge_search={{ challenge_search }}&show_challenges_without_email={{ show_challenges_without_email }}&show_challenges_to_be_analyzed={{ show_challenges_to_be_analyzed }}">
+                  Participants
                   </a>
               {% endif %}
             </th>
@@ -169,7 +169,7 @@
                     </a>
                 {% if challenge.seo_friendly_path %}
                     <br />
-                    <a href="{{ web_app_root_url }}/c/{{ challenge.seo_friendly_path }}"
+                    <a href="{{ web_app_root_url }}/{{ challenge.seo_friendly_path }}/+/"
                        target="_blank">/{{ challenge.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
                 </span><br />
@@ -234,16 +234,16 @@
             {% endfor %}
             </td>
         {% endif %}
-            <td style="text-align: right">{% if challenge.supporters_count %}
-                <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
-                    {{ challenge.supporters_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
+            <td style="text-align: right">{% if challenge.participants_count %}
+                <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
+                    {{ challenge.participants_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
                 </a>
-                {% if challenge.supporters_count_minimum_ignored and challenge.supporters_count < 5 %}
+                {% if challenge.participants_count_minimum_ignored and challenge.participants_count < 5 %}
                     <br />
                     <span style="font-size: 1.rem;">
                     (Visible)
                     </span>
-                {% elif not challenge.is_supporters_count_minimum_exceeded %}
+                {% elif not challenge.is_participants_count_minimum_exceeded %}
                     <br />
                     <span style="font-size: .95rem; color: gray">
                     (NOT&nbsp;Visible)
@@ -252,7 +252,7 @@
             {% endif %}</td>
             <td style="text-align: right">
             {% if challenge.chip_in_total != 'none' %}
-                <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?only_show_supporters_with_endorsements=0&show_supporters_not_visible_to_public=1" target="_blank">
+                <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?show_participants_not_visible_to_public=1" target="_blank">
                     {{ challenge.chip_in_total }}
                     <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
                 </a>

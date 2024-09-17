@@ -145,7 +145,7 @@ def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=None):
     return results
 
 
-def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterDeleteAccount
+def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterUpdate former: voterDeleteAccount
     success = True
     status = ""
 

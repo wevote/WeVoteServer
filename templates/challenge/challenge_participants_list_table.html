@@ -1,0 +1,109 @@
+{# templates/challenge/challenge_participants_list_table.html #}
+
+{% if participants_list %}
+<table class="table">
+    {% for challenge_participant in participants_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
+        <tr>
+            <th></th>
+        {% if not hide_participant_column %}
+            <th></th>
+            <th>Supporter</th>
+        {% endif %}
+        {% if show_challenge_column %}
+            <th></th>
+            <th>Challenge</th>
+        {% endif %}
+            <th>Endorsement</th>
+            <th>Chip Ins</th>
+            <th>Supporter Wants Visibility</th>
+            <th>Visibility Blocked by We Vote?</th>
+            <th>Delete</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+        {% if not hide_participant_column %}
+            <td>
+            {% if challenge_participant.we_vote_hosted_profile_image_url_tiny %}
+                {% if challenge_participant.voter_we_vote_id %}<a href="{% url 'voter:voter_edit_we_vote_id' challenge_participant.voter_we_vote_id %}" target="_blank">{% endif %}
+                    <img src="{{ challenge_participant.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                {% if challenge_participant.voter_we_vote_id %}</a>{% endif %}
+            {% endif %}
+            </td>
+            <td>
+                {{ challenge_participant.participant_name }}<br />
+                <input type="hidden" name="challenge_participant_{{ challenge_participant.id }}_exists" value="1">
+                <div class="u-no-break">
+                <span style="color: darkgray">{{ challenge_participant.voter_we_vote_id }} / {{ challenge_participant.organization_we_vote_id }}</span>&nbsp;
+                    {% if challenge_participant.voter_we_vote_id %}
+                    <a href="{% url 'voter:voter_edit_we_vote_id' challenge_participant.voter_we_vote_id %}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                    {% endif %}
+                </div>
+            </td>
+        {% endif %}
+        {% if show_challenge_column %}
+            <td>
+            {% if challenge_participant.challenge %}
+            {% if challenge_participant.challenge.we_vote_hosted_challenge_photo_small_url or challenge_participant.challenge.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'challenge:challenge_summary' challenge_participant.challenge_we_vote_id %}" target="_blank">
+                {% if challenge_participant.challenge.we_vote_hosted_challenge_photo_small_url %}
+                    <img src="{{ challenge_participant.challenge.we_vote_hosted_challenge_photo_small_url }}" width="32px" />
+                {% elif challenge_participant.challenge.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ challenge_participant.challenge.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                {% endif %}
+                </a>
+            {% endif %}
+            {% endif %}
+            </td>
+            <td>
+            {% if challenge_participant.challenge %}
+                {{ challenge_participant.challenge.challenge_title }}<br />
+                <input type="hidden" name="challenge_participant_{{ challenge_participant.id }}_exists" value="1">
+                <div class="u-no-break">
+                <span style="color: darkgray">{{ challenge_participant.challenge_we_vote_id }}</span>&nbsp;<a
+                    href="{% url 'challenge:challenge_summary' challenge_participant.challenge_we_vote_id %}"
+                    target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                </div>
+            {% endif %}
+            </td>
+        {% endif %}
+            <td>{{ challenge_participant.participant_endorsement|default_if_none:"" }}</td>
+            <td>{% if challenge_participant.chip_in_total != 'none' %}{{ challenge_participant.chip_in_total|default_if_none:"" }}{% endif %}</td>
+            <td>
+                <input type="checkbox"
+                       name="challenge_participant_visible_to_public_{{ challenge_participant.id }}"
+                       id="challenge_participant_visible_to_public_{{ challenge_participant.id }}_id"
+                       value="True"
+                       {% if challenge_participant.visible_to_public %}
+                         checked="checked"
+                       {% endif %}
+                />
+                visible
+            </td>
+            <td style="color: darkgray">
+                <input type="checkbox"
+                       name="challenge_participant_visibility_blocked_by_we_vote_{{ challenge_participant.id }}"
+                       id="challenge_participant_visibility_blocked_by_we_vote_{{ challenge_participant.id }}_id"
+                       value="True"
+                       {% if challenge_participant.visibility_blocked_by_we_vote %}
+                         checked="checked"
+                       {% endif %}
+                />
+                blocked
+            </td>
+            <td>
+                <input type="checkbox"
+                       name="delete_challenge_participant_{{ challenge_participant.id }}"
+                       id="delete_challenge_participant_{{ challenge_participant.id }}_id"
+                       value="True"
+                />
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}

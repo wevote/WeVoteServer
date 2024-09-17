@@ -61,13 +61,13 @@
             </tr>
         {% endif %}
             <tr>
-                <th>Supporters:&nbsp;</th>
-                <td> {{ challenge.supporters_count }}
+                <th>Participants:&nbsp;</th>
+                <td> {{ challenge.participants_count }}
         {% if not challenge.politician_we_vote_id %}
-            {% if challenge.supporters_count_minimum_ignored %}
-                        <span style="color: darkgray">(Visible -- Supporters Count Minimum Ignored)</span>
-            {% elif not challenge.is_supporters_count_minimum_exceeded %}
-                        <span style="color: darkgray">(NOT visible -- too few supporters)</span>
+            {% if challenge.participants_count_minimum_ignored %}
+                        <span style="color: darkgray">(Visible -- Participants Count Minimum Ignored)</span>
+            {% elif not challenge.is_participants_count_minimum_exceeded %}
+                        <span style="color: darkgray">(NOT visible -- too few participants)</span>
             {% endif %}
         {% endif %}
                 </td>
@@ -204,49 +204,26 @@
             <thead>
                 <tr>
                     <th>
-                        {% if challenge.politician_we_vote_id %}
-                            Endorsers: {{ challenge_supporters_count|intcomma }}
-                        {% else %}
-                            Supporters: {{ challenge_supporters_count|intcomma }}
-                        {% endif %}
+                        Participants: {{ challenge_participants_count|intcomma }}
                     </th>
                     <th>Comment</th>
                 </tr>
             </thead>
-    {% if challenge.politician_we_vote_id %}
-        {# PositionEntered #}
-        {% for position in position_list %}
+        {# Challenge Participants #}
+        {% for challenge_participant in challenge_participant_list %}
             <tr>
                 <td>
-                    {{ position.speaker_display_name }}&nbsp;&nbsp;
+                    {{ challenge_participant.participant_name }}&nbsp;&nbsp;
                 </td>
                 <td>
-                    <div style="white-space: pre-wrap;">{{ position.statement_text }}</div>&nbsp;&nbsp;
+                    <div style="white-space: pre-wrap;">{{ challenge_participant.participant_endorsement }}</div>&nbsp;&nbsp;
                 </td>
             </tr>
         {% endfor %}
-    {% else %}
-        {# Challenge Supporters #}
-        {% for challenge_supporter in challenge_supporter_list %}
-            <tr>
-                <td>
-                    {{ challenge_supporter.supporter_name }}&nbsp;&nbsp;
-                </td>
-                <td>
-                    <div style="white-space: pre-wrap;">{{ challenge_supporter.supporter_endorsement }}</div>&nbsp;&nbsp;
-                </td>
-            </tr>
-        {% endfor %}
-    {% endif %}
             <tr>
                 <td colspan="3">
-                {% if challenge.politician_we_vote_id %}
-{#                    <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"#}
-{#                                   class="btn btn-primary">View All Positions</a>#}
-                {% else %}
-                    <a href="{% url 'challenge:supporters_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
-                                   class="btn btn-primary">View All Supporters for Challenge</a>
-                {% endif %}
+                    <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                                   class="btn btn-primary">View All Participants</a>
                 </td>
             </tr>
         </table>
