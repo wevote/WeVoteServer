@@ -1690,7 +1690,7 @@ def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
         status = "VOTER_ADDRESS_RETRIEVE-ADDRESS_FOUND"
 
         voter_address_retrieve_results = {
-            'voter_device_id': voter_device_id,
+            # 'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
             'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
             'google_civic_election_id': voter_address.google_civic_election_id if voter_address.google_civic_election_id
@@ -1718,7 +1718,7 @@ def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
             'status': "VOTER_ADDRESS_NOT_FOUND",
             'success': success,
             'address_found': False,
-            'voter_device_id': voter_device_id,
+            # 'voter_device_id': voter_device_id,
             'address_type': '',
             'text_for_map_search': '',
             'google_civic_election_id': 0,
