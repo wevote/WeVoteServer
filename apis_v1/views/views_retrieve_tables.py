@@ -46,3 +46,11 @@ def fast_load_status_retrieve_view(request):   # fastLoadStatusRetrieve
 
 def fast_load_status_update_view(request):   # fastLoadStatusUpdate
     return fast_load_status_update(request)
+
+
+def retrieve_max_id(request):                   # retrieveMaxID
+    table_name = request.GET.get('table_name', 'bad_table_param_error')
+    json_data = {
+        'maxID': get_max_id(table_name)
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
