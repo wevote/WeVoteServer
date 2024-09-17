@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 from challenge.controllers import challenge_list_retrieve_for_api, challenge_news_item_save_for_api, \
     challenge_retrieve_for_api, challenge_save_for_api, \
-    challenge_supporter_retrieve_for_api, challenge_supporter_save_for_api
+    challenge_participant_retrieve_for_api, challenge_participant_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -74,10 +74,10 @@ def challenge_news_item_save_view(request):  # challengeNewsItemSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def challenge_supporter_retrieve_view(request):  # challengeSupporterRetrieve
+def challenge_participant_retrieve_view(request):  # challengeParticipantRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
-    json_data = challenge_supporter_retrieve_for_api(
+    json_data = challenge_participant_retrieve_for_api(
         voter_device_id=voter_device_id,
         challenge_we_vote_id=challenge_we_vote_id,
     )
@@ -101,12 +101,14 @@ def challenge_retrieve_view(request):  # challengeRetrieve (CDN)
 def challenge_retrieve_as_owner_view(request):  # challengeRetrieveAsOwner (No CDN)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
+    seo_friendly_path = request.GET.get('seo_friendly_path', '')
     hostname = request.GET.get('hostname', '')
     json_data = challenge_retrieve_for_api(
         voter_device_id=voter_device_id,
         challenge_we_vote_id=challenge_we_vote_id,
         as_owner=True,
         hostname=hostname,
+        seo_friendly_path=seo_friendly_path,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -152,21 +154,13 @@ def challenge_save_view(request):  # challengeSave & challengeStartSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def challenge_supporter_save_view(request):  # challengeSupporterSave
+def challenge_participant_save_view(request):  # challengeParticipantSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    supporter_endorsement = request.GET.get('supporter_endorsement', '')
-    supporter_endorsement_changed = positive_value_exists(request.GET.get('supporter_endorsement_changed', False))
     visible_to_public = positive_value_exists(request.GET.get('visible_to_public', True))
     visible_to_public_changed = positive_value_exists(request.GET.get('visible_to_public_changed', False))
-    challenge_supported = positive_value_exists(request.GET.get('challenge_supported', False))
-    challenge_supported_changed = positive_value_exists(request.GET.get('challenge_supported_changed', False))
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
-    json_data = challenge_supporter_save_for_api(
+    json_data = challenge_participant_save_for_api(
         challenge_we_vote_id=challenge_we_vote_id,
-        challenge_supported=challenge_supported,
-        challenge_supported_changed=challenge_supported_changed,
-        supporter_endorsement=supporter_endorsement,
-        supporter_endorsement_changed=supporter_endorsement_changed,
         visible_to_public=visible_to_public,
         visible_to_public_changed=visible_to_public_changed,
         voter_device_id=voter_device_id,
