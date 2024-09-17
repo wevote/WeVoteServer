@@ -37,18 +37,18 @@ def save_off_database():
     time.sleep(20)
 
 
-# def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
-#     try:
-#         response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
-#                                 verify=True,
-#                                 params={'table_name': table_name,
-#                                         'additional_records': additional_records,
-#                                         'is_running': True,
-#                                         'voter_api_device_id': voter_api_device_id,
-#                                         })
-#         # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
-#     except Exception as e:
-#         logger.error('update_fast_load_db caught: ', str(e))
+def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
+    try:
+        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
+                                verify=True,
+                                params={'table_name': table_name,
+                                        'additional_records': additional_records,
+                                        'is_running': True,
+                                        'voter_api_device_id': voter_api_device_id,
+                                        })
+        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+    except Exception as e:
+        logger.error('update_fast_load_db caught: ', str(e))
 
 
 def connect_to_db():
@@ -92,8 +92,7 @@ def fetch_data_from_api(url, params, max_retries=10):
 
 
 def get_max_id(params):
-    #  host = 'https://api.wevoteusa.org'
-    host = 'https://steve.ngrok.pro/'
+    host = 'https://api.wevoteusa.org'
     try:
         response = requests.get(host + '/apis/v1/retrieveMaxID', params=params)
         if response.status_code == 200:
@@ -111,7 +110,6 @@ def retrieve_sql_files_from_master_server(request):
     Runs on the Local server (developer's Mac)
     :return:
     """
-    status = ''
     t0 = time.time()
     engine = connect_to_db()
     print(
@@ -126,7 +124,6 @@ def retrieve_sql_files_from_master_server(request):
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
     # host = 'https://wevotedeveloper.com:8000'
     host = 'https://api.wevoteusa.org'
-
     voter_api_device_id = get_voter_api_device_id(request)
     requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
                  params={"initialize": True, "voter_api_device_id": voter_api_device_id}, verify=True)
@@ -161,6 +158,7 @@ def retrieve_sql_files_from_master_server(request):
                 try:
                     data = structured_json['files'].get(table_name, "")
                     split_data = data.splitlines(keepends=True)
+                    update_fast_load_db(host, voter_api_device_id, table_name, len(split_data))
                     lines_count = process_table_data(table_name, split_data)
                     # print(f'{lines_count} lines in chunk')
                 except Exception as e:

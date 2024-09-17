@@ -21,43 +21,43 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
 allowable_tables = [
-    # 'ballot_ballotitem',
-    # 'position_positionentered',
-    # 'campaign_campaignx',
-    # 'campaign_campaignxowner',
-    # 'campaign_campaignxpolitician',
-    # 'campaign_campaignxlistedbyorganization',
-    # 'campaign_campaignxnewsitem',
-    # 'campaign_campaignxseofriendlypath',
-    # 'campaign_campaignxsupporter',
-    # 'candidate_candidatesarenotduplicates',
-    # 'candidate_candidatetoofficelink',
-    # 'election_ballotpediaelection',
-    # 'election_election',
-    # 'electoral_district_electoraldistrict',
-    # 'issue_issue',
-    # 'issue_organizationlinktoissue',
-    # 'measure_contestmeasure',
-    # 'measure_contestmeasuresarenotduplicates',
-    # 'office_contestoffice',
-    # 'office_contestofficesarenotduplicates',
-    # 'office_contestofficevisitingotherelection',
-    # 'office_held_officeheld',
-    # 'organization_organizationreserveddomain',
-    # 'party_party',
+    'position_positionentered',
+    'campaign_campaignx',
+    'campaign_campaignxowner',
+    'campaign_campaignxpolitician',
+    'campaign_campaignxlistedbyorganization',
+    'campaign_campaignxnewsitem',
+    'campaign_campaignxseofriendlypath',
+    'campaign_campaignxsupporter',
+    'candidate_candidatesarenotduplicates',
+    'candidate_candidatetoofficelink',
+    'election_ballotpediaelection',
+    'election_election',
+    'electoral_district_electoraldistrict',
+    'issue_issue',
+    'issue_organizationlinktoissue',
+    'measure_contestmeasure',
+    'measure_contestmeasuresarenotduplicates',
+    'office_contestoffice',
+    'office_contestofficesarenotduplicates',
+    'office_contestofficevisitingotherelection',
+    'office_held_officeheld',
+    'organization_organizationreserveddomain',
+    'party_party',
     'politician_politician',
-    # 'politician_politiciansarenotduplicates',
-    # 'representative_representative',
-    # 'representative_representativesarenotduplicates',
-    # 'twitter_twitterlinktoorganization',
-    # 'voter_guide_voterguidepossibility',
-    # 'voter_guide_voterguidepossibilityposition',
-    # 'voter_guide_voterguide',
-    # 'wevote_settings_wevotesetting',
-    # 'ballot_ballotreturned',
-    # 'polling_location_pollinglocation',
-    # 'organization_organization',
-    # 'candidate_candidatecampaign',
+    'politician_politiciansarenotduplicates',
+    'representative_representative',
+    'representative_representativesarenotduplicates',
+    'twitter_twitterlinktoorganization',
+    'voter_guide_voterguidepossibility',
+    'voter_guide_voterguidepossibilityposition',
+    'voter_guide_voterguide',
+    'wevote_settings_wevotesetting',
+    'ballot_ballotreturned',
+    'polling_location_pollinglocation',
+    'organization_organization',
+    'candidate_candidatecampaign',
+    'ballot_ballotitem',
 ]
 
 dummy_unique_id = 10000000
@@ -89,7 +89,7 @@ def get_max_id(table_name):
 
 def get_total_row_count():
     """
-    Returns the total row count of tables to be fetched from the MASTER server
+    Returns the total row count of all tables to be fetched from the MASTER server
     Runs on the Master server
     :return: the number of rows
     """
@@ -104,17 +104,13 @@ def get_total_row_count():
     rows = 0
     for table_name in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
+            sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
             cursor.execute(sql)
             row = cursor.fetchone()
             if positive_value_exists(row[0]):
                 cnt = int(row[0])
             else:
-                sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
-                cursor.execute(sql)
-                row = cursor.fetchone()
-                if positive_value_exists(row[0]):
-                    cnt = int(row[0])
+                cnt = 0
             print('get_total_row_count of table ', table_name, ' is ', cnt)
             rows += cnt
 
