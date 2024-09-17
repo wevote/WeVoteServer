@@ -24,7 +24,6 @@ from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-
 # This api will only return the data from the following tables
 
 dummy_unique_id = 10000000
@@ -76,13 +75,13 @@ def fetch_data_from_api(url, params, max_retries=10):
     :return:
     """
     for attempt in range(max_retries):
-        print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
+        # print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
         try:
             response = requests.get(url, params=params, verify=True, timeout=5)
             if response.status_code == 200:
                 return response.json()
             else:
-                logger.warning(f"API request failed with status code {response.status_code}, retrying...")
+                logger.warning(f"\nAPI request failed with status code {response.status_code}, retrying...")
         except requests.Timeout:
             logger.error(f"Request timed out, retrying...")
         except requests.RequestException as e:
@@ -92,7 +91,7 @@ def fetch_data_from_api(url, params, max_retries=10):
     raise Exception("API request failed after maximum retries")
 
 
-def get_table_row_count(params):
+def get_max_id(params):
     #  host = 'https://api.wevoteusa.org'
     host = 'https://steve.ngrok.pro/'
     try:
@@ -101,6 +100,7 @@ def get_table_row_count(params):
             return response.json()
         else:
             print(f"API request failed with status code {response.status_code}")
+            return -1
     except Exception as e:
         print(f"ROW_COUNT_ERROR: {str(e)}", )
 
@@ -120,7 +120,7 @@ def retrieve_sql_files_from_master_server(request):
     # save_off_database()
     dt = time.time() - t0
     stats = {}
-    print('Saved off local database in ' + str(int(dt)) + ' seconds')
+    print('Saved off local database in ' + str(int(dt)) + ' seconds \n')
     stats |= {'save_off': str(int(dt))}
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
@@ -131,22 +131,21 @@ def retrieve_sql_files_from_master_server(request):
     requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
                  params={"initialize": True, "voter_api_device_id": voter_api_device_id}, verify=True)
     for table_name in allowable_tables:
+        print(f"{table_name.upper()}\n--------------------")
         truncate_table(engine, table_name)
 
         max_id_params = {'table_name': table_name}
-        max_id_response = get_table_row_count(max_id_params)
+        max_id_response = get_max_id(max_id_params)
         max_id = max_id_response['maxID']
         chunk_size = 10000
-        print(f'\nStarting on the {table_name} table, requesting {chunk_size} rows')
         start = 0
         end = chunk_size - 1
         structured_json = {}
         table_start_time = time.time()
         # filling table with 10,000 line chunks
-        if max_id:
-            while end < max_id:
-                chunk_start_time = time.time()
-                print(f"\nProcessing chunk from {start} to {end} of {max_id} for table {table_name}")
+        if max_id and max_id != -1:
+            while end-chunk_size < max_id:
+                print(f"{table_name}:   {((start/max_id)*100):.0f}% -- Chunk {start} to {end} of {max_id} rows")
                 try:
                     url = f'{host}/apis/v1/retrieveSQLTables/'
                     params = {'table_name': table_name, 'start': start, 'end': end,
@@ -163,20 +162,18 @@ def retrieve_sql_files_from_master_server(request):
                     data = structured_json['files'].get(table_name, "")
                     split_data = data.splitlines(keepends=True)
                     lines_count = process_table_data(table_name, split_data)
-                    print(f'{lines_count} lines in chunk')
+                    # print(f'{lines_count} lines in chunk')
                 except Exception as e:
                     print(f"TABLE_PROCESSING_ERROR: {table_name} -- {str(e)}")
                 start += chunk_size
                 end += chunk_size
-                print(f"Chunk took {(time.time() - chunk_start_time):.1f}s")
 
-            print(f'\n Table took {(time.time() - table_start_time) / 60} min')
+            print(f'Table {table_name} took {((time.time() - table_start_time) / 60):.1f} min\n')
 
             # reset table's id sequence
             reset_id_seq(engine, table_name)
         else:
-            print(f"   - {table_name} is empty")
-
+            print(f"{table_name} is empty\n")
     minutes = (time.time() - t0) / 60
     print(f"Total time for all tables: {minutes:.1f} minutes")
     results = {'status': 'Completed', 'status_code': 200}
@@ -229,11 +226,11 @@ def process_table_data(table_name, split_data):
     :param split_data: list of rows from data returned by API
     :return:
     """
-    print("Processing data from API...")
+    # print("Processing data from API...")
     first_len = len(split_data[0].split("|"))
     lines = [line.split("|") for line in split_data if len(line.split("|")) == first_len]
+    # No valid lines to process for table. Skipping insertion.
     if not lines:
-        print(f"No valid lines to process for {table_name}. Skipping insertion.")
         return
     engine = connect_to_db()
 
@@ -253,8 +250,8 @@ def process_table_data(table_name, split_data):
 
     # Reorder DataFrame columns to match the table schema
     df = df[col_names]
+    # No valid data to insert for table. Skipping insertion
     if df.empty:
-        print(f"No valid data to insert for {table_name}. Skipping insertion.")
         return 0
 
     # retrieve constraints from table
@@ -269,16 +266,15 @@ def process_table_data(table_name, split_data):
         if not col['nullable']:
             not_null_columns.append(col['name'])
         col_dict[col['name']] = str(col['type'])
-    print("   - Cleaning data from API...")
 
     with engine.connect() as conn:
-        max_id = fetch_max_id(conn, table_name, "id")
+        max_id = fetch_local_max_id(conn, table_name, "id")
     try:
         df_cleaned = clean_df(df, col_dict, unique_cols, not_null_columns, fk_cols, max_id)
     except Exception as e:
         print(f"TABLE_CLEANING_ERROR: {str(e)}")
+    # No valid data to insert for {table_name}. Skipping insertion.
     if df_cleaned.empty:
-        print(f"No valid data to insert for {table_name}. Skipping insertion.")
         return 0
 
     with engine.connect() as conn:
@@ -388,7 +384,7 @@ def get_row_count_from_master_server():
         return -1
 
 
-def fetch_max_id(conn, table_name, id_column):
+def fetch_local_max_id(conn, table_name, id_column):
     """
     Fetches the maximum ID value from a specified local table.
     :param conn: SQLAlchemy connection object.
