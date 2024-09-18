@@ -8,7 +8,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.controllers_master import fast_load_status_retrieve, retrieve_sql_tables_as_csv, \
-    get_total_row_count
+    get_total_row_count, get_max_id
 from retrieve_tables.controllers_master import fast_load_status_update
 from wevote_functions.functions import get_voter_api_device_id
 
@@ -57,3 +57,11 @@ def fast_load_status_retrieve_view(request):   # fastLoadStatusRetrieve
 
 def fast_load_status_update_view(request):   # fastLoadStatusUpdate
     return fast_load_status_update(request)
+
+
+def retrieve_max_id(request):                   # retrieveMaxID
+    table_name = request.GET.get('table_name', 'bad_table_param_error')
+    json_data = {
+        'maxID': get_max_id(table_name)
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
