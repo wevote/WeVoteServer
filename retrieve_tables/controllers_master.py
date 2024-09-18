@@ -278,7 +278,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         success = False
         row_id = ''
 
-    started_txt = started.strftime(DATE_FORMAT_YMD_HMS) if started else "" # '%Y-%m-%d %H:%M:%S'
+    started_txt = started.strftime(DATE_FORMAT_YMD_HMS) if started else ""  # '%Y-%m-%d %H:%M:%S'
     results = {
         'status': status,
         'success': success,
@@ -323,19 +323,20 @@ def fast_load_status_update(request):
             row.total_records = total_records
         row.save()
         status = 'ROW_SAVED'
-        id = row.id
-        print('fast_load_status_update AFTER SAVE table_name', table_name, chunk, row.current_record, additional_records)
+        row_id = row.id
+        print('fast_load_status_update AFTER SAVE table_name',
+              table_name, chunk, row.current_record, additional_records)
 
     except Exception as e:
         logger.error("fast_load_status_update caught exception: " + str(e))
         success = False
         status = 'ROW_NOT_SAVED  ' + str(e)
-        id = -1
+        row_id = -1
 
     results = {
         'status': status,
         'success': success,
-        'row_id': id,
+        'row_id': row_id,
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')

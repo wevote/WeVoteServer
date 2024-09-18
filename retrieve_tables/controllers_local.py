@@ -2,20 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import csv
 import json
 import os
 import time
 from datetime import datetime, timezone
 
-import sqlalchemy as sa
-from sqlalchemy.engine.reflection import Inspector
-import psycopg2
 import numpy as np
-
-import requests
 import pandas as pd
+import psycopg2
+import requests
+import sqlalchemy as sa
 from django.http import HttpResponse
+from sqlalchemy.engine.reflection import Inspector
 
 import wevote_functions.admin
 from config.base import get_environment_variable
@@ -38,14 +36,22 @@ def save_off_database():
 
 
 def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
+    """
+    Updates progress bar and data on fast load HTML page
+    :param host:
+    :param voter_api_device_id:
+    :param table_name:
+    :param additional_records:
+    :return:
+    """
     try:
-        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
-                                verify=True,
-                                params={'table_name': table_name,
-                                        'additional_records': additional_records,
-                                        'is_running': True,
-                                        'voter_api_device_id': voter_api_device_id,
-                                        })
+       response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
+                     verify=True,
+                     params={'table_name': table_name,
+                             'additional_records': additional_records,
+                             'is_running': True,
+                             'voter_api_device_id': voter_api_device_id,
+                             })
         # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
@@ -53,14 +59,18 @@ def update_fast_load_db(host, voter_api_device_id, table_name, additional_record
 
 def connect_to_db():
     """
-    Create a connection with the local postgres database
+    Create a connection with the local postgres database with sqlalchemy and psycopg2
     :return:
     """
-    # CONNECT TO POSTGRES LOCAL WITH SQLALCHEMY AND PSYCOPG
     try:
-        engine = sa.create_engine(
-            f"postgresql+psycopg2://{get_environment_variable('DATABASE_USER')}:{get_environment_variable('DATABASE_PASSWORD')}@{get_environment_variable('DATABASE_HOST')}:{5432}/{get_environment_variable('DATABASE_NAME')}"
+        connection_string = (
+            f"postgresql+psycopg2://{get_environment_variable('DATABASE_USER')}:"
+            f"{get_environment_variable('DATABASE_PASSWORD')}@"
+            f"{get_environment_variable('DATABASE_HOST')}:"
+            f"{5432}/"
+            f"{get_environment_variable('DATABASE_NAME')}"
         )
+        engine = sa.create_engine(connection_string)
         return engine
     except Exception as e:
         logger.error('Unable to connect to database: ', str(e))
@@ -92,6 +102,11 @@ def fetch_data_from_api(url, params, max_retries=10):
 
 
 def get_max_id(params):
+    """
+    Gets the maximum id present in the remote Postgres table
+    :param params: list of parameters to pass to API
+    :return: response.json()
+    """
     host = 'https://api.wevoteusa.org'
     try:
         response = requests.get(host + '/apis/v1/retrieveMaxID', params=params)
@@ -141,8 +156,8 @@ def retrieve_sql_files_from_master_server(request):
         table_start_time = time.time()
         # filling table with 10,000 line chunks
         if max_id and max_id != -1:
-            while end-chunk_size < max_id:
-                print(f"{table_name}:   {((start/max_id)*100):.0f}% -- Chunk {start} to {end} of {max_id} rows")
+            while end - chunk_size < max_id:
+                print(f"{table_name}:   {((start / max_id) * 100):.0f}% -- Chunk {start} to {end} of {max_id} rows")
                 try:
                     url = f'{host}/apis/v1/retrieveSQLTables/'
                     params = {'table_name': table_name, 'start': start, 'end': end,
@@ -179,6 +194,12 @@ def retrieve_sql_files_from_master_server(request):
 
 
 def truncate_table(engine, table_name):
+    """
+    Truncates (completely clears contents of) local table
+    :param engine: connection to local Postgres
+    :param table_name: table to truncate
+    :return:
+    """
     with engine.connect() as conn:
         try:
             # Truncate the table
@@ -219,7 +240,7 @@ def reset_id_seq(engine, table_name):
 
 def process_table_data(table_name, split_data):
     """
-    Processes and inserts data into Postgres table
+    Processes and inserts data into local Postgres table
     :param table_name: target table to insert into
     :param split_data: list of rows from data returned by API
     :return:
@@ -260,6 +281,7 @@ def process_table_data(table_name, split_data):
 
     not_null_columns = []
     col_dict = {}
+    df_cleaned = pd.DataFrame()
     for col in columns:
         if not col['nullable']:
             not_null_columns.append(col['name'])
@@ -422,6 +444,13 @@ def get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id):
 
 
 def copy_df_to_postgres(df: pd.DataFrame, conn, table_name):
+    """
+    Copies pandas DataFrame to local Postgres table
+    :param df: pandas DataFrame to copy
+    :param conn: connection to local postgres
+    :param table_name: name of table to copy into in local Postgres
+    :return:
+    """
     if df.empty:
         print("DataFrame is empty. Skipping insert.")
         return
