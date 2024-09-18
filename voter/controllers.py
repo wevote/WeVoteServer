@@ -1677,7 +1677,9 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'voter_device_id': voter_device_id,
         }
         return voter_address_retrieve_results
-    return voter_address_retrieve_for_voter_id(voter_id, voter_device_id)
+    results = voter_address_retrieve_for_voter_id(voter_id, voter_device_id)
+    results['voter_device_id'] = voter_device_id
+    return results
 
 
 def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
