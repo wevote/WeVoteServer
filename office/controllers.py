@@ -725,7 +725,7 @@ def office_create_from_office_held(office_held_we_vote_id='', google_civic_elect
             office_url=office_held.office_held_url,
             primary_party=office_held.primary_party,
             state_code=office_held.state_code,
-        )
+        )  # Cannot be readonly
         contest_office_found = True
         election_day_text = ''
 

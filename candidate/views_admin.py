@@ -150,7 +150,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             new_filter = Q(party__icontains=candidate_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=candidate_search)
+            new_filter = Q(we_vote_id=candidate_search)
             filters.append(new_filter)
 
             # Add the first query
@@ -387,8 +387,8 @@ def candidates_not_duplicates_view(request):
         candidate1_we_vote_id, candidate2_we_vote_id)
     if results['success']:
         queryset = CandidatesArePossibleDuplicates.objects.filter(
-            candidate1_we_vote_id__iexact=candidate1_we_vote_id,
-            candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+            candidate1_we_vote_id=candidate1_we_vote_id,
+            candidate2_we_vote_id=candidate2_we_vote_id,
         )
         queryset.delete()
         messages.add_message(request, messages.INFO, 'Two candidates marked as not duplicates.')
@@ -1099,10 +1099,10 @@ def candidate_list_view(request):
                 new_filter = Q(google_civic_candidate_name3__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(linked_campaignx_we_vote_id__iexact=one_word)
+                new_filter = Q(linked_campaignx_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(politician_we_vote_id__iexact=one_word)
+                new_filter = Q(politician_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(party__icontains=one_word)
@@ -1120,7 +1120,7 @@ def candidate_list_view(request):
                 new_filter = Q(vote_usa_politician_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_url__icontains=one_word)
@@ -1457,7 +1457,7 @@ def candidate_list_view(request):
                     candidate.candidate_merge_possibility = twitter_possibility_list[0]
                 else:
                     request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
-                        candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                        candidate_campaign_we_vote_id=candidate.we_vote_id,
                         kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
                     request_history_list = list(request_history_query)
                     if request_history_list and positive_value_exists(len(request_history_list)):
@@ -1478,7 +1478,7 @@ def candidate_list_view(request):
                     candidate.google_search_merge_possibility = google_search_possibility_query[0]
                 else:
                     request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
-                        candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                        candidate_campaign_we_vote_id=candidate.we_vote_id,
                         kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
                     request_history_list = list(request_history_query)
                     if request_history_list and positive_value_exists(len(request_history_list)):
@@ -1585,7 +1585,7 @@ def candidate_new_search_view(request):
     if google_civic_election_id:
         # These are the Offices already entered for this election
         try:
-            office_queryset = ContestOffice.objects.order_by('office_name')
+            office_queryset = ContestOffice.objects.using('readonly').order_by('office_name')
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             contest_office_list = list(office_queryset)
 
@@ -1976,7 +1976,7 @@ def candidate_new_view(request):
     if not no_office:
         # These are the Offices already entered for this election
         try:
-            office_queryset = ContestOffice.objects.order_by('office_name')
+            office_queryset = ContestOffice.objects.using('readonly').order_by('office_name')
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             contest_office_list = list(office_queryset)
 
@@ -2292,7 +2292,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             from politician.models import PoliticianSEOFriendlyPath
             try:
                 path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
-                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_query = path_query.filter(politician_we_vote_id=politician_we_vote_id)
                 path_count = path_query.count()
                 path_list = list(path_query[:3])
             except Exception as e:
@@ -2381,7 +2381,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=candidate_on_stage)
 
         queryset = CandidateChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(candidate_we_vote_id__iexact=candidate_we_vote_id)
+        queryset = queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
 
@@ -2811,7 +2811,7 @@ def candidate_edit_process_view(request):
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
-    candidate_on_stage = CandidateCampaign()
+    candidate_on_stage = None
     election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
     state_code_from_candidate = ''
@@ -3746,7 +3746,7 @@ def candidate_edit_process_view(request):
             politician_manager = PoliticianManager()
             results = politician_manager.retrieve_politician(
                 politician_we_vote_id=candidate_on_stage.politician_we_vote_id,
-                read_only=True)
+                read_only=False)
             if results['politician_found']:
                 politician = results['politician']
                 if positive_value_exists(politician.id) and candidate_on_stage.politician_id != politician.id:
@@ -3764,9 +3764,12 @@ def candidate_edit_process_view(request):
                 if results['success']:
                     save_changes = results['save_changes']
                     if positive_value_exists(save_changes):
-                        politician = results['politician']
-                        politician.save()
-
+                        try:
+                            politician = results['politician']
+                            politician.save()
+                        except Exception as e:
+                            messages.add_message(request, messages.ERROR,
+                                                 'Could not save politician with refreshed data:' + str(e))
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  'Could not save candidate with refreshed politician data:' + str(e))
@@ -5241,8 +5244,8 @@ def update_candidate_from_politician_view(request):
     politician_we_vote_id = politician.we_vote_id
 
     queryset = CandidateCampaign.objects.using('readonly').all()
-    queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
-    queryset = queryset.filter(we_vote_id__iexact=candidate_we_vote_id)
+    queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
+    queryset = queryset.filter(we_vote_id=candidate_we_vote_id)
     queryset = queryset.order_by('-candidate_year', '-candidate_ultimate_election_date')
     candidate_list = list(queryset)
     candidate_list_by_politician_we_vote_id = {}

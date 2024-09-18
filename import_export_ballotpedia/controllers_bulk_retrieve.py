@@ -135,7 +135,7 @@ def retrieve_ballotpedia_photos_in_bulk(
             # Check to see if we have already tried to find their photo link from Ballotpedia. We don't want to
             #  search Ballotpedia more than once.
             # request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
-            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+            #     candidate_campaign_we_vote_id=one_candidate.we_vote_id,
             #     kind_of_action=RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS)
             # request_history_list = list(request_history_query)
             request_history_list = []

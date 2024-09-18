@@ -1037,8 +1037,7 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
         voter = None
         voter_manager = VoterManager()
         existing_email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            normalized_email_address=email,
-        )
+            normalized_email_address=email, read_only=True)
         if existing_email_results['email_address_object_found']:
             email_address_object = existing_email_results['email_address_object']
             voter_we_vote_id = email_address_object.voter_we_vote_id

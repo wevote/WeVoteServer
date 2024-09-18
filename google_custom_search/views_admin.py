@@ -156,7 +156,7 @@ def bulk_retrieve_possible_google_search_users_view(request):
                 # Check to see if we have already tried to find their information from Twitter. We don't want to
                 #  search Twitter more than once.
                 request_history_query = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+                    candidate_campaign_we_vote_id=one_candidate.we_vote_id,
                     kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
                 request_history_list = list(request_history_query)
 

@@ -83,6 +83,7 @@ ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER = [
     'secure.actblue.com', 'secure.anedot.com', 'secure.ngpvan.com', 'secure.winred.com',
     't.co', 't.me', 'tinyurl.com', 'twitter.com',
     'wix.com', 'wixsite.com', 'wordpress.com', 'www.',
+    'x.com',
     'yahoo.com', 'youtube.com',
 ]
 
@@ -259,7 +260,7 @@ class OrganizationManager(models.Manager):
                 "hashtag_text": hashtag_text,
             }
             new_organization_link_to_hastag, created = OrganizationLinkToHashtag.objects.update_or_create(
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 hashtag_text__iexact=hashtag_text,
                 defaults=defaults,)
             # NOTE: Hashtags are only significant if there are more than one for a particular issue so I'm not sure
@@ -317,9 +318,9 @@ class OrganizationManager(models.Manager):
                 "voter_we_vote_id":         voter_we_vote_id,
             }
             new_organization_link_to_voter, created = OrganizationMembershipLinkToVoter.objects.update_or_create(
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 external_voter_id=external_voter_id,
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 defaults=defaults,)
             status += "CREATE_ORGANIZATION_LINK_TO_VOTER_SUCCESSFUL "
             success = True
@@ -2654,7 +2655,7 @@ class OrganizationListManager(models.Manager):
                 # - organization.twitter_user_id
                 # - organization.organization_twitter_handle
                 try:
-                    organization_queryset = Organization.objects.all()
+                    organization_queryset = Organization.objects.all()  # Cannot be Readonly
 
                     # We want to find organizations with *any* of these values
                     new_filter = Q(twitter_user_id=twitter_user_id)
@@ -2995,7 +2996,7 @@ class OrganizationListManager(models.Manager):
 
         if positive_value_exists(organization_name):
             try:
-                organization_queryset = Organization.objects.all()
+                organization_queryset = Organization.objects.using('readonly').all()
                 organization_queryset = organization_queryset.filter(
                     organization_name__iexact=organization_name)
 
@@ -3560,7 +3561,7 @@ class Organization(models.Model):
 
     def generate_twitter_link(self):
         if self.organization_twitter_handle:
-            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)
+            return "https://x.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)
         else:
             return ''
 
@@ -3633,10 +3634,13 @@ class OrganizationTeamMember(models.Model):
 
     organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     can_edit_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_edit_challenge_owned_by_organization = models.BooleanField(default=True)
     can_edit_organization = models.BooleanField(default=True)
     can_manage_team_members = models.BooleanField(default=False)
     can_moderate_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_moderate_challenge_owned_by_organization = models.BooleanField(default=True)
     can_send_updates_for_campaignx_owned_by_organization = models.BooleanField(default=False)
+    can_send_updates_for_challenge_owned_by_organization = models.BooleanField(default=True)
     team_member_name = models.CharField(max_length=255, null=False, blank=False)
     team_member_organization_we_vote_id = models.CharField(
         max_length=255, null=True, blank=True, unique=False, db_index=True)

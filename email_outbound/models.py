@@ -497,13 +497,15 @@ class EmailManager(models.Manager):
     def retrieve_email_address_object(
             normalized_email_address='',
             email_address_object_we_vote_id='',
-            voter_we_vote_id=''):
+            voter_we_vote_id='',
+            read_only=False):
         """
         There are cases where we store multiple entries for the same normalized_email_address (prior to an email
         address being verified)
         :param normalized_email_address:
         :param email_address_object_we_vote_id:
         :param voter_we_vote_id:
+        :param read_only:
         :return:
         """
         exception_does_not_exist = False
@@ -518,27 +520,43 @@ class EmailManager(models.Manager):
         try:
             if positive_value_exists(email_address_object_we_vote_id):
                 if positive_value_exists(voter_we_vote_id):
-                    email_address_object = EmailAddress.objects.get(
-                        we_vote_id__iexact=email_address_object_we_vote_id,
-                        voter_we_vote_id__iexact=voter_we_vote_id,
-                        deleted=False
-                    )
+                    if positive_value_exists(read_only):
+                        email_address_object = EmailAddress.objects.using('readonly').get(
+                            we_vote_id=email_address_object_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            deleted=False
+                        )
+                    else:
+                        email_address_object = EmailAddress.objects.get(
+                            we_vote_id=email_address_object_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            deleted=False
+                        )
                 else:
-                    email_address_object = EmailAddress.objects.get(
-                        we_vote_id__iexact=email_address_object_we_vote_id,
-                        deleted=False
-                    )
+                    if positive_value_exists(read_only):
+                        email_address_object = EmailAddress.objects.using('readonly').get(
+                            we_vote_id=email_address_object_we_vote_id,
+                            deleted=False
+                        )
+                    else:
+                        email_address_object = EmailAddress.objects.get(
+                            we_vote_id=email_address_object_we_vote_id,
+                            deleted=False
+                        )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
                 success = True
                 status += "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(normalized_email_address):
-                email_address_queryset = EmailAddress.objects.all()
+                if positive_value_exists(read_only):
+                    email_address_queryset = EmailAddress.objects.using('readonly').all()
+                else:
+                    email_address_queryset = EmailAddress.objects.all()
                 if positive_value_exists(voter_we_vote_id):
                     email_address_queryset = email_address_queryset.filter(
                         normalized_email_address__iexact=normalized_email_address,
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                         deleted=False
                     )
                 else:
@@ -714,10 +732,11 @@ class EmailManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_voter_email_address_list(voter_we_vote_id):
+    def retrieve_voter_email_address_list(voter_we_vote_id, read_only=True):
         """
 
         :param voter_we_vote_id:
+        :param read_only:
         :return:
         """
         status = ""
@@ -735,9 +754,12 @@ class EmailManager(models.Manager):
 
         email_address_list = []
         try:
-            email_address_queryset = EmailAddress.objects.all()
+            if positive_value_exists(read_only):
+                email_address_queryset = EmailAddress.objects.using('readonly').all()
+            else:
+                email_address_queryset = EmailAddress.objects.all()
             email_address_queryset = email_address_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 deleted=False
             )
             email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
@@ -773,7 +795,10 @@ class EmailManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_primary_email_with_ownership_verified(voter_we_vote_id='', normalized_email_address=''):
+    def retrieve_primary_email_with_ownership_verified(
+            voter_we_vote_id='',
+            normalized_email_address='',
+            read_only=True):
         status = ""
         email_address_list = []
         email_address_list_found = False
@@ -781,9 +806,12 @@ class EmailManager(models.Manager):
         email_address_object_found = False
         try:
             if positive_value_exists(voter_we_vote_id):
-                email_address_queryset = EmailAddress.objects.all()
+                if positive_value_exists(read_only):
+                    email_address_queryset = EmailAddress.objects.using('readonly').all()
+                else:
+                    email_address_queryset = EmailAddress.objects.all()
                 email_address_queryset = email_address_queryset.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     email_ownership_is_verified=True,
                     deleted=False
                 )
@@ -829,7 +857,7 @@ class EmailManager(models.Manager):
         return results
 
     def fetch_primary_email_with_ownership_verified(self, voter_we_vote_id):
-        results = self.retrieve_primary_email_with_ownership_verified(voter_we_vote_id)
+        results = self.retrieve_primary_email_with_ownership_verified(voter_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             email_address_object = results['email_address_object']
             return email_address_object.normalized_email_address

@@ -3217,16 +3217,16 @@ def create_batch_row_action_ballot_item(batch_description,
         try:
             # This used to retrieve from using('readonly') but the query gets interrupted from updates from master
             existing_ballot_item_query = BallotItem.objects.all()
-            existing_ballot_item_query = existing_ballot_item_query.filter(
-                google_civic_election_id=google_civic_election_id,
-                polling_location_we_vote_id__iexact=polling_location_we_vote_id
-            )
             if positive_value_exists(contest_office_we_vote_id):
                 existing_ballot_item_query = existing_ballot_item_query.filter(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+                    contest_office_we_vote_id=contest_office_we_vote_id)  # 2024-09-01 Removed __iexact for speed
             elif positive_value_exists(contest_measure_we_vote_id):
                 existing_ballot_item_query = existing_ballot_item_query.filter(
-                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                    contest_measure_we_vote_id=contest_measure_we_vote_id)  # 2024-09-01 Removed __iexact for speed
+            existing_ballot_item_query = existing_ballot_item_query.filter(
+                polling_location_we_vote_id=polling_location_we_vote_id)  # 2024-09-01 Removed __iexact for speed
+            existing_ballot_item_query = existing_ballot_item_query.filter(
+                google_civic_election_id=google_civic_election_id)
 
             existing_entry_list = existing_ballot_item_query[:1]
             existing_ballot_item_query_completed = True

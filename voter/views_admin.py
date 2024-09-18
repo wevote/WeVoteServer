@@ -384,7 +384,8 @@ def voter_edit_process_view(request):
         # Search for this email address in the EmailAddress table
         if positive_value_exists(email):
             try:
-                email_belonging_to_other_voter = EmailAddress.objects.exclude(voter_we_vote_id=voter_we_vote_id).get(
+                email_belonging_to_other_voter = EmailAddress.objects.using('readonly')\
+                    .exclude(voter_we_vote_id=voter_we_vote_id).get(
                     normalized_email_address__iexact=email,
                     email_ownership_is_verified=True,
                     deleted=False,
@@ -605,7 +606,7 @@ def voter_edit_process_view(request):
         if positive_value_exists(voter_we_vote_id):
             from campaign.models import CampaignXSupporter
             supporters_query = CampaignXSupporter.objects.all()
-            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            supporters_query = supporters_query.filter(voter_we_vote_id=voter_we_vote_id)
             supporters_list = list(supporters_query)
             update_campaignx_supporter_count = False
             from campaign.views_admin import deleting_or_editing_campaignx_supporter_list
@@ -731,19 +732,19 @@ def voter_edit_process_view(request):
             team_we_vote_id = volunteer_team.we_vote_id
             if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
                 try:
-                    number_deleted, details = VolunteerTeamMember.objects.using('readonly') \
+                    number_deleted, details = VolunteerTeamMember.objects \
                         .filter(
-                            team_we_vote_id__iexact=team_we_vote_id,
-                            voter_we_vote_id__iexact=voter_we_vote_id,
+                            team_we_vote_id=team_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
                         ) \
                         .delete()
                     messages.add_message(request, messages.INFO,
                                          "Deleted VolunteerTeamMember ({number_deleted})."
                                          .format(number_deleted=number_deleted))
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership1: ' + str(e))
             else:
-                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership1.')
         # Add this voter to the team
         add_variable_name = "add_volunteer_team_member_" + str(volunteer_team.id)
         add_voter_to_team = positive_value_exists(request.POST.get(add_variable_name, False))
@@ -774,9 +775,9 @@ def voter_edit_process_view(request):
                                 voter_we_vote_id=voter_we_vote_id)
                     messages.add_message(request, messages.INFO, message)
                 except Exception as e:
-                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership2: ' + str(e))
             else:
-                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership2.')
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)) +
                                 "?voter_invitation_password=" + password_text)
@@ -834,7 +835,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         # Get FacebookLinkToVoter
         try:
             facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+                voter_we_vote_id=voter_on_stage.we_vote_id)
             if positive_value_exists(facebook_link_to_voter.facebook_user_id):
                 facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
                 voter_on_stage.facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
@@ -844,7 +845,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         # Get TwitterLinkToVoter
         try:
             twitter_link_to_voter = TwitterLinkToVoter.objects.get(
-                voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+                voter_we_vote_id=voter_on_stage.we_vote_id)
             if positive_value_exists(twitter_link_to_voter.twitter_id):
                 twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
                 voter_on_stage.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
@@ -906,7 +907,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             for one_duplicate_voter in voter_list_duplicate_facebook:
                 try:
                     facebook_link_to_another_voter = FacebookLinkToVoter.objects.get(
-                        voter_we_vote_id__iexact=one_duplicate_voter.we_vote_id)
+                        voter_we_vote_id=one_duplicate_voter.we_vote_id)
                     if positive_value_exists(facebook_link_to_another_voter.facebook_user_id):
                         facebook_id_from_link_to_voter_for_another_voter = True
                         one_duplicate_voter.facebook_id_from_link_to_voter = \
@@ -949,7 +950,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             for one_duplicate_voter in voter_list_duplicate_twitter:
                 try:
                     twitter_link_to_another_voter = TwitterLinkToVoter.objects.get(
-                        voter_we_vote_id__iexact=one_duplicate_voter.we_vote_id)
+                        voter_we_vote_id=one_duplicate_voter.we_vote_id)
                     if positive_value_exists(twitter_link_to_another_voter.twitter_id):
                         twitter_id_from_link_to_voter_for_another_voter = True
                         one_duplicate_voter.twitter_id_from_link_to_voter = twitter_link_to_another_voter.twitter_id
@@ -987,7 +988,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                 for item in org_twitter_filters:
                     final_filters |= item
 
-            organization_list_with_duplicate_twitter = Organization.objects.all()
+            organization_list_with_duplicate_twitter = Organization.objects.using('readonly').all()
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.filter(final_filters)
             organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.exclude(
                 we_vote_id=voter_on_stage.linked_organization_we_vote_id)
@@ -995,7 +996,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             for one_duplicate_organization in organization_list_with_duplicate_twitter:
                 try:
                     linked_voter = Voter.objects.get(
-                        linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
+                        linked_organization_we_vote_id=one_duplicate_organization.we_vote_id)
                     one_duplicate_organization.linked_voter = linked_voter
                 except Voter.DoesNotExist:
                     pass
@@ -1005,15 +1006,15 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         # ####################################
         # Find the voter that has this organization as their linked_organization_we_vote_id
         linked_organization_we_vote_id_list_updated = []
-        linked_organization_we_vote_id_list = Organization.objects.all()
+        linked_organization_we_vote_id_list = Organization.objects.using('readonly').all()
         linked_organization_we_vote_id_list = linked_organization_we_vote_id_list.filter(
-            we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
+            we_vote_id=voter_on_stage.linked_organization_we_vote_id)
 
         linked_organization_found = False
         for one_linked_organization in linked_organization_we_vote_id_list:
             try:
-                linked_voter = Voter.objects.get(
-                    linked_organization_we_vote_id__iexact=one_linked_organization.we_vote_id)
+                linked_voter = Voter.objects.using('readonly').get(
+                    linked_organization_we_vote_id=one_linked_organization.we_vote_id)
                 one_linked_organization.linked_voter = linked_voter
                 linked_organization_found = True
             except Voter.DoesNotExist:
@@ -1023,7 +1024,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             linked_organization_we_vote_id_list_updated.append(one_linked_organization)
 
         # Search for all email addresses tied to this voter
-        email_addresses_query = EmailAddress.objects.filter(
+        email_addresses_query = EmailAddress.objects.using('readonly').filter(
             voter_we_vote_id=voter_we_vote_id,
         )
         email_addresses_list = list(email_addresses_query)
@@ -1036,10 +1037,10 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
 
         # Do some checks on all the public positions owned by this voter
         position_filters = []
-        new_filter = Q(voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+        new_filter = Q(voter_we_vote_id=voter_on_stage.we_vote_id)
         position_filters.append(new_filter)
         if positive_value_exists(voter_on_stage.linked_organization_we_vote_id):
-            new_filter = Q(organization_we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
+            new_filter = Q(organization_we_vote_id=voter_on_stage.linked_organization_we_vote_id)
             position_filters.append(new_filter)
 
         final_position_filters = []
@@ -1218,7 +1219,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         if positive_value_exists(voter_we_vote_id):
             from campaign.models import CampaignXSupporter
             supporters_query = CampaignXSupporter.objects.all()
-            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            supporters_query = supporters_query.filter(voter_we_vote_id=voter_we_vote_id)
             # if positive_value_exists(only_show_supporters_with_endorsements):
             #     supporters_query = supporters_query.exclude(
             #         Q(supporter_endorsement__isnull=True) |
@@ -1263,7 +1264,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         volunteer_team_member_dict = {}
         try:
             queryset = VolunteerTeamMember.objects.using('readonly').all()\
-                .filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                .filter(voter_we_vote_id=voter_we_vote_id)
             volunteer_team_membership_list = list(queryset)
             if len(volunteer_team_membership_list) > 0:
                 for volunteer_team_member in volunteer_team_membership_list:
@@ -1706,19 +1707,19 @@ def voter_list_view(request):
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
             normalized_email_address__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
             normalized_sms_phone_number__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
         # Now search voter object
-        voter_query = Voter.objects.all()
+        voter_query = Voter.objects.using('readonly').all()
         search_words = voter_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
@@ -1731,7 +1732,7 @@ def voter_list_view(request):
             new_filter = Q(last_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             if len(voter_we_vote_ids_with_email) > 0:
@@ -1757,7 +1758,7 @@ def voter_list_view(request):
             new_filter = Q(twitter_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(linked_organization_we_vote_id__iexact=one_word)
+            new_filter = Q(linked_organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1770,7 +1771,7 @@ def voter_list_view(request):
 
                 voter_query = voter_query.filter(final_filters)
     else:
-        voter_query = Voter.objects.order_by(
+        voter_query = Voter.objects.using('readonly').order_by(
             '-date_last_changed')
 
     if positive_value_exists(is_admin):
@@ -1806,8 +1807,8 @@ def voter_list_view(request):
         voter_query = voter_query.filter(we_vote_id__in=merge_data_we_vote_id_list)
         for voter_merge_status in voter_merge_status_list:
             log_queryset = VoterMergeLog.objects.filter(
-                from_voter_we_vote_id__iexact=voter_merge_status.from_voter_we_vote_id,
-                to_voter_we_vote_id__iexact=voter_merge_status.to_voter_we_vote_id,
+                from_voter_we_vote_id=voter_merge_status.from_voter_we_vote_id,
+                to_voter_we_vote_id=voter_merge_status.to_voter_we_vote_id,
             ).order_by('id')
             voter_merge_log_list = list(log_queryset)
             voter_merge_status.voter_merge_log_list = voter_merge_log_list
@@ -1941,7 +1942,7 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     else:
         # Otherwise, use VoterWhoSharesSummaryAllTime object
         voter_who_shares_query = VoterWhoSharesSummaryAllTime.objects.using('readonly').all()
-    voter_who_shares_query = voter_who_shares_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+    voter_who_shares_query = voter_who_shares_query.filter(voter_we_vote_id=voter_we_vote_id)
     voter_who_shares_summary_list = list(voter_who_shares_query)
 
     voter_who_shares_summary_list_modified = []
@@ -1954,13 +1955,13 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
 
         if positive_value_exists(voter_summary_search):
             # Search for an email address - do not require to be verified
-            voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+            voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
                 normalized_email_address__icontains=voter_summary_search,
             ).values_list('voter_we_vote_id', flat=True)
             voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
             # Search for a phone number
-            voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+            voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
                 normalized_sms_phone_number__icontains=voter_summary_search,
             ).values_list('voter_we_vote_id', flat=True)
             voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
@@ -1982,7 +1983,7 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
                 new_filter = Q(shared_by_display_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(shared_by_voter_we_vote_id__iexact=one_word)
+                new_filter = Q(shared_by_voter_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query

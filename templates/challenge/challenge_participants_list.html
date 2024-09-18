@@ -1,0 +1,143 @@
+{# templates/challenge/challenge_participants_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Challenge Participants: {{ challenge_title }}{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<a href="{% url 'challenge:challenge_summary' challenge_we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">< Back to Challenge</a><br />
+
+<h1>Challenge Participants: {{ challenge_title }}</h1>
+
+<form name="state_code_form" method="get" action="{% url 'challenge:participants_list' challenge_we_vote_id %}">
+    {% csrf_token %}
+    <input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden" name="challenge_search" value="{% if challenge_search %}{{ challenge_search }}{% endif %}">
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
+
+    {#  #}
+    <label for="only_show_participants_with_endorsements_id">
+      <input type="checkbox" name="only_show_participants_with_endorsements" id="only_show_participants_with_endorsements_id" value="1"
+             {% if only_show_participants_with_endorsements %}checked{% endif %} /> Only Show Participants w/ Endorsement Text
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <label for="show_participants_not_visible_to_public_id">
+      <input type="checkbox" name="show_participants_not_visible_to_public" id="show_participants_not_visible_to_public_id" value="1"
+             {% if show_participants_not_visible_to_public %}checked{% endif %} /> Include Participants Not Visible to Public
+    </label>
+
+    <br />
+
+{% if challenge_search %}
+    <a href="{% url 'challenge:participants_list' challenge_we_vote_id %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="challenge_search" id="challenge_search_id" value="{{ challenge_search }}" />
+    <input type="submit" value="Search for Participant" />
+
+</form>
+
+<form action="{% url "challenge:participants_list_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="challenge_we_vote_id" value="{{ challenge_we_vote_id }}">
+<input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
+<input type="hidden" name="challenge_search" value="{% if challenge_search %}{{ challenge_search }}{% endif %}">
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+<input type="hidden" name="only_show_participants_with_endorsements" value="{{ only_show_participants_with_endorsements }}">
+<input type="hidden" name="show_participants_not_visible_to_public" value="{{ show_participants_not_visible_to_public }}">
+
+<hr />
+<div class="form-group">
+    <div class="col-sm-12">
+        <strong>Add New Participant:</strong><br />
+        <table id="challenge_participant_add">
+            <thead>
+                <tr>
+                    <th style="color: darkgray">Voter or Organization We Vote Id</th>
+                    <th style="color: darkgray">Endorsement</th>
+                    <th style="color: darkgray">Participant Wants Visibility &nbsp;&nbsp;</th>
+                    <th style="color: darkgray">Visibility Blocked by We Vote &nbsp;&nbsp;</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="incoming_challenge_participant_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+                <td style="width: 320px;">
+                    <textarea
+                            name="incoming_challenge_participant_endorsement"
+                            rows="1"
+                            style="width: 300px; border: 1px solid lightgray;"></textarea>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="incoming_challenge_participant_wants_visibility"
+                           id="incoming_challenge_participant_wants_visibility_id"
+                           value=1
+                           checked
+                    />
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="incoming_visibility_blocked_by_we_vote"
+                           id="incoming_visibility_blocked_by_we_vote_id"
+                           value=1
+                    />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{% if participants_list %}
+{% include "challenge/challenge_participants_list_table.html" with participants_list=participants_list %}
+
+    <p></p>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'challenge:participants_list' challenge_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Challenge Participants</button>
+    </div>
+</div>
+
+</form>
+
+{% else %}
+    <p>(no participants found with current filters)</p>
+{% endif %}
+
+    <p></p>
+
+    <script>
+        $(function() {
+            $('#limit_to_opinions_in_this_year_id').change(function() {
+                this.form.submit();
+            });
+            $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_participants_not_visible_to_public_id').change(function() {
+                this.form.submit();
+             });
+            $('#only_show_participants_with_endorsements_id').change(function() {
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

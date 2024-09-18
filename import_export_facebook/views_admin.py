@@ -307,7 +307,7 @@ def bulk_retrieve_facebook_photos_view(request):
             # Check to see if we have already tried to find their photo link from Facebook. We don't want to
             #  search Facebook more than once.
             # request_history_query = RemoteRequestHistory.objects.filter(
-            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+            #     candidate_campaign_we_vote_id=one_candidate.we_vote_id,
             #     kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS)
             # request_history_list = list(request_history_query)
             request_history_list = []
@@ -379,9 +379,10 @@ def get_and_save_facebook_photo_view(request):
                                     )
 
     try:
-        query = CandidateCampaign.objects.all() if is_candidate else Organization.objects.all()
+        query = CandidateCampaign.objects.all() if is_candidate else Organization.objects.all()  # Cannot be
+        # 'readonly' because we save facebook URL and Profile image information below
 
-        query = query.filter(we_vote_id__iexact=we_vote_id)
+        query = query.filter(we_vote_id=we_vote_id)
         entity_list = list(query)
         one_entity = entity_list[0]
 

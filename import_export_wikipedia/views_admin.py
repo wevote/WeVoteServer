@@ -104,7 +104,7 @@ def bulk_retrieve_wikipedia_photos_view(request):
             # Check to see if we have already tried to find their photo link from Wikipedia. We don't want to
             #  search Wikipedia more than once.
             # request_history_query = RemoteRequestHistory.objects.using('readonly').filter(
-            #     candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+            #     candidate_campaign_we_vote_id=one_candidate.we_vote_id,
             #     kind_of_action=RETRIEVE_POSSIBLE_WIKIPEDIA_PHOTOS)
             # request_history_list = list(request_history_query)
             request_history_list = []

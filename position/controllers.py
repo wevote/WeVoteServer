@@ -153,7 +153,7 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
     position_filters = []
     final_position_filters = []
     if positive_value_exists(voter.we_vote_id):
-        new_position_filter = Q(voter_we_vote_id__iexact=voter.we_vote_id)
+        new_position_filter = Q(voter_we_vote_id=voter.we_vote_id)
         position_filters.append(new_position_filter)
     if positive_value_exists(voter.id):
         new_position_filter = Q(voter_id=voter.id)
@@ -189,7 +189,7 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
         if positive_value_exists(one_position.organization_we_vote_id) and \
                 one_position.organization_we_vote_id not in organization_we_vote_ids_found:
             organization_we_vote_ids_found.append(one_position.organization_we_vote_id)
-            new_organization_filter = Q(we_vote_id__iexact=one_position.organization_we_vote_id)
+            new_organization_filter = Q(we_vote_id=one_position.organization_we_vote_id)
             organization_filters.append(new_organization_filter)
 
     # PositionForFriends
@@ -208,7 +208,7 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
         if positive_value_exists(one_position.organization_we_vote_id) and \
                 one_position.organization_we_vote_id not in organization_we_vote_ids_found:
             organization_we_vote_ids_found.append(one_position.organization_we_vote_id)
-            new_organization_filter = Q(we_vote_id__iexact=one_position.organization_we_vote_id)
+            new_organization_filter = Q(we_vote_id=one_position.organization_we_vote_id)
             organization_filters.append(new_organization_filter)
 
     # Now that we have a list of all possible organization_id or organization_we_vote_id entries, retrieve all
@@ -220,7 +220,7 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
             final_organization_filters |= item
 
         # Finally, retrieve all of the organizations from any of these positions
-        organization_list_query = Organization.objects.all()
+        organization_list_query = Organization.objects.using('readonly').all()
         organization_list_query = organization_list_query.filter(final_organization_filters)
 
         for organization in organization_list_query:
@@ -1323,7 +1323,7 @@ def move_positions_to_another_politician(
     if positive_value_exists(from_politician_we_vote_id):
         try:
             position_entries_moved += PositionEntered.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_id=to_politician_id,
                         politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:
@@ -1332,7 +1332,7 @@ def move_positions_to_another_politician(
 
         try:
             position_entries_moved += PositionForFriends.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_id=to_politician_id,
                         politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:

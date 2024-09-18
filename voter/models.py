@@ -691,8 +691,9 @@ class VoterManager(BaseUserManager):
             voter_id = voter.id
             voter_created = True
         except IntegrityError as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            logger.error("create_voter IntegrityError exception (#1): " + str(e))
+            error_message = "create_voter IntegrityError exception (#1): " + str(e)
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+            logger.error(error_message)
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
                 # by calling 'fetch_next_we_vote_id_voter_integer'
@@ -702,15 +703,18 @@ class VoterManager(BaseUserManager):
                 voter_id = voter.id
                 voter_created = True
             except IntegrityError as e:
-                handle_record_not_saved_exception(e, logger=logger)
-                logger.error("create_voter IntegrityError exception (#2): " + str(e))
+                error_message = "create_voter IntegrityError exception (#2): " + str(e)
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+                logger.error(error_message)
             except Exception as e:
-                handle_record_not_saved_exception(e, logger=logger)
-                logger.error("create_voter general exception (#1): " + str(e))
+                error_message = "create_voter general exception ERROR (#2): " + str(e)
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+                logger.error(error_message)
 
         except Exception as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            logger.error("create_voter general exception (#2): " + str(e))
+            error_message = "create_voter general exception ERROR (#1): " + str(e)
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=error_message)
+            logger.error(error_message)
 
         results = {
             'email_not_valid':      email_not_valid,
@@ -1243,7 +1247,7 @@ class VoterManager(BaseUserManager):
         try:
             # This way of retrieving the voter_we_vote_id has led to some very slow queries
             # queryset = Voter.objects.using('readonly').filter(
-            #     linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            #     linked_organization_we_vote_id=linked_organization_we_vote_id)
             # we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
             # return we_vote_id_list[0] if we_vote_id_list else None
             voter = Voter.objects.using('readonly').get(linked_organization_we_vote_id=linked_organization_we_vote_id)
@@ -1719,9 +1723,9 @@ class VoterManager(BaseUserManager):
                     success = True
             elif positive_value_exists(voter_we_vote_id):
                 if read_only:
-                    voter_on_stage = Voter.objects.using('readonly').get(we_vote_id__iexact=voter_we_vote_id)
+                    voter_on_stage = Voter.objects.using('readonly').get(we_vote_id=voter_we_vote_id)
                 else:
-                    voter_on_stage = Voter.objects.get(we_vote_id__iexact=voter_we_vote_id)
+                    voter_on_stage = Voter.objects.get(we_vote_id=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 voter_found = True
@@ -1790,9 +1794,9 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(primary_email_we_vote_id):
                 if read_only:
                     voter_on_stage = Voter.objects.using('readonly').get(
-                        primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                        primary_email_we_vote_id=primary_email_we_vote_id)
                 else:
-                    voter_on_stage = Voter.objects.get(primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                    voter_on_stage = Voter.objects.get(primary_email_we_vote_id=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 voter_found = True
@@ -3464,7 +3468,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_with_apple(self):
         try:
-            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id__iexact=self.we_vote_id)
+            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id=self.we_vote_id)
             return True
         except AppleUser.DoesNotExist:
             return False
@@ -4592,7 +4596,7 @@ class VoterAddress(models.Model):
     MultipleObjectsReturned = None
     objects = None
     voter_id = models.BigIntegerField(
-        verbose_name="voter unique identifier", null=False, blank=False, unique=False, db_index=True)
+        verbose_name="voter unique identifier", null=False, blank=False, unique=False)
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
@@ -4632,6 +4636,19 @@ class VoterAddress(models.Model):
 
     voter_entered_address = models.BooleanField(verbose_name="Did the voter manually enter an address?", default=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['voter_id'],
+                name='voter_id_address'),
+            models.Index(
+                fields=['voter_id', '-date_last_changed'],
+                name='voter_id_address_date'),
+            models.Index(
+                fields=['voter_id', 'address_type'],
+                name='voter_id_type'),
+        ]
 
     def get_state_code_from_text_for_map_search(self):
         if positive_value_exists(self.text_for_map_search):

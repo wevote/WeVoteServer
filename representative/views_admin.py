@@ -694,7 +694,7 @@ def representative_list_view(request):
                 new_filter = Q(office_held_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(office_held_we_vote_id__iexact=one_word)
+                new_filter = Q(office_held_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(political_party__icontains=one_word)
@@ -717,7 +717,7 @@ def representative_list_view(request):
                 )
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -1030,7 +1030,7 @@ def representative_edit_view(request, representative_id):
         duplicate_representative_query = \
             duplicate_representative_query.filter(state_code=representative_on_stage.state_code)
         duplicate_representative_query = duplicate_representative_query.exclude(
-            we_vote_id__iexact=representative_on_stage.we_vote_id)
+            we_vote_id=representative_on_stage.we_vote_id)
         filter_list = Q(representative_name__icontains=representative_on_stage.representative_name)
         filter_list |= Q(google_civic_representative_name__iexact=representative_on_stage.representative_name)
         filter_list |= Q(google_civic_representative_name2__iexact=representative_on_stage.representative_name)
@@ -1819,7 +1819,7 @@ def update_representative_from_politician_view(request):
     representative_id = representative.id
 
     queryset = Politician.objects.using('readonly').all()
-    queryset = queryset.filter(we_vote_id__iexact=politician_we_vote_id)
+    queryset = queryset.filter(we_vote_id=politician_we_vote_id)
     politician_list = list(queryset)
 
     if len(politician_list) > 0:

@@ -6,6 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/loading_banner.html" %}
 
 <h1>Endorsers</h1>
 
@@ -263,44 +264,57 @@
 {#    </p>#}
 
     <script>
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
         $(function() {
             $('#limit_to_opinions_in_this_year_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#limit_to_opinions_in_state_code_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#organization_type_filter_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#show_all_id').change(function() {
+                displayLoadingBanner();
                 document.getElementById('show_more_loading_id').innerHTML = '*** Updating number of endorsers shown... ***';
                 this.form.show_up_to_1000_id.checked = false;
                 this.form.show_up_to_2000_id.checked = false;
                 this.form.submit();
             });
             $('#show_organizations_without_email_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#show_twitter_updates_failing_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#show_organizations_to_be_analyzed_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
             $('#show_up_to_1000_id').change(function() {
+                displayLoadingBanner();
                 this.form.show_all_id.checked = false;
                 document.getElementById('show_more_loading_id').innerHTML = '*** Updating number of endorsers shown... ***';
                 this.form.show_up_to_2000_id.checked = false;
                 this.form.submit();
             });
             $('#show_up_to_2000_id').change(function() {
+                displayLoadingBanner();
                 this.form.show_all_id.checked = false;
                 document.getElementById('show_more_loading_id').innerHTML = '*** Updating number of endorsers shown... ***';
                 this.form.show_up_to_1000_id.checked = false;
                 this.form.submit();
             });
             $('#state_code_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
             });
         });

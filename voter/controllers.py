@@ -145,7 +145,7 @@ def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=None):
     return results
 
 
-def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterDeleteAccount
+def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterUpdate former: voterDeleteAccount
     success = True
     status = ""
 
@@ -1978,7 +1978,7 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
         temp_voter_we_vote_id = ""
         email_manager = EmailManager()
         email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email, read_only=False)
         if email_results['email_address_object_found']:
             # If here, then it turns out the facebook_email is verified, and we can
             #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
@@ -4454,7 +4454,8 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
         voter_found_by_email = voter_results['voter']
 
     email_manager = EmailManager()
-    email_results = email_manager.retrieve_primary_email_with_ownership_verified("", normalized_email_address)
+    email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+        "", normalized_email_address, read_only=False)
     if email_results['email_address_object_found']:
         verified_email_address_object = email_results['email_address_object']
         if voter_found_by_email_boolean:

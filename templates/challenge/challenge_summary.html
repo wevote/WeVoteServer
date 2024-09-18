@@ -1,0 +1,235 @@
+{# templates/challenge/challenge_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if challenge %}{{ challenge.challenge_title  }}{% else %}New Challenge{% endif %}{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+<style>
+    span.nobr { white-space: nowrap; }
+    select.form-control {
+      height: auto !important;
+    }
+</style>
+
+<a href="{% url 'challenge:challenge_list' %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">< Back to List</a>
+
+<h1>{% if challenge %}Challenge: {{ challenge.challenge_title }}{% else %}New Challenge{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<table>{# Two column master table #}
+<tr>
+    <td style="vertical-align:top; width: 50%;">
+        {% if challenge.we_vote_hosted_challenge_photo_large_url %}
+            <img src="{{ challenge.we_vote_hosted_challenge_photo_large_url }}" />
+        {% elif challenge.we_vote_hosted_profile_image_url_large %}
+            <img src="{{ challenge.we_vote_hosted_profile_image_url_large }}" />
+        {% endif %}
+        <table>
+            <tr>
+                <th>We Vote ID:&nbsp;</th>
+                <td> {{ challenge.we_vote_id }}
+                    (<a href="{% url 'challenge:challenge_edit' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">edit</a>)
+                </td>
+            </tr>
+        {% if challenge.politician_we_vote_id %}
+            <tr>
+                <th>Politician We Vote ID:&nbsp;</th>
+                <td> {{ challenge.politician_we_vote_id }}
+                    <a href="{% url 'politician:politician_we_vote_id_edit' challenge.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                </td>
+            </tr>
+        {% endif %}
+            <tr>
+                <th>Organization We Vote ID:&nbsp;</th>
+                <td>
+                    {{ challenge.organization_we_vote_id }}
+                    {% if challenge.organization_we_vote_id %}
+                    <a href="{% url 'organization:organization_edit_we_vote_id' challenge.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% if challenge.in_draft_mode %}
+            <tr>
+                <th>IN DRAFT MODE</th>
+                <td></td>
+            </tr>
+        {% endif %}
+            <tr>
+                <th>Participants:&nbsp;</th>
+                <td> {{ challenge.participants_count }}
+        {% if not challenge.politician_we_vote_id %}
+            {% if challenge.participants_count_minimum_ignored %}
+                        <span style="color: darkgray">(Visible -- Participants Count Minimum Ignored)</span>
+            {% elif not challenge.is_participants_count_minimum_exceeded %}
+                        <span style="color: darkgray">(NOT visible -- too few participants)</span>
+            {% endif %}
+        {% endif %}
+                </td>
+            </tr>
+        <tr>
+            <th>Live link:</th>
+            <td>
+            {% if challenge.seo_friendly_path %}
+                <a href="{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/"
+                   target="_blank">{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% else %}
+                <a href="{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}"
+                   target="_blank">{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Alternate URL Paths:</th>
+            <td>
+            {% if path_list %}
+                {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+            {% else %}
+                <div style="color: darkgray">
+                No alternate URL paths found.
+                </div>
+            {% endif %}
+            </td>
+        </tr>
+        {% if challenge.challenge_description %}
+            <tr>
+                <td colspan="2" style="vertical-align:top">
+<div style="white-space: pre-wrap;">
+{{ challenge.challenge_description|default_if_none:"" }}
+</div>
+                    {% if challenge.date_challenge_started %}
+                        <span class="u-no-break" style="color: darkgray">(Started: {{ challenge.date_challenge_started }})</span>
+                    {% endif %}
+                    {% if challenge.final_election_date_as_integer %}
+                        <span class="u-no-break" style="color: gray">
+                        (Final election: {{ challenge.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > challenge.final_election_date_as_integer %}-EXPIRED{% endif %})
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endif %}
+            <tr>
+                <th></th>
+                <td><a href="{% url 'challenge:challenge_edit' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                       class="btn btn-primary">Edit</a></td>
+            </tr>
+        </table>
+    </td>
+    <td>&nbsp;&nbsp;&nbsp;</td>
+    <td style="vertical-align:top; width: 50%;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Challenge Owner(s)</th>
+                    <th>Visible to Public</th>
+                    <th>Feature this Profile Image</th>
+                </tr>
+            </thead>
+        {% for challenge_owner in challenge_owner_list %}
+            <tr>
+                <td>
+                    {% if challenge_owner.we_vote_hosted_profile_image_url_tiny %}
+                        <img src="{{ challenge_owner.we_vote_hosted_profile_image_url_tiny }}" />
+                    {% endif %}
+                    {% if challenge_owner.organization_name %}
+                    {{ challenge_owner.organization_name }}&nbsp;&nbsp;
+                    {% elif challenge_owner.organization_we_vote_id %}
+                    {{ challenge_owner.organization_we_vote_id }}&nbsp;&nbsp;
+                    {% else %}
+                    {{ challenge_owner.voter_we_vote_id }}&nbsp;&nbsp;
+                    {% endif %}
+                </td>
+                <td>
+                    {% if challenge_owner.visible_to_public %}
+                        visible
+                    {% else %}
+                        NOT visible
+                    {% endif %}
+                </td>
+                <td>
+                    {% if challenge_owner.feature_this_profile_image %}
+                        featured
+                    {% else %}
+                        NOT featured
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <a href="{% url 'challenge:challenge_edit_owners' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                       class="btn btn-primary">
+                        Add or Edit Challenge Owners
+                    </a>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Challenge Politician(s) or Measure(s)</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+        {% for challenge_politician in challenge_politician_list %}
+            <tr>
+                <td>
+                    {{ challenge_politician.politician_name }}&nbsp;&nbsp;
+                    {% if challenge_politician.politician_we_vote_id %}
+                        <span style="color: darkgray">
+                        {{ challenge_politician.politician_we_vote_id }}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ challenge_politician.state_code }}&nbsp;&nbsp;
+                </td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td colspan="3"><a href="{% url 'challenge:challenge_edit_politicians' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                                   class="btn btn-primary">Add or Edit Politicians to Challenge</a></td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Participants: {{ challenge_participants_count|intcomma }}
+                    </th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+        {# Challenge Participants #}
+        {% for challenge_participant in challenge_participant_list %}
+            <tr>
+                <td>
+                    {{ challenge_participant.participant_name }}&nbsp;&nbsp;
+                </td>
+                <td>
+                    <div style="white-space: pre-wrap;">{{ challenge_participant.participant_endorsement }}</div>&nbsp;&nbsp;
+                </td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                                   class="btn btn-primary">View All Participants</a>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>{# End of two column master table #}
+
+
+{% endblock %}

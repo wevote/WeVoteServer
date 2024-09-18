@@ -49,7 +49,7 @@ def issues_sync_out_view(request):  # issuesSyncOut
             new_filter = Q(issue_description__icontains=issue_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=issue_search)
+            new_filter = Q(we_vote_id=issue_search)
             filters.append(new_filter)
 
             # Add the first query
@@ -255,7 +255,7 @@ def issue_list_view(request):
                 new_filter = Q(issue_description__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -408,7 +408,7 @@ def issue_edit_view(request, issue_we_vote_id):
     organization_list = []
 
     try:
-        issue_on_stage = Issue.objects.using('readonly').get(we_vote_id__iexact=issue_we_vote_id)
+        issue_on_stage = Issue.objects.using('readonly').get(we_vote_id=issue_we_vote_id)
         issue_on_stage_found = True
     except Issue.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -560,7 +560,7 @@ def issue_edit_process_view(request):
     issue_on_stage = Issue()
     if positive_value_exists(issue_we_vote_id):
         try:
-            issue_on_stage = Issue.objects.get(we_vote_id__iexact=issue_we_vote_id)
+            issue_on_stage = Issue.objects.get(we_vote_id=issue_we_vote_id)
             issue_on_stage_found = True
         except Issue.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
@@ -739,7 +739,7 @@ def issue_delete_process_view(request):
     issue_on_stage = Issue()
     if positive_value_exists(issue_we_vote_id):
         try:
-            issue_query = Issue.objects.filter(we_vote_id__iexact=issue_we_vote_id)
+            issue_query = Issue.objects.filter(we_vote_id=issue_we_vote_id)
             if len(issue_query):
                 issue_on_stage = issue_query[0]
                 issue_on_stage_found = True
@@ -818,7 +818,7 @@ def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssu
         #     new_filter = Q(issue_description__icontains=issue_search)
         #     filters.append(new_filter)
         #
-        #     new_filter = Q(we_vote_id__iexact=issue_search)
+        #     new_filter = Q(we_vote_id=issue_search)
         #     filters.append(new_filter)
         #
         #     # Add the first query

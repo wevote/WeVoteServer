@@ -1,14 +1,14 @@
 {# templates/admin_tools/loading_banner.html #}
 
 <body>
-<div class="alert alert-danger" role="alert" id="CandidateFilterPopupMessage"
+<div class="alert alert-danger" role="alert" id="FilterPopupMessage"
      style="display: none; padding: 20px;position: fixed; top: 0; left: 0;text-align: center; width: 100%;z-index: 9999;">
   <span class="close">&times;</span>
   <p>Fresh data being retrieved. Please wait before choosing any other filters.</p>
 </div>
 <script>
     document.querySelector('.close').addEventListener('click', function() {
-        document.getElementById('CandidateFilterPopupMessage').style.display = 'none';
+        document.getElementById('FilterPopupMessage').style.display = 'none';
     });
 </script>
 </body>

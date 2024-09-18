@@ -1354,6 +1354,9 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
         "http://twitter.com", "http://www.twitter.com", "http://m.twitter.com", "https://twitter.com",
         "https://m.twitter.com", "https://www.twitter.com", "/www.twitter.com", "www.twitter.com",
         "twitter.com", "@",
+        "http://x.com", "http://www.x.com", "http://m.x.com", "https://x.com",
+        "https://m.x.com", "https://www.x.com", "/www.x.com", "www.x.com",
+        "x.com",
     ]
     for string_to_be_removed in strings_to_be_removed_from_url:
         twitter_text_string = re.compile(re.escape(string_to_be_removed), re.IGNORECASE).sub("", twitter_text_string)

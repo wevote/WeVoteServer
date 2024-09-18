@@ -712,7 +712,7 @@ def retrieve_all_organizations_logos_from_wikipedia(state_code=''):
     logos_found = 0
     force_retrieve = False
 
-    organization_list_query = Organization.objects.order_by('organization_name')
+    organization_list_query = Organization.objects.order_by('organization_name')  # Cannot be 'readonly'
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code=state_code)
 

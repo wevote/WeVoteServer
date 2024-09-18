@@ -122,32 +122,32 @@ def shared_item_list_view(request):
 
     if positive_value_exists(shared_item_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
             normalized_email_address__icontains=shared_item_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
             normalized_sms_phone_number__icontains=shared_item_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
         # Now search SharedItem object
-        shared_item_query = SharedItem.objects.all()
+        shared_item_query = SharedItem.objects.using('readonly').all()
         search_words = shared_item_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
-            new_filter = Q(campaignx_we_vote_id__iexact=one_word)
+            new_filter = Q(campaignx_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(candidate_we_vote_id__iexact=one_word)
+            new_filter = Q(candidate_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(destination_full_url__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(measure_we_vote_id__iexact=one_word)
+            new_filter = Q(measure_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(other_voter_display_name__icontains=one_word)
@@ -159,7 +159,7 @@ def shared_item_list_view(request):
             new_filter = Q(other_voter_last_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(other_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(other_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             if len(voter_we_vote_ids_with_email) > 0:
@@ -179,7 +179,7 @@ def shared_item_list_view(request):
             new_filter = Q(other_voter_email_address_text__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(office_we_vote_id__iexact=one_word)
+            new_filter = Q(office_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(shared_by_display_name__icontains=one_word)
@@ -191,7 +191,7 @@ def shared_item_list_view(request):
             new_filter = Q(shared_by_last_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(shared_by_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(shared_by_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(shared_message__icontains=one_word)
@@ -393,13 +393,13 @@ def voter_who_shares_summary_list_view(request):
 
     if positive_value_exists(voter_summary_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.using('readonly').filter(
             normalized_email_address__icontains=voter_summary_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.using('readonly').filter(
             normalized_sms_phone_number__icontains=voter_summary_search,
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
@@ -418,7 +418,7 @@ def voter_who_shares_summary_list_view(request):
             new_filter = Q(shared_by_display_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query

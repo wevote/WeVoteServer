@@ -67,6 +67,7 @@ WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
     '*.travis-ci.org',
     'blank',
     'platform.twitter.com',
+    'platform.x.com',
     's7.addthis.com',
     'vars.hotjar.com',
     'regex101.com',
@@ -282,7 +283,7 @@ class VoterGuideManager(models.Manager):
                 try:
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        organization_we_vote_id=organization_we_vote_id,
                         defaults=updated_values)
                 except VoterGuide.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
@@ -400,7 +401,7 @@ class VoterGuideManager(models.Manager):
                         updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         vote_smart_time_span__exact=vote_smart_time_span,
-                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        organization_we_vote_id=organization_we_vote_id,
                         defaults=updated_values)
                     success = True
                     if new_voter_guide_created:
@@ -518,7 +519,7 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    organization_we_vote_id__iexact=linked_organization_we_vote_id,
+                    organization_we_vote_id=linked_organization_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
@@ -557,7 +558,7 @@ class VoterGuideManager(models.Manager):
         try:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=google_civic_election_id,
-                                                              organization_we_vote_id__iexact=organization_we_vote_id)
+                                                              organization_we_vote_id=organization_we_vote_id)
                 voter_guide_found = True if voter_guide_query.count() > 0 else False
         except VoterGuide.MultipleObjectsReturned as e:
             handle_exception(e, logger=logger)
@@ -617,37 +618,38 @@ class VoterGuideManager(models.Manager):
                 if read_only:
                     voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
                         google_civic_election_id=google_civic_election_id,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
                 else:
                     voter_guide_on_stage = VoterGuide.objects.get(
                         google_civic_election_id=google_civic_election_id,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
+                        organization_we_vote_id=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
-            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
-                if read_only:
-                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
-                        vote_smart_time_span=vote_smart_time_span,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
-                else:
-                    voter_guide_on_stage = VoterGuide.objects.get(
-                        vote_smart_time_span=vote_smart_time_span,
-                        organization_we_vote_id__iexact=organization_we_vote_id)
-                voter_guide_on_stage_id = voter_guide_on_stage.id
-                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
-                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
+            # 2024 We no longer support voter_smart_time_span
+            # elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
+            #     status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
+            #     if read_only:
+            #         voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+            #             vote_smart_time_span=vote_smart_time_span,
+            #             organization_we_vote_id=organization_we_vote_id)
+            #     else:
+            #         voter_guide_on_stage = VoterGuide.objects.get(
+            #             vote_smart_time_span=vote_smart_time_span,
+            #             organization_we_vote_id=organization_we_vote_id)
+            #     voter_guide_on_stage_id = voter_guide_on_stage.id
+            #     voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
+            #     status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID "  # Set this in case the get fails
                 if read_only:
                     voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
                         google_civic_election_id=google_civic_election_id,
-                        public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                        public_figure_we_vote_id=public_figure_we_vote_id)
                 else:
                     voter_guide_on_stage = VoterGuide.objects.get(
                         google_civic_election_id=google_civic_election_id,
-                        public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                        public_figure_we_vote_id=public_figure_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID "
@@ -656,11 +658,11 @@ class VoterGuideManager(models.Manager):
                 if read_only:
                     voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
                         google_civic_election_id=google_civic_election_id,
-                        owner_we_vote_id__iexact=owner_we_vote_id)
+                        owner_we_vote_id=owner_we_vote_id)
                 else:
                     voter_guide_on_stage = VoterGuide.objects.get(
                         google_civic_election_id=google_civic_election_id,
-                        owner_we_vote_id__iexact=owner_we_vote_id)
+                        owner_we_vote_id=owner_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID "
@@ -1221,6 +1223,11 @@ class VoterGuide(models.Model):
         return self.last_updated
 
     class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'voter_guide_owner_type', '-twitter_followers_count'],
+                name='election_owner_followers'),
+        ]
         ordering = ('last_updated',)
 
     objects = VoterGuideManager()
@@ -1468,13 +1475,13 @@ class VoterGuideListManager(models.Manager):
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if positive_value_exists(organization_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
-                    organization_we_vote_id__iexact=organization_we_vote_id)
+                    organization_we_vote_id=organization_we_vote_id)
             elif positive_value_exists(owner_voter_id):
                 voter_guide_query = voter_guide_query.filter(
                     owner_voter_id=owner_voter_id)
             elif positive_value_exists(owner_voter_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
-                    owner_we_vote_id__iexact=owner_voter_we_vote_id)
+                    owner_we_vote_id=owner_voter_we_vote_id)
             if positive_value_exists(maximum_number_to_retrieve):
                 voter_guide_list = voter_guide_query[:maximum_number_to_retrieve]
             else:
@@ -1605,7 +1612,7 @@ class VoterGuideListManager(models.Manager):
             filter_list = Q()
             for item in orgs_we_need_found_by_position_and_time_span_list_of_dicts:
                 filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
-                                 organization_we_vote_id__iexact=item['organization_we_vote_id'])
+                                 organization_we_vote_id=item['organization_we_vote_id'])
             voter_guide_query = voter_guide_query.filter(filter_list)
 
             if search_string:
@@ -1659,8 +1666,8 @@ class VoterGuideListManager(models.Manager):
             else:
                 voter_guide_query = VoterGuide.objects.all()
             # As of August 2018, we no longer want to support Vote Smart ratings voter guides
-            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
             if positive_value_exists(len(organization_we_vote_ids_followed_or_ignored_by_voter)):
                 voter_guide_query = voter_guide_query.exclude(
@@ -1688,7 +1695,7 @@ class VoterGuideListManager(models.Manager):
             else:
                 # If not searching, make sure we do not include individuals. We *do* retrieve PUBLIC_FIGURES
                 status += "NOT_SEARCHING-EXCLUDING_INDIVIDUALS "
-                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type=INDIVIDUAL)  # Removed __iexact
 
                 if not positive_value_exists(len(google_civic_election_id_list)):
                     # We also want to exclude voter guides with election_day_text smaller than today's date
@@ -1698,7 +1705,7 @@ class VoterGuideListManager(models.Manager):
                     datetime_now = generate_localized_datetime_from_obj()[1]
                     two_days = timedelta(days=2)
                     datetime_two_days_ago = datetime_now - two_days
-                    earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD) # "%Y-%m-%d"
+                    earliest_date_to_show = datetime_two_days_ago.strftime(DATE_FORMAT_YMD)  # "%Y-%m-%d"
                     voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
                     voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 
@@ -1790,15 +1797,14 @@ class VoterGuideListManager(models.Manager):
         voter_guide_list_found = False
         try:
             voter_guide_query = VoterGuide.objects.all()
-            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
-            if not positive_value_exists(show_individuals):
-                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            # voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
             if positive_value_exists(google_civic_election_id):
                 voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+            if not positive_value_exists(show_individuals):
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type=INDIVIDUAL)  # Removed __iexact
             if order_by == 'google_civic_election_id':
-                voter_guide_query = voter_guide_query.order_by(
-                    '-vote_smart_time_span', '-google_civic_election_id')
+                voter_guide_query = voter_guide_query.order_by('-google_civic_election_id')  # '-vote_smart_time_span',
             else:
                 voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
 
@@ -1810,7 +1816,7 @@ class VoterGuideListManager(models.Manager):
                 for one_word in search_words:
                     filters = []
 
-                    new_filter = Q(we_vote_id__iexact=one_word)
+                    new_filter = Q(we_vote_id=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(display_name__icontains=one_word)
@@ -1819,13 +1825,13 @@ class VoterGuideListManager(models.Manager):
                     new_filter = Q(google_civic_election_id__iexact=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(organization_we_vote_id__iexact=one_word)
+                    new_filter = Q(organization_we_vote_id=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(owner_we_vote_id__iexact=one_word)
+                    new_filter = Q(owner_we_vote_id=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(public_figure_we_vote_id__iexact=one_word)
+                    new_filter = Q(public_figure_we_vote_id=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(state_code__icontains=one_word)
@@ -1904,20 +1910,21 @@ class VoterGuideListManager(models.Manager):
             voter_guide_query = VoterGuide.objects.all()
             if positive_value_exists(google_civic_election_id):
                 voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
-            elif positive_value_exists(vote_smart_time_span):
-                voter_guide_query = voter_guide_query.filter(vote_smart_time_span__iexact=vote_smart_time_span)
+            # 2024 We no longer support voter_smart_time_span
+            # elif positive_value_exists(vote_smart_time_span):
+            #     voter_guide_query = voter_guide_query.filter(vote_smart_time_span__iexact=vote_smart_time_span)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                voter_guide_query = voter_guide_query.exclude(we_vote_id__iexact=we_vote_id_from_master)
+                voter_guide_query = voter_guide_query.exclude(we_vote_id=we_vote_id_from_master)
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(organization_we_vote_id):
-                new_filter = Q(organization_we_vote_id__iexact=organization_we_vote_id)
+                new_filter = Q(organization_we_vote_id=organization_we_vote_id)
                 filters.append(new_filter)
 
             if positive_value_exists(public_figure_we_vote_id):
-                new_filter = Q(public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                new_filter = Q(public_figure_we_vote_id=public_figure_we_vote_id)
                 filters.append(new_filter)
 
             if positive_value_exists(twitter_handle):
@@ -2335,7 +2342,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 now = datetime.now()
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
-                    organization_we_vote_id__iexact=organization_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
                     hide_from_active_review=False,
                     date_last_changed__year=now.year)
                 if voter_guide_possibility_on_stage is not None:
@@ -2353,7 +2360,7 @@ class VoterGuidePossibilityManager(models.Manager):
             #     # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
             #     voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
             #         google_civic_election_id=google_civic_election_id,
-            #         voter_who_submitted_we_vote_id__iexact=voter_who_submitted_we_vote_id,
+            #         voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
             #         hide_from_active_review=False)
             #     if voter_guide_possibility_on_stage is not None:
             #         voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
@@ -2447,7 +2454,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     Q(assigned_to_voter_we_vote_id=""))
             elif positive_value_exists(assigned_to_voter_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
-                    assigned_to_voter_we_vote_id__iexact=assigned_to_voter_we_vote_id)
+                    assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id)
 
             if positive_value_exists(search_string):
                 try:
@@ -2465,7 +2472,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     new_filter = Q(organization_name__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(organization_we_vote_id__iexact=one_word)
+                    new_filter = Q(organization_we_vote_id=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(organization_twitter_handle__icontains=one_word)
@@ -2474,7 +2481,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     new_filter = Q(voter_guide_possibility_url__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(voter_who_submitted_we_vote_id__iexact=one_word)
+                    new_filter = Q(voter_who_submitted_we_vote_id=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(voter_who_submitted_name__icontains=one_word)
@@ -2483,7 +2490,7 @@ class VoterGuidePossibilityManager(models.Manager):
                     try:
                         candidate_we_vote_id_query = VoterGuidePossibilityPosition.objects.all()
                         candidate_we_vote_id_query = candidate_we_vote_id_query.filter(
-                            candidate_we_vote_id__iexact=one_word)
+                            candidate_we_vote_id=one_word)
                         candidate_we_vote_id_query = candidate_we_vote_id_query.values(
                             'voter_guide_possibility_parent_id').distinct()
                         candidate_voter_guide_possibility_parent_id_dict = list(candidate_we_vote_id_query)
@@ -2494,7 +2501,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
                         measure_we_vote_id_query = VoterGuidePossibilityPosition.objects.all()
                         measure_we_vote_id_query = measure_we_vote_id_query.filter(
-                            measure_we_vote_id__iexact=one_word)
+                            measure_we_vote_id=one_word)
                         measure_we_vote_id_query = measure_we_vote_id_query.values(
                             'voter_guide_possibility_parent_id').distinct()
                         measure_voter_guide_possibility_parent_id_dict = list(measure_we_vote_id_query)

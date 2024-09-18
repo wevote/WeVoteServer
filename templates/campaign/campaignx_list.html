@@ -6,6 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/loading_banner.html" %}
 
 <h1>Campaigns</h1>
 <ul>
@@ -113,7 +114,7 @@
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
-    <input type="submit" value="Search for Campaign" />
+    <input type="submit" id="campaignx_search_submit" value="Search for Campaign" />
 
 
 
@@ -317,6 +318,9 @@
     <p></p>
 
     <script>
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
         $(function() {
             $('#limit_to_opinions_in_this_year_id').change(function() {
                 this.form.submit();
@@ -325,32 +329,45 @@
                 this.form.submit();
             });
             $('#campaignx_owner_organization_we_vote_id_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#campaignx_type_filter_id').change(function() {
                 this.form.submit();
             });
             $('#hide_campaigns_not_visible_yet_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#include_campaigns_from_prior_elections_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#show_blocked_campaigns_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#show_campaigns_in_draft_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#show_campaigns_linked_to_politicians_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#show_ocd_id_state_mismatch_id').change(function() {
+                displayLoadingBanner()
                 this.form.submit();
             });
             $('#state_code_id').change(function() {
                 this.form.submit();
             });
+            $(function() {
+                $('#campaignx_search_submit').click(function() {
+                    displayLoadingBanner();
+                    this.form.submit();
+                });
+        });
         });
     </script>
 

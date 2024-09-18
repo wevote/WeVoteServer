@@ -284,7 +284,7 @@ def issues_import_from_structured_json(structured_json):
         issue_on_stage_found = False
         try:
             if positive_value_exists(we_vote_id):
-                issue_query = Issue.objects.filter(we_vote_id__iexact=we_vote_id)
+                issue_query = Issue.objects.filter(we_vote_id=we_vote_id)
                 if len(issue_query):
                     issue_on_stage = issue_query[0]
                     issue_on_stage_found = True
@@ -523,7 +523,7 @@ def issue_organizations_retrieve_for_api(issue_we_vote_id=''):  # issueOrganizat
     organization_list_found = False
     from organization.models import Organization
     try:
-        organization_queryset = Organization.objects.all()
+        organization_queryset = Organization.objects.using('readonly').all()
         organization_queryset = organization_queryset.filter(we_vote_id__in=complete_organization_we_vote_id_list)
         organization_queryset = organization_queryset.order_by('-twitter_followers_count')
         organization_list = list(organization_queryset)
@@ -1252,8 +1252,8 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
         organization_link_found = False
         try:
             organization_link_query = OrganizationLinkToIssue.objects.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
-            organization_link_query = organization_link_query.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+                organization_we_vote_id=organization_we_vote_id)
+            organization_link_query = organization_link_query.filter(issue_we_vote_id=issue_we_vote_id)
             if len(organization_link_query):
                 organization_link = organization_link_query[0]
                 organization_link_found = True

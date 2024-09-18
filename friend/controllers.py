@@ -55,7 +55,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
     try:
         number_deleted, details = FriendInvitationEmailLink.objects\
-            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(sender_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -67,7 +67,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
     try:
         number_deleted, details = FriendInvitationVoterLink.objects\
-            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(sender_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -78,7 +78,7 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
     # FROM RECIPIENT: Invitations sent TO the voter_to_delete from others            
     try:
         number_deleted, details = FriendInvitationVoterLink.objects\
-            .filter(recipient_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(recipient_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_invitation_entries_deleted += number_deleted
     except Exception as e:
@@ -133,7 +133,7 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
     
     try:
         number_deleted, details = CurrentFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         friend_entries_deleted += number_deleted
     except Exception as e:
@@ -186,7 +186,7 @@ def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
             
     try:
         number_deleted, details = SuggestedFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=voter_to_delete_we_vote_id, )\
             .delete()
         suggested_friend_entries_deleted += number_deleted
     except Exception as e:
@@ -211,7 +211,7 @@ def fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation):
         email_manager = EmailManager()
         temp_voter_we_vote_id = ""
         primary_email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            temp_voter_we_vote_id, friend_invitation.recipient_voter_email)
+            temp_voter_we_vote_id, friend_invitation.recipient_voter_email, read_only=True)
         if primary_email_results['email_address_object_found']:
             email_address_object = primary_email_results['email_address_object']
             return email_address_object.voter_we_vote_id
@@ -265,7 +265,8 @@ def friend_accepted_invitation_send(
     original_sender_email = ""
     original_sender_email_subscription_secret_key = ""
     if original_sender_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(original_sender_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            original_sender_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             original_sender_email_object = results['email_address_object']
             original_sender_email_we_vote_id = original_sender_email_object.we_vote_id
@@ -284,7 +285,8 @@ def friend_accepted_invitation_send(
     accepting_voter_email = ""
     accepting_voter_we_vote_id = accepting_voter.we_vote_id
     if accepting_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(accepting_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            accepting_voter_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             accepting_voter_email_object = results['email_address_object']
             accepting_voter_email = accepting_voter_email_object.normalized_email_address
@@ -1746,7 +1748,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             # email this voter just verified by clicking the friend invitation
             temp_voter_we_vote_id = ""
             email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-                temp_voter_we_vote_id, voter_accepting_invitation.email)
+                temp_voter_we_vote_id, voter_accepting_invitation.email, read_only=True)
             if email_results['email_address_object_found']:
                 # The email belongs to this or another voter, and we don't want to proceed
                 # with any additional data healing
@@ -1756,7 +1758,8 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 # See if an email_address_object already exists for this voter
                 this_voter_email_results = email_manager.retrieve_email_address_object(
                     normalized_email_address=voter_accepting_invitation.email,
-                    voter_we_vote_id=voter_we_vote_id_accepting_invitation)
+                    voter_we_vote_id=voter_we_vote_id_accepting_invitation,
+                    read_only=False)
                 email_address_object = None
                 email_address_object_found = False
                 if this_voter_email_results['email_address_object_found']:
@@ -1829,7 +1832,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         temp_voter_we_vote_id = ""
         update_voter_name = False
         email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-            temp_voter_we_vote_id, friend_invitation_email_link.recipient_voter_email)
+            temp_voter_we_vote_id, friend_invitation_email_link.recipient_voter_email, read_only=False)
         if email_results['email_address_object_found']:
             # The email belongs to this or another voter
             email_address_object = email_results['email_address_object']
@@ -1840,7 +1843,8 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 status += "VOTER_ACCEPTING_INVITATION_NOT_CURRENT_SIGNED_IN_VOTER "
                 email_address_object.email_ownership_is_verified = True
                 email_address_object.save()
-                email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+                email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(
+                    email_address_object.voter_we_vote_id, read_only=False)
                 if email_owner_results['voter_found']:
                     email_owner_voter = email_owner_results['voter']
                     voter_manager.update_voter_email_ownership_verified(email_owner_voter, email_address_object)
@@ -1864,7 +1868,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             email_we_vote_id = ''
             email_results = email_manager.retrieve_email_address_object(
                 friend_invitation_email_link.recipient_voter_email, email_we_vote_id,
-                voter_we_vote_id)
+                voter_we_vote_id, read_only=False)
             if email_results['email_address_object_found']:
                 status += "UNVERIFIED_EMAIL_ADDRESS_OBJECT_FOUND "
                 email_address_object = email_results['email_address_object']
@@ -2301,7 +2305,7 @@ def friend_invitation_by_we_vote_id_send_for_api(  # friendInvitationByWeVoteIdS
         invitation_secret_key = friend_invitation.secret_key
 
     if recipient_voter.has_email_with_verified_ownership() and positive_value_exists(invitation_secret_key):
-        results = email_manager.retrieve_primary_email_with_ownership_verified(other_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(other_voter_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             recipient_email_address_object = results['email_address_object']
 
@@ -3199,11 +3203,11 @@ def generate_mutual_friend_preview_list_serialized_for_two_voters(
     #  for both person A and person B, regardless of which one is looking
     queryset = MutualFriend.objects.using('readonly').all()
     queryset = queryset.filter(
-        Q(viewer_voter_we_vote_id__iexact=first_friend_voter_we_vote_id) |
-        Q(viewee_voter_we_vote_id__iexact=first_friend_voter_we_vote_id))
+        Q(viewer_voter_we_vote_id=first_friend_voter_we_vote_id) |
+        Q(viewee_voter_we_vote_id=first_friend_voter_we_vote_id))
     queryset = queryset.filter(
-        Q(viewer_voter_we_vote_id__iexact=second_friend_voter_we_vote_id) |
-        Q(viewee_voter_we_vote_id__iexact=second_friend_voter_we_vote_id))
+        Q(viewer_voter_we_vote_id=second_friend_voter_we_vote_id) |
+        Q(viewee_voter_we_vote_id=second_friend_voter_we_vote_id))
     queryset = queryset.filter(
         Q(mutual_friend_display_name_exists=True) |
         Q(mutual_friend_profile_image_exists=True))
@@ -3313,7 +3317,7 @@ def get_friend_invitations_processed(status, voter):
     friend_list = []
     status += "KIND_OF_LIST-FRIEND_INVITATIONS_PROCESSED "
     retrieve_invitations_processed_results = friend_manager.retrieve_friend_invitations_processed(
-        voter.we_vote_id)
+        voter.we_vote_id)  # Always 'readonly'
     success = retrieve_invitations_processed_results['success']
     status += retrieve_invitations_processed_results['status']
     if retrieve_invitations_processed_results['friend_list_found']:
@@ -3321,7 +3325,7 @@ def get_friend_invitations_processed(status, voter):
         for one_friend_invitation in raw_friend_list:
             # Augment the line with voter information
             friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                one_friend_invitation.sender_voter_we_vote_id)  # This is the voter who sent the invitation to me
+                one_friend_invitation.sender_voter_we_vote_id, read_only=True)  # The voter who sent invitation to me
             if friend_voter_results['voter_found']:
                 friend_voter = friend_voter_results['voter']
                 recipient_voter_email = one_friend_invitation.recipient_voter_email \
@@ -3623,17 +3627,18 @@ def get_suggested_friends_list(status, voter):
                 # We need to retrieve another voter object that can be saved
                 organization_manager = OrganizationManager()
                 voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                    suggested_friend.we_vote_id, read_only=False)
+                    suggested_friend.we_vote_id, read_only=True)
                 if voter_results['voter_found']:
                     suggested_friend = voter_results['voter']
-                    heal_results = \
-                        organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
-                    if heal_results['voter_healed']:
-                        suggested_friend = heal_results['voter']
-                        status += "SUGGESTED_FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
-                                  "" + suggested_friend.we_vote_id + " "
-                    else:
-                        status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+                    # Do another place
+                    # heal_results = \
+                    #     organization_manager.heal_voter_missing_linked_organization_we_vote_id(suggested_friend)
+                    # if heal_results['voter_healed']:
+                    #     suggested_friend = heal_results['voter']
+                    #     status += "SUGGESTED_FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+                    #               "" + suggested_friend.we_vote_id + " "
+                    # else:
+                    #     status += "SUGGESTED_FRIEND_VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
                 else:
                     status += "SUGGESTED-COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
             # mutual_friends = \
@@ -3766,7 +3771,7 @@ def message_to_friend_send_for_api(
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
 
     if not voter_results['voter_found']:
         status += "OTHER_VOTER_NOT_FOUND_FOR_MESSAGE_TO_FRIEND"
@@ -3783,7 +3788,7 @@ def message_to_friend_send_for_api(
     recipient_voter = Voter()
     if positive_value_exists(other_voter_we_vote_id):
         other_voter_we_vote_id_found = True
-        recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(other_voter_we_vote_id)
+        recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(other_voter_we_vote_id, read_only=True)
         if recipient_voter_results['voter_found']:
             recipient_voter = recipient_voter_results['voter']
             other_voter_found = True
@@ -3833,7 +3838,7 @@ def message_to_friend_send_for_api(
     #     invitation_secret_key = friend_invitation.secret_key
 
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(other_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(other_voter_we_vote_id, read_only=True)
         if results['email_address_object_found']:
             recipient_email_address_object = results['email_address_object']
 
@@ -4208,7 +4213,7 @@ def move_friends_to_another_voter(
 
     try:
         number_deleted, details = CurrentFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=from_voter_we_vote_id, )\
             .delete()
         from_voter_we_vote_id += number_deleted
     except Exception as e:
@@ -4300,7 +4305,7 @@ def move_suggested_friends_to_another_voter(
     
     try:
         number_deleted, details = SuggestedFriend.objects\
-            .filter(viewer_voter_we_vote_id__iexact=from_voter_we_vote_id, )\
+            .filter(viewer_voter_we_vote_id=from_voter_we_vote_id, )\
             .delete()
         from_voter_we_vote_id += number_deleted
     except Exception as e:

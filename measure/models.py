@@ -69,27 +69,27 @@ class ContestMeasure(models.Model):
     maplight_id = models.CharField(db_index=True, max_length=255, null=True, blank=True, unique=False)
     vote_smart_id = models.CharField(db_index=True, max_length=200, null=True, blank=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
-    measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
+    measure_title = models.TextField(verbose_name="measure title", null=False, blank=False)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The measure's title as passed over by Google Civic. We save this so we can match to this measure even
     # if we edit the measure's name locally.
-    google_civic_measure_title = models.CharField(verbose_name="measure name exactly as received from google civic",
-                                                  max_length=255, null=True, blank=True)
-    google_civic_measure_title2 = models.CharField(verbose_name="measure name from google civic alternative",
-                                                   max_length=255, null=True, blank=True)
-    google_civic_measure_title3 = models.CharField(verbose_name="measure name from google civic alternative",
-                                                   max_length=255, null=True, blank=True)
-    google_civic_measure_title4 = models.CharField(verbose_name="measure name from google civic alternative",
-                                                   max_length=255, null=True, blank=True)
-    google_civic_measure_title5 = models.CharField(verbose_name="measure name from google civic alternative",
-                                                   max_length=255, null=True, blank=True)
+    google_civic_measure_title = models.TextField(verbose_name="measure name exactly as received from google civic",
+                                                  null=True, blank=True)
+    google_civic_measure_title2 = models.TextField(verbose_name="measure name from google civic alternative",
+                                                   null=True, blank=True)
+    google_civic_measure_title3 = models.TextField(verbose_name="measure name from google civic alternative",
+                                                   null=True, blank=True)
+    google_civic_measure_title4 = models.TextField(verbose_name="measure name from google civic alternative",
+                                                   null=True, blank=True)
+    google_civic_measure_title5 = models.TextField(verbose_name="measure name from google civic alternative",
+                                                   null=True, blank=True)
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
     # The text of the measure. This field is only populated for contests of type 'Referendum'.
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
-    measure_url = models.CharField(verbose_name="measure details url", max_length=255, null=True, blank=False)
+    measure_url = models.TextField(verbose_name="measure details url", null=True, blank=False)
     google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -131,16 +131,16 @@ class ContestMeasure(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(
         verbose_name="ballotpedia election id", default=0, null=False, blank=False)
     ballotpedia_measure_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
-    ballotpedia_measure_name = models.CharField(
-        verbose_name="ballotpedia measure name", max_length=255, null=True, blank=True)
+    ballotpedia_measure_name = models.TextField(
+        verbose_name="ballotpedia measure name", null=True, blank=True)
     ballotpedia_measure_status = models.CharField(
         verbose_name="ballotpedia measure status", max_length=255, null=True, blank=True)
     ballotpedia_measure_summary = models.TextField(
         verbose_name="ballotpedia measure summary", null=True, blank=True, default="")
     ballotpedia_measure_text = models.TextField(
         verbose_name="ballotpedia measure text", null=True, blank=True, default="")
-    ballotpedia_measure_url = models.URLField(
-        verbose_name='ballotpedia url of measure', max_length=255, blank=True, null=True)
+    ballotpedia_measure_url = models.TextField(
+        verbose_name='ballotpedia url of measure', blank=True, null=True)
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(
@@ -406,7 +406,7 @@ class ContestMeasureManager(models.Manager):
                 try:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__iexact=we_vote_id,
+                        we_vote_id=we_vote_id,
                         defaults=updated_contest_measure_values)
                     success = True
                     status += 'CONTEST_UPDATE_OR_CREATE_SUCCEEDED '
@@ -834,12 +834,12 @@ class ContestMeasureManager(models.Manager):
             if positive_value_exists(read_only):
                 contest_measures_are_not_duplicates_list_query = \
                     ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                        contest_measure1_we_vote_id=contest_measure_we_vote_id,
                     )
             else:
                 contest_measures_are_not_duplicates_list_query = \
                     ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                        contest_measure1_we_vote_id=contest_measure_we_vote_id,
                     )
             contest_measures_are_not_duplicates_list1 = list(contest_measures_are_not_duplicates_list_query)
             success = True
@@ -857,12 +857,12 @@ class ContestMeasureManager(models.Manager):
                 if positive_value_exists(read_only):
                     contest_measures_are_not_duplicates_list_query = \
                         ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
-                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                            contest_measure2_we_vote_id=contest_measure_we_vote_id,
                         )
                 else:
                     contest_measures_are_not_duplicates_list_query = \
                         ContestMeasuresAreNotDuplicates.objects.filter(
-                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                            contest_measure2_we_vote_id=contest_measure_we_vote_id,
                         )
                 contest_measures_are_not_duplicates_list2 = list(contest_measures_are_not_duplicates_list_query)
                 success = True
@@ -1004,7 +1004,7 @@ class ContestMeasureManager(models.Manager):
         existing_measure_entry = ''
 
         try:
-            existing_measure_entry = ContestMeasure.objects.get(we_vote_id__iexact=measure_we_vote_id)
+            existing_measure_entry = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
             if existing_measure_entry:
                 # found the existing entry, update the values
                 existing_measure_entry.measure_title = measure_title
@@ -1691,11 +1691,11 @@ class ContestMeasureListManager(models.Manager):
             measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for contest_measure_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
-            # measure_queryset = measure_queryset.filter(contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+            # measure_queryset = measure_queryset.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                measure_queryset = measure_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                measure_queryset = measure_queryset.filter(~Q(we_vote_id=we_vote_id_from_master))
 
             # We want to find measures with *any* of these values
             if positive_value_exists(measure_title):
@@ -1871,7 +1871,7 @@ class ContestMeasureListManager(models.Manager):
                 contest_measures_are_not_duplicates, new_contest_measures_are_not_duplicates_created = \
                     ContestMeasuresAreNotDuplicates.objects.update_or_create(
                         contest_measure1_we_vote_id__exact=contest_measure1_we_vote_id,
-                        contest_measure2_we_vote_id__iexact=contest_measure2_we_vote_id,
+                        contest_measure2_we_vote_id=contest_measure2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CONTEST_MEASURES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "

@@ -275,7 +275,7 @@ def match_politician_to_organization_view(request, politician_we_vote_id):
 
     try:
         queryset = Politician.objects.all()
-        politician = queryset.get(we_vote_id__iexact=politician_we_vote_id)
+        politician = queryset.get(we_vote_id=politician_we_vote_id)
     except Exception as e:
         status += "POLITICIAN_RETRIEVE_ERROR: " + str(e) + " "
 
@@ -930,7 +930,7 @@ def politician_list_view(request):
                 new_filter = Q(last_name__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(linked_campaignx_we_vote_id__iexact=one_word)
+                new_filter = Q(linked_campaignx_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = (
@@ -961,7 +961,7 @@ def politician_list_view(request):
                 new_filter = Q(vote_usa_politician_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -990,7 +990,7 @@ def politician_list_view(request):
     #     try:
     #         linked_candidate_query = CandidateCampaign.objects.using('readonly').all()
     #         linked_candidate_query = linked_candidate_query.filter(
-    #             Q(politician_we_vote_id__iexact=one_politician.we_vote_id) |
+    #             Q(politician_we_vote_id=one_politician.we_vote_id) |
     #             Q(politician_id=one_politician.id))
     #         linked_candidate_list_count = linked_candidate_query.count()
     #         one_politician.linked_candidate_list_count = linked_candidate_list_count
@@ -1103,7 +1103,7 @@ def politician_list_view(request):
         if one_politician.we_vote_id:
             try:
                 queryset = Representative.objects.all()
-                queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
+                queryset = queryset.filter(politician_we_vote_id=one_politician.we_vote_id)
                 linked_representative_we_vote_id_list = []
                 linked_representative_list = list(queryset)
                 if positive_value_exists(show_ocd_id_state_mismatch):
@@ -1191,8 +1191,8 @@ def politician_merge_process_view(request):
             politician1_we_vote_id, politician2_we_vote_id)
         if results['success']:
             queryset = PoliticiansArePossibleDuplicates.objects.filter(
-                politician1_we_vote_id__iexact=politician1_we_vote_id,
-                politician2_we_vote_id__iexact=politician2_we_vote_id,
+                politician1_we_vote_id=politician1_we_vote_id,
+                politician2_we_vote_id=politician2_we_vote_id,
             )
             queryset.delete()
             messages.add_message(request, messages.INFO, 'Prior politicians skipped, and not merged.')
@@ -1267,8 +1267,8 @@ def politician_merge_process_view(request):
         messages.add_message(request, messages.INFO, "Politician '{politician_name}' merged."
                                                      "".format(politician_name=politician.politician_name))
         queryset = PoliticiansArePossibleDuplicates.objects.filter(
-            politician1_we_vote_id__iexact=politician1_we_vote_id,
-            politician2_we_vote_id__iexact=politician2_we_vote_id,
+            politician1_we_vote_id=politician1_we_vote_id,
+            politician2_we_vote_id=politician2_we_vote_id,
         )
         queryset.delete()
         if positive_value_exists(voter_we_vote_id):
@@ -1352,7 +1352,7 @@ def politician_new_view(request):
 
     # These are the Offices already entered for this election
     try:
-        contest_office_list = ContestOffice.objects.order_by('office_name')
+        contest_office_list = ContestOffice.objects.using('readonly').order_by('office_name')
         contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
@@ -1758,7 +1758,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             from politician.models import PoliticianSEOFriendlyPath
             try:
                 path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
-                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_query = path_query.filter(politician_we_vote_id=politician_we_vote_id)
                 path_count = path_query.count()
                 path_list = list(path_query[:4])
             except Exception as e:
@@ -1783,7 +1783,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 from organization.models import Organization
                 organization_queryset = Organization.objects.using('readonly').all()
                 organization_by_we_vote_id = organization_queryset.get(
-                    we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                    we_vote_id=politician_on_stage.organization_we_vote_id)
                 if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
                     please_update_politician = True
                     organization_error += " ERROR: Organization politician_we_vote_id doesn't match this politician. "
@@ -1799,7 +1799,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             from organization.models import Organization
             organization_queryset = Organization.objects.using('readonly').all()
             organization_queryset = organization_queryset.filter(
-                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                politician_we_vote_id=politician_on_stage.we_vote_id)
             organization_linked_to_politician_list = list(organization_queryset)
             if len(organization_linked_to_politician_list) > 0:
                 if not positive_value_exists(politician_on_stage.organization_we_vote_id):
@@ -1832,7 +1832,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         try:
             politician_position_query = PositionEntered.objects.using('readonly').all()
             politician_position_list = politician_position_query.filter(
-                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                politician_we_vote_id=politician_on_stage.we_vote_id)
         except Exception as e:
             politician_position_list = []
 
@@ -1848,7 +1848,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             try:
                 follow_query = FollowOrganization.objects.using('readonly').all()
                 follow_query = follow_query\
-                    .filter(organization_we_vote_id__iexact=organization_we_vote_id_linked_to_politician)
+                    .filter(organization_we_vote_id=organization_we_vote_id_linked_to_politician)
                 follow_query = follow_query.filter(
                     organization_we_vote_id_that_is_following__in=organizations_with_positions_about_this_politician)
                 follow_list = list(follow_query)
@@ -1869,7 +1869,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         try:
             linked_candidate_list = CandidateCampaign.objects.using('readonly').all()
             linked_candidate_list = linked_candidate_list.filter(
-                Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+                Q(politician_we_vote_id=politician_on_stage.we_vote_id) |
                 Q(politician_id=politician_on_stage.id))
         except Exception as e:
             linked_candidate_list = []
@@ -1911,7 +1911,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             try:
                 duplicate_politician_list = Politician.objects.using('readonly').all()
                 duplicate_politician_list = duplicate_politician_list.exclude(
-                    we_vote_id__iexact=politician_on_stage.we_vote_id)
+                    we_vote_id=politician_on_stage.we_vote_id)
 
                 filters = []
                 if positive_value_exists(politician_on_stage.politician_name):
@@ -2007,7 +2007,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         linked_representative_list = []
         if positive_value_exists(politician_we_vote_id):
             queryset = Representative.objects.using('readonly').all()
-            queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+            queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
             linked_representative_list = list(queryset)
 
         # ##################################
@@ -2022,7 +2022,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         if positive_value_exists(politician_we_vote_id):
             from campaign.models import CampaignX
             queryset = CampaignX.objects.using('readonly').all()
-            queryset = queryset.filter(linked_politician_we_vote_id__iexact=politician_we_vote_id)
+            queryset = queryset.filter(linked_politician_we_vote_id=politician_we_vote_id)
             linked_campaignx_list = list(queryset)
 
         # ##################################
@@ -2037,7 +2037,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         if positive_value_exists(politician_we_vote_id):
             from politician.models import RecommendedPoliticianLinkByPolitician
             queryset = RecommendedPoliticianLinkByPolitician.objects.using('readonly').all()
-            queryset = queryset.filter(from_politician_we_vote_id__iexact=politician_we_vote_id)
+            queryset = queryset.filter(from_politician_we_vote_id=politician_we_vote_id)
             recommended_politicians = list(queryset)
         recommended_politician_we_vote_ids = [rec.recommended_politician_we_vote_id for rec in recommended_politicians]
         recommended_politicians_list = []
@@ -2053,7 +2053,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             politician_linked_campaignx_we_vote_id = politician_on_stage.linked_campaignx_we_vote_id
 
         queryset = PoliticianChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+        queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
 
@@ -2295,8 +2295,8 @@ def politicians_not_duplicates_view(request):
         politician1_we_vote_id, politician2_we_vote_id)
     if results['success']:
         queryset = PoliticiansArePossibleDuplicates.objects.filter(
-            politician1_we_vote_id__iexact=politician1_we_vote_id,
-            politician2_we_vote_id__iexact=politician2_we_vote_id,
+            politician1_we_vote_id=politician1_we_vote_id,
+            politician2_we_vote_id=politician2_we_vote_id,
         )
         queryset.delete()
         messages.add_message(request, messages.INFO, 'Two politicians marked as not duplicates.')
@@ -2931,7 +2931,7 @@ def politician_edit_process_view(request):
                     from organization.models import Organization
                     organization_queryset = Organization.objects.all()  # Cannot be 'readonly'
                     organization_by_we_vote_id = organization_queryset.get(
-                        we_vote_id__iexact=politician_on_stage.organization_we_vote_id)
+                        we_vote_id=politician_on_stage.organization_we_vote_id)
                     if organization_by_we_vote_id.politician_we_vote_id != politician_on_stage.we_vote_id:
                         # Since politician is the master link, clear Organization.politician_we_vote_id
                         organization_by_we_vote_id.politician_we_vote_id = ''
@@ -2948,7 +2948,7 @@ def politician_edit_process_view(request):
                     from organization.models import Organization
                     organization_queryset = Organization.objects.using('readonly').all()
                     organization_queryset = organization_queryset.filter(
-                        politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                        politician_we_vote_id=politician_on_stage.we_vote_id)
                     organization_linked_list = list(organization_queryset)
                     if len(organization_linked_list) > 0:
                         # Just use the first
@@ -3325,7 +3325,7 @@ def politician_edit_process_view(request):
     try:
         linked_candidate_query = CandidateCampaign.objects.all()
         linked_candidate_query = linked_candidate_query.filter(
-            Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+            Q(politician_we_vote_id=politician_on_stage.we_vote_id) |
             Q(politician_id=politician_on_stage.id)
         )
         linked_candidate_list = list(linked_candidate_query)
@@ -3358,7 +3358,7 @@ def politician_edit_process_view(request):
     try:
         linked_representative_query = Representative.objects.all()
         linked_representative_query = linked_representative_query.filter(
-            Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+            Q(politician_we_vote_id=politician_on_stage.we_vote_id) |
             Q(politician_id=politician_on_stage.id)
         )
         linked_representative_list = list(linked_representative_query)
@@ -3842,7 +3842,7 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             new_filter = Q(party__icontains=politician_search)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=politician_search)
+            new_filter = Q(we_vote_id=politician_search)
             filters.append(new_filter)
 
             # Add the first query
@@ -4019,7 +4019,7 @@ def repair_ocd_id_mismatch_damage_view(request):
             # Now find all representative ids related to this politician
             try:
                 queryset = Representative.objects.all()
-                queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
+                queryset = queryset.filter(politician_we_vote_id=one_politician.we_vote_id)
                 linked_representative_list = list(queryset)
                 linked_representative = linked_representative_list[0]  # For now, just take the first one
                 if positive_value_exists(linked_representative.ocd_division_id) and \
@@ -4087,9 +4087,9 @@ def update_politician_from_candidate_view(request):
     politician_we_vote_id = politician.we_vote_id
 
     queryset = CandidateCampaign.objects.using('readonly').all()
-    queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+    queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
     if positive_value_exists(candidate_we_vote_id):
-        queryset = queryset.filter(we_vote_id__iexact=candidate_we_vote_id)
+        queryset = queryset.filter(we_vote_id=candidate_we_vote_id)
     queryset = queryset.order_by('-candidate_year', '-candidate_ultimate_election_date')
     candidate_list = list(queryset)
     candidate_list_by_politician_we_vote_id = {}

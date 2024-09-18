@@ -443,8 +443,8 @@ class CampaignXManager(models.Manager):
 
         try:
             campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id)
             voter_is_campaignx_owner = positive_value_exists(campaignx_owner_query.count())
             status += 'VOTER_IS_CAMPAIGNX_OWNER '
         except CampaignXOwner as e:
@@ -456,7 +456,7 @@ class CampaignXManager(models.Manager):
             try:
                 # Which teams does this voter belong to, with campaignX rights?
                 team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id)
                 team_member_queryset = team_member_queryset.filter(
                     Q(can_edit_campaignx_owned_by_organization=True) |
                     Q(can_moderate_campaignx_owned_by_organization=True) |
@@ -469,7 +469,7 @@ class CampaignXManager(models.Manager):
             if len(teams_voter_is_on_organization_we_vote_id_list) > 0:
                 try:
                     owner_queryset = CampaignXOwner.objects.using('readonly').filter(
-                        campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                        campaignx_we_vote_id=campaignx_we_vote_id,
                         organization_we_vote_id__in=teams_voter_is_on_organization_we_vote_id_list)
                     voter_is_campaignx_owner = positive_value_exists(owner_queryset.count())
                     status += 'VOTER_IS_CAMPAIGNX_OWNER_AS_TEAM_MEMBER '
@@ -491,8 +491,8 @@ class CampaignXManager(models.Manager):
 
         try:
             queryset = CampaignXSupporter.objects.using('readonly').filter(
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id)
             voter_is_campaignx_owner = positive_value_exists(queryset.count())
             status += 'VOTER_IS_CAMPAIGNX_SUPPORTER '
         except CampaignXSupporter as e:
@@ -518,6 +518,7 @@ class CampaignXManager(models.Manager):
                     campaignx_politician.delete()
                 except Exception as e:
                     status += "DELETE_FAILED: " + str(e) + ' '
+                    success = False
 
         results = {
             'status':                       status,
@@ -862,11 +863,11 @@ class CampaignXManager(models.Manager):
             if positive_value_exists(read_only):
                 campaignx_entries_are_not_duplicates_list_query = \
                     CampaignXEntriesAreNotDuplicates.objects.using('readonly').filter(
-                        campaignx1_we_vote_id__iexact=campaignx_we_vote_id,
+                        campaignx1_we_vote_id=campaignx_we_vote_id,
                     )
             else:
                 campaignx_entries_are_not_duplicates_list_query = CampaignXEntriesAreNotDuplicates.objects.filter(
-                    campaignx1_we_vote_id__iexact=campaignx_we_vote_id,
+                    campaignx1_we_vote_id=campaignx_we_vote_id,
                 )
             campaignx_entries_are_not_duplicates_list1 = list(campaignx_entries_are_not_duplicates_list_query)
             success = True
@@ -884,12 +885,12 @@ class CampaignXManager(models.Manager):
                 if positive_value_exists(read_only):
                     campaignx_entries_are_not_duplicates_list_query = \
                         CampaignXEntriesAreNotDuplicates.objects.using('readonly').filter(
-                            campaignx2_we_vote_id__iexact=campaignx_we_vote_id,
+                            campaignx2_we_vote_id=campaignx_we_vote_id,
                         )
                 else:
                     campaignx_entries_are_not_duplicates_list_query = \
                         CampaignXEntriesAreNotDuplicates.objects.filter(
-                            campaignx2_we_vote_id__iexact=campaignx_we_vote_id,
+                            campaignx2_we_vote_id=campaignx_we_vote_id,
                         )
                 campaignx_entries_are_not_duplicates_list2 = list(campaignx_entries_are_not_duplicates_list_query)
                 success = True
@@ -1159,7 +1160,7 @@ class CampaignXManager(models.Manager):
             else:
                 if positive_value_exists(including_started_by_voter_we_vote_id):
                     # started_by this voter
-                    new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                    new_filter = Q(started_by_voter_we_vote_id=including_started_by_voter_we_vote_id)
                     filters.append(new_filter)
                     # Voter is owner of the campaign, or on team that owns it
                     voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
@@ -1262,7 +1263,7 @@ class CampaignXManager(models.Manager):
             if positive_value_exists(including_started_by_voter_we_vote_id):
                 # started_by this voter
                 new_filter = \
-                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                    Q(started_by_voter_we_vote_id=including_started_by_voter_we_vote_id)
                 filters.append(new_filter)
                 # Voter is owner of the campaign, or on team that owns it
                 voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
@@ -2029,14 +2030,15 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_title(campaignx_we_vote_id='', read_only=False):
         if campaignx_we_vote_id is None or len(campaignx_we_vote_id) == 0:
             return ''
         try:
             if positive_value_exists(read_only):
-                campaignx = CampaignX.objects.using('readonly').get(we_vote_id__iexact=campaignx_we_vote_id)
+                campaignx = CampaignX.objects.using('readonly').get(we_vote_id=campaignx_we_vote_id)
             else:
-                campaignx = CampaignX.objects.get(we_vote_id__iexact=campaignx_we_vote_id)
+                campaignx = CampaignX.objects.get(we_vote_id=campaignx_we_vote_id)
             return campaignx.campaign_title
         except CampaignX.DoesNotExist as e:
             # Some test data will throw this, no worries
@@ -2082,7 +2084,7 @@ class CampaignXManager(models.Manager):
 
         try:
             campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             campaignx_owner_query = campaignx_owner_query.values_list('campaignx_we_vote_id', flat=True).distinct()
             campaignx_owner_campaignx_we_vote_ids = list(campaignx_owner_query)
         except CampaignXOwner as e:
@@ -2092,7 +2094,7 @@ class CampaignXManager(models.Manager):
         try:
             # Which teams does this voter belong to, with can_send_updates_for_campaignx_owned_by_organization rights?
             team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 can_send_updates_for_campaignx_owned_by_organization=True
             )
             team_member_queryset = team_member_queryset.values_list('organization_we_vote_id', flat=True).distinct()
@@ -2128,7 +2130,7 @@ class CampaignXManager(models.Manager):
 
         try:
             campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             campaignx_owner_query = campaignx_owner_query.values_list('campaignx_we_vote_id', flat=True).distinct()
             campaignx_owner_campaignx_we_vote_ids = list(campaignx_owner_query)
         except CampaignXOwner as e:
@@ -2138,7 +2140,7 @@ class CampaignXManager(models.Manager):
         try:
             # Which teams does this voter belong to, with campaignX rights?
             team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             team_member_queryset = team_member_queryset.filter(
                 Q(can_edit_campaignx_owned_by_organization=True) |
                 Q(can_moderate_campaignx_owned_by_organization=True) |
@@ -2176,7 +2178,7 @@ class CampaignXManager(models.Manager):
 
         try:
             campaignx_owner_entries_updated = CampaignXOwner.objects \
-                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .filter(organization_we_vote_id=organization_we_vote_id) \
                 .update(organization_name=organization_name,
                         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
@@ -2203,7 +2205,7 @@ class CampaignXManager(models.Manager):
 
         try:
             campaignx_supporter_entries_updated = CampaignXSupporter.objects \
-                .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
+                .filter(organization_we_vote_id=organization_we_vote_id) \
                 .update(supporter_name=supporter_name,
                         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
@@ -2232,7 +2234,7 @@ class CampaignXManager(models.Manager):
             if not positive_value_exists(campaignx_we_vote_id):
                 try:
                     queryset = CampaignX.objects.using('readonly').all()
-                    queryset = queryset.filter(linked_politician_we_vote_id__iexact=politician_we_vote_id)
+                    queryset = queryset.filter(linked_politician_we_vote_id=politician_we_vote_id)
                     temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
                     campaignx_we_vote_id = temp_list[0]
                 except Exception as e:
@@ -2241,7 +2243,7 @@ class CampaignXManager(models.Manager):
                     return error_results
             try:
                 queryset = Organization.objects.using('readonly').all()
-                queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
                 temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
                 organization_we_vote_id = temp_list[0]
             except Exception as e:
@@ -2251,7 +2253,7 @@ class CampaignXManager(models.Manager):
             try:
                 from follow.models import FOLLOWING, FOLLOW_DISLIKE, FollowOrganization
                 queryset = FollowOrganization.objects.using('readonly').all()
-                queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
                 following_queryset = queryset.filter(following_status=FOLLOWING)
                 supporters_count = following_queryset.count()
                 disliking_queryset = queryset.filter(following_status=FOLLOW_DISLIKE)
@@ -2263,7 +2265,7 @@ class CampaignXManager(models.Manager):
         else:
             try:
                 count_query = CampaignXSupporter.objects.using('readonly').all()
-                count_query = count_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+                count_query = count_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
                 count_query = count_query.filter(campaign_supported=True)
                 supporters_count = count_query.count()
             except Exception as e:
@@ -2562,8 +2564,8 @@ class CampaignXManager(models.Manager):
                 }
                 campaignx_entries_are_not_duplicates, new_campaignx_entries_are_not_duplicates_created = \
                     CampaignXEntriesAreNotDuplicates.objects.update_or_create(
-                        campaignx1_we_vote_id__iexact=campaignx1_we_vote_id,
-                        campaignx2_we_vote_id__iexact=campaignx2_we_vote_id,
+                        campaignx1_we_vote_id=campaignx1_we_vote_id,
+                        campaignx2_we_vote_id=campaignx2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "CAMPAIGNX_ENTRIES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "

@@ -45,7 +45,8 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
     recipient_email = ""
     recipient_email_subscription_secret_key = ""
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            recipient_voter_we_vote_id, read_only=True)
         success = results['success']
         if results['email_address_object_found']:
             recipient_email_object = results['email_address_object']
@@ -239,7 +240,8 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
     recipient_email = ""
     recipient_email_subscription_secret_key = ""
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            recipient_voter_we_vote_id, read_only=True)
         success = results['success']
         if results['email_address_object_found']:
             recipient_email_object = results['email_address_object']
@@ -512,7 +514,8 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     recipient_email = ""
     recipient_email_subscription_secret_key = ""
     if recipient_voter.has_email_with_verified_ownership():
-        results = email_manager.retrieve_primary_email_with_ownership_verified(recipient_voter_we_vote_id)
+        results = email_manager.retrieve_primary_email_with_ownership_verified(
+            recipient_voter_we_vote_id, read_only=True)
         success = results['success']
         if results['email_address_object_found']:
             recipient_email_object = results['email_address_object']

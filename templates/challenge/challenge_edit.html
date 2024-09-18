@@ -1,0 +1,323 @@
+{# templates/challenge/challenge_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if challenge %}{{ challenge.challenge_title  }}{% else %}New Challenge{% endif %}{% endblock %}
+
+{%  block content %}
+{% load humanize %}
+{% load template_filters %}
+<style>
+    span.nobr { white-space: nowrap; }
+    select.form-control {
+      height: auto !important;
+    }
+</style>
+<a href="{% url 'challenge:challenge_list' %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">< Cancel and Back to List</a>
+
+<h1>{% if challenge %}Challenge: {{ challenge.challenge_title }}{% else %}Create New Challenge{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+{% if challenge %}
+{% else %}
+    <p>Create a new Challenge. You will be able to add more information on the next "Edit" page.</p>
+{% endif %}
+
+<form action="{% url "challenge:challenge_edit_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+    <input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden" name="challenge_search" value="{% if challenge_search %}{{ challenge_search }}{% endif %}">
+    <input type="hidden" name="challenge_we_vote_id" value="{% if challenge %}{{ challenge.we_vote_id }}{% endif %}">
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+    {% if challenge %}
+        <a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
+    {% else %}
+        <a href="{% url 'challenge:challenge_list' %}?challenge_search={{ challenge_search }}">cancel</a>
+    {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">{% if challenge %}Update Challenge{% else %}Create Challenge{% endif %}</button>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="challenge_title_id" class="col-sm-3 control-label">Challenge Title</label>
+    <div class="col-sm-8">
+        <input type="text" name="challenge_title" id="challenge_title_id" class="form-control"
+               value="{% if challenge %}{{ challenge.challenge_title|default_if_none:"" }}{% else %}{{ challenge_title|default_if_none:"" }}{% endif %}" />
+        {% if challenge %}
+            {{ challenge.we_vote_id }}
+            {% if challenge and challenge.politician_we_vote_id %}
+                <br />
+                <span style="color: darkgray;">
+                    This challenge ('{{ challenge.challenge_title }}') was generated for this politician (state_code: {{ politician_state_code }}):
+                </span>
+                <a href="{% url 'politician:politician_we_vote_id_edit' challenge.politician_we_vote_id %}"
+                   target="_blank">
+                    {{ challenge.politician_we_vote_id }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% if challenge %}
+
+<div class="form-group">
+    <label for="politician_we_vote_id_id" class="col-sm-3 control-label">
+        Politician WeVote ID
+        {% if challenge and challenge.politician_we_vote_id %}
+        <a href="{% url 'politician:politician_we_vote_id_edit' challenge.politician_we_vote_id %}"
+           target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="politician_we_vote_id" id="politician_we_vote_id_id" class="form-control"
+               value="{% if challenge %}{{ challenge.politician_we_vote_id|default_if_none:"" }}{% else %}{{ politician_we_vote_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="organization_we_vote_id_id" class="col-sm-3 control-label">
+        Organization WeVote ID
+        {% if challenge.organization_we_vote_id %}
+            <a href="{% url 'organization:organization_edit_we_vote_id' challenge.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="organization_we_vote_id" id="organization_we_vote_id_id" class="form-control"
+               value="{% if challenge %}{{ challenge.organization_we_vote_id|default_if_none:"" }}{% else %}{{ organization_we_vote_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="seo_friendly_path_id" class="col-sm-3 control-label">
+        SEO Friendly Path
+        {% if challenge.seo_friendly_path %}
+            <a href="{{ web_app_root_url }}/c/{{ challenge.seo_friendly_path }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"{% if challenge.politician_we_vote_id %} disabled{% endif %}
+               value="{% if challenge %}{{ challenge.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
+    {% if challenge.politician_we_vote_id %}
+        <span style="color: darkgray">Since this Challenge is hard-linked to a politician, please edit the SEO Friendly Path on the Politician record.</span>
+    {% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Challenge Description</label>
+    <div class="col-sm-8 ">
+        <textarea
+            name="challenge_description"
+            class="form-control animated"
+            id="challenge_description_id"
+            placeholder="Challenge description..."
+            rows="8">{{ challenge.challenge_description|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Politician List Serialized</label>
+    <div class="col-sm-8 ">
+        <textarea
+            name="politician_starter_list_serialized"
+            class="form-control animated"
+            id="politician_starter_list_serialized_id"
+            placeholder="Politician List Serialized..."
+            rows="2">{{ challenge.politician_starter_list_serialized|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="final_election_date_as_integer_id" class="col-sm-3 control-label">Election Date</label>
+    <div class="col-sm-8">
+        <input type="text" name="final_election_date_as_integer" id="final_election_date_as_integer_id" class="form-control"
+               value="{% if challenge %}{{ challenge.final_election_date_as_integer|default_if_none:"" }}{% else %}{{ final_election_date_as_integer|default_if_none:"" }}{% endif %}" />
+        The last election any of the candidates are in. In YYYYMMDD format. This challenge won't be promoted after this date.
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Challenge Owner: Team Review Mode</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_in_team_review_mode" id="is_in_team_review_mode_id" value="1"
+                {% if challenge.is_in_team_review_mode %}checked{% endif %} />
+        <label for="is_in_team_review_mode_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, owner/team still reviewing, so don't list on any site. Challenge can still be visited with direct link by anyone. Uncheck when ready to promote.</span></label>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Challenge Owner: Allow Promotion</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_ok_to_promote_on_we_vote" id="is_ok_to_promote_on_we_vote_id" value="1"
+                {% if challenge.is_ok_to_promote_on_we_vote %}checked{% endif %} />
+        <label for="is_ok_to_promote_on_we_vote_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, challenge may be promoted on WeVote.US. Uncheck if the challenge owner(s) don&apos;t want promotion.</span></label>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Is Not Promoted By We Vote?</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_not_promoted_by_we_vote" id="is_not_promoted_by_we_vote_id" value="1"
+                {% if challenge.is_not_promoted_by_we_vote %}checked{% endif %} />
+        <label for="is_not_promoted_by_we_vote_id" style="font-weight: normal !important;">Do not show in lists on WeVote.US</label>
+        <textarea name="is_not_promoted_by_we_vote_reason"
+                  class="form-control animated"
+                  id="is_not_promoted_by_we_vote_reason_id"
+                  placeholder="If not promoted by We Vote, why? (This text is visible to Challenge Owner.)">{{ challenge.is_not_promoted_by_we_vote_reason|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Is Blocked By We Vote?</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="is_blocked_by_we_vote" id="is_blocked_by_we_vote_id" value="1"
+                {% if challenge.is_blocked_by_we_vote %}checked{% endif %} />
+        <label for="is_blocked_by_we_vote_id" style="font-weight: normal !important;">Prevent ability to see on WeVote.US</label>
+        <textarea name="is_blocked_by_we_vote_reason"
+                  class="form-control animated"
+                  id="is_blocked_by_we_vote_reason_id"
+                  placeholder="If blocked by We Vote, why? (This text is visible to Challenge Owner.)">{{ challenge.is_blocked_by_we_vote_reason|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Don&apos;t Require Minimum 5 Supporters</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="supporters_count_minimum_ignored" id="supporters_count_minimum_ignored_id" value="1"
+                {% if challenge.supporters_count_minimum_ignored %}checked{% endif %} />
+        <label for="supporters_count_minimum_ignored_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, promote challenge on WeVote.US before 5 people have supported. Uncheck to require 5 supporters.</span></label>
+    </div>
+</div>
+
+{% if challenge.in_draft_mode %}
+<div class="form-group">
+    <label class="col-sm-3 control-label">Take Out Of Draft Mode</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="take_out_of_draft_mode" id="take_out_of_draft_mode_id" value="1" />
+        <label for="take_out_of_draft_mode_id" style="font-weight: normal !important;"><span style="color: darkgray">Check to take challenge out of draft mode.</span></label>
+    </div>
+</div>
+{% endif %}
+
+{% endif %}
+
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+    {% if challenge %}
+        <a href="{% url 'challenge:challenge_summary' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
+    {% else %}
+        <a href="{% url 'challenge:challenge_list' %}?challenge_search={{ challenge_search }}">cancel</a>
+    {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">{% if challenge %}Update Challenge{% else %}Create Challenge{% endif %}</button>
+    </div>
+</div>
+</form>
+
+<div style='clear:both'></div>
+
+
+{% if challenge %}
+  <br />
+  <br />
+    {% if challenge.we_vote_hosted_challenge_photo_large_url %}
+        <img src="{{ challenge.we_vote_hosted_challenge_photo_large_url }}"><br />
+        Large<br />
+    {% endif %}
+    {% if challenge.we_vote_hosted_profile_image_url_large %}
+        <img src="{{ challenge.we_vote_hosted_profile_image_url_large }}"><br />
+        Politician Photo Large<br />
+    {% endif %}
+{% endif %}
+
+{% if related_challenge_list %}
+    <h4>Possibly Related Challenges</h4>
+    <table class="table">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Challenge Title</td>
+            <td>SEO Friendly Path</td>
+            <td>Id</td>
+        </tr>
+    {% for related_challenge in related_challenge_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if related_challenge.we_vote_hosted_challenge_photo_medium_url %}
+                <a href="{% url 'challenge:challenge_summary' related_challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ related_challenge.we_vote_hosted_challenge_photo_medium_url }}' height="48px" />
+                </a>
+                {% elif related_challenge.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'challenge:challenge_summary' related_challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ related_challenge.we_vote_hosted_profile_image_url_medium }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'challenge:challenge_summary' related_challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                {{ related_challenge.challenge_title }} <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+                <br />
+                {{ related_challenge.supporters_count|intcomma }} supporters
+                &nbsp;&nbsp;
+                <a href="{% url 'challenge:compare_two_challenges_for_merge' %}?challenge1_we_vote_id={{ challenge.we_vote_id }}&challenge2_we_vote_id={{ related_challenge.we_vote_id }}" target="_blank">
+                    compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td class="padded">
+                {% if related_challenge.seo_friendly_path %}<a href="https://quality.wevote.us/c/{{ related_challenge.seo_friendly_path }}" target="_blank" target="_blank">{{ related_challenge.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}</td>
+            </td>
+            <td>{{ related_challenge.id }} &nbsp;
+                {{ related_challenge.we_vote_id }}
+                {% if related_challenge.politician_we_vote_id %}
+                    {{ related_challenge.politician_we_vote_id }}
+                {% else %}
+                    ("pol"&nbsp;missing)
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+{% endif %}
+
+{% if challenge %}
+<form action="{% url "challenge:compare_two_challenges_for_merge" %}" method="get" class="form-horizontal" target="_blank">
+    <input type="hidden" name="challenge1_we_vote_id" value="{% if challenge %}{{ challenge.we_vote_id }}{% else %}0{% endif %}">
+    <input type="text" name="challenge2_we_vote_id" placeholder="Enter We Vote ID for other challenge" size="40" />
+    <button type="submit" class="btn btn-default">Compare with Specific Challenge</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</form>
+{% endif %}
+
+
+{% if challenge %}
+  <br />
+  <br />
+<form action="{% url "challenge:challenge_delete_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+  <input type="hidden" name="challenge_we_vote_id" value="{% if challenge %}{{ challenge.we_vote_id }}{% else %}0{% endif %}">
+  <button type="submit" class="btn btn-danger">Delete Challenge</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <label for="confirm_delete_id">
+    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this challenge
+  </label>
+</form>
+  <br />
+  <br />
+{% endif %}
+
+{% endblock %}

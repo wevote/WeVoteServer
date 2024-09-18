@@ -377,7 +377,7 @@ class Representative(models.Model):
 
     def generate_twitter_link(self):
         if self.representative_twitter_handle:
-            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.representative_twitter_handle)
+            return "https://x.com/{twitter_handle}".format(twitter_handle=self.representative_twitter_handle)
         else:
             return ''
 
@@ -733,13 +733,13 @@ class RepresentativeManager(models.Manager):
         try:
             if positive_value_exists(read_only):
                 representatives_are_not_duplicates = RepresentativesAreNotDuplicates.objects.using('readonly').get(
-                    representative1_we_vote_id__iexact=representative1_we_vote_id,
-                    representative2_we_vote_id__iexact=representative2_we_vote_id,
+                    representative1_we_vote_id=representative1_we_vote_id,
+                    representative2_we_vote_id=representative2_we_vote_id,
                 )
             else:
                 representatives_are_not_duplicates = RepresentativesAreNotDuplicates.objects.get(
-                    representative1_we_vote_id__iexact=representative1_we_vote_id,
-                    representative2_we_vote_id__iexact=representative2_we_vote_id,
+                    representative1_we_vote_id=representative1_we_vote_id,
+                    representative2_we_vote_id=representative2_we_vote_id,
                 )
             representatives_are_not_duplicates_found = True
             success = True
@@ -760,14 +760,14 @@ class RepresentativeManager(models.Manager):
                 if positive_value_exists(read_only):
                     representatives_are_not_duplicates = \
                         RepresentativesAreNotDuplicates.objects.using('readonly').get(
-                            representative1_we_vote_id__iexact=representative2_we_vote_id,
-                            representative2_we_vote_id__iexact=representative1_we_vote_id,
+                            representative1_we_vote_id=representative2_we_vote_id,
+                            representative2_we_vote_id=representative1_we_vote_id,
                         )
                 else:
                     representatives_are_not_duplicates = \
                         RepresentativesAreNotDuplicates.objects.get(
-                            representative1_we_vote_id__iexact=representative2_we_vote_id,
-                            representative2_we_vote_id__iexact=representative1_we_vote_id
+                            representative1_we_vote_id=representative2_we_vote_id,
+                            representative2_we_vote_id=representative1_we_vote_id
                         )
                 representatives_are_not_duplicates_found = True
                 success = True
@@ -807,12 +807,12 @@ class RepresentativeManager(models.Manager):
             if positive_value_exists(read_only):
                 representatives_are_not_duplicates_list_query = \
                     RepresentativesAreNotDuplicates.objects.using('readonly').filter(
-                        representative1_we_vote_id__iexact=representative_we_vote_id,
+                        representative1_we_vote_id=representative_we_vote_id,
                     )
             else:
                 representatives_are_not_duplicates_list_query = \
                     RepresentativesAreNotDuplicates.objects.filter(
-                        representative1_we_vote_id__iexact=representative_we_vote_id)
+                        representative1_we_vote_id=representative_we_vote_id)
             representatives_are_not_duplicates_list1 = list(representatives_are_not_duplicates_list_query)
             success = True
             status += "REPRESENTATIVES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
@@ -829,12 +829,12 @@ class RepresentativeManager(models.Manager):
                 if positive_value_exists(read_only):
                     representatives_are_not_duplicates_list_query = \
                         RepresentativesAreNotDuplicates.objects.using('readonly').filter(
-                            representative2_we_vote_id__iexact=representative_we_vote_id,
+                            representative2_we_vote_id=representative_we_vote_id,
                         )
                 else:
                     representatives_are_not_duplicates_list_query = \
                         RepresentativesAreNotDuplicates.objects.filter(
-                            representative2_we_vote_id__iexact=representative_we_vote_id)
+                            representative2_we_vote_id=representative_we_vote_id)
                 representatives_are_not_duplicates_list2 = list(representatives_are_not_duplicates_list_query)
                 success = True
                 status += "REPRESENTATIVES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
@@ -1273,7 +1273,7 @@ class RepresentativeManager(models.Manager):
                 representatives_are_not_duplicates, new_representatives_are_not_duplicates_created = \
                     RepresentativesAreNotDuplicates.objects.update_or_create(
                         representative1_we_vote_id__exact=representative1_we_vote_id,
-                        representative2_we_vote_id__iexact=representative2_we_vote_id,
+                        representative2_we_vote_id=representative2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "REPRESENTATIVES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
@@ -1629,7 +1629,7 @@ class RepresentativeManager(models.Manager):
         representative_updated = False
 
         try:
-            representative = Representative.objects.get(we_vote_id__iexact=representative_we_vote_id)
+            representative = Representative.objects.get(we_vote_id=representative_we_vote_id)
             representative_found = True
         except Representative.DoesNotExist:
             status += "REPRESENTATIVE_NOT_FOUND "

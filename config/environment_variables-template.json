@@ -5,6 +5,7 @@
   "WE_VOTE_SERVER_ROOT_URL":        "http://localhost:8000",
   "WEB_APP_ROOT_URL":               "http://localhost:3000",
   "CAMPAIGNS_ROOT_URL":             "http://localhost:3000",
+  "CHALLENGES_ROOT_URL":            "http://localhost:3000",
   "TIME_ZONE":                      "US/Pacific",
   "SERVER_IN_DEBUG_MODE":           true,
 
@@ -156,6 +157,8 @@
   "_comment-Search_Google_Drive_for_TWITTER_CONSUMER_KEY_for_more_details": "",
   "_comment-SOCIAL_AUTH_TWITTER_KEY == TWITTER_CONSUMER_KEY": "",
   "_comment-SOCIAL_AUTH_TWITTER_SECRET == TWITTER_CONSUMER_SECRET": "",
+  "_comment-MOBILE_PHONE_BYPASS":   "Use this test phone number and code when creating automated tests",
+  "SMS_BYPASS_MOBILE_NUMBER":       "+1 808-935-8555",
   "SOCIAL_AUTH_SMS_BYPASS":         "123456",
   "SOCIAL_AUTH_TWITTER_KEY":        "<This is Twitter's `Consumer Key`>",
   "SOCIAL_AUTH_TWITTER_SECRET":     "<This is Twitter's `Consumer Secret`>",

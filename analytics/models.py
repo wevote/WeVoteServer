@@ -160,6 +160,28 @@ class AnalyticsAction(models.Model):
     is_desktop = models.BooleanField(verbose_name="request came from desktop device", default=False)
     is_tablet = models.BooleanField(verbose_name="request came from tablet device", default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['google_civic_election_id', 'action_constant'],
+                name='election_action_constant'),
+            models.Index(
+                fields=['voter_we_vote_id', 'action_constant'],
+                name='voter_action_constant'),
+            models.Index(
+                fields=['voter_we_vote_id', 'date_as_integer'],
+                name='voter_date'),
+            models.Index(
+                fields=['voter_we_vote_id'],
+                name='voter_index'),
+            models.Index(
+                fields=['date_as_integer'],
+                name='date_as_integer_index'),
+            models.Index(
+                fields=['date_as_integer', 'is_signed_in'],
+                name='date_as_integer_signed_in'),
+        ]
+
     # We override the save function to auto-generate date_as_integer
     def save(self, *args, **kwargs):
         if self.date_as_integer:
@@ -242,7 +264,7 @@ class AnalyticsCountManager(models.Manager):
             first_visit_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             first_visit_query = first_visit_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
                                                          Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
-            first_visit_query = first_visit_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            first_visit_query = first_visit_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(google_civic_election_id):
                 first_visit_query = first_visit_query.filter(google_civic_election_id=google_civic_election_id)
             first_visit_query = first_visit_query.filter(first_visit_today=True)
@@ -368,7 +390,7 @@ class AnalyticsCountManager(models.Manager):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
                 count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
-                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(limit_to_one_date_as_integer):
                 count_query = count_query.filter(date_as_integer=limit_to_one_date_as_integer)
             elif positive_value_exists(count_through_this_date_as_integer):
@@ -394,7 +416,7 @@ class AnalyticsCountManager(models.Manager):
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
                                              Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
-            count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.filter(first_visit_today=True)
             count_query = count_query.values('voter_we_vote_id').distinct()
@@ -416,7 +438,7 @@ class AnalyticsCountManager(models.Manager):
             count_query = count_query.filter(Q(action_constant=ACTION_ORGANIZATION_FOLLOW) |
                                              Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
             if positive_value_exists(organization_we_vote_id):
-                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.values('voter_we_vote_id').distinct()
             count_result = count_query.count()
@@ -436,7 +458,7 @@ class AnalyticsCountManager(models.Manager):
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
             count_query = count_query.filter(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW)
             if positive_value_exists(organization_we_vote_id):
-                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.values('voter_we_vote_id').distinct()
             count_result = count_query.count()
@@ -449,7 +471,7 @@ class AnalyticsCountManager(models.Manager):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -460,12 +482,12 @@ class AnalyticsCountManager(models.Manager):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
-                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -476,7 +498,7 @@ class AnalyticsCountManager(models.Manager):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_WELCOME_VISIT)
             count_result = count_query.count()
         except Exception as e:
@@ -488,7 +510,7 @@ class AnalyticsCountManager(models.Manager):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_query = count_query.values('date_as_integer').distinct()
             count_result = count_query.count()
         except Exception as e:
@@ -500,7 +522,7 @@ class AnalyticsCountManager(models.Manager):
         last_action_date = None
         try:
             fetch_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            fetch_query = fetch_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            fetch_query = fetch_query.filter(voter_we_vote_id=voter_we_vote_id)
             fetch_query = fetch_query.order_by('-id')
             fetch_query = fetch_query[:1]
             fetch_result = list(fetch_query)
@@ -515,7 +537,7 @@ class AnalyticsCountManager(models.Manager):
         count_result = 0
         try:
             count_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
             count_query = count_query.values('organization_we_vote_id').distinct()
             count_result = count_query.count()
@@ -720,13 +742,13 @@ class AnalyticsManager(models.Manager):
             else:
                 list_query = AnalyticsAction.objects.using('analytics').all()
             if positive_value_exists(voter_we_vote_id):
-                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                list_query = list_query.filter(voter_we_vote_id=voter_we_vote_id)
             elif len(voter_we_vote_id_list):
                 list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
-                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                list_query = list_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(action_constant):
                 list_query = list_query.filter(action_constant=action_constant)
             if positive_value_exists(state_code):
@@ -780,13 +802,13 @@ class AnalyticsManager(models.Manager):
             elif positive_value_exists(analytics_date_as_integer):
                 list_query = list_query.filter(analytics_date_as_integer=analytics_date_as_integer)
             if positive_value_exists(voter_we_vote_id):
-                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                list_query = list_query.filter(voter_we_vote_id=voter_we_vote_id)
             elif len(voter_we_vote_id_list):
                 list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
-                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                list_query = list_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(kind_of_process):
                 list_query = list_query.filter(kind_of_process__iexact=kind_of_process)
 
@@ -832,13 +854,13 @@ class AnalyticsManager(models.Manager):
             list_query = AnalyticsProcessed.objects.using('analytics').filter(
                 analytics_date_as_integer=analytics_date_as_integer)
             if positive_value_exists(voter_we_vote_id):
-                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                list_query = list_query.filter(voter_we_vote_id=voter_we_vote_id)
             elif len(voter_we_vote_id_list):
                 list_query = list_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(organization_we_vote_id):
-                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                list_query = list_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(kind_of_process):
                 list_query = list_query.filter(kind_of_process__iexact=kind_of_process)
             list_query.delete()
@@ -1440,7 +1462,7 @@ class AnalyticsManager(models.Manager):
             try:
                 metrics_saved, created = OrganizationElectionMetrics.objects.using('analytics').update_or_create(
                     google_civic_election_id=google_civic_election_id,
-                    organization_we_vote_id__iexact=organization_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
                     defaults=organization_election_metrics_values
                 )
             except Exception as e:
@@ -1524,7 +1546,7 @@ class AnalyticsManager(models.Manager):
 
             try:
                 metrics_saved, created = SitewideVoterMetrics.objects.using('analytics').update_or_create(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     defaults=sitewide_voter_metrics_values
                 )
                 success = True
@@ -1551,7 +1573,7 @@ class AnalyticsManager(models.Manager):
     @staticmethod
     def sitewide_voter_metrics_for_this_voter_updated_this_date(voter_we_vote_id, updated_date_integer):
         updated_on_date_query = SitewideVoterMetrics.objects.using('readonly').filter(  # 'analytics'
-            voter_we_vote_id__iexact=voter_we_vote_id,
+            voter_we_vote_id=voter_we_vote_id,
             last_calculated_date_as_integer=updated_date_integer
         )
         return positive_value_exists(updated_on_date_query.count())
@@ -1619,7 +1641,7 @@ class AnalyticsManager(models.Manager):
                     first_visit_query = AnalyticsAction.objects.using('analytics').all()
                     first_visit_query = first_visit_query.order_by("id")  # order by oldest first
                     first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
-                    first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                    first_visit_query = first_visit_query.filter(voter_we_vote_id=voter_we_vote_id)
                     analytics_action = first_visit_query.first()
 
                     if not analytics_action.first_visit_today:
@@ -1650,7 +1672,7 @@ class AnalyticsManager(models.Manager):
         # Get distinct days
         try:
             distinct_days_query = AnalyticsAction.objects.using('readonly').all()  # 'analytics'
-            distinct_days_query = distinct_days_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            distinct_days_query = distinct_days_query.filter(voter_we_vote_id=voter_we_vote_id)
             distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
             distinct_days_list = list(distinct_days_query)
         except Exception as e:
@@ -1667,7 +1689,7 @@ class AnalyticsManager(models.Manager):
                 first_visit_query = AnalyticsAction.objects.using('analytics').all()
                 first_visit_query = first_visit_query.order_by("id")  # order by oldest first
                 first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
-                first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                first_visit_query = first_visit_query.filter(voter_we_vote_id=voter_we_vote_id)
                 analytics_action = first_visit_query.first()
 
                 analytics_action.first_visit_today = True

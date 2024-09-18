@@ -585,7 +585,7 @@ class PoliticianManager(models.Manager):
         empty_list = []
         try:
             suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.using('readonly').filter(
-                from_politician_we_vote_id__iexact=we_vote_id)
+                from_politician_we_vote_id=we_vote_id)
             suggested_politicians = list(suggested_politicians)
             if len(suggested_politicians):
                 recommend_found = True
@@ -1039,9 +1039,9 @@ class PoliticianManager(models.Manager):
                 politician_found = True
             elif positive_value_exists(politician_we_vote_id):
                 if positive_value_exists(read_only):
-                    politician = Politician.objects.using('readonly').get(we_vote_id__iexact=politician_we_vote_id)
+                    politician = Politician.objects.using('readonly').get(we_vote_id=politician_we_vote_id)
                 else:
-                    politician = Politician.objects.get(we_vote_id__iexact=politician_we_vote_id)
+                    politician = Politician.objects.get(we_vote_id=politician_we_vote_id)
                 politician_id = politician.id
                 politician_we_vote_id = politician.we_vote_id
                 politician_found = True
@@ -1573,7 +1573,7 @@ class PoliticianManager(models.Manager):
             if positive_value_exists(politician_we_vote_id):
                 politician, new_politician_created = \
                     Politician.objects.update_or_create(
-                        we_vote_id__iexact=politician_we_vote_id,
+                        we_vote_id=politician_we_vote_id,
                         defaults=updated_politician_values)
                 politician_found = True
             elif positive_value_exists(vote_smart_id):
@@ -1897,7 +1897,7 @@ class PoliticianManager(models.Manager):
         existing_politician_entry = ''
 
         try:
-            existing_politician_entry = Politician.objects.get(we_vote_id__iexact=politician_we_vote_id)
+            existing_politician_entry = Politician.objects.get(we_vote_id=politician_we_vote_id)
             if existing_politician_entry:
                 # found the existing entry, update the values
                 existing_politician_entry.politician_name = politician_name
@@ -2343,11 +2343,11 @@ class PoliticianManager(models.Manager):
             if positive_value_exists(read_only):
                 politicians_are_not_duplicates_list_query = \
                     PoliticiansAreNotDuplicates.objects.using('readonly').filter(
-                        politician1_we_vote_id__iexact=politician_we_vote_id,
+                        politician1_we_vote_id=politician_we_vote_id,
                     )
             else:
                 politicians_are_not_duplicates_list_query = PoliticiansAreNotDuplicates.objects.filter(
-                    politician1_we_vote_id__iexact=politician_we_vote_id,
+                    politician1_we_vote_id=politician_we_vote_id,
                 )
             politicians_are_not_duplicates_list1 = list(politicians_are_not_duplicates_list_query)
             success = True
@@ -2365,12 +2365,12 @@ class PoliticianManager(models.Manager):
                 if positive_value_exists(read_only):
                     politicians_are_not_duplicates_list_query = \
                         PoliticiansAreNotDuplicates.objects.using('readonly').filter(
-                            politician2_we_vote_id__iexact=politician_we_vote_id,
+                            politician2_we_vote_id=politician_we_vote_id,
                         )
                 else:
                     politicians_are_not_duplicates_list_query = \
                         PoliticiansAreNotDuplicates.objects.filter(
-                            politician2_we_vote_id__iexact=politician_we_vote_id,
+                            politician2_we_vote_id=politician_we_vote_id,
                         )
                 politicians_are_not_duplicates_list2 = list(politicians_are_not_duplicates_list_query)
                 success = True
@@ -2656,7 +2656,7 @@ class PoliticianManager(models.Manager):
                 politicians_are_not_duplicates, new_politicians_are_not_duplicates_created = \
                     PoliticiansAreNotDuplicates.objects.update_or_create(
                         politician1_we_vote_id__exact=politician1_we_vote_id,
-                        politician2_we_vote_id__iexact=politician2_we_vote_id,
+                        politician2_we_vote_id=politician2_we_vote_id,
                         defaults=updated_values)
                 success = True
                 status += "POLITICIANS_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "

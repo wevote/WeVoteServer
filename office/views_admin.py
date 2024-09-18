@@ -22,7 +22,7 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager
-from exception.models import handle_record_found_more_than_one_exception,\
+from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
@@ -208,7 +208,7 @@ def offices_copy_to_another_election_view(request):
 
     # Whether we are just displaying some offices, or actually doing the conversion, we want to retrieve
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all()  # Cannot be read only
 
         if show_offices_with_zero_candidates_in_to_election:
             office_queryset = office_queryset.filter(google_civic_election_id=to_google_civic_election_id)
@@ -248,7 +248,7 @@ def offices_copy_to_another_election_view(request):
                 new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -367,7 +367,8 @@ def offices_copy_to_another_election_view(request):
                             new_contest_office.ballotpedia_id = None
                             new_contest_office.ballotpedia_race_id = None
                             new_contest_office.google_civic_election_id = to_google_civic_election_id
-                            new_contest_office.google_civic_election_id_new = convert_to_int(to_google_civic_election_id)
+                            new_contest_office.google_civic_election_id_new = \
+                                convert_to_int(to_google_civic_election_id)
                             new_contest_office.is_ballotpedia_general_election = False
                             new_contest_office.is_ballotpedia_general_runoff_election = False
                             new_contest_office.is_ballotpedia_primary_election = False
@@ -566,6 +567,8 @@ def office_list_view(request):
     race_office_level = request.GET.get('race_office_level', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
+    show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
+    print("Show Statistics:", show_statistics)
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     state_code = request.GET.get('state_code', '')
 
@@ -575,7 +578,6 @@ def office_list_view(request):
     office_list_count = 0
 
     election_manager = ElectionManager()
-    office_manager = ContestOfficeManager()
     if positive_value_exists(show_all_elections):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
@@ -601,7 +603,7 @@ def office_list_view(request):
                 election_day_text_by_election_id_dict[one_election.google_civic_election_id] = \
                     convert_we_vote_date_string_to_date_as_integer(one_election.election_day_text)
         # Now get ContestOffice objects we want to update
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all()  # Cannot be readonly
         office_queryset = office_queryset.filter(
             Q(election_date_as_integer__isnull=True) |
             Q(election_date_as_integer=0)
@@ -653,13 +655,50 @@ def office_list_view(request):
         if positive_value_exists(add_election_date_as_integer_to_all_offices_status):
             messages.add_message(request, messages.INFO, add_election_date_as_integer_to_all_offices_status)
 
+    repair_parallel_fields_with_years = False
+    office_repair_success = True
+    office_repair_list = []
+    if repair_parallel_fields_with_years:
+        # TODO: When we want to turn this repair script back on, add code to retrieve offices to be repaired.
+        if len(office_repair_list) > 0:
+            from politician.controllers import update_parallel_fields_with_years_in_related_objects
+            for office_on_stage in office_repair_list:
+                if office_repair_success and not office_on_stage.is_battleground_race_spread_to_all_objects:
+                    election_day_text = office_on_stage.get_election_day_text()
+                    year = 0
+                    years_false_list = []
+                    years_true_list = []
+                    if positive_value_exists(election_day_text):
+                        date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                        year = date_as_integer // 10000
+                    if positive_value_exists(year):
+                        if positive_value_exists(office_on_stage.is_battleground_race):
+                            years_true_list = [year]
+                        else:
+                            # For this update script we only want to propagate True values (i.e. years_true_list)
+                            # years_false_list = [year]
+                            pass
+                    years_list = list(set(years_false_list + years_true_list))
+                    if len(years_list) > 0:
+                        results = update_parallel_fields_with_years_in_related_objects(
+                            field_key_root='is_battleground_race_',
+                            master_we_vote_id_updated=office_on_stage.we_vote_id,
+                            years_false_list=years_false_list,
+                            years_true_list=years_true_list,
+                        )
+                        office_repair_success = results['success']
+                        if office_repair_success:
+                            office_on_stage.is_battleground_race_spread_to_all_objects = True
+                            office_on_stage.save()
+                        else:
+                            status += results['status']
+                            messages.add_message(request, messages.ERROR, status)
     # ################################################
     # Maintenance script section END
     # ################################################
 
-    office_repair_list = []
     try:
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):
@@ -707,7 +746,7 @@ def office_list_view(request):
                 new_filter = Q(vote_usa_office_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -724,8 +763,6 @@ def office_list_view(request):
                     office_queryset = office_queryset.filter(final_filters)
 
         office_list_count = office_queryset.count()
-        if show_marquee_or_battleground:
-            office_repair_list = list(office_queryset)
 
         office_queryset = office_queryset[:200]
         office_list = list(office_queryset)
@@ -750,9 +787,10 @@ def office_list_view(request):
     if office_list_found:
         position_list_manager = PositionListManager()
         for office in office_list:
-            office.candidate_count = fetch_candidate_count_for_office(office.id)
-            office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
-                office.id, office.we_vote_id)
+            if show_statistics:
+                office.candidate_count = fetch_candidate_count_for_office(office.id)
+                office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
+                    office.id, office.we_vote_id)
 
             updated_office_list.append(office)
 
@@ -793,7 +831,6 @@ def office_list_view(request):
 
     messages.add_message(request, messages.INFO, status_print_list)
 
-    # This code needs to be moved to a maintenance script
     # if office_list_found and fix_office_district_ids:
     #     # Do some data clean up
     #     office_list = updated_office_list
@@ -806,42 +843,6 @@ def office_list_view(request):
     #                 office.ballotpedia_race_office_level = 'State'
     #                 office.save()
     #         updated_office_list.append(office)
-
-    office_repair_success = True
-
-    if len(office_repair_list) > 0:
-        from politician.controllers import update_parallel_fields_with_years_in_related_objects
-        for office_on_stage in office_repair_list:
-            if office_repair_success and not office_on_stage.is_battleground_race_spread_to_all_objects:
-                election_day_text = office_on_stage.get_election_day_text()
-                year = 0
-                years_false_list = []
-                years_true_list = []
-                if positive_value_exists(election_day_text):
-                    date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
-                    year = date_as_integer // 10000
-                if positive_value_exists(year):
-                    if positive_value_exists(office_on_stage.is_battleground_race):
-                        years_true_list = [year]
-                    else:
-                        # For this update script we only want to propagate True values (i.e. years_true_list)
-                        # years_false_list = [year]
-                        pass
-                years_list = list(set(years_false_list + years_true_list))
-                if len(years_list) > 0:
-                    results = update_parallel_fields_with_years_in_related_objects(
-                        field_key_root='is_battleground_race_',
-                        master_we_vote_id_updated=office_on_stage.we_vote_id,
-                        years_false_list=years_false_list,
-                        years_true_list=years_true_list,
-                    )
-                    office_repair_success = results['success']
-                    if office_repair_success:
-                        office_on_stage.is_battleground_race_spread_to_all_objects = True
-                        office_on_stage.save()
-                    else:
-                        status += results['status']
-                        messages.add_message(request, messages.ERROR, status)
 
     messages_on_stage = get_messages(request)
 
@@ -856,6 +857,7 @@ def office_list_view(request):
         'race_office_level':            race_office_level,
         'show_all_elections':           show_all_elections,
         'show_battleground':            show_battleground,
+        'show_statistics':              show_statistics,
         'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
@@ -907,7 +909,7 @@ def office_list_process_view(request):
         for organization_we_vote_id in select_for_marking_office_we_vote_ids:
             try:
                 contest_office_on_stage = ContestOffice.objects.get(
-                    we_vote_id__iexact=organization_we_vote_id)
+                    we_vote_id=organization_we_vote_id)  # Cannot be readonly
                 if which_marking == "is_battleground_race":
                     contest_office_on_stage.is_battleground_race = True
                 contest_office_on_stage.save()
@@ -1087,9 +1089,9 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
     office_on_stage_found = False
     try:
         if positive_value_exists(office_id):
-            office_on_stage = ContestOffice.objects.get(id=office_id)
+            office_on_stage = ContestOffice.objects.using('readonly').get(id=office_id)
         else:
-            office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            office_on_stage = ContestOffice.objects.using('readonly').get(we_vote_id=contest_office_we_vote_id)
         office_on_stage_found = True
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1113,7 +1115,8 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'label':    'Office Name (for Ballotpedia matching)',
                 'id':       'ballotpedia_office_name_id',
                 'name':     'ballotpedia_office_name',
-                'value':     ballotpedia_office_name if ballotpedia_office_name else office_on_stage.ballotpedia_office_name
+                'value':     ballotpedia_office_name
+                if ballotpedia_office_name else office_on_stage.ballotpedia_office_name
             },
             'ballotpedia_race_id_dict':              
             {
@@ -1142,35 +1145,40 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'label':    'Office Name 1 (for Google Civic matching)',
                 'id':       'google_civic_office_name_id',
                 'name':     'google_civic_office_name',
-                'value':     google_civic_office_name if google_civic_office_name else office_on_stage.google_civic_office_name
+                'value':     google_civic_office_name
+                if google_civic_office_name else office_on_stage.google_civic_office_name
             },
             'google_civic_office_name2_dict':              
             {
                 'label':    'Office Name 2',
                 'id':       'google_civic_office_name2_id',
                 'name':     'google_civic_office_name2',
-                'value':     google_civic_office_name2 if google_civic_office_name2 else office_on_stage.google_civic_office_name2
+                'value':     google_civic_office_name2
+                if google_civic_office_name2 else office_on_stage.google_civic_office_name2
             },
             'google_civic_office_name3_dict':              
             {
                 'label':    'Office Name 3',
                 'id':       'google_civic_office_name3_id',
                 'name':     'google_civic_office_name3',
-                'value':     google_civic_office_name3 if google_civic_office_name3 else office_on_stage.google_civic_office_name3
+                'value':     google_civic_office_name3
+                if google_civic_office_name3 else office_on_stage.google_civic_office_name3
             },
             'google_civic_office_name4_dict':              
             {
                 'label':    'Office Name 4',
                 'id':       'google_civic_office_name4_id',
                 'name':     'google_civic_office_name4',
-                'value':     google_civic_office_name4 if google_civic_office_name4 else office_on_stage.google_civic_office_name4
+                'value':     google_civic_office_name4
+                if google_civic_office_name4 else office_on_stage.google_civic_office_name4
             },
             'google_civic_office_name5_dict':              
             {
                 'label':    'Office Name 5',
                 'id':       'google_civic_office_name5_id',
                 'name':     'google_civic_office_name5',
-                'value':     google_civic_office_name5 if google_civic_office_name5 else office_on_stage.google_civic_office_name5
+                'value':     google_civic_office_name5
+                if google_civic_office_name5 else office_on_stage.google_civic_office_name5
             },
             'messages_on_stage':        messages_on_stage,
             'ocd_division_id_dict':              
@@ -1242,7 +1250,7 @@ def office_edit_process_view(request):
     office_on_stage_found = False
     office_on_stage = None
     try:
-        office_query = ContestOffice.objects.filter(id=office_id)
+        office_query = ContestOffice.objects.filter(id=office_id)  # Cannot be readonly
         if len(office_query):
             office_on_stage = office_query[0]
             office_on_stage_found = True
@@ -1395,9 +1403,9 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     try:
         if positive_value_exists(office_id):
-            contest_office = ContestOffice.objects.get(id=office_id)
+            contest_office = ContestOffice.objects.using('readonly').get(id=office_id)
         else:
-            contest_office = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            contest_office = ContestOffice.objects.using('readonly').get(we_vote_id=contest_office_we_vote_id)
         contest_office_found = True
         contest_office_we_vote_id = contest_office.we_vote_id
         google_civic_election_id = contest_office.google_civic_election_id
@@ -1410,7 +1418,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     candidate_list_modified = []
     position_list_manager = PositionListManager()
-    # Cache the full names of candidates for the root contest_office so we can check to see if possible duplicate
+    # Cache the full names of candidates for the root contest_office, so we can check to see if possible duplicate
     # offices share the same candidates
     root_office_candidate_last_names = ""
     candidate_list_manager = CandidateListManager()
@@ -1418,7 +1426,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         contest_office_we_vote_id_list=[contest_office_we_vote_id])
     existing_candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     try:
-        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = CandidateCampaign.objects.using('readonly').all()
         candidate_query = candidate_query.filter(we_vote_id__in=existing_candidate_we_vote_id_list)
         candidate_query = candidate_query.order_by('candidate_name')
         candidate_list = list(candidate_query)
@@ -1445,10 +1453,10 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     root_office_candidate_last_names = root_office_candidate_last_names.lower()
 
-    election_list = Election.objects.order_by('-election_day_text')
+    election_list = Election.objects.using('readonly').order_by('-election_day_text')
 
     if positive_value_exists(google_civic_election_id):
-        election = Election.objects.get(google_civic_election_id=google_civic_election_id)
+        election = Election.objects.using('readonly').get(google_civic_election_id=google_civic_election_id)
 
     # ##############################################################
     # Office Add Candidates
@@ -1555,9 +1563,9 @@ def office_summary_merge_with_other_office_process_view(
 
     office_search_results_list = []
     if positive_value_exists(office_search):
-        office_queryset = ContestOffice.objects.all()
+        office_queryset = ContestOffice.objects.all()  # Cannot be readonly
         office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
-        office_queryset = office_queryset.exclude(we_vote_id__iexact=contest_office_we_vote_id)
+        office_queryset = office_queryset.exclude(we_vote_id=contest_office_we_vote_id)
 
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
@@ -1574,7 +1582,7 @@ def office_summary_merge_with_other_office_process_view(
             new_filter = Q(vote_usa_office_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(wikipedia_id__iexact=one_word)
@@ -1635,8 +1643,7 @@ def office_summary_merge_with_other_office_process_view(
 def office_summary_add_candidates_process_view(
         request,
         contest_office=None,
-        existing_candidate_we_vote_id_list=[],
-    ):
+        existing_candidate_we_vote_id_list=[]):
     """
 
     :param request:
@@ -1881,7 +1888,7 @@ def office_delete_process_view(request):
     office_on_stage = ContestOffice()
     office_on_stage_we_vote_id = ''
     try:
-        office_on_stage = ContestOffice.objects.get(id=office_id)
+        office_on_stage = ContestOffice.objects.get(id=office_id)  # Cannot be readonly
         office_on_stage_found = True
         google_civic_election_id = office_on_stage.google_civic_election_id
         office_on_stage_we_vote_id = office_on_stage.we_vote_id
@@ -2000,7 +2007,7 @@ def find_and_merge_duplicate_offices_view(request):
 
     try:
         # We sort by ID so that the entry which was saved first becomes the "master"
-        contest_office_query = ContestOffice.objects.order_by('id')
+        contest_office_query = ContestOffice.objects.order_by('id')  # Cannot be readonly
         contest_office_query = contest_office_query.filter(google_civic_election_id=google_civic_election_id)
         contest_office_list = list(contest_office_query)
     except ContestOffice.DoesNotExist:
@@ -2187,7 +2194,8 @@ def office_merge_process_view(request):
         contest_office1_we_vote_id = request.POST.get('contest_office1_we_vote_id', 0)
         contest_office2_we_vote_id = request.POST.get('contest_office2_we_vote_id', 0)
         google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-        redirect_to_contest_office_list = positive_value_exists(request.POST.get('redirect_to_contest_office_list', False))
+        redirect_to_contest_office_list = \
+            positive_value_exists(request.POST.get('redirect_to_contest_office_list', False))
         remove_duplicate_process = positive_value_exists(request.POST.get('remove_duplicate_process', False))
         state_code = request.POST.get('state_code', '')
     else:
@@ -2197,7 +2205,8 @@ def office_merge_process_view(request):
         contest_office1_we_vote_id = request.GET.get('contest_office1_we_vote_id', 0)
         contest_office2_we_vote_id = request.GET.get('contest_office2_we_vote_id', 0)
         google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-        redirect_to_contest_office_list = positive_value_exists(request.GET.get('redirect_to_contest_office_list', False))
+        redirect_to_contest_office_list = \
+            positive_value_exists(request.GET.get('redirect_to_contest_office_list', False))
         remove_duplicate_process = positive_value_exists(request.GET.get('remove_duplicate_process', False))
         state_code = request.GET.get('state_code', '')
 

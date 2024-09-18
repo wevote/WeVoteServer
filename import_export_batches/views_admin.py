@@ -1725,7 +1725,7 @@ def batch_process_list_view(request):
                 new_filter = Q(office_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(wikipedia_id__icontains=one_word)
@@ -2297,7 +2297,7 @@ def batch_process_log_entry_list_view(request):
                 new_filter = Q(google_civic_election_id__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(polling_location_we_vote_id__iexact=one_word)
+                new_filter = Q(polling_location_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(state_code__iexact=one_word)

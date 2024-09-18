@@ -437,6 +437,14 @@ def fetch_next_we_vote_id_candidate_campaign_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_candidate_campaign_integer')
 
 
+def fetch_next_we_vote_id_challenge_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_challenge_integer')
+
+
+def fetch_next_we_vote_id_challenge_news_item_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_challenge_news_item_integer')
+
+
 def fetch_next_we_vote_id_contest_office_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_contest_office_integer')
 
@@ -601,9 +609,9 @@ class RemoteRequestHistoryManager(models.Manager):
             list_query = list_query.filter(kind_of_action__iexact=kind_of_action)
             list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(candidate_campaign_we_vote_id):
-                list_query = list_query.filter(candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
+                list_query = list_query.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
             if positive_value_exists(organization_we_vote_id):
-                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                list_query = list_query.filter(organization_we_vote_id=organization_we_vote_id)
             list_query_count = list_query.count()
             if positive_value_exists(list_query_count):
                 return True

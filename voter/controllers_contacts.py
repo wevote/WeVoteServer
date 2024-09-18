@@ -59,18 +59,18 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
     # Migrations
     try:
         query = VoterContactEmail.objects.all()
-        query = query.filter(imported_by_voter_we_vote_id__iexact=to_voter_we_vote_id)
+        query = query.filter(imported_by_voter_we_vote_id=to_voter_we_vote_id)
         query = query.exclude(google_contact_id__isnull=True)
         query = query.values_list('google_contact_id', flat=True).distinct()
         google_contact_id_list_to_not_overwrite = list(query)
 
         voter_contact_email_entries_moved += VoterContactEmail.objects\
-            .filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(imported_by_voter_we_vote_id=from_voter_we_vote_id)\
             .exclude(google_contact_id__in=google_contact_id_list_to_not_overwrite)\
             .update(imported_by_voter_we_vote_id=to_voter_we_vote_id)
 
         entries_deleted = \
-            VoterContactEmail.objects.filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id).delete()
+            VoterContactEmail.objects.filter(imported_by_voter_we_vote_id=from_voter_we_vote_id).delete()
         status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE_IMPORTED_BY: " + str(e) + " "
@@ -78,7 +78,7 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
 
     try:
         voter_contact_email_entries_moved += VoterContactEmail.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE: " + str(e) + " "
@@ -102,7 +102,7 @@ def delete_all_voter_contact_emails_for_voter(voter_we_vote_id=''):  # voterCont
     try:
         google_contacts_deleted_tuple = VoterContactEmail.objects\
             .filter(
-                imported_by_voter_we_vote_id__iexact=voter_we_vote_id,
+                imported_by_voter_we_vote_id=voter_we_vote_id,
             )\
             .delete()
         google_contacts_deleted_count = google_contacts_deleted_tuple[0]

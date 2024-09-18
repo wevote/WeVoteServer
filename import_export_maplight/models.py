@@ -41,23 +41,27 @@ class MapLightContestOfficeManager(models.Manager):
     def __unicode__(self):
         return "MapLightContestOfficeManager"
 
-    def retrieve_maplight_contest_office_from_id(self, contest_office_id):
+    @staticmethod
+    def retrieve_maplight_contest_office_from_id(contest_office_id):
         maplight_contest_office_manager = MapLightContestOfficeManager()
         return maplight_contest_office_manager.retrieve_maplight_contest_office(contest_office_id)
 
-    def fetch_maplight_contest_office_from_id_maplight(self, id_maplight):
+    @staticmethod
+    def fetch_maplight_contest_office_from_id_maplight(id_maplight):
         maplight_contest_office_manager = MapLightContestOfficeManager()
         results = maplight_contest_office_manager.retrieve_maplight_contest_office_from_id_maplight(id_maplight)
         if results['success']:
             return results['maplight_contest_office']
         return MapLightContestOffice()
 
-    def retrieve_maplight_contest_office_from_id_maplight(self, id_maplight):
+    @staticmethod
+    def retrieve_maplight_contest_office_from_id_maplight(id_maplight):
         contest_office_id = 0
         maplight_contest_office_manager = MapLightContestOfficeManager()
         return maplight_contest_office_manager.retrieve_maplight_contest_office(contest_office_id, id_maplight)
 
-    def fetch_maplight_contest_office_id_from_id_maplight(self, id_maplight):
+    @staticmethod
+    def fetch_maplight_contest_office_id_from_id_maplight(id_maplight):
         contest_office_id = 0
         maplight_contest_office_manager = MapLightContestOfficeManager()
         results = maplight_contest_office_manager.retrieve_maplight_contest_office(contest_office_id, id_maplight)
@@ -66,7 +70,8 @@ class MapLightContestOfficeManager(models.Manager):
         return 0
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_maplight_contest_office(self, contest_office_id, id_maplight=None):
+    @staticmethod
+    def retrieve_maplight_contest_office(contest_office_id, id_maplight=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -103,8 +108,6 @@ class MapLightCandidate(models.Model):
         verbose_name='display name', max_length=255, null=False, blank=False, unique=False)  # "Jerry Brown"
     first_name = models.CharField(
         verbose_name='first name', max_length=255, null=False, blank=True, unique=False)
-    models.CharField(
-        verbose_name='display name', max_length=255, null=False, blank=False, unique=False)
     gender = models.CharField(
         verbose_name='gender', max_length=1, null=False, blank=False, default='U', unique=False)  # "M"
     last_funding_update = models.DateField(
@@ -136,18 +139,21 @@ class MapLightCandidateManager(models.Manager):
     def __unicode__(self):
         return "MapLightCandidateManager"
 
-    def retrieve_maplight_candidate_from_id(self, candidate_id):
+    @staticmethod
+    def retrieve_maplight_candidate_from_id(candidate_id):
         maplight_candidate_manager = MapLightCandidateManager()
         return maplight_candidate_manager.retrieve_maplight_candidate(candidate_id)
 
-    def retrieve_maplight_candidate_from_candidate_id_maplight(self, candidate_id_maplight):
+    @staticmethod
+    def retrieve_maplight_candidate_from_candidate_id_maplight(candidate_id_maplight):
         candidate_id = 0
         politician_id_maplight = 0
         maplight_candidate_manager = MapLightCandidateManager()
         return maplight_candidate_manager.retrieve_maplight_candidate(
             candidate_id, candidate_id_maplight, politician_id_maplight)
 
-    def fetch_maplight_candidate_from_candidate_id_maplight(self, candidate_id_maplight):
+    @staticmethod
+    def fetch_maplight_candidate_from_candidate_id_maplight(candidate_id_maplight):
         maplight_candidate_manager = MapLightCandidateManager()
         results = maplight_candidate_manager.retrieve_maplight_candidate_from_candidate_id_maplight(
             candidate_id_maplight)
@@ -156,14 +162,16 @@ class MapLightCandidateManager(models.Manager):
         else:
             return MapLightCandidate()
 
-    def retrieve_maplight_candidate_from_politician_id_maplight(self, politician_id_maplight):
+    @staticmethod
+    def retrieve_maplight_candidate_from_politician_id_maplight(politician_id_maplight):
         candidate_id = 0
         candidate_id_maplight = 0
         maplight_candidate_manager = MapLightCandidateManager()
         return maplight_candidate_manager.retrieve_maplight_candidate(
             candidate_id, candidate_id_maplight, politician_id_maplight)
 
-    def fetch_maplight_candidate_from_politician_id_maplight(self, politician_id_maplight):
+    @staticmethod
+    def fetch_maplight_candidate_from_politician_id_maplight(politician_id_maplight):
         maplight_candidate_manager = MapLightCandidateManager()
         results = maplight_candidate_manager.retrieve_maplight_candidate_from_politician_id_maplight(
             politician_id_maplight)
@@ -173,7 +181,8 @@ class MapLightCandidateManager(models.Manager):
             return MapLightCandidate()
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_maplight_candidate(self, candidate_id, candidate_id_maplight=None, politician_id_maplight=None):
+    @staticmethod
+    def retrieve_maplight_candidate(candidate_id, candidate_id_maplight=None, politician_id_maplight=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False

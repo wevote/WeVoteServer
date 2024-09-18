@@ -289,7 +289,7 @@ def find_campaignx_list_to_link_to_this_politician(politician=None):
     try:
         related_list = CampaignX.objects.using('readonly').all()
         related_list = related_list.exclude(
-            linked_politician_we_vote_id__iexact=politician.we_vote_id)
+            linked_politician_we_vote_id=politician.we_vote_id)
         related_list = related_list.filter(campaign_title__icontains=politician.first_name)
         related_list = related_list.filter(campaign_title__icontains=politician.last_name)
 
@@ -329,7 +329,7 @@ def find_candidates_to_link_to_this_politician(politician=None):
     try:
         related_candidate_list = CandidateCampaign.objects.using('readonly').all()
         related_candidate_list = related_candidate_list.exclude(
-            politician_we_vote_id__iexact=politician.we_vote_id)
+            politician_we_vote_id=politician.we_vote_id)
 
         filters = []
         new_filter = \
@@ -415,7 +415,7 @@ def find_representatives_to_link_to_this_politician(politician=None):
     try:
         related_representative_list = Representative.objects.using('readonly').all()
         related_representative_list = related_representative_list.exclude(
-            politician_we_vote_id__iexact=politician.we_vote_id)
+            politician_we_vote_id=politician.we_vote_id)
 
         filters = []
         new_filter = \
@@ -700,6 +700,7 @@ def match_politician_to_organization(
     results = {
         'organization_created': False,
         'organization_creation_error': False,
+        'politician': politician,
         'politician_error': False,
         'politician_has_two_linked_organizations': False,
         'politician_has_two_possible_organizations': False,
@@ -712,7 +713,7 @@ def match_politician_to_organization(
     # Search the Organization table to see if there is already an organization linked to this politician
     try:
         queryset = Organization.objects.using('readonly').all()
-        queryset = queryset.filter(politician_we_vote_id__iexact=politician.we_vote_id)
+        queryset = queryset.filter(politician_we_vote_id=politician.we_vote_id)
         linked_organization_list = list(queryset)
         if len(linked_organization_list) > 1:
             politician.organization_analysis_needed = False
@@ -754,7 +755,7 @@ def match_politician_to_organization(
         queryset = Organization.objects.all()  # Cannot be 'readonly' because we save link to Politician below
         queryset = queryset.filter(
             Q(politician_we_vote_id__isnull=True) |
-            Q(politician_we_vote_id__iexact=''))
+            Q(politician_we_vote_id=''))
         filters = []
 
         if positive_value_exists(politician.politician_twitter_handle):
@@ -823,10 +824,10 @@ def match_politician_to_organization(
     if use_name_match:
         organization_possible_match_by_name_found = False
         try:
-            queryset = Organization.objects.all()
+            queryset = Organization.objects.all()  # Cannot be 'readonly'
             queryset = queryset.filter(
                 Q(politician_we_vote_id__isnull=True) |
-                Q(politician_we_vote_id__iexact=''))
+                Q(politician_we_vote_id=''))
             queryset = queryset.filter(organization_name__iexact=politician.politician_name)
             if positive_value_exists(politician.state_code):
                 # If the politician has a state code, only match to an existing organization by name if
@@ -1404,7 +1405,7 @@ def merge_these_two_politicians(
     # Preserve the shortcuts used by politician2
     try:
         shortcuts_moved = PoliticianSEOFriendlyPath.objects \
-            .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+            .filter(politician_we_vote_id=politician2_we_vote_id) \
             .update(politician_we_vote_id=politician1_we_vote_id)
         status += "SHORTCUTS_MOVED: " + str(shortcuts_moved) + " "
     except Exception as e:
@@ -1463,7 +1464,7 @@ def merge_these_two_politicians(
     # Update any CampaignXPolitician entries to new politician_we_vote_id
     from campaign.models import CampaignXPolitician
     campaign_politicians_moved = CampaignXPolitician.objects \
-        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .filter(politician_we_vote_id=politician2_we_vote_id) \
         .update(politician_we_vote_id=politician1_we_vote_id)
     status += "CAMPAIGNX_POLITICIANS_MOVED: " + str(campaign_politicians_moved) + " "
 
@@ -1487,7 +1488,7 @@ def merge_these_two_politicians(
     # Update any WeVoteImage entries to new politician_we_vote_id
     from image.models import WeVoteImage
     images_moved = WeVoteImage.objects \
-        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .filter(politician_we_vote_id=politician2_we_vote_id) \
         .update(politician_we_vote_id=politician1_we_vote_id)
     status += "WE_VOTE_IMAGE_ENTRIES_MOVED: " + str(images_moved) + " "
 

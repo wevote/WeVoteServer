@@ -201,7 +201,7 @@ class ElectoralDistrictManager(models.Manager):
         try:
             if positive_value_exists(polling_location_we_vote_id):
                 electoral_district_query = ElectoralDistrictLinkToPollingLocation.objects.filter(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location_we_vote_id=polling_location_we_vote_id)
                 electoral_district_list = list(electoral_district_query)
                 for one_electoral_district in electoral_district_list:
                     one_electoral_district.delete()
@@ -210,8 +210,8 @@ class ElectoralDistrictManager(models.Manager):
                 status += 'ELECTORAL_DISTRICT_LINKS_DELETED_BY_POLLING_LOCATION_WE_VOTE_ID '
             # elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
             #     electoral_district_query = ElectoralDistrictLinkToPollingLocation.objects.filter(
-            #         voter_we_vote_id__iexact=voter_we_vote_id,
-            #         issue_we_vote_id__iexact=issue_we_vote_id)
+            #         voter_we_vote_id=voter_we_vote_id,
+            #         issue_we_vote_id=issue_we_vote_id)
             #     electoral_district_list = list(electoral_district_query)
             #     for one_electoral_district in electoral_district_list:
             #         one_electoral_district.delete()
@@ -328,11 +328,11 @@ class ElectoralDistrictManager(models.Manager):
 
                 if positive_value_exists(polling_location_we_vote_id):
                     electoral_district_query = \
-                        electoral_district_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                        electoral_district_query.filter(polling_location_we_vote_id=polling_location_we_vote_id)
                 if positive_value_exists(electoral_district_we_vote_id):
                     electoral_district_query = \
                         electoral_district_query.filter(
-                            electoral_district_we_vote_id__iexact=electoral_district_we_vote_id)
+                            electoral_district_we_vote_id=electoral_district_we_vote_id)
                 if positive_value_exists(ballotpedia_district_id):
                     electoral_district_query = \
                         electoral_district_query.filter(ballotpedia_district_id=ballotpedia_district_id)
@@ -434,14 +434,14 @@ class ElectoralDistrictManager(models.Manager):
 
             if positive_value_exists(ballotpedia_district_id):
                 ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
                     ballotpedia_district_id=ballotpedia_district_id,
                     defaults=defaults,
                     )
             elif positive_value_exists(electoral_district_we_vote_id):
                 ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
-                    electoral_district_we_vote_id__iexact=electoral_district_we_vote_id,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    electoral_district_we_vote_id=electoral_district_we_vote_id,
                     defaults=defaults,
                     )
             status = "POLLING_LOCATION_LINK_TO_ELECTORAL_DISTRICT_CREATED_OR_UPDATED "
