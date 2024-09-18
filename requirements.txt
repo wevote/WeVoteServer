@@ -65,6 +65,7 @@ six==1.16.0
 setuptools==65.5.1    # Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages)
 social-auth-app-django==5.0.0
 social-auth-core==4.2.0
+sqlalchemy==2.0.35
 sqlparse>=0.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
 stripe==8.7.0
 tqdm~=4.66.1            #recommend engine

@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/challenge_supporter_retrieve_doc.py
+# apis_v1/documentation_source/challenge_participant_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def challenge_supporter_retrieve_doc_template_values(url_root):
+def challenge_participant_save_doc_template_values(url_root):
     """
-    Show documentation about challengeSupporterRetrieve
+    Show documentation about challengeParticipantSave
     """
     required_query_parameter_list = [
         {
@@ -23,8 +23,48 @@ def challenge_supporter_retrieve_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'The we_vote_id for the challenge.',
         },
+        {
+            'name':         'voter_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The voter_we_vote_id for the supporter.',
+        },
     ]
     optional_query_parameter_list = [
+        {
+            'name':         'organization_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The organization_we_vote_id for the supporter.',
+        },
+        {
+            'name':         'participant_name',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The title of the challenge.',
+        },
+        {
+            'name':         'participant_name_changed',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Are we trying to change the challenge\'s title?',
+        },
+        {
+            'name': 'supporter_endorsement',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'The title of the challenge.',
+        },
+        {
+            'name': 'supporter_endorsement_changed',
+            'value': 'boolean',  # boolean, integer, long, string
+            'description': 'Are we trying to change the challenge\'s title?',
+        },
+        {
+            'name': 'visible_to_public',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'The title of the challenge.',
+        },
+        {
+            'name': 'visible_to_public_changed',
+            'value': 'boolean',  # boolean, integer, long, string
+            'description': 'Are we trying to change the challenge\'s title?',
+        },
     ]
 
     potential_status_codes_list = [
@@ -45,24 +85,23 @@ def challenge_supporter_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "challenge_supported": boolean,\n' \
                    '  "challenge_we_vote_id": string,\n' \
                    '  "date_last_changed": string,\n' \
-                   '  "date_supported": string,\n' \
+                   '  "date_joined": string,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "supporter_endorsement": string,\n' \
-                   '  "supporter_name": string,\n' \
+                   '  "participant_name": string,\n' \
                    '  "visible_to_public": boolean,\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'
 
     template_values = {
-        'api_name': 'challengeSupporterRetrieve',
-        'api_slug': 'challengeSupporterRetrieve',
+        'api_name': 'challengeParticipantSave',
+        'api_slug': 'challengeParticipantSave',
         'api_introduction':
             "",
-        'try_now_link': 'apis_v1:challengeSupporterRetrieveView',
+        'try_now_link': 'apis_v1:challengeParticipantSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

@@ -2,18 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import csv
 import json
 import os
 import time
+from datetime import datetime, timezone
 
+import numpy as np
+import pandas as pd
 import psycopg2
 import requests
+import sqlalchemy as sa
 from django.http import HttpResponse
+from sqlalchemy.engine.reflection import Inspector
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from retrieve_tables.controllers_master import allowable_tables, dump_row_col_labels_and_errors
+from retrieve_tables.controllers_master import allowable_tables
 from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -26,22 +30,93 @@ LOCAL_TMP_PATH = '/tmp/'
 
 def save_off_database():
     file = "WeVoteServerDB-{:.0f}.pgsql".format(time.time())
+    os.environ['PATH'] = '/opt/homebrew/bin:' + os.environ['PATH']
     os.system('pg_dump WeVoteServerDB > ' + file)
     time.sleep(20)
 
 
 def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
+    """
+    Updates progress bar and data on fast load HTML page
+    :param host:
+    :param voter_api_device_id:
+    :param table_name:
+    :param additional_records:
+    :return:
+    """
     try:
-        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
-                                verify=True,
-                                params={'table_name': table_name,
-                                        'additional_records': additional_records,
-                                        'is_running': True,
-                                        'voter_api_device_id': voter_api_device_id,
-                                        })
+       response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
+                     verify=True,
+                     params={'table_name': table_name,
+                             'additional_records': additional_records,
+                             'is_running': True,
+                             'voter_api_device_id': voter_api_device_id,
+                             })
         # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
+
+
+def connect_to_db():
+    """
+    Create a connection with the local postgres database with sqlalchemy and psycopg2
+    :return:
+    """
+    try:
+        connection_string = (
+            f"postgresql+psycopg2://{get_environment_variable('DATABASE_USER')}:"
+            f"{get_environment_variable('DATABASE_PASSWORD')}@"
+            f"{get_environment_variable('DATABASE_HOST')}:"
+            f"{5432}/"
+            f"{get_environment_variable('DATABASE_NAME')}"
+        )
+        engine = sa.create_engine(connection_string)
+        return engine
+    except Exception as e:
+        logger.error('Unable to connect to database: ', str(e))
+
+
+def fetch_data_from_api(url, params, max_retries=10):
+    """
+    Fetches data from remote Postgres database
+    :param url:
+    :param params:
+    :param max_retries:
+    :return:
+    """
+    for attempt in range(max_retries):
+        # print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
+        try:
+            response = requests.get(url, params=params, verify=True, timeout=5)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.warning(f"\nAPI request failed with status code {response.status_code}, retrying...")
+        except requests.Timeout:
+            logger.error(f"Request timed out, retrying...")
+        except requests.RequestException as e:
+            logger.error(f"API request failed: {e}, retrying...")
+        time.sleep(2 ** attempt)  # Exponential backoff
+
+    raise Exception("API request failed after maximum retries")
+
+
+def get_max_id(params):
+    """
+    Gets the maximum id present in the remote Postgres table
+    :param params: list of parameters to pass to API
+    :return: response.json()
+    """
+    host = 'https://api.wevoteusa.org'
+    try:
+        response = requests.get(host + '/apis/v1/retrieveMaxID', params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"API request failed with status code {response.status_code}")
+            return -1
+    except Exception as e:
+        print(f"ROW_COUNT_ERROR: {str(e)}", )
 
 
 def retrieve_sql_files_from_master_server(request):
@@ -50,397 +125,269 @@ def retrieve_sql_files_from_master_server(request):
     Runs on the Local server (developer's Mac)
     :return:
     """
-    status = ''
     t0 = time.time()
+    engine = connect_to_db()
     print(
-        'Saving off a copy of your local db (an an emergency fallback, that will almost never be needed) in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
-    save_off_database()
+        '\nSaving off a copy of your local db (an an emergency fallback, that will almost never be needed) in '
+        '\'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
+    # save_off_database()
     dt = time.time() - t0
     stats = {}
-    print('Saved off local database in ' + str(int(dt)) + ' seconds')
+    print('Saved off local database in ' + str(int(dt)) + ' seconds \n')
     stats |= {'save_off': str(int(dt))}
 
     # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
     # host = 'https://wevotedeveloper.com:8000'
     host = 'https://api.wevoteusa.org'
-
     voter_api_device_id = get_voter_api_device_id(request)
     requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
                  params={"initialize": True, "voter_api_device_id": voter_api_device_id}, verify=True)
-
     for table_name in allowable_tables:
-        print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
-        t1 = time.time()
-        dt = 0
-        tables_with_too_many_columns = {'candidate_candidatecampaign'}
-        gulp_size = 500000 if table_name not in tables_with_too_many_columns else 100000
+        print(f"{table_name.upper()}\n--------------------")
+        truncate_table(engine, table_name)
+
+        max_id_params = {'table_name': table_name}
+        max_id_response = get_max_id(max_id_params)
+        max_id = max_id_response['maxID']
+        chunk_size = 10000
         start = 0
-        end = gulp_size - 1
-
-        final_lines_count = 0
-        while end < 20000000:
-            t2 = time.time()
-            request_count = 0
-            wait_for_a_http_200 = True
-            response = {}
-
-            while wait_for_a_http_200:
-                load_successful = False
-                retry = 1
-                while not load_successful:
-                    base_url = (host + 'apis/v1/retrieveSQLTables/?table_name=' + table_name + '&start=' + str(start) +
-                                '&end=' + str(end))
-                    try:
-                        response = requests.get(host + '/apis/v1/retrieveSQLTables/',
-                                                verify=True,
-                                                params={'table_name': table_name, 'start': start, 'end': end,
-                                                        'voter_api_device_id': voter_api_device_id})
-                        print('retrieveSQLTables url: ' + response.url)
-                        request_count += 1
-                        load_successful = True
-                        if response.status_code == 200:
-                            wait_for_a_http_200 = False
-                        else:
-                            print(host + '/apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
-                                  str(response.status_code) + '  RETRY ---- ' + base_url)
-                            continue
-                    except Exception as getErr:
-                        print(host +
-                              '/apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
-                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + base_url)
-                        retry += 1
-                        if retry < 10:
-                            continue
-
-            bytes_transferred = len(response.text)
-            structured_json = json.loads(response.text)
-            if structured_json['success'] is False:
-                print("FAILED:  Did not receive '" + table_name + " from server")
-                break
-
-            data = structured_json['files'][table_name]
-            lines = data.splitlines()
-            if len(lines) == 1:
-                dt = time.time() - t1
-                print('... Retrieved ' + "{:,}".format(final_lines_count) + ' lines from the ' + table_name +
-                      ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
-                break
-            final_lines_count += len(lines)
-            print(f'... Intermediate line count from this request of {gulp_size:,} rows, returned {len(lines):,} '
-                  f'rows ({bytes_transferred:,} bytes), cumulative lines is {final_lines_count:,}')
-            update_fast_load_db(host, voter_api_device_id, table_name, len(lines))
-
-            if len(lines) > 0:
+        end = chunk_size - 1
+        structured_json = {}
+        table_start_time = time.time()
+        # filling table with 10,000 line chunks
+        if max_id and max_id != -1:
+            while end - chunk_size < max_id:
+                print(f"{table_name}:   {((start / max_id) * 100):.0f}% -- Chunk {start} to {end} of {max_id} rows")
                 try:
-                    conn = psycopg2.connect(
-                        database=get_environment_variable('DATABASE_NAME'),
-                        user=get_environment_variable('DATABASE_USER'),
-                        password=get_environment_variable('DATABASE_PASSWORD'),
-                        host=get_environment_variable('DATABASE_HOST'),
-                        port=get_environment_variable('DATABASE_PORT')
-                    )
+                    url = f'{host}/apis/v1/retrieveSQLTables/'
+                    params = {'table_name': table_name, 'start': start, 'end': end,
+                              'voter_api_device_id': voter_api_device_id}
 
-                    cur = conn.cursor()
-
-                    print("... Processing rows " + "{:,}".format(start) + " through " + "{:,}".format(end) +
-                          " of table " + table_name + " data received from master server.")
-                    if start == 0:
-                        cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this table
-                        conn.commit()
-                        print("... SQL executed: DELETE (all) FROM " + table_name)
-
-                    with open(os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp'), 'w') as csv_file:
-                        for s in lines:
-                            csv_file.write("%s\n" % s)
-                        csv_file.close()
-
-                    header = csv_file_to_clean_csv_file2(table_name)
-
-                    try:
-                        with open(os.path.join(LOCAL_TMP_PATH, table_name + '2.csvTemp'), 'r') as file:
-                            cur.copy_from(file, table_name, sep='|', size=16384, columns=header)
-                            file.close()
-                    except Exception as e0:
-                        print("FAILED_TABLE_INSERT: " + table_name + " -- " + str(e0))
-                    conn.commit()
-                    conn.close()
-                    dt = time.time() - t1
-                    dt2 = time.time() - t2
-                    dtc = time.time() - t0
-                    print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
-                          str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
-                    stats |= {table_name: str(int(dtc))}
-
+                    structured_json = fetch_data_from_api(url, params)
                 except Exception as e:
-                    status += "retrieve_tables retrieve_sql_files_from_master_server caught " + str(e)
-                    logger.error(status)
+                    print(f"FETCH_ERROR: {table_name} -- {str(e)}")
 
-                finally:
-                    if table_name not in tables_with_too_many_columns:
-                        start += 500000
-                        end += 500000
-                    else:
-                        start += 100000
-                        end += 100000
+                if not structured_json['success']:
+                    print(f"FAILED: Did not receive '{table_name}' from server")
+                    break
+                try:
+                    data = structured_json['files'].get(table_name, "")
+                    split_data = data.splitlines(keepends=True)
+                    update_fast_load_db(host, voter_api_device_id, table_name, len(split_data))
+                    lines_count = process_table_data(table_name, split_data)
+                    # print(f'{lines_count} lines in chunk')
+                except Exception as e:
+                    print(f"TABLE_PROCESSING_ERROR: {table_name} -- {str(e)}")
+                start += chunk_size
+                end += chunk_size
 
-        # Update the last_value for this table so creating new entries doesn't
-        #  throw "django Key (id)= already exists" error
-        try:
-            conn = psycopg2.connect(
-                database=get_environment_variable('DATABASE_NAME'),
-                user=get_environment_variable('DATABASE_USER'),
-                password=get_environment_variable('DATABASE_PASSWORD'),
-                host=get_environment_variable('DATABASE_HOST'),
-                port=get_environment_variable('DATABASE_PORT')
-            )
+            print(f'Table {table_name} took {((time.time() - table_start_time) / 60):.1f} min\n')
 
-            cur = conn.cursor()
-            command = "SELECT setval('" + table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\"))"
-            cur.execute(command)
-            data_tuple = cur.fetchone()
-            print("... SQL executed: " + command + " and returned " + str(data_tuple[0]))
-            conn.commit()
-            if str(data_tuple[0]) != 'None':
-                command = "ALTER SEQUENCE " + table_name + "_id_seq START WITH " + str(data_tuple[0])
-                cur.execute(command)
-                conn.commit()
-            conn.close()
-            print("... SQL executed: " + command)
-            # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
-
-        except Exception as e:
-            status += "... SQL FAILED: SELECT setval('" + \
-                      table_name + "_id_seq', (SELECT MAX(id) FROM \"" + table_name + "\")): " + str(e)
-            logger.error(status)
-
-        status += ", " + " loaded " + table_name
-        stat = 'Processing and loading table: ' + table_name + '  took ' + str(int(dt)) + ' seconds'
-        print("... " + stat)
-        status += stat
-
-    minutes = (time.time() - t0)/60
-
-    for table in stats:
-        secs = int(stats[table])
-        min1 = int(secs / 60)
-        secs1 = int(secs % 60)
-        print("Processing and loading table " + table + " ended at " + str(min1) + ":" + str(secs1) + "  cumulative")
-    print("Processing and loading grand total " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
-
-    os.system('rm ' + os.path.join(LOCAL_TMP_PATH, '*.csvTemp'))    # Clean up all the temp files
-
-    results = {
-        'status': status,
-        'status_code': status,
-    }
+            # reset table's id sequence
+            reset_id_seq(engine, table_name)
+        else:
+            print(f"{table_name} is empty\n")
+    minutes = (time.time() - t0) / 60
+    print(f"Total time for all tables: {minutes:.1f} minutes")
+    results = {'status': 'Completed', 'status_code': 200}
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-# We don't check every field for garbage, although maybe we should...
-# Since the error reporting in the python console is pretty good, you should be able to figure out what field has
-# garbage in it.
-# Because we export to csv (comma separated values) files, that end up the WeVoterServer root dir, you can stop
-# processing with the debugger, open the csv files in Excel, and get a decent view of what is happening.  The diagnostic
-# function dump_row_col_labels_and_errors(table_name, header, row, '2000060') also is really good at figuring out what
-# field has problems, and it dumps the field numbers and names which helps determine what row processing functions need
-# to be added, like 'clean_row(row, 10)                      # ballot_item_display_name'
-# The data provided to the developers local is pretty good, but some of the cleanups removes commas, and other niceities
-# from text fields.  It should be good enough, and if not, this function is where it can be improved.
-# hint: temporarily comment out some lines in allowable_tables, so you can get to the problem table quicker
-# hint: Access https://pg.admin.wevote.us/  (view access to the production server Postgres) can really help, ask Dale
-def csv_file_to_clean_csv_file2(table_name):
+def truncate_table(engine, table_name):
     """
-    Runs on the Master server
+    Truncates (completely clears contents of) local table
+    :param engine: connection to local Postgres
+    :param table_name: table to truncate
+    :return:
     """
-    csv_rows = []
-    with open(os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp'), 'r') as csv_file2:
-        line_reader = csv.reader(csv_file2, delimiter='|')
-        header = None
+    with engine.connect() as conn:
+        try:
+            # Truncate the table
+            conn.execute(sa.text(f"TRUNCATE {table_name} RESTART IDENTITY CASCADE"))
+            conn.commit()
+        except Exception as e:
+            print(f'FAILED_TABLE_TRUNCATE: {table_name} -- {str(e)}')
+        # checking that table is actually empty before inserting new data
+        try:
+            result = conn.execute(sa.text(f"SELECT COUNT(*) FROM {table_name}"))
+            row_count = result.fetchone()[0]
+            if row_count > 0:
+                print(f"Error: {table_name} is not empty after truncation")
+                return
+        except Exception as e:
+            print(f"TRUNCATION_CHECK: {table_name} -- {str(e)}")
 
-        skipped_rows = '... Skipped rows in ' + table_name + ': '
-        for row in line_reader:
-            # check_for_non_ascii(table_name, row)
-            try:
-                if header is None:
-                    header = row
-                    continue
-                if len(header) != len(row) or '|' in str(row):  # Messed up records with '|' in them
-                    skipped_rows += row[0] + ", "
-                    continue
 
-                if table_name == "ballot_ballotitem":
-                    clean_row(row, 10)                      # ballot_item_display_name
-                    clean_row(row, 12)                      # measure_subtitle
-                    clean_row(row, 14)                      # measure_text
-                    clean_row(row, 16)                      # no_vote_description
-                    clean_row(row, 17)                      # yes_vote_description
-                    # dump_row_col_labels_and_errors(table_name, header, row, '3000150')
-                elif table_name == "ballot_ballotreturned":
-                    clean_row(row, 6)                       # text_for_map_search
-                    substitute_null(row, 7, '0.0')          # latitude
-                    substitute_null(row, 8, '0.0')          # longitude
-                    # dump_row_col_labels_and_errors(table_name, header, row, '50490')
-                elif table_name == "candidate_candidatetoofficelink":
-                    if row[1] == '':                        # candidate_we_vote_id
-                        continue
-                elif table_name == "campaign_campaignx":
-                    clean_row(row, 6)                 # campaign_description
-                # elif table_name == "campaign_campaignxowner":
-                #     dump_row_col_labels_and_errors("campaign_campaignxowner", header, row, '5')
-                elif table_name == "campaign_campaignxsupporter":
-                    clean_row(row, 6)                 # supporter_endorsement
-                    # dump_row_col_labels_and_errors("campaign_campaignxsupporter", header, row, '45')
-                elif table_name == "election_election":
-                    substitute_null(row, 2, '0')  # google_civic_election_id_new is an integer
-                    if row[8] == '' or row[8] == '\\N' or row[8] == '0':
-                        row[8] = get_dummy_unique_id()       # ballotpedia_election_id
-                    substitute_null(row, 8, '0')            #
-                    clean_row(row, 10)                      # internal_notes
-                    substitute_null(row, 2, 'f')            # election_preparation_finished
-                elif table_name == "politician_politician":
-                    row[2] = row[2].replace("\\", "")       # middle_name
-                    substitute_null(row, 7, 'U')            # gender
-                    substitute_null(row, 8, '\\N')          # birth_date
-                    row[9] = get_dummy_unique_id()          # bioguide_id, looks like we don't even use this anymore
-                    row[10] = get_dummy_unique_id()         # thomas_id, looks like we don't even use this anymore
-                    row[11] = get_dummy_unique_id()         # lis_id, looks like we don't even use this anymore
-                    row[12] = get_dummy_unique_id()         # govtrack_id, looks like we don't even use this anymore
-                    row[15] = get_dummy_unique_id()         # fec_id, looks like we don't even use this anymore
-                    row[19] = get_dummy_unique_id()         # maplight_id, looks like we don't even use this anymore
-                    clean_row(row, 52)                      # twitter description
-                    clean_row(row, 54)                      # twitter_location
-                    clean_row(row, 55)                      # twitter_name
-                    clean_row(row, 111)                     # ballot_guide_official_statement
-                elif table_name == "polling_location_pollinglocation":
-                    clean_row(row, 2)                       # location_name
-                    row[2] = row[2].replace("\\", "")       # 'BIG BONE STATE PARK GARAGE BLDG\\'
-                    clean_row(row, 3)                       # polling_hours_text
-                    clean_row(row, 4)                       # directions_text
-                    clean_row(row, 5)                       # line1
-                    clean_row(row, 6)                       # line2
-                    substitute_null(row, 11, '0.00001')     # latitude
-                    substitute_null(row, 12, '0.00001')     # longitude
-                    substitute_null(row, 14, '\\N')         # google_response_address_not_found
-                elif table_name == "office_contestoffice":
-                    substitute_null(row, 4, '0')            # google_civic_election_id_new is an integer
-                    row[6] = get_dummy_unique_id()          # maplight_id, looks like we don't even use this anymore
-                    substitute_null(row, 24, '0')           # ballotpedia_office_id is an integer
-                    substitute_null(row, 28, '0')           # ballotpedia_district_id is an integer
-                    substitute_null(row, 29, '0')           # ballotpedia_election_id is an integer
-                    substitute_null(row, 30, '0')           # ballotpedia_race_id is an integer
-                    substitute_null(row, 33, '0')           # google_ballot_placement is an integer
-                    substitute_null(row, 40, 'f')           # ballotpedia_is_marquee is a bool
-                    substitute_null(row, 41, 'f')           # is_battleground_race is a bool
-                elif table_name == "candidate_candidatecampaign":
-                    row[2] = get_dummy_unique_id()          # maplight_id, looks like we don't even use this anymore
-                    substitute_null(row, 6, '0')            # politician_id
-                    clean_row(row, 8)                       # candidate_name |"Elizabeth Nelson ""Liz"" Johnson"|
-                    clean_row(row, 9)                       # google_civic_candidate_name
-                    clean_row(row, 24)                      # candidate_email
-                    substitute_null(row, 28, '0')           # wikipedia_page_id
-                    clean_row(row, 32)                      # twitter_description
-                    substitute_null(row, 33, '0')           # twitter_followers_count
-                    clean_row(row, 34)                      # twitter_location
-                    clean_row(row, 35)                      # twitter_name
-                    clean_row(row, 36)                      # twitter_profile_background_image_url_https
-                    substitute_null(row, 39, '0')           # twitter_user_id
-                    clean_row(row, 40)                      # ballot_guide_official_statement
-                    clean_row(row, 41)                      # contest_office_name
-                    substitute_null(row, 53, '0')           # ballotpedia_candidate_id
-                    clean_row(row, 57)                      # ballotpedia_candidate_summary
-                    substitute_null(row, 58, '0')           # ballotpedia_election_id
-                    substitute_null(row, 59, '0')           # ballotpedia_image_id
-                    substitute_null(row, 60, '0')           # ballotpedia_office_id
-                    substitute_null(row, 61, '0')           # ballotpedia_person_id
-                    substitute_null(row, 62, '0')           # ballotpedia_race_id
-                    substitute_null(row, 65, '0')           # crowdpac_candidate_id
-                    substitute_null(row, 71, '\\N')         # withdrawal_date
-                    substitute_null(row, 75, '0')           # candidate_year
-                    substitute_null(row, 76, '0')           # candidate_ultimate_election_date
-                    # dump_row_col_labels_and_errors(table_name, header, row, '4441')
-                elif table_name == "measure_contestmeasure":
-                    row[3] = row[3].replace('\n', '  ')     # measure_title
-                    clean_row(row, 4)                       #
-                    clean_row(row, 5)                       #
-                    clean_row(row, 6)                       # measure_url
-                    substitute_null(row, 17, '0')           # wikipedia_page_id is a bigint
-                    clean_row(row, 26)                      # ballotpedia_measure_name
-                    clean_row(row, 28)                      # ballotpedia_measure_summ
-                    clean_row(row, 29)                      # ballotpedia_measure_text
-                    clean_row(row, 32)                      # ballotpedia_no_vote_desc
-                    clean_row(row, 33)                      # ballotpedia_yes_vote_des
-                    substitute_null(row, 34, '0')           # google_ballot_placement is a bigint
-                    substitute_null(row, 39, '0')           # measure_year is an integer
-                    substitute_null(row, 40, '0')           # measure_ultimate_election_date is an integer
-                # elif table_name == 'office_contestofficevisitingotherelection':
-                #     pass   # no fixes needed
-                elif table_name == 'organization_organization':
-                    clean_row(row, 11)                      # organization_description
-                    clean_row(row, 12)                      # organization_address
-                    substitute_null(row, 23, '0')           # twitter_followers_count
-                    clean_row(row, 22)                      # twitter_description
-                    substitute_null(row, 31, '0')           # wikipedia_thumbnail_height
-                    substitute_null(row, 33, '0')           # wikipedia_thumbnail_width
-                    clean_row(row, 47)                      # issue_analysis_admin_notes
-                    # dump_row_col_labels_and_errors(table_name, header, row, '1')
-                elif table_name == 'position_positionentered':
-                    clean_row(row, 4)                       # ballot_item_display_name
-                    substitute_null(row, 5, '1970-01-01 00:00:00+00')
-                    clean_row(row, 15)                      #
-                    clean_row(row, 16)                      # vote_smart_rating_name
-                    clean_bigint_row(row, 18)               # contest_office_id
-                    clean_row(row, 22)                      # google_civic_candidate_name
-                    clean_row(row, 28)                      # statement_text
-                    clean_url(row, 30)                      # more_info_url
-                    clean_row(row, 37)                      # speaker_display_name
-                    clean_row(row, 43)                      # google_civic_measure_title
-                    clean_row(row, 44)                      # contest_office_name
-                    clean_row(row, 45)                      # political_party
-                    # dump_row_col_labels_and_errors(table_name, header, row, '33083')
-                elif table_name == 'voter_guide_voterguidepossibility':
-                    clean_url(row, 1)                       # voter_guide_possibility_url
-                    clean_row(row, 5)                       # ballot_items_raw
-                    clean_row(row, 6)                       # organization_name
-                    clean_row(row, 7)                       # organization_twitter_handle
-                    clean_row(row, 11)                      # internal_notes
-                    clean_row(row, 20)                      # contributor_comments
-                    clean_row(row, 22)                      # candidate_name
-                    # dump_row_col_labels_and_errors(table_name, header, row, '4')
-                elif table_name == 'voter_guide_voterguidepossibilityposition':
-                    substitute_null(row, 1, '0')            # voter_guide_possibility_parent_id
-                    substitute_null(row, 2, '0')            # possibility_position_number
-                    clean_row(row, 3)                       # ballot_item_name
-                    clean_row(row, 4)                       # candidate_we_vote_id
-                    clean_row(row, 5)                       # position_we_vote_id
-                    clean_row(row, 6)                       # measure_we_vote_id
-                    clean_row(row, 7)                       # statement_text
-                    substitute_null(row, 8, '0')            # google_civic_election_id
-                    clean_url(row, 10)                      # more_info_url
-                    clean_row(row, 13)                      # candidate_twitter_handle
-                    clean_row(row, 14)                      # organization_name
-                    clean_row(row, 15)                      # organization_twitter_handle
-                    clean_row(row, 16)                      # organization_we_vote_id
-                    # dump_row_col_labels_and_errors(table_name, header, row, '4')
-                elif table_name == 'voter_guide_voterguide':
-                    clean_row(row, 14)                      # twitter_description
-                    # dump_row_col_labels_and_errors(table_name, header, row, '3482')
-                elif table_name == 'representative_representative':
-                    clean_row(row, 18)                  # 'twitter_location'
-                    clean_row(row, 23)                  # 'twitter_description'
-                csv_rows.append(row)
-            except Exception as e:
-                logger.error("csv_file_to_clean_csv_file2 (" + table_name + ") caught " + str(e))
+def reset_id_seq(engine, table_name):
+    """
+    Resets id sequence of table
+    :param engine:
+    :param table_name:
+    :return:
+    """
+    with engine.connect() as conn:
+        try:
+            query = sa.text(f"""SELECT setval('{table_name}_id_seq', (SELECT MAX(id) FROM "{table_name}"))""")
+            result = conn.execute(query)
+            sequence_val = result.fetchone()[0]
+            if sequence_val is not None:
+                query = sa.text(f"ALTER SEQUENCE {table_name}_id_seq RESTART WITH {int(sequence_val) + 1}")
+                conn.execute(query)
+            # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
+        except Exception as e:
+            print(f'...FAILED_SEQUENCE_RESET: {table_name} -- {str(e)}')
 
-        csv_file2.close()
-        if ',' in skipped_rows:
-            print(skipped_rows + ' were skipped since they had pipe characters in the data')
 
-    with open(os.path.join(LOCAL_TMP_PATH, table_name + '2.csvTemp'), 'w') as csv_file:
-        csvwriter = csv.writer(csv_file, delimiter='|')
-        for row in csv_rows:
-            csvwriter.writerow(row)
-    csv_file.close()
-    return header
+def process_table_data(table_name, split_data):
+    """
+    Processes and inserts data into local Postgres table
+    :param table_name: target table to insert into
+    :param split_data: list of rows from data returned by API
+    :return:
+    """
+    # print("Processing data from API...")
+    first_len = len(split_data[0].split("|"))
+    lines = [line.split("|") for line in split_data if len(line.split("|")) == first_len]
+    # No valid lines to process for table. Skipping insertion.
+    if not lines:
+        return
+    engine = connect_to_db()
+
+    inspector = Inspector.from_engine(engine)
+    columns = inspector.get_columns(table_name)
+    # list of column names in the correct order
+    col_names = [col['name'] for col in columns]
+
+    df = pd.DataFrame(lines[1:], columns=lines[0])
+    # Strip extra whitespace from column names
+    df.columns = df.columns.str.strip()
+
+    # Ensure DataFrame has all columns from the table
+    for col in col_names:
+        if col not in df.columns:
+            df[col] = pd.NA  # Add missing columns with NaN values
+
+    # Reorder DataFrame columns to match the table schema
+    df = df[col_names]
+    # No valid data to insert for table. Skipping insertion
+    if df.empty:
+        return 0
+
+    # retrieve constraints from table
+    unique_constraints = inspector.get_unique_constraints(table_name)
+    unique_cols = [con['column_names'][0] for con in unique_constraints]
+    foreign_keys = inspector.get_foreign_keys(table_name)
+    fk_cols = [col['constrained_columns'][0] for col in foreign_keys]
+
+    not_null_columns = []
+    col_dict = {}
+    df_cleaned = pd.DataFrame()
+    for col in columns:
+        if not col['nullable']:
+            not_null_columns.append(col['name'])
+        col_dict[col['name']] = str(col['type'])
+
+    with engine.connect() as conn:
+        max_id = fetch_local_max_id(conn, table_name, "id")
+    try:
+        df_cleaned = clean_df(df, col_dict, unique_cols, not_null_columns, fk_cols, max_id)
+    except Exception as e:
+        print(f"TABLE_CLEANING_ERROR: {str(e)}")
+    # No valid data to insert for {table_name}. Skipping insertion.
+    if df_cleaned.empty:
+        return 0
+
+    with engine.connect() as conn:
+        try:
+            # Write cleaned DataFrame to the PostgresSQL table
+            copy_df_to_postgres(df_cleaned, conn, table_name)
+        except Exception as e:
+            print(f"FAILED_TABLE_INSERT: {table_name} -- {str(e)}")
+    return len(df_cleaned)
+
+
+def clean_df(df, col_dict, unique_cols, not_null_columns, fk_cols, start_id):
+    """
+    Prepares the pandas DataFrame for insertion into the Postgres table
+    :param df: pandas DataFrame to be cleaned
+    :param col_dict: a dictionary with column name as key, column dtype as value
+    :param unique_cols: list of cols with unique value constraint
+    :param not_null_columns: list of cols with not-null constraint
+    :param fk_cols: list of cols with foreign key constraint
+    :param start_id: index of first row in the chunk
+    :return
+    """
+    df = df.apply(lambda col: col.replace('\\N', pd.NA)
+                  .str.replace(r'[\n,]', ' ', regex=True)
+                  .str.replace(r'[^0-9a-zA-Z\. _,]', '', regex=True) if col.dtype == 'object' else col)
+
+    # Remove leading and trailing whitespaces in each cell of df
+    df = strip_whitespace(df)
+
+    boolean_map = {
+        'True': 1, 'False': 0,
+        't': 1, 'f': 0,
+        '1': 1, '0': 0,
+        'yes': 1, 'no': 0
+    }
+    not_null_id_cols = []
+    boolean_columns = [col for col, dtype in col_dict.items() if dtype == "BOOLEAN" and col in df.columns]
+    timestamp_columns = [col for col, dtype in col_dict.items() if dtype == "TIMESTAMP" and col in df.columns]
+    integer_columns = [col for col, dtype in col_dict.items() if dtype in ["INTEGER", "BIGINT"] and col in df.columns]
+    double_precision_columns = [col for col, dtype in col_dict.items() if
+                                dtype == "DOUBLE PRECISION" and col in df.columns]
+    date_columns = [col for col, dtype in col_dict.items() if dtype == "DATE" and col in df.columns]
+    varchar_cols = [col for col, dtype in col_dict.items() if "VARCHAR" in dtype and col in df.columns]
+
+    if boolean_columns:
+        df[boolean_columns] = df[boolean_columns].replace(r'^\s*$', pd.NA, regex=True).replace(boolean_map)
+        df[boolean_columns] = df[boolean_columns].fillna(False).astype(bool)
+    if timestamp_columns:
+        for col in timestamp_columns:
+            if col in not_null_columns:
+                df[col] = df[col].replace(['', pd.NA, 'null'], datetime.now(timezone.utc))
+            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True,
+                                     format="%Y-%m-%d %H:%M:%S")  # convert cols to datetime
+            df[col] = df[col].fillna(datetime.now(timezone.utc))  # Fill any NaT values that were created by conversion
+            if df[col].dt.tz is None:  # Convert to UTC timezone if not timezone specified
+                df[col] = df[col].dt.tz_localize('UTC', ambiguous='NaT', nonexistent='NaT')
+            else:
+                df[col] = df[col].dt.tz_convert('UTC')
+    if integer_columns:
+        # Separate those with and without fk constraints
+        non_fk_int_columns = [col for col in integer_columns if col not in fk_cols]
+        fk_integer_columns = [col for col in integer_columns if col in fk_cols]
+
+        if non_fk_int_columns:
+            df[non_fk_int_columns] = df[non_fk_int_columns].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+        if fk_integer_columns:
+            df[fk_integer_columns] = df[fk_integer_columns].apply(pd.to_numeric, errors='coerce')
+            df[fk_integer_columns] = df[fk_integer_columns].apply(lambda col: col.replace(pd.NA, None))
+
+        # Keep track of non-null ID columns
+        not_null_id_cols.extend([col for col in integer_columns if col in not_null_columns])
+    if double_precision_columns:
+        df[double_precision_columns] = df[double_precision_columns].replace(['False'], pd.NA)
+    if date_columns:
+        df[date_columns] = df[date_columns].apply(lambda col: col.replace(['', pd.NA, pd.NaT, 'null'], "1800-01-01"))
+    if varchar_cols:
+        cols_to_update = [col for col in varchar_cols if col in not_null_columns]
+        df[cols_to_update] = df[cols_to_update].apply(lambda col: col.replace('', ' '))
+
+    # add any column to this list if you know it doesn't have ids
+    dummy_cols = {'ballotpedia_election_id', 'bioguide_id', 'thomas_id', 'lis_id', 'govtrack_id', 'fec_id',
+                  'maplight_id'}
+    df = get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id + 1)
+    return df
+
+
+def strip_whitespace(df):
+    """
+    Strips whitespace from every cell in the DataFrame.
+    """
+    str_columns = df.select_dtypes(include=['object'])
+    df[str_columns.columns] = str_columns.apply(lambda col: col.str.strip())
+    return df
 
 
 def get_row_count_from_master_server():
@@ -457,30 +404,74 @@ def get_row_count_from_master_server():
         return -1
 
 
-def clean_row(row, index):
-    newstring = row[index].replace('\n', ' ').replace(',', ' ')
-    newstring = ''.join(ch for ch in newstring if ch.isdigit() or ch.isalnum() or ch == ' ' or ch == '.' or ch == '_')
-    row[index] = newstring.strip()
+def fetch_local_max_id(conn, table_name, id_column):
+    """
+    Fetches the maximum ID value from a specified local table.
+    :param conn: SQLAlchemy connection object.
+    :param table_name: Name of the table to query.
+    :param id_column: Name of the ID column.
+    :return: Maximum ID value or 0 if the table is empty.
+    """
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cursor:
+        cursor.execute(f"SELECT COALESCE(MAX({id_column}), 0) FROM {table_name}")
+        max_id = cursor.fetchone()[0]
+    return max_id
 
 
-def clean_bigint_row(row, index):
-    if not row[index].isnumeric() and row[index] != '\\N':
-        row[index] = 0
+def get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id):
+    """
+    Generates unique id's for each row in dummy_cols, unique_constraints, not_null_id_cols
+    :param df:
+    :param dummy_cols: a list of col names that require unique id's for each row
+    :param unique_cols: a list of col names that have unique constraints
+    :param not_null_id_cols: a list of id columns that cannot contain null values
+    :param start_id: the index of the first row in the chunk
+    :return:
+    """
+    dummy_cols.update(set(unique_cols) - dummy_cols)
+    dummy_cols.update(set(not_null_id_cols) - dummy_cols)
+    dummy_cols = list(dummy_cols)
+
+    new_ids = np.arange(start_id, start_id + len(df))
+
+    # Replace the entire column with new IDs for each column that requires unique IDs
+    for col in dummy_cols:
+        if col in df.columns:
+            df[col] = new_ids
+
+    return df
 
 
-def clean_url(row, index):
-    if "," in row[index]:
-        # ','' is technically valid in a URL, but is a reserved char, can mess up some ".xml" urls, but "ok" for
-        # developer data
-        row[index] = row[index].replace(",", "")
+def copy_df_to_postgres(df: pd.DataFrame, conn, table_name):
+    """
+    Copies pandas DataFrame to local Postgres table
+    :param df: pandas DataFrame to copy
+    :param conn: connection to local postgres
+    :param table_name: name of table to copy into in local Postgres
+    :return:
+    """
+    if df.empty:
+        print("DataFrame is empty. Skipping insert.")
+        return
 
+    temp_dir = os.path.join(LOCAL_TMP_PATH, table_name)
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_csv_path = os.path.join(temp_dir, f'{table_name}.csvTemp')
+    try:
+        df.to_csv(temp_csv_path, index=False, header=False, sep="|")
+    except Exception as e:
+        print(f"TO_CSV FAILED: {table_name} -- {str(e)}")
 
-def substitute_null(row, index, sub):
-    if row[index] == '\\N' or row[index] == '':
-        row[index] = sub
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cursor:
+        try:
+            with open(temp_csv_path, 'r') as csv_file:
+                cursor.copy_from(csv_file, table_name, sep='|', null="")
+            dbapi_conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(f"FAILED_COPY_FROM: {str(error)}")
+        finally:
+            # Clean up by removing the temporary CSV file
+            os.remove(temp_csv_path)
 
-
-def get_dummy_unique_id():
-    global dummy_unique_id
-    dummy_unique_id += 1
-    return str(dummy_unique_id)

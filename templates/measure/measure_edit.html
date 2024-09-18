@@ -17,8 +17,10 @@
 <div class="form-group">
     <label for="measure_title_id" class="col-sm-3 control-label">Measure Title</label>
     <div class="col-sm-8">
-        <input type="text" name="measure_title" id="measure_title_id" class="form-control"
-               value="{% if measure %}{{ measure.measure_title|default_if_none:"" }}{% else %}{{ measure_title|default_if_none:"" }}{% endif %}" />
+        <textarea name="measure_title"
+                  id="measure_title_id"
+                  class="form-control animated"
+                  placeholder="Enter measure title">{% if measure %}{{ measure.measure_title|default_if_none:"" }}{% else %}{{ measure_title|default_if_none:"" }}{% endif %}</textarea>
         {% if measure %}{{ measure.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
     </div>
 </div>

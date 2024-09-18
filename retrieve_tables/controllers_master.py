@@ -21,7 +21,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
 allowable_tables = [
-    'ballot_ballotitem',
     'position_positionentered',
     'campaign_campaignx',
     'campaign_campaignxowner',
@@ -58,15 +57,39 @@ allowable_tables = [
     'polling_location_pollinglocation',
     'organization_organization',
     'candidate_candidatecampaign',
+    'ballot_ballotitem',
 ]
 
 dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'
 
 
+def get_max_id(table_name):
+    """
+    Returns the maximum id of table to be fetched from the MASTER server
+    Runs on the Master server
+    :return: the number of rows
+    """
+    conn = psycopg2.connect(
+        database=get_environment_variable('DATABASE_NAME_READONLY'),
+        user=get_environment_variable('DATABASE_USER_READONLY'),
+        password=get_environment_variable('DATABASE_PASSWORD_READONLY'),
+        host=get_environment_variable('DATABASE_HOST_READONLY'),
+        port=get_environment_variable('DATABASE_PORT_READONLY')
+    )
+
+    with conn.cursor() as cursor:
+        sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        max_id = result[0]
+    conn.close()
+    return max_id
+
+
 def get_total_row_count():
     """
-    Returns the total row count of tables to be fetched from the MASTER server
+    Returns the total row count of all tables to be fetched from the MASTER server
     Runs on the Master server
     :return: the number of rows
     """
@@ -81,17 +104,13 @@ def get_total_row_count():
     rows = 0
     for table_name in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT MAX(id) FROM {table_name};".format(table_name=table_name)
+            sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
             cursor.execute(sql)
             row = cursor.fetchone()
             if positive_value_exists(row[0]):
                 cnt = int(row[0])
             else:
-                sql = "SELECT COUNT(*) FROM {table_name};".format(table_name=table_name)
-                cursor.execute(sql)
-                row = cursor.fetchone()
-                if positive_value_exists(row[0]):
-                    cnt = int(row[0])
+                cnt = 0
             print('get_total_row_count of table ', table_name, ' is ', cnt)
             rows += cnt
 
@@ -210,6 +229,11 @@ def check_for_non_ascii(table_name, row):
 
 
 def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
+    """
+    Returns fast load status information for the progress update on the HTML page
+    :param request:
+    :return:
+    """
     initialize = positive_value_exists(request.GET.get('initialize', False))
     voter_api_device_id = get_voter_api_device_id(request)
     is_running = positive_value_exists(request.GET.get('is_running', True))
@@ -243,7 +267,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
             table_name = row.table_name
             chunk = row.chunk
             records = row.current_record
-            total = row.total_records
+            total = get_total_row_count
             started = row.started_date
             row_id = row.id
             status += "ROW_RETRIEVED "
@@ -254,7 +278,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         success = False
         row_id = ''
 
-    started_txt = started.strftime(DATE_FORMAT_YMD_HMS) if started else "" # '%Y-%m-%d %H:%M:%S'
+    started_txt = started.strftime(DATE_FORMAT_YMD_HMS) if started else ""  # '%Y-%m-%d %H:%M:%S'
     results = {
         'status': status,
         'success': success,
@@ -299,19 +323,20 @@ def fast_load_status_update(request):
             row.total_records = total_records
         row.save()
         status = 'ROW_SAVED'
-        id = row.id
-        print('fast_load_status_update AFTER SAVE table_name', table_name, chunk, row.current_record, additional_records)
+        row_id = row.id
+        print('fast_load_status_update AFTER SAVE table_name',
+              table_name, chunk, row.current_record, additional_records)
 
     except Exception as e:
         logger.error("fast_load_status_update caught exception: " + str(e))
         success = False
         status = 'ROW_NOT_SAVED  ' + str(e)
-        id = -1
+        row_id = -1
 
     results = {
         'status': status,
         'success': success,
-        'row_id': id,
+        'row_id': row_id,
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')
