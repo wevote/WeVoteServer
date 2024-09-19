@@ -69,7 +69,7 @@ class SocialMiddleware(object):
 
         return response
 
-    def process_exception(request, exception):
+    def process_exception(self, request, exception):
         # if hasattr(social_exceptions, exception.__class__.__name__):
         #     if exception.__class__.__name__ == 'AuthAlreadyAssociated':
         #         return HttpResponse("AuthAlreadyAssociated: %s" % exception)

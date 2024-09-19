@@ -2505,6 +2505,8 @@ def voter_guide_search_process_view(request):
     :param request:
     :return:
     """
+    search_performed = False
+
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -2513,38 +2515,40 @@ def voter_guide_search_process_view(request):
     add_organization_button = request.POST.get('add_organization_button', False)
     if add_organization_button:
         return organization_edit_process_view(request)
+    
+    if request.method == 'POST':
+        search_performed = True
+        organization_name = request.POST.get('organization_name', '')
+        organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
+        organization_facebook = request.POST.get('organization_facebook', '')
+        organization_type = request.POST.get('organization_type', '')
+        organization_website = request.POST.get('organization_website', '')
+        state_code = request.POST.get('state_code', "")
 
-    organization_name = request.POST.get('organization_name', '')
-    organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
-    organization_facebook = request.POST.get('organization_facebook', '')
-    organization_type = request.POST.get('organization_type', '')
-    organization_website = request.POST.get('organization_website', '')
-    state_code = request.POST.get('state_code', "")
+        # Save this variable so we have it on the "Add New Position" page
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
 
-    # Save this variable so we have it on the "Add New Position" page
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        # Filter incoming data
+        organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
-    # Filter incoming data
-    organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
+        # Search for organizations that match
+        organization_list_manager = OrganizationListManager()
+        results = organization_list_manager.organization_search_find_any_possibilities(
+            organization_name=organization_name,
+            organization_twitter_handle=organization_twitter_handle,
+            # organization_website=organization_website,
+            # organization_facebook=organization_facebook,
+            read_only=True)
 
-    # Search for organizations that match
-    organization_list_manager = OrganizationListManager()
-    results = organization_list_manager.organization_search_find_any_possibilities(
-        organization_name=organization_name,
-        organization_twitter_handle=organization_twitter_handle,
-        organization_website=organization_website,
-        organization_facebook=organization_facebook,
-        read_only=True)
+        if results['organizations_found']:
+            organizations_list = results['organizations_list']
+            organizations_count = len(organizations_list)
 
-    if results['organizations_found']:
-        organizations_list = results['organizations_list']
-        organizations_count = len(organizations_list)
-
-        messages.add_message(request, messages.INFO, 'We found {count} existing organization(s) '
-                                                     'that might match.'.format(count=organizations_count))
-    else:
-        organizations_list = []
-        messages.add_message(request, messages.INFO, 'No voter guides found with those search terms. '
+            messages.add_message(request, messages.INFO, 'We found {count} existing organization(s) '
+                                                        'that might match.'.format(count=organizations_count))
+        else:
+            organizations_list = []
+            messages.add_message(request, messages.INFO, 'No endorser found with those search terms. '
                                                      'Please try again. ')
 
     election_manager = ElectionManager()
@@ -2568,6 +2572,7 @@ def voter_guide_search_process_view(request):
         'organization_website':         organization_website,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
+        'search_performed':             search_performed,
         'upcoming_election_list':       upcoming_election_list,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)

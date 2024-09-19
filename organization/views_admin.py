@@ -1374,7 +1374,7 @@ def organization_edit_process_view(request):
         url_variables += "&organization_instagram_handle=" + str(organization_instagram_handle)
 
     if organization_name is not False:
-        url_variables += "&organization_name=" + str(organization_name)
+        url_variables += f"&organization_name={organization_name}"
 
     if organization_twitter_handle is not False:
         url_variables += "&organization_twitter_handle=" + str(organization_twitter_handle)
@@ -1403,7 +1403,10 @@ def organization_edit_process_view(request):
     if google_civic_election_id is not False:
         url_variables += "&google_civic_election_id=" + str(google_civic_election_id)
     
-
+    if not organization_name:
+        messages.error(request, 'Organization name is required.')
+        return render(request, 'voter_guide/voter_guide_search.html')
+        
     if not success:
         messages.add_message(request, messages.ERROR,
                              'ORGANIZATION_ERROR Please click the back arrow and send URL to the engineering team: '
