@@ -30,11 +30,11 @@ from wevote_functions.functions import convert_state_code_to_state_text, convert
 from wevote_functions.functions_date import generate_date_as_integer
 from .controllers import fetch_duplicate_challenge_count, \
     figure_out_challenge_conflict_values, find_duplicate_challenge, merge_if_duplicate_challenges, \
-    refresh_challenge_supporters_count_in_all_children, merge_these_two_challenges
+    merge_these_two_challenges
 from .models import Challenge, ChallengesAreNotDuplicates, ChallengesArePossibleDuplicates, \
-    ChallengeManager, ChallengeOwner, ChallengePolitician, ChallengeSEOFriendlyPath, ChallengeSupporter, \
+    ChallengeManager, ChallengeOwner, ChallengePolitician, ChallengeSEOFriendlyPath, ChallengeParticipant, \
     CHALLENGE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    CHALLENGE_UNIQUE_IDENTIFIERS, FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
+    CHALLENGE_UNIQUE_IDENTIFIERS, FINAL_ELECTION_DATE_COOL_DOWN, PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING
 
 logger = wevote_functions.admin.get_logger(__name__)
 CHALLENGES_ROOT_URL = get_environment_variable("CHALLENGES_ROOT_URL", no_exception=True)
@@ -596,7 +596,7 @@ def challenge_edit_process_view(request):
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     seo_friendly_path = request.POST.get('seo_friendly_path', None)
     state_code = request.POST.get('state_code', None)
-    supporters_count_minimum_ignored = request.POST.get('supporters_count_minimum_ignored', False)
+    participants_count_minimum_ignored = request.POST.get('participants_count_minimum_ignored', False)
 
     # Check to see if this challenge is already being used anywhere
     challenge = None
@@ -675,8 +675,8 @@ def challenge_edit_process_view(request):
                 if not positive_value_exists(seo_friendly_path):
                     seo_friendly_path = None
                 challenge.seo_friendly_path = seo_friendly_path
-            if supporters_count_minimum_ignored is not None:
-                challenge.supporters_count_minimum_ignored = positive_value_exists(supporters_count_minimum_ignored)
+            if participants_count_minimum_ignored is not None:
+                challenge.participants_count_minimum_ignored = positive_value_exists(participants_count_minimum_ignored)
             challenge.save()
 
             messages.add_message(request, messages.INFO, 'Challenge updated.')
@@ -1131,8 +1131,8 @@ def challenge_list_view(request):
     challenge_list_query = Challenge.objects.using('readonly').all()
     if positive_value_exists(hide_challenges_not_visible_yet):
         challenge_list_query = challenge_list_query.filter(
-            Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
-            Q(supporters_count_minimum_ignored=True))
+            Q(participants_count__gte=PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING) |
+            Q(participants_count_minimum_ignored=True))
 
     final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
     if positive_value_exists(include_challenges_from_prior_elections):
@@ -1175,9 +1175,9 @@ def challenge_list_view(request):
         #     challenge_list_query = \
         #         challenge_list_query.order_by('organization_name').order_by('-twitter_followers_count')
         # else:
-        challenge_list_query = challenge_list_query.order_by('-supporters_count')
+        challenge_list_query = challenge_list_query.order_by('-participants_count')
     else:
-        challenge_list_query = challenge_list_query.order_by('-supporters_count')
+        challenge_list_query = challenge_list_query.order_by('-participants_count')
 
     if positive_value_exists(challenge_search):
         search_words = challenge_search.split()
@@ -1189,19 +1189,19 @@ def challenge_list_view(request):
             new_filter = Q(challenge_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(politician_we_vote_id__iexact=one_word)
+            new_filter = Q(politician_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(seo_friendly_path__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(started_by_voter_we_vote_id__iexact=one_word)
+            new_filter = Q(started_by_voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1359,7 +1359,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
         from challenge.models import ChallengeSEOFriendlyPath
         try:
             path_query = ChallengeSEOFriendlyPath.objects.all()
-            path_query = path_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+            path_query = path_query.filter(challenge_we_vote_id=challenge_we_vote_id)
             path_count = path_query.count()
             path_list = list(path_query[:4])
         except Exception as e:
@@ -1391,53 +1391,26 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
     for challenge_politician in challenge_politician_list:
         challenge_politician_list_modified.append(challenge_politician)
 
-    challenge_supporter_list = []
     position_list = []
-    if positive_value_exists(challenge.politician_we_vote_id):
-        from position.models import PositionEntered
-        position_query = PositionEntered.objects.using('readonly').all()
-        position_query = position_query.filter(politician_we_vote_id__iexact=challenge.politician_we_vote_id)
-        # position_query = position_query.exclude(
-        #     Q(statement_text__isnull=True) |
-        #     Q(statement_text__exact='')
-        # )
-        position_list = list(position_query[:4])
-    else:
-        supporters_query = ChallengeSupporter.objects.using('readonly').all()
-        supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
-        supporters_query = supporters_query.exclude(
-            Q(supporter_endorsement__isnull=True) |
-            Q(supporter_endorsement__exact='')
-        )
-        challenge_supporter_list = list(supporters_query[:4])
-
-    challenge_supporters_count = 0
-    if positive_value_exists(challenge.politician_we_vote_id):
-        organization_manager = OrganizationManager()
-        results = organization_manager.retrieve_organization(politician_we_vote_id=challenge.politician_we_vote_id)
-        if results['organization_found']:
-            organization = results['organization']
-            organization_we_vote_id = organization.we_vote_id
-
-            from follow.models import FollowMetricsManager
-            follow_metrics_manager = FollowMetricsManager()
-            challenge_supporters_count = follow_metrics_manager.fetch_organization_followers(organization_we_vote_id)
-    else:
-        challenge_supporters_count = challenge_manager.fetch_challenge_supporter_count(challenge_we_vote_id)
+    participants_query = ChallengeParticipant.objects.using('readonly').all()
+    participants_query = participants_query.filter(challenge_we_vote_id=challenge_we_vote_id)
+    participants_query = participants_query.filter(visible_to_public=True)
+    challenge_participants_count = participants_query.count()
+    challenge_participant_list = list(participants_query[:4])
 
     if 'localhost' in CHALLENGES_ROOT_URL:
         challenges_site_root_url = 'https://localhost:3000'
     else:
         challenges_site_root_url = 'https://WeVote.US'
     template_values = {
-        'challenges_site_root_url':                  challenges_site_root_url,
+        'challenges_site_root_url':                 challenges_site_root_url,
         'challenge':                                challenge,
         'challenge_owner_list':                     challenge_owner_list_modified,
         'challenge_owner_organization_we_vote_id':  challenge_owner_organization_we_vote_id,
         'challenge_politician_list':                challenge_politician_list_modified,
         'challenge_search':                         challenge_search,
-        'challenge_supporters_count':               challenge_supporters_count,
-        'challenge_supporter_list':                 challenge_supporter_list,
+        'challenge_participants_count':             challenge_participants_count,
+        'challenge_participant_list':               challenge_participant_list,
         'google_civic_election_id':                 google_civic_election_id,
         'messages_on_stage':                        messages_on_stage,
         'path_count':                               path_count,
@@ -1449,7 +1422,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
 
 
 @login_required
-def challenge_supporters_list_view(request, challenge_we_vote_id=""):
+def challenge_participants_list_view(request, challenge_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -1466,64 +1439,64 @@ def challenge_supporters_list_view(request, challenge_we_vote_id=""):
     show_all = request.GET.get('show_all', False)
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
-    only_show_supporters_with_endorsements = \
-        positive_value_exists(request.GET.get('only_show_supporters_with_endorsements', False))
-    show_supporters_not_visible_to_public = \
-        positive_value_exists(request.GET.get('show_supporters_not_visible_to_public', False))
+    only_show_participants_with_endorsements = \
+        positive_value_exists(request.GET.get('only_show_participants_with_endorsements', False))
+    show_participants_not_visible_to_public = \
+        positive_value_exists(request.GET.get('show_participants_not_visible_to_public', False))
 
     messages_on_stage = get_messages(request)
 
-    challenge = Challenge.objects.get(we_vote_id__iexact=challenge_we_vote_id)
+    challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
     challenge_title = challenge.challenge_title
 
-    supporters_query = ChallengeSupporter.objects.all()
-    supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+    participants_query = ChallengeParticipant.objects.all()
+    participants_query = participants_query.filter(challenge_we_vote_id=challenge_we_vote_id)
 
-    if positive_value_exists(only_show_supporters_with_endorsements):
-        supporters_query = supporters_query.exclude(
-            Q(supporter_endorsement__isnull=True) |
-            Q(supporter_endorsement__exact='')
+    if positive_value_exists(only_show_participants_with_endorsements):
+        participants_query = participants_query.exclude(
+            Q(participant_endorsement__isnull=True) |
+            Q(participant_endorsement__exact='')
         )
 
-    supporters_query = supporters_query.order_by('-date_supported')
+    participants_query = participants_query.order_by('-date_joined')
 
-    if positive_value_exists(show_supporters_not_visible_to_public):
+    if positive_value_exists(show_participants_not_visible_to_public):
         pass
     else:
         # Default to only show visible_to_public
-        supporters_query = supporters_query.filter(visible_to_public=True)
+        participants_query = participants_query.filter(visible_to_public=True)
 
     # if positive_value_exists(state_code):
-    #     supporters_query = supporters_query.filter(state_served_code__iexact=state_code)
+    #     participants_query = participants_query.filter(state_served_code__iexact=state_code)
     #
     # if positive_value_exists(challenge_type_filter):
     #     if challenge_type_filter == UNKNOWN:
     #         # Make sure to also show organizations that are not specified
-    #         supporters_query = supporters_query.filter(
+    #         participants_query = participants_query.filter(
     #             Q(organization_type__iexact=challenge_type_filter) |
     #             Q(organization_type__isnull=True) |
     #             Q(organization_type__exact='')
     #         )
     #     else:
-    #         supporters_query = supporters_query.filter(organization_type__iexact=challenge_type_filter)
+    #         participants_query = participants_query.filter(organization_type__iexact=challenge_type_filter)
     # else:
     #     # By default, don't show individuals
-    #     supporters_query = supporters_query.exclude(organization_type__iexact=INDIVIDUAL)
+    #     participants_query = participants_query.exclude(organization_type__iexact=INDIVIDUAL)
 
     if positive_value_exists(challenge_search):
         search_words = challenge_search.split()
         for one_word in search_words:
             filters = []
-            new_filter = Q(supporter_name__icontains=one_word)
+            new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(supporter_endorsement__icontains=one_word)
+            new_filter = Q(participant_endorsement__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1534,23 +1507,23 @@ def challenge_supporters_list_view(request, challenge_we_vote_id=""):
                 for item in filters:
                     final_filters |= item
 
-                supporters_query = supporters_query.filter(final_filters)
+                participants_query = participants_query.filter(final_filters)
 
-    supporters_count = supporters_query.count()
+    participants_count = participants_query.count()
     messages.add_message(request, messages.INFO,
-                         'Showing {supporters_count:,} challenge supporters.'.format(supporters_count=supporters_count))
+                         'Showing {participants_count:,} challenge participants.'.format(participants_count=participants_count))
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
-        supporters_list = supporters_query[:1000]
+        participants_list = participants_query[:1000]
     elif positive_value_exists(show_all):
-        supporters_list = supporters_query
+        participants_list = participants_query
     else:
-        supporters_list = supporters_query[:200]
+        participants_list = participants_query[:200]
 
-    for supporter in supporters_list:
-        supporter.chip_in_total = StripeManager.retrieve_chip_in_total(supporter.voter_we_vote_id,
-                                                                       supporter.challenge_we_vote_id)
+    for participant in participants_list:
+        participant.chip_in_total = StripeManager.retrieve_chip_in_total(participant.voter_we_vote_id,
+                                                                       participant.challenge_we_vote_id)
 
 
     state_list = STATE_CODE_MAP
@@ -1567,21 +1540,21 @@ def challenge_supporters_list_view(request, challenge_we_vote_id=""):
         'messages_on_stage':                        messages_on_stage,
         'challenge_type_filter':                    challenge_type_filter,
         'challenge_types':                          [],
-        'supporters_list':                          supporters_list,
+        'participants_list':                          participants_list,
         'show_all':                                 show_all,
         'show_issues':                              show_issues,
         'show_more':                                show_more,
-        'show_supporters_not_visible_to_public':    show_supporters_not_visible_to_public,
-        'only_show_supporters_with_endorsements':     only_show_supporters_with_endorsements,
+        'show_participants_not_visible_to_public':    show_participants_not_visible_to_public,
+        'only_show_participants_with_endorsements':     only_show_participants_with_endorsements,
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
     }
-    return render(request, 'challenge/challenge_supporters_list.html', template_values)
+    return render(request, 'challenge/challenge_participants_list.html', template_values)
 
 
 @login_required
-def challenge_supporters_list_process_view(request):
+def challenge_participants_list_process_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -1591,36 +1564,36 @@ def challenge_supporters_list_process_view(request):
     challenge_search = request.POST.get('challenge_search', '')
     challenge_we_vote_id = request.POST.get('challenge_we_vote_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', '')
-    incoming_challenge_supporter_we_vote_id = request.POST.get('incoming_challenge_supporter_we_vote_id', '')
-    incoming_challenge_supporter_endorsement = request.POST.get('incoming_challenge_supporter_endorsement', '')
-    incoming_challenge_supporter_wants_visibility = request.POST.get('incoming_challenge_supporter_wants_visibility', '')
+    incoming_challenge_participant_we_vote_id = request.POST.get('incoming_challenge_participant_we_vote_id', '')
+    incoming_challenge_participant_endorsement = request.POST.get('incoming_challenge_participant_endorsement', '')
+    incoming_challenge_participant_wants_visibility = request.POST.get('incoming_challenge_participant_wants_visibility', '')
     incoming_visibility_blocked_by_we_vote = request.POST.get('incoming_visibility_blocked_by_we_vote', '')
     state_code = request.POST.get('state_code', '')
     show_all = request.POST.get('show_all', False)
     show_more = request.POST.get('show_more', False)  # Show up to 1,000 organizations
-    only_show_supporters_with_endorsements = \
-        positive_value_exists(request.POST.get('only_show_supporters_with_endorsements', False))
-    show_supporters_not_visible_to_public = \
-        positive_value_exists(request.POST.get('show_supporters_not_visible_to_public', False))
+    only_show_participants_with_endorsements = \
+        positive_value_exists(request.POST.get('only_show_participants_with_endorsements', False))
+    show_participants_not_visible_to_public = \
+        positive_value_exists(request.POST.get('show_participants_not_visible_to_public', False))
 
     update_message = ''
     voter_manager = VoterManager()
     organization_manager = OrganizationManager()
 
-    challenge_supporter_organization_we_vote_id = ''
-    challenge_supporter_voter_we_vote_id = ''
-    if positive_value_exists(incoming_challenge_supporter_we_vote_id):
+    challenge_participant_organization_we_vote_id = ''
+    challenge_participant_voter_we_vote_id = ''
+    if positive_value_exists(incoming_challenge_participant_we_vote_id):
         # We allow either organization_we_vote_id or voter_we_vote_id
-        if 'org' in incoming_challenge_supporter_we_vote_id:
-            challenge_supporter_organization_we_vote_id = incoming_challenge_supporter_we_vote_id
-            challenge_supporter_voter_we_vote_id = \
+        if 'org' in incoming_challenge_participant_we_vote_id:
+            challenge_participant_organization_we_vote_id = incoming_challenge_participant_we_vote_id
+            challenge_participant_voter_we_vote_id = \
                 voter_manager.fetch_voter_we_vote_id_by_linked_organization_we_vote_id(
-                    challenge_supporter_organization_we_vote_id)
-        elif 'voter' in incoming_challenge_supporter_we_vote_id:
-            challenge_supporter_voter_we_vote_id = incoming_challenge_supporter_we_vote_id
-            challenge_supporter_organization_we_vote_id = \
+                    challenge_participant_organization_we_vote_id)
+        elif 'voter' in incoming_challenge_participant_we_vote_id:
+            challenge_participant_voter_we_vote_id = incoming_challenge_participant_we_vote_id
+            challenge_participant_organization_we_vote_id = \
                 voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(
-                    incoming_challenge_supporter_we_vote_id)
+                    incoming_challenge_participant_we_vote_id)
 
     politician_we_vote_id = ''
     if positive_value_exists(challenge_we_vote_id):
@@ -1635,7 +1608,7 @@ def challenge_supporters_list_process_view(request):
 
     # 2024-07-23
     if positive_value_exists(politician_we_vote_id):
-        # If this Challenge is linked to a politician, don't work with classic ChallengeSupporters
+        # If this Challenge is linked to a politician, don't work with classic ChallengeParticipants
         challenge_we_vote_id_list_to_refresh = [challenge_we_vote_id]
         error_message_to_print = ''
         info_message_to_print = ''
@@ -1663,64 +1636,64 @@ def challenge_supporters_list_process_view(request):
                 list(set(challenge_we_vote_id_list_changed + challenge_we_vote_id_list_to_refresh))
 
         follow_organization_manager = FollowOrganizationManager()
-        supporters_count = follow_organization_manager.fetch_follow_organization_count(
+        participants_count = follow_organization_manager.fetch_follow_organization_count(
             following_status=FOLLOWING,
             organization_we_vote_id_being_followed=challenge_on_stage.organization_we_vote_id)
         opposers_count = follow_organization_manager.fetch_follow_organization_count(
             following_status=FOLLOW_DISLIKE,
             organization_we_vote_id_being_followed=challenge_on_stage.organization_we_vote_id)
         challenge_on_stage.opposers_count = opposers_count
-        challenge_on_stage.supporters_count = supporters_count
+        challenge_on_stage.participants_count = participants_count
         challenge_on_stage.save()
 
         if positive_value_exists(results['error_message_to_print']):
             error_message_to_print += results['error_message_to_print']
         if positive_value_exists(results['info_message_to_print']):
             info_message_to_print += results['info_message_to_print']
-        messages.add_message(request, messages.INFO, 'ChallengeSupporter linked to Politician -- cannot process.')
-        return HttpResponseRedirect(reverse('challenge:supporters_list', args=(challenge_we_vote_id,)) +
+        messages.add_message(request, messages.INFO, 'ChallengeParticipant linked to Politician -- cannot process.')
+        return HttpResponseRedirect(reverse('challenge:participants_list', args=(challenge_we_vote_id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&challenge_owner_organization_we_vote_id=" +
                                     str(challenge_owner_organization_we_vote_id) +
                                     "&challenge_search=" + str(challenge_search) +
                                     "&state_code=" + str(state_code) +
-                                    "&only_show_supporters_with_endorsements=" +
-                                    str(only_show_supporters_with_endorsements) +
-                                    "&show_supporters_not_visible_to_public=" + str(
-            show_supporters_not_visible_to_public)
+                                    "&only_show_participants_with_endorsements=" +
+                                    str(only_show_participants_with_endorsements) +
+                                    "&show_participants_not_visible_to_public=" + str(
+            show_participants_not_visible_to_public)
                                     )
 
-    supporters_query = ChallengeSupporter.objects.all()
-    supporters_query = supporters_query.filter(challenge_we_vote_id__iexact=challenge_we_vote_id)
+    participants_query = ChallengeParticipant.objects.all()
+    participants_query = participants_query.filter(challenge_we_vote_id=challenge_we_vote_id)
 
-    if positive_value_exists(only_show_supporters_with_endorsements):
-        supporters_query = supporters_query.exclude(
-            Q(supporter_endorsement__isnull=True) |
-            Q(supporter_endorsement__exact='')
+    if positive_value_exists(only_show_participants_with_endorsements):
+        participants_query = participants_query.exclude(
+            Q(participant_endorsement__isnull=True) |
+            Q(participant_endorsement__exact='')
         )
 
-    supporters_query = supporters_query.order_by('-date_supported')
+    participants_query = participants_query.order_by('-date_joined')
 
-    if positive_value_exists(show_supporters_not_visible_to_public):
+    if positive_value_exists(show_participants_not_visible_to_public):
         pass
     else:
         # Default to only show visible_to_public
-        supporters_query = supporters_query.filter(visible_to_public=True)
+        participants_query = participants_query.filter(visible_to_public=True)
 
     if positive_value_exists(challenge_search):
         search_words = challenge_search.split()
         for one_word in search_words:
             filters = []
-            new_filter = Q(supporter_name__icontains=one_word)
+            new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(supporter_endorsement__icontains=one_word)
+            new_filter = Q(participant_endorsement__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            new_filter = Q(voter_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -1731,84 +1704,84 @@ def challenge_supporters_list_process_view(request):
                 for item in filters:
                     final_filters |= item
 
-                supporters_query = supporters_query.filter(final_filters)
+                participants_query = participants_query.filter(final_filters)
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
-        supporters_list = supporters_query[:1000]
+        participants_list = participants_query[:1000]
     elif positive_value_exists(show_all):
-        supporters_list = supporters_query
+        participants_list = participants_query
     else:
-        supporters_list = supporters_query[:200]
+        participants_list = participants_query[:200]
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    # Create new ChallengeSupporter
-    if positive_value_exists(challenge_supporter_organization_we_vote_id) or \
-            positive_value_exists(challenge_supporter_voter_we_vote_id):
+    # Create new ChallengeParticipant
+    if positive_value_exists(challenge_participant_organization_we_vote_id) or \
+            positive_value_exists(challenge_participant_voter_we_vote_id):
         do_not_create = False
-        supporter_already_exists = False
+        participant_already_exists = False
         status = ""
         # Does it already exist?
         try:
-            if positive_value_exists(challenge_supporter_organization_we_vote_id):
-                ChallengeSupporter.objects.get(
+            if positive_value_exists(challenge_participant_organization_we_vote_id):
+                ChallengeParticipant.objects.get(
                     challenge_we_vote_id=challenge_we_vote_id,
-                    organization_we_vote_id=challenge_supporter_organization_we_vote_id)
-                supporter_already_exists = True
-            elif positive_value_exists(challenge_supporter_voter_we_vote_id):
-                ChallengeSupporter.objects.get(
+                    organization_we_vote_id=challenge_participant_organization_we_vote_id)
+                participant_already_exists = True
+            elif positive_value_exists(challenge_participant_voter_we_vote_id):
+                ChallengeParticipant.objects.get(
                     challenge_we_vote_id=challenge_we_vote_id,
-                    voter_we_vote_id=challenge_supporter_voter_we_vote_id)
-                supporter_already_exists = True
-        except ChallengeSupporter.DoesNotExist:
-            supporter_already_exists = False
+                    voter_we_vote_id=challenge_participant_voter_we_vote_id)
+                participant_already_exists = True
+        except ChallengeParticipant.DoesNotExist:
+            participant_already_exists = False
         except Exception as e:
             do_not_create = True
-            messages.add_message(request, messages.ERROR, 'ChallengeSupporter already exists.')
-            status += "ADD_CHALLENGE_SUPPORTER_ALREADY_EXISTS " + str(e) + " "
+            messages.add_message(request, messages.ERROR, 'ChallengeParticipant already exists.')
+            status += "ADD_CHALLENGE_PARTICIPANT_ALREADY_EXISTS " + str(e) + " "
 
-        if not do_not_create and not supporter_already_exists:
+        if not do_not_create and not participant_already_exists:
             organization_results = \
-                organization_manager.retrieve_organization_from_we_vote_id(challenge_supporter_organization_we_vote_id)
+                organization_manager.retrieve_organization_from_we_vote_id(challenge_participant_organization_we_vote_id)
             if organization_results['organization_found']:
-                supporter_name = organization_results['organization'].supporter_name
+                participant_name = organization_results['organization'].participant_name
                 we_vote_hosted_profile_image_url_medium = \
                     organization_results['organization'].we_vote_hosted_profile_image_url_medium
                 we_vote_hosted_profile_image_url_tiny = \
                     organization_results['organization'].we_vote_hosted_profile_image_url_tiny
             else:
-                supporter_name = ''
+                participant_name = ''
                 we_vote_hosted_profile_image_url_medium = ''
                 we_vote_hosted_profile_image_url_tiny = ''
             try:
-                # Create the ChallengeSupporter
-                ChallengeSupporter.objects.create(
+                # Create the ChallengeParticipant
+                ChallengeParticipant.objects.create(
                     challenge_we_vote_id=challenge_we_vote_id,
-                    supporter_name=supporter_name,
-                    organization_we_vote_id=challenge_supporter_organization_we_vote_id,
-                    supporter_endorsement=incoming_challenge_supporter_endorsement,
-                    voter_we_vote_id=challenge_supporter_voter_we_vote_id,
+                    participant_name=participant_name,
+                    organization_we_vote_id=challenge_participant_organization_we_vote_id,
+                    participant_endorsement=incoming_challenge_participant_endorsement,
+                    voter_we_vote_id=challenge_participant_voter_we_vote_id,
                     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                     visibility_blocked_by_we_vote=incoming_visibility_blocked_by_we_vote,
-                    visible_to_public=incoming_challenge_supporter_wants_visibility)
+                    visible_to_public=incoming_challenge_participant_wants_visibility)
 
-                messages.add_message(request, messages.INFO, 'New ChallengeSupporter created.')
+                messages.add_message(request, messages.INFO, 'New ChallengeParticipant created.')
             except Exception as e:
                 messages.add_message(request, messages.ERROR,
-                                     'Could not create ChallengeSupporter.'
+                                     'Could not create ChallengeParticipant.'
                                      ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
     # ##################################
-    # Deleting or editing a ChallengeSupporter
-    update_challenge_supporter_count = False
-    results = deleting_or_editing_challenge_supporter_list(
+    # Deleting or editing a ChallengeParticipant
+    update_challenge_participant_count = False
+    results = deleting_or_editing_challenge_participant_list(
         request=request,
-        supporters_list=supporters_list,
+        participants_list=participants_list,
     )
-    update_challenge_supporter_count = update_challenge_supporter_count or results['update_challenge_supporter_count']
+    update_challenge_participant_count = update_challenge_participant_count or results['update_challenge_participant_count']
     update_message = results['update_message']
     if positive_value_exists(update_message):
         messages.add_message(request, messages.INFO, update_message)
@@ -1818,37 +1791,31 @@ def challenge_supporters_list_process_view(request):
     info_message_to_print = ''
 
     # We update here only if we didn't save above
-    if update_challenge_supporter_count and positive_value_exists(challenge_we_vote_id):
+    if update_challenge_participant_count and positive_value_exists(challenge_we_vote_id):
         challenge_manager = ChallengeManager()
-        supporter_count = challenge_manager.fetch_challenge_supporter_count(challenge_we_vote_id)
+        participant_count = challenge_manager.fetch_challenge_participant_count(challenge_we_vote_id)
         results = challenge_manager.retrieve_challenge(
             challenge_we_vote_id=challenge_we_vote_id,
             read_only=False)
         if results['challenge_found']:
             challenge = results['challenge']
-            challenge.supporters_count = supporter_count
+            challenge.participants_count = participant_count
             challenge.save()
-
-    results = refresh_challenge_supporters_count_in_all_children(
-        request,
-        challenge_we_vote_id_list=challenge_we_vote_id_list_to_refresh)
-    if positive_value_exists(results['update_message']):
-        update_message += results['update_message']
 
     if positive_value_exists(error_message_to_print):
         messages.add_message(request, messages.ERROR, error_message_to_print)
     if positive_value_exists(info_message_to_print):
         messages.add_message(request, messages.INFO, info_message_to_print)
 
-    return HttpResponseRedirect(reverse('challenge:supporters_list', args=(challenge_we_vote_id,)) +
+    return HttpResponseRedirect(reverse('challenge:participants_list', args=(challenge_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&challenge_owner_organization_we_vote_id=" +
                                 str(challenge_owner_organization_we_vote_id) +
                                 "&challenge_search=" + str(challenge_search) +
                                 "&state_code=" + str(state_code) +
-                                "&only_show_supporters_with_endorsements=" +
-                                str(only_show_supporters_with_endorsements) +
-                                "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)
+                                "&only_show_participants_with_endorsements=" +
+                                str(only_show_participants_with_endorsements) +
+                                "&show_participants_not_visible_to_public=" + str(show_participants_not_visible_to_public)
                                 )
 
 
@@ -2297,8 +2264,8 @@ def challenge_not_duplicates_view(request):
         challenge1_we_vote_id, challenge2_we_vote_id)
     if results['success']:
         queryset = ChallengesArePossibleDuplicates.objects.filter(
-            challenge1_we_vote_id__iexact=challenge1_we_vote_id,
-            challenge2_we_vote_id__iexact=challenge2_we_vote_id,
+            challenge1_we_vote_id=challenge1_we_vote_id,
+            challenge2_we_vote_id=challenge2_we_vote_id,
         )
         queryset.delete()
         if positive_value_exists(voter_we_vote_id):
@@ -2321,89 +2288,89 @@ def challenge_not_duplicates_view(request):
                                 "?state_code=" + str(state_code))
 
 
-def deleting_or_editing_challenge_supporter_list(
+def deleting_or_editing_challenge_participant_list(
         request=None,
-        supporters_list=[]):
+        participants_list=[]):
     organization_dict_by_we_vote_id = {}
     organization_manager = OrganizationManager()
-    update_challenge_supporter_count = False
+    update_challenge_participant_count = False
     update_message = ''
     voter_manager = VoterManager()
-    for challenge_supporter in supporters_list:
-        if positive_value_exists(challenge_supporter.challenge_we_vote_id):
-            delete_variable_name = "delete_challenge_supporter_" + str(challenge_supporter.id)
-            delete_challenge_supporter = positive_value_exists(request.POST.get(delete_variable_name, False))
-            if positive_value_exists(delete_challenge_supporter):
-                challenge_supporter.delete()
-                update_challenge_supporter_count = True
-                update_message += 'Deleted ChallengeSupporter. '
+    for challenge_participant in participants_list:
+        if positive_value_exists(challenge_participant.challenge_we_vote_id):
+            delete_variable_name = "delete_challenge_participant_" + str(challenge_participant.id)
+            delete_challenge_participant = positive_value_exists(request.POST.get(delete_variable_name, False))
+            if positive_value_exists(delete_challenge_participant):
+                challenge_participant.delete()
+                update_challenge_participant_count = True
+                update_message += 'Deleted ChallengeParticipant. '
             else:
-                supporter_changed = False
+                participant_changed = False
                 data_exists_variable_name = \
-                    "challenge_supporter_" + str(challenge_supporter.id) + "_exists"
-                challenge_supporter_exists = request.POST.get(data_exists_variable_name, None)
+                    "challenge_participant_" + str(challenge_participant.id) + "_exists"
+                challenge_participant_exists = request.POST.get(data_exists_variable_name, None)
                 # Supporter Wants Visibility
-                visible_to_public_variable_name = "challenge_supporter_visible_to_public_" + str(challenge_supporter.id)
-                challenge_supporter_visible_to_public = \
+                visible_to_public_variable_name = "challenge_participant_visible_to_public_" + str(challenge_participant.id)
+                challenge_participant_visible_to_public = \
                     positive_value_exists(request.POST.get(visible_to_public_variable_name, False))
                 # Visibility Blocked by We Vote
                 blocked_by_we_vote_variable_name = \
-                    "challenge_supporter_visibility_blocked_by_we_vote_" + str(challenge_supporter.id)
-                challenge_supporter_visibility_blocked_by_we_vote = \
+                    "challenge_participant_visibility_blocked_by_we_vote_" + str(challenge_participant.id)
+                challenge_participant_visibility_blocked_by_we_vote = \
                     positive_value_exists(request.POST.get(blocked_by_we_vote_variable_name, False))
-                if challenge_supporter_exists is not None:
-                    challenge_supporter.visibility_blocked_by_we_vote = \
-                        challenge_supporter_visibility_blocked_by_we_vote
-                    challenge_supporter.visible_to_public = challenge_supporter_visible_to_public
-                    supporter_changed = True
+                if challenge_participant_exists is not None:
+                    challenge_participant.visibility_blocked_by_we_vote = \
+                        challenge_participant_visibility_blocked_by_we_vote
+                    challenge_participant.visible_to_public = challenge_participant_visible_to_public
+                    participant_changed = True
 
                 # Now refresh organization cached data
                 organization = None
                 organization_found = False
-                if challenge_supporter.organization_we_vote_id in organization_dict_by_we_vote_id:
-                    organization = organization_dict_by_we_vote_id[challenge_supporter.organization_we_vote_id]
+                if challenge_participant.organization_we_vote_id in organization_dict_by_we_vote_id:
+                    organization = organization_dict_by_we_vote_id[challenge_participant.organization_we_vote_id]
                     if hasattr(organization, 'we_vote_hosted_profile_image_url_medium'):
                         organization_found = True
                 else:
                     organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        challenge_supporter.organization_we_vote_id,
+                        challenge_participant.organization_we_vote_id,
                         read_only=True)
                     if organization_results['organization_found']:
                         organization = organization_results['organization']
-                        organization_dict_by_we_vote_id[challenge_supporter.organization_we_vote_id] = organization
+                        organization_dict_by_we_vote_id[challenge_participant.organization_we_vote_id] = organization
                         organization_found = True
                 if organization_found:
-                    supporter_name = organization.organization_name
-                    if positive_value_exists(supporter_name) and \
-                            challenge_supporter.supporter_name != supporter_name:
-                        challenge_supporter.supporter_name = supporter_name
-                        supporter_changed = True
+                    participant_name = organization.organization_name
+                    if positive_value_exists(participant_name) and \
+                            challenge_participant.participant_name != participant_name:
+                        challenge_participant.participant_name = participant_name
+                        participant_changed = True
                     we_vote_hosted_profile_image_url_medium = \
                         organization.we_vote_hosted_profile_image_url_medium
                     if positive_value_exists(we_vote_hosted_profile_image_url_medium) and \
-                            challenge_supporter.we_vote_hosted_profile_image_url_medium != \
+                            challenge_participant.we_vote_hosted_profile_image_url_medium != \
                             we_vote_hosted_profile_image_url_medium:
-                        challenge_supporter.we_vote_hosted_profile_image_url_medium = \
+                        challenge_participant.we_vote_hosted_profile_image_url_medium = \
                             we_vote_hosted_profile_image_url_medium
-                        supporter_changed = True
+                        participant_changed = True
                     we_vote_hosted_profile_image_url_tiny = organization.we_vote_hosted_profile_image_url_tiny
                     if positive_value_exists(we_vote_hosted_profile_image_url_tiny) and \
-                            challenge_supporter.we_vote_hosted_profile_image_url_tiny != \
+                            challenge_participant.we_vote_hosted_profile_image_url_tiny != \
                             we_vote_hosted_profile_image_url_tiny:
-                        challenge_supporter.we_vote_hosted_profile_image_url_tiny = \
+                        challenge_participant.we_vote_hosted_profile_image_url_tiny = \
                             we_vote_hosted_profile_image_url_tiny
-                        supporter_changed = True
-                if not positive_value_exists(challenge_supporter.voter_we_vote_id):
+                        participant_changed = True
+                if not positive_value_exists(challenge_participant.voter_we_vote_id):
                     voter_we_vote_id = voter_manager.fetch_voter_we_vote_id_by_linked_organization_we_vote_id(
-                        challenge_supporter.organization_we_vote_id)
+                        challenge_participant.organization_we_vote_id)
                     if positive_value_exists(voter_we_vote_id):
-                        challenge_supporter.voter_we_vote_id = voter_we_vote_id
-                        supporter_changed = True
-                if supporter_changed:
-                    challenge_supporter.save()
-                    update_message += 'Updated ChallengeSupporter. '
+                        challenge_participant.voter_we_vote_id = voter_we_vote_id
+                        participant_changed = True
+                if participant_changed:
+                    challenge_participant.save()
+                    update_message += 'Updated ChallengeParticipant. '
     results = {
-        'update_challenge_supporter_count': update_challenge_supporter_count,
+        'update_challenge_participant_count': update_challenge_participant_count,
         'update_message': update_message,
     }
     return results

@@ -268,7 +268,7 @@ def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
         return results
 
     voter_members_query = OrganizationMembershipLinkToVoter.objects.all()
-    voter_members_query = voter_members_query.filter(voter_we_vote_id__iexact=from_voter_we_vote_id)
+    voter_members_query = voter_members_query.filter(voter_we_vote_id=from_voter_we_vote_id)
     voter_members_list = list(voter_members_query)
     for voter_member_link in voter_members_list:
         try:
@@ -297,7 +297,7 @@ def delete_organization_membership_link_for_organization(from_organization_we_vo
 
     organization_members_query = OrganizationMembershipLinkToVoter.objects.all()
     organization_members_query = organization_members_query.filter(
-        organization_we_vote_id__iexact=from_organization_we_vote_id)
+        organization_we_vote_id=from_organization_we_vote_id)
     organization_members_list = list(organization_members_query)
     for organization_member_link in organization_members_list:
         try:
@@ -660,7 +660,7 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
     for election_participation in election_participation_list:
         link_query = OrganizationMembershipLinkToVoter.objects.all()
         link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
-        link_query = link_query.filter(voter_we_vote_id__iexact=election_participation.voter_we_vote_id)
+        link_query = link_query.filter(voter_we_vote_id=election_participation.voter_we_vote_id)
         link_list = list(link_query)
         if len(link_list) > 0:
             for external_voter in link_list:
@@ -1123,7 +1123,7 @@ def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_vote
 
     voter_members_query = OrganizationMembershipLinkToVoter.objects.all()
     voter_members_query = voter_members_query.filter(
-        voter_we_vote_id__iexact=from_voter_we_vote_id)
+        voter_we_vote_id=from_voter_we_vote_id)
     voter_members_list = list(voter_members_query)
     for voter_member_link in voter_members_list:
         try:
@@ -1357,7 +1357,7 @@ def move_organization_team_member_entries_to_another_organization(
     # Move based on organization_we_vote_id
     try:
         organization_team_member_entries_moved += OrganizationTeamMember.objects \
-            .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .filter(organization_we_vote_id=from_organization_we_vote_id) \
             .update(organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-ORG_TEAM_MEMBER_UPDATE_ORG-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -1412,7 +1412,7 @@ def move_organization_team_member_entries_to_another_voter(
     # Move based on voter_we_vote_id
     try:
         organization_team_member_entries_moved += OrganizationTeamMember.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-ORG_TEAM_MEMBER_VOTER_UPDATE: " + str(e) + " "
@@ -1423,7 +1423,7 @@ def move_organization_team_member_entries_to_another_voter(
         if positive_value_exists(to_organization_name):
             try:
                 organization_team_member_entries_moved += OrganizationTeamMember.objects \
-                    .filter(team_member_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                    .filter(team_member_organization_we_vote_id=from_organization_we_vote_id) \
                     .update(organization_name=to_organization_name,
                             team_member_organization_we_vote_id=to_organization_we_vote_id)
             except Exception as e:
@@ -1431,7 +1431,7 @@ def move_organization_team_member_entries_to_another_voter(
         else:
             try:
                 organization_team_member_entries_moved += OrganizationTeamMember.objects \
-                    .filter(team_member_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                    .filter(team_member_organization_we_vote_id=from_organization_we_vote_id) \
                     .update(team_member_organization_we_vote_id=to_organization_we_vote_id)
             except Exception as e:
                 status += "FAILED-ORG_TEAM_MEMBER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -1439,7 +1439,7 @@ def move_organization_team_member_entries_to_another_voter(
         # Move based on organization_we_vote_id
         try:
             organization_team_member_entries_moved += OrganizationTeamMember.objects \
-                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .filter(organization_we_vote_id=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-ORG_TEAM_MEMBER_UPDATE_ORG-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
@@ -1589,7 +1589,7 @@ def move_organization_membership_link_to_another_organization(from_organization_
 
     organization_members_query = OrganizationMembershipLinkToVoter.objects.all()
     organization_members_query = organization_members_query.filter(
-        organization_we_vote_id__iexact=from_organization_we_vote_id)
+        organization_we_vote_id=from_organization_we_vote_id)
     organization_members_list = list(organization_members_query)
     for organization_member_link in organization_members_list:
         try:

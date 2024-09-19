@@ -1268,7 +1268,7 @@ class PollingLocationManager(models.Manager):
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                polling_location_queryset = polling_location_queryset.filter(~Q(we_vote_id__iexact=
+                polling_location_queryset = polling_location_queryset.filter(~Q(we_vote_id=
                                                                                 we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values

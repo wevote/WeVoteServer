@@ -353,13 +353,13 @@ class SMSManager(models.Manager):
             if positive_value_exists(sms_phone_number_we_vote_id):
                 if positive_value_exists(voter_we_vote_id):
                     sms_phone_number = SMSPhoneNumber.objects.get(
-                        we_vote_id__iexact=sms_phone_number_we_vote_id,
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        we_vote_id=sms_phone_number_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                         deleted=False
                     )
                 else:
                     sms_phone_number = SMSPhoneNumber.objects.get(
-                        we_vote_id__iexact=sms_phone_number_we_vote_id,
+                        we_vote_id=sms_phone_number_we_vote_id,
                         deleted=False
                     )
                 sms_phone_number_id = sms_phone_number.id
@@ -372,7 +372,7 @@ class SMSManager(models.Manager):
                 if positive_value_exists(voter_we_vote_id):
                     sms_phone_number_queryset = sms_phone_number_queryset.filter(
                         normalized_sms_phone_number__iexact=normalized_sms_phone_number,
-                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                         deleted=False
                     )
                 else:
@@ -588,7 +588,7 @@ class SMSManager(models.Manager):
         try:
             sms_phone_number_queryset = SMSPhoneNumber.objects.all()
             sms_phone_number_queryset = sms_phone_number_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id,
                 deleted=False
             )
             sms_phone_number_queryset = sms_phone_number_queryset.order_by('-id')  # Put most recent sms at top of list
@@ -636,7 +636,7 @@ class SMSManager(models.Manager):
             if positive_value_exists(voter_we_vote_id):
                 sms_phone_number_queryset = SMSPhoneNumber.objects.all()
                 sms_phone_number_queryset = sms_phone_number_queryset.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     sms_ownership_is_verified=True,
                     deleted=False
                 )
@@ -654,7 +654,7 @@ class SMSManager(models.Manager):
             elif positive_value_exists(sms_we_vote_id):
                 sms_phone_number_queryset = SMSPhoneNumber.objects.all()
                 sms_phone_number_queryset = sms_phone_number_queryset.filter(
-                    we_vote_id__iexact=sms_we_vote_id,
+                    we_vote_id=sms_we_vote_id,
                     sms_ownership_is_verified=True,
                     deleted=False
                 )

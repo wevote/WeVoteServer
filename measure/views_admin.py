@@ -474,7 +474,7 @@ def measure_list_view(request):
                 new_filter = Q(state_code__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(measure_title__icontains=one_word)
@@ -827,7 +827,7 @@ def measure_summary_view(request, measure_id):
     if positive_value_exists(measure_search) and positive_value_exists(measure_we_vote_id):
         measure_queryset = ContestMeasure.objects.all()
         measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
-        measure_queryset = measure_queryset.exclude(we_vote_id__iexact=measure_we_vote_id)
+        measure_queryset = measure_queryset.exclude(we_vote_id=measure_we_vote_id)
 
         if positive_value_exists(state_code):
             measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
@@ -838,7 +838,7 @@ def measure_summary_view(request, measure_id):
             new_filter = Q(measure_title__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(ballotpedia_measure_name__icontains=one_word)
@@ -882,7 +882,7 @@ def measure_summary_view(request, measure_id):
         try:
             measure_position_query = PositionEntered.objects.order_by('stance')
             measure_position_query = measure_position_query.filter(
-                contest_measure_we_vote_id__iexact=measure_on_stage.we_vote_id)
+                contest_measure_we_vote_id=measure_on_stage.we_vote_id)
             # if positive_value_exists(google_civic_election_id):
             #     measure_position_query = measure_position_query.filter(
             #         google_civic_election_id=google_civic_election_id)

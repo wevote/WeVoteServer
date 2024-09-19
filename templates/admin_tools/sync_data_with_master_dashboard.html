@@ -7,17 +7,20 @@
 {% load template_filters %}
 
 <h1>Fast Load Data From We Vote Master Servers</h1>
-    <div style="padding: 25px 25px 75px 25px; font-size: 18px">
+    <div style="padding: 25px 25px 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and in about
         fifty-two minutes (on a fast Mac), it will have loaded and stored all the election data we have for all elections and for all the states.
         <br>
 
         <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
         <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
-        <div style="padding-left: 15%; padding-top: 30px; padding-bottom: 30px">
-            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
+        <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
+            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
             <progress id="progress" value="0" max="100" style="display: none"></progress>
-            <span id="completion"></span>
+            <div id="current_table"></div>
+            <div id="current_status"></div>
+            <div id="total_time"></div>
+            <div id="completion"></div>
         </div>
         If you want to update to current election data, and don't care about overwriting your existing election data,
         "FAST LOAD" is all you need.  The Python logging screen shows progress as the tables are loaded.
@@ -300,17 +303,16 @@
         const t1 = new Date().getTime();
         const dt = t1 - t0;
         const percentComplete = current_record / total_records;
-        console.log('percent complete: ', percentComplete);
+        {#console.log('percent complete: ', percentComplete);#}
         const totalEstimate = dt / percentComplete;
-        console.log('totalEstimate: ', totalEstimate);
+        {#console.log('totalEstimate: ', totalEstimate);#}
         const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
         const timeLeftMin = Math.trunc(timeLeftSec / 60);
-        const timeElapsedMin = Math.trunc(dt/60000)
-        const secRemainder = timeLeftSec - (60 * timeLeftMin)
-        const sStr = timeElapsedMin !== 1 ? 's' : ''
-        stat = `Estimated completion in ${timeLeftMin} min ${secRemainder} sec, elapsed ${timeElapsedMin} minute${sStr}`
-        console.log(stat);
-        return stat;
+        const secRemainder = timeLeftSec - (60 * timeLeftMin);
+        const timeElapsedMin = dt/60000;
+        let stat = `${timeLeftMin} min ${secRemainder} sec`
+        let elapsed = `${timeElapsedMin.toFixed(1)} minutes`
+        return [stat, elapsed];
     }
 
     $(function() {
@@ -336,6 +338,9 @@
     const fastLoadButton = $("#fastLoadButton");
     const progress = $("#progress");
     const completion = $("#completion");
+    const current_status = $("#current_status");
+    const current_table = $("#current_table");
+    const total_time = $("#total_time");
     const startedFastUpdate = $('#started_fast_update');
     const fastInit = $('#started_fast_init');
     const currentDate = new Date();
@@ -345,7 +350,7 @@
     let counter = 0;
     setInterval(function () {
       {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
-      let origin = 'https://api.wevoteusa.org'
+      let origin = 'https://api.wevoteusa.org';
       let apiURL = origin + '/pl/import_status/';
       let startedOriginalElement = document.getElementById('started_original_update');
       let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
@@ -387,14 +392,19 @@
                               saveOffDBComplete = true;
                               progress.val(prog);  // Reset the progress bar after saving off completes
                           }
-                          const current = data.current_record.toLocaleString();
-                          const total = data.total_records.toLocaleString();
-                          newHtml = `.... loading table: '${data.table_name}', record ${current} of ${total} records`;
-                          prog = Math.trunc(((data.current_record / data.total_records) * 100) - 1.5);
+                          newHtml = `.... loading tables`;
+                          prog = ((data.current_record / data.total_records) * 100);
                       }
                       // console.log('progress ======= ', prog);
                       progress.val(prog);
-                      completion.text(getEstimatedCompletionTime(t0, data.current_record, data.total_records));
+                      let current = data.current_record.toLocaleString() || 0;
+                      let total = data.total_records.toLocaleString() || 0;
+                      let table_name = data.table_name || "";
+                      current_table.text(`Current table: ${table_name}`);
+                      current_status.text(`Processing: ${current} of ${total} records\n`);
+                      let [stat, elapsed] = getEstimatedCompletionTime(t0, data.current_record, data.total_records);
+                      completion.text(`Estimated time remaining: ${stat}`);
+                      total_time.text(`Elapsed time: ${elapsed}`);
                       fastLoadButton.html(newHtml);
 
                   }
@@ -411,11 +421,10 @@
       startedFastUpdate.val("true");
 
       if (!fastLoadButton.html().includes('.....')) {
-        progress.css({'display': 'block', 'font-size': '38px'}).val(0);
+        progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(0);
         fastLoadButton.html("... Loading all data from the master server, this takes about 20 to 40 minutes ...").css('background-color', '#FFFF00');
 
         let origin = new URL('{{request.build_absolute_uri}}').origin;
-
         const apiURL = origin + '/retrieve_tables/import/files/?';
         $.ajax({
           type: "GET",

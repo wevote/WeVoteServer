@@ -317,7 +317,7 @@ class DonationManager(models.Manager):
         if positive_value_exists(voter_we_vote_id):
             try:
                 stripe_customer_id_queryset = DonateLinkToVoter.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id).values()
+                    voter_we_vote_id=voter_we_vote_id).values()
                 stripe_customer_id = stripe_customer_id_queryset[0]['stripe_customer_id']
                 if positive_value_exists(stripe_customer_id):
                     success = True
@@ -884,7 +884,7 @@ class DonationManager(models.Manager):
 
         try:
             donation_queryset = DonationJournal.objects.all().order_by('-created')
-            donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            donation_queryset = donation_queryset.filter(voter_we_vote_id=voter_we_vote_id)
             donation_journal_list = list(donation_queryset)
 
             if len(donation_journal_list):
@@ -927,9 +927,9 @@ class DonationManager(models.Manager):
         try:
             donation_queryset = DonationPlanDefinition.objects.all().order_by('-id')
             if positive_value_exists(voter_we_vote_id):
-                donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                donation_queryset = donation_queryset.filter(voter_we_vote_id=voter_we_vote_id)
             elif positive_value_exists(organization_we_vote_id):
-                donation_queryset = donation_queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                donation_queryset = donation_queryset.filter(organization_we_vote_id=organization_we_vote_id)
             donation_queryset = donation_queryset.filter(is_organization_plan=is_organization_plan)
             if positive_value_exists(plan_type_enum):
                 donation_queryset = donation_queryset.filter(plan_type_enum__iexact=plan_type_enum)
@@ -977,9 +977,9 @@ class DonationManager(models.Manager):
         try:
             donation_queryset = DonationPlanDefinition.objects.all().order_by('-id')
             if positive_value_exists(voter_we_vote_id):
-                donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                donation_queryset = donation_queryset.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(organization_we_vote_id):
-                donation_queryset = donation_queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                donation_queryset = donation_queryset.filter(organization_we_vote_id=organization_we_vote_id)
             donation_plan_definition_list = list(donation_queryset)
 
             if len(donation_plan_definition_list):
@@ -1222,7 +1222,7 @@ class DonationManager(models.Manager):
             voter_manager = VoterManager()
             org_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
-            rows = DonationPlanDefinition.objects.get(organization_we_vote_id__iexact=org_we_vote_id,
+            rows = DonationPlanDefinition.objects.get(organization_we_vote_id=org_we_vote_id,
                                                       is_organization_plan=True,
                                                       donation_plan_is_active=True)
             if len(rows):
@@ -1255,7 +1255,7 @@ class DonationManager(models.Manager):
 
         try:
             donate_link_query = DonateLinkToVoter.objects.all()
-            donate_link_query = donate_link_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            donate_link_query = donate_link_query.filter(voter_we_vote_id=voter_we_vote_id)
             donate_link_list = list(donate_link_query)
             status += "move_donate_link_to_voter_from_voter_to_voter LIST_RETRIEVED-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " LENGTH: " + str(len(donate_link_list)) + " "
@@ -1304,7 +1304,7 @@ class DonationManager(models.Manager):
 
         try:
             donation_journal_query = DonationJournal.objects.all()
-            donation_journal_query = donation_journal_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            donation_journal_query = donation_journal_query.filter(voter_we_vote_id=voter_we_vote_id)
             donation_journal_list = list(donation_journal_query)
             status += "move_donation_journal_entries_from_voter_to_voter LIST_RETRIEVED-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
@@ -1355,7 +1355,7 @@ class DonationManager(models.Manager):
         try:
             donation_plan_definition_query = DonationPlanDefinition.objects.all()
             donation_plan_definition_query = donation_plan_definition_query.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id=voter_we_vote_id)
             donation_plan_definition_list = list(donation_plan_definition_query)
             status += "move_donation_plan_definition_entries_from_voter_to_voter LIST_RETRIEVED-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + \
@@ -1406,7 +1406,7 @@ class DonationManager(models.Manager):
         try:
             donation_journal_query = DonationJournal.objects.all()
             donation_journal_query = donation_journal_query.filter(
-                organization_we_vote_id__iexact=from_organization_we_vote_id)
+                organization_we_vote_id=from_organization_we_vote_id)
             donation_journal_list = list(donation_journal_query)
             status += "move_donation_journal_entries_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id +  \
@@ -1457,7 +1457,7 @@ class DonationManager(models.Manager):
         try:
             donation_plan_definition_query = DonationPlanDefinition.objects.all()
             donation_plan_definition_query = donation_plan_definition_query.filter(
-                organization_we_vote_id__iexact=from_organization_we_vote_id)
+                organization_we_vote_id=from_organization_we_vote_id)
             donation_plan_definition_list = list(donation_plan_definition_query)
             status += "move_donation_plan_definition_entries_from_organization_to_organization LIST_RETRIEVED-" + \
                       from_organization_we_vote_id + "-TO-" + to_organization_we_vote_id + \
@@ -1562,7 +1562,7 @@ class DonationManager(models.Manager):
     @staticmethod
     def update_journal_entry_for_refund(charge, voter_we_vote_id, refund):
         if refund and refund['amount'] > 0 and refund['status'] == "succeeded":
-            row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
+            row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id=voter_we_vote_id)
             row.status = textwrap.shorten(row.status + " CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) +
                                           "_" + refund['currency'] + "_" + str(refund['amount']) + "_REFUND_ID" +
                                           refund['id'] + " ", width=255, placeholder="...")
@@ -1579,7 +1579,7 @@ class DonationManager(models.Manager):
 
     @staticmethod
     def update_journal_entry_for_already_refunded(charge, voter_we_vote_id):
-        row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
+        row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id=voter_we_vote_id)
         row.status = textwrap.shorten(row.status + "CHARGE_WAS_ALREADY_REFUNDED_" + str(datetime.utcnow()) + " ",
                                       width=255, placeholder="...")
         row.amount_refunded = row.amount
@@ -1690,8 +1690,8 @@ class DonationManager(models.Manager):
         try:
             # Then find the SUBSCRIPTION_SETUP_AND_INITIAL in the DonationJournal row that matches this charge.succeeded
             queryset = DonationJournal.objects.all().order_by('-id')
-            journal_rows = queryset.filter(voter_we_vote_id__iexact=voter_we_vote_id,
-                                   organization_we_vote_id__iexact=organization_we_vote_id,
+            journal_rows = queryset.filter(voter_we_vote_id=voter_we_vote_id,
+                                   organization_we_vote_id=organization_we_vote_id,
                                    amount=amount,
                                    record_enum__iexact="SUBSCRIPTION_SETUP_AND_INITIAL")
 

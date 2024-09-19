@@ -39,11 +39,11 @@ def move_candidate_change_log_entries_to_another_voter(from_voter_we_vote_id, to
     # Migrations
     try:
         entries_moved += CandidateChangeLog.objects\
-            .filter(changed_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(changed_by_voter_we_vote_id=from_voter_we_vote_id)\
             .update(changed_by_voter_we_vote_id=to_voter_we_vote_id)
 
         entries_deleted = \
-            CandidateChangeLog.objects.filter(changed_by_voter_we_vote_id__iexact=from_voter_we_vote_id).delete()
+            CandidateChangeLog.objects.filter(changed_by_voter_we_vote_id=from_voter_we_vote_id).delete()
         status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-CANDIDATE_CHANGE_LOG_UPDATE: " + str(e) + " "
@@ -92,11 +92,11 @@ def move_voter_change_log_entries_to_another_voter(from_voter_we_vote_id, to_vot
     # Migrations
     try:
         entries_moved += VoterChangeLog.objects\
-            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .filter(voter_we_vote_id=from_voter_we_vote_id)\
             .update(voter_we_vote_id=to_voter_we_vote_id)
 
         entries_deleted = \
-            VoterChangeLog.objects.filter(voter_we_vote_id__iexact=from_voter_we_vote_id).delete()
+            VoterChangeLog.objects.filter(voter_we_vote_id=from_voter_we_vote_id).delete()
         status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-VOTER_CHANGE_LOG_UPDATE: " + str(e) + " "

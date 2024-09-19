@@ -460,8 +460,30 @@
         </select>
         <input type="submit" value="Go" />
     </div>
-    <h3>{{ organization_num_positions }} Position{{ organization_num_positions|pluralize }}{% if show_all_elections %} in All Elections{% else %} in Upcoming Elections{% endif %}</h3>
+    <h3>{{ organization_num_positions }} Position{{ organization_num_positions|pluralize }}
+        {% for key, state in state_list %}
+            {% if key == state_code %}
+                in {{ state }}
+            {% endif %}
+        {% endfor %} 
+        {% if show_all_elections %} in All Elections{% else %} in Upcoming Elections{% endif %}</h3>
     {# Default to showing only upcoming elections #}
+    {% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+        {% if '' == state_code %}
+            -- Filter by State Served --
+        {% else %}
+            -- Show All States Served --
+        {% endif %}
+        </option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+{% endif %}{# End of if state_list #}
     <label for="show_all_elections_id">
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
@@ -473,6 +495,7 @@
     <tr>
         <th></th>
         <th>Candidate/Measure</th>
+        <th>State</th>
         <th>Visibility?</th>
         <th>Stance</th>
         <th>Election</th>
@@ -494,10 +517,13 @@
                 (missing ballot_item_display_name)
             {% endif %}
             </a>
-            {% if organization_position.state_code %}
-            <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>
-            {% endif %}
+{#            {% if organization_position.state_code %}#}
+{#            <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>#}
+{#            {% endif %}#}
         <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
+        </td>
+        <td>
+            {{ organization_position.state_code|default_if_none:"" }}
         </td>
         <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
         <td>
@@ -524,6 +550,12 @@
     {% endfor %}
 
     </table>
+{% endif %}
+
+
+{% if not organization_position_list %}
+    {# The following is shown if there is no candidate list #}
+    <p>(no candidates found)</p>
 {% endif %}
 </form>
 
@@ -588,6 +620,11 @@
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#state_code_id').change(function() {
             this.form.submit();
         });
     });

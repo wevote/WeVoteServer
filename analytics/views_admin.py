@@ -801,7 +801,7 @@ def organization_analytics_index_view(request):
         organization_election_metrics_query = OrganizationElectionMetrics.objects.using('readonly').all()  # 'analytics'
         organization_election_metrics_query = organization_election_metrics_query.order_by('-election_day_text')
         organization_election_metrics_query = \
-            organization_election_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            organization_election_metrics_query.filter(organization_we_vote_id=organization_we_vote_id)
         organization_election_metrics_query = organization_election_metrics_query[:3]
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
@@ -813,7 +813,7 @@ def organization_analytics_index_view(request):
         organization_daily_metrics_query = OrganizationDailyMetrics.objects.using('readonly').all()  # 'analytics'
         organization_daily_metrics_query = organization_daily_metrics_query.order_by('-date_as_integer')
         organization_daily_metrics_query = \
-            organization_daily_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            organization_daily_metrics_query.filter(organization_we_vote_id=organization_we_vote_id)
         organization_daily_metrics_query = organization_daily_metrics_query[:3]
         organization_daily_metrics_list = list(organization_daily_metrics_query)
     except OrganizationDailyMetrics.DoesNotExist:
@@ -911,12 +911,12 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
             analytics_action_query = analytics_action_query.filter(
                 date_as_integer__lte=through_date_as_integer)
         if positive_value_exists(voter_we_vote_id):
-            analytics_action_query = analytics_action_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            analytics_action_query = analytics_action_query.filter(voter_we_vote_id=voter_we_vote_id)
         if positive_value_exists(google_civic_election_id):
             analytics_action_query = analytics_action_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(organization_we_vote_id):
             analytics_action_query = analytics_action_query.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
+                organization_we_vote_id=organization_we_vote_id)
 
         if positive_value_exists(analytics_action_search):
             search_words = analytics_action_search.split()
@@ -930,7 +930,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
                     new_filter = Q(action_constant=action_constant_integer)
                     filters.append(new_filter)
 
-                new_filter = Q(ballot_item_we_vote_id__iexact=one_word)
+                new_filter = Q(ballot_item_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 if positive_value_exists(one_word_integer):
@@ -945,13 +945,13 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
                     new_filter = Q(id=one_word_integer)
                     filters.append(new_filter)
 
-                new_filter = Q(organization_we_vote_id__iexact=one_word)
+                new_filter = Q(organization_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(state_code__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                new_filter = Q(voter_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -1106,7 +1106,7 @@ def organization_daily_metrics_view(request):
         organization_daily_metrics_query = OrganizationDailyMetrics.objects.using('analytics').\
             order_by('-date_as_integer')
         organization_daily_metrics_query = organization_daily_metrics_query.filter(
-            organization_we_vote_id__iexact=organization_we_vote_id)
+            organization_we_vote_id=organization_we_vote_id)
         organization_daily_metrics_list = list(organization_daily_metrics_query)
     except OrganizationDailyMetrics.DoesNotExist:
         # This is fine
@@ -1184,7 +1184,7 @@ def organization_election_metrics_view(request):
                 organization_election_metrics_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(organization_we_vote_id):
             organization_election_metrics_query = \
-                organization_election_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+                organization_election_metrics_query.filter(organization_we_vote_id=organization_we_vote_id)
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
         # This is fine

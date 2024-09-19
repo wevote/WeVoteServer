@@ -337,10 +337,10 @@ class BookmarkItemList(models.Model):
                     candidate_we_vote_id=candidate_we_vote_id)
             if positive_value_exists(contest_measure_we_vote_id):
                 bookmark_item_list = bookmark_item_list.filter(
-                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                    contest_measure_we_vote_id=contest_measure_we_vote_id)
             if positive_value_exists(contest_office_we_vote_id):
                 bookmark_item_list = bookmark_item_list.filter(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+                    contest_office_we_vote_id=contest_office_we_vote_id)
             if len(bookmark_item_list):
                 bookmark_item_list_found = True
         except Exception as e:

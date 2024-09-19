@@ -103,7 +103,7 @@ def office_held_list_view(request):
                 new_filter = Q(state_code__iexact=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__iexact=one_word)
+                new_filter = Q(we_vote_id=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -826,10 +826,10 @@ def offices_held_for_location_list_view(request):
             search_words = location_search.split()
             filters = []  # Reset for each search word
             for one_word in search_words:
-                new_filter = Q(polling_location_we_vote_id__iexact=one_word)
+                new_filter = Q(polling_location_we_vote_id=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                new_filter = Q(voter_we_vote_id=one_word)
                 filters.append(new_filter)
 
                 count = 1

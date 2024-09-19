@@ -807,7 +807,7 @@ def move_representatives_to_another_politician(
     if positive_value_exists(from_politician_we_vote_id):
         try:
             representatives_entries_moved += Representative.objects \
-                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .filter(politician_we_vote_id=from_politician_we_vote_id) \
                 .update(politician_id=to_politician_id,
                         politician_we_vote_id=to_politician_we_vote_id)
         except Exception as e:

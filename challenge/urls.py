@@ -31,8 +31,8 @@ urlpatterns = [
     re_path(r'^merge/$', views_admin.challenge_merge_process_view, name='challenge_merge_process'),
     re_path(r'^(?P<challenge_we_vote_id>wv[\w]{2}chal[\w]+)/summary$',
         views_admin.challenge_summary_view, name='challenge_summary'),
-    re_path(r'^(?P<challenge_we_vote_id>wv[\w]{2}chal[\w]+)/supporters$',
-        views_admin.challenge_supporters_list_view, name='supporters_list'),
-    re_path(r'^supporters_list_process/$', views_admin.challenge_supporters_list_process_view,
-            name='supporters_list_process'),
+    re_path(r'^(?P<challenge_we_vote_id>wv[\w]{2}chal[\w]+)/participants$',
+        views_admin.challenge_participants_list_view, name='participants_list'),
+    re_path(r'^participants_list_process/$', views_admin.challenge_participants_list_process_view,
+            name='participants_list_process'),
 ]

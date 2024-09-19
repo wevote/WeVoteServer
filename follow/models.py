@@ -173,15 +173,15 @@ class FollowCampaignXManager(models.Manager):
                 status = 'FOLLOW_ISSUE_FOUND_WITH_ID'
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
                 follow_campaignx_on_stage = FollowIssue.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     issue_id=issue_id)
                 follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
                 success = True
                 status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_ID'
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 follow_campaignx_on_stage = FollowIssue.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    issue_we_vote_id__iexact=issue_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id)
                 follow_campaignx_on_stage_id = follow_campaignx_on_stage.id
                 success = True
                 status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
@@ -242,7 +242,7 @@ class FollowCampaignXManager(models.Manager):
                 status += 'FOLLOW_ISSUE_DELETED_BY_ID '
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
                 follow_campaignx_query = FollowIssue.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     issue_id=issue_id)
                 follow_campaignx_list = list(follow_campaignx_query)
                 for one_follow_campaignx in follow_campaignx_list:
@@ -252,8 +252,8 @@ class FollowCampaignXManager(models.Manager):
                 status += 'FOLLOW_ISSUE_DELETED_BY_VOTER_WE_VOTE_ID_AND_ISSUE_ID '
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 follow_campaignx_query = FollowIssue.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    issue_we_vote_id__iexact=issue_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id)
                 follow_campaignx_list = list(follow_campaignx_query)
                 for one_follow_campaignx in follow_campaignx_list:
                     one_follow_campaignx.delete()
@@ -453,15 +453,15 @@ class FollowIssueManager(models.Manager):
                 status = 'FOLLOW_ISSUE_FOUND_WITH_ID'
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
                 follow_issue_on_stage = FollowIssue.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     issue_id=issue_id)
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 success = True
                 status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_ID'
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 follow_issue_on_stage = FollowIssue.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    issue_we_vote_id__iexact=issue_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id)
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 success = True
                 status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
@@ -522,7 +522,7 @@ class FollowIssueManager(models.Manager):
                 status += 'FOLLOW_ISSUE_DELETED_BY_ID '
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
                 follow_issue_query = FollowIssue.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
                     issue_id=issue_id)
                 follow_issue_list = list(follow_issue_query)
                 for one_follow_issue in follow_issue_list:
@@ -532,8 +532,8 @@ class FollowIssueManager(models.Manager):
                 status += 'FOLLOW_ISSUE_DELETED_BY_VOTER_WE_VOTE_ID_AND_ISSUE_ID '
             elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 follow_issue_query = FollowIssue.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    issue_we_vote_id__iexact=issue_we_vote_id)
+                    voter_we_vote_id=voter_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id)
                 follow_issue_list = list(follow_issue_query)
                 for one_follow_issue in follow_issue_list:
                     one_follow_issue.delete()
@@ -607,7 +607,7 @@ class FollowIssueManager(models.Manager):
         try:
             suggested_issue_to_follow_queryset = SuggestedIssueToFollow.objects.all()
             suggested_issue_to_follow_list = suggested_issue_to_follow_queryset.filter(
-                viewer_voter_we_vote_id__iexact=viewer_voter_we_vote_id,
+                viewer_voter_we_vote_id=viewer_voter_we_vote_id,
                 from_twitter=from_twitter)
             if len(suggested_issue_to_follow_list):
                 success = True
@@ -646,7 +646,7 @@ class FollowMetricsManager(models.Manager):
         count_result = None
         try:
             count_query = FollowOrganization.objects.using('readonly').all()
-            count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
             # count_query = count_query.values("voter_id").distinct()
             count_query = count_query.values("organization_we_vote_id_that_is_following").distinct()
@@ -685,7 +685,7 @@ class FollowMetricsManager(models.Manager):
         try:
             count_query = FollowIssue.objects.using('readonly').all()
             if positive_value_exists(voter_we_vote_id):
-                count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                count_query = count_query.filter(voter_we_vote_id=voter_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
             if positive_value_exists(limit_to_one_date_as_integer):
                 date_as_string = "{date}".format(date=limit_to_one_date_as_integer)
@@ -727,7 +727,7 @@ class FollowIssueList(models.Model):
         follow_issue_list_length = 0
         try:
             follow_issue_list_query = FollowIssue.objects.using('readonly').all()
-            follow_issue_list_query = follow_issue_list_query.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(issue_we_vote_id=issue_we_vote_id)
             follow_issue_list_query = follow_issue_list_query.filter(following_status=FOLLOWING)
             follow_issue_list_length = follow_issue_list_query.count()
 
@@ -743,7 +743,7 @@ class FollowIssueList(models.Model):
         follow_issue_list_length = 0
         try:
             follow_issue_list_query = FollowIssue.objects.using('readonly').all()
-            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id=voter_we_vote_id)
             follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
             follow_issue_list_length = follow_issue_list_query.count()
 
@@ -773,7 +773,7 @@ class FollowIssueList(models.Model):
                 follow_issue_list_query = FollowIssue.objects.using('readonly').all()
             else:
                 follow_issue_list_query = FollowIssue.objects.all()
-            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list = follow_issue_list_query.filter(following_status=following_status)
             if len(follow_issue_list):
@@ -798,7 +798,7 @@ class FollowIssueList(models.Model):
 
         try:
             follow_issue_list_query = FollowIssue.objects.using('readonly').all()
-            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
             follow_issue_list_query = follow_issue_list_query.values("issue_we_vote_id").distinct()
@@ -851,7 +851,7 @@ class FollowIssueList(models.Model):
             if positive_value_exists(issue_id):
                 follow_issue_list = follow_issue_list.filter(issue_id=issue_id)
             else:
-                follow_issue_list = follow_issue_list.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+                follow_issue_list = follow_issue_list.filter(issue_we_vote_id=issue_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list = follow_issue_list.filter(following_status=following_status)
             if len(follow_issue_list):
@@ -1328,7 +1328,7 @@ class FollowOrganizationManager(models.Manager):
         try:
             suggested_organization_to_follow_queryset = SuggestedOrganizationToFollow.objects.all()
             suggested_organization_to_follow_list = suggested_organization_to_follow_queryset.filter(
-                viewer_voter_we_vote_id__iexact=viewer_voter_we_vote_id,
+                viewer_voter_we_vote_id=viewer_voter_we_vote_id,
                 from_twitter=from_twitter)
             if len(suggested_organization_to_follow_list):
                 success = True

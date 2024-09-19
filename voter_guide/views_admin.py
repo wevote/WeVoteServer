@@ -1678,7 +1678,7 @@ def voter_guide_list_view(request):
         for one_word in search_words:
             filters = []
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(display_name__icontains=one_word)
@@ -1687,13 +1687,13 @@ def voter_guide_list_view(request):
             new_filter = Q(google_civic_election_id__iexact=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            new_filter = Q(organization_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(owner_we_vote_id__iexact=one_word)
+            new_filter = Q(owner_we_vote_id=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(public_figure_we_vote_id__iexact=one_word)
+            new_filter = Q(public_figure_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(state_code__icontains=one_word)

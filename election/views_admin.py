@@ -394,7 +394,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     if positive_value_exists(polling_location_we_vote_id):
         try:
             polling_location = PollingLocation.objects.get(
-                we_vote_id__iexact=polling_location_we_vote_id)
+                we_vote_id=polling_location_we_vote_id)
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Could not retrieve ballot data for this map point for {election_name}, '

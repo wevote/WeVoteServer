@@ -425,7 +425,7 @@
 {#                {% endif %}#}
 
             <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ one_state_code }}" target="_blank">
-                <span style="{% if election.data_getting_stale %}color: red{% endif %}">
+                <span style="{% if one_state_dict.data_getting_stale %}color: red{% endif %}">
                     {% if one_state_dict.refresh_date_completed %}
                         {{ one_state_dict.refresh_date_completed }}
                     {% elif one_state_dict.retrieve_date_completed %}
@@ -439,7 +439,7 @@
                 {% if one_state_dict.refresh_date_completed >= one_state_dict.refresh_date_started %}
 {#                    Show nothing#}
                 {% elif one_state_dict.refresh_date_started %}
-                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                    <span style="{% if not one_state_dict.data_getting_stale %}color: lightgray{% endif %}">
                         refresh start: {{ one_state_dict.refresh_date_started }}
                     </span>
                 {% elif one_state_dict.refresh_date_added_to_queue %}
@@ -450,7 +450,7 @@
                 {% if one_state_dict.retrieve_date_completed >= one_state_dict.retrieve_date_started %}
 {#                    Show nothing#}
                 {% elif one_state_dict.retrieve_date_started %}
-                    <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                    <span style="{% if not one_state_dict.data_getting_stale %}color: lightgray{% endif %}">
                         retrieve start: {{ one_state_dict.retrieve_date_started }}
                     </span>
                 {% elif one_state_dict.retrieve_date_added_to_queue %}

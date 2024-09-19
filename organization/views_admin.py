@@ -557,13 +557,13 @@ def organization_list_view(request):
             new_filter = Q(organization_website__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(politician_we_vote_id__iexact=one_word)
+            new_filter = Q(politician_we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(twitter_description__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(vote_smart_id__icontains=one_word)
@@ -1023,7 +1023,7 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
     else:
@@ -2107,6 +2107,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     # POST
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+    state_code = request.POST.get('state_code', '')
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
 
     # Bulk delete
     select_for_changing_position_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -2171,7 +2174,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         if positive_value_exists(organization_id):
             organization_query = Organization.objects.using('readonly').filter(id=organization_id)
         else:
-            organization_query = Organization.objects.using('readonly').filter(we_vote_id__iexact=organization_we_vote_id)
+            organization_query = Organization.objects.using('readonly').filter(we_vote_id=organization_we_vote_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
@@ -2217,6 +2220,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
+        if positive_value_exists(state_code):
+            public_position_query = public_position_query.filter(state_code__iexact=state_code)
         if positive_value_exists(show_all_elections):
             # Don't limit to positions for upcoming elections
             pass
@@ -2234,6 +2239,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             # As of Aug 2018 we are no longer using PERCENT_RATING
             friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
+            if positive_value_exists(state_code):
+                friends_only_position_query = friends_only_position_query.filter(state_code__iexact=state_code)
             if positive_value_exists(show_all_elections):
                 # Don't limit to positions for upcoming elections
                 pass
@@ -2300,7 +2307,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_search_results_list = []
     if positive_value_exists(organization_search_for_merge) and positive_value_exists(organization_we_vote_id):
         organization_query = Organization.objects.using('readonly').all()
-        organization_query = organization_query.exclude(we_vote_id__iexact=organization_we_vote_id)
+        organization_query = organization_query.exclude(we_vote_id=organization_we_vote_id)
 
         search_words = organization_search_for_merge.split()
         for one_word in search_words:
@@ -2308,7 +2315,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             new_filter = Q(organization_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__iexact=one_word)
+            new_filter = Q(we_vote_id=one_word)
             filters.append(new_filter)
 
             new_filter = Q(organization_description__icontains=one_word)
@@ -2381,7 +2388,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
-        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
     else:
@@ -2407,6 +2414,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'organization_voter':               organization_voter,
         'public_position_count':            public_position_count,
         'show_all_elections':               show_all_elections,
+        'state_code':                       state_code,
+        'state_list':                       sorted_state_list,
         'twitter_handle_mismatch':          twitter_handle_mismatch,
         'twitter_link_to_organization':     twitter_link_to_organization,
         'voter':                            voter,

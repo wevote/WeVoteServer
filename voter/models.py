@@ -1247,7 +1247,7 @@ class VoterManager(BaseUserManager):
         try:
             # This way of retrieving the voter_we_vote_id has led to some very slow queries
             # queryset = Voter.objects.using('readonly').filter(
-            #     linked_organization_we_vote_id__iexact=linked_organization_we_vote_id)
+            #     linked_organization_we_vote_id=linked_organization_we_vote_id)
             # we_vote_id_list = queryset.values_list('we_vote_id', flat=True)
             # return we_vote_id_list[0] if we_vote_id_list else None
             voter = Voter.objects.using('readonly').get(linked_organization_we_vote_id=linked_organization_we_vote_id)
@@ -1723,9 +1723,9 @@ class VoterManager(BaseUserManager):
                     success = True
             elif positive_value_exists(voter_we_vote_id):
                 if read_only:
-                    voter_on_stage = Voter.objects.using('readonly').get(we_vote_id__iexact=voter_we_vote_id)
+                    voter_on_stage = Voter.objects.using('readonly').get(we_vote_id=voter_we_vote_id)
                 else:
-                    voter_on_stage = Voter.objects.get(we_vote_id__iexact=voter_we_vote_id)
+                    voter_on_stage = Voter.objects.get(we_vote_id=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 voter_found = True
@@ -1794,9 +1794,9 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(primary_email_we_vote_id):
                 if read_only:
                     voter_on_stage = Voter.objects.using('readonly').get(
-                        primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                        primary_email_we_vote_id=primary_email_we_vote_id)
                 else:
-                    voter_on_stage = Voter.objects.get(primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                    voter_on_stage = Voter.objects.get(primary_email_we_vote_id=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 voter_found = True
@@ -3468,7 +3468,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_with_apple(self):
         try:
-            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id__iexact=self.we_vote_id)
+            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id=self.we_vote_id)
             return True
         except AppleUser.DoesNotExist:
             return False
@@ -4642,6 +4642,9 @@ class VoterAddress(models.Model):
             models.Index(
                 fields=['voter_id'],
                 name='voter_id_address'),
+            models.Index(
+                fields=['voter_id', '-date_last_changed'],
+                name='voter_id_address_date'),
             models.Index(
                 fields=['voter_id', 'address_type'],
                 name='voter_id_type'),
