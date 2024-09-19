@@ -1374,7 +1374,7 @@ def organization_edit_process_view(request):
         url_variables += "&organization_instagram_handle=" + str(organization_instagram_handle)
 
     if organization_name is not False:
-        url_variables += f"&organization_name={organization_name}"
+        url_variables += "&organization_name=" + str(organization_name)
 
     if organization_twitter_handle is not False:
         url_variables += "&organization_twitter_handle=" + str(organization_twitter_handle)
