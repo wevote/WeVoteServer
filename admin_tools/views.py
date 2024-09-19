@@ -1061,7 +1061,7 @@ def data_cleanup_voter_hanging_data_process_view(request):
         elif positive_value_exists(one_voter.primary_email_we_vote_id):
             # Is there an EmailAddress entry matching this primary_email_we_vote_id?
             try:
-                verified_email_address = EmailAddress.objects.get(
+                verified_email_address = EmailAddress.objects.using('readonly').get(
                     we_vote_id=one_voter.primary_email_we_vote_id,
                     email_ownership_is_verified=True,
                     # email_permanent_bounce=False,
