@@ -2113,7 +2113,7 @@ def merge_these_two_campaignx_entries(
     # Merge CampaignXListedByOrganization
     campaignx1_organization_we_vote_id_list = []
     campaignx2_listed_by_organization_to_delete_list = []
-    queryset = CampaignXListedByOrganization.objects.all()
+    queryset = CampaignXListedByOrganization.objects.using('readonly').all()
     queryset = queryset.filter(campaignx_we_vote_id=campaignx1_we_vote_id)
     campaignx1_listed_by_organization_list = list(queryset)
     for campaignx1_listed_by_organization in campaignx1_listed_by_organization_list:

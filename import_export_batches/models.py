@@ -1779,7 +1779,7 @@ class BatchManager(models.Manager):
         status = ""
         try:
             batch_row_action_organization = BatchRowActionOrganization.objects.get(batch_header_id=batch_header_id,
-                                                                                   batch_row_id=batch_row_id)
+                                                                                   batch_row_id=batch_row_id) # Cannot be 'readonly' because data is being saved
             batch_row_action_found = True
             success = True
             status += "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVED "

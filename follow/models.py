@@ -1455,7 +1455,7 @@ class FollowOrganizationList(models.Model):
         following_status = FOLLOWING
         follow_organization_list = []
         try:
-            follow_organization_list = FollowOrganization.objects.all()
+            follow_organization_list = FollowOrganization.objects.using('readonly').all()
             follow_organization_list = follow_organization_list.filter(
                 organization_we_vote_id_that_is_following=organization_we_vote_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
@@ -1615,7 +1615,7 @@ class FollowOrganizationList(models.Model):
         following_status = FOLLOWING
         follow_organization_list = {}
         try:
-            follow_organization_list = FollowOrganization.objects.all()
+            follow_organization_list = FollowOrganization.objects.all() # Cannot be 'readonly' because data is being deleted
             follow_organization_list = follow_organization_list.filter(organization_id=organization_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
             if len(follow_organization_list):
