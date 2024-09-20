@@ -594,6 +594,25 @@ class ChallengeManager(models.Manager):
             status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ERROR: ' + str(e) + ' '
             success = False
 
+        if not positive_value_exists(challenge_found) and positive_value_exists(seo_friendly_path):
+            # Search by alternate seo_friendly_path
+            try:
+                queryset = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                challenge_seo_friendly_path = queryset.get(final_pathname_string__iexact=seo_friendly_path)
+                challenge_we_vote_id = challenge_seo_friendly_path.challenge_we_vote_id
+
+                if positive_value_exists(challenge_we_vote_id):
+                    if positive_value_exists(read_only):
+                        challenge = Challenge.objects.using('readonly').get(we_vote_id=challenge_we_vote_id)
+                    else:
+                        challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
+                    challenge_found = True
+                    challenge_we_vote_id = challenge.we_vote_id
+                    status += 'RETRIEVE_CHALLENGE_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                    success = True
+            except Exception as e:
+                status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ALTERNATE_SEO_FRIENDLY_PATH_ERROR: ' + str(e) + " "
+
         if positive_value_exists(challenge_found):
             if not viewer_is_owner and positive_value_exists(challenge_we_vote_id):
                 viewer_is_owner = challenge_manager.is_voter_challenge_owner(
@@ -720,6 +739,25 @@ class ChallengeManager(models.Manager):
             exception_does_not_exist = True
             status += 'CHALLENGE_NOT_FOUND_DoesNotExist '
             success = True
+
+        if not positive_value_exists(challenge_found) and positive_value_exists(seo_friendly_path):
+            # Search by alternate seo_friendly_path
+            try:
+                queryset = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                challenge_seo_friendly_path = queryset.get(final_pathname_string__iexact=seo_friendly_path)
+                challenge_we_vote_id = challenge_seo_friendly_path.challenge_we_vote_id
+
+                if positive_value_exists(challenge_we_vote_id):
+                    if positive_value_exists(read_only):
+                        challenge = Challenge.objects.using('readonly').get(we_vote_id=challenge_we_vote_id)
+                    else:
+                        challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
+                    challenge_found = True
+                    challenge_we_vote_id = challenge.we_vote_id
+                    status += 'RETRIEVE_CHALLENGE_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                    success = True
+            except Exception as e:
+                status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ALTERNATE_SEO_FRIENDLY_PATH_ERROR: ' + str(e) + " "
 
         if positive_value_exists(challenge_found):
             if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
