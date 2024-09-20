@@ -52,7 +52,6 @@ CHALLENGE_ERROR_DICT = {
     'is_blocked_by_we_vote': False,
     'is_blocked_by_we_vote_reason': '',
     'is_participants_count_minimum_exceeded': False,
-    'latest_challenge_participant_endorsement_list': [],
     'latest_challenge_participant_list': [],
     'politician_we_vote_id': '',
     'opposers_count': 0,
@@ -727,8 +726,6 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             if voter.signed_in_with_email():
                 # Make sure the person creating the challenge has a challenge_participant entry IFF they are signed in
                 update_values = {
-                    'participant_endorsement': '',
-                    'participant_endorsement_changed': False,
                     'visible_to_public': True,
                     'visible_to_public_changed': True,
                 }
@@ -907,7 +904,6 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
             'date_last_changed':            '',
             'date_joined':                  '',
             'organization_we_vote_id':      '',
-            'participant_endorsement':      '',
             'participant_name':             '',
             'visible_to_public':            True,
             'voter_we_vote_id':             '',
@@ -925,7 +921,6 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
             'date_last_changed':            '',
             'date_joined':                  '',
             'organization_we_vote_id':      '',
-            'participant_endorsement':      '',
             'participant_name':             '',
             'visible_to_public':            True,
             'voter_we_vote_id':             '',
@@ -955,6 +950,63 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
         'voter_signed_in_with_email':   voter_signed_in_with_email,
         'we_vote_hosted_profile_photo_image_url_medium': challenge_participant.we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_photo_image_url_tiny': challenge_participant.we_vote_hosted_profile_image_url_tiny,
+    }
+    return results
+
+
+def challenge_participant_list_retrieve_for_api(  # challengeParticipantListRetrieve
+        voter_device_id='',
+        challenge_we_vote_id=''):
+    status = ''
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        status += "VALID_VOTER_ID_MISSING "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'challenge_participant_list':   [],
+            'challenge_we_vote_id':         challenge_we_vote_id,
+            'voter_we_vote_id':             '',
+        }
+        return results
+
+    challenge_manager = ChallengeManager()
+    results = challenge_manager.retrieve_challenge_participant_list(
+        challenge_we_vote_id=challenge_we_vote_id,
+        read_only=True,
+    )
+    status += results['status']
+    if not results['success']:
+        status += "CHALLENGE_PARTICIPANT_LIST_RETRIEVE_ERROR "
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'challenge_participant_list':   [],
+            'challenge_we_vote_id':         challenge_we_vote_id,
+            'voter_we_vote_id':             '',
+        }
+        return results
+    elif not results['participant_list_found']:
+        status += "CHALLENGE_PARTICIPANT_LIST_NOT_FOUND: "
+        status += results['status'] + " "
+
+    challenge_participant_list = []
+    for challenge_participant in results['participant_list']:
+        generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
+            challenge_participant=challenge_participant)
+        if generate_results['success']:
+            challenge_participant_list.append(generate_results['challenge_participant_dict'])
+    results = {
+        'status':                       status,
+        'success':                      True,
+        'challenge_participant_list':   challenge_participant_list,
+        'challenge_we_vote_id':         challenge_we_vote_id,
+        'voter_we_vote_id':             voter_we_vote_id,
     }
     return results
 
@@ -1527,7 +1579,6 @@ def generate_challenge_dict_from_challenge_object(
             challenge_we_vote_id=challenge.we_vote_id,
         )
 
-    latest_challenge_participant_endorsement_list = []  # Latest participants with comments
     latest_challenge_participant_list = []  # Latest participants with or without comments
     latest_position_dict_list = []  # DALE 2024-07-06 I don't know if we want to bring this in here
     participants_count_next_goal = 0
@@ -1544,88 +1595,27 @@ def generate_challenge_dict_from_challenge_object(
             read_only=True)
         if participant_results['success'] and participant_results['challenge_participant_found']:
             challenge_participant = participant_results['challenge_participant']
-            chip_in_total = 'none'
-            date_last_changed_string = ''
-            date_joined_string = ''
-            try:
-                date_last_changed_string = challenge_participant.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-                date_joined_string = challenge_participant.date_joined.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            except Exception as e:
-                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-            try:
-                from stripe_donations.models import StripeManager
-                chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, challenge.we_vote_id)
-            except Exception as e:
-                status += "RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
-
-            voter_challenge_participant_dict = {
-                'challenge_we_vote_id':         challenge_participant.challenge_we_vote_id,
-                'chip_in_total':                chip_in_total,
-                'date_last_changed':            date_last_changed_string,
-                'date_joined':                  date_joined_string,
-                'id':                           challenge_participant.id,
-                'organization_we_vote_id':      challenge_participant.organization_we_vote_id,
-                'participant_name':             challenge_participant.participant_name,
-                'visible_to_public':            challenge_participant.visible_to_public,
-                'voter_we_vote_id':             challenge_participant.voter_we_vote_id,
-                'voter_signed_in_with_email':   voter_signed_in_with_email,
-                'we_vote_hosted_profile_image_url_medium': challenge_participant.we_vote_hosted_profile_image_url_medium,
-                'we_vote_hosted_profile_image_url_tiny': challenge_participant.we_vote_hosted_profile_image_url_tiny,
-            }
+            generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
+                challenge_participant=challenge_participant)
+            if generate_results['success']:
+                voter_challenge_participant_dict = generate_results['challenge_participant_dict']
 
         # Get most recent participants, regardless of whether there is a written endorsement.
         participant_list_results = challenge_manager.retrieve_challenge_participant_list(
             challenge_we_vote_id=challenge.we_vote_id,
             limit=7,
             read_only=True,
-            require_participant_endorsement=False,
+            require_custom_message_for_friends=False,
             require_visible_to_public=True)
         if participant_list_results['participant_list_found']:
             participant_list = participant_list_results['participant_list']
             for challenge_participant in participant_list:
-                date_joined_string = ''
-                try:
-                    date_joined_string = challenge_participant.date_joined.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-                except Exception as e:
-                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-                one_participant_dict = {
-                    'id': challenge_participant.id,
-                    'challenge_we_vote_id': challenge_participant.challenge_we_vote_id,
-                    'date_joined': date_joined_string,
-                    'organization_we_vote_id': challenge_participant.organization_we_vote_id,
-                    'participant_name': challenge_participant.participant_name,
-                    'voter_we_vote_id': challenge_participant.voter_we_vote_id,
-                    'we_vote_hosted_profile_image_url_medium': challenge_participant.we_vote_hosted_profile_image_url_medium,
-                    'we_vote_hosted_profile_image_url_tiny': challenge_participant.we_vote_hosted_profile_image_url_tiny,
-                }
-                latest_challenge_participant_list.append(one_participant_dict)
+                generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
+                    challenge_participant=challenge_participant)
+                if generate_results['success']:
+                    one_participant_dict = generate_results['challenge_participant_dict']
+                    latest_challenge_participant_list.append(one_participant_dict)
 
-        # Get most recent participant_endorsements which include written endorsement
-        # (require_participant_endorsement == True)
-        participant_list_results = challenge_manager.retrieve_challenge_participant_list(
-            challenge_we_vote_id=challenge.we_vote_id,
-            limit=10,
-            read_only=True,
-            require_participant_endorsement=True)
-        if participant_list_results['participant_list_found']:
-            participant_list = participant_list_results['participant_list']
-            for challenge_participant in participant_list:
-                date_joined_string = ''
-                try:
-                    date_joined_string = challenge_participant.date_joined.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-                except Exception as e:
-                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-                one_participant_dict = {
-                    'id': challenge_participant.id,
-                    'challenge_we_vote_id': challenge_participant.challenge_we_vote_id,
-                    'date_joined': date_joined_string,
-                    'organization_we_vote_id': challenge_participant.organization_we_vote_id,
-                    'participant_name': challenge_participant.participant_name,
-                    'voter_we_vote_id': challenge_participant.voter_we_vote_id,
-                    'we_vote_hosted_profile_image_url_medium': challenge_participant.we_vote_hosted_profile_image_url_medium,
-                    'we_vote_hosted_profile_image_url_tiny': challenge_participant.we_vote_hosted_profile_image_url_tiny,
-                }
-                latest_challenge_participant_endorsement_list.append(one_participant_dict)
         participants_count_next_goal = challenge_manager.fetch_participants_count_next_goal(
             participants_count=challenge.participants_count,
             participants_count_victory_goal=challenge.participants_count_victory_goal)
@@ -1675,7 +1665,6 @@ def generate_challenge_dict_from_challenge_object(
         'is_blocked_by_we_vote':            challenge.is_blocked_by_we_vote,
         'is_blocked_by_we_vote_reason':     challenge.is_blocked_by_we_vote_reason,
         'is_participants_count_minimum_exceeded': challenge.is_participants_count_minimum_exceeded(),
-        'latest_challenge_participant_endorsement_list':  latest_challenge_participant_endorsement_list,
         'latest_challenge_participant_list':  latest_challenge_participant_list,
         'politician_we_vote_id':            challenge.politician_we_vote_id,
         'opposers_count':                   challenge.opposers_count,
@@ -1705,6 +1694,61 @@ def generate_challenge_dict_from_challenge_object(
         'challenge_dict':   challenge_dict,
         'status':           status,
         'success':          success,
+    }
+    return results
+
+
+def generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant=None):
+    status = ""
+    success = True
+
+    # If smaller sizes weren't stored, use large image
+    if challenge_participant.we_vote_hosted_profile_image_url_medium:
+        we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_medium
+    else:
+        we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_large
+    if challenge_participant.we_vote_hosted_profile_image_url_tiny:
+        we_vote_hosted_profile_image_url_tiny = challenge_participant.we_vote_hosted_profile_image_url_tiny
+    else:
+        we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_medium
+
+    if not hasattr(challenge_participant, 'visible_to_public'):
+        status += "VALID_CHALLENGE_PARTICIPANT_OBJECT_MISSING "
+        results = {
+            'challenge_participant_dict': {},
+            'status': status,
+            'success': False,
+        }
+        return results
+
+    date_last_changed_string = ''
+    date_joined_string = ''
+    try:
+        date_last_changed_string = challenge_participant.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)
+        date_joined_string = challenge_participant.date_joined.strftime(DATE_FORMAT_YMD_HMS)
+    except Exception as e:
+        status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    participant_dict = {
+        'date_joined':                              date_joined_string,
+        'date_last_changed':                        date_last_changed_string,
+        'friends_invited':                          challenge_participant.friends_invited,
+        'friends_who_joined':                       challenge_participant.friends_who_joined,
+        'friends_who_viewed':                       challenge_participant.friends_who_viewed,
+        'friends_who_viewed_plus':                  challenge_participant.friends_who_viewed_plus,
+        'organization_we_vote_id':                  challenge_participant.organization_we_vote_id,
+        'participant_name':                         challenge_participant.participant_name,
+        'points':                                   challenge_participant.points,
+        'rank':                                     challenge_participant.rank,
+        'visible_to_public':                        challenge_participant.visible_to_public,
+        'voter_we_vote_id':                         challenge_participant.voter_we_vote_id,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+    }
+
+    results = {
+        'challenge_participant_dict':   participant_dict,
+        'status':                       status,
+        'success':                      success,
     }
     return results
 
@@ -2011,8 +2055,8 @@ def merge_these_two_challenges(
     challenge2_participants_to_delete_list = []
     queryset = ChallengeParticipant.objects.all()
     queryset = queryset.filter(challenge_we_vote_id=challenge1_we_vote_id)
-    challenge1_participants_list = list(queryset)
-    for challenge1_participant in challenge1_participants_list:
+    challenge1_participant_list = list(queryset)
+    for challenge1_participant in challenge1_participant_list:
         if positive_value_exists(challenge1_participant.organization_we_vote_id) and \
                 challenge1_participant.organization_we_vote_id not in challenge1_organization_we_vote_id_list:
             challenge1_organization_we_vote_id_list.append(challenge1_participant.organization_we_vote_id)
@@ -2022,8 +2066,8 @@ def merge_these_two_challenges(
 
     queryset = ChallengeParticipant.objects.all()
     queryset = queryset.filter(challenge_we_vote_id=challenge2_we_vote_id)
-    challenge2_participants_list = list(queryset)
-    for challenge2_participant in challenge2_participants_list:
+    challenge2_participant_list = list(queryset)
+    for challenge2_participant in challenge2_participant_list:
         # Is this challenge politician already in Challenge 1?
         challenge2_participant_matches_challenge1_participant = False
         if positive_value_exists(challenge2_participant.organization_we_vote_id) and \

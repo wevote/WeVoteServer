@@ -123,19 +123,6 @@ def challenge_retrieve_doc_template_values(url_root):
                    '     "label": string,\n' \
                    '   },\n' \
                    '   ],\n' \
-                   '  "latest_challenge_participant_endorsement_list": list\n' \
-                   '   [\n' \
-                   '   {\n' \
-                   '     "id": integer,\n' \
-                   '     "challenge_we_vote_id": string,\n' \
-                   '     "date_joined": string,\n' \
-                   '     "organization_we_vote_id": string,\n' \
-                   '     "supporter_endorsement": string,\n' \
-                   '     "participant_name": string,\n' \
-                   '     "voter_we_vote_id": string,\n' \
-                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
-                   '   },\n' \
-                   '   ],\n' \
                    '  "latest_challenge_participant_list": list\n' \
                    '   [\n' \
                    '   {\n' \

@@ -1,8 +1,8 @@
-{# templates/challenge/challenge_participants_list_table.html #}
+{# templates/challenge/challenge_participant_list_table.html #}
 
-{% if participants_list %}
+{% if participant_list %}
 <table class="table">
-    {% for challenge_participant in participants_list %}
+    {% for challenge_participant in participant_list %}
     {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
     {# Show the header every ~15 lines #}
      <thead>
@@ -72,7 +72,7 @@
             {% endif %}
             </td>
         {% endif %}
-            <td>{{ challenge_participant.participant_endorsement|default_if_none:"" }}</td>
+            <td>{{ challenge_participant.custom_message_for_friends|default_if_none:"" }}</td>
             <td>{% if challenge_participant.chip_in_total != 'none' %}{{ challenge_participant.chip_in_total|default_if_none:"" }}{% endif %}</td>
             <td>
                 <input type="checkbox"

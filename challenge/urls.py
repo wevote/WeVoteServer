@@ -32,7 +32,7 @@ urlpatterns = [
     re_path(r'^(?P<challenge_we_vote_id>wv[\w]{2}chal[\w]+)/summary$',
         views_admin.challenge_summary_view, name='challenge_summary'),
     re_path(r'^(?P<challenge_we_vote_id>wv[\w]{2}chal[\w]+)/participants$',
-        views_admin.challenge_participants_list_view, name='participants_list'),
-    re_path(r'^participants_list_process/$', views_admin.challenge_participants_list_process_view,
-            name='participants_list_process'),
+        views_admin.challenge_participant_list_view, name='participant_list'),
+    re_path(r'^participant_list_process/$', views_admin.challenge_participant_list_process_view,
+            name='participant_list_process'),
 ]
