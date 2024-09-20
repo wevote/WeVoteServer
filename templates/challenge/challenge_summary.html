@@ -216,13 +216,13 @@
                     {{ challenge_participant.participant_name }}&nbsp;&nbsp;
                 </td>
                 <td>
-                    <div style="white-space: pre-wrap;">{{ challenge_participant.participant_endorsement }}</div>&nbsp;&nbsp;
+                    <div style="white-space: pre-wrap;">{{ challenge_participant.custom_message_for_friends }}</div>&nbsp;&nbsp;
                 </td>
             </tr>
         {% endfor %}
             <tr>
                 <td colspan="3">
-                    <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
+                    <a href="{% url 'challenge:participant_list' challenge.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}"
                                    class="btn btn-primary">View All Participants</a>
                 </td>
             </tr>

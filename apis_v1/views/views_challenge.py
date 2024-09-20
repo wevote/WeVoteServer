@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 from challenge.controllers import challenge_list_retrieve_for_api, challenge_news_item_save_for_api, \
     challenge_retrieve_for_api, challenge_save_for_api, \
-    challenge_participant_retrieve_for_api, challenge_participant_save_for_api
+    challenge_participant_retrieve_for_api, challenge_participant_list_retrieve_for_api, challenge_participant_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -78,6 +78,16 @@ def challenge_participant_retrieve_view(request):  # challengeParticipantRetriev
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
     json_data = challenge_participant_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        challenge_we_vote_id=challenge_we_vote_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def challenge_participant_list_retrieve_view(request):  # challengeParticipantListRetrieve
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
+    json_data = challenge_participant_list_retrieve_for_api(
         voter_device_id=voter_device_id,
         challenge_we_vote_id=challenge_we_vote_id,
     )

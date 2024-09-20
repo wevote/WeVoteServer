@@ -235,7 +235,7 @@
             </td>
         {% endif %}
             <td style="text-align: right">{% if challenge.participants_count %}
-                <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
+                <a href="{% url 'challenge:participant_list' challenge.we_vote_id %}?challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}" target="_blank">
                     {{ challenge.participants_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
                 </a>
                 {% if challenge.participants_count_minimum_ignored and challenge.participants_count < 5 %}
@@ -252,7 +252,7 @@
             {% endif %}</td>
             <td style="text-align: right">
             {% if challenge.chip_in_total != 'none' %}
-                <a href="{% url 'challenge:participants_list' challenge.we_vote_id %}?show_participants_not_visible_to_public=1" target="_blank">
+                <a href="{% url 'challenge:participant_list' challenge.we_vote_id %}?show_participants_not_visible_to_public=1" target="_blank">
                     {{ challenge.chip_in_total }}
                     <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
                 </a>
