@@ -109,8 +109,12 @@
     <div class="col-sm-8">
         <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"{% if challenge.politician_we_vote_id %} disabled{% endif %}
                value="{% if challenge %}{{ challenge.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
-    {% if challenge.politician_we_vote_id %}
-        <span style="color: darkgray">Since this Challenge is hard-linked to a politician, please edit the SEO Friendly Path on the Politician record.</span>
+    {% if path_list %}
+        {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+    {% else %}
+        <div style="color: darkgray">
+        No alternate URL paths found.
+        </div>
     {% endif %}
     </div>
 </div>
