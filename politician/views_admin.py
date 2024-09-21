@@ -3158,7 +3158,6 @@ def politician_edit_process_view(request):
             elif not positive_value_exists(politician_on_stage.seo_friendly_path):
                 update_to_new_seo_friendly_path = True
             if update_to_new_seo_friendly_path:
-                # If path isn't passed in, create one. If provided, verify it is unique.
                 seo_results = politician_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
                     politician_name=politician_on_stage.politician_name,

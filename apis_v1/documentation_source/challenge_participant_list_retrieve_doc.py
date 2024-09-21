@@ -49,6 +49,7 @@ def challenge_participant_list_retrieve_doc_template_values(url_root):
                    '  "date_last_changed": string,\n' \
                    '  "participant_list: list \n' \
                    '  [{\n' \
+                   '    "challenge_we_vote_id": string,\n' \
                    '    "date_joined": string,\n' \
                    '    "date_last_changed": string,\n' \
                    '    "friends_invited": number,\n' \

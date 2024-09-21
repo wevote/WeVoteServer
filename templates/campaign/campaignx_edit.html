@@ -117,6 +117,13 @@
     {% if campaignx.linked_politician_we_vote_id %}
         <span style="color: darkgray">Since this Campaign is hard-linked to a politician, please edit the SEO Friendly Path on the Politician record.</span>
     {% endif %}
+    {% if path_list %}
+        {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+    {% else %}
+        <div style="color: darkgray">
+        No alternate URL paths found.
+        </div>
+    {% endif %}
     </div>
 </div>
 

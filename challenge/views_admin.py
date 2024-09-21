@@ -664,8 +664,17 @@ def challenge_edit_process_view(request):
                 elif politician_results['success']:
                     # It was a successful query, but politician wasn't found. Remove the politician_we_vote_id
                     challenge.politician_we_vote_id = None
-            if seo_friendly_path is not None:
-                # If path isn't passed in, create one. If provided, verify it is unique.
+            # If new seo_friendly_path is provided, check to make sure it is not already in use
+            # If seo_friendly_path is not provided, only create a new one if challenge.seo_friendly_path
+            #  doesn't already exist.
+            update_to_new_seo_friendly_path = False
+            if seo_friendly_path is not False:
+                if positive_value_exists(seo_friendly_path):
+                    if seo_friendly_path != challenge.seo_friendly_path:
+                        update_to_new_seo_friendly_path = True
+            elif not positive_value_exists(challenge.seo_friendly_path):
+                update_to_new_seo_friendly_path = True
+            if update_to_new_seo_friendly_path:
                 seo_results = challenge_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
                     challenge_title=challenge.challenge_title,
@@ -675,6 +684,25 @@ def challenge_edit_process_view(request):
                 if not positive_value_exists(seo_friendly_path):
                     seo_friendly_path = None
                 challenge.seo_friendly_path = seo_friendly_path
+
+            # Now generate_seo_friendly_path if there isn't one
+            #  This code is not redundant because of a few rare cases where we can fall-through the logic above.
+            if not positive_value_exists(challenge.seo_friendly_path):
+                seo_results = challenge_manager.generate_seo_friendly_path(
+                    base_pathname_string=challenge.seo_friendly_path,
+                    challenge_title=challenge.challenge_title,
+                    challenge_we_vote_id=challenge.we_vote_id)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        challenge.seo_friendly_path = seo_friendly_path
+                        messages.add_message(request, messages.INFO,
+                                             'Challenge saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
+
             if participants_count_minimum_ignored is not None:
                 challenge.participants_count_minimum_ignored = positive_value_exists(participants_count_minimum_ignored)
             challenge.save()
@@ -720,11 +748,12 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
 
     messages_on_stage = get_messages(request)
     challenge_manager = ChallengeManager()
-    challenge = None
+    challenge_on_stage = None
+    status = ""
     results = challenge_manager.retrieve_challenge(challenge_we_vote_id=challenge_we_vote_id)
 
     if results['challenge_found']:
-        challenge = results['challenge']
+        challenge_on_stage = results['challenge']
 
     election_manager = ElectionManager()
     upcoming_election_list = []
@@ -737,10 +766,10 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
 
     politician_state_code = ''
     related_challenge_list = []
-    if challenge and positive_value_exists(challenge.politician_we_vote_id):
+    if challenge_on_stage and positive_value_exists(challenge_on_stage.politician_we_vote_id):
         try:
             politician_queryset = Politician.objects.using('readonly').all()
-            politician = politician_queryset.get(we_vote_id=challenge.politician_we_vote_id)
+            politician = politician_queryset.get(we_vote_id=challenge_on_stage.politician_we_vote_id)
             if positive_value_exists(politician.last_name):
                 from challenge.models import Challenge
                 queryset = Challenge.objects.using('readonly').all()
@@ -753,16 +782,39 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
         except Exception as e:
             related_challenge_list = []
 
+    # ##################################
+    # Show the seo friendly paths for this politician
+    path_count = 0
+    path_list = []
+    if positive_value_exists(challenge_we_vote_id):
+        from challenge.models import ChallengeSEOFriendlyPath
+        try:
+            path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(challenge_we_vote_id=challenge_we_vote_id)
+            path_count = path_query.count()
+            path_list = list(path_query[:4])
+        except Exception as e:
+            status += 'ERROR_RETRIEVING_FROM_ChallengeSEOFriendlyPath: ' + str(e) + ' '
+
+        if positive_value_exists(challenge_on_stage.seo_friendly_path):
+            path_list_modified = []
+            for one_path in path_list:
+                if challenge_on_stage.seo_friendly_path != one_path.final_pathname_string:
+                    path_list_modified.append(one_path)
+            path_list = path_list_modified
+        path_list = path_list[:3]
+
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
     else:
         web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
-        'challenge':                                challenge,
+        'challenge':                                challenge_on_stage,
         'challenge_owner_organization_we_vote_id':  challenge_owner_organization_we_vote_id,
         'challenge_search':                         challenge_search,
         'google_civic_election_id':                 google_civic_election_id,
         'messages_on_stage':                        messages_on_stage,
+        'path_list':                                path_list,
         'politician_state_code':                    politician_state_code,
         'related_challenge_list':                   related_challenge_list,
         'state_list':                               sorted_state_list,

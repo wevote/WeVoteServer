@@ -140,17 +140,18 @@ def challenge_retrieve_doc_template_values(url_root):
                    '  "seo_friendly_path_list": list\n' \
                    '   [],\n' \
                    '  "voter_challenge_participant": {\n' \
-                   '     "id": integer,\n' \
                    '     "challenge_we_vote_id": string,\n' \
-                   '     "chip_in_total": string,\n' \
                    '     "date_last_changed": string,\n' \
                    '     "date_joined": string,\n' \
+                   '     "friends_invited": number,\n' \
+                   '     "friends_who_joined": number,\n' \
+                   '     "friends_who_viewed": number,\n' \
+                   '     "friends_who_viewed_plus": number,\n' \
                    '     "organization_we_vote_id": string,\n' \
-                   '     "supporter_endorsement": string,\n' \
                    '     "participant_name": string,\n' \
                    '     "visible_to_public": boolean,\n' \
-                   '     "voter_signed_in_with_email": boolean,\n' \
                    '     "voter_we_vote_id": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   },\n' \
                    '}'

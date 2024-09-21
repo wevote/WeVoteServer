@@ -153,7 +153,7 @@ def generate_seo_friendly_path_generic(
         elif for_challenge:
             # Is that path already stored for this challenge?
             path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
-            path_query = path_query.filter(challenge_we_vote_id=campaignx_we_vote_id)
+            path_query = path_query.filter(challenge_we_vote_id=challenge_we_vote_id)
             path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
             match_count = path_query.count()
         elif for_politician:

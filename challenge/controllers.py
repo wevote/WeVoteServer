@@ -1729,6 +1729,7 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
     except Exception as e:
         status += "DATE_CONVERSION_ERROR: " + str(e) + " "
     participant_dict = {
+        'challenge_we_vote_id':                     challenge_participant.challenge_we_vote_id,
         'date_joined':                              date_joined_string,
         'date_last_changed':                        date_last_changed_string,
         'friends_invited':                          challenge_participant.friends_invited,
