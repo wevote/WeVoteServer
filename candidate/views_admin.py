@@ -18,8 +18,6 @@ from django.db.models.functions import Length
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.template import loader
-from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.timezone import localtime, now
 
@@ -2245,6 +2243,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     politician_we_vote_id = ''
     seo_friendly_path = ''
     status = ''
+    candidate_edit_process_view(request)
+    performance_dict = " - "
 
     try:
         if positive_value_exists(candidate_id):
@@ -2512,6 +2512,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             }, 
             'path_count':                       path_count,
             'path_list':                        path_list,
+            'performance_dict':                 performance_dict,
             'rating_list':                      rating_list,
             'related_candidate_list':           related_candidate_list,
             'state_code':                       state_code,
@@ -2675,6 +2676,7 @@ def candidate_edit_process_view(request):
     performance_dict = {
         'performance_list': performance_list,
     }
+
 
 
 
@@ -3574,10 +3576,6 @@ def candidate_edit_process_view(request):
                     save_to_database=True,
                 )
             t5 = time()
-            if positive_value_exists(results['error_message_to_print']):
-                messages.add_message(request, messages.ERROR, results['error_message_to_print'])
-            if positive_value_exists(results['info_message_to_print']):
-                messages.add_message(request, messages.INFO, results['info_message_to_print'])
             if (wikipedia_url_changed or not positive_value_exists(candidate_on_stage.wikipedia_photo_url)) \
                     and positive_value_exists(wikipedia_url):
                 # update_candidate_wikipedia_image(candidate_on_stage, request, messages)
@@ -3853,8 +3851,6 @@ def candidate_edit_process_view(request):
                                     url_variables)
 
 
-def template_speed_test(request, performance_dict):
-    return render(request, 'admin_tools/speed_statistics_banner.html', performance_dict)
 @login_required
 def candidate_politician_match_view(request):
     """
