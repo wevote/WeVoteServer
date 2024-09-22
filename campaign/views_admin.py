@@ -647,8 +647,17 @@ def campaign_edit_process_view(request):
                 elif politician_results['success']:
                     # It was a successful query, but politician wasn't found. Remove the linked_politician_we_vote_id
                     campaignx.linked_politician_we_vote_id = None
-            if seo_friendly_path is not None:
-                # If path isn't passed in, create one. If provided, verify it is unique.
+            # If new seo_friendly_path is provided, check to make sure it is not already in use
+            # If seo_friendly_path is not provided, only create a new one if campaignx.seo_friendly_path
+            #  doesn't already exist.
+            update_to_new_seo_friendly_path = False
+            if seo_friendly_path is not False:
+                if positive_value_exists(seo_friendly_path):
+                    if seo_friendly_path != campaignx.seo_friendly_path:
+                        update_to_new_seo_friendly_path = True
+            elif not positive_value_exists(campaignx.seo_friendly_path):
+                update_to_new_seo_friendly_path = True
+            if update_to_new_seo_friendly_path:
                 seo_results = campaignx_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
                     campaignx_title=campaignx.campaign_title,
@@ -658,8 +667,28 @@ def campaign_edit_process_view(request):
                 if not positive_value_exists(seo_friendly_path):
                     seo_friendly_path = None
                 campaignx.seo_friendly_path = seo_friendly_path
+
+            # Now generate_seo_friendly_path if there isn't one
+            #  This code is not redundant because of a few rare cases where we can fall-through the logic above.
+            if not positive_value_exists(campaignx.seo_friendly_path):
+                seo_results = campaignx_manager.generate_seo_friendly_path(
+                    base_pathname_string=campaignx.seo_friendly_path,
+                    campaignx_title=campaignx.campaign_title,
+                    campaignx_we_vote_id=campaignx.we_vote_id)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        campaignx.seo_friendly_path = seo_friendly_path
+                        messages.add_message(request, messages.INFO,
+                                             'CampaignX saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
+
             if supporters_count_minimum_ignored is not None:
                 campaignx.supporters_count_minimum_ignored = positive_value_exists(supporters_count_minimum_ignored)
+
             campaignx.save()
 
             messages.add_message(request, messages.INFO, 'CampaignX updated.')

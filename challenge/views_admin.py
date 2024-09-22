@@ -664,8 +664,17 @@ def challenge_edit_process_view(request):
                 elif politician_results['success']:
                     # It was a successful query, but politician wasn't found. Remove the politician_we_vote_id
                     challenge.politician_we_vote_id = None
-            if seo_friendly_path is not None:
-                # If path isn't passed in, create one. If provided, verify it is unique.
+            # If new seo_friendly_path is provided, check to make sure it is not already in use
+            # If seo_friendly_path is not provided, only create a new one if challenge.seo_friendly_path
+            #  doesn't already exist.
+            update_to_new_seo_friendly_path = False
+            if seo_friendly_path is not False:
+                if positive_value_exists(seo_friendly_path):
+                    if seo_friendly_path != challenge.seo_friendly_path:
+                        update_to_new_seo_friendly_path = True
+            elif not positive_value_exists(challenge.seo_friendly_path):
+                update_to_new_seo_friendly_path = True
+            if update_to_new_seo_friendly_path:
                 seo_results = challenge_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
                     challenge_title=challenge.challenge_title,
@@ -675,6 +684,25 @@ def challenge_edit_process_view(request):
                 if not positive_value_exists(seo_friendly_path):
                     seo_friendly_path = None
                 challenge.seo_friendly_path = seo_friendly_path
+
+            # Now generate_seo_friendly_path if there isn't one
+            #  This code is not redundant because of a few rare cases where we can fall-through the logic above.
+            if not positive_value_exists(challenge.seo_friendly_path):
+                seo_results = challenge_manager.generate_seo_friendly_path(
+                    base_pathname_string=challenge.seo_friendly_path,
+                    challenge_title=challenge.challenge_title,
+                    challenge_we_vote_id=challenge.we_vote_id)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                    if positive_value_exists(seo_friendly_path):
+                        challenge.seo_friendly_path = seo_friendly_path
+                        messages.add_message(request, messages.INFO,
+                                             'Challenge saved with new SEO friendly path.')
+                    else:
+                        status += seo_results['status'] + ' '
+                else:
+                    status += seo_results['status'] + ' '
+
             if participants_count_minimum_ignored is not None:
                 challenge.participants_count_minimum_ignored = positive_value_exists(participants_count_minimum_ignored)
             challenge.save()
@@ -720,11 +748,12 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
 
     messages_on_stage = get_messages(request)
     challenge_manager = ChallengeManager()
-    challenge = None
+    challenge_on_stage = None
+    status = ""
     results = challenge_manager.retrieve_challenge(challenge_we_vote_id=challenge_we_vote_id)
 
     if results['challenge_found']:
-        challenge = results['challenge']
+        challenge_on_stage = results['challenge']
 
     election_manager = ElectionManager()
     upcoming_election_list = []
@@ -737,10 +766,10 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
 
     politician_state_code = ''
     related_challenge_list = []
-    if challenge and positive_value_exists(challenge.politician_we_vote_id):
+    if challenge_on_stage and positive_value_exists(challenge_on_stage.politician_we_vote_id):
         try:
             politician_queryset = Politician.objects.using('readonly').all()
-            politician = politician_queryset.get(we_vote_id=challenge.politician_we_vote_id)
+            politician = politician_queryset.get(we_vote_id=challenge_on_stage.politician_we_vote_id)
             if positive_value_exists(politician.last_name):
                 from challenge.models import Challenge
                 queryset = Challenge.objects.using('readonly').all()
@@ -753,16 +782,39 @@ def challenge_edit_view(request, challenge_we_vote_id=""):
         except Exception as e:
             related_challenge_list = []
 
+    # ##################################
+    # Show the seo friendly paths for this politician
+    path_count = 0
+    path_list = []
+    if positive_value_exists(challenge_we_vote_id):
+        from challenge.models import ChallengeSEOFriendlyPath
+        try:
+            path_query = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(challenge_we_vote_id=challenge_we_vote_id)
+            path_count = path_query.count()
+            path_list = list(path_query[:4])
+        except Exception as e:
+            status += 'ERROR_RETRIEVING_FROM_ChallengeSEOFriendlyPath: ' + str(e) + ' '
+
+        if positive_value_exists(challenge_on_stage.seo_friendly_path):
+            path_list_modified = []
+            for one_path in path_list:
+                if challenge_on_stage.seo_friendly_path != one_path.final_pathname_string:
+                    path_list_modified.append(one_path)
+            path_list = path_list_modified
+        path_list = path_list[:3]
+
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
     else:
         web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
-        'challenge':                                challenge,
+        'challenge':                                challenge_on_stage,
         'challenge_owner_organization_we_vote_id':  challenge_owner_organization_we_vote_id,
         'challenge_search':                         challenge_search,
         'google_civic_election_id':                 google_civic_election_id,
         'messages_on_stage':                        messages_on_stage,
+        'path_list':                                path_list,
         'politician_state_code':                    politician_state_code,
         'related_challenge_list':                   related_challenge_list,
         'state_list':                               sorted_state_list,
@@ -1422,7 +1474,7 @@ def challenge_summary_view(request, challenge_we_vote_id=""):
 
 
 @login_required
-def challenge_participants_list_view(request, challenge_we_vote_id=""):
+def challenge_participant_list_view(request, challenge_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -1454,8 +1506,8 @@ def challenge_participants_list_view(request, challenge_we_vote_id=""):
 
     if positive_value_exists(only_show_participants_with_endorsements):
         participants_query = participants_query.exclude(
-            Q(participant_endorsement__isnull=True) |
-            Q(participant_endorsement__exact='')
+            Q(custom_message_for_friends__isnull=True) |
+            Q(custom_message_for_friends__exact='')
         )
 
     participants_query = participants_query.order_by('-date_joined')
@@ -1490,7 +1542,7 @@ def challenge_participants_list_view(request, challenge_we_vote_id=""):
             new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(participant_endorsement__icontains=one_word)
+            new_filter = Q(custom_message_for_friends__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(voter_we_vote_id=one_word)
@@ -1515,13 +1567,13 @@ def challenge_participants_list_view(request, challenge_we_vote_id=""):
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
-        participants_list = participants_query[:1000]
+        participant_list = participants_query[:1000]
     elif positive_value_exists(show_all):
-        participants_list = participants_query
+        participant_list = participants_query
     else:
-        participants_list = participants_query[:200]
+        participant_list = participants_query[:200]
 
-    for participant in participants_list:
+    for participant in participant_list:
         participant.chip_in_total = StripeManager.retrieve_chip_in_total(participant.voter_we_vote_id,
                                                                        participant.challenge_we_vote_id)
 
@@ -1540,21 +1592,21 @@ def challenge_participants_list_view(request, challenge_we_vote_id=""):
         'messages_on_stage':                        messages_on_stage,
         'challenge_type_filter':                    challenge_type_filter,
         'challenge_types':                          [],
-        'participants_list':                          participants_list,
+        'participant_list':                         participant_list,
         'show_all':                                 show_all,
         'show_issues':                              show_issues,
         'show_more':                                show_more,
-        'show_participants_not_visible_to_public':    show_participants_not_visible_to_public,
-        'only_show_participants_with_endorsements':     only_show_participants_with_endorsements,
+        'show_participants_not_visible_to_public':  show_participants_not_visible_to_public,
+        'only_show_participants_with_endorsements': only_show_participants_with_endorsements,
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
     }
-    return render(request, 'challenge/challenge_participants_list.html', template_values)
+    return render(request, 'challenge/challenge_participant_list.html', template_values)
 
 
 @login_required
-def challenge_participants_list_process_view(request):
+def challenge_participant_list_process_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -1565,7 +1617,7 @@ def challenge_participants_list_process_view(request):
     challenge_we_vote_id = request.POST.get('challenge_we_vote_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', '')
     incoming_challenge_participant_we_vote_id = request.POST.get('incoming_challenge_participant_we_vote_id', '')
-    incoming_challenge_participant_endorsement = request.POST.get('incoming_challenge_participant_endorsement', '')
+    incoming_challenge_custom_message_for_friends = request.POST.get('incoming_challenge_custom_message_for_friends', '')
     incoming_challenge_participant_wants_visibility = request.POST.get('incoming_challenge_participant_wants_visibility', '')
     incoming_visibility_blocked_by_we_vote = request.POST.get('incoming_visibility_blocked_by_we_vote', '')
     state_code = request.POST.get('state_code', '')
@@ -1651,7 +1703,7 @@ def challenge_participants_list_process_view(request):
         if positive_value_exists(results['info_message_to_print']):
             info_message_to_print += results['info_message_to_print']
         messages.add_message(request, messages.INFO, 'ChallengeParticipant linked to Politician -- cannot process.')
-        return HttpResponseRedirect(reverse('challenge:participants_list', args=(challenge_we_vote_id,)) +
+        return HttpResponseRedirect(reverse('challenge:participant_list', args=(challenge_we_vote_id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&challenge_owner_organization_we_vote_id=" +
                                     str(challenge_owner_organization_we_vote_id) +
@@ -1668,8 +1720,8 @@ def challenge_participants_list_process_view(request):
 
     if positive_value_exists(only_show_participants_with_endorsements):
         participants_query = participants_query.exclude(
-            Q(participant_endorsement__isnull=True) |
-            Q(participant_endorsement__exact='')
+            Q(custom_message_for_friends__isnull=True) |
+            Q(custom_message_for_friends__exact='')
         )
 
     participants_query = participants_query.order_by('-date_joined')
@@ -1687,7 +1739,7 @@ def challenge_participants_list_process_view(request):
             new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(participant_endorsement__icontains=one_word)
+            new_filter = Q(custom_message_for_friends__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(voter_we_vote_id=one_word)
@@ -1708,11 +1760,11 @@ def challenge_participants_list_process_view(request):
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
-        participants_list = participants_query[:1000]
+        participant_list = participants_query[:1000]
     elif positive_value_exists(show_all):
-        participants_list = participants_query
+        participant_list = participants_query
     else:
-        participants_list = participants_query[:200]
+        participant_list = participants_query[:200]
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -1761,7 +1813,7 @@ def challenge_participants_list_process_view(request):
                     challenge_we_vote_id=challenge_we_vote_id,
                     participant_name=participant_name,
                     organization_we_vote_id=challenge_participant_organization_we_vote_id,
-                    participant_endorsement=incoming_challenge_participant_endorsement,
+                    custom_message_for_friends=incoming_challenge_custom_message_for_friends,
                     voter_we_vote_id=challenge_participant_voter_we_vote_id,
                     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
@@ -1779,7 +1831,7 @@ def challenge_participants_list_process_view(request):
     update_challenge_participant_count = False
     results = deleting_or_editing_challenge_participant_list(
         request=request,
-        participants_list=participants_list,
+        participant_list=participant_list,
     )
     update_challenge_participant_count = update_challenge_participant_count or results['update_challenge_participant_count']
     update_message = results['update_message']
@@ -1807,7 +1859,7 @@ def challenge_participants_list_process_view(request):
     if positive_value_exists(info_message_to_print):
         messages.add_message(request, messages.INFO, info_message_to_print)
 
-    return HttpResponseRedirect(reverse('challenge:participants_list', args=(challenge_we_vote_id,)) +
+    return HttpResponseRedirect(reverse('challenge:participant_list', args=(challenge_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&challenge_owner_organization_we_vote_id=" +
                                 str(challenge_owner_organization_we_vote_id) +
@@ -2290,13 +2342,13 @@ def challenge_not_duplicates_view(request):
 
 def deleting_or_editing_challenge_participant_list(
         request=None,
-        participants_list=[]):
+        participant_list=[]):
     organization_dict_by_we_vote_id = {}
     organization_manager = OrganizationManager()
     update_challenge_participant_count = False
     update_message = ''
     voter_manager = VoterManager()
-    for challenge_participant in participants_list:
+    for challenge_participant in participant_list:
         if positive_value_exists(challenge_participant.challenge_we_vote_id):
             delete_variable_name = "delete_challenge_participant_" + str(challenge_participant.id)
             delete_challenge_participant = positive_value_exists(request.POST.get(delete_variable_name, False))

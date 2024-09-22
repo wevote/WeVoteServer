@@ -1,4 +1,4 @@
-{# templates/challenge/challenge_participants_list.html #}
+{# templates/challenge/challenge_participant_list.html #}
 {% extends "template_base.html" %}
 
 {% block title %}Challenge Participants: {{ challenge_title }}{% endblock %}
@@ -11,7 +11,7 @@
 
 <h1>Challenge Participants: {{ challenge_title }}</h1>
 
-<form name="state_code_form" method="get" action="{% url 'challenge:participants_list' challenge_we_vote_id %}">
+<form name="state_code_form" method="get" action="{% url 'challenge:participant_list' challenge_we_vote_id %}">
     {% csrf_token %}
     <input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
     <input type="hidden" name="challenge_search" value="{% if challenge_search %}{{ challenge_search }}{% endif %}">
@@ -35,7 +35,7 @@
     <br />
 
 {% if challenge_search %}
-    <a href="{% url 'challenge:participants_list' challenge_we_vote_id %}?state_code={{ state_code }}">
+    <a href="{% url 'challenge:participant_list' challenge_we_vote_id %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="challenge_search" id="challenge_search_id" value="{{ challenge_search }}" />
@@ -43,7 +43,7 @@
 
 </form>
 
-<form action="{% url "challenge:participants_list_process" %}" method="post" class="form-horizontal">
+<form action="{% url "challenge:participant_list_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
 <input type="hidden" name="challenge_we_vote_id" value="{{ challenge_we_vote_id }}">
 <input type="hidden" name="challenge_owner_organization_we_vote_id" value="{% if challenge_owner_organization_we_vote_id %}{{ challenge_owner_organization_we_vote_id }}{% endif %}">
@@ -74,7 +74,7 @@
                 </td>
                 <td style="width: 320px;">
                     <textarea
-                            name="incoming_challenge_participant_endorsement"
+                            name="incoming_challenge_custom_message_for_friends"
                             rows="1"
                             style="width: 300px; border: 1px solid lightgray;"></textarea>
                 </td>
@@ -98,14 +98,14 @@
     </div>
 </div>
 
-{% if participants_list %}
-{% include "challenge/challenge_participants_list_table.html" with participants_list=participants_list %}
+{% if participant_list %}
+{% include "challenge/challenge_participant_list_table.html" with participant_list=participant_list %}
 
     <p></p>
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-      <a href="{% url 'challenge:participants_list' challenge_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
+      <a href="{% url 'challenge:participant_list' challenge_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&challenge_owner_organization_we_vote_id={{ challenge_owner_organization_we_vote_id }}&challenge_search={{ challenge_search }}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-default">Update Challenge Participants</button>

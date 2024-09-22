@@ -114,6 +114,8 @@ urlpatterns = [
                           views_challenge.challenge_participant_retrieve_view, name='challengeParticipantRetrieveView'),
                   re_path(r'^challengeParticipantSave/', views_challenge.challenge_participant_save_view,
                           name='challengeParticipantSaveView'),
+                  re_path(r'^challengeParticipantListRetrieve/',
+                          views_challenge.challenge_participant_list_retrieve_view, name='challengeParticipantListRetrieveView'),
                   # url(r'^couponSummaryRetrieve',
                   #     views_donation.coupon_summary_retrieve_for_api_view, name='couponSummaryRetrieve'),
                   # No doc yet
@@ -567,6 +569,8 @@ urlpatterns = [
                        views_docs.challenge_participant_retrieve_doc_view, name='challengeParticipantRetrieveDocs'),
                   path('docs/challengeParticipantSave/',
                        views_docs.challenge_participant_save_doc_view, name='challengeParticipantSaveDocs'),
+                  path('docs/challengeParticipantListRetrieve/',
+                       views_docs.challenge_participant_list_retrieve_doc_view, name='challengeParticipantListRetrieveDocs'),
                   path('docs/deviceIdGenerate/', views_docs.device_id_generate_doc_view,
                        name='deviceIdGenerateDocs'),
                   path('docs/deviceStoreFirebaseCloudMessagingToken/',

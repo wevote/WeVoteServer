@@ -396,7 +396,8 @@ class FacebookManager(models.Manager):
         return results
 
     @staticmethod
-    def update_or_create_facebook_friends_using_we_vote(facebook_id_of_me, facebook_id_of_my_friend):
+    def update_or_create_facebook_friends_using_we_vote(facebook_id_of_me,
+                                                        facebook_id_of_my_friend):
         """
         We use this subroutine to create or update FacebookFriendsUsingWeVote table with my friends facebook id.
         :param facebook_id_of_me:
@@ -554,7 +555,9 @@ class FacebookManager(models.Manager):
             }
         return results
 
-    def reset_facebook_user_image_details(self, facebook_user_id, facebook_profile_image_url_https,
+    def reset_facebook_user_image_details(self,
+                                          facebook_user_id,
+                                          facebook_profile_image_url_https,
                                           facebook_background_image_url_https):
         """
          Reset an facebook user entry with original image details from we vote image.

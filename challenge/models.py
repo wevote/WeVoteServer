@@ -594,6 +594,25 @@ class ChallengeManager(models.Manager):
             status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ERROR: ' + str(e) + ' '
             success = False
 
+        if not positive_value_exists(challenge_found) and positive_value_exists(seo_friendly_path):
+            # Search by alternate seo_friendly_path
+            try:
+                queryset = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                challenge_seo_friendly_path = queryset.get(final_pathname_string__iexact=seo_friendly_path)
+                challenge_we_vote_id = challenge_seo_friendly_path.challenge_we_vote_id
+
+                if positive_value_exists(challenge_we_vote_id):
+                    if positive_value_exists(read_only):
+                        challenge = Challenge.objects.using('readonly').get(we_vote_id=challenge_we_vote_id)
+                    else:
+                        challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
+                    challenge_found = True
+                    challenge_we_vote_id = challenge.we_vote_id
+                    status += 'RETRIEVE_CHALLENGE_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                    success = True
+            except Exception as e:
+                status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ALTERNATE_SEO_FRIENDLY_PATH_ERROR: ' + str(e) + " "
+
         if positive_value_exists(challenge_found):
             if not viewer_is_owner and positive_value_exists(challenge_we_vote_id):
                 viewer_is_owner = challenge_manager.is_voter_challenge_owner(
@@ -720,6 +739,25 @@ class ChallengeManager(models.Manager):
             exception_does_not_exist = True
             status += 'CHALLENGE_NOT_FOUND_DoesNotExist '
             success = True
+
+        if not positive_value_exists(challenge_found) and positive_value_exists(seo_friendly_path):
+            # Search by alternate seo_friendly_path
+            try:
+                queryset = ChallengeSEOFriendlyPath.objects.using('readonly').all()
+                challenge_seo_friendly_path = queryset.get(final_pathname_string__iexact=seo_friendly_path)
+                challenge_we_vote_id = challenge_seo_friendly_path.challenge_we_vote_id
+
+                if positive_value_exists(challenge_we_vote_id):
+                    if positive_value_exists(read_only):
+                        challenge = Challenge.objects.using('readonly').get(we_vote_id=challenge_we_vote_id)
+                    else:
+                        challenge = Challenge.objects.get(we_vote_id=challenge_we_vote_id)
+                    challenge_found = True
+                    challenge_we_vote_id = challenge.we_vote_id
+                    status += 'RETRIEVE_CHALLENGE_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                    success = True
+            except Exception as e:
+                status += 'RETRIEVE_CHALLENGE_AS_OWNER_NOT_FOUND_ALTERNATE_SEO_FRIENDLY_PATH_ERROR: ' + str(e) + " "
 
         if positive_value_exists(challenge_found):
             if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
@@ -1736,10 +1774,10 @@ class ChallengeManager(models.Manager):
                     status += 'REPAIR_CHALLENGE_PARTICIPANT_FOUND_MULTIPLE_WITH_WE_VOTE_ID '
                     challenge_participant_found = True
                     first_challenge_participant = challenge_participant_list[0]
-                    # We want to keep the participant_endorsement with the most characters
-                    participant_endorsement_to_keep = first_challenge_participant.participant_endorsement
-                    participant_endorsement_to_keep_length = len(participant_endorsement_to_keep) \
-                        if positive_value_exists(participant_endorsement_to_keep) else 0
+                    # We want to keep the custom_message_for_friends with the most characters
+                    custom_message_for_friends_to_keep = first_challenge_participant.custom_message_for_friends
+                    custom_message_for_friends_to_keep_length = len(custom_message_for_friends_to_keep) \
+                        if positive_value_exists(custom_message_for_friends_to_keep) else 0
                     visible_to_public = first_challenge_participant.visible_to_public
                     visibility_blocked_by_we_vote = first_challenge_participant.visibility_blocked_by_we_vote
 
@@ -1747,11 +1785,11 @@ class ChallengeManager(models.Manager):
                     # We set a "safety valve" of 25
                     while array_index < number_of_challenge_participants_found and array_index < 25:
                         challenge_participant_temp = challenge_participant_list[array_index]
-                        # We want to keep the participant_endorsement with the most characters
-                        if participant_endorsement_to_keep_length < len(challenge_participant_temp.participant_endorsement):
-                            participant_endorsement_to_keep = challenge_participant_temp.participant_endorsement
-                            participant_endorsement_to_keep_length = len(participant_endorsement_to_keep) \
-                                if positive_value_exists(participant_endorsement_to_keep) else 0
+                        # We want to keep the custom_message_for_friends with the most characters
+                        if custom_message_for_friends_to_keep_length < len(challenge_participant_temp.custom_message_for_friends):
+                            custom_message_for_friends_to_keep = challenge_participant_temp.custom_message_for_friends
+                            custom_message_for_friends_to_keep_length = len(custom_message_for_friends_to_keep) \
+                                if positive_value_exists(custom_message_for_friends_to_keep) else 0
                         # If any have visible_to_public true, mark the one to keep as true
                         if not positive_value_exists(visible_to_public):
                             visible_to_public = challenge_participant_temp.visible_to_public
@@ -1761,7 +1799,7 @@ class ChallengeManager(models.Manager):
                         array_index += 1
 
                     # Now update first_challenge_participant with values from while loop
-                    first_challenge_participant.participant_endorsement_to_keep = participant_endorsement_to_keep
+                    first_challenge_participant.custom_message_for_friends_to_keep = custom_message_for_friends_to_keep
                     first_challenge_participant.visible_to_public = visible_to_public
                     first_challenge_participant.visibility_blocked_by_we_vote = visibility_blocked_by_we_vote
 
@@ -1885,7 +1923,7 @@ class ChallengeManager(models.Manager):
     def retrieve_challenge_participant_list(
             challenge_we_vote_id=None,
             voter_we_vote_id=None,
-            require_participant_endorsement=False,
+            require_custom_message_for_friends=False,
             require_visible_to_public=True,
             require_not_blocked_by_we_vote=True,
             limit=10,
@@ -1896,29 +1934,29 @@ class ChallengeManager(models.Manager):
 
         try:
             if read_only:
-                challenge_queryset = ChallengeParticipant.objects.using('readonly').all()
+                queryset = ChallengeParticipant.objects.using('readonly').all()
             else:
-                challenge_queryset = ChallengeParticipant.objects.all()
+                queryset = ChallengeParticipant.objects.all()
 
             if positive_value_exists(challenge_we_vote_id):
-                challenge_queryset = challenge_queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
-            else:
-                challenge_queryset = challenge_queryset.filter(voter_we_vote_id=voter_we_vote_id)
+                queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+            if positive_value_exists(voter_we_vote_id):
+                queryset = queryset.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(require_visible_to_public):
-                challenge_queryset = challenge_queryset.filter(visible_to_public=True)
+                queryset = queryset.filter(visible_to_public=True)
             if positive_value_exists(require_not_blocked_by_we_vote):
-                challenge_queryset = challenge_queryset.filter(visibility_blocked_by_we_vote=False)
-            if positive_value_exists(require_participant_endorsement):
-                challenge_queryset = challenge_queryset.exclude(
-                    Q(participant_endorsement__isnull=True) |
-                    Q(participant_endorsement__exact='')
+                queryset = queryset.filter(visibility_blocked_by_we_vote=False)
+            if positive_value_exists(require_custom_message_for_friends):
+                queryset = queryset.exclude(
+                    Q(custom_message_for_friends__isnull=True) |
+                    Q(custom_message_for_friends__exact='')
                 )
-            challenge_queryset = challenge_queryset.order_by('-date_joined')
+            queryset = queryset.order_by('-date_joined')
 
             if limit > 0:
-                participant_list = challenge_queryset[:limit]
+                participant_list = queryset[:limit]
             else:
-                participant_list = list(challenge_queryset)
+                participant_list = list(queryset)
             participant_list_found = positive_value_exists(len(participant_list))
             status += "RETRIEVE_CHALLENGE_PARTICIPANT_LIST_SUCCEEDED "
         except Exception as e:
@@ -1927,10 +1965,10 @@ class ChallengeManager(models.Manager):
             participant_list_found = False
 
         results = {
-            'success':                                  success,
-            'status':                                   status,
-            'participant_list_found':                     participant_list_found,
-            'participant_list':                           participant_list,
+            'success':                  success,
+            'status':                   status,
+            'participant_list_found':   participant_list_found,
+            'participant_list':         participant_list,
         }
         return results
 
@@ -3129,10 +3167,10 @@ class ChallengeManager(models.Manager):
                         and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
                     challenge_participant.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
                     challenge_participant_changed = True
-                if 'participant_endorsement_changed' in update_values \
-                        and positive_value_exists(update_values['participant_endorsement_changed']):
-                    challenge_participant.participant_endorsement = \
-                        update_values['participant_endorsement']
+                if 'custom_message_for_friends_changed' in update_values \
+                        and positive_value_exists(update_values['custom_message_for_friends_changed']):
+                    challenge_participant.custom_message_for_friends = \
+                        update_values['custom_message_for_friends']
                     challenge_participant_changed = True
                 if 'visible_to_public_changed' in update_values \
                         and positive_value_exists(update_values['visible_to_public_changed']):
@@ -3223,13 +3261,17 @@ class ChallengeParticipant(models.Model):
         return "ChallengeParticipant"
 
     challenge_we_vote_id = models.CharField(max_length=255, db_index=True)
+    custom_message_for_friends = models.TextField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     date_joined = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
-    is_subscribed_by_email = models.BooleanField(default=None, null=True)
-    linked_position_we_vote_id = models.CharField(max_length=255, null=True)
+    friends_invited = models.PositiveIntegerField(default=0, null=False)
+    friends_who_joined = models.PositiveIntegerField(default=0, null=False)
+    friends_who_viewed = models.PositiveIntegerField(default=0, null=False)
+    friends_who_viewed_plus = models.PositiveIntegerField(default=0, null=False)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     participant_name = models.CharField(max_length=255, null=True)
-    participant_endorsement = models.TextField(null=True)
+    points = models.PositiveIntegerField(default=0, null=False)
+    rank = models.PositiveIntegerField(default=0, null=False)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=True)
     voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)

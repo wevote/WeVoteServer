@@ -204,7 +204,7 @@ def data_cleanup_organization_analysis_view(request):
         organization = Organization.objects.using('readonly').get(we_vote_id__iexact=organization_we_vote_id)
         organization_found = True
         try:
-            organization.linked_voter = Voter.objects.get(
+            organization.linked_voter = Voter.objects.using('readonly').get(
                 linked_organization_we_vote_id__iexact=organization.we_vote_id)
         except Voter.DoesNotExist:
             pass
@@ -229,7 +229,7 @@ def data_cleanup_organization_analysis_view(request):
     #  check to see if anyone else owns it.
     if not twitter_link_to_this_organization_exists and organization.twitter_user_id:
         try:
-            twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+            twitter_link_to_organization = TwitterLinkToOrganization.objects.using('readonly').get(
                 twitter_id=organization.twitter_user_id)
             if positive_value_exists(twitter_link_to_organization.twitter_id):
                 if twitter_link_to_organization.organization_we_vote_id != organization.we_vote_id:
@@ -238,7 +238,7 @@ def data_cleanup_organization_analysis_view(request):
             pass
 
     # Voter that is linked to this Organization
-    voter_linked_organization_we_vote_id_list = Voter.objects.all()
+    voter_linked_organization_we_vote_id_list = Voter.objects.using('readonly').all()
     voter_linked_organization_we_vote_id_list = voter_linked_organization_we_vote_id_list.filter(
         linked_organization_we_vote_id__iexact=organization.we_vote_id)
     voter_linked_organization_we_vote_id_list = voter_linked_organization_we_vote_id_list[:10]
@@ -285,7 +285,7 @@ def data_cleanup_organization_analysis_view(request):
             for one_duplicate_organization in organization_list_with_duplicate_twitter:
                 try:
                     linked_voter = \
-                        Voter.objects.get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
+                        Voter.objects.using('readonly').get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
                     one_duplicate_organization.linked_voter = linked_voter
                 except Voter.DoesNotExist:
                     pass
@@ -310,7 +310,7 @@ def data_cleanup_organization_analysis_view(request):
         for item in voter_raw_filters:
             final_voter_filters |= item
 
-        voter_list_duplicate_twitter = Voter.objects.all()
+        voter_list_duplicate_twitter = Voter.objects.using('readonly').all()
         voter_list_duplicate_twitter = voter_list_duplicate_twitter.filter(final_voter_filters)
         voter_list_duplicate_twitter = voter_list_duplicate_twitter.exclude(
             linked_organization_we_vote_id__iexact=organization.we_vote_id)
@@ -435,7 +435,7 @@ def data_cleanup_organization_list_analysis_view(request):
             # Retrieve the linked_voter
             linked_voter_exists = False
             try:
-                linked_voter = Voter.objects.get(
+                linked_voter = Voter.objects.using('readonly').get(
                     linked_organization_we_vote_id__iexact=one_organization.we_vote_id)
                 one_organization.linked_voter = linked_voter
                 linked_voter_exists = True
@@ -464,7 +464,7 @@ def data_cleanup_organization_list_analysis_view(request):
                     twitter_user = twitter_results['twitter_user']
                     twitter_id = twitter_user.twitter_id
                     try:
-                        twitter_link_to_organization = TwitterLinkToOrganization.objects.get(twitter_id=twitter_id)
+                        twitter_link_to_organization = TwitterLinkToOrganization.objects.using('readonly').get(twitter_id=twitter_id)
                         if positive_value_exists(twitter_link_to_organization.organization_we_vote_id):
                             one_organization.organization_we_vote_id_from_link_to_organization = \
                                 twitter_link_to_organization.organization_we_vote_id
@@ -494,7 +494,7 @@ def data_cleanup_organization_list_analysis_view(request):
                     twitter_user = twitter_results['twitter_user']
                     twitter_id = twitter_user.twitter_id
                     try:
-                        twitter_link_to_voter = TwitterLinkToVoter.objects.get(twitter_id=twitter_id)
+                        twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(twitter_id=twitter_id)
                         if positive_value_exists(twitter_link_to_voter.voter_we_vote_id):
                             one_organization.voter_we_vote_id_from_link_to_voter = \
                                 twitter_link_to_voter.voter_we_vote_id
@@ -1061,7 +1061,7 @@ def data_cleanup_voter_hanging_data_process_view(request):
         elif positive_value_exists(one_voter.primary_email_we_vote_id):
             # Is there an EmailAddress entry matching this primary_email_we_vote_id?
             try:
-                verified_email_address = EmailAddress.objects.get(
+                verified_email_address = EmailAddress.objects.using('readonly').get(
                     we_vote_id=one_voter.primary_email_we_vote_id,
                     email_ownership_is_verified=True,
                     # email_permanent_bounce=False,
@@ -1187,7 +1187,7 @@ def data_cleanup_voter_list_analysis_view(request):
             if results['suggested_friend_created_count']:
                 suggested_friend_created_count += results['suggested_friend_created_count']
 
-    voter_list_with_sign_in_data_query = Voter.objects.order_by('-id', '-date_last_changed')
+    voter_list_with_sign_in_data_query = Voter.objects.using('readonly').order_by('-id', '-date_last_changed')
     voter_list_with_sign_in_data_query = voter_list_with_sign_in_data_query.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
         ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
@@ -1204,7 +1204,7 @@ def data_cleanup_voter_list_analysis_view(request):
         # Get FacebookLinkToVoter
         facebook_id_from_link_to_voter = 0
         try:
-            facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+            facebook_link_to_voter = FacebookLinkToVoter.objects.using('readonly').get(
                 voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
             if positive_value_exists(facebook_link_to_voter.facebook_user_id):
                 facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
@@ -1265,7 +1265,7 @@ def data_cleanup_voter_list_analysis_view(request):
             for item in voter_raw_filters:
                 final_voter_filters |= item
 
-            duplicate_facebook_data_voter_list = Voter.objects.all()
+            duplicate_facebook_data_voter_list = Voter.objects.using('readonly').all()
             duplicate_facebook_data_voter_list = duplicate_facebook_data_voter_list.filter(final_voter_filters)
             duplicate_facebook_data_voter_list = duplicate_facebook_data_voter_list.exclude(
                 we_vote_id__iexact=one_linked_voter.we_vote_id)
@@ -1308,7 +1308,7 @@ def data_cleanup_voter_list_analysis_view(request):
             for item in voter_raw_filters:
                 final_voter_filters |= item
 
-            duplicate_twitter_data_voter_list = Voter.objects.all()
+            duplicate_twitter_data_voter_list = Voter.objects.using('readonly').all()
             duplicate_twitter_data_voter_list = duplicate_twitter_data_voter_list.filter(final_voter_filters)
             duplicate_twitter_data_voter_list = duplicate_twitter_data_voter_list.exclude(
                 we_vote_id__iexact=one_linked_voter.we_vote_id)
@@ -1344,7 +1344,7 @@ def data_cleanup_voter_list_analysis_view(request):
         one_linked_voter.positions_count = \
             position_metrics_manager.fetch_positions_count_for_this_voter(one_linked_voter)
 
-        email_address_list = EmailAddress.objects.all()
+        email_address_list = EmailAddress.objects.using('readonly').all()
         email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
         one_linked_voter.linked_emails = email_address_list
 
@@ -1415,7 +1415,7 @@ def data_voter_statistics_view(request):
     current_friend_query = CurrentFriend.objects.all()
     current_friend_count = current_friend_query.count()
 
-    voter_list_with_sign_in_data = Voter.objects.all()
+    voter_list_with_sign_in_data = Voter.objects.using('readonly').all()
     voter_list_with_sign_in_data = voter_list_with_sign_in_data.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
         ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
@@ -1437,7 +1437,7 @@ def data_voter_statistics_view(request):
         election_values_exist = False
         # ################################
         # For this election, how many addresses were saved?
-        address_query = VoterAddress.objects.all()
+        address_query = VoterAddress.objects.using('readonly').all()
         address_query = address_query.filter(google_civic_election_id=one_election.google_civic_election_id)
         one_election.voter_address_count = address_query.count()
         if positive_value_exists(one_election.voter_address_count):
@@ -1445,7 +1445,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many BallotSaved entries were saved for voters?
-        ballot_saved_query = VoterBallotSaved.objects.all()
+        ballot_saved_query = VoterBallotSaved.objects.using('readonly').all()
         ballot_saved_query = ballot_saved_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         ballot_saved_query = ballot_saved_query.exclude(
@@ -1456,7 +1456,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many BallotReturned entries were saved for voters?
-        ballot_returned_query = BallotReturned.objects.all()
+        ballot_returned_query = BallotReturned.objects.using('readonly').all()
         ballot_returned_query = ballot_returned_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         ballot_returned_query = ballot_returned_query.exclude(
@@ -1469,7 +1469,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many individual voters saved at least one Public PositionEntered entry?
-        voter_position_entered_query = PositionEntered.objects.all()
+        voter_position_entered_query = PositionEntered.objects.using('readonly').all()
         voter_position_entered_query = voter_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         voter_position_entered_query = voter_position_entered_query.exclude(
@@ -1481,7 +1481,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many Public PositionEntered entries were saved by voters?
-        voter_position_entered_query = PositionEntered.objects.all()
+        voter_position_entered_query = PositionEntered.objects.using('readonly').all()
         voter_position_entered_query = voter_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         voter_position_entered_query = voter_position_entered_query.exclude(
@@ -1492,7 +1492,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many individual voters saved at least one PositionForFriends entry?
-        voter_position_for_friends_query = PositionForFriends.objects.all()
+        voter_position_for_friends_query = PositionForFriends.objects.using('readonly').all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
         voter_position_for_friends_query = voter_position_for_friends_query.exclude(stance__iexact='PERCENT_RATING')
         voter_position_for_friends_query = voter_position_for_friends_query.filter(
@@ -1506,7 +1506,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many Public PositionForFriends entries were saved by voters?
-        voter_position_for_friends_query = PositionForFriends.objects.all()
+        voter_position_for_friends_query = PositionForFriends.objects.using('readonly').all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
         voter_position_for_friends_query = voter_position_for_friends_query.exclude(stance__iexact='PERCENT_RATING')
         voter_position_for_friends_query = voter_position_for_friends_query.filter(
@@ -1519,7 +1519,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many BallotReturned entries were saved for map points?
-        ballot_returned_query = BallotReturned.objects.all()
+        ballot_returned_query = BallotReturned.objects.using('readonly').all()
         ballot_returned_query = ballot_returned_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         ballot_returned_query = ballot_returned_query.exclude(
@@ -1530,7 +1530,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many endorsers shared at least one Public PositionEntered entry?
-        organization_position_entered_query = PositionEntered.objects.all()
+        organization_position_entered_query = PositionEntered.objects.using('readonly').all()
         organization_position_entered_query = organization_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         organization_position_entered_query = organization_position_entered_query.exclude(
@@ -1543,7 +1543,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many Public PositionEntered entries were for endorsers?
-        organization_position_entered_query = PositionEntered.objects.all()
+        organization_position_entered_query = PositionEntered.objects.using('readonly').all()
         organization_position_entered_query = organization_position_entered_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         organization_position_entered_query = organization_position_entered_query.exclude(
@@ -1554,7 +1554,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many ContestOffices
-        contest_office_query = ContestOffice.objects.all()
+        contest_office_query = ContestOffice.objects.using('readonly').all()
         contest_office_query = contest_office_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         one_election.number_of_offices = contest_office_query.count()
@@ -1563,7 +1563,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many CandidateCampaign
-        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = CandidateCampaign.objects.using('readonly').all()
         candidate_query = candidate_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         one_election.number_of_candidates = candidate_query.count()
@@ -1572,7 +1572,7 @@ def data_voter_statistics_view(request):
 
         # ################################
         # For this election, how many ContestMeasures
-        contest_measure_query = ContestMeasure.objects.all()
+        contest_measure_query = ContestMeasure.objects.using('readonly').all()
         contest_measure_query = contest_measure_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         one_election.number_of_measures = contest_measure_query.count()
@@ -1767,7 +1767,7 @@ def login_we_vote(request):
             email_address_obj = queryset.first()
             if email_address_obj:
                 voter_we_vote_id = email_address_obj.voter_we_vote_id
-                user_obj = Voter.objects.filter(we_vote_id__iexact=voter_we_vote_id).get()
+                user_obj = Voter.objects.using('readonly').filter(we_vote_id__iexact=voter_we_vote_id).get()
                 username = user_obj.email
             else:
                 username = None
