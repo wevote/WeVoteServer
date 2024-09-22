@@ -578,6 +578,15 @@
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" class="btn-primary" /></p>
 
 <br />
+
+{% if change_log_list %}
+    <br />
+<div class="form-group">
+    {% include "politician/change_log_list.html" with change_log_list=change_log_list %}
+</div>
+{% endif %}
+<br />
+
 {% if politician %}
 
 {% if linked_candidate_list %}
