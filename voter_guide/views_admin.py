@@ -2585,7 +2585,6 @@ def voter_guide_search_process_view(request):
         'search_performed':             search_performed,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
-        'search_performed':             search_performed,
         'upcoming_election_list':       upcoming_election_list,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)
