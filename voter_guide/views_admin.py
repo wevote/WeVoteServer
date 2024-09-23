@@ -2556,10 +2556,10 @@ def voter_guide_search_process_view(request):
         organizations_count = len(organizations_list)
 
         messages.add_message(request, messages.INFO, 'We found {count} existing organization(s) '
-                                                    'that might match.'.format(count=organizations_count))
+                                                'that might match.'.format(count=organizations_count))
     else:
         organizations_list = []
-        messages.add_message(request, messages.INFO, 'No endorser found with those search terms. '
+    messages.add_message(request, messages.INFO, 'No endorser found with those search terms. '
                                                     'Please try again. ')
 
     election_manager = ElectionManager()
@@ -2585,6 +2585,7 @@ def voter_guide_search_process_view(request):
         'search_performed':             search_performed,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
+        'search_performed':             search_performed,
         'upcoming_election_list':       upcoming_election_list,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)
