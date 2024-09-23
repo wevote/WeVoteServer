@@ -1290,9 +1290,9 @@ def organization_edit_process_view(request):
     issue_analysis_admin_notes = request.POST.get('issue_analysis_admin_notes', False)
     issue_analysis_done = request.POST.get('issue_analysis_done', False)
     organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
-    organization_email = request.POST.get('organization_email', False)
+    organization_email = request.POST.get('organization_email', '')
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
-    organization_facebook = request.POST.get('organization_facebook', False)
+    organization_facebook = request.POST.get('organization_facebook', '')
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     organization_instagram_handle = request.POST.get('organization_instagram_handle', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
@@ -1308,7 +1308,7 @@ def organization_edit_process_view(request):
     organization_twitter_updates_failing = \
         positive_value_exists(request.POST.get('organization_twitter_updates_failing', False))
     organization_type = request.POST.get('organization_type', GROUP)
-    organization_website = request.POST.get('organization_website', False)
+    organization_website = request.POST.get('organization_website', '')
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     state_served_code = request.POST.get('state_served_code', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
@@ -1403,10 +1403,6 @@ def organization_edit_process_view(request):
     if google_civic_election_id is not False:
         url_variables += "&google_civic_election_id=" + str(google_civic_election_id)
     
-    if not organization_name:
-        messages.error(request, 'Organization name is required.')
-        return render(request, 'voter_guide/voter_guide_search.html')
-        
     if not success:
         messages.add_message(request, messages.ERROR,
                              'ORGANIZATION_ERROR Please click the back arrow and send URL to the engineering team: '
@@ -1508,7 +1504,36 @@ def organization_edit_process_view(request):
                                  '' + str(status))
             return HttpResponseRedirect(reverse('organization:organization_list', args=()) + url_variables)
         else:
-            organization_on_stage_found = True
+            minimum_required_variables_exist = positive_value_exists(organization_name)
+            if not minimum_required_variables_exist:
+                upcoming_election_list = []
+                results = election_manager.retrieve_upcoming_elections()
+                if results['success']:
+                    upcoming_election_list = results['election_list']
+
+                state_list = STATE_CODE_MAP
+                sorted_state_list = sorted(state_list.items())
+
+                messages.add_message(request, messages.ERROR, 'Missing Endorser Name, which is required.')
+                messages_on_stage = get_messages(request)
+                template_values = {
+                    'google_civic_election_id':     google_civic_election_id,
+                    'messages_on_stage':            messages_on_stage,
+                    'organization_instagram_handle':    organization_instagram_handle,
+                    'organization_name':            organization_name,
+                    'organization_twitter_handle':  organization_twitter_handle,
+                    'organization_facebook':        organization_facebook,
+                    'organization_website':         organization_website,
+                    'wikipedia_page_title':         wikipedia_page_title,
+                    'wikipedia_photo_url':          wikipedia_photo_url,
+                    'state_served_code':            state_served_code,
+                    'state_list':                   sorted_state_list,
+                    'upcoming_election_list':       upcoming_election_list,
+                }
+                return render(request, 'voter_guide/voter_guide_search.html', template_values)
+            else: 
+                organization_on_stage_found = True
+            
             organization_on_stage = org_results['organization']
             org_results_organization_we_vote_id = organization_on_stage.we_vote_id
             if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
@@ -1537,7 +1562,7 @@ def organization_edit_process_view(request):
             results = organization_list_manager.organization_search_find_any_possibilities(
                 organization_name=organization_name,
                 organization_twitter_handle=organization_twitter_handle,
-                organization_website=organization_website,
+                # organization_website=organization_website, //Input commented out -> voter_guide_search.html
                 read_only=True)
 
             if results['organizations_found']:
@@ -1561,34 +1586,6 @@ def organization_edit_process_view(request):
                     'organizations_list':           organizations_list,
                     'organization_name':            organization_name,
                     'organization_instagram_handle':    organization_instagram_handle,
-                    'organization_twitter_handle':  organization_twitter_handle,
-                    'organization_facebook':        organization_facebook,
-                    'organization_website':         organization_website,
-                    'wikipedia_page_title':         wikipedia_page_title,
-                    'wikipedia_photo_url':          wikipedia_photo_url,
-                    'state_served_code':            state_served_code,
-                    'state_list':                   sorted_state_list,
-                    'upcoming_election_list':       upcoming_election_list,
-                }
-                return render(request, 'voter_guide/voter_guide_search.html', template_values)
-
-            minimum_required_variables_exist = positive_value_exists(organization_name)
-            if not minimum_required_variables_exist:
-                upcoming_election_list = []
-                results = election_manager.retrieve_upcoming_elections()
-                if results['success']:
-                    upcoming_election_list = results['election_list']
-
-                state_list = STATE_CODE_MAP
-                sorted_state_list = sorted(state_list.items())
-
-                messages.add_message(request, messages.INFO, 'Missing organization_name, which is required.')
-                messages_on_stage = get_messages(request)
-                template_values = {
-                    'google_civic_election_id':     google_civic_election_id,
-                    'messages_on_stage':            messages_on_stage,
-                    'organization_instagram_handle':    organization_instagram_handle,
-                    'organization_name':            organization_name,
                     'organization_twitter_handle':  organization_twitter_handle,
                     'organization_facebook':        organization_facebook,
                     'organization_website':         organization_website,
