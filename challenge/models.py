@@ -25,8 +25,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 # When merging Challenge entries, these are the fields we check for figure_out_challenge_conflict_values
 CHALLENGE_UNIQUE_IDENTIFIERS = [
     'challenge_description',
+    'challenge_ends_date_as_integer',
+    'challenge_starts_date_as_integer',
     'challenge_title',
-    'date_challenge_started',
     'final_election_date_as_integer',
     'in_draft_mode',
     'is_blocked_by_we_vote',
@@ -80,6 +81,8 @@ class Challenge(models.Model):
         blank=True, unique=True, db_index=True)
     challenge_description = models.TextField(null=True, blank=True)
     challenge_title = models.CharField(verbose_name="title of challenge", max_length=255, null=False, blank=False)
+    challenge_ends_date_as_integer = models.PositiveIntegerField(null=True)
+    challenge_starts_date_as_integer = models.PositiveIntegerField(null=True)
     date_last_updated_from_politician = models.DateTimeField(null=True, default=None)
     # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
     final_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
@@ -126,7 +129,6 @@ class Challenge(models.Model):
     we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
-    date_challenge_started = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
 
     def is_participants_count_minimum_exceeded(self):
         if positive_value_exists(self.participants_count_minimum_ignored) or \
@@ -203,6 +205,38 @@ class ChallengesArePossibleDuplicates(models.Model):
         else:
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
+
+
+class ChallengeInvitee(models.Model):
+    objects = None
+
+    def __unicode__(self):
+        return "ChallengeInvitee"
+
+    challenge_joined = models.BooleanField(default=False)
+    challenge_we_vote_id = models.CharField(max_length=255)
+    custom_message_from_inviter = models.TextField(null=True)
+    date_accepted_invite = models.DateTimeField(null=True)
+    date_invited = models.DateTimeField(null=True, auto_now_add=True)  # Use this field for message sent too
+    invitee_name = models.CharField(max_length=255, null=True)
+    invitee_url_code = models.CharField(max_length=50, null=True)  # generate_random_string(8)
+    inviter_name = models.CharField(max_length=255, null=True)
+    inviter_voter_we_vote_id = models.CharField(max_length=255, null=True)
+    invite_sent = models.BooleanField(default=False)
+    invite_viewed = models.BooleanField(default=False)
+    invite_viewed_count = models.PositiveIntegerField(default=0, null=False)
+    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['invitee_url_code'],
+                name='invitee_url_code_index'),
+            models.Index(
+                fields=['inviter_voter_we_vote_id', 'challenge_we_vote_id'],
+                name='inviter_challenge_list'),
+        ]
 
 
 class ChallengeListedByOrganization(models.Model):
@@ -1110,6 +1144,95 @@ class ChallengeManager(models.Manager):
         return results
 
     @staticmethod
+    def retrieve_challenge_invitee(
+            invitee_id=0,
+            invitee_url_code='',
+            read_only=False):
+        challenge_invitee = None
+        challenge_invitee_found = False
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(invitee_url_code):
+                if positive_value_exists(read_only):
+                    challenge_invitee_query = ChallengeInvitee.objects.using('readonly').filter(
+                        invitee_url_code=invitee_url_code)
+                else:
+                    challenge_invitee_query = ChallengeInvitee.objects.filter(
+                        invitee_url_code=invitee_url_code)
+                challenge_invitee_list = list(challenge_invitee_query)
+                if len(challenge_invitee_list) == 1:
+                    challenge_invitee = challenge_invitee_list[0]
+                    challenge_invitee_found = True
+                    status += 'CHALLENGE_INVITEE_FOUND_WITH_URL_CODE '
+                else:
+                    challenge_invitee_found = False
+                    status += 'CHALLENGE_INVITEE_NOT_FOUND_WITH_URL_CODE '
+            elif positive_value_exists(invitee_id):
+                if positive_value_exists(read_only):
+                    challenge_invitee = ChallengeInvitee.objects.using('readonly').get(id=invitee_id)
+                    challenge_invitee_found = True
+                    status += 'CHALLENGE_INVITEE_FOUND_WITH_ID_READ_ONLY '
+                else:
+                    challenge_invitee = ChallengeInvitee.objects.get(id=invitee_id)
+                    challenge_invitee_found = True
+                    status += 'CHALLENGE_INVITEE_FOUND_WITH_ID '
+            else:
+                status += 'CHALLENGE_INVITEE_NOT_FOUND-MISSING_VARIABLES '
+                success = False
+        except Exception as e:
+            status += 'CHALLENGE_INVITEE_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'challenge_invitee':        challenge_invitee,
+            'challenge_invitee_found':  challenge_invitee_found,
+        }
+        return results
+
+    @staticmethod
+    def retrieve_challenge_invitee_list(
+            challenge_we_vote_id=None,
+            inviter_voter_we_vote_id=None,
+            limit=50,
+            read_only=True):
+        invitee_list = []
+        success = True
+        status = ""
+
+        try:
+            if read_only:
+                queryset = ChallengeInvitee.objects.using('readonly').all()
+            else:
+                queryset = ChallengeInvitee.objects.all()
+
+            queryset = queryset.filter(inviter_voter_we_vote_id=inviter_voter_we_vote_id)
+            if positive_value_exists(challenge_we_vote_id):
+                queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+
+            if limit > 0:
+                invitee_list = queryset[:limit]
+            else:
+                invitee_list = list(queryset)
+            invitee_list_found = positive_value_exists(len(invitee_list))
+            status += "RETRIEVE_CHALLENGE_INVITEE_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CHALLENGE_INVITEE_LIST_FAILED: " + str(e) + " "
+            invitee_list_found = False
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'invitee_list_found':   invitee_list_found,
+            'invitee_list':         invitee_list,
+        }
+        return results
+
+    @staticmethod
     def retrieve_challenge_list(
             including_started_by_voter_we_vote_id=None,
             including_challenge_we_vote_id_list=[],
@@ -1851,6 +1974,71 @@ class ChallengeManager(models.Manager):
             'challenge_participant':          challenge_participant,
             'challenge_participant_found':    challenge_participant_found,
             'challenge_participant_repaired': challenge_participant_repaired,
+        }
+        return results
+
+    def retrieve_challenge_invitee(
+            self,
+            challenge_we_vote_id='',
+            voter_we_vote_id='',
+            read_only=False,
+            recursion_ok=True):
+        challenge_invitee = None
+        challenge_invitee_found = False
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                if positive_value_exists(read_only):
+                    challenge_invitee_query = ChallengeParticipant.objects.using('readonly').filter(
+                        challenge_we_vote_id=challenge_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                else:
+                    challenge_invitee_query = ChallengeParticipant.objects.filter(
+                        challenge_we_vote_id=challenge_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                challenge_invitee_list = list(challenge_invitee_query)
+                if len(challenge_invitee_list) > 1:
+                    if positive_value_exists(recursion_ok):
+                        repair_results = self.repair_challenge_invitee(
+                            challenge_we_vote_id=challenge_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+
+                        )
+                        status += repair_results['status']
+                        second_retrieve_results = self.retrieve_challenge_invitee(
+                            challenge_we_vote_id=challenge_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            read_only=read_only,
+                            recursion_ok=False
+                        )
+                        challenge_invitee_found = second_retrieve_results['challenge_invitee_found']
+                        challenge_invitee = second_retrieve_results['challenge_invitee']
+                        success = second_retrieve_results['success']
+                        status += second_retrieve_results['status']
+                    else:
+                        challenge_invitee = challenge_invitee_list[0]
+                        challenge_invitee_found = True
+                elif len(challenge_invitee_list) == 1:
+                    challenge_invitee = challenge_invitee_list[0]
+                    challenge_invitee_found = True
+                    status += 'CHALLENGE_PARTICIPANT_FOUND_WITH_WE_VOTE_ID '
+                else:
+                    challenge_invitee_found = False
+                    status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_WITH_WE_VOTE_ID '
+            else:
+                status += 'CHALLENGE_PARTICIPANT_NOT_FOUND-MISSING_VARIABLES '
+                success = False
+        except Exception as e:
+            status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'challenge_invitee':          challenge_invitee,
+            'challenge_invitee_found':    challenge_invitee_found,
         }
         return results
 
@@ -2612,6 +2800,139 @@ class ChallengeManager(models.Manager):
         return results
 
     @staticmethod
+    def update_or_create_challenge_invitee(
+            challenge_we_vote_id='',
+            invitee_id=0,
+            inviter_voter_we_vote_id='',
+            update_values={}):
+        status = ""
+        success = True
+        challenge_invitee = None
+        challenge_invitee_changed = False
+        challenge_invitee_created = False
+        challenge_invitee_found = False
+        challenge_manager = ChallengeManager()
+
+        create_variables_exist = positive_value_exists(challenge_we_vote_id) \
+            and positive_value_exists(inviter_voter_we_vote_id)
+        update_variables_exist = positive_value_exists(challenge_we_vote_id) \
+            and positive_value_exists(inviter_voter_we_vote_id) \
+            and positive_value_exists(invitee_id)
+        if not create_variables_exist and not update_variables_exist:
+            status += "COULD_NOT_UPDATE_OR_CREATE: "
+            if not create_variables_exist:
+                status += "CREATE_CHALLENGE_INVITEE_VARIABLES_MISSING "
+            if not update_variables_exist:
+                status += "UPDATE_CHALLENGE_INVITEE_VARIABLES_MISSING "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'challenge_invitee':          None,
+                'challenge_invitee_changed':  False,
+                'challenge_invitee_created':  False,
+                'challenge_invitee_found':    False,
+                'challenge_we_vote_id':         '',
+                'voter_we_vote_id':             '',
+            }
+            return results
+
+        if positive_value_exists(invitee_id):
+            results = challenge_manager.retrieve_challenge_invitee(
+                invitee_id=invitee_id,
+                read_only=False)
+            challenge_invitee_found = results['challenge_invitee_found']
+            if challenge_invitee_found:
+                challenge_invitee = results['challenge_invitee']
+            success = results['success']
+            status += results['status']
+
+        if not positive_value_exists(success):
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'challenge_invitee':            challenge_invitee,
+                'challenge_invitee_changed':    challenge_invitee_changed,
+                'challenge_invitee_created':    challenge_invitee_created,
+                'challenge_invitee_found':      challenge_invitee_found,
+                'challenge_we_vote_id':         challenge_we_vote_id,
+                # 'voter_we_vote_id':             voter_we_vote_id,
+            }
+            return results
+
+        challenge_invitee_changed = False
+        if not challenge_invitee_found:
+            try:
+                update_values['challenge_we_vote_id'] = challenge_we_vote_id
+                update_values['inviter_voter_we_vote_id'] = inviter_voter_we_vote_id
+                challenge_invitee = ChallengeInvitee.objects.create(**update_values)
+                status += "CHALLENGE_INVITEE_CREATED "
+                challenge_invitee_created = True
+                challenge_invitee_found = True
+                success = True
+            except Exception as e:
+                challenge_invitee_changed = False
+                challenge_invitee_created = False
+                challenge_invitee = None
+                success = False
+                status += "CHALLENGE_INVITEE_NOT_CREATED: " + str(e) + " "
+
+        # if challenge_invitee_found:
+        #     # Update existing challenge_invitee with changes
+        #     try:
+        #         # Retrieve the invitee_name and we_vote_hosted_profile_image_url_tiny from the organization entry
+        #         organization_results = \
+        #             organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        #         if organization_results['organization_found']:
+        #             organization = organization_results['organization']
+        #             if positive_value_exists(organization.organization_name):
+        #                 challenge_invitee.invitee_name = organization.organization_name
+        #                 challenge_invitee_changed = True
+        #             if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
+        #                 challenge_invitee.we_vote_hosted_profile_image_url_medium = \
+        #                     organization.we_vote_hosted_profile_image_url_medium
+        #                 challenge_invitee_changed = True
+        #             if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
+        #                 challenge_invitee.we_vote_hosted_profile_image_url_tiny = \
+        #                     organization.we_vote_hosted_profile_image_url_tiny
+        #                 challenge_invitee_changed = True
+        #
+        #         if 'linked_position_we_vote_id_changed' in update_values \
+        #                 and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
+        #             challenge_invitee.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
+        #             challenge_invitee_changed = True
+        #         if 'custom_message_for_friends_changed' in update_values \
+        #                 and positive_value_exists(update_values['custom_message_for_friends_changed']):
+        #             challenge_invitee.custom_message_for_friends = \
+        #                 update_values['custom_message_for_friends']
+        #             challenge_invitee_changed = True
+        #         if 'visible_to_public_changed' in update_values \
+        #                 and positive_value_exists(update_values['visible_to_public_changed']):
+        #             challenge_invitee.visible_to_public = update_values['visible_to_public']
+        #             challenge_invitee_changed = True
+        #         if challenge_invitee_changed:
+        #             challenge_invitee.save()
+        #             status += "CHALLENGE_INVITEE_UPDATED "
+        #         else:
+        #             status += "CHALLENGE_INVITEE_NOT_UPDATED-NO_CHANGES_FOUND "
+        #         success = True
+        #     except Exception as e:
+        #         challenge_invitee = None
+        #         challenge_invitee_changed = False
+        #         success = False
+        #         status += "CHALLENGE_INVITEE_NOT_UPDATED: " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'challenge_invitee':            challenge_invitee,
+            'challenge_invitee_changed':    challenge_invitee_changed,
+            'challenge_invitee_created':    challenge_invitee_created,
+            'challenge_invitee_found':      challenge_invitee_found,
+            'challenge_we_vote_id':         challenge_we_vote_id,
+        }
+        return results
+
+    @staticmethod
     def update_or_create_challenge_news_item(
             challenge_news_item_we_vote_id='',
             challenge_we_vote_id='',
@@ -3260,10 +3581,10 @@ class ChallengeParticipant(models.Model):
     def __unicode__(self):
         return "ChallengeParticipant"
 
-    challenge_we_vote_id = models.CharField(max_length=255, db_index=True)
+    challenge_we_vote_id = models.CharField(max_length=255)
     custom_message_for_friends = models.TextField(null=True)
-    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
-    date_joined = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    date_joined = models.DateTimeField(null=True, auto_now_add=True)
     friends_invited = models.PositiveIntegerField(default=0, null=False)
     friends_who_joined = models.PositiveIntegerField(default=0, null=False)
     friends_who_viewed = models.PositiveIntegerField(default=0, null=False)
@@ -3274,9 +3595,19 @@ class ChallengeParticipant(models.Model):
     rank = models.PositiveIntegerField(default=0, null=False)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=True)
-    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['challenge_we_vote_id', '-points'],
+                name='challenge_points'),
+            models.Index(
+                fields=['voter_we_vote_id', 'challenge_we_vote_id'],
+                name='voter_challenge_participant'),
+        ]
 
 
 class ChallengeNewsItem(models.Model):
