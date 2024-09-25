@@ -102,9 +102,12 @@
 <div style="white-space: pre-wrap;">
 {{ challenge.challenge_description|default_if_none:"" }}
 </div>
-                    {% if challenge.date_challenge_started %}
-                        <span class="u-no-break" style="color: darkgray">(Started: {{ challenge.date_challenge_started }})</span>
-                    {% endif %}
+                {% if challenge.challenge_starts_date_as_integer %}
+                    <span class="u-no-break" style="color: darkgray">(Started: {{ challenge.challenge_starts_date_as_integer }})</span>
+                {% endif %}
+                {% if challenge.challenge_ends_date_as_integer %}
+                    <span class="u-no-break" style="color: darkgray">(Ends: {{ challenge.challenge_ends_date_as_integer }})</span>
+                {% endif %}
                     {% if challenge.final_election_date_as_integer %}
                         <span class="u-no-break" style="color: gray">
                         (Final election: {{ challenge.final_election_date_as_integer|default_if_none:"" }}{% if final_election_date_plus_cool_down > challenge.final_election_date_as_integer %}-EXPIRED{% endif %})
