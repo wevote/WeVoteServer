@@ -18,6 +18,7 @@ from apis_v1.documentation_source import \
     candidate_retrieve_doc, \
     candidates_query_doc, candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
     candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, \
+    challenge_invitee_retrieve_doc, challenge_invitee_list_retrieve_doc, challenge_invitee_save_doc, \
     challenge_follow_doc, challenge_news_item_save_doc, challenge_retrieve_doc, challenge_save_doc, \
     challenge_participant_retrieve_doc, challenge_participant_list_retrieve_doc, challenge_participant_save_doc, \
     challenge_list_retrieve_doc, \
@@ -385,6 +386,36 @@ def challenge_follow_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = challenge_follow_doc.challenge_follow_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_invitee_retrieve_doc_view(request):
+    """
+    Show documentation about challengeInviteeRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_invitee_retrieve_doc.challenge_invitee_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_invitee_list_retrieve_doc_view(request):
+    """
+    Show documentation about challengeInviteeListRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_invitee_list_retrieve_doc.challenge_invitee_list_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def challenge_invitee_save_doc_view(request):
+    """
+    Show documentation about challengeInviteeSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = challenge_invitee_save_doc.challenge_invitee_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
