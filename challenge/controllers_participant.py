@@ -132,30 +132,18 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         visible_to_public=False,
         visible_to_public_changed=False,
         voter_device_id=''):
+    challenge_participant = None
     status = ''
     success = True
-    voter_signed_in_with_email = False
 
-    error_results = {
-        'status': status,
-        'success': False,
-        'challenge_we_vote_id': '',
-        'date_last_changed': '',
-        'date_joined': '',
-        'id': '',
-        'organization_we_vote_id': '',
-        'participant_name': '',
-        'visible_to_public': True,
-        'voter_we_vote_id': '',
-        'voter_signed_in_with_email': voter_signed_in_with_email,
-        'we_vote_hosted_profile_photo_image_url_tiny': '',
-    }
+    generate_results = generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant)
+    error_results = generate_results['challenge_participant_dict']
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-        voter_signed_in_with_email = voter.signed_in_with_email()
+
         voter_we_vote_id = voter.we_vote_id
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     else:
@@ -188,63 +176,46 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         update_values=update_values,
     )
 
-    if create_results['challenge_participant_found']:
-        challenge_participant = create_results['challenge_participant']
-
-        results = challenge_manager.retrieve_challenge(
-            challenge_we_vote_id=challenge_we_vote_id,
-            read_only=True,
-        )
-        notice_seed_statement_text = ''
-        if results['challenge_found']:
-            challenge = results['challenge']
-            notice_seed_statement_text = challenge.challenge_title
-
-        # TODO
-        # activity_results = update_or_create_activity_notice_seed_for_challenge_participant_initial_response(
-        #     challenge_we_vote_id=challenge_participant.challenge_we_vote_id,
-        #     visibility_is_public=challenge_participant.visible_to_public,
-        #     speaker_name=challenge_participant.participant_name,
-        #     speaker_organization_we_vote_id=challenge_participant.organization_we_vote_id,
-        #     speaker_voter_we_vote_id=challenge_participant.voter_we_vote_id,
-        #     speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
-        #     speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
-        #     statement_text=notice_seed_statement_text)
-        # status += activity_results['status']
+    # if create_results['challenge_participant_found']:
+    #     challenge_participant = create_results['challenge_participant']
+    #
+    #     results = challenge_manager.retrieve_challenge(
+    #         challenge_we_vote_id=challenge_we_vote_id,
+    #         read_only=True,
+    #     )
+    #     notice_seed_statement_text = ''
+    #     if results['challenge_found']:
+    #         challenge = results['challenge']
+    #         notice_seed_statement_text = challenge.challenge_title
+    #
+    #     # TODO
+    #     activity_results = update_or_create_activity_notice_seed_for_challenge_participant_initial_response(
+    #         challenge_we_vote_id=challenge_participant.challenge_we_vote_id,
+    #         visibility_is_public=challenge_participant.visible_to_public,
+    #         speaker_name=challenge_participant.participant_name,
+    #         speaker_organization_we_vote_id=challenge_participant.organization_we_vote_id,
+    #         speaker_voter_we_vote_id=challenge_participant.voter_we_vote_id,
+    #         speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+    #         speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
+    #         statement_text=notice_seed_statement_text)
+    #     status += activity_results['status']
 
     status += create_results['status']
     if create_results['challenge_participant_found']:
         count_results = challenge_manager.update_challenge_participants_count(challenge_we_vote_id)
 
         challenge_participant = create_results['challenge_participant']
-        date_last_changed_string = ''
-        date_joined_string = ''
-        try:
-            date_last_changed_string = challenge_participant.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            date_joined_string = challenge_participant.date_joined.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-        except Exception as e:
-            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-        results = {
-            'status':                       status,
-            'success':                      success,
-            'challenge_we_vote_id':         challenge_participant.challenge_we_vote_id,
-            'date_last_changed':            date_last_changed_string,
-            'date_joined':                  date_joined_string,
-            'id':                           challenge_participant.id,
-            'organization_we_vote_id':      challenge_participant.organization_we_vote_id,
-            'participant_name':             challenge_participant.participant_name,
-            'visible_to_public':            challenge_participant.visible_to_public,
-            'voter_we_vote_id':             challenge_participant.voter_we_vote_id,
-            'voter_signed_in_with_email':   voter_signed_in_with_email,
-            'we_vote_hosted_profile_photo_image_url_medium':
-                challenge_participant.we_vote_hosted_profile_image_url_medium,
-            'we_vote_hosted_profile_photo_image_url_tiny': challenge_participant.we_vote_hosted_profile_image_url_tiny,
-        }
-        return results
+        generate_results = generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant)
+        challenge_participant_results = generate_results['challenge_participant_dict']
+        status += generate_results['status']
+        challenge_participant_results['status'] = status
+        challenge_participant_results['success'] = generate_results['success']
+        return challenge_participant_results
     else:
         status += "CHALLENGE_PARTICIPANT_SAVE_ERROR "
         results = error_results
         results['status'] = status
+        results['success'] = False
         return results
 
 
@@ -332,16 +303,6 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
         'we_vote_hosted_profile_image_url_tiny': '',
     }
 
-    # If smaller sizes weren't stored, use large image
-    if challenge_participant.we_vote_hosted_profile_image_url_medium:
-        we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_medium
-    else:
-        we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_large
-    if challenge_participant.we_vote_hosted_profile_image_url_tiny:
-        we_vote_hosted_profile_image_url_tiny = challenge_participant.we_vote_hosted_profile_image_url_tiny
-    else:
-        we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_medium
-
     if not hasattr(challenge_participant, 'visible_to_public'):
         status += "VALID_CHALLENGE_PARTICIPANT_OBJECT_MISSING "
         results = {
@@ -350,6 +311,20 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
             'success': False,
         }
         return results
+
+    # If smaller sizes weren't stored, use large image
+    if challenge_participant:
+        if challenge_participant.we_vote_hosted_profile_image_url_medium:
+            we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_medium
+        else:
+            we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_large
+        if challenge_participant.we_vote_hosted_profile_image_url_tiny:
+            we_vote_hosted_profile_image_url_tiny = challenge_participant.we_vote_hosted_profile_image_url_tiny
+        else:
+            we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_medium
+    else:
+        we_vote_hosted_profile_image_url_medium = ''
+        we_vote_hosted_profile_image_url_tiny = ''
 
     date_last_changed_string = ''
     date_joined_string = ''

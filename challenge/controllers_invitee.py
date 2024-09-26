@@ -286,18 +286,6 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         'we_vote_hosted_profile_image_url_tiny': '',
     }
 
-    # If smaller sizes weren't stored, use large image
-    if challenge_invitee.we_vote_hosted_profile_image_url_medium:
-        we_vote_hosted_profile_image_url_medium = challenge_invitee.we_vote_hosted_profile_image_url_medium
-    else:
-        we_vote_hosted_profile_image_url_medium = ''
-    if challenge_invitee.we_vote_hosted_profile_image_url_tiny:
-        we_vote_hosted_profile_image_url_tiny = challenge_invitee.we_vote_hosted_profile_image_url_tiny
-    elif challenge_invitee.we_vote_hosted_profile_image_url_medium:
-        we_vote_hosted_profile_image_url_tiny = challenge_invitee.we_vote_hosted_profile_image_url_medium
-    else:
-        we_vote_hosted_profile_image_url_tiny = ''
-
     if not hasattr(challenge_invitee, 'inviter_voter_we_vote_id'):
         status += "VALID_CHALLENGE_INVITEE_OBJECT_MISSING "
         results = {
@@ -306,6 +294,22 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
             'success': False,
         }
         return results
+
+    # If smaller sizes weren't stored, use large image
+    if challenge_invitee:
+        if challenge_invitee.we_vote_hosted_profile_image_url_medium:
+            we_vote_hosted_profile_image_url_medium = challenge_invitee.we_vote_hosted_profile_image_url_medium
+        else:
+            we_vote_hosted_profile_image_url_medium = ''
+        if challenge_invitee.we_vote_hosted_profile_image_url_tiny:
+            we_vote_hosted_profile_image_url_tiny = challenge_invitee.we_vote_hosted_profile_image_url_tiny
+        elif challenge_invitee.we_vote_hosted_profile_image_url_medium:
+            we_vote_hosted_profile_image_url_tiny = challenge_invitee.we_vote_hosted_profile_image_url_medium
+        else:
+            we_vote_hosted_profile_image_url_tiny = ''
+    else:
+        we_vote_hosted_profile_image_url_medium = ''
+        we_vote_hosted_profile_image_url_tiny = ''
 
     date_accepted_invite_string = ''
     date_invited_string = ''

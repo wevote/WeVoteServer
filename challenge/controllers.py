@@ -720,7 +720,7 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         )
 
         if in_draft_mode_changed and not positive_value_exists(in_draft_mode):
-            if voter.signed_in_with_email():
+            if voter.signed_in():
                 # Make sure the person creating the challenge has a challenge_participant entry IFF they are signed in
                 update_values = {
                     'visible_to_public': True,
@@ -742,9 +742,10 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
 
         # We need to know all the politicians this voter can vote for so we can figure out
         #  if the voter can vote for any politicians in the election
-        from ballot.controllers import what_voter_can_vote_for
-        results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
-        voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+        # from ballot.controllers import what_voter_can_vote_for
+        # results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+        # voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+        voter_can_vote_for_politician_we_vote_ids = []
 
         generate_results = generate_challenge_dict_from_challenge_object(
             challenge=challenge,
@@ -1244,42 +1245,36 @@ def generate_challenge_dict_from_challenge_object(
     latest_position_dict_list = []  # DALE 2024-07-06 I don't know if we want to bring this in here
     participants_count_next_goal = 0
     voter_challenge_participant_dict = {}
-    # Only retrieve news items if NOT linked to a politician
-    if challenge and positive_value_exists(challenge.politician_we_vote_id):
-        # If linked to a politician, retrieve positions instead of challenge_participants
-        pass
-    elif challenge and not positive_value_exists(challenge.politician_we_vote_id):
-        # If NOT linked to a politician, retrieve challenge_participants instead of positions
-        participant_results = challenge_manager.retrieve_challenge_participant(
-            challenge_we_vote_id=challenge.we_vote_id,
-            voter_we_vote_id=voter_we_vote_id,
-            read_only=True)
-        if participant_results['success'] and participant_results['challenge_participant_found']:
-            challenge_participant = participant_results['challenge_participant']
+    participant_results = challenge_manager.retrieve_challenge_participant(
+        challenge_we_vote_id=challenge.we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+        read_only=True)
+    if participant_results['success'] and participant_results['challenge_participant_found']:
+        challenge_participant = participant_results['challenge_participant']
+        generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
+            challenge_participant=challenge_participant)
+        if generate_results['success']:
+            voter_challenge_participant_dict = generate_results['challenge_participant_dict']
+
+    # Get most recent participants
+    participant_list_results = challenge_manager.retrieve_challenge_participant_list(
+        challenge_we_vote_id=challenge.we_vote_id,
+        limit=7,
+        read_only=True,
+        require_custom_message_for_friends=False,
+        require_visible_to_public=True)
+    if participant_list_results['participant_list_found']:
+        participant_list = participant_list_results['participant_list']
+        for challenge_participant in participant_list:
             generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
                 challenge_participant=challenge_participant)
             if generate_results['success']:
-                voter_challenge_participant_dict = generate_results['challenge_participant_dict']
+                one_participant_dict = generate_results['challenge_participant_dict']
+                latest_challenge_participant_list.append(one_participant_dict)
 
-        # Get most recent participants, regardless of whether there is a written endorsement.
-        participant_list_results = challenge_manager.retrieve_challenge_participant_list(
-            challenge_we_vote_id=challenge.we_vote_id,
-            limit=7,
-            read_only=True,
-            require_custom_message_for_friends=False,
-            require_visible_to_public=True)
-        if participant_list_results['participant_list_found']:
-            participant_list = participant_list_results['participant_list']
-            for challenge_participant in participant_list:
-                generate_results = generate_challenge_participant_dict_from_challenge_participant_object(
-                    challenge_participant=challenge_participant)
-                if generate_results['success']:
-                    one_participant_dict = generate_results['challenge_participant_dict']
-                    latest_challenge_participant_list.append(one_participant_dict)
-
-        participants_count_next_goal = challenge_manager.fetch_participants_count_next_goal(
-            participants_count=challenge.participants_count,
-            participants_count_victory_goal=challenge.participants_count_victory_goal)
+    participants_count_next_goal = challenge_manager.fetch_participants_count_next_goal(
+        participants_count=challenge.participants_count,
+        participants_count_victory_goal=challenge.participants_count_victory_goal)
 
     if voter_can_send_updates_challenge_we_vote_ids is not None:
         # Leave it as is, even if empty
