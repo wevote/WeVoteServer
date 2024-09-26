@@ -2455,6 +2455,8 @@ def voter_guide_search_view(request):
     :param request:
     :return:
     """
+    form_view = request.GET.get('form_view', 'search')
+
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -2488,7 +2490,8 @@ def voter_guide_search_view(request):
     sorted_state_list = sorted(state_list.items())
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
+        'form_view':                form_view,
+        'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
         'organization_type_list':   organization_type_list,
         'state_code':               state_code,
@@ -2505,6 +2508,11 @@ def voter_guide_search_process_view(request):
     :param request:
     :return:
     """
+    search_performed = False
+
+    if request.method == 'POST':
+        search_performed = True
+    
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -2513,13 +2521,20 @@ def voter_guide_search_process_view(request):
     add_organization_button = request.POST.get('add_organization_button', False)
     if add_organization_button:
         return organization_edit_process_view(request)
-
+    
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_facebook = request.POST.get('organization_facebook', '')
     organization_type = request.POST.get('organization_type', '')
     organization_website = request.POST.get('organization_website', '')
     state_code = request.POST.get('state_code', "")
+
+    # voter_guide_search form logic
+    view_form_button = request.POST.get('view_form_button') == 'true'
+    form_view = request.POST.get('form_view', 'search')  
+
+    if view_form_button:
+        form_view = 'create' if form_view == 'search' else 'search'
 
     # Save this variable so we have it on the "Add New Position" page
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -2532,8 +2547,8 @@ def voter_guide_search_process_view(request):
     results = organization_list_manager.organization_search_find_any_possibilities(
         organization_name=organization_name,
         organization_twitter_handle=organization_twitter_handle,
-        organization_website=organization_website,
-        organization_facebook=organization_facebook,
+        # organization_website=organization_website,
+        # organization_facebook=organization_facebook,
         read_only=True)
 
     if results['organizations_found']:
@@ -2541,11 +2556,11 @@ def voter_guide_search_process_view(request):
         organizations_count = len(organizations_list)
 
         messages.add_message(request, messages.INFO, 'We found {count} existing organization(s) '
-                                                     'that might match.'.format(count=organizations_count))
+                                                'that might match.'.format(count=organizations_count))
     else:
         organizations_list = []
-        messages.add_message(request, messages.INFO, 'No voter guides found with those search terms. '
-                                                     'Please try again. ')
+    messages.add_message(request, messages.INFO, 'No endorser found with those search terms. '
+                                                    'Please try again. ')
 
     election_manager = ElectionManager()
     upcoming_election_list = []
@@ -2558,6 +2573,7 @@ def voter_guide_search_process_view(request):
 
     messages_on_stage = get_messages(request)
     template_values = {
+        'form_view':                    form_view,
         'google_civic_election_id':     google_civic_election_id,
         'messages_on_stage':            messages_on_stage,
         'organizations_list':           organizations_list,
@@ -2566,6 +2582,7 @@ def voter_guide_search_process_view(request):
         'organization_facebook':        organization_facebook,
         'organization_type':            organization_type,
         'organization_website':         organization_website,
+        'search_performed':             search_performed,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'upcoming_election_list':       upcoming_election_list,

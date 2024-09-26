@@ -1,11 +1,19 @@
 {# templates/voter_guide/voter_guide_search.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Find Voter Guide{% endblock %}
+{% block title %}Find Endorser{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
-<h1>Find Voter Guide</h1>
+
+{% if form_view == 'search' %}
+    <h1>Find Endorser</h1>
+    <p>First ensure that the endorser doesn't already exist.</p>
+    <p>If you include the twitter handle for this endorser below, we will have a better chance of finding endorser.</p>
+{% else %}
+    <h1>Create Endorser</h1>
+{% endif %}
+
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <style>
@@ -21,63 +29,27 @@
     }
 </style>
 
-{% if organizations_list %}
-    <h3>Is the organization you are adding one of these?</h3>
-    <div style="padding: 15px 0">
-        <table>
-            <tr>
-                <td></td>
-                <td>Endorser Management (open in new window)</td>
-                <td>Twitter</td>
-                <td>Facebook</td>
-                <td>Website (open in new window)</td>
-                <td></td>
-            </tr>
-        {% for possible_organization in organizations_list %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ possible_organization.organization_name }}</a></td>
-                <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
-                <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
-                <td>{% if possible_organization.organization_website %}
-                    <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
-                {% endif %}</td>
-                <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                    Enter Position</a></td>
-            </tr>
-        {% endfor %}
-        </table>
-    </div>
-    <p></p>
-{% endif %}
-
-
-
-{% if organization %}
-{% else %}
-    <p>If you include the twitter handle and website for this organization below, we will have a better chance of finding a voter guide.</p>
-{% endif %}
-
-<form action="{% url "voter_guide:voter_guide_search_process" %}" method="post" class="form-horizontal">
+<form action="{% url 'voter_guide:voter_guide_search_process' %}" method="post" class="form-horizontal">
 {% csrf_token %}
-
-<div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_name" id="organization_name_id" class="form-control"
-               value="{{ organization_name }}" />
+    <input type="hidden" name="form_view" value="{{ form_view }}">
+    <div class="form-group">
+        <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
+        <div class="col-sm-8">
+            <input type="text" name="organization_name" id="organization_name_id" class="form-control"
+                value="{{ organization_name }}" />
+        </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
+    <div class="form-group">
+        <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
+        <div class="col-sm-8">
+            <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
+                value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
+        </div>
     </div>
-</div>
 
-<div class="form-group">
+
+<!-- <div class="form-group">
     <label for="organization_website_id" class="col-sm-3 control-label">Endorser Website</label>
     <div class="col-sm-8">
         <input type="text" name="organization_website" id="organization_website_id" class="form-control"
@@ -139,17 +111,56 @@
         </select>
     </div>
 </div>
-{% endif %}{# End of if state_list #}
+{% endif %}{# End of if state_list #} -->
 
-<div class="form-group">
-    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'voter_guide:voter_guide_list' %}">cancel</a></label>
-    <div class="col-sm-8">
-        <button type="submit" class="btn btn-default" name="find_voter_guide_button">Find Voter Guide</button>
-    - or -
-        <button type="submit" class="btn btn-default" name="add_organization_button" value="1">Add Endorser / Voter Guide</button>
+    <div class="form-group">
+        {% if form_view == 'search' %}
+        <div class="col-sm-8">
+            <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'voter_guide:voter_guide_list' %}">cancel</a></label>
+            <button type="submit" class="btn btn-primary" name="find_voter_guide_button">Search</button>
+        </div>
+        {% else %}
+        <div class="col-sm-8">
+            <button class="btn btn-default ml-10" name="view_form_button" value="true">Back</button>
+            <button type="submit" class="btn btn-primary" name="add_organization_button" value="1">Create</button>
+        </div>
+        {% endif %}
     </div>
-</div>
+    {% if search_performed %}
+    <div {% if form_view == 'create' %} style="display: none;" {% endif %}>
+        <h3>Go to add new form</h3>
+        <button class="btn btn-primary" name="view_form_button" value="true">Next</button>
+    </div>
+    {% endif %}
 </form>
-
-
+<div {% if form_view == 'create' %} style="display: none;" {% endif %}>
+    {% if organizations_list %}
+        <div style="padding: 15px 0">
+            <table>
+                <tr>
+                    <td></td>
+                    <td>Endorser Management (open in new window)</td>
+                    <td>Twitter</td>
+                    <td>Facebook</td>
+                    <td>Website (open in new window)</td>
+                    <td></td>
+                </tr>
+            {% for possible_organization in organizations_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ possible_organization.organization_name }}</a></td>
+                    <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
+                    <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
+                    <td>{% if possible_organization.organization_website %}
+                        <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
+                    {% endif %}</td>
+                    <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        Enter Position</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+        <p></p>
+    {% endif %}
+</div>
 {% endblock %}
