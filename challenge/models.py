@@ -2595,6 +2595,7 @@ class ChallengeManager(models.Manager):
                     participants_count=0,
                 )
                 challenge_we_vote_id = challenge.we_vote_id
+                challenge_created = True
                 challenge_found = True
             except Exception as e:
                 challenge_created = False
