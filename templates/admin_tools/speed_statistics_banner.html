@@ -1,0 +1,25 @@
+{# templates/admin_tools/speed_statistics_banner.html #}
+
+<body>
+<div class="alert alert-danger" role="alert" id="SpeedStatisticsPopup"
+     style="display: none; position: fixed; top: 0; right: 0;text-align: center; width: 35%;height:30%;overflow: auto;z-index: 9999;">
+    <span class="close">&times;</span>
+    <ul>
+{{performance_dict}}
+
+    </ul>
+    </div>
+
+<button id="SpeedStatisticsButton" class="toggle_button" style="position: absolute; top: 10%;
+      right: 0;padding: 10px 20px;z-index: 9999;">Speed Statistics </button>
+<script>
+    document.querySelector('.toggle_button').addEventListener('click', function() {
+        document.getElementById('SpeedStatisticsPopup').style.display = 'block';
+        document.getElementById('SpeedStatisticsButton').style.display = 'none';
+    });
+    document.querySelector('.close').addEventListener('click', function() {
+        document.getElementById('SpeedStatisticsPopup').style.display = 'none';
+        document.getElementById('SpeedStatisticsButton').style.display = 'block';
+    });
+</script>
+</body>
