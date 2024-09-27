@@ -740,7 +740,7 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         )
 
         if in_draft_mode_changed and not positive_value_exists(in_draft_mode):
-            if voter.signed_in():
+            if voter.is_signed_in():
                 # Make sure the person creating the challenge has a challenge_participant entry IFF they are signed in
                 update_values = {
                     'visible_to_public': True,
