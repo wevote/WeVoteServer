@@ -317,7 +317,7 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
         if challenge_participant.we_vote_hosted_profile_image_url_medium:
             we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_medium
         else:
-            we_vote_hosted_profile_image_url_medium = challenge_participant.we_vote_hosted_profile_image_url_large
+            we_vote_hosted_profile_image_url_medium = ''
         if challenge_participant.we_vote_hosted_profile_image_url_tiny:
             we_vote_hosted_profile_image_url_tiny = challenge_participant.we_vote_hosted_profile_image_url_tiny
         else:
