@@ -355,7 +355,7 @@
       let startedOriginalElement = document.getElementById('started_original_update');
       let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
 
-      console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());
+      {#console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());#}
       if (startedOriginal === 'start') {
         $.ajax({
           type: "GET",
@@ -371,6 +371,9 @@
       const voterApiDeviceId = getApiDeviceId();
       let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?initialize=' + fastInit.val() +
           '&counter=' + (counter++) + '&voter_api_device_id=' + voterApiDeviceId;
+      if (fastInit.val() === 'true') {
+        fastInit.val("false")
+      }
       if (startedFastUpdate.val() === 'true') {
 
           $.ajax({
@@ -378,9 +381,6 @@
               url: apiUrlFastLoadStatus,
               success: function (data) {
                   // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
-      if (fastInit.val() === 'true') {
-        fastInit.val("false")
-      } else {
                   if (fastLoadButton.html().startsWith('...')) {
                       let newHtml = '';
                       if (data.current_record === 0) {
