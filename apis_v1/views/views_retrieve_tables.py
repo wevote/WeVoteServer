@@ -7,8 +7,8 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from retrieve_tables.controllers_master import fast_load_status_retrieve, retrieve_sql_tables_as_csv, \
-    get_total_row_count, get_max_id
+from retrieve_tables.controllers_master import fast_load_status_retrieve, get_total_row_count, get_max_id, \
+    retrieve_sql_tables_as_csv
 from retrieve_tables.controllers_master import fast_load_status_update
 from wevote_functions.functions import get_voter_api_device_id
 
@@ -28,18 +28,18 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     end = request.GET.get('end', '')
     voter_api_device_id = get_voter_api_device_id(request)
 
-    # print("retrieveSQLTables voter_api_device_id: ", voter_api_device_id)
-    # DALE 2024-08-30 TURNING OFF DUE TO SERVER OVERLOAD
-    # json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
+    print("retrieveSQLTables voter_api_device_id: ", voter_api_device_id)
+    json_data = retrieve_sql_tables_as_csv(voter_api_device_id, table_name, start, end)
 
+    # DALE 2024-08-30 TURNING OFF DUE TO SERVER OVERLOAD
     # Temporary solution
-    status = ''
-    status += "Retrieving SQL tables: " + table_name + " " + start + " " + end + ""
-    status += "TURNED OFF DUE TO SERVER OVERLOAD Please contact Dale for more information. "
-    json_data = {
-        'success': False,
-        'status': status,
-    }
+    # status = ''
+    # status += "Retrieving SQL tables: " + table_name + " " + start + " " + end + ""
+    # status += "TURNED OFF DUE TO SERVER OVERLOAD Please contact Dale for more information. "
+    # json_data = {
+    #     'success': False,
+    #     'status': status,
+    # }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
