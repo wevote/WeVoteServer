@@ -292,8 +292,12 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         'total_records': total,
         'row_id': row_id,
     }
+    try:
+        string = json.dumps(results)
+    except Exception as e:
+        logger.error(f"ERROR - json.dump failed in fast_load_status_retrieve -- {str(e)}")
 
-    return HttpResponse(json.dumps(results), content_type='application/json')
+    return HttpResponse(string, content_type='application/json')
 
 
 def fast_load_status_update(request):
