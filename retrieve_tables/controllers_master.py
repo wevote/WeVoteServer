@@ -269,7 +269,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
             table_name = row.table_name
             chunk = row.chunk
             records = row.current_record
-            total = get_total_row_count()
+            total = row.total_records
             started = row.started_date
             row_id = row.id
             status += "ROW_RETRIEVED "
