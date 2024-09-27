@@ -116,7 +116,7 @@ urlpatterns = [
                           views_challenge.challenge_news_item_save_view, name='challengeNewsItemSaveView'),
                   re_path(r'^challengeSave/', views_challenge.challenge_save_view, name='challengeSaveView'),
                   # challenge_save_view also used for challengeStartSave
-                  re_path(r'^challengeStartSave/', views_challenge.challenge_save_view, name='challengeStartSaveView'),
+                  re_path(r'^challengeStartSave/', views_challenge.challenge_start_save_view, name='challengeStartSaveView'),
                   re_path(r'^challengeParticipantRetrieve/',
                           views_challenge.challenge_participant_retrieve_view, name='challengeParticipantRetrieveView'),
                   re_path(r'^challengeParticipantSave/', views_challenge.challenge_participant_save_view,

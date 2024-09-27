@@ -2586,7 +2586,7 @@ class ChallengeManager(models.Manager):
             try:
                 challenge_description = update_values.get('challenge_description', '')
                 challenge_title = update_values.get('challenge_title', '')
-                in_draft_mode = update_values.get('in_draft_mode', True)
+                in_draft_mode = update_values.get('in_draft_mode', False)
                 challenge = Challenge.objects.create(
                     challenge_description=challenge_description,
                     challenge_title=challenge_title,
@@ -3179,6 +3179,7 @@ class ChallengeManager(models.Manager):
                     challenge_owner.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 challenge_owner.save()
                 challenge_owner_created = True
+                challenge_owner_found = True
                 success = True
                 status += "CHALLENGE_OWNER_CREATED "
             except Exception as e:

@@ -173,7 +173,12 @@ def challenge_retrieve_as_owner_view(request):  # challengeRetrieveAsOwner (No C
 
 
 @csrf_exempt
-def challenge_save_view(request):  # challengeSave & challengeStartSave
+def challenge_start_save_view(request):  # challengeStartSave
+    return challenge_save_view(request, is_start_save=True)
+
+
+@csrf_exempt
+def challenge_save_view(request, is_start_save=False):  # challengeSave & challengeStartSave
     # This is set in /config/base.py: DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_description = request.POST.get('challenge_description', '')
@@ -196,6 +201,7 @@ def challenge_save_view(request):  # challengeSave & challengeStartSave
         challenge_description_changed=challenge_description_changed,
         in_draft_mode=in_draft_mode,
         in_draft_mode_changed=in_draft_mode_changed,
+        is_start_save=is_start_save,
         challenge_photo_from_file_reader=challenge_photo_from_file_reader,
         challenge_photo_changed=challenge_photo_changed,
         challenge_photo_delete=challenge_photo_delete,

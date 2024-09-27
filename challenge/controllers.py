@@ -519,6 +519,7 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         challenge_description_changed=False,
         in_draft_mode=False,
         in_draft_mode_changed=False,
+        is_start_save=False,
         challenge_photo_from_file_reader='',
         challenge_photo_changed=False,
         challenge_photo_delete=False,
@@ -588,6 +589,25 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
     if positive_value_exists(challenge_we_vote_id):
         viewer_is_owner = challenge_manager.is_voter_challenge_owner(
             challenge_we_vote_id=challenge_we_vote_id, voter_we_vote_id=voter_we_vote_id)
+        if not positive_value_exists(viewer_is_owner):
+            if is_start_save:
+                # Get owner_list
+                results = challenge_manager.retrieve_challenge_as_owner(
+                    challenge_we_vote_id=challenge_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                    read_only=True,
+                )
+                challenge_owner_list = results['challenge_owner_list']
+                # If there isn't another owner, make this voter the owner
+                temporarily_true = True
+                if temporarily_true or len(challenge_owner_list) == 0:
+                    owner_results = challenge_manager.update_or_create_challenge_owner(
+                        challenge_we_vote_id=challenge_we_vote_id,
+                        organization_we_vote_id=linked_organization_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                    status += owner_results['status']
+                    viewer_is_owner = owner_results['challenge_owner_created'] or owner_results['challenge_owner_found']
+
         if not positive_value_exists(viewer_is_owner):
             status += "VOTER_IS_NOT_OWNER_OF_CHALLENGE "
             results = challenge_error_dict
