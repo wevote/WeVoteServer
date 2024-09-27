@@ -236,6 +236,8 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
     """
     initialize = positive_value_exists(request.GET.get('initialize', False))
     voter_api_device_id = get_voter_api_device_id(request)
+    if not voter_api_device_id:
+        voter_api_device_id = request.GET.get('voter_api_device_id', '')
     is_running = positive_value_exists(request.GET.get('is_running', True))
     table_name = ''
     chunk = 0
@@ -267,7 +269,7 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
             table_name = row.table_name
             chunk = row.chunk
             records = row.current_record
-            total = get_total_row_count
+            total = get_total_row_count()
             started = row.started_date
             row_id = row.id
             status += "ROW_RETRIEVED "
@@ -292,12 +294,14 @@ def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
         'total_records': total,
         'row_id': row_id,
     }
+
+    res_str = ""
     try:
-        string = json.dumps(results)
+        res_str = json.dumps(results)
     except Exception as e:
         logger.error(f"ERROR - json.dump failed in fast_load_status_retrieve -- {str(e)}")
 
-    return HttpResponse(string, content_type='application/json')
+    return HttpResponse(res_str, content_type='application/json')
 
 
 def fast_load_status_update(request):
