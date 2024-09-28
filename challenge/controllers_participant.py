@@ -219,6 +219,89 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         return results
 
 
+def move_participant_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id, to_organization_we_vote_id):
+    status = ''
+    success = True
+    participant_entries_moved = 0
+    participant_entries_not_moved = 0
+    error_results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'participant_entries_moved': participant_entries_moved,
+        'participant_entries_not_moved': participant_entries_not_moved,
+    }
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_PARTICIPANT_ENTRIES_TO_ANOTHER_VOTER-" \
+                  "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        error_results['status'] = status
+        return error_results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_PARTICIPANT_ENTRIES_TO_ANOTHER_VOTER-from_voter_we_vote_id and to_voter_we_vote_id identical "
+        error_results['status'] = status
+        return error_results
+
+    challenge_manager = ChallengeManager()
+    results = challenge_manager.retrieve_challenge_participant_list(
+        voter_we_vote_id=from_voter_we_vote_id,
+        limit=0,
+        require_custom_message_for_friends=False,
+        require_visible_to_public=False,
+        require_not_blocked_by_we_vote=False,
+        read_only=False)
+    from_participant_list = results['participant_list']
+    results = challenge_manager.retrieve_challenge_participant_list(
+        voter_we_vote_id=to_voter_we_vote_id,
+        limit=0,
+        require_custom_message_for_friends=False,
+        require_visible_to_public=False,
+        require_not_blocked_by_we_vote=False,
+        read_only=False)
+    to_participant_list = results['participant_list']
+    to_participant_we_vote_id_list = []
+    for to_participant in to_participant_list:
+        if to_participant.voter_we_vote_id not in to_participant_we_vote_id_list:
+            to_participant_we_vote_id_list.append(to_participant.voter_we_vote_id)
+
+    bulk_update_list = []
+    for from_participant_entry in from_participant_list:
+        # See if the "to_voter" already has an entry for this issue
+        if from_participant_entry.voter_we_vote_id in to_participant_we_vote_id_list:
+            # Do not move this entry, since we already have an entry for this voter_we_vote_id the to_voter's list
+            pass
+        else:
+            # Change the from_voter_we_vote_id to to_voter_we_vote_id
+            try:
+                from_participant_entry.voter_we_vote_id = to_voter_we_vote_id
+                if positive_value_exists(to_organization_we_vote_id):
+                    from_participant_entry.organization_we_vote_id = to_organization_we_vote_id
+                bulk_update_list.append(from_participant_entry)
+                participant_entries_moved += 1
+            except Exception as e:
+                participant_entries_not_moved += 1
+                status += "FAILED_FROM_PARTICIPANT_SAVE: " + str(e) + " "
+                success = False
+    if positive_value_exists(participant_entries_moved):
+        try:
+            ChallengeParticipant.objects.bulk_update(bulk_update_list, ['organization_we_vote_id', 'voter_we_vote_id'])
+        except Exception as e:
+            status += "FAILED_BULK_PARTICIPANT_SAVE: " + str(e) + " "
+            success = False
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'participant_entries_moved':        participant_entries_moved,
+        'participant_entries_not_moved':    participant_entries_not_moved,
+    }
+    return results
+
+
 def refresh_challenge_participants_count_for_challenge_we_vote_id_list(challenge_we_vote_id_list=[]):
     error_message_to_print = ''
     status = ''

@@ -1742,171 +1742,161 @@ def merge_these_two_challenges(
     return results
 
 
-def move_challenge_to_another_organization(
-        from_organization_we_vote_id, to_organization_we_vote_id,
-        to_organization_name=None):
+# def move_challenge_to_another_organization(
+#         from_organization_we_vote_id, to_organization_we_vote_id,
+#         to_organization_name=None):
+#     status = ''
+#     success = True
+#     challenges_moved = 0
+#     challenge_listed_entries_moved = 0
+#     challenge_news_item_entries_moved = 0
+#     challenge_owner_entries_moved = 0
+#     challenge_participant_entries_moved = 0
+#
+#     if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
+#         status += "MOVE_CHALLENGE_TO_ORG-MISSING_EITHER_FROM_OR_TO_ORG_WE_VOTE_ID "
+#         success = False
+#         results = {
+#             'status':                           status,
+#             'success':                          success,
+#             'from_organization_we_vote_id':     from_organization_we_vote_id,
+#             'to_organization_we_vote_id':       to_organization_we_vote_id,
+#             'challenges_moved':                 challenges_moved,
+#             'challenge_owner_entries_moved':    challenge_owner_entries_moved,
+#         }
+#         return results
+#
+#     if from_organization_we_vote_id == to_organization_we_vote_id:
+#         status += "MOVE_CHALLENGE_TO_ORG-FROM_AND_TO_ORG_WE_VOTE_IDS_IDENTICAL "
+#         success = False
+#         results = {
+#             'status':                           status,
+#             'success':                          success,
+#             'from_organization_we_vote_id':     from_organization_we_vote_id,
+#             'to_organization_we_vote_id':       to_organization_we_vote_id,
+#             'challenges_moved':                 challenges_moved,
+#             'challenge_owner_entries_moved':    challenge_owner_entries_moved,
+#         }
+#         return results
+#
+#     # #############################################
+#     # Move based on organization_we_vote_id
+#     if positive_value_exists(to_organization_name):
+#         try:
+#             challenge_owner_entries_moved += ChallengeOwner.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(organization_name=to_organization_name,
+#                         organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+#         try:
+#             challenge_participant_entries_moved += ChallengeParticipant.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(participant_name=to_organization_name,
+#                         organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_TO_ORG_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+#         try:
+#             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(speaker_name=to_organization_name,
+#                         organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+#     else:
+#         try:
+#             challenge_owner_entries_moved += ChallengeOwner.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+#         try:
+#             challenge_participant_entries_moved += ChallengeParticipant.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_TO_ORG_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+#         try:
+#             challenge_news_item_entries_moved += ChallengeNewsItem.objects \
+#                 .filter(organization_we_vote_id=from_organization_we_vote_id) \
+#                 .update(organization_we_vote_id=to_organization_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+#
+#     results = {
+#         'status':                           status,
+#         'success':                          success,
+#         'from_organization_we_vote_id':     from_organization_we_vote_id,
+#         'to_organization_we_vote_id':       to_organization_we_vote_id,
+#         'challenges_moved':                 challenge_owner_entries_moved,
+#         'challenge_owner_entries_moved':    challenge_owner_entries_moved,
+#     }
+#     return results
+
+
+# def move_challenge_to_another_politician(
+#         from_politician_we_vote_id='',
+#         to_politician_we_vote_id=''):
+#     """
+#
+#     :param from_politician_we_vote_id:
+#     :param to_politician_we_vote_id:
+#     :return:
+#     """
+#     status = ''
+#     success = True
+#     challenges_moved = 0
+#
+#     if positive_value_exists(from_politician_we_vote_id):
+#         try:
+#             challenges_moved += ChallengePolitician.objects \
+#                 .filter(politician_we_vote_id=from_politician_we_vote_id) \
+#                 .update(politician_we_vote_id=to_politician_we_vote_id)
+#         except Exception as e:
+#             status += "FAILED_MOVE_CHALLENGE_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
+#             success = False
+#
+#     results = {
+#         'status':                   status,
+#         'success':                  success,
+#         'challenges_moved':  challenges_moved,
+#     }
+#     return results
+
+
+def move_challenges_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id, to_organization_we_vote_id):
     status = ''
     success = True
     challenges_moved = 0
-    challenge_listed_entries_moved = 0
+    challenge_invitee_entries_moved = 0
+    # challenge_listed_entries_moved = 0
     challenge_news_item_entries_moved = 0
     challenge_owner_entries_moved = 0
     challenge_participant_entries_moved = 0
 
-    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
-        status += "MOVE_CHALLENGE_TO_ORG-MISSING_EITHER_FROM_OR_TO_ORG_WE_VOTE_ID "
-        success = False
-        results = {
-            'status':                           status,
-            'success':                          success,
-            'from_organization_we_vote_id':     from_organization_we_vote_id,
-            'to_organization_we_vote_id':       to_organization_we_vote_id,
-            'challenges_moved':                 challenges_moved,
-            'challenge_owner_entries_moved':    challenge_owner_entries_moved,
-        }
-        return results
-
-    if from_organization_we_vote_id == to_organization_we_vote_id:
-        status += "MOVE_CHALLENGE_TO_ORG-FROM_AND_TO_ORG_WE_VOTE_IDS_IDENTICAL "
-        success = False
-        results = {
-            'status':                           status,
-            'success':                          success,
-            'from_organization_we_vote_id':     from_organization_we_vote_id,
-            'to_organization_we_vote_id':       to_organization_we_vote_id,
-            'challenges_moved':                 challenges_moved,
-            'challenge_owner_entries_moved':    challenge_owner_entries_moved,
-        }
-        return results
-
-    # #############################################
-    # Move based on organization_we_vote_id
-    if positive_value_exists(to_organization_name):
-        try:
-            challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
-        try:
-            challenge_participant_entries_moved += ChallengeParticipant.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(participant_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_TO_ORG_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
-        try:
-            challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(speaker_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-    else:
-        try:
-            challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-        try:
-            challenge_participant_entries_moved += ChallengeParticipant.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_TO_ORG_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-        try:
-            challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-
-    try:
-        challenge_listed_entries_moved += ChallengeListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
-            .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
-    except Exception as e:
-        status += "FAILED-CHALLENGE_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-
-    results = {
+    error_results = {
         'status':                           status,
         'success':                          success,
-        'from_organization_we_vote_id':     from_organization_we_vote_id,
-        'to_organization_we_vote_id':       to_organization_we_vote_id,
-        'challenges_moved':                 challenge_owner_entries_moved,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'challenges_moved':                 challenges_moved,
+        'challenge_invitee_entries_moved':  challenge_invitee_entries_moved,
+        'challenge_news_item_entries_moved': challenge_news_item_entries_moved,
         'challenge_owner_entries_moved':    challenge_owner_entries_moved,
+        'challenge_participant_entries_moved': challenge_participant_entries_moved,
     }
-    return results
-
-
-def move_challenge_to_another_politician(
-        from_politician_we_vote_id='',
-        to_politician_we_vote_id=''):
-    """
-
-    :param from_politician_we_vote_id:
-    :param to_politician_we_vote_id:
-    :return:
-    """
-    status = ''
-    success = True
-    challenges_moved = 0
-
-    if positive_value_exists(from_politician_we_vote_id):
-        try:
-            challenges_moved += ChallengePolitician.objects \
-                .filter(politician_we_vote_id=from_politician_we_vote_id) \
-                .update(politician_we_vote_id=to_politician_we_vote_id)
-        except Exception as e:
-            status += "FAILED_MOVE_CHALLENGE_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
-            success = False
-
-    results = {
-        'status':                   status,
-        'success':                  success,
-        'challenges_moved':  challenges_moved,
-    }
-    return results
-
-
-def move_challenge_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
-        to_organization_name=None):
-    status = ''
-    success = True
-    challenges_moved = 0
-    challenge_listed_entries_moved = 0
-    challenge_news_item_entries_moved = 0
-    challenge_owner_entries_moved = 0
-    challenge_participant_entries_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_CHALLENGE-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
-        success = False
-        results = {
-            'status':                           status,
-            'success':                          success,
-            'from_voter_we_vote_id':            from_voter_we_vote_id,
-            'to_voter_we_vote_id':              to_voter_we_vote_id,
-            'challenges_moved':                 challenges_moved,
-            'challenge_owner_entries_moved':    challenge_owner_entries_moved,
-        }
-        return results
+        error_results['success'] = False
+        error_results['status'] = status
+        return error_results
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_CHALLENGE-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
-        success = False
-        results = {
-            'status':                           status,
-            'success':                          success,
-            'from_voter_we_vote_id':            from_voter_we_vote_id,
-            'to_voter_we_vote_id':              to_voter_we_vote_id,
-            'challenges_moved':                 challenges_moved,
-            'challenge_owner_entries_moved':    challenge_owner_entries_moved,
-        }
-        return results
+        error_results['success'] = False
+        error_results['status'] = status
+        return error_results
 
     # ######################
     # Move based on started_by_voter_we_vote_id
@@ -1940,79 +1930,44 @@ def move_challenge_to_another_voter(
 
     # ######################
     # Move participants based on voter_we_vote_id
-    try:
-        challenge_participant_entries_moved += ChallengeParticipant.objects\
-            .filter(voter_we_vote_id=from_voter_we_vote_id)\
-            .update(voter_we_vote_id=to_voter_we_vote_id)
-    except Exception as e:
-        status += "FAILED-CHALLENGE_PARTICIPANT_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
-        success = False
-
-    # #############################################
-    # Move based on organization_we_vote_id
-    if positive_value_exists(to_organization_name):
-        try:
-            challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
-            success = False
-        try:
-            challenge_participant_entries_moved += ChallengeParticipant.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(participant_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
-            success = False
-        try:
-            challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(speaker_name=to_organization_name,
-                        organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-            success = False
+    from challenge.controllers_participant import move_participant_entries_to_another_voter
+    participant_results = move_participant_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id, to_organization_we_vote_id)
+    if participant_results['success']:
+        challenge_participant_entries_moved = participant_results['participant_entries_moved']
     else:
-        try:
-            challenge_owner_entries_moved += ChallengeOwner.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-            success = False
-        try:
-            challenge_participant_entries_moved += ChallengeParticipant.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_PARTICIPANT_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-            success = False
-        try:
-            challenge_news_item_entries_moved += ChallengeNewsItem.objects \
-                .filter(organization_we_vote_id=from_organization_we_vote_id) \
-                .update(organization_we_vote_id=to_organization_we_vote_id)
-        except Exception as e:
-            status += "FAILED-CHALLENGE_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
-            success = False
-
-    try:
-        challenge_listed_entries_moved += ChallengeListedByOrganization.objects \
-            .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
-            .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
-    except Exception as e:
-        status += "FAILED-CHALLENGE_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        status += participant_results['status'] + " "
         success = False
+
+    # ######################
+    # Move invitees based on voter_we_vote_id
+    from challenge.controllers_invitee import move_invitee_entries_to_another_voter
+    invitee_results = move_invitee_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    if invitee_results['success']:
+        challenge_invitee_entries_moved = invitee_results['invitee_entries_moved']
+    else:
+        status += invitee_results['status'] + " "
+        success = False
+
+    # try:
+    #     challenge_listed_entries_moved += ChallengeListedByOrganization.objects \
+    #         .filter(site_owner_organization_we_vote_id=from_organization_we_vote_id) \
+    #         .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
+    # except Exception as e:
+    #     status += "FAILED-CHALLENGE_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+    #     success = False
 
     results = {
         'status':                           status,
         'success':                          success,
         'from_voter_we_vote_id':            from_voter_we_vote_id,
         'to_voter_we_vote_id':              to_voter_we_vote_id,
-        'challenges_moved':                 challenge_owner_entries_moved,
+        'challenges_moved':                 challenges_moved,
+        'challenge_invitee_entries_moved':  challenge_invitee_entries_moved,
+        'challenge_news_item_entries_moved': challenge_news_item_entries_moved,
         'challenge_owner_entries_moved':    challenge_owner_entries_moved,
+        'challenge_participant_entries_moved': challenge_participant_entries_moved,
     }
     return results
 
