@@ -5442,6 +5442,8 @@ class VoterMergeStatus(models.Model):
     repair_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_candidate_change_log_complete = models.BooleanField(default=False)
     move_candidate_change_log_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_challenges_complete = models.BooleanField(default=False)
+    move_challenges_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_positions_complete = models.BooleanField(default=False)
     move_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_organization_complete = models.BooleanField(default=False)

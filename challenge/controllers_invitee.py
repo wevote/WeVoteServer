@@ -202,6 +202,81 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         return results
 
 
+def move_invitee_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = ''
+    success = True
+    invitee_entries_moved = 0
+    invitee_entries_not_moved = 0
+    error_results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'invitee_entries_moved': invitee_entries_moved,
+        'invitee_entries_not_moved': invitee_entries_not_moved,
+    }
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_INVITEE_ENTRIES_TO_ANOTHER_VOTER-" \
+                  "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        error_results['status'] = status
+        return error_results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_INVITEE_ENTRIES_TO_ANOTHER_VOTER-from_voter_we_vote_id and to_voter_we_vote_id identical "
+        error_results['status'] = status
+        return error_results
+
+    challenge_manager = ChallengeManager()
+    results = challenge_manager.retrieve_challenge_invitee_list(
+        inviter_voter_we_vote_id=from_voter_we_vote_id,
+        limit=0,
+        read_only=False)
+    from_invitee_list = results['invitee_list']
+    results = challenge_manager.retrieve_challenge_invitee_list(
+        inviter_voter_we_vote_id=to_voter_we_vote_id,
+        limit=0,
+        read_only=False)
+    to_invitee_list = results['invitee_list']
+    to_invitee_we_vote_id_list = []
+    for to_invitee in to_invitee_list:
+        if to_invitee.inviter_voter_we_vote_id not in to_invitee_we_vote_id_list:
+            to_invitee_we_vote_id_list.append(to_invitee.inviter_voter_we_vote_id)
+
+    bulk_update_list = []
+    for from_invitee_entry in from_invitee_list:
+        # See if the "to_voter" already has an entry for this issue
+        if from_invitee_entry.inviter_voter_we_vote_id in to_invitee_we_vote_id_list:
+            # Don't move this entry. We already have an entry for this inviter_voter_we_vote_id in the to_voter's list
+            pass
+        else:
+            # Change the from_voter_we_vote_id to to_voter_we_vote_id
+            try:
+                from_invitee_entry.inviter_voter_we_vote_id = to_voter_we_vote_id
+                bulk_update_list.append(from_invitee_entry)
+                invitee_entries_moved += 1
+            except Exception as e:
+                invitee_entries_not_moved += 1
+                status += "FAILED_FROM_INVITEE_SAVE: " + str(e) + " "
+                success = False
+    if positive_value_exists(invitee_entries_moved):
+        try:
+            ChallengeInvitee.objects.bulk_update(bulk_update_list, ['inviter_voter_we_vote_id'])
+        except Exception as e:
+            status += "FAILED_BULK_INVITEE_SAVE: " + str(e) + " "
+            success = False
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_voter_we_vote_id':        from_voter_we_vote_id,
+        'to_voter_we_vote_id':          to_voter_we_vote_id,
+        'invitee_entries_moved':        invitee_entries_moved,
+        'invitee_entries_not_moved':    invitee_entries_not_moved,
+    }
+    return results
+
+
 def refresh_challenge_invitees_count_for_challenge_we_vote_id_list(challenge_we_vote_id_list=[]):
     error_message_to_print = ''
     status = ''

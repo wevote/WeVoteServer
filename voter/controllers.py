@@ -3167,6 +3167,33 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     else:
         move_voter_contact_end_time = time()
 
+    move_challenges_start_time = time()
+    if not voter_merge_status.move_challenges_complete:  # Proceed even if process above has failed
+        from challenge.controllers import move_challenges_to_another_voter
+        move_challenges_results = move_challenges_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
+        # Log the results
+        move_challenges_end_time = time()
+        status += move_challenges_results['status']
+        local_success = move_challenges_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_challenges_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_challenges_start_time,
+            status=status,
+            step_name='move_challenges',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_challenges_end_time = time()
+
     move_voter_plan_start_time = time()
     if not voter_merge_status.move_voter_plan_complete:  # Proceed even if process above has failed
         # Bring over the voter's plans to vote
@@ -3638,6 +3665,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     move_activity_posts_duration = move_activity_posts_end_time - move_activity_posts_start_time
     move_activity_comments_duration = move_activity_comments_end_time - move_activity_comments_start_time
     move_campaignx_duration = move_campaignx_end_time - move_campaignx_start_time
+    move_challenges_duration = move_challenges_end_time - move_challenges_start_time
     move_analytics_duration = move_analytics_end_time - move_analytics_start_time
     merge_voter_duration = merge_voter_end_time - merge_voter_start_time
     move_images_duration = move_images_end_time - move_images_start_time
@@ -3673,6 +3701,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
                  ' seconds, move_analytics took ' + "{:.6f}".format(move_analytics_duration) +
                  ' seconds, merge_voter took ' + "{:.6f}".format(merge_voter_duration) +
                  ' seconds, move_images took ' + "{:.6f}".format(move_images_duration) +
+                 ' seconds, move_challenges took ' + "{:.6f}".format(move_challenges_duration) +
                  ' seconds, send_emails took ' + "{:.6f}".format(send_emails_duration) +
                  ' seconds, final_position_repair took ' + "{:.6f}".format(final_position_repair_duration) +
                  ' seconds, total took ' + "{:.6f}".format(time_difference) + ' seconds')
