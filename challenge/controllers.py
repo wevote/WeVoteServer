@@ -36,6 +36,7 @@ CHALLENGE_ERROR_DICT = {
     'status': 'ERROR ',
     'success': False,
     'challenge_description': '',
+    'challenge_invite_text_default': '',
     'challenge_title': '',
     'challenge_news_item_list': [],
     'challenge_owner_list': [],
@@ -517,6 +518,8 @@ def challenge_retrieve_for_api(  # challengeRetrieve & challengeRetrieveAsOwner 
 def challenge_save_for_api(  # challengeSave & challengeStartSave
         challenge_description='',
         challenge_description_changed=False,
+        challenge_invite_text_default='',
+        challenge_invite_text_default_changed=False,
         in_draft_mode=False,
         in_draft_mode_changed=False,
         is_start_save=False,
@@ -639,6 +642,8 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         update_values = {
             'challenge_description':                challenge_description,
             'challenge_description_changed':        challenge_description_changed,
+            'challenge_invite_text_default':    challenge_invite_text_default,
+            'challenge_invite_text_default_changed': challenge_invite_text_default_changed,
             'in_draft_mode':                        in_draft_mode,
             'in_draft_mode_changed':                in_draft_mode_changed,
             'challenge_photo_changed':              challenge_photo_changed,
@@ -667,6 +672,8 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         update_values = {
             'challenge_description':                challenge_description,
             'challenge_description_changed':        challenge_description_changed,
+            'challenge_invite_text_default':    challenge_invite_text_default,
+            'challenge_invite_text_default_changed': challenge_invite_text_default_changed,
             'in_draft_mode':                        in_draft_mode,
             'in_draft_mode_changed':                in_draft_mode_changed,
             'challenge_photo_delete':               challenge_photo_delete,
@@ -1281,7 +1288,7 @@ def generate_challenge_dict_from_challenge_object(
         challenge_we_vote_id=challenge.we_vote_id,
         limit=7,
         read_only=True,
-        require_custom_message_for_friends=False,
+        require_invite_text_for_friends=False,
         require_visible_to_public=True)
     if participant_list_results['participant_list_found']:
         participant_list = participant_list_results['participant_list']
@@ -1321,13 +1328,27 @@ def generate_challenge_dict_from_challenge_object(
         final_election_date_plus_cool_down >= challenge.final_election_date_as_integer \
         if positive_value_exists(challenge.final_election_date_as_integer) else False
 
+    if positive_value_exists(challenge.challenge_title):
+        challenge_title = challenge.challenge_title.strip()
+    else:
+        challenge_title = ""
+
     if hasattr(challenge, 'visible_on_this_site'):
         visible_on_this_site = challenge.visible_on_this_site
     else:
         visible_on_this_site = True
 
+    if positive_value_exists(challenge.challenge_invite_text_default):
+        challenge_invite_text_default = challenge.challenge_invite_text_default
+    else:
+        from challenge.models import CHALLENGE_INVITE_TEXT_DEFAULT
+        challenge_invite_text_default = CHALLENGE_INVITE_TEXT_DEFAULT
+        challenge_invite_text_default = \
+            challenge_invite_text_default.replace('[challenge_title]', challenge_title)
+
     challenge_dict = {
         'challenge_description':            challenge.challenge_description,
+        'challenge_invite_text_default':    challenge_invite_text_default,
         'challenge_ends_date_as_integer':   challenge.challenge_ends_date_as_integer,
         'challenge_starts_date_as_integer': challenge.challenge_starts_date_as_integer,
         'challenge_title':                  challenge.challenge_title,

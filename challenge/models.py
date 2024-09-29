@@ -25,6 +25,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # When merging Challenge entries, these are the fields we check for figure_out_challenge_conflict_values
 CHALLENGE_UNIQUE_IDENTIFIERS = [
     'challenge_description',
+    'challenge_invite_text_default',
     'challenge_ends_date_as_integer',
     'challenge_starts_date_as_integer',
     'challenge_title',
@@ -58,9 +59,15 @@ CHALLENGE_UNIQUE_IDENTIFIERS = [
 CHALLENGE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'seo_friendly_path',
 ]
-
+CHALLENGE_INVITE_TEXT_DEFAULT = \
+    "Leading up to the election on Nov 5th, 2024, I'm reminding friends as part of the [challenge_title] Challenge " \
+    "to make a plan to vote. " \
+    "Would you click the link below to check out the challenge and help boost my rank? " \
+    "If you join, I get an additional boost and we help get people to the polls. " \
+    "Thanks for your help!"
 FINAL_ELECTION_DATE_COOL_DOWN = 7
-PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING = 0  # How many participants are required before we will show challenge on We Vote
+PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING = 0  # How many participants are required before we show challenge on We Vote
+
 
 
 class Challenge(models.Model):
@@ -80,6 +87,7 @@ class Challenge(models.Model):
         verbose_name="we vote permanent id", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
     challenge_description = models.TextField(null=True, blank=True)
+    challenge_invite_text_default = models.TextField(null=True, blank=True)
     challenge_title = models.CharField(verbose_name="title of challenge", max_length=255, null=False, blank=False)
     challenge_ends_date_as_integer = models.PositiveIntegerField(null=True)
     challenge_starts_date_as_integer = models.PositiveIntegerField(null=True)
@@ -215,7 +223,7 @@ class ChallengeInvitee(models.Model):
 
     challenge_joined = models.BooleanField(default=False)
     challenge_we_vote_id = models.CharField(max_length=255)
-    custom_message_from_inviter = models.TextField(null=True)
+    invite_text_from_inviter = models.TextField(null=True)
     date_accepted_invite = models.DateTimeField(null=True)
     date_invited = models.DateTimeField(null=True, auto_now_add=True)  # Use this field for message sent too
     invitee_name = models.CharField(max_length=255, null=True)
@@ -1281,6 +1289,8 @@ class ChallengeManager(models.Manager):
                     # We want to find candidates with *any* of these values
                     new_search_filter = Q(challenge_description__icontains=search_word)
                     search_filters.append(new_search_filter)
+                    new_search_filter = Q(challenge_invite_text_default__icontains=search_word)
+                    search_filters.append(new_search_filter)
                     new_search_filter = Q(challenge_title__icontains=search_word)
                     search_filters.append(new_search_filter)
                     new_search_filter = Q(seo_friendly_path__icontains=search_word)
@@ -1897,10 +1907,10 @@ class ChallengeManager(models.Manager):
                     status += 'REPAIR_CHALLENGE_PARTICIPANT_FOUND_MULTIPLE_WITH_WE_VOTE_ID '
                     challenge_participant_found = True
                     first_challenge_participant = challenge_participant_list[0]
-                    # We want to keep the custom_message_for_friends with the most characters
-                    custom_message_for_friends_to_keep = first_challenge_participant.custom_message_for_friends
-                    custom_message_for_friends_to_keep_length = len(custom_message_for_friends_to_keep) \
-                        if positive_value_exists(custom_message_for_friends_to_keep) else 0
+                    # We want to keep the invite_text_for_friends with the most characters
+                    invite_text_for_friends_to_keep = first_challenge_participant.invite_text_for_friends
+                    invite_text_for_friends_to_keep_length = len(invite_text_for_friends_to_keep) \
+                        if positive_value_exists(invite_text_for_friends_to_keep) else 0
                     visible_to_public = first_challenge_participant.visible_to_public
                     visibility_blocked_by_we_vote = first_challenge_participant.visibility_blocked_by_we_vote
 
@@ -1908,11 +1918,11 @@ class ChallengeManager(models.Manager):
                     # We set a "safety valve" of 25
                     while array_index < number_of_challenge_participants_found and array_index < 25:
                         challenge_participant_temp = challenge_participant_list[array_index]
-                        # We want to keep the custom_message_for_friends with the most characters
-                        if custom_message_for_friends_to_keep_length < len(challenge_participant_temp.custom_message_for_friends):
-                            custom_message_for_friends_to_keep = challenge_participant_temp.custom_message_for_friends
-                            custom_message_for_friends_to_keep_length = len(custom_message_for_friends_to_keep) \
-                                if positive_value_exists(custom_message_for_friends_to_keep) else 0
+                        # We want to keep the invite_text_for_friends with the most characters
+                        if invite_text_for_friends_to_keep_length < len(challenge_participant_temp.invite_text_for_friends):
+                            invite_text_for_friends_to_keep = challenge_participant_temp.invite_text_for_friends
+                            invite_text_for_friends_to_keep_length = len(invite_text_for_friends_to_keep) \
+                                if positive_value_exists(invite_text_for_friends_to_keep) else 0
                         # If any have visible_to_public true, mark the one to keep as true
                         if not positive_value_exists(visible_to_public):
                             visible_to_public = challenge_participant_temp.visible_to_public
@@ -1922,7 +1932,7 @@ class ChallengeManager(models.Manager):
                         array_index += 1
 
                     # Now update first_challenge_participant with values from while loop
-                    first_challenge_participant.custom_message_for_friends_to_keep = custom_message_for_friends_to_keep
+                    first_challenge_participant.invite_text_for_friends_to_keep = invite_text_for_friends_to_keep
                     first_challenge_participant.visible_to_public = visible_to_public
                     first_challenge_participant.visibility_blocked_by_we_vote = visibility_blocked_by_we_vote
 
@@ -2111,7 +2121,7 @@ class ChallengeManager(models.Manager):
     def retrieve_challenge_participant_list(
             challenge_we_vote_id=None,
             voter_we_vote_id=None,
-            require_custom_message_for_friends=False,
+            require_invite_text_for_friends=False,
             require_visible_to_public=True,
             require_not_blocked_by_we_vote=True,
             limit=10,
@@ -2134,10 +2144,10 @@ class ChallengeManager(models.Manager):
                 queryset = queryset.filter(visible_to_public=True)
             if positive_value_exists(require_not_blocked_by_we_vote):
                 queryset = queryset.filter(visibility_blocked_by_we_vote=False)
-            if positive_value_exists(require_custom_message_for_friends):
+            if positive_value_exists(require_invite_text_for_friends):
                 queryset = queryset.exclude(
-                    Q(custom_message_for_friends__isnull=True) |
-                    Q(custom_message_for_friends__exact='')
+                    Q(invite_text_for_friends__isnull=True) |
+                    Q(invite_text_for_friends__exact='')
                 )
             queryset = queryset.order_by('-date_joined')
 
@@ -2611,6 +2621,10 @@ class ChallengeManager(models.Manager):
                         and positive_value_exists(update_values['challenge_description_changed']):
                     challenge.challenge_description = update_values['challenge_description']
                     challenge_changed = True
+                if 'challenge_invite_text_default_changed' in update_values \
+                        and positive_value_exists(update_values['challenge_invite_text_default_changed']):
+                    challenge.challenge_invite_text_default = update_values['challenge_invite_text_default']
+                    challenge_changed = True
                 # This is for the actual Challenge photo (profile image copied from Politician below)
                 if 'challenge_photo_changed' in update_values \
                         and positive_value_exists(update_values['challenge_photo_changed']):
@@ -2901,10 +2915,10 @@ class ChallengeManager(models.Manager):
         #                 and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
         #             challenge_invitee.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
         #             challenge_invitee_changed = True
-        #         if 'custom_message_for_friends_changed' in update_values \
-        #                 and positive_value_exists(update_values['custom_message_for_friends_changed']):
-        #             challenge_invitee.custom_message_for_friends = \
-        #                 update_values['custom_message_for_friends']
+        #         if 'invite_text_from_inviter_changed' in update_values \
+        #                 and positive_value_exists(update_values['invite_text_from_inviter_changed']):
+        #             challenge_invitee.invite_text_from_inviter = \
+        #                 update_values['invite_text_from_inviter']
         #             challenge_invitee_changed = True
         #         if 'visible_to_public_changed' in update_values \
         #                 and positive_value_exists(update_values['visible_to_public_changed']):
@@ -3490,10 +3504,10 @@ class ChallengeManager(models.Manager):
                         and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
                     challenge_participant.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
                     challenge_participant_changed = True
-                if 'custom_message_for_friends_changed' in update_values \
-                        and positive_value_exists(update_values['custom_message_for_friends_changed']):
-                    challenge_participant.custom_message_for_friends = \
-                        update_values['custom_message_for_friends']
+                if 'invite_text_for_friends_changed' in update_values \
+                        and positive_value_exists(update_values['invite_text_for_friends_changed']):
+                    challenge_participant.invite_text_for_friends = \
+                        update_values['invite_text_for_friends']
                     challenge_participant_changed = True
                 if 'visible_to_public_changed' in update_values \
                         and positive_value_exists(update_values['visible_to_public_changed']):
@@ -3584,7 +3598,7 @@ class ChallengeParticipant(models.Model):
         return "ChallengeParticipant"
 
     challenge_we_vote_id = models.CharField(max_length=255)
-    custom_message_for_friends = models.TextField(null=True)
+    invite_text_for_friends = models.TextField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     date_joined = models.DateTimeField(null=True, auto_now_add=True)
     friends_invited = models.PositiveIntegerField(default=0, null=False)

@@ -45,14 +45,20 @@ def challenge_invitee_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "challenge_joined": boolean,\n' \
                    '  "challenge_we_vote_id": string,\n' \
-                   '  "date_last_changed": string,\n' \
-                   '  "date_joined": string,\n' \
-                   '  "organization_we_vote_id": string,\n' \
-                   '  "supporter_endorsement": string,\n' \
+                   '  "date_accepted_invite": string,\n' \
+                   '  "date_invited": string,\n' \
+                   '  "invitee_id": number,\n' \
                    '  "invitee_name": string,\n' \
-                   '  "visible_to_public": boolean,\n' \
-                   '  "voter_we_vote_id": string,\n' \
+                   '  "invitee_url_code": string,\n' \
+                   '  "inviter_name": string,\n' \
+                   '  "inviter_voter_we_vote_id": string,\n' \
+                   '  "invite_sent": boolean,\n' \
+                   '  "invite_text_from_inviter": string,\n' \
+                   '  "invite_viewed": boolean,\n' \
+                   '  "invite_viewed_count": number,\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'
 
