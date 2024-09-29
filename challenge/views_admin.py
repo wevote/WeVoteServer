@@ -581,7 +581,12 @@ def challenge_edit_process_view(request):
     challenge_search = request.POST.get('challenge_search', '')
     challenge_we_vote_id = request.POST.get('challenge_we_vote_id', None)
     challenge_title = request.POST.get('challenge_title', None)
+    try:
+        challenge_title = challenge_title.strip()
+    except Exception as e:
+        pass
     challenge_description = request.POST.get('challenge_description', None)
+    challenge_invite_text_default = request.POST.get('challenge_invite_text_default', None)
     final_election_date_as_integer = convert_to_int(request.POST.get('final_election_date_as_integer', 0))
     final_election_date_as_integer = None if final_election_date_as_integer == 0 else final_election_date_as_integer
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -635,6 +640,8 @@ def challenge_edit_process_view(request):
                 challenge.challenge_title = challenge_title
             if challenge_description is not None:
                 challenge.challenge_description = challenge_description.strip()
+            if challenge_invite_text_default is not None:
+                challenge.challenge_invite_text_default = challenge_invite_text_default.strip()
             if take_out_of_draft_mode is not None and positive_value_exists(take_out_of_draft_mode):
                 # Take a challenge out of draft mode. Do not support taking it back to draft mode.
                 challenge.in_draft_mode = False
@@ -1241,6 +1248,9 @@ def challenge_list_view(request):
             new_filter = Q(challenge_description__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(challenge_invite_text_default__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(politician_we_vote_id=one_word)
             filters.append(new_filter)
 
@@ -1506,8 +1516,8 @@ def challenge_participant_list_view(request, challenge_we_vote_id=""):
 
     if positive_value_exists(only_show_participants_with_endorsements):
         participants_query = participants_query.exclude(
-            Q(custom_message_for_friends__isnull=True) |
-            Q(custom_message_for_friends__exact='')
+            Q(invite_text_for_friends__isnull=True) |
+            Q(invite_text_for_friends__exact='')
         )
 
     participants_query = participants_query.order_by('-date_joined')
@@ -1542,7 +1552,7 @@ def challenge_participant_list_view(request, challenge_we_vote_id=""):
             new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(custom_message_for_friends__icontains=one_word)
+            new_filter = Q(invite_text_for_friends__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(voter_we_vote_id=one_word)
@@ -1617,7 +1627,7 @@ def challenge_participant_list_process_view(request):
     challenge_we_vote_id = request.POST.get('challenge_we_vote_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', '')
     incoming_challenge_participant_we_vote_id = request.POST.get('incoming_challenge_participant_we_vote_id', '')
-    incoming_challenge_custom_message_for_friends = request.POST.get('incoming_challenge_custom_message_for_friends', '')
+    incoming_challenge_invite_text_for_friends = request.POST.get('incoming_challenge_invite_text_for_friends', '')
     incoming_challenge_participant_wants_visibility = request.POST.get('incoming_challenge_participant_wants_visibility', '')
     incoming_visibility_blocked_by_we_vote = request.POST.get('incoming_visibility_blocked_by_we_vote', '')
     state_code = request.POST.get('state_code', '')
@@ -1720,8 +1730,8 @@ def challenge_participant_list_process_view(request):
 
     if positive_value_exists(only_show_participants_with_endorsements):
         participants_query = participants_query.exclude(
-            Q(custom_message_for_friends__isnull=True) |
-            Q(custom_message_for_friends__exact='')
+            Q(invite_text_for_friends__isnull=True) |
+            Q(invite_text_for_friends__exact='')
         )
 
     participants_query = participants_query.order_by('-date_joined')
@@ -1739,7 +1749,7 @@ def challenge_participant_list_process_view(request):
             new_filter = Q(participant_name__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(custom_message_for_friends__icontains=one_word)
+            new_filter = Q(invite_text_for_friends__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(voter_we_vote_id=one_word)
@@ -1813,7 +1823,7 @@ def challenge_participant_list_process_view(request):
                     challenge_we_vote_id=challenge_we_vote_id,
                     participant_name=participant_name,
                     organization_we_vote_id=challenge_participant_organization_we_vote_id,
-                    custom_message_for_friends=incoming_challenge_custom_message_for_friends,
+                    invite_text_for_friends=incoming_challenge_invite_text_for_friends,
                     voter_we_vote_id=challenge_participant_voter_we_vote_id,
                     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,

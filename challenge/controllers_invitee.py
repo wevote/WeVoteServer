@@ -135,7 +135,7 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         'success': False,
         'challenge_joined': False,
         'challenge_we_vote_id': '',
-        'custom_message_from_inviter': '',
+        'invite_text_from_inviter': '',
         'date_accepted_invite': '',
         'date_invited': '',
         'id': '',
@@ -346,7 +346,6 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
     challenge_invitee_dict = {
         'challenge_joined': False,
         'challenge_we_vote_id': '',
-        'custom_message_from_inviter': '',
         'date_accepted_invite': '',
         'date_invited': '',
         'invitee_id': '',
@@ -355,6 +354,7 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         'inviter_name': '',
         'inviter_voter_we_vote_id': '',
         'invite_sent': False,
+        'invite_text_from_inviter': '',
         'invite_viewed': False,
         'invite_viewed_count': 0,
         'we_vote_hosted_profile_image_url_medium': '',
@@ -395,7 +395,7 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         status += "DATE_CONVERSION_ERROR: " + str(e) + " "
     challenge_invitee_dict['challenge_joined'] = challenge_invitee.challenge_joined
     challenge_invitee_dict['challenge_we_vote_id'] = challenge_invitee.challenge_we_vote_id
-    challenge_invitee_dict['custom_message_from_inviter'] = challenge_invitee.custom_message_from_inviter
+    challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
     challenge_invitee_dict['date_invited'] = date_invited_string
     challenge_invitee_dict['date_accepted_invite'] = date_accepted_invite_string
     challenge_invitee_dict['invitee_id'] = challenge_invitee.id

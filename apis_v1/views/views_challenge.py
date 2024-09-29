@@ -183,6 +183,9 @@ def challenge_save_view(request, is_start_save=False):  # challengeSave & challe
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_description = request.POST.get('challenge_description', '')
     challenge_description_changed = positive_value_exists(request.POST.get('challenge_description_changed', False))
+    challenge_invite_text_default = request.POST.get('challenge_invite_text_default', '')
+    challenge_invite_text_default_changed = \
+        positive_value_exists(request.POST.get('challenge_invite_text_default_changed', False))
     in_draft_mode = positive_value_exists(request.POST.get('in_draft_mode', True))
     in_draft_mode_changed = positive_value_exists(request.POST.get('in_draft_mode_changed', False))
     challenge_photo_from_file_reader = request.POST.get('challenge_photo_from_file_reader', '')
@@ -190,6 +193,10 @@ def challenge_save_view(request, is_start_save=False):  # challengeSave & challe
     challenge_photo_delete = request.POST.get('challenge_photo_delete', '')
     challenge_photo_delete_changed = positive_value_exists(request.POST.get('challenge_photo_delete_changed', False))
     challenge_title = request.POST.get('challenge_title', '')
+    try:
+        challenge_title = challenge_title.strip()
+    except Exception as e:
+        pass
     challenge_title_changed = positive_value_exists(request.POST.get('challenge_title_changed', False))
     challenge_we_vote_id = request.POST.get('challenge_we_vote_id', '')
     hostname = request.POST.get('hostname', '')
@@ -199,6 +206,8 @@ def challenge_save_view(request, is_start_save=False):  # challengeSave & challe
     json_data = challenge_save_for_api(
         challenge_description=challenge_description,
         challenge_description_changed=challenge_description_changed,
+        challenge_invite_text_default=challenge_invite_text_default,
+        challenge_invite_text_default_changed=challenge_invite_text_default_changed,
         in_draft_mode=in_draft_mode,
         in_draft_mode_changed=in_draft_mode_changed,
         is_start_save=is_start_save,

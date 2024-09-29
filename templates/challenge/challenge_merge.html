@@ -90,6 +90,8 @@
 
 {% include "challenge/challenge_merge_one_field_decision.html" with field_name="challenge_description" field_label="Challenge Description" conflict_status=conflict_values.challenge_description challenge1_field_value=challenge_option1.challenge_description challenge2_field_value=challenge_option2.challenge_description challenge1=challenge_option1 challenge2=challenge_option2 %}
 
+{% include "challenge/challenge_merge_one_field_decision.html" with field_name="challenge_invite_text_default" field_label="Challenge Invitation (Default)" conflict_status=conflict_values.challenge_invite_text_default challenge1_field_value=challenge_option1.challenge_invite_text_default challenge2_field_value=challenge_option2.challenge_invite_text_default challenge1=challenge_option1 challenge2=challenge_option2 %}
+
 {% include "challenge/challenge_merge_one_field_decision.html" with field_name="challenge_description_link_to_twitter" field_label="Description Linked to Twitter?" conflict_status=conflict_values.challenge_description_link_to_twitter challenge1_field_value=challenge_option1.challenge_description_link_to_twitter challenge2_field_value=challenge_option2.challenge_description_link_to_twitter challenge1=challenge_option1 challenge2=challenge_option2 %}
 
 {% include "challenge/challenge_merge_one_field_decision.html" with field_name="started_by_voter_we_vote_id" field_label="Started by Voter ID" conflict_status=conflict_values.started_by_voter_we_vote_id challenge1_field_value=challenge_option1.started_by_voter_we_vote_id challenge2_field_value=challenge_option2.started_by_voter_we_vote_id challenge1=challenge_option1 challenge2=challenge_option2 %}

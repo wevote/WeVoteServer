@@ -66,6 +66,7 @@ def challenge_save_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "challenge_description": string,\n' \
+                   '  "challenge_invite_text_default": string,\n' \
                    '  "challenge_title": string,\n' \
                    '  "challenge_politician_list_exists": boolean,\n' \
                    '  "challenge_we_vote_id": string,\n' \

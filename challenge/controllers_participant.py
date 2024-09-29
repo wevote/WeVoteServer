@@ -248,7 +248,7 @@ def move_participant_entries_to_another_voter(from_voter_we_vote_id, to_voter_we
     results = challenge_manager.retrieve_challenge_participant_list(
         voter_we_vote_id=from_voter_we_vote_id,
         limit=0,
-        require_custom_message_for_friends=False,
+        require_invite_text_for_friends=False,
         require_visible_to_public=False,
         require_not_blocked_by_we_vote=False,
         read_only=False)
@@ -256,7 +256,7 @@ def move_participant_entries_to_another_voter(from_voter_we_vote_id, to_voter_we
     results = challenge_manager.retrieve_challenge_participant_list(
         voter_we_vote_id=to_voter_we_vote_id,
         limit=0,
-        require_custom_message_for_friends=False,
+        require_invite_text_for_friends=False,
         require_visible_to_public=False,
         require_not_blocked_by_we_vote=False,
         read_only=False)
@@ -376,7 +376,9 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
         'friends_who_joined': '',
         'friends_who_viewed': '',
         'friends_who_viewed_plus': '',
+        'invite_text_for_friends': '',
         'organization_we_vote_id': '',
+        'participant_id': 0,
         'participant_name': '',
         'points': '',
         'rank': '',
@@ -423,7 +425,9 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
     participant_dict['friends_who_joined'] = challenge_participant.friends_who_joined
     participant_dict['friends_who_viewed'] = challenge_participant.friends_who_viewed
     participant_dict['friends_who_viewed_plus'] = challenge_participant.friends_who_viewed_plus
+    participant_dict['invite_text_for_friends'] = challenge_participant.invite_text_for_friends
     participant_dict['organization_we_vote_id'] = challenge_participant.organization_we_vote_id
+    participant_dict['participant_id'] = challenge_participant.id
     participant_dict['participant_name'] = challenge_participant.participant_name
     participant_dict['points'] = challenge_participant.points
     participant_dict['rank'] = challenge_participant.rank

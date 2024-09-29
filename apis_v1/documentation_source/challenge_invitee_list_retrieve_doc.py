@@ -49,19 +49,19 @@ def challenge_invitee_list_retrieve_doc_template_values(url_root):
                    '  "date_last_changed": string,\n' \
                    '  "invitee_list: list \n' \
                    '  [{\n' \
+                   '    "challenge_joined": boolean,\n' \
                    '    "challenge_we_vote_id": string,\n' \
-                   '    "date_joined": string,\n' \
-                   '    "date_last_changed": string,\n' \
-                   '    "friends_invited": number,\n' \
-                   '    "friends_who_joined": number,\n' \
-                   '    "friends_who_viewed": number,\n' \
-                   '    "friends_who_viewed_plus": number,\n' \
-                   '    "organization_we_vote_id": string,\n' \
+                   '    "date_accepted_invite": string,\n' \
+                   '    "date_invited": string,\n' \
+                   '    "invitee_id": number,\n' \
                    '    "invitee_name": string,\n' \
-                   '    "points": number,\n' \
-                   '    "rank": number,\n' \
-                   '    "visible_to_public": boolean,\n' \
-                   '    "voter_we_vote_id": string,\n' \
+                   '    "invitee_url_code": string,\n' \
+                   '    "inviter_name": string,\n' \
+                   '    "inviter_voter_we_vote_id": string,\n' \
+                   '    "invite_sent": boolean,\n' \
+                   '    "invite_text_from_inviter": string,\n' \
+                   '    "invite_viewed": boolean,\n' \
+                   '    "invite_viewed_count": number,\n' \
                    '    "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '    "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '  },]\n' \

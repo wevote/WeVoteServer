@@ -99,9 +99,9 @@
         {% if challenge.challenge_description %}
             <tr>
                 <td colspan="2" style="vertical-align:top">
-<div style="white-space: pre-wrap;">
-{{ challenge.challenge_description|default_if_none:"" }}
-</div>
+                    <div style="white-space: pre-wrap;">
+                    {{ challenge.challenge_description|default_if_none:"" }}
+                    </div>
                 {% if challenge.challenge_starts_date_as_integer %}
                     <span class="u-no-break" style="color: darkgray">(Started: {{ challenge.challenge_starts_date_as_integer }})</span>
                 {% endif %}
@@ -219,7 +219,7 @@
                     {{ challenge_participant.participant_name }}&nbsp;&nbsp;
                 </td>
                 <td>
-                    <div style="white-space: pre-wrap;">{{ challenge_participant.custom_message_for_friends }}</div>&nbsp;&nbsp;
+                    <div style="white-space: pre-wrap;">{{ challenge_participant.invite_text_for_friends }}</div>&nbsp;&nbsp;
                 </td>
             </tr>
         {% endfor %}
