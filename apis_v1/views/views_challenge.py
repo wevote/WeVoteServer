@@ -131,11 +131,15 @@ def challenge_participant_retrieve_view(request):  # challengeParticipantRetriev
 
 def challenge_participant_save_view(request):  # challengeParticipantSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    invite_text_for_friends = request.GET.get('invite_text_for_friends', '')
+    invite_text_for_friends_changed = positive_value_exists(request.GET.get('invite_text_for_friends_changed', False))
     visible_to_public = positive_value_exists(request.GET.get('visible_to_public', True))
     visible_to_public_changed = positive_value_exists(request.GET.get('visible_to_public_changed', False))
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
     json_data = challenge_participant_save_for_api(
         challenge_we_vote_id=challenge_we_vote_id,
+        invite_text_for_friends=invite_text_for_friends,
+        invite_text_for_friends_changed=invite_text_for_friends_changed,
         visible_to_public=visible_to_public,
         visible_to_public_changed=visible_to_public_changed,
         voter_device_id=voter_device_id,

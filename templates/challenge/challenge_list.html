@@ -249,7 +249,10 @@
                     (NOT&nbsp;Visible)
                     </span>
                 {% endif %}
-            {% endif %}</td>
+            {% endif %}
+            <br />
+            <a href="{% url 'challenge:refresh_participant_info' %}?challenge_we_vote_id={{ challenge.we_vote_id }}">refresh</a>
+            </td>
             <td style="text-align: right">
             {% if challenge.chip_in_total != 'none' %}
                 <a href="{% url 'challenge:participant_list' challenge.we_vote_id %}?show_participants_not_visible_to_public=1" target="_blank">

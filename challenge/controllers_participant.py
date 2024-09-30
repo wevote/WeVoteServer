@@ -9,7 +9,7 @@ from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import generate_dict_from_list_with_key_from_one_attribute, positive_value_exists
 from wevote_functions.functions_date import generate_date_as_integer, get_current_date_as_integer, DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -19,7 +19,6 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
         voter_device_id='',
         challenge_we_vote_id=''):
     status = ''
-    voter_signed_in_with_email = False
 
     dict_results = generate_challenge_participant_dict_from_challenge_participant_object()
     error_results = dict_results['challenge_participant_dict']
@@ -28,7 +27,6 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-        voter_signed_in_with_email = voter.signed_in_with_email()
         voter_we_vote_id = voter.we_vote_id
     else:
         status += "VALID_VOTER_ID_MISSING "
@@ -65,7 +63,7 @@ def challenge_participant_retrieve_for_api(  # challengeParticipantRetrieve
         results['success'] = True
         return results
     else:
-        status += "CHALLENGE_INVITEE_GENERATE_RESULTS_ERROR "
+        status += "CHALLENGE_PARTICIPANT_GENERATE_RESULTS_ERROR "
         error_results['status'] = status
         return error_results
 
@@ -129,14 +127,15 @@ def challenge_participant_list_retrieve_for_api(  # challengeParticipantListRetr
 
 def challenge_participant_save_for_api(  # challengeParticipantSave
         challenge_we_vote_id='',
+        invite_text_for_friends='',
+        invite_text_for_friends_changed=False,
         visible_to_public=False,
         visible_to_public_changed=False,
         voter_device_id=''):
-    challenge_participant = None
     status = ''
     success = True
 
-    generate_results = generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant)
+    generate_results = generate_challenge_participant_dict_from_challenge_participant_object()
     error_results = generate_results['challenge_participant_dict']
 
     voter_manager = VoterManager()
@@ -166,11 +165,14 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
 
     challenge_manager = ChallengeManager()
     update_values = {
+        'invite_text_for_friends':          invite_text_for_friends,
+        'invite_text_for_friends_changed':  invite_text_for_friends_changed,
         'visible_to_public':                visible_to_public,
         'visible_to_public_changed':        visible_to_public_changed,
     }
     create_results = challenge_manager.update_or_create_challenge_participant(
         challenge_we_vote_id=challenge_we_vote_id,
+        voter=voter,
         voter_we_vote_id=voter_we_vote_id,
         organization_we_vote_id=linked_organization_we_vote_id,
         update_values=update_values,
@@ -595,5 +597,167 @@ def delete_challenge_participant(voter_to_delete=None):
         'challenge_participant_deleted':      challenge_participant_deleted,
         'challenge_participant_not_deleted':  challenge_participant_not_deleted,
     }
-    
+    return results
+
+
+def update_challenge_participant_entries_from_voter_object(voter_object=None):
+    status = ""
+    success = True
+
+    voter_dict = {}
+    voter_we_vote_id = voter_object.we_vote_id
+    voter_dict[voter_we_vote_id] = voter_object
+
+    try:
+        queryset = ChallengeParticipant.objects.all()
+        queryset = queryset.filter(voter_we_vote_id=voter_we_vote_id)
+        challenge_participant_list = list(queryset)
+    except Exception as e:
+        status += "CHALLENGE_PARTICIPANT_LIST_RETRIEVE_ERROR: " + str(e) + " "
+        results = {
+            'status': status,
+            'success': False,
+            'challenge_participant_list': [],
+            'voter_dict': voter_dict,
+        }
+        return results
+
+    participants_with_data_changed_list = []
+    for one_challenge_participant in challenge_participant_list:
+        hydrate_results = hydrate_challenge_participant_object_from_voter_object(
+            challenge_participant=one_challenge_participant,
+            voter_dict=voter_dict,
+        )
+        if hydrate_results['success'] and hydrate_results['changes_found']:
+            challenge_participant = hydrate_results['challenge_participant']
+            participants_with_data_changed_list.append(challenge_participant)
+
+    if len(participants_with_data_changed_list) > 0:
+        try:
+            rows_updated = ChallengeParticipant.objects.bulk_update(
+                participants_with_data_changed_list,
+                ['participant_name',
+                 'we_vote_hosted_profile_image_url_medium', 'we_vote_hosted_profile_image_url_tiny'])
+            status += "BULK_PARTICIPANT_UPDATES: " + str(rows_updated) + " "
+        except Exception as e:
+            status += "BULK_PARTICIPANT_UPDATE_FAILED: " + str(e)
+            success = False
+    results = {
+        'status':                           status,
+        'success':                          success,
+    }
+    return results
+
+
+def hydrate_challenge_participant_object_from_voter_object(
+            challenge_participant=None,
+            voter_dict=None):
+    changes_found = False
+    status = ''
+    success = True
+
+    if challenge_participant and positive_value_exists(challenge_participant.id):
+        pass
+    else:
+        status += "CHALLENGE_PARTICIPANT_NOT_FOUND "
+        success = False
+        results = {
+            'challenge_participant':    None,
+            'changes_found':            changes_found,
+            'status':                   status,
+            'success':                  success,
+        }
+        return results
+
+    if voter_dict and challenge_participant.voter_we_vote_id in voter_dict:
+        voter = voter_dict[challenge_participant.voter_we_vote_id]
+    else:
+        status += "VOTER_NOT_FOUND_IN_VOTER_DICT "
+        success = False
+        results = {
+            'challenge_participant':    challenge_participant,
+            'changes_found':            changes_found,
+            'status':                   status,
+            'success':                  success,
+        }
+        return results
+
+    voter_full_name = voter.get_full_name(real_name_only=True)
+    if positive_value_exists(voter_full_name) and challenge_participant.participant_name != voter_full_name:
+        challenge_participant.participant_name = voter_full_name
+        changes_found = True
+    if positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) and \
+            challenge_participant.we_vote_hosted_profile_image_url_medium != \
+            voter.we_vote_hosted_profile_image_url_medium:
+        challenge_participant.we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+        changes_found = True
+    if positive_value_exists(voter.we_vote_hosted_profile_image_url_tiny) and \
+            challenge_participant.we_vote_hosted_profile_image_url_tiny != \
+            voter.we_vote_hosted_profile_image_url_tiny:
+        challenge_participant.we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
+        changes_found = True
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'challenge_participant':    challenge_participant,
+        'changes_found':            changes_found,
+    }
+    return results
+
+
+def refresh_participant_name_and_photo_for_challenge_participant_list(
+        challenge_we_vote_id_list=[],
+        challenge_participant_list=[],
+        voter_dict=''):
+    status = ''
+    success = True
+
+    if len(challenge_participant_list) == 0 and len(challenge_we_vote_id_list) > 0:
+        try:
+            queryset = ChallengeParticipant.objects.all()
+            queryset = queryset.filter(challenge_we_vote_id__in=challenge_we_vote_id_list)
+            challenge_participant_list = list(queryset)
+        except Exception as e:
+            status += "CHALLENGE_PARTICIPANT_LIST_RETRIEVE_ERROR: " + str(e) + " "
+            results = {
+                'status':                       status,
+                'success':                      False,
+                'challenge_participant_list':   [],
+                'voter_dict':                   voter_dict,
+            }
+            return results
+
+    # Retrieve voter data for all participants
+    voter_we_vote_id_list = [challenge_participant.voter_we_vote_id
+                             for challenge_participant in challenge_participant_list]
+    queryset = Voter.objects.using('readonly').filter(we_vote_id__in=voter_we_vote_id_list)
+    voter_list = list(queryset)
+    voter_dict, results = generate_dict_from_list_with_key_from_one_attribute(
+        incoming_list=voter_list, field_to_use_as_key='we_vote_id')
+
+    participants_with_data_changed_list = []
+    for challenge_participant in challenge_participant_list:
+        hydrate_results = hydrate_challenge_participant_object_from_voter_object(
+            challenge_participant=challenge_participant,
+            voter_dict=voter_dict)
+        if hydrate_results['success'] and hydrate_results['changes_found']:
+            participants_with_data_changed_list.append(hydrate_results['challenge_participant'])
+    if len(participants_with_data_changed_list) > 0:
+        try:
+            rows_updated = ChallengeParticipant.objects.bulk_update(
+                participants_with_data_changed_list,
+                ['participant_name',
+                 'we_vote_hosted_profile_image_url_medium', 'we_vote_hosted_profile_image_url_tiny'])
+            status += "BULK_PARTICIPANT_UPDATES: " + str(rows_updated) + " "
+        except Exception as e:
+            status += "BULK_PARTICIPANT_UPDATE_FAILED: " + str(e)
+            success = False
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'challenge_participant_list':   challenge_participant_list,
+        'voter_dict':                   voter_dict,
+    }
     return results

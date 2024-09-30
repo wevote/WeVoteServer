@@ -3011,7 +3011,8 @@ def voter_update_view(request):  # voterUpdate
             and positive_value_exists(linked_organization_we_vote_id):
         voter_name_changed = True
     if voter_name_changed or voter_photo_changed:
-        results = organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
+        results = organization_manager.retrieve_organization_from_we_vote_id(
+            linked_organization_we_vote_id, read_only=False)
         if results['organization_found']:
             organization = results['organization']
             organization_changed = False
@@ -3072,6 +3073,16 @@ def voter_update_view(request):  # voterUpdate
                 except Exception as e:
                     status += "COULD_NOT_SAVE_ORGANIZATION: " + str(e) + " "
                     pass
+
+    if voter_name_changed or voter_photo_changed:
+        # Update ChallengeParticipant records
+        try:
+            from challenge.controllers_participant import update_challenge_participant_entries_from_voter_object
+            results = update_challenge_participant_entries_from_voter_object(voter_object=voter)
+            status += results['status']
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_CHALLENGE_PARTICIPANTS: " + str(e) + " "
+
     if voter_name_needs_to_be_updated_in_activity:
         from activity.models import ActivityManager
         activity_manager = ActivityManager()

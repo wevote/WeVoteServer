@@ -194,11 +194,13 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         status += return_results['status']
         results = return_results['challenge_invitee_dict']
         results['status'] = status
+        results['success'] = True
         return results
     else:
         status += "CHALLENGE_INVITEE_SAVE_ERROR "
         results = error_results
         results['status'] = status
+        results['success'] = False
         return results
 
 

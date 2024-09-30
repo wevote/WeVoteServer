@@ -35,4 +35,6 @@ urlpatterns = [
         views_admin.challenge_participant_list_view, name='participant_list'),
     re_path(r'^participant_list_process/$', views_admin.challenge_participant_list_process_view,
             name='participant_list_process'),
+    re_path(r'^refresh_participant_info/$', views_admin.refresh_participant_info_view,
+            name='refresh_participant_info'),
 ]

@@ -2436,3 +2436,22 @@ def deleting_or_editing_challenge_participant_list(
         'update_message': update_message,
     }
     return results
+
+
+@login_required
+def refresh_participant_info_view(request):
+    status = ""
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
+    challenge_we_vote_id_list = [challenge_we_vote_id]
+    from challenge.controllers_participant import refresh_participant_name_and_photo_for_challenge_participant_list
+    results = refresh_participant_name_and_photo_for_challenge_participant_list(
+        challenge_we_vote_id_list=challenge_we_vote_id_list)
+    status += results['status']
+
+    messages.add_message(request, messages.INFO, status)
+    return HttpResponseRedirect(reverse('challenge:challenge_list', args=()))
