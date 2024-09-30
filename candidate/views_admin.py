@@ -4546,6 +4546,7 @@ def render_candidate_merge_form(
         'remove_duplicate_process':                         remove_duplicate_process,
         'state_code':                                       state_code,
     }
+    return render(request, 'candidate/candidate_merge.html', template_values)
 
 
 @login_required
