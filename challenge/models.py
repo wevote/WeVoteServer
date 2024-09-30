@@ -2844,6 +2844,8 @@ class ChallengeManager(models.Manager):
         challenge_invitee_changed = False
         if not challenge_invitee_found:
             try:
+                if 'invitee_name' not in update_values or not positive_value_exists(update_values['invitee_name']):
+                    update_values['invitee_name'] = 'Unnamed friend'
                 update_values['challenge_we_vote_id'] = challenge_we_vote_id
                 update_values['inviter_voter_we_vote_id'] = inviter_voter_we_vote_id
                 challenge_invitee = ChallengeInvitee.objects.create(**update_values)
