@@ -2443,57 +2443,24 @@ class ChallengeManager(models.Manager):
         }
         return results
 
-    def update_challenge_participants_count(self, challenge_we_vote_id='', politician_we_vote_id=''):
+    def update_challenge_participants_count(self, challenge_we_vote_id=''):
         status = ''
         opposers_count = 0
         participants_count = 0
         error_results = {
             'challenge_we_vote_id': challenge_we_vote_id,
+            'participants_count': participants_count,
             'status': status,
             'success': False,
-            'participants_count': participants_count,
         }
-        if positive_value_exists(politician_we_vote_id):
-            if not positive_value_exists(challenge_we_vote_id):
-                try:
-                    queryset = Challenge.objects.using('readonly').all()
-                    queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
-                    temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
-                    challenge_we_vote_id = temp_list[0]
-                except Exception as e:
-                    status += "FAILED_RETRIEVING_CHALLENGE: " + str(e) + ' '
-                    error_results['status'] += status
-                    return error_results
-            try:
-                queryset = Organization.objects.using('readonly').all()
-                queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
-                temp_list = queryset.values_list('we_vote_id', flat=True).distinct()
-                organization_we_vote_id = temp_list[0]
-            except Exception as e:
-                status += "FAILED_RETRIEVING_ORGANIZATION: " + str(e) + ' '
-                error_results['status'] += status
-                return error_results
-            try:
-                from follow.models import FOLLOWING, FOLLOW_DISLIKE, FollowOrganization
-                queryset = FollowOrganization.objects.using('readonly').all()
-                queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
-                following_queryset = queryset.filter(following_status=FOLLOWING)
-                participants_count = following_queryset.count()
-                disliking_queryset = queryset.filter(following_status=FOLLOW_DISLIKE)
-                opposers_count = disliking_queryset.count()
-            except Exception as e:
-                status += "FAILED_RETRIEVING_FOLLOW_ORGANIZATION_COUNTS: " + str(e) + ' '
-                error_results['status'] += status
-                return error_results
-        else:
-            try:
-                count_query = ChallengeParticipant.objects.using('readonly').all()
-                count_query = count_query.filter(challenge_we_vote_id=challenge_we_vote_id)
-                participants_count = count_query.count()
-            except Exception as e:
-                status += "FAILED_RETRIEVING_CHALLENGE_PARTICIPANT_COUNT: " + str(e) + ' '
-                error_results['status'] += status
-                return error_results
+        try:
+            count_query = ChallengeParticipant.objects.using('readonly').all()
+            count_query = count_query.filter(challenge_we_vote_id=challenge_we_vote_id)
+            participants_count = count_query.count()
+        except Exception as e:
+            status += "FAILED_RETRIEVING_CHALLENGE_PARTICIPANT_COUNT: " + str(e) + ' '
+            error_results['status'] += status
+            return error_results
 
         update_values = {
             'opposers_count': opposers_count,
@@ -2508,9 +2475,9 @@ class ChallengeManager(models.Manager):
 
         results = {
             'challenge_we_vote_id': challenge_we_vote_id,
+            'participants_count':   participants_count,
             'status':               status,
             'success':              success,
-            'participants_count':     participants_count,
         }
         return results
 
@@ -3405,6 +3372,7 @@ class ChallengeManager(models.Manager):
     @staticmethod
     def update_or_create_challenge_participant(
             challenge_we_vote_id='',
+            voter=None,
             voter_we_vote_id='',
             organization_we_vote_id='',
             update_values={}):
@@ -3414,6 +3382,9 @@ class ChallengeManager(models.Manager):
         challenge_participant_created = False
         challenge_manager = ChallengeManager()
 
+        voter_dict = {}
+        if voter is not None:
+            voter_dict[voter.we_vote_id] = voter
         create_variables_exist = positive_value_exists(challenge_we_vote_id) \
             and positive_value_exists(voter_we_vote_id) \
             and positive_value_exists(organization_we_vote_id)
@@ -3460,7 +3431,6 @@ class ChallengeManager(models.Manager):
             }
             return results
 
-        organization_manager = OrganizationManager()
         challenge_participant_changed = False
         if not challenge_participant_found:
             try:
@@ -3483,22 +3453,13 @@ class ChallengeManager(models.Manager):
         if challenge_participant_found:
             # Update existing challenge_participant with changes
             try:
-                # Retrieve the participant_name and we_vote_hosted_profile_image_url_tiny from the organization entry
-                organization_results = \
-                    organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
-                if organization_results['organization_found']:
-                    organization = organization_results['organization']
-                    if positive_value_exists(organization.organization_name):
-                        challenge_participant.participant_name = organization.organization_name
-                        challenge_participant_changed = True
-                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
-                        challenge_participant.we_vote_hosted_profile_image_url_medium = \
-                            organization.we_vote_hosted_profile_image_url_medium
-                        challenge_participant_changed = True
-                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
-                        challenge_participant.we_vote_hosted_profile_image_url_tiny = \
-                            organization.we_vote_hosted_profile_image_url_tiny
-                        challenge_participant_changed = True
+                # Retrieve the participant_name and we_vote_hosted_profile_image_url_tiny from the voter entry
+                from challenge.controllers_participant import hydrate_challenge_participant_object_from_voter_object
+                hydrate_results = hydrate_challenge_participant_object_from_voter_object(
+                    challenge_participant=challenge_participant,
+                    voter_dict=voter_dict)
+                if hydrate_results['success'] and hydrate_results['changes_found']:
+                    challenge_participant = hydrate_results['challenge_participant']
 
                 if 'linked_position_we_vote_id_changed' in update_values \
                         and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
@@ -3623,6 +3584,9 @@ class ChallengeParticipant(models.Model):
             models.Index(
                 fields=['voter_we_vote_id', 'challenge_we_vote_id'],
                 name='voter_challenge_participant'),
+            models.Index(
+                fields=['challenge_we_vote_id'],
+                name='challenge_we_vote_id'),
         ]
 
 

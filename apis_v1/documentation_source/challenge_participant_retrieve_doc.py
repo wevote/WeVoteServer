@@ -52,6 +52,7 @@ def challenge_participant_retrieve_doc_template_values(url_root):
                    '  "friends_who_joined": number,\n' \
                    '  "friends_who_viewed": number,\n' \
                    '  "friends_who_viewed_plus": number,\n' \
+                   '  "invite_text_for_friends": string,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "participant_name": string,\n' \
                    '  "points": number,\n' \

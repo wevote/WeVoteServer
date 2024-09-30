@@ -485,6 +485,27 @@ def is_ordinal_number(incoming_integer):
     return False
 
 
+def generate_dict_from_list_with_key_from_one_attribute(incoming_list=[], field_to_use_as_key=""):
+    status = ""
+    success = True
+    if not incoming_list:
+        status += "INCOMING_LIST_EMPTY "
+    generated_dict = {}
+    try:
+        for item in incoming_list:
+            if hasattr(item, field_to_use_as_key):
+                generated_dict[getattr(item, field_to_use_as_key)] = item
+    except Exception as e:
+        status += f"ERROR_WHILE_GENERATING_DICT: {str(e)} "
+        success = False
+    results = {
+        "status": status,
+        "success": success,
+        "results": generated_dict,
+    }
+    return generated_dict, results
+
+
 def generate_office_equivalent_district_phrase_pairs():
     district_numbers_in_chosen_order = []
     district_number = 200

@@ -672,7 +672,7 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
         update_values = {
             'challenge_description':                challenge_description,
             'challenge_description_changed':        challenge_description_changed,
-            'challenge_invite_text_default':    challenge_invite_text_default,
+            'challenge_invite_text_default':        challenge_invite_text_default,
             'challenge_invite_text_default_changed': challenge_invite_text_default_changed,
             'in_draft_mode':                        in_draft_mode,
             'in_draft_mode_changed':                in_draft_mode_changed,
@@ -755,6 +755,7 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
                 }
                 create_results = challenge_manager.update_or_create_challenge_participant(
                     challenge_we_vote_id=challenge_we_vote_id,
+                    voter=voter,
                     voter_we_vote_id=voter_we_vote_id,
                     organization_we_vote_id=linked_organization_we_vote_id,
                     update_values=update_values,
