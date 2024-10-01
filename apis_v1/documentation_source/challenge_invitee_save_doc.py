@@ -83,16 +83,24 @@ def challenge_invitee_save_doc_template_values(url_root):
     }
 
     api_response = '{\n' \
+                   '  "challenge_we_vote_id": string,\n' \
+                   '  "challenge_joined": boolean,\n' \
+                   '  "date_invite_sent": string,\n' \
+                   '  "date_invite_viewed": string,\n' \
+                   '  "date_challenge_joined": string,\n' \
+                   '  "invitee_id": string,\n' \
+                   '  "invitee_name": string,\n' \
+                   '  "invitee_url_code": string,\n' \
+                   '  "inviter_name": string,\n' \
+                   '  "inviter_voter_we_vote_id": string,\n' \
+                   '  "invite_sent": boolean,\n' \
+                   '  "invite_text_from_inviter": string,\n' \
+                   '  "invite_viewed": boolean,\n' \
+                   '  "invite_viewed_count": number,\n' \
+                   '  "next_invitee_url_code": string,\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "challenge_we_vote_id": string,\n' \
-                   '  "date_last_changed": string,\n' \
-                   '  "date_joined": string,\n' \
-                   '  "organization_we_vote_id": string,\n' \
-                   '  "supporter_endorsement": string,\n' \
-                   '  "invitee_name": string,\n' \
-                   '  "visible_to_public": boolean,\n' \
-                   '  "voter_we_vote_id": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'
 

@@ -378,7 +378,7 @@ def challenge_news_item_save_for_api(  # challengeNewsItemSave
             date_posted_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
             date_sent_to_email_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
-            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+            status += "DATE_CONVERSION_ERROR-NEWS_ITEM: " + str(e) + " "
         results = {
             'status':                       status,
             'success':                      success,
@@ -1201,7 +1201,7 @@ def generate_challenge_dict_from_challenge_object(
                     if positive_value_exists(news_item.date_sent_to_email):
                         date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
-                    status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                    status += "DATE_CONVERSION_ERROR-CHALLENGE: " + str(e) + " "
                 one_news_item_dict = {
                     'challenge_news_subject': news_item.challenge_news_subject,
                     'challenge_news_text': news_item.challenge_news_text,

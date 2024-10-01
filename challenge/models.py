@@ -224,8 +224,9 @@ class ChallengeInvitee(models.Model):
     challenge_joined = models.BooleanField(default=False)
     challenge_we_vote_id = models.CharField(max_length=255)
     invite_text_from_inviter = models.TextField(null=True)
-    date_accepted_invite = models.DateTimeField(null=True)
-    date_invited = models.DateTimeField(null=True, auto_now_add=True)  # Use this field for message sent too
+    date_challenge_joined = models.DateTimeField(null=True)
+    date_invite_sent = models.DateTimeField(null=True, auto_now_add=True)  # Use this field for message sent too
+    date_invite_viewed = models.DateTimeField(null=True)
     invitee_name = models.CharField(max_length=255, null=True)
     invitee_url_code = models.CharField(max_length=50, null=True)  # generate_random_string(8)
     inviter_name = models.CharField(max_length=255, null=True)
@@ -2846,9 +2847,12 @@ class ChallengeManager(models.Manager):
             try:
                 if 'invitee_name' not in update_values or not positive_value_exists(update_values['invitee_name']):
                     update_values['invitee_name'] = 'Unnamed friend'
-                update_values['challenge_we_vote_id'] = challenge_we_vote_id
-                update_values['inviter_voter_we_vote_id'] = inviter_voter_we_vote_id
-                challenge_invitee = ChallengeInvitee.objects.create(**update_values)
+                create_values = {
+                    'invitee_name': update_values['invitee_name'],
+                    'challenge_we_vote_id': challenge_we_vote_id,
+                    'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+                }
+                challenge_invitee = ChallengeInvitee.objects.create(**create_values)
                 status += "CHALLENGE_INVITEE_CREATED "
                 challenge_invitee_created = True
                 challenge_invitee_found = True
@@ -2860,50 +2864,34 @@ class ChallengeManager(models.Manager):
                 success = False
                 status += "CHALLENGE_INVITEE_NOT_CREATED: " + str(e) + " "
 
-        # if challenge_invitee_found:
-        #     # Update existing challenge_invitee with changes
-        #     try:
-        #         # Retrieve the invitee_name and we_vote_hosted_profile_image_url_tiny from the organization entry
-        #         organization_results = \
-        #             organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
-        #         if organization_results['organization_found']:
-        #             organization = organization_results['organization']
-        #             if positive_value_exists(organization.organization_name):
-        #                 challenge_invitee.invitee_name = organization.organization_name
-        #                 challenge_invitee_changed = True
-        #             if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
-        #                 challenge_invitee.we_vote_hosted_profile_image_url_medium = \
-        #                     organization.we_vote_hosted_profile_image_url_medium
-        #                 challenge_invitee_changed = True
-        #             if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
-        #                 challenge_invitee.we_vote_hosted_profile_image_url_tiny = \
-        #                     organization.we_vote_hosted_profile_image_url_tiny
-        #                 challenge_invitee_changed = True
-        #
-        #         if 'linked_position_we_vote_id_changed' in update_values \
-        #                 and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
-        #             challenge_invitee.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
-        #             challenge_invitee_changed = True
-        #         if 'invite_text_from_inviter_changed' in update_values \
-        #                 and positive_value_exists(update_values['invite_text_from_inviter_changed']):
-        #             challenge_invitee.invite_text_from_inviter = \
-        #                 update_values['invite_text_from_inviter']
-        #             challenge_invitee_changed = True
-        #         if 'visible_to_public_changed' in update_values \
-        #                 and positive_value_exists(update_values['visible_to_public_changed']):
-        #             challenge_invitee.visible_to_public = update_values['visible_to_public']
-        #             challenge_invitee_changed = True
-        #         if challenge_invitee_changed:
-        #             challenge_invitee.save()
-        #             status += "CHALLENGE_INVITEE_UPDATED "
-        #         else:
-        #             status += "CHALLENGE_INVITEE_NOT_UPDATED-NO_CHANGES_FOUND "
-        #         success = True
-        #     except Exception as e:
-        #         challenge_invitee = None
-        #         challenge_invitee_changed = False
-        #         success = False
-        #         status += "CHALLENGE_INVITEE_NOT_UPDATED: " + str(e) + " "
+        if challenge_invitee_found:
+            # Update existing challenge_invitee with changes
+            try:
+                if 'invitee_name' in update_values and \
+                        positive_value_exists(update_values['invitee_name_changed']):
+                    if not positive_value_exists(update_values['invitee_name']):
+                        update_values['invitee_name'] = 'Unnamed friend'
+                    challenge_invitee.invitee_name = update_values['invitee_name']
+                    challenge_invitee_changed = True
+                if 'invitee_text_from_inviter' in update_values and \
+                        positive_value_exists(update_values['invitee_text_from_inviter_changed']):
+                    challenge_invitee.invitee_text_from_inviter = update_values['invitee_text_from_inviter']
+                    challenge_invitee_changed = True
+                if 'invitee_url_code' in update_values and \
+                        positive_value_exists(update_values['invitee_url_code_changed']):
+                    challenge_invitee.invitee_url_code = update_values['invitee_url_code']
+                    challenge_invitee_changed = True
+                if challenge_invitee_changed:
+                    challenge_invitee.save()
+                    status += "CHALLENGE_INVITEE_UPDATED "
+                else:
+                    status += "CHALLENGE_INVITEE_NOT_UPDATED-NO_CHANGES_FOUND "
+                success = True
+            except Exception as e:
+                challenge_invitee = None
+                challenge_invitee_changed = False
+                success = False
+                status += "CHALLENGE_INVITEE_NOT_UPDATED: " + str(e) + " "
 
         results = {
             'success':                      success,
