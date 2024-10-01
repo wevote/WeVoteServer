@@ -47,8 +47,9 @@ def challenge_invitee_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "challenge_joined": boolean,\n' \
                    '  "challenge_we_vote_id": string,\n' \
-                   '  "date_accepted_invite": string,\n' \
-                   '  "date_invited": string,\n' \
+                   '  "date_invite_viewed": string,\n' \
+                   '  "date_challenge_joined": string,\n' \
+                   '  "date_invite_sent": string,\n' \
                    '  "invitee_id": number,\n' \
                    '  "invitee_name": string,\n' \
                    '  "invitee_url_code": string,\n' \
@@ -58,6 +59,7 @@ def challenge_invitee_retrieve_doc_template_values(url_root):
                    '  "invite_text_from_inviter": string,\n' \
                    '  "invite_viewed": boolean,\n' \
                    '  "invite_viewed_count": number,\n' \
+                   '  "next_invitee_url_code": string,\n' \
                    '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'

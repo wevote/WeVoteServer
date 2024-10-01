@@ -45,10 +45,22 @@ def challenge_invitee_retrieve_view(request):  # challengeInviteeRetrieve
 def challenge_invitee_save_view(request):  # challengeInviteeSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
+    invitee_id = request.GET.get('invitee_id', None)
     invitee_name = request.GET.get('invitee_name', None)
+    invitee_name_changed = request.GET.get('invitee_name_changed', False)
+    invitee_text_from_inviter = request.GET.get('invitee_text_from_inviter', None)
+    invitee_text_from_inviter_changed = request.GET.get('invitee_text_from_inviter_changed', False)
+    invitee_url_code = request.GET.get('invitee_url_code', None)
+    invitee_url_code_changed = request.GET.get('invitee_url_code_changed', False)
     json_data = challenge_invitee_save_for_api(
         challenge_we_vote_id=challenge_we_vote_id,
+        invitee_id=invitee_id,
         invitee_name=invitee_name,
+        invitee_name_changed=invitee_name_changed,
+        invitee_text_from_inviter=invitee_text_from_inviter,
+        invitee_text_from_inviter_changed=invitee_text_from_inviter_changed,
+        invitee_url_code=invitee_url_code,
+        invitee_url_code_changed=invitee_url_code_changed,
         voter_device_id=voter_device_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')

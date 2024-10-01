@@ -9,7 +9,7 @@ from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import generate_random_string, positive_value_exists
 from wevote_functions.functions_date import generate_date_as_integer, get_current_date_as_integer, DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -20,8 +20,11 @@ def challenge_invitee_retrieve_for_api(  # challengeInviteeRetrieve
         invitee_url_code=''):
     status = ''
 
-    dict_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
-    error_results = dict_results['challenge_invitee_dict']
+    return_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
+    status += return_results['status']
+    error_results = return_results['challenge_invitee_dict']
+    error_results['status'] = status
+    error_results['success'] = False
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
@@ -40,6 +43,9 @@ def challenge_invitee_retrieve_for_api(  # challengeInviteeRetrieve
         read_only=True,
     )
     status += results['status']
+    random_string = generate_random_string(8)
+    # TODO: Confirm its not in use
+    next_invitee_url_code = random_string
     if not results['success']:
         status += "CHALLENGE_INVITEE_RETRIEVE_ERROR "
         error_results['status'] = status
@@ -47,6 +53,7 @@ def challenge_invitee_retrieve_for_api(  # challengeInviteeRetrieve
     elif not results['challenge_invitee_found']:
         status += "CHALLENGE_INVITEE_NOT_FOUND: "
         error_results['status'] = status
+        error_results['next_invitee_url_code'] = next_invitee_url_code
         return error_results
 
     challenge_invitee = results['challenge_invitee']
@@ -56,6 +63,7 @@ def challenge_invitee_retrieve_for_api(  # challengeInviteeRetrieve
         results = dict_results['challenge_invitee_dict']
         results['status'] = status
         results['success'] = True
+        results['next_invitee_url_code'] = next_invitee_url_code
         return results
     else:
         status += "CHALLENGE_INVITEE_GENERATE_RESULTS_ERROR "
@@ -91,6 +99,9 @@ def challenge_invitee_list_retrieve_for_api(  # challengeInviteeListRetrieve
         read_only=True,
     )
     status += results['status']
+    random_string = generate_random_string(8)
+    # TODO: Confirm its not in use
+    next_invitee_url_code = random_string
     if not results['success']:
         status += "CHALLENGE_INVITEE_LIST_RETRIEVE_ERROR "
         results = {
@@ -116,6 +127,7 @@ def challenge_invitee_list_retrieve_for_api(  # challengeInviteeListRetrieve
         'success':                  True,
         'challenge_invitee_list':   challenge_invitee_list,
         'challenge_we_vote_id':     challenge_we_vote_id,
+        'next_invitee_url_code':    next_invitee_url_code,
         'voter_we_vote_id':         voter_we_vote_id,
     }
     return results
@@ -125,37 +137,27 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         challenge_we_vote_id='',
         invitee_id=None,
         invitee_name=None,
+        invitee_name_changed=False,
+        invitee_text_from_inviter=None,
+        invitee_text_from_inviter_changed=False,
+        invitee_url_code=None,
+        invitee_url_code_changed=False,
         voter_device_id=''):
     status = ''
     success = True
-    voter_signed_in_with_email = False
 
-    error_results = {
-        'status': status,
-        'success': False,
-        'challenge_joined': False,
-        'challenge_we_vote_id': '',
-        'invite_text_from_inviter': '',
-        'date_accepted_invite': '',
-        'date_invited': '',
-        'id': '',
-        'invitee_name': '',
-        'inviter_name': '',
-        'inviter_organization_we_vote_id': '',
-        'inviter_voter_we_vote_id': '',
-        'invite_sent': True,
-        'invite_viewed': True,
-        'invite_viewed_count': 0,
-        'we_vote_hosted_profile_image_url_medium': '',
-        'we_vote_hosted_profile_image_url_tiny': '',
-    }
+    return_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
+    status += return_results['status']
+    error_results = return_results['challenge_invitee_dict']
+    error_results['status'] = status
+    error_results['success'] = success
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
+        voter_name = voter.get_full_name(real_name_only=True)
         voter_we_vote_id = voter.we_vote_id
-        linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     else:
         status += "VALID_VOTER_ID_MISSING "
         results = error_results
@@ -177,16 +179,25 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
 
     challenge_manager = ChallengeManager()
     update_values = {
-        'invitee_name':                invitee_name,
+        'invitee_name': invitee_name,
+        'invitee_name_changed': invitee_name_changed,
+        'invitee_text_from_inviter': invitee_text_from_inviter,
+        'invitee_text_from_inviter_changed': invitee_text_from_inviter_changed,
+        'invitee_url_code': invitee_url_code,
+        'invitee_url_code_changed': invitee_url_code_changed,
+        'inviter_name': voter_name,
     }
     create_results = challenge_manager.update_or_create_challenge_invitee(
         challenge_we_vote_id=challenge_we_vote_id,
-        # invitee_id=invitee_id,
+        invitee_id=invitee_id,
         inviter_voter_we_vote_id=voter_we_vote_id,
         update_values=update_values,
     )
 
     status += create_results['status']
+    random_string = generate_random_string(8)
+    # TODO: Confirm its not in use
+    next_invitee_url_code = random_string
     if create_results['challenge_invitee_found']:
         challenge_invitee = create_results['challenge_invitee']
         return_results = generate_challenge_invitee_dict_from_challenge_invitee_object(
@@ -195,6 +206,7 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         results = return_results['challenge_invitee_dict']
         results['status'] = status
         results['success'] = True
+        results['next_invitee_url_code'] = next_invitee_url_code
         return results
     else:
         status += "CHALLENGE_INVITEE_SAVE_ERROR "
@@ -348,8 +360,9 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
     challenge_invitee_dict = {
         'challenge_joined': False,
         'challenge_we_vote_id': '',
-        'date_accepted_invite': '',
-        'date_invited': '',
+        'date_invite_sent': '',
+        'date_invite_viewed': '',
+        'date_challenge_joined': '',
         'invitee_id': '',
         'invitee_name': '',
         'invitee_url_code': '',
@@ -388,18 +401,21 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         we_vote_hosted_profile_image_url_medium = ''
         we_vote_hosted_profile_image_url_tiny = ''
 
-    date_accepted_invite_string = ''
-    date_invited_string = ''
+    date_invite_viewed_string = ''
+    date_challenge_joined_string = ''
+    date_invite_sent_string = ''
     try:
-        date_accepted_invite_string = challenge_invitee.date_accepted_invite.strftime(DATE_FORMAT_YMD_HMS)
-        date_invited_string = challenge_invitee.date_invited.strftime(DATE_FORMAT_YMD_HMS)
+        date_invite_sent_string = challenge_invitee.date_invite_sent.strftime(DATE_FORMAT_YMD_HMS)
+        date_invite_viewed_string = challenge_invitee.date_invite_viewed.strftime(DATE_FORMAT_YMD_HMS)
+        date_challenge_joined_string = challenge_invitee.date_challenge_joined.strftime(DATE_FORMAT_YMD_HMS)
     except Exception as e:
-        status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+        status += "DATE_CONVERSION_ERROR-INVITEE: " + str(e) + " "
     challenge_invitee_dict['challenge_joined'] = challenge_invitee.challenge_joined
     challenge_invitee_dict['challenge_we_vote_id'] = challenge_invitee.challenge_we_vote_id
     challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
-    challenge_invitee_dict['date_invited'] = date_invited_string
-    challenge_invitee_dict['date_accepted_invite'] = date_accepted_invite_string
+    challenge_invitee_dict['date_invite_sent'] = date_invite_sent_string
+    challenge_invitee_dict['date_invite_viewed'] = date_invite_viewed_string
+    challenge_invitee_dict['date_challenge_joined'] = date_challenge_joined_string
     challenge_invitee_dict['invitee_id'] = challenge_invitee.id
     challenge_invitee_dict['invitee_name'] = challenge_invitee.invitee_name
     challenge_invitee_dict['invitee_url_code'] = challenge_invitee.invitee_url_code
