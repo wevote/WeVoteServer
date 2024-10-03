@@ -1234,9 +1234,9 @@ def challenge_list_view(request):
         #     challenge_list_query = \
         #         challenge_list_query.order_by('organization_name').order_by('-twitter_followers_count')
         # else:
-        challenge_list_query = challenge_list_query.order_by('-participants_count')
+        challenge_list_query = challenge_list_query.order_by('-invitees_count')
     else:
-        challenge_list_query = challenge_list_query.order_by('-participants_count')
+        challenge_list_query = challenge_list_query.order_by('-invitees_count')
 
     if positive_value_exists(challenge_search):
         search_words = challenge_search.split()
@@ -1668,63 +1668,6 @@ def challenge_participant_list_process_view(request):
     if positive_value_exists(politician_we_vote_id):
         politician_we_vote_id_list.append(politician_we_vote_id)
 
-    # 2024-07-23
-    if positive_value_exists(politician_we_vote_id):
-        # If this Challenge is linked to a politician, don't work with classic ChallengeParticipants
-        challenge_we_vote_id_list_to_refresh = [challenge_we_vote_id]
-        error_message_to_print = ''
-        info_message_to_print = ''
-        # #############################
-        # Create FollowOrganization entries
-        #  From PUBLIC positions
-        results = create_followers_from_positions(
-            friends_only_positions=False,
-            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
-        if positive_value_exists(results['error_message_to_print']):
-            error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
-        challenge_we_vote_id_list_changed = results['challenge_we_vote_id_list_to_refresh']
-        if len(challenge_we_vote_id_list_changed) > 0:
-            challenge_we_vote_id_list_to_refresh = \
-                list(set(challenge_we_vote_id_list_changed + challenge_we_vote_id_list_to_refresh))
-        # From FRIENDS_ONLY positions
-        results = create_followers_from_positions(
-            friends_only_positions=True,
-            politicians_to_follow_we_vote_id_list=politician_we_vote_id_list)
-        challenge_we_vote_id_list_changed = results['challenge_we_vote_id_list_to_refresh']
-        if len(challenge_we_vote_id_list_changed) > 0:
-            challenge_we_vote_id_list_to_refresh = \
-                list(set(challenge_we_vote_id_list_changed + challenge_we_vote_id_list_to_refresh))
-
-        follow_organization_manager = FollowOrganizationManager()
-        participants_count = follow_organization_manager.fetch_follow_organization_count(
-            following_status=FOLLOWING,
-            organization_we_vote_id_being_followed=challenge_on_stage.organization_we_vote_id)
-        opposers_count = follow_organization_manager.fetch_follow_organization_count(
-            following_status=FOLLOW_DISLIKE,
-            organization_we_vote_id_being_followed=challenge_on_stage.organization_we_vote_id)
-        challenge_on_stage.opposers_count = opposers_count
-        challenge_on_stage.participants_count = participants_count
-        challenge_on_stage.save()
-
-        if positive_value_exists(results['error_message_to_print']):
-            error_message_to_print += results['error_message_to_print']
-        if positive_value_exists(results['info_message_to_print']):
-            info_message_to_print += results['info_message_to_print']
-        messages.add_message(request, messages.INFO, 'ChallengeParticipant linked to Politician -- cannot process.')
-        return HttpResponseRedirect(reverse('challenge:participant_list', args=(challenge_we_vote_id,)) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&challenge_owner_organization_we_vote_id=" +
-                                    str(challenge_owner_organization_we_vote_id) +
-                                    "&challenge_search=" + str(challenge_search) +
-                                    "&state_code=" + str(state_code) +
-                                    "&only_show_participants_with_endorsements=" +
-                                    str(only_show_participants_with_endorsements) +
-                                    "&show_participants_not_visible_to_public=" + str(
-            show_participants_not_visible_to_public)
-                                    )
-
     participants_query = ChallengeParticipant.objects.all()
     participants_query = participants_query.filter(challenge_we_vote_id=challenge_we_vote_id)
 
@@ -1843,7 +1786,9 @@ def challenge_participant_list_process_view(request):
         request=request,
         participant_list=participant_list,
     )
-    update_challenge_participant_count = update_challenge_participant_count or results['update_challenge_participant_count']
+    update_challenge_participant_count = \
+        update_challenge_participant_count or \
+        results['update_challenge_participant_count']
     update_message = results['update_message']
     if positive_value_exists(update_message):
         messages.add_message(request, messages.INFO, update_message)
@@ -1855,12 +1800,14 @@ def challenge_participant_list_process_view(request):
     # We update here only if we didn't save above
     if update_challenge_participant_count and positive_value_exists(challenge_we_vote_id):
         challenge_manager = ChallengeManager()
+        invitees_count = challenge_manager.fetch_challenge_invitee_count(challenge_we_vote_id)
         participant_count = challenge_manager.fetch_challenge_participant_count(challenge_we_vote_id)
         results = challenge_manager.retrieve_challenge(
             challenge_we_vote_id=challenge_we_vote_id,
             read_only=False)
         if results['challenge_found']:
             challenge = results['challenge']
+            challenge.invitees_count = invitees_count
             challenge.participants_count = participant_count
             challenge.save()
 

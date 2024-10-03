@@ -304,68 +304,6 @@ def move_participant_entries_to_another_voter(from_voter_we_vote_id, to_voter_we
     return results
 
 
-def refresh_challenge_participants_count_for_challenge_we_vote_id_list(challenge_we_vote_id_list=[]):
-    error_message_to_print = ''
-    status = ''
-    success = True
-    update_message = ''
-    challenges_need_to_be_updated = False
-    challenge_manager = ChallengeManager()
-    challenge_bulk_update_list = []
-    challenge_updates_made = 0
-    if len(challenge_we_vote_id_list) > 0:
-        follow_organization_manager = FollowOrganizationManager()
-        queryset = Challenge.objects.all()  # Cannot be readonly because of bulk_update below
-        queryset = queryset.filter(we_vote_id__in=challenge_we_vote_id_list)
-        challenge_list = list(queryset)
-        for one_challenge in challenge_list:
-            changes_found = False
-            opposers_count = 0
-            if positive_value_exists(one_challenge.politician_we_vote_id):
-                if positive_value_exists(one_challenge.organization_we_vote_id):
-                    opposers_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOW_DISLIKE,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-
-                    participants_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOWING,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-                else:
-                    error_message_to_print += "CHALLENGE_MISSING_ORGANIZATION: " + str(one_challenge.we_vote_id) + " "
-                    continue
-            else:
-                participants_count = challenge_manager.fetch_challenge_participant_count(
-                    challenge_we_vote_id=one_challenge.we_vote_id)
-            if opposers_count != one_challenge.opposers_count:
-                one_challenge.opposers_count = opposers_count
-                changes_found = True
-            if participants_count != one_challenge.participants_count:
-                one_challenge.participants_count = participants_count
-                changes_found = True
-            if changes_found:
-                challenge_bulk_update_list.append(one_challenge)
-                challenges_need_to_be_updated = True
-                challenge_updates_made += 1
-    if challenges_need_to_be_updated:
-        try:
-            Challenge.objects.bulk_update(challenge_bulk_update_list, ['opposers_count', 'participants_count'])
-            update_message += \
-                "{challenge_updates_made:,} Challenge entries updated with fresh participants_count, " \
-                "".format(challenge_updates_made=challenge_updates_made)
-        except Exception as e:
-            status += "ERROR with Challenge.objects.bulk_update: {e}, ".format(e=e)
-            error_message_to_print += "ERROR with Challenge.objects.bulk_update: {e}, ".format(e=e)
-            success = False
-
-    results = {
-        'error_message_to_print':   error_message_to_print,
-        'status':                   status,
-        'success':                  success,
-        'update_message':           update_message,
-    }
-    return results
-
-
 def generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant=None):
     status = ""
     success = True
@@ -374,10 +312,10 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
         'challenge_we_vote_id': '',
         'date_joined': '',
         'date_last_changed': '',
-        'friends_invited': '',
-        'friends_who_joined': '',
-        'friends_who_viewed': '',
-        'friends_who_viewed_plus': '',
+        'invitees_count': '',
+        'invitees_who_joined': '',
+        'invitees_who_viewed': '',
+        'invitees_who_viewed_plus': '',
         'invite_text_for_friends': '',
         'organization_we_vote_id': '',
         'participant_id': 0,
@@ -423,10 +361,10 @@ def generate_challenge_participant_dict_from_challenge_participant_object(challe
     participant_dict['challenge_we_vote_id'] = challenge_participant.challenge_we_vote_id
     participant_dict['date_joined'] = date_joined_string
     participant_dict['date_last_changed'] = date_last_changed_string
-    participant_dict['friends_invited'] = challenge_participant.friends_invited
-    participant_dict['friends_who_joined'] = challenge_participant.friends_who_joined
-    participant_dict['friends_who_viewed'] = challenge_participant.friends_who_viewed
-    participant_dict['friends_who_viewed_plus'] = challenge_participant.friends_who_viewed_plus
+    participant_dict['invitees_count'] = challenge_participant.invitees_count
+    participant_dict['invitees_who_joined'] = challenge_participant.invitees_who_joined
+    participant_dict['invitees_who_viewed'] = challenge_participant.invitees_who_viewed
+    participant_dict['invitees_who_viewed_plus'] = challenge_participant.invitees_who_viewed_plus
     participant_dict['invite_text_for_friends'] = challenge_participant.invite_text_for_friends
     participant_dict['organization_we_vote_id'] = challenge_participant.organization_we_vote_id
     participant_dict['participant_id'] = challenge_participant.id
@@ -759,5 +697,31 @@ def refresh_participant_name_and_photo_for_challenge_participant_list(
         'success':                      success,
         'challenge_participant_list':   challenge_participant_list,
         'voter_dict':                   voter_dict,
+    }
+    return results
+
+
+def update_challenge_participant_with_invitee_stats(challenge_we_vote_id='', inviter_voter_we_vote_id=''):
+    status = ""
+    success = True
+
+    from challenge.controllers_invitee import retrieve_invitee_stats_to_store_in_participant
+    stats_results = retrieve_invitee_stats_to_store_in_participant(challenge_we_vote_id, inviter_voter_we_vote_id)
+    if stats_results['success']:
+        update_values = stats_results['update_values']
+        try:
+            participants_updated = ChallengeParticipant.objects \
+                .filter(
+                    challenge_we_vote_id=challenge_we_vote_id,
+                    voter_we_vote_id=inviter_voter_we_vote_id) \
+                .update(**update_values)
+            status += "UPDATED_INVITEE_STATS: " + str(participants_updated) + " "
+        except Exception as e:
+            status += "FAILED_UPDATE_INVITEE_STATS: " + str(e) + " "
+            success = False
+
+    results = {
+        'status':   status,
+        'success':  success,
     }
     return results

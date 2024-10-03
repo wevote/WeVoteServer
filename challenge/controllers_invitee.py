@@ -195,6 +195,16 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     )
 
     status += create_results['status']
+
+    count_results = challenge_manager.update_challenge_invitees_count(challenge_we_vote_id)
+
+    from challenge.controllers_participant import update_challenge_participant_with_invitee_stats
+    stats_results = update_challenge_participant_with_invitee_stats(
+        challenge_we_vote_id=challenge_we_vote_id,
+        inviter_voter_we_vote_id=voter_we_vote_id,
+    )
+    status += stats_results['status']
+
     random_string = generate_random_string(8)
     # TODO: Confirm its not in use
     next_invitee_url_code = random_string
@@ -214,6 +224,60 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         results['status'] = status
         results['success'] = False
         return results
+
+
+def retrieve_invitee_stats_to_store_in_participant(
+        challenge_we_vote_id='',
+        inviter_voter_we_vote_id=''):
+    status = ''
+    success = True
+    invitees_count = 0
+    invitees_who_joined = 0
+    invitees_who_viewed = 0
+    # invitees_who_viewed_plus = 0
+    error_results = {
+        'challenge_we_vote_id': challenge_we_vote_id,
+        'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+        'status': status,
+        'success': False,
+        'update_values': {},
+    }
+    try:
+        queryset = ChallengeInvitee.objects.using('readonly').all()
+        queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+        queryset = queryset.filter(inviter_voter_we_vote_id=inviter_voter_we_vote_id)
+        invitee_list = list(queryset)
+    except Exception as e:
+        status += "FAILED_RETRIEVING_INVITEE_STATS: " + str(e) + ' '
+        success = False
+        error_results['status'] += status
+        error_results['success'] += success
+        return error_results
+
+    for one_invitee in invitee_list:
+        invitees_count += 1
+        if one_invitee.challenge_joined:
+            invitees_who_joined += 1
+        if one_invitee.invite_viewed:
+            invitees_who_viewed += 1
+        # Will take another routine to calculate
+        # if one_invitee.is_viewed_plus:
+        #     invitees_who_viewed_plus += 1
+
+    update_values = {
+        'invitees_count':       invitees_count,
+        'invitees_who_joined':  invitees_who_joined,
+        'invitees_who_viewed':  invitees_who_viewed,
+    }
+
+    results = {
+        'challenge_we_vote_id':     challenge_we_vote_id,
+        'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+        'update_values':            update_values,
+        'status':                   status,
+        'success':                  success,
+    }
+    return results
 
 
 def move_invitee_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
