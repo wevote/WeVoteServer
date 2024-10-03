@@ -31,6 +31,7 @@ CHALLENGE_UNIQUE_IDENTIFIERS = [
     'challenge_title',
     'final_election_date_as_integer',
     'in_draft_mode',
+    'invitees_count',
     'is_blocked_by_we_vote',
     'is_blocked_by_we_vote_reason',
     'is_in_team_review_mode',
@@ -96,6 +97,7 @@ class Challenge(models.Model):
     final_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     # Has not been released for view
     in_draft_mode = models.BooleanField(default=True, db_index=True)
+    invitees_count = models.PositiveIntegerField(default=0)
     # Challenge owner allows challenge to be promoted by We Vote on free home page and elsewhere
     is_ok_to_promote_on_we_vote = models.BooleanField(default=True, db_index=True)
     # Settings controlled by We Vote staff
@@ -119,7 +121,6 @@ class Challenge(models.Model):
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     started_by_voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True)  # If focused on one state. Based on politician state_code.
-    # If this Challenge has a politician_we_vote_id, then participants_count comes from Organization followers
     participants_count = models.PositiveIntegerField(default=0)
     # Updates both participants_count and opposers_count from the position_list page in position/views_admin.py
     participants_count_to_update_with_bulk_script = models.BooleanField(default=True)
@@ -341,6 +342,19 @@ class ChallengeManager(models.Manager):
                         return challenge_count
                 except Challenge.DoesNotExist:
                     status += "FETCH_CHALLENGES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT3 "
+
+        return 0
+
+    @staticmethod
+    def fetch_challenge_invitee_count(challenge_we_vote_id=None):
+        status = ""
+
+        try:
+            challenge_queryset = ChallengeInvitee.objects.using('readonly').all()
+            challenge_queryset = challenge_queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+            return challenge_queryset.count()
+        except Exception as e:
+            status += "RETRIEVE_CHALLENGE_INVITEE_LIST_FAILED: " + str(e) + " "
 
         return 0
 
@@ -1350,7 +1364,7 @@ class ChallengeManager(models.Manager):
 
                 challenge_queryset = challenge_queryset.filter(final_filters)
 
-            challenge_queryset = challenge_queryset.order_by('-participants_count')
+            challenge_queryset = challenge_queryset.order_by('-invitees_count')
             challenge_queryset = challenge_queryset.order_by('-in_draft_mode')
 
             challenge_list = challenge_queryset[:limit]
@@ -1453,7 +1467,7 @@ class ChallengeManager(models.Manager):
 
                 challenge_queryset = challenge_queryset.filter(final_filters)
 
-            challenge_queryset = challenge_queryset.order_by('-participants_count')
+            challenge_queryset = challenge_queryset.order_by('-invitees_count')
             challenge_queryset = challenge_queryset.order_by('-in_draft_mode')
 
             challenge_list = challenge_queryset[:limit]
@@ -2390,6 +2404,42 @@ class ChallengeManager(models.Manager):
 
         return list(combined_set)
 
+    def update_challenge_invitees_count(self, challenge_we_vote_id=''):
+        status = ''
+        invitees_count = 0
+        error_results = {
+            'challenge_we_vote_id': challenge_we_vote_id,
+            'invitees_count': invitees_count,
+            'status': status,
+            'success': False,
+        }
+        try:
+            count_query = ChallengeInvitee.objects.using('readonly').all()
+            count_query = count_query.filter(challenge_we_vote_id=challenge_we_vote_id)
+            invitees_count = count_query.count()
+        except Exception as e:
+            status += "FAILED_RETRIEVING_CHALLENGE_INVITEE_COUNT: " + str(e) + ' '
+            error_results['status'] += status
+            return error_results
+
+        update_values = {
+            'invitees_count': invitees_count,
+        }
+        update_results = self.update_or_create_challenge(
+            challenge_we_vote_id=challenge_we_vote_id,
+            update_values=update_values,
+        )
+        status = update_results['status']
+        success = update_results['success']
+
+        results = {
+            'challenge_we_vote_id': challenge_we_vote_id,
+            'invitees_count':   invitees_count,
+            'status':               status,
+            'success':              success,
+        }
+        return results
+
     @staticmethod
     def update_challenge_owners_with_organization_change(
             organization_we_vote_id,
@@ -2649,6 +2699,10 @@ class ChallengeManager(models.Manager):
                     if in_draft_mode_may_be_updated:
                         challenge.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
                         challenge_changed = True
+                if 'invitees_count' in update_values \
+                        and positive_value_exists(update_values['invitees_count']):
+                    challenge.invitees_count = update_values['invitees_count']
+                    challenge_changed = True
                 if 'politician_we_vote_id' in update_values \
                         and positive_value_exists(update_values['politician_we_vote_id']):
                     challenge.politician_we_vote_id = update_values['politician_we_vote_id']
@@ -3552,10 +3606,10 @@ class ChallengeParticipant(models.Model):
     invite_text_for_friends = models.TextField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     date_joined = models.DateTimeField(null=True, auto_now_add=True)
-    friends_invited = models.PositiveIntegerField(default=0, null=False)
-    friends_who_joined = models.PositiveIntegerField(default=0, null=False)
-    friends_who_viewed = models.PositiveIntegerField(default=0, null=False)
-    friends_who_viewed_plus = models.PositiveIntegerField(default=0, null=False)
+    invitees_count = models.PositiveIntegerField(default=0, null=False)
+    invitees_who_joined = models.PositiveIntegerField(default=0, null=False)
+    invitees_who_viewed = models.PositiveIntegerField(default=0, null=False)
+    invitees_who_viewed_plus = models.PositiveIntegerField(default=0, null=False)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     participant_name = models.CharField(max_length=255, null=True)
     points = models.PositiveIntegerField(default=0, null=False)
