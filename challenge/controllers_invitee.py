@@ -135,6 +135,8 @@ def challenge_invitee_list_retrieve_for_api(  # challengeInviteeListRetrieve
 
 def challenge_invitee_save_for_api(  # challengeInviteeSave
         challenge_we_vote_id='',
+        invite_sent=None,
+        invite_sent_changed=False,
         invitee_id=None,
         invitee_name=None,
         invitee_name_changed=False,
@@ -179,6 +181,8 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
 
     challenge_manager = ChallengeManager()
     update_values = {
+        'invite_sent': invite_sent,
+        'invite_sent_changed': invite_sent_changed,
         'invitee_name': invitee_name,
         'invitee_name_changed': invitee_name_changed,
         'invitee_text_from_inviter': invitee_text_from_inviter,
@@ -186,6 +190,7 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         'invitee_url_code': invitee_url_code,
         'invitee_url_code_changed': invitee_url_code_changed,
         'inviter_name': voter_name,
+        'inviter_name_changed': True,
     }
     create_results = challenge_manager.update_or_create_challenge_invitee(
         challenge_we_vote_id=challenge_we_vote_id,

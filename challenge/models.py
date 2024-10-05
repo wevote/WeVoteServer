@@ -6,6 +6,7 @@ import json
 
 from django.db import models
 from django.db.models import Q
+from django.utils.timezone import now
 
 import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
@@ -2002,71 +2003,6 @@ class ChallengeManager(models.Manager):
         }
         return results
 
-    def retrieve_challenge_invitee(
-            self,
-            challenge_we_vote_id='',
-            voter_we_vote_id='',
-            read_only=False,
-            recursion_ok=True):
-        challenge_invitee = None
-        challenge_invitee_found = False
-        status = ''
-        success = True
-
-        try:
-            if positive_value_exists(challenge_we_vote_id) and positive_value_exists(voter_we_vote_id):
-                if positive_value_exists(read_only):
-                    challenge_invitee_query = ChallengeParticipant.objects.using('readonly').filter(
-                        challenge_we_vote_id=challenge_we_vote_id,
-                        voter_we_vote_id=voter_we_vote_id)
-                else:
-                    challenge_invitee_query = ChallengeParticipant.objects.filter(
-                        challenge_we_vote_id=challenge_we_vote_id,
-                        voter_we_vote_id=voter_we_vote_id)
-                challenge_invitee_list = list(challenge_invitee_query)
-                if len(challenge_invitee_list) > 1:
-                    if positive_value_exists(recursion_ok):
-                        repair_results = self.repair_challenge_invitee(
-                            challenge_we_vote_id=challenge_we_vote_id,
-                            voter_we_vote_id=voter_we_vote_id,
-
-                        )
-                        status += repair_results['status']
-                        second_retrieve_results = self.retrieve_challenge_invitee(
-                            challenge_we_vote_id=challenge_we_vote_id,
-                            voter_we_vote_id=voter_we_vote_id,
-                            read_only=read_only,
-                            recursion_ok=False
-                        )
-                        challenge_invitee_found = second_retrieve_results['challenge_invitee_found']
-                        challenge_invitee = second_retrieve_results['challenge_invitee']
-                        success = second_retrieve_results['success']
-                        status += second_retrieve_results['status']
-                    else:
-                        challenge_invitee = challenge_invitee_list[0]
-                        challenge_invitee_found = True
-                elif len(challenge_invitee_list) == 1:
-                    challenge_invitee = challenge_invitee_list[0]
-                    challenge_invitee_found = True
-                    status += 'CHALLENGE_PARTICIPANT_FOUND_WITH_WE_VOTE_ID '
-                else:
-                    challenge_invitee_found = False
-                    status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_WITH_WE_VOTE_ID '
-            else:
-                status += 'CHALLENGE_PARTICIPANT_NOT_FOUND-MISSING_VARIABLES '
-                success = False
-        except Exception as e:
-            status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
-            success = False
-
-        results = {
-            'status':                       status,
-            'success':                      success,
-            'challenge_invitee':          challenge_invitee,
-            'challenge_invitee_found':    challenge_invitee_found,
-        }
-        return results
-
     def retrieve_challenge_participant(
             self,
             challenge_we_vote_id='',
@@ -2921,6 +2857,25 @@ class ChallengeManager(models.Manager):
         if challenge_invitee_found:
             # Update existing challenge_invitee with changes
             try:
+                if 'challenge_joined' in update_values and \
+                        positive_value_exists(update_values['challenge_joined_changed']):
+                    challenge_invitee.challenge_joined = update_values['challenge_joined']
+                    challenge_invitee.date_challenge_joined = now()
+                    challenge_invitee_changed = True
+                if 'invite_sent' in update_values and \
+                        positive_value_exists(update_values['invite_sent_changed']):
+                    challenge_invitee.invite_sent = update_values['invite_sent']
+                    challenge_invitee.date_invite_sent = now()
+                    challenge_invitee_changed = True
+                if 'invite_viewed' in update_values and \
+                        positive_value_exists(update_values['invite_viewed_changed']):
+                    challenge_invitee.invite_viewed = update_values['invite_viewed']
+                    challenge_invitee.date_invite_viewed = now()
+                    challenge_invitee_changed = True
+                if 'invite_viewed_count' in update_values and \
+                        positive_value_exists(update_values['invite_viewed_count_changed']):
+                    challenge_invitee.invite_viewed_count = update_values['invite_viewed_count']
+                    challenge_invitee_changed = True
                 if 'invitee_name' in update_values and \
                         positive_value_exists(update_values['invitee_name_changed']):
                     if not positive_value_exists(update_values['invitee_name']):
@@ -2934,6 +2889,10 @@ class ChallengeManager(models.Manager):
                 if 'invitee_url_code' in update_values and \
                         positive_value_exists(update_values['invitee_url_code_changed']):
                     challenge_invitee.invitee_url_code = update_values['invitee_url_code']
+                    challenge_invitee_changed = True
+                if 'inviter_name' in update_values and \
+                        positive_value_exists(update_values['inviter_name_changed']):
+                    challenge_invitee.inviter_name = update_values['inviter_name']
                     challenge_invitee_changed = True
                 if challenge_invitee_changed:
                     challenge_invitee.save()
