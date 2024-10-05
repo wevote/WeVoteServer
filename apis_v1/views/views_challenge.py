@@ -47,13 +47,18 @@ def challenge_invitee_save_view(request):  # challengeInviteeSave
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
     invitee_id = request.GET.get('invitee_id', None)
     invitee_name = request.GET.get('invitee_name', None)
-    invitee_name_changed = request.GET.get('invitee_name_changed', False)
+    invitee_name_changed = positive_value_exists(request.GET.get('invitee_name_changed', False))
+    invite_sent = positive_value_exists(request.GET.get('invite_sent', None))
+    invite_sent_changed = positive_value_exists(request.GET.get('invite_sent_changed', False))
     invitee_text_from_inviter = request.GET.get('invitee_text_from_inviter', None)
-    invitee_text_from_inviter_changed = request.GET.get('invitee_text_from_inviter_changed', False)
+    invitee_text_from_inviter_changed = \
+        positive_value_exists(request.GET.get('invitee_text_from_inviter_changed', False))
     invitee_url_code = request.GET.get('invitee_url_code', None)
-    invitee_url_code_changed = request.GET.get('invitee_url_code_changed', False)
+    invitee_url_code_changed = positive_value_exists(request.GET.get('invitee_url_code_changed', False))
     json_data = challenge_invitee_save_for_api(
         challenge_we_vote_id=challenge_we_vote_id,
+        invite_sent=invite_sent,
+        invite_sent_changed=invite_sent_changed,
         invitee_id=invitee_id,
         invitee_name=invitee_name,
         invitee_name_changed=invitee_name_changed,
