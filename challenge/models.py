@@ -2370,7 +2370,7 @@ class ChallengeManager(models.Manager):
 
         results = {
             'challenge_we_vote_id': challenge_we_vote_id,
-            'invitees_count':   invitees_count,
+            'invitees_count':       invitees_count,
             'status':               status,
             'success':              success,
         }
@@ -3388,6 +3388,7 @@ class ChallengeManager(models.Manager):
         voter_dict = {}
         if voter is not None:
             voter_dict[voter.we_vote_id] = voter
+            voter_we_vote_id = voter.we_vote_id
         create_variables_exist = positive_value_exists(challenge_we_vote_id) \
             and positive_value_exists(voter_we_vote_id) \
             and positive_value_exists(organization_we_vote_id)
@@ -3463,6 +3464,7 @@ class ChallengeManager(models.Manager):
                     voter_dict=voter_dict)
                 if hydrate_results['success'] and hydrate_results['changes_found']:
                     challenge_participant = hydrate_results['challenge_participant']
+                    challenge_participant_changed = True
 
                 if 'linked_position_we_vote_id_changed' in update_values \
                         and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
@@ -3472,6 +3474,10 @@ class ChallengeManager(models.Manager):
                         and positive_value_exists(update_values['invite_text_for_friends_changed']):
                     challenge_participant.invite_text_for_friends = \
                         update_values['invite_text_for_friends']
+                    challenge_participant_changed = True
+                if 'participant_name_changed' in update_values \
+                        and positive_value_exists(update_values['participant_name_changed']):
+                    challenge_participant.participant_name = update_values['participant_name']
                     challenge_participant_changed = True
                 if 'visible_to_public_changed' in update_values \
                         and positive_value_exists(update_values['visible_to_public_changed']):
@@ -3569,6 +3575,7 @@ class ChallengeParticipant(models.Model):
     invitees_who_joined = models.PositiveIntegerField(default=0, null=False)
     invitees_who_viewed = models.PositiveIntegerField(default=0, null=False)
     invitees_who_viewed_plus = models.PositiveIntegerField(default=0, null=False)
+    invites_sent_count = models.PositiveIntegerField(default=0, null=False)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     participant_name = models.CharField(max_length=255, null=True)
     points = models.PositiveIntegerField(default=0, null=False)

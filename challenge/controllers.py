@@ -540,6 +540,14 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
     status = ''
     success = True
     challenge_error_dict = copy.deepcopy(CHALLENGE_ERROR_DICT)
+    try:
+        challenge_description = challenge_description.strip()
+    except Exception as e:
+        pass
+    try:
+        challenge_title = challenge_title.strip()
+    except Exception as e:
+        pass
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
@@ -1330,6 +1338,10 @@ def generate_challenge_dict_from_challenge_object(
         final_election_date_plus_cool_down >= challenge.final_election_date_as_integer \
         if positive_value_exists(challenge.final_election_date_as_integer) else False
 
+    if positive_value_exists(challenge.challenge_description):
+        challenge_description = challenge.challenge_description.strip()
+    else:
+        challenge_description = ''
     if positive_value_exists(challenge.challenge_title):
         challenge_title = challenge.challenge_title.strip()
     else:
@@ -1349,11 +1361,11 @@ def generate_challenge_dict_from_challenge_object(
             challenge_invite_text_default.replace('[challenge_title]', challenge_title)
 
     challenge_dict = {
-        'challenge_description':            challenge.challenge_description,
+        'challenge_description':            challenge_description,
         'challenge_invite_text_default':    challenge_invite_text_default,
         'challenge_ends_date_as_integer':   challenge.challenge_ends_date_as_integer,
         'challenge_starts_date_as_integer': challenge.challenge_starts_date_as_integer,
-        'challenge_title':                  challenge.challenge_title,
+        'challenge_title':                  challenge_title,
         'challenge_news_item_list':         challenge_news_item_list,
         'challenge_owner_list':             challenge_owner_list,
         'challenge_politician_list':        challenge_politician_list_modified,

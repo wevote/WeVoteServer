@@ -3343,7 +3343,7 @@ class Voter(AbstractBaseUser):
     def get_full_name(self, real_name_only=False):
         """
 
-        :param real_name_only: Only return a real name if we have it. Otherwise return blank. If false, make up a
+        :param real_name_only: Only return a real name if we have it. Otherwise, return blank. If false, make up a
         placeholder name.
         :return:
         """

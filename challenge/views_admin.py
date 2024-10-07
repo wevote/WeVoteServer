@@ -2400,5 +2400,17 @@ def refresh_participant_info_view(request):
         challenge_we_vote_id_list=challenge_we_vote_id_list)
     status += results['status']
 
+    from challenge.controllers_participant import update_challenge_participants_for_challenge_with_invitee_stats
+    for one_challenge_we_vote_id in challenge_we_vote_id_list:
+        results = update_challenge_participants_for_challenge_with_invitee_stats(
+            challenge_we_vote_id=one_challenge_we_vote_id)
+        status += results['status']
+
+    from challenge.controllers_scoring import refresh_participant_points_for_challenge
+    for one_challenge_we_vote_id in challenge_we_vote_id_list:
+        results = refresh_participant_points_for_challenge(
+            challenge_we_vote_id=one_challenge_we_vote_id)
+        status += results['status']
+
     messages.add_message(request, messages.INFO, status)
     return HttpResponseRedirect(reverse('challenge:challenge_list', args=()))

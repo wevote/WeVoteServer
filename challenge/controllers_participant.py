@@ -132,6 +132,7 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         visible_to_public=False,
         visible_to_public_changed=False,
         voter_device_id=''):
+    participant_name_changed = False
     status = ''
     success = True
 
@@ -142,7 +143,9 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-
+        participant_name = voter.get_full_name(True)
+        if positive_value_exists(participant_name):
+            participant_name_changed = True
         voter_we_vote_id = voter.we_vote_id
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     else:
@@ -167,6 +170,8 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
     update_values = {
         'invite_text_for_friends':          invite_text_for_friends,
         'invite_text_for_friends_changed':  invite_text_for_friends_changed,
+        'participant_name':                 participant_name,
+        'participant_name_changed':         participant_name_changed,
         'visible_to_public':                visible_to_public,
         'visible_to_public_changed':        visible_to_public_changed,
     }
@@ -178,35 +183,22 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         update_values=update_values,
     )
 
-    # if create_results['challenge_participant_found']:
-    #     challenge_participant = create_results['challenge_participant']
-    #
-    #     results = challenge_manager.retrieve_challenge(
-    #         challenge_we_vote_id=challenge_we_vote_id,
-    #         read_only=True,
-    #     )
-    #     notice_seed_statement_text = ''
-    #     if results['challenge_found']:
-    #         challenge = results['challenge']
-    #         notice_seed_statement_text = challenge.challenge_title
-    #
-    #     # TODO
-    #     activity_results = update_or_create_activity_notice_seed_for_challenge_participant_initial_response(
-    #         challenge_we_vote_id=challenge_participant.challenge_we_vote_id,
-    #         visibility_is_public=challenge_participant.visible_to_public,
-    #         speaker_name=challenge_participant.participant_name,
-    #         speaker_organization_we_vote_id=challenge_participant.organization_we_vote_id,
-    #         speaker_voter_we_vote_id=challenge_participant.voter_we_vote_id,
-    #         speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
-    #         speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
-    #         statement_text=notice_seed_statement_text)
-    #     status += activity_results['status']
-
     status += create_results['status']
     if create_results['challenge_participant_found']:
+        challenge_participant = create_results['challenge_participant']
         count_results = challenge_manager.update_challenge_participants_count(challenge_we_vote_id)
 
-        challenge_participant = create_results['challenge_participant']
+        from challenge.controllers_scoring import refresh_participant_points_for_challenge
+        results = refresh_participant_points_for_challenge(
+            challenge_participant_list=[challenge_participant],
+            challenge_we_vote_id=challenge_we_vote_id)
+        status += results['status']
+        if results['success']:
+            try:
+                challenge_participant = ChallengeParticipant.objects.get(id=challenge_participant.id)
+            except Exception as e:
+                pass
+
         generate_results = generate_challenge_participant_dict_from_challenge_participant_object(challenge_participant)
         challenge_participant_results = generate_results['challenge_participant_dict']
         status += generate_results['status']
@@ -701,7 +693,52 @@ def refresh_participant_name_and_photo_for_challenge_participant_list(
     return results
 
 
-def update_challenge_participant_with_invitee_stats(challenge_we_vote_id='', inviter_voter_we_vote_id=''):
+def update_challenge_participants_for_challenge_with_invitee_stats(
+        challenge_we_vote_id=''):
+    status = ""
+    success = True
+    try:
+        queryset = ChallengeParticipant.objects.all()
+        queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+        queryset = queryset.values_list('voter_we_vote_id', flat=True).distinct()
+        voter_we_vote_id_list = list(queryset)
+    except Exception as e:
+        status += "CHALLENGE_PARTICIPANT_LIST_RETRIEVE_ERROR: " + str(e) + " "
+        results = {
+            'status': status,
+            'success': False,
+        }
+        return results
+
+    try:
+        queryset = Voter.objects.using('readonly').all()
+        queryset = queryset.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(queryset)
+    except Exception as e:
+        status += "VOTER_LIST_RETRIEVE_ERROR: " + str(e) + " "
+        results = {
+            'status': status,
+            'success': False,
+        }
+        return results
+
+    for voter in voter_list:
+        challenge_results = update_challenge_participant_with_invitee_stats(
+            challenge_we_vote_id=challenge_we_vote_id,
+            inviter_voter=voter,
+            inviter_voter_we_vote_id=voter.we_vote_id)
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+    return results
+
+
+def update_challenge_participant_with_invitee_stats(
+        challenge_we_vote_id='',
+        inviter_voter=None,
+        inviter_voter_we_vote_id=''):
     status = ""
     success = True
 
@@ -709,6 +746,11 @@ def update_challenge_participant_with_invitee_stats(challenge_we_vote_id='', inv
     stats_results = retrieve_invitee_stats_to_store_in_participant(challenge_we_vote_id, inviter_voter_we_vote_id)
     if stats_results['success']:
         update_values = stats_results['update_values']
+        # While here, make sure Participant name is up-to-date
+        if inviter_voter and hasattr(inviter_voter, 'first_name'):
+            voter_name = inviter_voter.get_full_name(real_name_only=True)
+            if positive_value_exists(voter_name):
+                update_values['participant_name'] = voter_name
         try:
             participants_updated = ChallengeParticipant.objects \
                 .filter(

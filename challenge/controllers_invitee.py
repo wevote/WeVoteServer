@@ -206,9 +206,17 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     from challenge.controllers_participant import update_challenge_participant_with_invitee_stats
     stats_results = update_challenge_participant_with_invitee_stats(
         challenge_we_vote_id=challenge_we_vote_id,
+        inviter_voter=voter,
         inviter_voter_we_vote_id=voter_we_vote_id,
     )
     status += stats_results['status']
+
+    challenge_we_vote_id_list = [challenge_we_vote_id]
+    from challenge.controllers_scoring import refresh_participant_points_for_challenge
+    for one_challenge_we_vote_id in challenge_we_vote_id_list:
+        results = refresh_participant_points_for_challenge(
+            challenge_we_vote_id=one_challenge_we_vote_id)
+        status += results['status']
 
     random_string = generate_random_string(8)
     # TODO: Confirm its not in use
@@ -240,6 +248,7 @@ def retrieve_invitee_stats_to_store_in_participant(
     invitees_who_joined = 0
     invitees_who_viewed = 0
     # invitees_who_viewed_plus = 0
+    invites_sent_count = 0
     error_results = {
         'challenge_we_vote_id': challenge_we_vote_id,
         'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
@@ -268,11 +277,14 @@ def retrieve_invitee_stats_to_store_in_participant(
         # Will take another routine to calculate
         # if one_invitee.is_viewed_plus:
         #     invitees_who_viewed_plus += 1
+        if one_invitee.invite_sent:
+            invites_sent_count += 1
 
     update_values = {
         'invitees_count':       invitees_count,
         'invitees_who_joined':  invitees_who_joined,
         'invitees_who_viewed':  invitees_who_viewed,
+        'invites_sent_count':   invites_sent_count,
     }
 
     results = {
