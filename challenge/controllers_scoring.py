@@ -3,14 +3,17 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Challenge, ChallengeManager, ChallengeParticipant
-from django.contrib import messages
-from django.db.models import Q
-from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
-from position.models import OPPOSE, SUPPORT
-from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_date import generate_date_as_integer, get_current_date_as_integer, DATE_FORMAT_YMD_HMS
+
+POINT_VALUES_PER_ATTRIBUTE = {
+    'invitees_count':           1,
+    'invitees_who_joined':      10,
+    'invitees_who_viewed':      5,
+    # 'invitees_who_viewed_plus': 0,
+    'invites_sent_count':       2,
+    'participant_photo_exists': 5,
+}
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -21,7 +24,7 @@ def refresh_participant_points_for_challenge(
     status = ''
     success = True
 
-    if len(challenge_participant_list) > 0:
+    if not challenge_participant_list or len(challenge_participant_list) == 0:
         challenge_manager = ChallengeManager()
         results = challenge_manager.retrieve_challenge_participant_list(
             challenge_we_vote_id=challenge_we_vote_id,
@@ -40,6 +43,7 @@ def refresh_participant_points_for_challenge(
             return results
         elif not results['participant_list_found']:
             status += "CHALLENGE_PARTICIPANT_LIST_NOT_FOUND: "
+            challenge_participant_list = []
         else:
             challenge_participant_list = results['participant_list']
 
@@ -47,8 +51,8 @@ def refresh_participant_points_for_challenge(
     for challenge_participant in challenge_participant_list:
         generate_results = calculate_points_from_challenge_participant_object(
             challenge_participant=challenge_participant)
-        if generate_results['success']:
-            participants_with_points_changed_list.append(generate_results['challenge_participant_dict'])
+        if generate_results['success'] and generate_results['score_changed']:
+            participants_with_points_changed_list.append(generate_results['challenge_participant'])
     if len(participants_with_points_changed_list) > 0:
         try:
             rows_updated = ChallengeParticipant.objects.bulk_update(
@@ -69,10 +73,39 @@ def refresh_participant_points_for_challenge(
 
 
 def calculate_points_from_challenge_participant_object(challenge_participant=None):
+    participant_points = 0
+    score_changed = False
+    status = ''
+    success = True
+
+    if not challenge_participant or not hasattr(challenge_participant, 'invite_text_for_friends'):
+        success = False
+        status += "VALID_CHALLENGE_PARTICIPANT_OBJECT_MISSING "
+        results = {
+            'challenge_participant':    challenge_participant,
+            'score_changed':            score_changed,
+            'status':                   status,
+            'success':                  success,
+        }
+        return results
+
+    participant_points += challenge_participant.invitees_count * POINT_VALUES_PER_ATTRIBUTE['invitees_count']
+    participant_points += challenge_participant.invitees_who_joined * POINT_VALUES_PER_ATTRIBUTE['invitees_who_joined']
+    participant_points += challenge_participant.invitees_who_viewed * POINT_VALUES_PER_ATTRIBUTE['invitees_who_viewed']
+    # participant_points += \
+    #     challenge_participant.invitees_who_viewed_plus * POINT_VALUES_PER_ATTRIBUTE['invitees_who_viewed_plus']
+    participant_points += challenge_participant.invites_sent_count * POINT_VALUES_PER_ATTRIBUTE['invites_sent_count']
+    if positive_value_exists(challenge_participant.we_vote_hosted_profile_image_url_medium):
+        participant_points += POINT_VALUES_PER_ATTRIBUTE['participant_photo_exists']
+
+    if participant_points != challenge_participant.points:
+        score_changed = True
+        challenge_participant.points = participant_points
+
     results = {
-        'status':                       status,
-        'success':                      True,
-        'challenge_participant_list':   challenge_participant_list,
-        'challenge_we_vote_id':         challenge_we_vote_id,
+        'challenge_participant':    challenge_participant,
+        'score_changed':            score_changed,
+        'status':                   status,
+        'success':                  success,
     }
     return results
