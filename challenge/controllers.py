@@ -625,28 +625,6 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             results = challenge_error_dict
             results['status'] = status
             return results
-        # Save challenge_photo_from_file_reader and get back we_vote_hosted_challenge_photo_original_url
-        we_vote_hosted_challenge_photo_large_url = None
-        we_vote_hosted_challenge_photo_medium_url = None
-        we_vote_hosted_challenge_photo_original_url = None
-        we_vote_hosted_challenge_photo_small_url = None
-        if challenge_photo_changed and challenge_photo_from_file_reader:
-            photo_results = challenge_save_photo_from_file_reader(
-                challenge_we_vote_id=challenge_we_vote_id,
-                challenge_photo_from_file_reader=challenge_photo_from_file_reader)
-            if photo_results['we_vote_hosted_challenge_photo_original_url']:
-                we_vote_hosted_challenge_photo_original_url = \
-                    photo_results['we_vote_hosted_challenge_photo_original_url']
-                # Now we want to resize to a large version
-                create_resized_image_results = create_resized_images(
-                    challenge_we_vote_id=challenge_we_vote_id,
-                    challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
-                we_vote_hosted_challenge_photo_large_url = \
-                    create_resized_image_results['cached_resized_image_url_large']
-                we_vote_hosted_challenge_photo_medium_url = \
-                    create_resized_image_results['cached_resized_image_url_medium']
-                we_vote_hosted_challenge_photo_small_url = \
-                    create_resized_image_results['cached_resized_image_url_tiny']
 
         update_values = {
             'challenge_description':                challenge_description,
@@ -663,11 +641,30 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             'politician_delete_list_serialized':    politician_delete_list_serialized,
             'politician_starter_list_changed':      politician_starter_list_changed,
             'politician_starter_list_serialized':   politician_starter_list_serialized,
-            'we_vote_hosted_challenge_photo_large_url': we_vote_hosted_challenge_photo_large_url,
-            'we_vote_hosted_challenge_photo_medium_url': we_vote_hosted_challenge_photo_medium_url,
-            'we_vote_hosted_challenge_photo_small_url': we_vote_hosted_challenge_photo_small_url,
-            'we_vote_hosted_challenge_photo_original_url': we_vote_hosted_challenge_photo_original_url,
         }
+        # Save challenge_photo_from_file_reader and get back we_vote_hosted_challenge_photo_original_url
+        if challenge_photo_changed and challenge_photo_from_file_reader:
+            photo_results = challenge_save_photo_from_file_reader(
+                challenge_we_vote_id=challenge_we_vote_id,
+                challenge_photo_from_file_reader=challenge_photo_from_file_reader)
+            if photo_results['we_vote_hosted_challenge_photo_original_url']:
+                we_vote_hosted_challenge_photo_original_url = \
+                    photo_results['we_vote_hosted_challenge_photo_original_url']
+                # Now we want to resize to a large version
+                # Temp: Store as a campaignx photo
+                create_resized_image_results = create_resized_images(
+                    campaignx_we_vote_id=challenge_we_vote_id,
+                    campaignx_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                # create_resized_image_results = create_resized_images(
+                #     challenge_we_vote_id=challenge_we_vote_id,
+                #     challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                update_values['we_vote_hosted_challenge_photo_large_url'] = \
+                    create_resized_image_results['cached_resized_image_url_large']
+                update_values['we_vote_hosted_challenge_photo_medium_url'] = \
+                    create_resized_image_results['cached_resized_image_url_medium']
+                update_values['we_vote_hosted_challenge_photo_small_url'] = \
+                    create_resized_image_results['cached_resized_image_url_tiny']
+
         create_results = challenge_manager.update_or_create_challenge(
             challenge_we_vote_id=challenge_we_vote_id,
             voter_we_vote_id=voter_we_vote_id,
