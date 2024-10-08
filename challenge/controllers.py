@@ -651,9 +651,13 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
                 we_vote_hosted_challenge_photo_original_url = \
                     photo_results['we_vote_hosted_challenge_photo_original_url']
                 # Now we want to resize to a large version
+                # Temp: Store as a campaignx photo
                 create_resized_image_results = create_resized_images(
-                    challenge_we_vote_id=challenge_we_vote_id,
-                    challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                    campaignx_we_vote_id=challenge_we_vote_id,
+                    campaignx_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                # create_resized_image_results = create_resized_images(
+                #     challenge_we_vote_id=challenge_we_vote_id,
+                #     challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
                 update_values['we_vote_hosted_challenge_photo_large_url'] = \
                     create_resized_image_results['cached_resized_image_url_large']
                 update_values['we_vote_hosted_challenge_photo_medium_url'] = \
