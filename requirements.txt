@@ -1,7 +1,7 @@
 beautifulsoup4==4.12.3
 boto3==1.34.66
 CacheControl==0.13.1
-certifi>=2024.2.2 # Want to update continuously to the latest.  Root Certificates used by Requests in Python
+certifi>=2024.7.4 # Want to update continuously to the latest.  Root Certificates used by Requests in Python
 cloudscraper==1.2.68
 cryptography==42.0.8
 dj-database-url==2.1.0
