@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.db.models import Q
 from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
+from share.models import ShareManager
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_random_string, positive_value_exists
@@ -135,6 +136,8 @@ def challenge_invitee_list_retrieve_for_api(  # challengeInviteeListRetrieve
 
 def challenge_invitee_save_for_api(  # challengeInviteeSave
         challenge_we_vote_id='',
+        destination_full_url=None,
+        google_civic_election_id=None,
         invite_sent=None,
         invite_sent_changed=False,
         invitee_id=None,
@@ -147,6 +150,12 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         voter_device_id=''):
     status = ''
     success = True
+    voter_first_name = ''
+    voter_full_name = ''
+    voter_last_name = ''
+    we_vote_hosted_profile_image_url_large = ''
+    we_vote_hosted_profile_image_url_medium = ''
+    we_vote_hosted_profile_image_url_tiny = ''
 
     return_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
     status += return_results['status']
@@ -158,8 +167,15 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-        voter_name = voter.get_full_name(real_name_only=True)
+        voter_full_name = voter.get_full_name(real_name_only=True)
+        if positive_value_exists(voter.first_name):
+            voter_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            voter_last_name = voter.last_name
         voter_we_vote_id = voter.we_vote_id
+        we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+        we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+        we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
     else:
         status += "VALID_VOTER_ID_MISSING "
         results = error_results
@@ -189,17 +205,47 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         'invitee_text_from_inviter_changed': invitee_text_from_inviter_changed,
         'invitee_url_code': invitee_url_code,
         'invitee_url_code_changed': invitee_url_code_changed,
-        'inviter_name': voter_name,
+        'inviter_name': voter_full_name,
         'inviter_name_changed': True,
     }
-    create_results = challenge_manager.update_or_create_challenge_invitee(
+    invitee_results = challenge_manager.update_or_create_challenge_invitee(
         challenge_we_vote_id=challenge_we_vote_id,
         invitee_id=invitee_id,
         inviter_voter_we_vote_id=voter_we_vote_id,
         update_values=update_values,
     )
 
-    status += create_results['status']
+    status += invitee_results['status']
+
+    share_manager = ShareManager()
+    defaults = {
+        'is_challenge_share':                   True,
+        'other_voter_display_name':             invitee_name,
+        # 'other_voter_first_name':               other_voter_first_name,
+        # 'other_voter_last_name':                other_voter_last_name,
+        'shared_by_display_name':               voter_full_name,
+        'shared_by_first_name':                 voter_first_name,
+        'shared_by_last_name':                  voter_last_name,
+        # 'shared_by_organization_type':          shared_by_organization_type,
+        # 'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           voter_we_vote_id,
+        'shared_by_we_vote_hosted_profile_image_url_large':     we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium':    we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny':      we_vote_hosted_profile_image_url_tiny,
+        'shared_item_code_challenge':           invitee_url_code,
+        # 'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+    }
+    shared_item_results = share_manager.update_or_create_shared_item(
+        destination_full_url=destination_full_url,
+        force_create_new=True,
+        shared_by_voter_we_vote_id=voter_we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+        defaults=defaults,
+    )
+    status += shared_item_results['status']
+    if shared_item_results['success']:
+        # shared_item_code_challenge = shared_item_results['shared_item_code']
+        pass
 
     count_results = challenge_manager.update_challenge_invitees_count(challenge_we_vote_id)
 
@@ -221,8 +267,8 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     random_string = generate_random_string(8)
     # TODO: Confirm its not in use
     next_invitee_url_code = random_string
-    if create_results['challenge_invitee_found']:
-        challenge_invitee = create_results['challenge_invitee']
+    if invitee_results['challenge_invitee_found']:
+        challenge_invitee = invitee_results['challenge_invitee']
         return_results = generate_challenge_invitee_dict_from_challenge_invitee_object(
             challenge_invitee=challenge_invitee)
         status += return_results['status']
