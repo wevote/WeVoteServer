@@ -381,6 +381,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     include_friends_only_positions = False
     is_ballot_share = False
     is_candidate_share = False
+    is_challenge_share = False
     is_measure_share = False
     is_office_share = False
     is_organization_share = False
@@ -447,6 +448,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'include_friends_only_positions':   include_friends_only_positions,
             'is_ballot_share':                  is_ballot_share,
             'is_candidate_share':               is_candidate_share,
+            'is_challenge_share':               is_challenge_share,
             'is_measure_share':                 is_measure_share,
             'is_office_share':                  is_office_share,
             'is_organization_share':            is_organization_share,
@@ -480,6 +482,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
     shared_item = results['shared_item']
     shared_item_id = shared_item.id
+    url_with_shared_item_code_no_opinions = ''
+    url_with_shared_item_code_all_opinions = ''
     if positive_value_exists(shared_item.destination_full_url):
         try:
             hostname = shared_item.destination_full_url.strip().lower()
@@ -488,10 +492,13 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             if '/' in hostname:
                 hostname_array = hostname.split('/')
                 hostname = hostname_array[0]
-            url_with_shared_item_code_no_opinions = \
-                "https://" + hostname + "/-" + shared_item.shared_item_code_no_opinions
-            url_with_shared_item_code_all_opinions = \
-                "https://" + hostname + "/-" + shared_item.shared_item_code_all_opinions
+            if positive_value_exists(hostname):
+                if shared_item.shared_item_code_no_opinions:
+                    url_with_shared_item_code_no_opinions = \
+                        "https://" + hostname + "/-" + shared_item.shared_item_code_no_opinions
+                if shared_item.shared_item_code_all_opinions:
+                    url_with_shared_item_code_all_opinions = \
+                        "https://" + hostname + "/-" + shared_item.shared_item_code_all_opinions
         except Exception as e:
             status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
 
@@ -704,6 +711,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'email_secret_key':                     email_secret_key,  # Only returned on first click
         'is_ballot_share':                      shared_item.is_ballot_share,
         'is_candidate_share':                   shared_item.is_candidate_share,
+        'is_challenge_share':                   shared_item.is_challenge_share,
         'is_measure_share':                     shared_item.is_measure_share,
         'is_office_share':                      shared_item.is_office_share,
         'is_organization_share':                shared_item.is_organization_share,
@@ -736,6 +744,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     if api_call_coming_from_voter_who_shared:
         results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
         results['shared_item_code_all_opinions'] = shared_item.shared_item_code_all_opinions
+        results['shared_item_code_challenge'] = shared_item.shared_item_code_challenge
         results['shared_item_code_ready'] = shared_item.shared_item_code_ready
         results['shared_item_code_remind_contacts'] = shared_item.shared_item_code_remind_contacts
         results['url_with_shared_item_code_no_opinions'] = url_with_shared_item_code_no_opinions
@@ -754,6 +763,10 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         else:
             results['shared_item_code_all_opinions'] = ''
             results['url_with_shared_item_code_all_opinions'] = ''
+        if shared_item.shared_item_code_challenge == shared_item_code:
+            results['shared_item_code_challenge'] = shared_item.shared_item_code_challenge
+        else:
+            results['shared_item_code_ready'] = ''
         if shared_item.shared_item_code_ready == shared_item_code:
             results['shared_item_code_ready'] = shared_item.shared_item_code_ready
         else:
