@@ -827,7 +827,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         contest_office = results['contest_office']
         date_last_updated = ''
         if positive_value_exists(contest_office.date_last_updated):
-            date_last_updated = contest_office.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_last_updated = contest_office.date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
         json_data = {
             'status':                   status,
             'success':                  True,

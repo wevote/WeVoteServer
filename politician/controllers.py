@@ -2273,7 +2273,7 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
         for one_field in character_to_datetime_fields:
             if one_field in one_politician and positive_value_exists(one_politician[one_field]):
                 updated_politician_values[one_field] = \
-                    datetime.strptime(one_politician[one_field], DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    datetime.strptime(one_politician[one_field], DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
             else:
                 updated_politician_values[one_field] = None
         for one_field in integer_fields:

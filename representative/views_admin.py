@@ -1780,15 +1780,15 @@ def representatives_sync_out_view(request):  # representativesSyncOut
             for one_dict in representative_list_dict:
                 date_last_updated = one_dict.get('date_last_updated', '')
                 if positive_value_exists(date_last_updated):
-                    one_dict['date_last_updated'] = date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    one_dict['date_last_updated'] = date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 date_last_updated_from_politician = one_dict.get('date_last_updated_from_politician', '')
                 if positive_value_exists(date_last_updated_from_politician):
                     one_dict['date_last_updated_from_politician'] = \
-                        date_last_updated_from_politician.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        date_last_updated_from_politician.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 seo_friendly_path_date_last_updated = one_dict.get('seo_friendly_path_date_last_updated', '')
                 if positive_value_exists(seo_friendly_path_date_last_updated):
                     one_dict['seo_friendly_path_date_last_updated'] = \
-                        seo_friendly_path_date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        seo_friendly_path_date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 modified_representative_list_dict.append(one_dict)
             representative_list_json = list(modified_representative_list_dict)
             return HttpResponse(json.dumps(representative_list_json), content_type='application/json')

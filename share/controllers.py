@@ -2,10 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.db.models import F
 from django.utils.timezone import now
+
 from .models import ShareManager
 from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, \
+    ACTION_VIEW_SHARED_CHALLENGE, \
     ACTION_VIEW_SHARED_MEASURE, ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_OFFICE, ACTION_VIEW_SHARED_OFFICE_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_ORGANIZATION, ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS, \
@@ -418,6 +421,49 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     voter_id = 0
     is_signed_in = False
 
+    error_results = {
+        'status': status,
+        'success': False,
+        'candidate_we_vote_id': candidate_we_vote_id,
+        'date_first_shared': date_first_shared,
+        'destination_full_url': destination_full_url,
+        'destination_full_url_override': '',
+        'email_secret_key': email_secret_key,
+        'google_civic_election_id': google_civic_election_id,
+        'include_friends_only_positions': include_friends_only_positions,
+        'is_ballot_share': is_ballot_share,
+        'is_candidate_share': is_candidate_share,
+        'is_challenge_share': is_challenge_share,
+        'is_measure_share': is_measure_share,
+        'is_office_share': is_office_share,
+        'is_organization_share': is_organization_share,
+        'is_ready_share': is_ready_share,
+        'is_remind_contact_share': is_remind_contact_share,
+        'measure_we_vote_id': measure_we_vote_id,
+        'office_we_vote_id': office_we_vote_id,
+        'other_voter_email_address_text': other_voter_email_address_text,
+        'other_voter_display_name': other_voter_display_name,
+        'other_voter_first_name': other_voter_first_name,
+        'other_voter_last_name': other_voter_last_name,
+        'other_voter_we_vote_id': other_voter_we_vote_id,
+        'shared_by_display_name': shared_by_display_name,
+        'shared_by_first_name': shared_by_first_name,
+        'shared_by_last_name': shared_by_last_name,
+        'shared_by_voter_we_vote_id': shared_by_voter_we_vote_id,
+        'shared_by_organization_type': shared_by_organization_type,
+        'shared_by_organization_we_vote_id': shared_by_organization_we_vote_id,
+        'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
+        'shared_item_code_no_opinions': shared_item_code_no_opinions,
+        'shared_item_code_all_opinions': shared_item_code_all_opinions,
+        'shared_message': shared_message,
+        'site_owner_organization_we_vote_id': site_owner_organization_we_vote_id,
+        'sms_secret_key': sms_secret_key,
+        'url_with_shared_item_code_no_opinions': url_with_shared_item_code_no_opinions,
+        'url_with_shared_item_code_all_opinions': url_with_shared_item_code_all_opinions,
+    }
+
     share_manager = ShareManager()
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
@@ -436,49 +482,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     status += results['status']
     if not results['shared_item_found']:
         status += "SHARED_ITEM_NOT_FOUND "
-        results = {
-            'status':                           status,
-            'success':                          False,
-            'candidate_we_vote_id':             candidate_we_vote_id,
-            'date_first_shared':                date_first_shared,
-            'destination_full_url':             destination_full_url,
-            'destination_full_url_override':    '',
-            'email_secret_key':                 email_secret_key,
-            'google_civic_election_id':         google_civic_election_id,
-            'include_friends_only_positions':   include_friends_only_positions,
-            'is_ballot_share':                  is_ballot_share,
-            'is_candidate_share':               is_candidate_share,
-            'is_challenge_share':               is_challenge_share,
-            'is_measure_share':                 is_measure_share,
-            'is_office_share':                  is_office_share,
-            'is_organization_share':            is_organization_share,
-            'is_ready_share':                   is_ready_share,
-            'is_remind_contact_share':          is_remind_contact_share,
-            'measure_we_vote_id':               measure_we_vote_id,
-            'office_we_vote_id':                        office_we_vote_id,
-            'other_voter_email_address_text':           other_voter_email_address_text,
-            'other_voter_display_name':                 other_voter_display_name,
-            'other_voter_first_name':                   other_voter_first_name,
-            'other_voter_last_name':                    other_voter_last_name,
-            'other_voter_we_vote_id':                   other_voter_we_vote_id,
-            'shared_by_display_name':                   shared_by_display_name,
-            'shared_by_first_name':                     shared_by_first_name,
-            'shared_by_last_name':                      shared_by_last_name,
-            'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
-            'shared_by_organization_type':              shared_by_organization_type,
-            'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
-            'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
-            'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
-            'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
-            'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-            'shared_item_code_all_opinions':            shared_item_code_all_opinions,
-            'shared_message':                           shared_message,
-            'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
-            'sms_secret_key':                           sms_secret_key,
-            'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-            'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
-        }
-        return results
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
 
     shared_item = results['shared_item']
     shared_item_id = shared_item.id
@@ -616,6 +622,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                 # elif positive_value_exists(include_public_positions):  # Sharing only your public opinions
                 else:
                     action_view_type = ACTION_VIEW_SHARED_CANDIDATE
+            elif shared_item.is_challenge_share:
+                action_view_type = ACTION_VIEW_SHARED_CHALLENGE
             elif shared_item.is_measure_share:
                 if positive_value_exists(include_friends_only_positions):
                     action_view_type = ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS
@@ -655,6 +663,20 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     else:
         # Shared item not clicked
         pass
+
+    # If is_challenge share, update ChallengeInvitee.invite_viewed & ChallengeInvitee.invite_viewed_count
+    if positive_value_exists(shared_item_clicked) and not positive_value_exists(api_call_coming_from_voter_who_shared):
+        if shared_item.is_challenge_share and positive_value_exists(shared_item_code):
+            from challenge.models import ChallengeInvitee
+            try:
+                queryset = ChallengeInvitee.objects.all()
+                queryset = queryset.filter(invitee_url_code=shared_item_code)
+                update_count = queryset.update(
+                    invite_viewed=True,
+                    invite_viewed_count=F('invite_viewed_count') + 1,
+                    date_invite_viewed=now())
+            except Exception as e:
+                status += "CHALLENGE_INVITEE_UPDATE_FAILED: " + str(e) + " "
 
     ballot_item_list = []
     candidate_position_list = []
@@ -699,7 +721,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_tiny) else ''
 
     if positive_value_exists(shared_item.date_first_shared):
-        date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+        date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
 
     results = {
         'status':                               status,
@@ -766,7 +788,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if shared_item.shared_item_code_challenge == shared_item_code:
             results['shared_item_code_challenge'] = shared_item.shared_item_code_challenge
         else:
-            results['shared_item_code_ready'] = ''
+            results['shared_item_code_challenge'] = ''
         if shared_item.shared_item_code_ready == shared_item_code:
             results['shared_item_code_ready'] = shared_item.shared_item_code_ready
         else:
@@ -1026,7 +1048,7 @@ def shared_item_save_for_api(  # sharedItemSave
     if create_results['shared_item_found']:
         shared_item = create_results['shared_item']
         if positive_value_exists(shared_item.date_first_shared):
-            date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_first_shared = shared_item.date_first_shared.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
 
         shared_item_code_no_opinions = shared_item.shared_item_code_no_opinions
         url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item_code_no_opinions
@@ -1224,7 +1246,7 @@ def super_share_item_save_for_api(  # superShareItemSave
                 try:
                     if super_share_email_recipient.date_sent_to_email:
                         date_sent_to_email_string = super_share_email_recipient.date_sent_to_email\
-                            .strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                            .strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     pass
                 email_recipient_dict = {
@@ -1312,7 +1334,7 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
                 super_share_item.date_sent_to_email = activity_notice_seed.date_sent_to_email
                 super_share_item.save()
                 try:
-                    date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     pass
         else:

@@ -1852,7 +1852,7 @@ def generate_candidate_dict_from_candidate_object(
     # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
     date_last_updated = ''
     if positive_value_exists(candidate.date_last_updated):
-        date_last_updated = candidate.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+        date_last_updated = candidate.date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
     date_today_as_integer = get_current_date_as_integer()
     try:
         election_is_upcoming = True if positive_value_exists(candidate.candidate_ultimate_election_date) and \

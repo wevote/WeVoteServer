@@ -108,9 +108,6 @@
   "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
   "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
 
- "_comment":                       "Vertex AI name recognition",
-  "GOOGLE_APPLICATION_CREDENTIALS_VERTEX":  "",
-
   "_comment":                       "Google reCAPTCHA",
   "GOOGLE_RECAPTCHA_SECRET_KEY":    "",
 

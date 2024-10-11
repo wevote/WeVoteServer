@@ -3968,15 +3968,15 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
                     one_dict['birth_date'] = birth_date.strftime('%Y-%m-%d')
                 date_last_updated = one_dict.get('date_last_updated', '')
                 if positive_value_exists(date_last_updated):
-                    one_dict['date_last_updated'] = date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    one_dict['date_last_updated'] = date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 date_last_updated_from_candidate = one_dict.get('date_last_updated_from_candidate', '')
                 if positive_value_exists(date_last_updated_from_candidate):
                     one_dict['date_last_updated_from_candidate'] = \
-                        date_last_updated_from_candidate.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        date_last_updated_from_candidate.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 seo_friendly_path_date_last_updated = one_dict.get('seo_friendly_path_date_last_updated', '')
                 if positive_value_exists(seo_friendly_path_date_last_updated):
                     one_dict['seo_friendly_path_date_last_updated'] = \
-                        seo_friendly_path_date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        seo_friendly_path_date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 modified_politician_dict_list.append(one_dict)
             politician_list_json = list(modified_politician_dict_list)
             return HttpResponse(json.dumps(politician_list_json), content_type='application/json')

@@ -375,9 +375,9 @@ def challenge_news_item_save_for_api(  # challengeNewsItemSave
         date_posted_string = ''
         date_sent_to_email_string = ''
         try:
-            date_last_changed_string = challenge_news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            date_posted_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            date_sent_to_email_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_last_changed_string = challenge_news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+            date_posted_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+            date_sent_to_email_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
             status += "DATE_CONVERSION_ERROR-NEWS_ITEM: " + str(e) + " "
         results = {
@@ -1202,10 +1202,10 @@ def generate_challenge_dict_from_challenge_object(
                 date_posted_string = ''
                 date_sent_to_email_string = ''
                 try:
-                    date_last_changed_string = news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-                    date_posted_string = news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    date_last_changed_string = news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+                    date_posted_string = news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                     if positive_value_exists(news_item.date_sent_to_email):
-                        date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR-CHALLENGE: " + str(e) + " "
                 one_news_item_dict = {
