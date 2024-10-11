@@ -3281,7 +3281,7 @@ def get_current_friends_list(status, voter):
             # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
             one_friend = {
                 "voter_we_vote_id":                 friend_voter.we_vote_id,
-                "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
                 "voter_display_name":               friend_voter.get_full_name(),
                 "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -3337,7 +3337,7 @@ def get_friend_invitations_processed(status, voter):
                 # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
-                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -3425,7 +3425,7 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
                 # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
-                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -3563,7 +3563,7 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                     mutual_friend_preview_list = []
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
-                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                    "voter_date_last_changed":          friend_voter.date_last_changed.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
                     if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
@@ -3648,7 +3648,7 @@ def get_suggested_friends_list(status, voter):
             # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(suggested_friend)
             one_friend = {
                 "voter_we_vote_id":                 suggested_friend.we_vote_id,
-                "voter_date_last_changed":          suggested_friend.date_last_changed.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+                "voter_date_last_changed":          suggested_friend.date_last_changed.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
                 "voter_display_name":               suggested_friend.get_full_name(),
                 "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)

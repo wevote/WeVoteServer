@@ -2245,7 +2245,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     seo_friendly_path = ''
     status = ''
     t0 = time()
-    candidate_edit_process_view(request)
+    # candidate_edit_process_view(request)
     t1 = time()
     time_difference1 = t1 - t0
     if not performance_dict:

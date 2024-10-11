@@ -345,6 +345,12 @@ class ShareManager(models.Manager):
             create_shared_item_code_all_opinions = True
         elif is_candidate_share:
             pass
+        elif is_challenge_share:
+            if 'shared_item_code_challenge' in defaults and positive_value_exists(
+                    defaults['shared_item_code_challenge']):
+                # This shared item code is generated as next_invitee_url_code (on the API server),
+                #  and then passed back to API server as invitee_url_code
+                shared_item_code_challenge = defaults['shared_item_code_challenge']
         elif is_measure_share:
             pass
         elif is_office_share:
@@ -378,7 +384,17 @@ class ShareManager(models.Manager):
             }
             return results
 
-        if force_create_new:
+        if is_challenge_share:
+            results = self.retrieve_shared_item(
+                destination_full_url=destination_full_url,
+                shared_item_code=shared_item_code_challenge,
+                shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                read_only=False)
+            shared_item_found = results['shared_item_found']
+            shared_item = results['shared_item']
+            status += results['status']
+        elif force_create_new:
             shared_item = None
             shared_item_found = False
         else:
@@ -1092,7 +1108,7 @@ class ShareManager(models.Manager):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         shared_item_found = False
-        shared_item = SharedItem()
+        shared_item = None
         shared_item_list_found = False
         shared_item_list = []
         status = ""

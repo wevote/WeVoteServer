@@ -233,7 +233,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             election_display_name = ""
         date_last_updated = ''
         if positive_value_exists(contest_measure.date_last_updated):
-            date_last_updated = contest_measure.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_last_updated = contest_measure.date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
         json_data = {
             'status':                   status,
             'success':                  True,

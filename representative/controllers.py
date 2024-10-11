@@ -412,7 +412,7 @@ def generate_representative_dict_from_representative_object(
 
     date_last_updated = ''
     if positive_value_exists(representative.date_last_updated):
-        date_last_updated = representative.date_last_updated.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+        date_last_updated = representative.date_last_updated.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
     representative_dict = {
         'id':                           representative.id,
         'we_vote_id':                   representative.we_vote_id,
@@ -1109,7 +1109,7 @@ def representatives_import_from_structured_json(structured_json):  # representat
         for one_field in character_to_datetime_fields:
             if one_field in one_representative and positive_value_exists(one_representative[one_field]):
                 updated_representative_values[one_field] = \
-                    datetime.strptime(one_representative[one_field], DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    datetime.strptime(one_representative[one_field], DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
             else:
                 updated_representative_values[one_field] = None
         for one_field in integer_fields:

@@ -151,14 +151,9 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     status = ''
     success = True
     voter_first_name = ''
-    voter_full_name = ''
     voter_last_name = ''
-    we_vote_hosted_profile_image_url_large = ''
-    we_vote_hosted_profile_image_url_medium = ''
-    we_vote_hosted_profile_image_url_tiny = ''
 
     return_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
-    status += return_results['status']
     error_results = return_results['challenge_invitee_dict']
     error_results['status'] = status
     error_results['success'] = success
@@ -167,6 +162,7 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
+        shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
         voter_full_name = voter.get_full_name(real_name_only=True)
         if positive_value_exists(voter.first_name):
             voter_first_name = voter.first_name
@@ -214,38 +210,41 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         inviter_voter_we_vote_id=voter_we_vote_id,
         update_values=update_values,
     )
-
     status += invitee_results['status']
+    if invitee_results['success'] and invitee_results['challenge_invitee_found']:
+        invitee = invitee_results['challenge_invitee']
+        invitee_id = invitee.id
+        invitee_url_code = invitee.invitee_url_code
 
-    share_manager = ShareManager()
-    defaults = {
-        'is_challenge_share':                   True,
-        'other_voter_display_name':             invitee_name,
-        # 'other_voter_first_name':               other_voter_first_name,
-        # 'other_voter_last_name':                other_voter_last_name,
-        'shared_by_display_name':               voter_full_name,
-        'shared_by_first_name':                 voter_first_name,
-        'shared_by_last_name':                  voter_last_name,
-        # 'shared_by_organization_type':          shared_by_organization_type,
-        # 'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
-        'shared_by_voter_we_vote_id':           voter_we_vote_id,
-        'shared_by_we_vote_hosted_profile_image_url_large':     we_vote_hosted_profile_image_url_large,
-        'shared_by_we_vote_hosted_profile_image_url_medium':    we_vote_hosted_profile_image_url_medium,
-        'shared_by_we_vote_hosted_profile_image_url_tiny':      we_vote_hosted_profile_image_url_tiny,
-        'shared_item_code_challenge':           invitee_url_code,
-        # 'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-    }
-    shared_item_results = share_manager.update_or_create_shared_item(
-        destination_full_url=destination_full_url,
-        force_create_new=True,
-        shared_by_voter_we_vote_id=voter_we_vote_id,
-        google_civic_election_id=google_civic_election_id,
-        defaults=defaults,
-    )
-    status += shared_item_results['status']
-    if shared_item_results['success']:
-        # shared_item_code_challenge = shared_item_results['shared_item_code']
-        pass
+    if positive_value_exists(invitee_url_code) and positive_value_exists(destination_full_url):
+        share_manager = ShareManager()
+        defaults = {
+            'is_challenge_share':                   True,
+            'other_voter_display_name':             invitee_name,
+            # 'other_voter_first_name':               other_voter_first_name,
+            # 'other_voter_last_name':                other_voter_last_name,
+            'shared_by_display_name':               voter_full_name,
+            'shared_by_first_name':                 voter_first_name,
+            'shared_by_last_name':                  voter_last_name,
+            # 'shared_by_organization_type':          shared_by_organization_type,
+            'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':           voter_we_vote_id,
+            'shared_by_we_vote_hosted_profile_image_url_large':     we_vote_hosted_profile_image_url_large,
+            'shared_by_we_vote_hosted_profile_image_url_medium':    we_vote_hosted_profile_image_url_medium,
+            'shared_by_we_vote_hosted_profile_image_url_tiny':      we_vote_hosted_profile_image_url_tiny,
+            'shared_item_code_challenge':           invitee_url_code,
+            # 'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+        }
+        shared_item_results = share_manager.update_or_create_shared_item(
+            destination_full_url=destination_full_url,
+            shared_by_voter_we_vote_id=voter_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            defaults=defaults,
+        )
+        status += shared_item_results['status']
+        if shared_item_results['success']:
+            # shared_item_code_challenge = shared_item_results['shared_item_code']
+            pass
 
     count_results = challenge_manager.update_challenge_invitees_count(challenge_we_vote_id)
 
