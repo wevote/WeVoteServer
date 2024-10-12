@@ -61,15 +61,16 @@ CHALLENGE_UNIQUE_IDENTIFIERS = [
 CHALLENGE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'seo_friendly_path',
 ]
-CHALLENGE_INVITE_TEXT_DEFAULT = \
-    "Leading up to the election on Nov 5th, 2024, I'm reminding friends as part of the [challenge_title] Challenge " \
-    "to make a plan to vote. " \
-    "Would you click the link below to check out the challenge and help boost my rank? " \
-    "If you join, I get an additional boost and we help get people to the polls. " \
-    "Thanks for your help!"
+CHALLENGE_INVITE_TEXT_DEFAULT = (
+    "The 2024 elections are almost here! "
+    "I've joined WeVote's nonpartisan [challenge_title]. It's  "
+    "all about getting people to vote—because friends "
+    "make sure friends vote! Whether you're voting early, by mail, or on November 5th, "
+    "click the link to see who's winning this challenge, and make a voting plan. "
+    "The more of us who join the challenge, the more people we can get to vote. "
+    "Thank you for supporting our democracy!")
 FINAL_ELECTION_DATE_COOL_DOWN = 7
 PARTICIPANTS_COUNT_MINIMUM_FOR_LISTING = 0  # How many participants are required before we show challenge on We Vote
-
 
 
 class Challenge(models.Model):
@@ -2882,9 +2883,9 @@ class ChallengeManager(models.Manager):
                         update_values['invitee_name'] = 'Unnamed friend'
                     challenge_invitee.invitee_name = update_values['invitee_name']
                     challenge_invitee_changed = True
-                if 'invitee_text_from_inviter' in update_values and \
-                        positive_value_exists(update_values['invitee_text_from_inviter_changed']):
-                    challenge_invitee.invitee_text_from_inviter = update_values['invitee_text_from_inviter']
+                if 'invite_text_from_inviter' in update_values and \
+                        positive_value_exists(update_values['invite_text_from_inviter_changed']):
+                    challenge_invitee.invite_text_from_inviter = update_values['invite_text_from_inviter']
                     challenge_invitee_changed = True
                 if 'invitee_url_code' in update_values and \
                         positive_value_exists(update_values['invitee_url_code_changed']):
