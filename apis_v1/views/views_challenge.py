@@ -52,9 +52,9 @@ def challenge_invitee_save_view(request):  # challengeInviteeSave
     invitee_name_changed = positive_value_exists(request.GET.get('invitee_name_changed', False))
     invite_sent = positive_value_exists(request.GET.get('invite_sent', None))
     invite_sent_changed = positive_value_exists(request.GET.get('invite_sent_changed', False))
-    invitee_text_from_inviter = request.GET.get('invitee_text_from_inviter', None)
-    invitee_text_from_inviter_changed = \
-        positive_value_exists(request.GET.get('invitee_text_from_inviter_changed', False))
+    invite_text_from_inviter = request.GET.get('invite_text_from_inviter', None)
+    invite_text_from_inviter_changed = \
+        positive_value_exists(request.GET.get('invite_text_from_inviter_changed', False))
     invitee_url_code = request.GET.get('invitee_url_code', None)
     invitee_url_code_changed = positive_value_exists(request.GET.get('invitee_url_code_changed', False))
     json_data = challenge_invitee_save_for_api(
@@ -66,8 +66,8 @@ def challenge_invitee_save_view(request):  # challengeInviteeSave
         invitee_id=invitee_id,
         invitee_name=invitee_name,
         invitee_name_changed=invitee_name_changed,
-        invitee_text_from_inviter=invitee_text_from_inviter,
-        invitee_text_from_inviter_changed=invitee_text_from_inviter_changed,
+        invite_text_from_inviter=invite_text_from_inviter,
+        invite_text_from_inviter_changed=invite_text_from_inviter_changed,
         invitee_url_code=invitee_url_code,
         invitee_url_code_changed=invitee_url_code_changed,
         voter_device_id=voter_device_id,
