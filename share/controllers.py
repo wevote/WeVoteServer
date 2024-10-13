@@ -652,10 +652,13 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             if positive_value_exists(action_view_type):
                 analytics_results = analytics_manager.save_action(
                     action_constant=action_view_type,
-                    voter_we_vote_id=viewed_by_voter_we_vote_id, voter_id=voter_id, is_signed_in=is_signed_in,
+                    voter_we_vote_id=viewed_by_voter_we_vote_id,
+                    voter_id=voter_id,
+                    is_signed_in=is_signed_in,
                     organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
                     google_civic_election_id=clicked_google_civic_election_id,
-                    user_agent_string=user_agent_string, is_bot=is_bot,
+                    user_agent_string=user_agent_string,
+                    is_bot=is_bot,
                     is_mobile=user_agent_object.is_mobile,
                     is_desktop=user_agent_object.is_pc,
                     is_tablet=user_agent_object.is_tablet)
@@ -665,18 +668,38 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         pass
 
     # If is_challenge share, update ChallengeInvitee.invite_viewed & ChallengeInvitee.invite_viewed_count
+    update_invitee_count = 0
     if positive_value_exists(shared_item_clicked) and not positive_value_exists(api_call_coming_from_voter_who_shared):
+        challenge_we_vote_id_from_invitee = ''
+        inviter_voter_we_vote_id = ''
         if shared_item.is_challenge_share and positive_value_exists(shared_item_code):
             from challenge.models import ChallengeInvitee
             try:
                 queryset = ChallengeInvitee.objects.all()
                 queryset = queryset.filter(invitee_url_code=shared_item_code)
-                update_count = queryset.update(
+                update_invitee_count = queryset.update(
                     invite_viewed=True,
                     invite_viewed_count=F('invite_viewed_count') + 1,
                     date_invite_viewed=now())
+                if update_invitee_count > 0:
+                    try:
+                        refreshed_invitee = ChallengeInvitee.objects.get(invitee_url_code=shared_item_code)
+                        challenge_we_vote_id_from_invitee = refreshed_invitee.challenge_we_vote_id
+                        inviter_voter_we_vote_id = refreshed_invitee.inviter_voter_we_vote_id
+                    except Exception as e:
+                        status += "COULD_NOT_GET_REFRESHED_CHALLENGE_INVITEE: " + str(e) + " "
             except Exception as e:
                 status += "CHALLENGE_INVITEE_UPDATE_FAILED: " + str(e) + " "
+
+        if update_invitee_count > 0 and \
+                positive_value_exists(challenge_we_vote_id_from_invitee) and \
+                positive_value_exists(inviter_voter_we_vote_id):
+            from challenge.controllers_scoring import refresh_participant_points_for_challenge
+            refresh_results = refresh_participant_points_for_challenge(
+                challenge_we_vote_id=challenge_we_vote_id_from_invitee,
+                voter_we_vote_id=inviter_voter_we_vote_id,
+            )
+            status += refresh_results['status']
 
     ballot_item_list = []
     candidate_position_list = []

@@ -427,31 +427,13 @@ def refresh_challenge_invitees_count_for_challenge_we_vote_id_list(challenge_we_
     challenge_bulk_update_list = []
     challenge_updates_made = 0
     if len(challenge_we_vote_id_list) > 0:
-        follow_organization_manager = FollowOrganizationManager()
         queryset = Challenge.objects.all()  # Cannot be readonly because of bulk_update below
         queryset = queryset.filter(we_vote_id__in=challenge_we_vote_id_list)
         challenge_list = list(queryset)
         for one_challenge in challenge_list:
             changes_found = False
-            opposers_count = 0
-            if positive_value_exists(one_challenge.politician_we_vote_id):
-                if positive_value_exists(one_challenge.organization_we_vote_id):
-                    opposers_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOW_DISLIKE,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-
-                    invitees_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOWING,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-                else:
-                    error_message_to_print += "CHALLENGE_MISSING_ORGANIZATION: " + str(one_challenge.we_vote_id) + " "
-                    continue
-            else:
-                invitees_count = challenge_manager.fetch_challenge_invitee_count(
-                    challenge_we_vote_id=one_challenge.we_vote_id)
-            if opposers_count != one_challenge.opposers_count:
-                one_challenge.opposers_count = opposers_count
-                changes_found = True
+            invitees_count = challenge_manager.fetch_challenge_invitee_count(
+                challenge_we_vote_id=one_challenge.we_vote_id)
             if invitees_count != one_challenge.invitees_count:
                 one_challenge.invitees_count = invitees_count
                 changes_found = True
@@ -461,7 +443,7 @@ def refresh_challenge_invitees_count_for_challenge_we_vote_id_list(challenge_we_
                 challenge_updates_made += 1
     if challenges_need_to_be_updated:
         try:
-            Challenge.objects.bulk_update(challenge_bulk_update_list, ['opposers_count', 'invitees_count'])
+            Challenge.objects.bulk_update(challenge_bulk_update_list, ['invitees_count'])
             update_message += \
                 "{challenge_updates_made:,} Challenge entries updated with fresh invitees_count, " \
                 "".format(challenge_updates_made=challenge_updates_made)
@@ -492,12 +474,15 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         'invitee_id': '',
         'invitee_name': '',
         'invitee_url_code': '',
+        'invitee_voter_name': '',
+        'invitee_voter_we_vote_id': '',
         'inviter_name': '',
         'inviter_voter_we_vote_id': '',
         'invite_sent': False,
         'invite_text_from_inviter': '',
         'invite_viewed': False,
         'invite_viewed_count': 0,
+        'parent_invitee_id': 0,
         'we_vote_hosted_profile_image_url_medium': '',
         'we_vote_hosted_profile_image_url_tiny': '',
     }
@@ -538,18 +523,21 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         status += "DATE_CONVERSION_ERROR-INVITEE: " + str(e) + " "
     challenge_invitee_dict['challenge_joined'] = challenge_invitee.challenge_joined
     challenge_invitee_dict['challenge_we_vote_id'] = challenge_invitee.challenge_we_vote_id
-    challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
     challenge_invitee_dict['date_invite_sent'] = date_invite_sent_string
     challenge_invitee_dict['date_invite_viewed'] = date_invite_viewed_string
     challenge_invitee_dict['date_challenge_joined'] = date_challenge_joined_string
+    challenge_invitee_dict['invite_sent'] = challenge_invitee.invite_sent
+    challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
+    challenge_invitee_dict['invite_viewed'] = challenge_invitee.invite_viewed
+    challenge_invitee_dict['invite_viewed_count'] = challenge_invitee.invite_viewed_count
     challenge_invitee_dict['invitee_id'] = challenge_invitee.id
     challenge_invitee_dict['invitee_name'] = challenge_invitee.invitee_name
     challenge_invitee_dict['invitee_url_code'] = challenge_invitee.invitee_url_code
+    challenge_invitee_dict['invitee_voter_name'] = challenge_invitee.invitee_voter_name
+    challenge_invitee_dict['invitee_voter_we_vote_id'] = challenge_invitee.invitee_voter_we_vote_id
     challenge_invitee_dict['inviter_name'] = challenge_invitee.inviter_name
     challenge_invitee_dict['inviter_voter_we_vote_id'] = challenge_invitee.inviter_voter_we_vote_id
-    challenge_invitee_dict['invite_sent'] = challenge_invitee.invite_sent
-    challenge_invitee_dict['invite_viewed'] = challenge_invitee.invite_viewed
-    challenge_invitee_dict['invite_viewed_count'] = challenge_invitee.invite_viewed_count
+    challenge_invitee_dict['parent_invitee_id'] = challenge_invitee.parent_invitee_id
     challenge_invitee_dict['we_vote_hosted_profile_image_url_medium'] = we_vote_hosted_profile_image_url_medium
     challenge_invitee_dict['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
 

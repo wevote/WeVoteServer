@@ -2,11 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import Challenge, ChallengeManager, ChallengeParticipant
+from datetime import datetime
 from django.contrib import messages
 from django.db.models import Q
-from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
+
+from .models import Challenge, ChallengeInvitee, ChallengeManager, ChallengeParticipant
 from position.models import OPPOSE, SUPPORT
+from share.models import SharedLinkClicked
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_dict_from_list_with_key_from_one_attribute, positive_value_exists
@@ -132,6 +134,8 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         visible_to_public=False,
         visible_to_public_changed=False,
         voter_device_id=''):
+    challenge_invitee = None
+    inviter_voter_we_vote_id = ''
     participant_name_changed = False
     status = ''
     success = True
@@ -166,6 +170,80 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         results['status'] = status
         return results
 
+    # Before calling update_or_create_challenge_participant, see if voter was invited by a current participant,
+    #  so we can give points credit for this new participant.
+    shared_item_code_list = []
+    # Search SharedLinkClicked for viewed_by_voter_we_vote_id for this challenge, to get shared_item_code list,
+    #  that led to this voter viewing this challenge.
+    #  This is the proof that this voter was invited by a current participant.
+    try:
+        queryset = SharedLinkClicked.objects.using('readonly').filter(viewed_by_voter_we_vote_id=voter_we_vote_id)
+        link_clicked_list = list(queryset)
+        shared_item_code_list = []
+        for link_clicked in link_clicked_list:
+            if positive_value_exists(link_clicked.shared_item_code) and \
+                    link_clicked.shared_item_code not in shared_item_code_list:
+                shared_item_code_list.append(link_clicked.shared_item_code)
+    except Exception as e:
+        status += "SHARED_LINK_CLICKED_RETRIEVE_ERROR: " + str(e) + " "
+
+    # Then find ChallengeInvitee.invitee_url_code matching shared_item_code, so we can inviter_voter_we_vote_id.
+    if len(shared_item_code_list) > 0:
+        try:
+            queryset = ChallengeInvitee.objects.filter(
+                challenge_we_vote_id=challenge_we_vote_id,
+                invitee_url_code__in=shared_item_code_list)
+            challenge_invitee_list = list(queryset)
+            #  If found, get inviter_voter_we_vote_id from ChallengeInvitee to add to ChallengeParticipant.
+            if len(challenge_invitee_list) > 0:
+                challenge_invitee = challenge_invitee_list[0]
+                inviter_voter_we_vote_id = challenge_invitee.inviter_voter_we_vote_id
+        except Exception as e:
+            status += "CHALLENGE_INVITEE_RETRIEVE_ERROR: " + str(e) + " "
+
+    if hasattr(challenge_invitee, 'invitee_voter_we_vote_id'):
+        # Does ChallengeInvitee already have a invitee_voter_we_vote_id? (from viewed_by_voter_we_vote_id)
+        if positive_value_exists(challenge_invitee.invitee_voter_we_vote_id):
+            # If so, create new ChallengeInvitee for that Participant.
+            #  Add parent_invitee_id field to tie new Invitee back to parent Invitee.
+            try:
+                create_values = {
+                    'challenge_joined': True,
+                    'challenge_we_vote_id': challenge_we_vote_id,
+                    'date_challenge_joined': datetime.now(),
+                    'date_invite_sent': challenge_invitee.date_invite_sent,
+                    'date_invite_viewed': challenge_invitee.date_invite_viewed,
+                    'invite_sent': challenge_invitee.invite_sent,
+                    'invite_text_from_inviter': challenge_invitee.invite_text_from_inviter,
+                    'invite_viewed': challenge_invitee.invite_viewed,
+                    'invite_viewed_count': 1,
+                    'invitee_name': challenge_invitee.invitee_name,
+                    'invitee_voter_name': participant_name,
+                    'invitee_voter_we_vote_id': voter_we_vote_id,
+                    'inviter_name': challenge_invitee.inviter_name,
+                    'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+                    'parent_invitee_id': challenge_invitee.id,
+                    'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                }
+                new_challenge_invitee = ChallengeInvitee.objects.create(**create_values)
+            except Exception as e:
+                status += "CHALLENGE_INVITEE_CREATE_ERROR: " + str(e) + " "
+        else:
+            # If not, update ChallengeInvitee invitee_voter_name & invitee_voter_we_vote_id with this voter_we_vote_id
+            try:
+                challenge_invitee.challenge_joined = True
+                challenge_invitee.date_challenge_joined = datetime.now()
+                challenge_invitee.invitee_voter_name = participant_name
+                challenge_invitee.invitee_voter_we_vote_id = voter_we_vote_id
+                challenge_invitee.we_vote_hosted_profile_image_url_medium = \
+                    voter.we_vote_hosted_profile_image_url_medium
+                challenge_invitee.we_vote_hosted_profile_image_url_tiny = \
+                    voter.we_vote_hosted_profile_image_url_tiny
+                challenge_invitee.save()
+            except Exception as e:
+                status += "CHALLENGE_INVITEE_UPDATE_ERROR: " + str(e) + " "
+
     challenge_manager = ChallengeManager()
     update_values = {
         'invite_text_for_friends':          invite_text_for_friends,
@@ -175,6 +253,10 @@ def challenge_participant_save_for_api(  # challengeParticipantSave
         'visible_to_public':                visible_to_public,
         'visible_to_public_changed':        visible_to_public_changed,
     }
+    if positive_value_exists(inviter_voter_we_vote_id):
+        # Add inviter_voter_we_vote_id field to tie Participant back to parent Participant (who invited this voter)
+        update_values['inviter_voter_we_vote_id'] = inviter_voter_we_vote_id
+        update_values['inviter_voter_we_vote_id_changed'] = True
     create_results = challenge_manager.update_or_create_challenge_participant(
         challenge_we_vote_id=challenge_we_vote_id,
         voter=voter,
