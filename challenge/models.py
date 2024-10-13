@@ -63,7 +63,7 @@ CHALLENGE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
 ]
 CHALLENGE_INVITE_TEXT_DEFAULT = (
     "The 2024 elections are almost here! "
-    "I've joined WeVote's nonpartisan [challenge_title]. It's  "
+    "I've joined WeVote's nonpartisan challenge: [challenge_title]. It's "
     "all about getting people to vote—because friends "
     "make sure friends vote! Whether you're voting early, by mail, or on November 5th, "
     "click the link to see who's winning this challenge, and make a voting plan. "
@@ -226,19 +226,22 @@ class ChallengeInvitee(models.Model):
 
     challenge_joined = models.BooleanField(default=False)
     challenge_we_vote_id = models.CharField(max_length=255)
-    invite_text_from_inviter = models.TextField(null=True)
     date_challenge_joined = models.DateTimeField(null=True)
     date_invite_sent = models.DateTimeField(null=True, auto_now_add=True)  # Use this field for message sent too
     date_invite_viewed = models.DateTimeField(null=True)
-    invitee_name = models.CharField(max_length=255, null=True)
-    invitee_url_code = models.CharField(max_length=50, null=True)  # generate_random_string(8)
-    inviter_name = models.CharField(max_length=255, null=True)
-    inviter_voter_we_vote_id = models.CharField(max_length=255, null=True)
     invite_sent = models.BooleanField(default=False)
+    invite_text_from_inviter = models.TextField(null=True)
     invite_viewed = models.BooleanField(default=False)
     invite_viewed_count = models.PositiveIntegerField(default=0, null=False)
-    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+    invitee_name = models.CharField(max_length=255, null=True)
+    invitee_url_code = models.CharField(max_length=50, null=True)  # generate_random_string(8)
+    invitee_voter_name = models.CharField(max_length=255, null=True)  # Filled in after they Join
+    invitee_voter_we_vote_id = models.CharField(max_length=255, null=True)  # Filled in after they Join
+    inviter_name = models.CharField(max_length=255, null=True)
+    inviter_voter_we_vote_id = models.CharField(max_length=255, null=True)
+    parent_invitee_id = models.PositiveIntegerField(default=0, null=False)  # Filled in after they Join
+    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)  # Filled in after they Join
+    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)  # Filled in after they Join
 
     class Meta:
         indexes = [
@@ -2072,11 +2075,12 @@ class ChallengeManager(models.Manager):
     @staticmethod
     def retrieve_challenge_participant_list(
             challenge_we_vote_id=None,
+            has_parent=False,
             voter_we_vote_id=None,
             require_invite_text_for_friends=False,
             require_visible_to_public=True,
             require_not_blocked_by_we_vote=True,
-            limit=10,
+            limit=100,
             read_only=True):
         participant_list = []
         success = True
@@ -2090,6 +2094,11 @@ class ChallengeManager(models.Manager):
 
             if positive_value_exists(challenge_we_vote_id):
                 queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+            if positive_value_exists(has_parent):
+                queryset = queryset.exclude(
+                    Q(inviter_voter_we_vote_id__isnull=True) |
+                    Q(inviter_voter_we_vote_id__exact='')
+                )
             if positive_value_exists(voter_we_vote_id):
                 queryset = queryset.filter(voter_we_vote_id=voter_we_vote_id)
             if positive_value_exists(require_visible_to_public):
@@ -3473,8 +3482,11 @@ class ChallengeManager(models.Manager):
                     challenge_participant_changed = True
                 if 'invite_text_for_friends_changed' in update_values \
                         and positive_value_exists(update_values['invite_text_for_friends_changed']):
-                    challenge_participant.invite_text_for_friends = \
-                        update_values['invite_text_for_friends']
+                    challenge_participant.invite_text_for_friends = update_values['invite_text_for_friends']
+                    challenge_participant_changed = True
+                if 'inviter_voter_we_vote_id_changed' in update_values \
+                        and positive_value_exists(update_values['inviter_voter_we_vote_id_changed']):
+                    challenge_participant.inviter_voter_we_vote_id = update_values['inviter_voter_we_vote_id']
                     challenge_participant_changed = True
                 if 'participant_name_changed' in update_values \
                         and positive_value_exists(update_values['participant_name_changed']):
@@ -3569,13 +3581,14 @@ class ChallengeParticipant(models.Model):
         return "ChallengeParticipant"
 
     challenge_we_vote_id = models.CharField(max_length=255)
-    invite_text_for_friends = models.TextField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     date_joined = models.DateTimeField(null=True, auto_now_add=True)
+    invite_text_for_friends = models.TextField(null=True)
     invitees_count = models.PositiveIntegerField(default=0, null=False)
     invitees_who_joined = models.PositiveIntegerField(default=0, null=False)
     invitees_who_viewed = models.PositiveIntegerField(default=0, null=False)
     invitees_who_viewed_plus = models.PositiveIntegerField(default=0, null=False)
+    inviter_voter_we_vote_id = models.CharField(max_length=255, null=True)  # The participant who invited this one
     invites_sent_count = models.PositiveIntegerField(default=0, null=False)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     participant_name = models.CharField(max_length=255, null=True)
