@@ -4,7 +4,7 @@
 
 from datetime import datetime
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import F, Q
 
 from .models import Challenge, ChallengeInvitee, ChallengeManager, ChallengeParticipant
 from position.models import OPPOSE, SUPPORT
@@ -809,6 +809,15 @@ def update_challenge_participants_for_challenge_with_invitee_stats(
             challenge_we_vote_id=challenge_we_vote_id,
             inviter_voter=voter,
             inviter_voter_we_vote_id=voter.we_vote_id)
+        status += challenge_results['status']
+
+    # Now calculate and save invitees_who_viewed_plus
+    for voter in voter_list:
+        stats_results = update_challenge_participant_with_invitees_who_viewed_plus(
+            challenge_we_vote_id=challenge_we_vote_id,
+            inviter_voter_we_vote_id=voter.we_vote_id,
+        )
+        status += stats_results['status']
 
     results = {
         'status':   status,
@@ -828,7 +837,7 @@ def update_challenge_participant_with_invitee_stats(
     stats_results = retrieve_invitee_stats_to_store_in_participant(challenge_we_vote_id, inviter_voter_we_vote_id)
     if stats_results['success']:
         update_values = stats_results['update_values']
-        # While here, make sure Participant name is up-to-date
+        # While here, make sure Participant name is up-to-date if a voter was passed in
         if inviter_voter and hasattr(inviter_voter, 'first_name'):
             voter_name = inviter_voter.get_full_name(real_name_only=True)
             if positive_value_exists(voter_name):
@@ -843,6 +852,50 @@ def update_challenge_participant_with_invitee_stats(
         except Exception as e:
             status += "FAILED_UPDATE_INVITEE_STATS: " + str(e) + " "
             success = False
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+    return results
+
+
+def update_challenge_participant_with_invitees_who_viewed_plus(
+        challenge_we_vote_id='',
+        inviter_voter_we_vote_id=''):
+    status = ""
+    success = True
+
+    # invitees_who_viewed_plus must be calculated after all challenge participants
+    # have been updated individually with invitee_stats.
+    invitees_who_viewed_from_children = 0
+    children_invitee_list = []
+    if positive_value_exists(inviter_voter_we_vote_id):
+        # Get a list of Participants who were invited by this voter (i.e., inviter_voter_we_vote_id).
+        try:
+            queryset = ChallengeParticipant.objects.using('readonly').all()
+            queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+            queryset = queryset.filter(inviter_voter_we_vote_id=inviter_voter_we_vote_id)
+            children_invitee_list = list(queryset)
+        except Exception as e:
+            status += "FAILED_RETRIEVING_PARTICIPANT_LIST_FOR_WHO_VIEWED: " + str(e) + ' '
+            success = False
+
+    for invitee_child in children_invitee_list:
+        invitees_who_viewed_from_children += invitee_child.invitees_who_viewed
+
+    # Update even if invitees_who_viewed_from_children is zero, so we can update
+    #  invitees_who_viewed_plus to match invitees_who_viewed
+    try:
+        queryset = ChallengeParticipant.objects.all()
+        queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+        queryset = queryset.filter(voter_we_vote_id=inviter_voter_we_vote_id)
+        update_count = queryset.update(
+            invitees_who_viewed_plus=F('invitees_who_viewed') + invitees_who_viewed_from_children)
+        if update_count > 0:
+            pass
+    except Exception as e:
+        status += "CHALLENGE_PARTICIPANT_WHO_VIEWED_PLUS_UPDATE_FAILED: " + str(e) + " "
 
     results = {
         'status':   status,

@@ -2412,5 +2412,17 @@ def refresh_participant_info_view(request):
             challenge_we_vote_id=one_challenge_we_vote_id)
         status += results['status']
 
+    challenge_manager = ChallengeManager()
+    invitees_count = challenge_manager.fetch_challenge_invitee_count(challenge_we_vote_id)
+    participant_count = challenge_manager.fetch_challenge_participant_count(challenge_we_vote_id)
+    results = challenge_manager.retrieve_challenge(
+        challenge_we_vote_id=challenge_we_vote_id,
+        read_only=False)
+    if results['challenge_found']:
+        challenge = results['challenge']
+        challenge.invitees_count = invitees_count
+        challenge.participants_count = participant_count
+        challenge.save()
+
     messages.add_message(request, messages.INFO, status)
     return HttpResponseRedirect(reverse('challenge:challenge_list', args=()))

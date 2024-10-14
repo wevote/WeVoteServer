@@ -114,8 +114,6 @@ class Challenge(models.Model):
     #  We use the ChallengePolitician table to store links to politicians when supporting or opposing.
     politician_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     politician_we_vote_id_verified = models.BooleanField(default=False, null=False)
-    # If this Challenge has a politician_we_vote_id, then opposers_count comes from Organization opposers
-    opposers_count = models.PositiveIntegerField(default=0)
     # organization_we_vote_id is the id of the Endorser/Politician/Organization that started this challenge
     organization_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)
@@ -2652,10 +2650,6 @@ class ChallengeManager(models.Manager):
                 if 'politician_we_vote_id' in update_values \
                         and positive_value_exists(update_values['politician_we_vote_id']):
                     challenge.politician_we_vote_id = update_values['politician_we_vote_id']
-                    challenge_changed = True
-                if 'opposers_count' in update_values \
-                        and positive_value_exists(update_values['opposers_count']):
-                    challenge.opposers_count = update_values['opposers_count']
                     challenge_changed = True
                 if 'politician_delete_list_serialized' in update_values \
                         and positive_value_exists(update_values['politician_delete_list_serialized']):

@@ -63,39 +63,44 @@
             <tr>
                 <th>Participants:&nbsp;</th>
                 <td> {{ challenge.participants_count }}
-        {% if not challenge.politician_we_vote_id %}
-            {% if challenge.participants_count_minimum_ignored %}
-                        <span style="color: darkgray">(Visible -- Participants Count Minimum Ignored)</span>
-            {% elif not challenge.is_participants_count_minimum_exceeded %}
-                        <span style="color: darkgray">(NOT visible -- too few participants)</span>
+            {% if not challenge.politician_we_vote_id %}
+                {% if challenge.participants_count_minimum_ignored %}
+                            <span style="color: darkgray">(Visible -- Participants Count Minimum Ignored)</span>
+                {% elif not challenge.is_participants_count_minimum_exceeded %}
+                            <span style="color: darkgray">(NOT visible -- too few participants)</span>
+                {% endif %}
             {% endif %}
-        {% endif %}
                 </td>
             </tr>
-        <tr>
-            <th>Live link:</th>
-            <td>
-            {% if challenge.seo_friendly_path %}
-                <a href="{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/"
-                   target="_blank">{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            <tr>
+                <th>Friends Invited (Invitees):&nbsp;</th>
+                <td> {{ challenge.invitees_count }}
+                </td>
+            </tr>
+            <tr>
+                <th>Live link:</th>
+                <td>
+                {% if challenge.seo_friendly_path %}
+                    <a href="{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/"
+                       target="_blank">{{ challenges_site_root_url }}/{{ challenge.seo_friendly_path }}/+/&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                    {% else %}
+                    <a href="{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}"
+                       target="_blank">{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Alternate URL Paths:</th>
+                <td>
+                {% if path_list %}
+                    {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
                 {% else %}
-                <a href="{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}"
-                   target="_blank">{{ challenges_site_root_url }}/+/{{ challenge.we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-            {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <th>Alternate URL Paths:</th>
-            <td>
-            {% if path_list %}
-                {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
-            {% else %}
-                <div style="color: darkgray">
-                No alternate URL paths found.
-                </div>
-            {% endif %}
-            </td>
-        </tr>
+                    <div style="color: darkgray">
+                    No alternate URL paths found.
+                    </div>
+                {% endif %}
+                </td>
+            </tr>
         {% if challenge.challenge_description %}
             <tr>
                 <td colspan="2" style="vertical-align:top">
@@ -209,7 +214,7 @@
                     <th>
                         Participants: {{ challenge_participants_count|intcomma }}
                     </th>
-                    <th>Comment</th>
+                    <th>Participant Invite Text for Friends</th>
                 </tr>
             </thead>
         {# Challenge Participants #}
