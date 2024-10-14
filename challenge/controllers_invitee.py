@@ -5,7 +5,6 @@
 from .models import Challenge, ChallengeManager, ChallengeInvitee
 from django.contrib import messages
 from django.db.models import Q
-from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
 from share.models import ShareManager
 from voter.models import Voter, VoterManager
@@ -256,6 +255,13 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     )
     status += stats_results['status']
 
+    from challenge.controllers_participant import update_challenge_participant_with_invitees_who_viewed_plus
+    stats_results = update_challenge_participant_with_invitees_who_viewed_plus(
+        challenge_we_vote_id=challenge_we_vote_id,
+        inviter_voter_we_vote_id=voter_we_vote_id,
+    )
+    status += stats_results['status']
+
     challenge_we_vote_id_list = [challenge_we_vote_id]
     from challenge.controllers_scoring import refresh_participant_points_for_challenge
     for one_challenge_we_vote_id in challenge_we_vote_id_list:
@@ -292,7 +298,6 @@ def retrieve_invitee_stats_to_store_in_participant(
     invitees_count = 0
     invitees_who_joined = 0
     invitees_who_viewed = 0
-    # invitees_who_viewed_plus = 0
     invites_sent_count = 0
     error_results = {
         'challenge_we_vote_id': challenge_we_vote_id,
@@ -319,12 +324,8 @@ def retrieve_invitee_stats_to_store_in_participant(
             invitees_who_joined += 1
         if one_invitee.invite_viewed:
             invitees_who_viewed += 1
-        # Will take another routine to calculate
-        # if one_invitee.is_viewed_plus:
-        #     invitees_who_viewed_plus += 1
         if one_invitee.invite_sent:
             invites_sent_count += 1
-
     update_values = {
         'invitees_count':       invitees_count,
         'invitees_who_joined':  invitees_who_joined,

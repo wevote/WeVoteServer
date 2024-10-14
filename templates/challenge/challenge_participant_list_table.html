@@ -16,8 +16,7 @@
             <th></th>
             <th>Challenge</th>
         {% endif %}
-            <th>Endorsement</th>
-            <th>Chip Ins</th>
+            <th>Invite Text for Friends</th>
             <th>Participant Wants Visibility</th>
             <th>Visibility Blocked by We Vote?</th>
             <th>Delete</th>
@@ -73,7 +72,6 @@
             </td>
         {% endif %}
             <td>{{ challenge_participant.invite_text_for_friends|default_if_none:"" }}</td>
-            <td>{% if challenge_participant.chip_in_total != 'none' %}{{ challenge_participant.chip_in_total|default_if_none:"" }}{% endif %}</td>
             <td>
                 <input type="checkbox"
                        name="challenge_participant_visible_to_public_{{ challenge_participant.id }}"

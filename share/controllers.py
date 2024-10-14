@@ -426,6 +426,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'success': False,
         'candidate_we_vote_id': candidate_we_vote_id,
         'date_first_shared': date_first_shared,
+        'destination_path_backup': '/ready',
         'destination_full_url': destination_full_url,
         'destination_full_url_override': '',
         'email_secret_key': email_secret_key,
@@ -455,6 +456,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
         'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
         'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
+        'shared_item_code': shared_item_code,
         'shared_item_code_no_opinions': shared_item_code_no_opinions,
         'shared_item_code_all_opinions': shared_item_code_all_opinions,
         'shared_message': shared_message,
@@ -481,9 +483,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         read_only=True)
     status += results['status']
     if not results['shared_item_found']:
-        status += "SHARED_ITEM_NOT_FOUND "
+        status += "SHARED_ITEM_NOT_FOUND_REDIRECT_TO_READY "
         error_results['status'] = status
-        error_results['success'] = False
+        error_results['success'] = True
         return error_results
 
     shared_item = results['shared_item']
@@ -694,6 +696,20 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if update_invitee_count > 0 and \
                 positive_value_exists(challenge_we_vote_id_from_invitee) and \
                 positive_value_exists(inviter_voter_we_vote_id):
+            from challenge.controllers_participant import update_challenge_participant_with_invitee_stats
+            update_results = update_challenge_participant_with_invitee_stats(
+                challenge_we_vote_id=challenge_we_vote_id_from_invitee,
+                inviter_voter_we_vote_id=inviter_voter_we_vote_id,
+            )
+            status += update_results['status']
+
+            from challenge.controllers_participant import update_challenge_participant_with_invitees_who_viewed_plus
+            stats_results = update_challenge_participant_with_invitees_who_viewed_plus(
+                challenge_we_vote_id=challenge_we_vote_id_from_invitee,
+                inviter_voter_we_vote_id=inviter_voter_we_vote_id,
+            )
+            status += stats_results['status']
+
             from challenge.controllers_scoring import refresh_participant_points_for_challenge
             refresh_results = refresh_participant_points_for_challenge(
                 challenge_we_vote_id=challenge_we_vote_id_from_invitee,
