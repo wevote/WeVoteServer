@@ -883,21 +883,21 @@ def save_analytics_action_for_api(  # saveAnalyticsAction
             status += "POLITICIAN_NOT_FOUND-FROM_SEO_FRIENDLY_PATH: " + str(e) + " "
 
     save_results = analytics_manager.save_action(
-        action_constant,
-        voter_we_vote_id,
-        voter_id,
-        is_signed_in,
-        state_code,
-        organization_we_vote_id,
-        organization_id,
-        google_civic_election_id,
-        user_agent_string,
-        is_bot,
-        is_mobile,
-        is_desktop,
-        is_tablet,
-        ballot_item_we_vote_id,
-        voter_device_id,
+        action_constant=action_constant,
+        voter_we_vote_id=voter_we_vote_id,
+        voter_id=voter_id,
+        is_signed_in=is_signed_in,
+        state_code=state_code,
+        organization_we_vote_id=organization_we_vote_id,
+        organization_id=organization_id,
+        google_civic_election_id=google_civic_election_id,
+        user_agent_string=user_agent_string,
+        is_bot=is_bot,
+        is_mobile=is_mobile,
+        is_desktop=is_desktop,
+        is_tablet=is_tablet,
+        ballot_item_we_vote_id=ballot_item_we_vote_id,
+        voter_device_id=voter_device_id,
         politician_we_vote_id=politician_we_vote_id)
     if save_results['action_saved']:
         action = save_results['action']

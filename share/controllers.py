@@ -637,13 +637,17 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             if positive_value_exists(action_view_type):
                 analytics_results = analytics_manager.save_action(
                     action_constant=action_view_type,
-                    voter_we_vote_id=viewed_by_voter_we_vote_id, voter_id=voter_id, is_signed_in=is_signed_in,
+                    voter_we_vote_id=viewed_by_voter_we_vote_id,
+                    voter_id=voter_id,
+                    is_signed_in=is_signed_in,
                     organization_we_vote_id=shared_item.shared_by_organization_we_vote_id,
                     google_civic_election_id=clicked_google_civic_election_id,
-                    user_agent_string=user_agent_string, is_bot=is_bot,
+                    user_agent_string=user_agent_string,
+                    is_bot=is_bot,
                     is_mobile=user_agent_object.is_mobile,
                     is_desktop=user_agent_object.is_pc,
-                    is_tablet=user_agent_object.is_tablet)
+                    is_tablet=user_agent_object.is_tablet,
+                )
                 status += analytics_results['status']
     else:
         # Shared item not clicked

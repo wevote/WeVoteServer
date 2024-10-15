@@ -6724,11 +6724,21 @@ class PositionManager(models.Manager):
             is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
             analytics_manager = AnalyticsManager()
             analytics_results = analytics_manager.save_action(
-                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                organization_we_vote_id_temp, organization_id_temp,
-                google_civic_election_id, user_agent_string=user_agent_string, is_bot=is_bot,
-                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
-                is_tablet=user_agent_object.is_tablet, ballot_item_we_vote_id=ballot_item_we_vote_id)
+                action_constant=ACTION_POSITION_TAKEN,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                state_code=state_code,
+                organization_we_vote_id=organization_we_vote_id_temp,
+                organization_id=organization_id_temp,
+                google_civic_election_id=google_civic_election_id,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+                ballot_item_we_vote_id=ballot_item_we_vote_id,
+            )
 
         results = {
             'status':               status,
