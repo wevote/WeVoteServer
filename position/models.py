@@ -3563,7 +3563,7 @@ class PositionListManager(models.Manager):
                 politician_we_vote_id = position.politician_we_vote_id \
                     if positive_value_exists(position.politician_we_vote_id) else ''
                 try:
-                    date_last_changed = position.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    date_last_changed = position.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += 'VOTER_POSITION_DATE_LAST_CHANGED_FAILED: ' + str(e) + ' '
                     date_last_changed = ''

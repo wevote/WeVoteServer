@@ -97,6 +97,7 @@ ACTION_VIEW_SHARED_ORGANIZATION_ALL_OPINIONS = 78
 ACTION_ORGANIZATION_FOLLOW_DISLIKE = 79
 ACTION_ORGANIZATION_STOP_DISLIKING = 80
 ACTION_POLITICIAN_PAGE_VISIT = 81
+ACTION_VIEW_SHARED_CHALLENGE = 82
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -2167,6 +2168,8 @@ def display_action_constant_human_readable(action_constant):
         return "VIEW_SHARED_CANDIDATE"
     if action_constant == ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS:
         return "VIEW_SHARED_CANDIDATE_ALL_OPINIONS"
+    if action_constant == ACTION_VIEW_SHARED_CHALLENGE:
+        return "VIEW_SHARED_CHALLENGE"
     if action_constant == ACTION_VIEW_SHARED_MEASURE:
         return "VIEW_SHARED_MEASURE"
     if action_constant == ACTION_VIEW_SHARED_MEASURE_ALL_OPINIONS:
@@ -2364,4 +2367,8 @@ def fetch_action_constant_number_from_constant_string(action_constant_string):
         return 79
     if action_constant_string in 'ACTION_ORGANIZATION_STOP_DISLIKING':
         return 80
+    if action_constant_string in 'ACTION_POLITICIAN_PAGE_VISIT':
+        return 81
+    if action_constant_string in 'ACTION_VIEW_SHARED_CHALLENGE':
+        return 82
     return 0

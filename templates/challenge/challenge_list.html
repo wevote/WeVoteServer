@@ -144,7 +144,7 @@
                   </a>
               {% endif %}
             </th>
-            <th style="min-width: 90px">Chipped In</th>
+            <th>Invitees</th>
             <th>Description</th>
         </tr>
       </thead>
@@ -254,12 +254,7 @@
             <a href="{% url 'challenge:refresh_participant_info' %}?challenge_we_vote_id={{ challenge.we_vote_id }}">refresh</a>
             </td>
             <td style="text-align: right">
-            {% if challenge.chip_in_total != 'none' %}
-                <a href="{% url 'challenge:participant_list' challenge.we_vote_id %}?show_participants_not_visible_to_public=1" target="_blank">
-                    {{ challenge.chip_in_total }}
-                    <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
-                </a>
-            {% endif %}
+                {{ challenge.invitees_count|intcomma }}
             </td>
             <td>
                 {{ challenge.challenge_description|default_if_none:""|truncatechars:250 }}

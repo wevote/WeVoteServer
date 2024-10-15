@@ -45,20 +45,29 @@ def challenge_invitee_retrieve_view(request):  # challengeInviteeRetrieve
 def challenge_invitee_save_view(request):  # challengeInviteeSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     challenge_we_vote_id = request.GET.get('challenge_we_vote_id', '')
+    destination_full_url = request.GET.get('destination_full_url', None)
+    google_civic_election_id = request.GET.get('google_civic_election_id', None)
     invitee_id = request.GET.get('invitee_id', None)
     invitee_name = request.GET.get('invitee_name', None)
-    invitee_name_changed = request.GET.get('invitee_name_changed', False)
-    invitee_text_from_inviter = request.GET.get('invitee_text_from_inviter', None)
-    invitee_text_from_inviter_changed = request.GET.get('invitee_text_from_inviter_changed', False)
+    invitee_name_changed = positive_value_exists(request.GET.get('invitee_name_changed', False))
+    invite_sent = positive_value_exists(request.GET.get('invite_sent', None))
+    invite_sent_changed = positive_value_exists(request.GET.get('invite_sent_changed', False))
+    invite_text_from_inviter = request.GET.get('invite_text_from_inviter', None)
+    invite_text_from_inviter_changed = \
+        positive_value_exists(request.GET.get('invite_text_from_inviter_changed', False))
     invitee_url_code = request.GET.get('invitee_url_code', None)
-    invitee_url_code_changed = request.GET.get('invitee_url_code_changed', False)
+    invitee_url_code_changed = positive_value_exists(request.GET.get('invitee_url_code_changed', False))
     json_data = challenge_invitee_save_for_api(
         challenge_we_vote_id=challenge_we_vote_id,
+        destination_full_url=destination_full_url,
+        google_civic_election_id=google_civic_election_id,
+        invite_sent=invite_sent,
+        invite_sent_changed=invite_sent_changed,
         invitee_id=invitee_id,
         invitee_name=invitee_name,
         invitee_name_changed=invitee_name_changed,
-        invitee_text_from_inviter=invitee_text_from_inviter,
-        invitee_text_from_inviter_changed=invitee_text_from_inviter_changed,
+        invite_text_from_inviter=invite_text_from_inviter,
+        invite_text_from_inviter_changed=invite_text_from_inviter_changed,
         invitee_url_code=invitee_url_code,
         invitee_url_code_changed=invitee_url_code_changed,
         voter_device_id=voter_device_id,

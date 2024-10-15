@@ -216,6 +216,23 @@ class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
             return ''
 
 
+class CandidateCTCLAlternateMap(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two candidates as NOT duplicates
+    """
+    ctcl_uuid_primary = models.CharField(max_length=36, null=True, unique=False)
+    ctcl_uuid_alternate = models.CharField(max_length=36, null=True, unique=False)
+
+    def fetch_other_ctcl_uuid(self, one_ctcl_uuid):
+        if one_ctcl_uuid == self.ctcl_uuid_primary:
+            return self.ctcl_uuid_alternate
+        elif one_ctcl_uuid == self.ctcl_uuid_alternate:
+            return self.ctcl_uuid_primary
+        else:
+            # If the ctcl_uuid passed in wasn't found, don't return another ctcl_uuid
+            return ""
+
+
 class CandidateListManager(models.Manager):
     """
     This is a class to make it easy to retrieve lists of Candidates
@@ -2740,8 +2757,7 @@ class CandidateCampaign(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default=None)
-    crowdpac_candidate_id = models.PositiveIntegerField(
-        verbose_name="crowdpac integer id", null=True, blank=True)
+    crowdpac_candidate_id = models.PositiveIntegerField(null=True, blank=True)
     # CTCL candidate data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True, db_index=True)
 
@@ -3109,6 +3125,15 @@ class CandidateManager(models.Manager):
                 candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(candidate_ctcl_uuid):
+                try:
+                    queryset = CandidateCTCLAlternateMap.objects.using('readonly')\
+                        .filter(ctcl_uuid_alternate=candidate_ctcl_uuid)
+                    primary_list = list(queryset)
+                    if len(primary_list) > 0:
+                        # Jump over to the primary ctcl_uuid
+                        candidate_ctcl_uuid = primary_list[0].ctcl_uuid_primary
+                except Exception as e:
+                    pass
                 if positive_value_exists(read_only):
                     candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         ctcl_uuid=candidate_ctcl_uuid)

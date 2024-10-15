@@ -4309,7 +4309,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'success':                          True,
             'address':                          address_results,
             'can_edit_campaignx_owned_by_organization_list': can_edit_campaignx_owned_by_organization_list,
-            'date_joined':                      voter.date_joined.strftime(DATE_FORMAT_YMD_HMS), # '%Y-%m-%d %H:%M:%S'
+            'date_joined':                      voter.date_joined.strftime(DATE_FORMAT_YMD_HMS),  # '%Y-%m-%d %H:%M:%S'
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
             'facebook_id':                      voter.facebook_id,

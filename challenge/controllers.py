@@ -47,6 +47,7 @@ CHALLENGE_ERROR_DICT = {
     'final_election_date_as_integer': None,
     'final_election_date_in_past': False,
     'in_draft_mode': True,
+    'invitees_count': 0,
     'is_blocked_by_we_vote': False,
     'is_blocked_by_we_vote_reason': '',
     'is_participants_count_minimum_exceeded': False,
@@ -374,9 +375,9 @@ def challenge_news_item_save_for_api(  # challengeNewsItemSave
         date_posted_string = ''
         date_sent_to_email_string = ''
         try:
-            date_last_changed_string = challenge_news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            date_posted_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-            date_sent_to_email_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+            date_last_changed_string = challenge_news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+            date_posted_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+            date_sent_to_email_string = challenge_news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
         except Exception as e:
             status += "DATE_CONVERSION_ERROR-NEWS_ITEM: " + str(e) + " "
         results = {
@@ -539,6 +540,14 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
     status = ''
     success = True
     challenge_error_dict = copy.deepcopy(CHALLENGE_ERROR_DICT)
+    try:
+        challenge_description = challenge_description.strip()
+    except Exception as e:
+        pass
+    try:
+        challenge_title = challenge_title.strip()
+    except Exception as e:
+        pass
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
@@ -616,28 +625,6 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             results = challenge_error_dict
             results['status'] = status
             return results
-        # Save challenge_photo_from_file_reader and get back we_vote_hosted_challenge_photo_original_url
-        we_vote_hosted_challenge_photo_large_url = None
-        we_vote_hosted_challenge_photo_medium_url = None
-        we_vote_hosted_challenge_photo_original_url = None
-        we_vote_hosted_challenge_photo_small_url = None
-        if challenge_photo_changed and challenge_photo_from_file_reader:
-            photo_results = challenge_save_photo_from_file_reader(
-                challenge_we_vote_id=challenge_we_vote_id,
-                challenge_photo_from_file_reader=challenge_photo_from_file_reader)
-            if photo_results['we_vote_hosted_challenge_photo_original_url']:
-                we_vote_hosted_challenge_photo_original_url = \
-                    photo_results['we_vote_hosted_challenge_photo_original_url']
-                # Now we want to resize to a large version
-                create_resized_image_results = create_resized_images(
-                    challenge_we_vote_id=challenge_we_vote_id,
-                    challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
-                we_vote_hosted_challenge_photo_large_url = \
-                    create_resized_image_results['cached_resized_image_url_large']
-                we_vote_hosted_challenge_photo_medium_url = \
-                    create_resized_image_results['cached_resized_image_url_medium']
-                we_vote_hosted_challenge_photo_small_url = \
-                    create_resized_image_results['cached_resized_image_url_tiny']
 
         update_values = {
             'challenge_description':                challenge_description,
@@ -654,11 +641,30 @@ def challenge_save_for_api(  # challengeSave & challengeStartSave
             'politician_delete_list_serialized':    politician_delete_list_serialized,
             'politician_starter_list_changed':      politician_starter_list_changed,
             'politician_starter_list_serialized':   politician_starter_list_serialized,
-            'we_vote_hosted_challenge_photo_large_url': we_vote_hosted_challenge_photo_large_url,
-            'we_vote_hosted_challenge_photo_medium_url': we_vote_hosted_challenge_photo_medium_url,
-            'we_vote_hosted_challenge_photo_small_url': we_vote_hosted_challenge_photo_small_url,
-            'we_vote_hosted_challenge_photo_original_url': we_vote_hosted_challenge_photo_original_url,
         }
+        # Save challenge_photo_from_file_reader and get back we_vote_hosted_challenge_photo_original_url
+        if challenge_photo_changed and challenge_photo_from_file_reader:
+            photo_results = challenge_save_photo_from_file_reader(
+                challenge_we_vote_id=challenge_we_vote_id,
+                challenge_photo_from_file_reader=challenge_photo_from_file_reader)
+            if photo_results['we_vote_hosted_challenge_photo_original_url']:
+                we_vote_hosted_challenge_photo_original_url = \
+                    photo_results['we_vote_hosted_challenge_photo_original_url']
+                # Now we want to resize to a large version
+                # Temp: Store as a campaignx photo
+                create_resized_image_results = create_resized_images(
+                    campaignx_we_vote_id=challenge_we_vote_id,
+                    campaignx_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                # create_resized_image_results = create_resized_images(
+                #     challenge_we_vote_id=challenge_we_vote_id,
+                #     challenge_photo_url_https=we_vote_hosted_challenge_photo_original_url)
+                update_values['we_vote_hosted_challenge_photo_large_url'] = \
+                    create_resized_image_results['cached_resized_image_url_large']
+                update_values['we_vote_hosted_challenge_photo_medium_url'] = \
+                    create_resized_image_results['cached_resized_image_url_medium']
+                update_values['we_vote_hosted_challenge_photo_small_url'] = \
+                    create_resized_image_results['cached_resized_image_url_tiny']
+
         create_results = challenge_manager.update_or_create_challenge(
             challenge_we_vote_id=challenge_we_vote_id,
             voter_we_vote_id=voter_we_vote_id,
@@ -1196,10 +1202,10 @@ def generate_challenge_dict_from_challenge_object(
                 date_posted_string = ''
                 date_sent_to_email_string = ''
                 try:
-                    date_last_changed_string = news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
-                    date_posted_string = news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                    date_last_changed_string = news_item.date_last_changed.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
+                    date_posted_string = news_item.date_posted.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                     if positive_value_exists(news_item.date_sent_to_email):
-                        date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS) # '%Y-%m-%d %H:%M:%S'
+                        date_sent_to_email_string = news_item.date_sent_to_email.strftime(DATE_FORMAT_YMD_HMS)  # '%Y-%m-%d %H:%M:%S'
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR-CHALLENGE: " + str(e) + " "
                 one_news_item_dict = {
@@ -1329,6 +1335,10 @@ def generate_challenge_dict_from_challenge_object(
         final_election_date_plus_cool_down >= challenge.final_election_date_as_integer \
         if positive_value_exists(challenge.final_election_date_as_integer) else False
 
+    if positive_value_exists(challenge.challenge_description):
+        challenge_description = challenge.challenge_description.strip()
+    else:
+        challenge_description = ''
     if positive_value_exists(challenge.challenge_title):
         challenge_title = challenge.challenge_title.strip()
     else:
@@ -1348,11 +1358,11 @@ def generate_challenge_dict_from_challenge_object(
             challenge_invite_text_default.replace('[challenge_title]', challenge_title)
 
     challenge_dict = {
-        'challenge_description':            challenge.challenge_description,
+        'challenge_description':            challenge_description,
         'challenge_invite_text_default':    challenge_invite_text_default,
         'challenge_ends_date_as_integer':   challenge.challenge_ends_date_as_integer,
         'challenge_starts_date_as_integer': challenge.challenge_starts_date_as_integer,
-        'challenge_title':                  challenge.challenge_title,
+        'challenge_title':                  challenge_title,
         'challenge_news_item_list':         challenge_news_item_list,
         'challenge_owner_list':             challenge_owner_list,
         'challenge_politician_list':        challenge_politician_list_modified,
@@ -1362,27 +1372,27 @@ def generate_challenge_dict_from_challenge_object(
         'final_election_date_as_integer':   challenge.final_election_date_as_integer,
         'final_election_date_in_past':      final_election_date_in_past,
         'in_draft_mode':                    challenge.in_draft_mode,
+        'invitees_count':                   challenge.invitees_count,
         'is_blocked_by_we_vote':            challenge.is_blocked_by_we_vote,
         'is_blocked_by_we_vote_reason':     challenge.is_blocked_by_we_vote_reason,
         'is_participants_count_minimum_exceeded': challenge.is_participants_count_minimum_exceeded(),
         'latest_challenge_participant_list':  latest_challenge_participant_list,
-        'politician_we_vote_id':            challenge.politician_we_vote_id,
-        'opposers_count':                   challenge.opposers_count,
         'order_in_list':                    order_in_list,
+        'participants_count':               challenge.participants_count,
+        'participants_count_next_goal':     participants_count_next_goal,
+        'participants_count_victory_goal':  challenge.participants_count_victory_goal,
+        'politician_we_vote_id':            challenge.politician_we_vote_id,
         'profile_image_background_color':   challenge.profile_image_background_color,
         'seo_friendly_path':                challenge.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
-        'participants_count':                 challenge.participants_count,
-        'participants_count_next_goal':       participants_count_next_goal,
-        'participants_count_victory_goal':    challenge.participants_count_victory_goal,
         'visible_on_this_site':             visible_on_this_site,
-        'voter_challenge_participant':        voter_challenge_participant_dict,
+        'voter_challenge_participant':      voter_challenge_participant_dict,
         'voter_can_send_updates_to_challenge':
             challenge.we_vote_id in voter_can_send_updates_challenge_we_vote_ids,
         'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
         'voter_is_challenge_owner':         voter_is_challenge_owner,
         'voter_signed_in_with_email':       voter_signed_in_with_email,
-        'we_vote_hosted_challenge_photo_large_url':  challenge.we_vote_hosted_challenge_photo_large_url,
+        'we_vote_hosted_challenge_photo_large_url': challenge.we_vote_hosted_challenge_photo_large_url,
         'we_vote_hosted_challenge_photo_medium_url': we_vote_hosted_challenge_photo_medium_url,
         'we_vote_hosted_challenge_photo_small_url': we_vote_hosted_challenge_photo_small_url,
         'we_vote_hosted_profile_image_url_large': challenge.we_vote_hosted_profile_image_url_large,

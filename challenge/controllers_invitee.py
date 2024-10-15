@@ -5,8 +5,8 @@
 from .models import Challenge, ChallengeManager, ChallengeInvitee
 from django.contrib import messages
 from django.db.models import Q
-from follow.models import FOLLOW_DISLIKE, FOLLOWING, FollowOrganizationManager
 from position.models import OPPOSE, SUPPORT
+from share.models import ShareManager
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_random_string, positive_value_exists
@@ -135,19 +135,24 @@ def challenge_invitee_list_retrieve_for_api(  # challengeInviteeListRetrieve
 
 def challenge_invitee_save_for_api(  # challengeInviteeSave
         challenge_we_vote_id='',
+        destination_full_url=None,
+        google_civic_election_id=None,
+        invite_sent=None,
+        invite_sent_changed=False,
         invitee_id=None,
         invitee_name=None,
         invitee_name_changed=False,
-        invitee_text_from_inviter=None,
-        invitee_text_from_inviter_changed=False,
+        invite_text_from_inviter=None,
+        invite_text_from_inviter_changed=False,
         invitee_url_code=None,
         invitee_url_code_changed=False,
         voter_device_id=''):
     status = ''
     success = True
+    voter_first_name = ''
+    voter_last_name = ''
 
     return_results = generate_challenge_invitee_dict_from_challenge_invitee_object()
-    status += return_results['status']
     error_results = return_results['challenge_invitee_dict']
     error_results['status'] = status
     error_results['success'] = success
@@ -156,8 +161,16 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-        voter_name = voter.get_full_name(real_name_only=True)
+        shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+        voter_full_name = voter.get_full_name(real_name_only=True)
+        if positive_value_exists(voter.first_name):
+            voter_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            voter_last_name = voter.last_name
         voter_we_vote_id = voter.we_vote_id
+        we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+        we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+        we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
     else:
         status += "VALID_VOTER_ID_MISSING "
         results = error_results
@@ -179,27 +192,88 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
 
     challenge_manager = ChallengeManager()
     update_values = {
+        'invite_sent': invite_sent,
+        'invite_sent_changed': invite_sent_changed,
         'invitee_name': invitee_name,
         'invitee_name_changed': invitee_name_changed,
-        'invitee_text_from_inviter': invitee_text_from_inviter,
-        'invitee_text_from_inviter_changed': invitee_text_from_inviter_changed,
+        'invite_text_from_inviter': invite_text_from_inviter,
+        'invite_text_from_inviter_changed': invite_text_from_inviter_changed,
         'invitee_url_code': invitee_url_code,
         'invitee_url_code_changed': invitee_url_code_changed,
-        'inviter_name': voter_name,
+        'inviter_name': voter_full_name,
+        'inviter_name_changed': True,
     }
-    create_results = challenge_manager.update_or_create_challenge_invitee(
+    invitee_results = challenge_manager.update_or_create_challenge_invitee(
         challenge_we_vote_id=challenge_we_vote_id,
         invitee_id=invitee_id,
         inviter_voter_we_vote_id=voter_we_vote_id,
         update_values=update_values,
     )
+    status += invitee_results['status']
+    if invitee_results['success'] and invitee_results['challenge_invitee_found']:
+        invitee = invitee_results['challenge_invitee']
+        invitee_id = invitee.id
+        invitee_url_code = invitee.invitee_url_code
 
-    status += create_results['status']
+    if positive_value_exists(invitee_url_code) and positive_value_exists(destination_full_url):
+        share_manager = ShareManager()
+        defaults = {
+            'is_challenge_share':                   True,
+            'other_voter_display_name':             invitee_name,
+            # 'other_voter_first_name':               other_voter_first_name,
+            # 'other_voter_last_name':                other_voter_last_name,
+            'shared_by_display_name':               voter_full_name,
+            'shared_by_first_name':                 voter_first_name,
+            'shared_by_last_name':                  voter_last_name,
+            # 'shared_by_organization_type':          shared_by_organization_type,
+            'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':           voter_we_vote_id,
+            'shared_by_we_vote_hosted_profile_image_url_large':     we_vote_hosted_profile_image_url_large,
+            'shared_by_we_vote_hosted_profile_image_url_medium':    we_vote_hosted_profile_image_url_medium,
+            'shared_by_we_vote_hosted_profile_image_url_tiny':      we_vote_hosted_profile_image_url_tiny,
+            'shared_item_code_challenge':           invitee_url_code,
+            # 'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+        }
+        shared_item_results = share_manager.update_or_create_shared_item(
+            destination_full_url=destination_full_url,
+            shared_by_voter_we_vote_id=voter_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            defaults=defaults,
+        )
+        status += shared_item_results['status']
+        if shared_item_results['success']:
+            # shared_item_code_challenge = shared_item_results['shared_item_code']
+            pass
+
+    count_results = challenge_manager.update_challenge_invitees_count(challenge_we_vote_id)
+
+    from challenge.controllers_participant import update_challenge_participant_with_invitee_stats
+    stats_results = update_challenge_participant_with_invitee_stats(
+        challenge_we_vote_id=challenge_we_vote_id,
+        inviter_voter=voter,
+        inviter_voter_we_vote_id=voter_we_vote_id,
+    )
+    status += stats_results['status']
+
+    from challenge.controllers_participant import update_challenge_participant_with_invitees_who_viewed_plus
+    stats_results = update_challenge_participant_with_invitees_who_viewed_plus(
+        challenge_we_vote_id=challenge_we_vote_id,
+        inviter_voter_we_vote_id=voter_we_vote_id,
+    )
+    status += stats_results['status']
+
+    challenge_we_vote_id_list = [challenge_we_vote_id]
+    from challenge.controllers_scoring import refresh_participant_points_for_challenge
+    for one_challenge_we_vote_id in challenge_we_vote_id_list:
+        results = refresh_participant_points_for_challenge(
+            challenge_we_vote_id=one_challenge_we_vote_id)
+        status += results['status']
+
     random_string = generate_random_string(8)
     # TODO: Confirm its not in use
     next_invitee_url_code = random_string
-    if create_results['challenge_invitee_found']:
-        challenge_invitee = create_results['challenge_invitee']
+    if invitee_results['challenge_invitee_found']:
+        challenge_invitee = invitee_results['challenge_invitee']
         return_results = generate_challenge_invitee_dict_from_challenge_invitee_object(
             challenge_invitee=challenge_invitee)
         status += return_results['status']
@@ -214,6 +288,59 @@ def challenge_invitee_save_for_api(  # challengeInviteeSave
         results['status'] = status
         results['success'] = False
         return results
+
+
+def retrieve_invitee_stats_to_store_in_participant(
+        challenge_we_vote_id='',
+        inviter_voter_we_vote_id=''):
+    status = ''
+    success = True
+    invitees_count = 0
+    invitees_who_joined = 0
+    invitees_who_viewed = 0
+    invites_sent_count = 0
+    error_results = {
+        'challenge_we_vote_id': challenge_we_vote_id,
+        'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+        'status': status,
+        'success': False,
+        'update_values': {},
+    }
+    try:
+        queryset = ChallengeInvitee.objects.using('readonly').all()
+        queryset = queryset.filter(challenge_we_vote_id=challenge_we_vote_id)
+        queryset = queryset.filter(inviter_voter_we_vote_id=inviter_voter_we_vote_id)
+        invitee_list = list(queryset)
+    except Exception as e:
+        status += "FAILED_RETRIEVING_INVITEE_STATS: " + str(e) + ' '
+        success = False
+        error_results['status'] += status
+        error_results['success'] += success
+        return error_results
+
+    for one_invitee in invitee_list:
+        invitees_count += 1
+        if one_invitee.challenge_joined:
+            invitees_who_joined += 1
+        if one_invitee.invite_viewed:
+            invitees_who_viewed += 1
+        if one_invitee.invite_sent:
+            invites_sent_count += 1
+    update_values = {
+        'invitees_count':       invitees_count,
+        'invitees_who_joined':  invitees_who_joined,
+        'invitees_who_viewed':  invitees_who_viewed,
+        'invites_sent_count':   invites_sent_count,
+    }
+
+    results = {
+        'challenge_we_vote_id':     challenge_we_vote_id,
+        'inviter_voter_we_vote_id': inviter_voter_we_vote_id,
+        'update_values':            update_values,
+        'status':                   status,
+        'success':                  success,
+    }
+    return results
 
 
 def move_invitee_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
@@ -301,31 +428,13 @@ def refresh_challenge_invitees_count_for_challenge_we_vote_id_list(challenge_we_
     challenge_bulk_update_list = []
     challenge_updates_made = 0
     if len(challenge_we_vote_id_list) > 0:
-        follow_organization_manager = FollowOrganizationManager()
         queryset = Challenge.objects.all()  # Cannot be readonly because of bulk_update below
         queryset = queryset.filter(we_vote_id__in=challenge_we_vote_id_list)
         challenge_list = list(queryset)
         for one_challenge in challenge_list:
             changes_found = False
-            opposers_count = 0
-            if positive_value_exists(one_challenge.politician_we_vote_id):
-                if positive_value_exists(one_challenge.organization_we_vote_id):
-                    opposers_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOW_DISLIKE,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-
-                    invitees_count = follow_organization_manager.fetch_follow_organization_count(
-                        following_status=FOLLOWING,
-                        organization_we_vote_id_being_followed=one_challenge.organization_we_vote_id)
-                else:
-                    error_message_to_print += "CHALLENGE_MISSING_ORGANIZATION: " + str(one_challenge.we_vote_id) + " "
-                    continue
-            else:
-                invitees_count = challenge_manager.fetch_challenge_invitee_count(
-                    challenge_we_vote_id=one_challenge.we_vote_id)
-            if opposers_count != one_challenge.opposers_count:
-                one_challenge.opposers_count = opposers_count
-                changes_found = True
+            invitees_count = challenge_manager.fetch_challenge_invitee_count(
+                challenge_we_vote_id=one_challenge.we_vote_id)
             if invitees_count != one_challenge.invitees_count:
                 one_challenge.invitees_count = invitees_count
                 changes_found = True
@@ -335,7 +444,7 @@ def refresh_challenge_invitees_count_for_challenge_we_vote_id_list(challenge_we_
                 challenge_updates_made += 1
     if challenges_need_to_be_updated:
         try:
-            Challenge.objects.bulk_update(challenge_bulk_update_list, ['opposers_count', 'invitees_count'])
+            Challenge.objects.bulk_update(challenge_bulk_update_list, ['invitees_count'])
             update_message += \
                 "{challenge_updates_made:,} Challenge entries updated with fresh invitees_count, " \
                 "".format(challenge_updates_made=challenge_updates_made)
@@ -366,12 +475,15 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         'invitee_id': '',
         'invitee_name': '',
         'invitee_url_code': '',
+        'invitee_voter_name': '',
+        'invitee_voter_we_vote_id': '',
         'inviter_name': '',
         'inviter_voter_we_vote_id': '',
         'invite_sent': False,
         'invite_text_from_inviter': '',
         'invite_viewed': False,
         'invite_viewed_count': 0,
+        'parent_invitee_id': 0,
         'we_vote_hosted_profile_image_url_medium': '',
         'we_vote_hosted_profile_image_url_tiny': '',
     }
@@ -412,18 +524,21 @@ def generate_challenge_invitee_dict_from_challenge_invitee_object(challenge_invi
         status += "DATE_CONVERSION_ERROR-INVITEE: " + str(e) + " "
     challenge_invitee_dict['challenge_joined'] = challenge_invitee.challenge_joined
     challenge_invitee_dict['challenge_we_vote_id'] = challenge_invitee.challenge_we_vote_id
-    challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
     challenge_invitee_dict['date_invite_sent'] = date_invite_sent_string
     challenge_invitee_dict['date_invite_viewed'] = date_invite_viewed_string
     challenge_invitee_dict['date_challenge_joined'] = date_challenge_joined_string
+    challenge_invitee_dict['invite_sent'] = challenge_invitee.invite_sent
+    challenge_invitee_dict['invite_text_from_inviter'] = challenge_invitee.invite_text_from_inviter
+    challenge_invitee_dict['invite_viewed'] = challenge_invitee.invite_viewed
+    challenge_invitee_dict['invite_viewed_count'] = challenge_invitee.invite_viewed_count
     challenge_invitee_dict['invitee_id'] = challenge_invitee.id
     challenge_invitee_dict['invitee_name'] = challenge_invitee.invitee_name
     challenge_invitee_dict['invitee_url_code'] = challenge_invitee.invitee_url_code
+    challenge_invitee_dict['invitee_voter_name'] = challenge_invitee.invitee_voter_name
+    challenge_invitee_dict['invitee_voter_we_vote_id'] = challenge_invitee.invitee_voter_we_vote_id
     challenge_invitee_dict['inviter_name'] = challenge_invitee.inviter_name
     challenge_invitee_dict['inviter_voter_we_vote_id'] = challenge_invitee.inviter_voter_we_vote_id
-    challenge_invitee_dict['invite_sent'] = challenge_invitee.invite_sent
-    challenge_invitee_dict['invite_viewed'] = challenge_invitee.invite_viewed
-    challenge_invitee_dict['invite_viewed_count'] = challenge_invitee.invite_viewed_count
+    challenge_invitee_dict['parent_invitee_id'] = challenge_invitee.parent_invitee_id
     challenge_invitee_dict['we_vote_hosted_profile_image_url_medium'] = we_vote_hosted_profile_image_url_medium
     challenge_invitee_dict['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
 
