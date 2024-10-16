@@ -663,7 +663,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
                     is_bot=is_bot,
                     is_mobile=user_agent_object.is_mobile,
                     is_desktop=user_agent_object.is_pc,
-                    is_tablet=user_agent_object.is_tablet)
+                    is_tablet=user_agent_object.is_tablet,
+                )
                 status += analytics_results['status']
     else:
         # Shared item not clicked

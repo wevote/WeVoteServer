@@ -514,30 +514,45 @@ def voter_campaignx_follow_for_api(voter_device_id, issue_we_vote_id, follow_val
         if follow_value:
             result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
                                                                           issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_FOLLOW,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
                                                                            issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_STOP_FOLLOWING,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
                                                                               issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_FOLLOW_IGNORE,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
 
     if not result:
         new_result = {
@@ -589,30 +604,45 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
         if follow_value:
             result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
                                                                           issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_FOLLOW,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
                                                                            issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_STOP_FOLLOWING,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
                                                                               issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE,
-                                                              voter_we_vote_id, voter_id, is_signed_in,
-                                                              user_agent_string=user_agent_string, is_bot=is_bot,
-                                                              is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_pc,
-                                                              is_tablet=user_agent_object.is_tablet)
+            analytics_results = analytics_manager.save_action(
+                action_constant=ACTION_ISSUE_FOLLOW_IGNORE,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                is_signed_in=is_signed_in,
+                user_agent_string=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile,
+                is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet,
+            )
 
     if not result:
         new_result = {
