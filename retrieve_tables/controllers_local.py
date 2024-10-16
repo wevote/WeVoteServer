@@ -45,14 +45,16 @@ def update_fast_load_db(host, voter_api_device_id, table_name, additional_record
     :return:
     """
     try:
-       response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
-                     verify=True,
-                     params={'table_name': table_name,
-                             'additional_records': additional_records,
-                             'is_running': True,
-                             'voter_api_device_id': voter_api_device_id,
-                             })
-        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+        response = requests.get(host + '/apis/v1/fastLoadStatusUpdate/',
+                                verify=True,
+                                params={'table_name': table_name,
+                                        'additional_records': additional_records,
+                                        'is_running': True,
+                                        'voter_api_device_id': voter_api_device_id,
+                                        })
+
+        # print(response.request.url)
+        print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
 
@@ -474,4 +476,3 @@ def copy_df_to_postgres(df: pd.DataFrame, conn, table_name):
         finally:
             # Clean up by removing the temporary CSV file
             os.remove(temp_csv_path)
-

@@ -298,7 +298,8 @@
 
     function getEstimatedCompletionTime (t0, current_record, total_records) {
         if (current_record === 0) {
-            return 'Save off estimated duration is 40 seconds';
+            return ["", ""]
+            {#return 'Save off estimated duration is 40 seconds';#}
         }
         const t1 = new Date().getTime();
         const dt = t1 - t0;
@@ -401,7 +402,9 @@
                       let total = data.total_records.toLocaleString() || 0;
                       let table_name = data.table_name || "";
                       current_table.text(`Current table: ${table_name}`);
-                      current_status.text(`Processing: ${current} of ${total} records\n`);
+                      if (table_name.length > 0) {
+                          current_status.text(`Processing: ${current} of ${total} records\n`);
+                      }
                       let [stat, elapsed] = getEstimatedCompletionTime(t0, data.current_record, data.total_records);
                       completion.text(`Estimated time remaining: ${stat}`);
                       total_time.text(`Elapsed time: ${elapsed}`);
