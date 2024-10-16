@@ -308,7 +308,8 @@ def fast_load_status_update(request):
     """
     Save updated fast load status
     """
-    voter_api_device_id = get_voter_api_device_id(request)
+    # use the voter_api_device_id from the url (Python), not the one from a cookie (JavaScript)
+    voter_api_device_id = request.GET.get('voter_api_device_id', '')
     table_name = request.GET.get('table_name', '')
     additional_records = convert_to_int(request.GET.get('additional_records', 0))
     chunk = convert_to_int(request.GET.get('chunk', None))
@@ -317,6 +318,7 @@ def fast_load_status_update(request):
     print('fast_load_status_update ENTRY table_name', table_name, chunk, 'no row yet', additional_records)
 
     success = True
+    response_string = "error"
 
     try:
         row = RetrieveTableState.objects.get(voter_api_device_id=voter_api_device_id)
@@ -332,8 +334,11 @@ def fast_load_status_update(request):
         row.save()
         status = 'ROW_SAVED'
         row_id = row.id
-        print('fast_load_status_update AFTER SAVE table_name',
-              table_name, chunk, row.current_record, additional_records)
+        response_string = (f"fast_load_status_update AFTER SAVE row_id {row_id}, started_date {row.started_date}, "
+                           f"table_name {row.table_name}, chunk {row.chunk}, current_record {row.current_record}, "
+                           f"total_records {row.total_records}, voter_api_device_id {row.voter_api_device_id}, "
+                           f"additional_records {additional_records}")
+        print(response_string)
 
     except Exception as e:
         logger.error("fast_load_status_update caught exception: " + str(e))
@@ -344,6 +349,7 @@ def fast_load_status_update(request):
     results = {
         'status': status,
         'success': success,
+        'response_string': response_string,
         'row_id': row_id,
     }
 
