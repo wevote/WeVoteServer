@@ -660,7 +660,7 @@ def voter_address_save_view(request):  # voterAddressSave
                     status += save_results['status']
                     google_civic_election_id = save_results['google_civic_election_id']
             else:
-                status += "NOT_REACHING_OUT_TO_VOTE_USA "
+                status += "NOT_REACHING_OUT_TO_CTCL_TEXT_NOT_LONG_ENOUGH "
         elif default_election_data_source_is_vote_usa:
             status += "VOTER_ADDRESS_SAVE-USING_VOTE_USA "
             length_at_which_we_suspect_address_has_street = 25
@@ -725,7 +725,7 @@ def voter_address_save_view(request):  # voterAddressSave
                     status += save_results['status']
                     google_civic_election_id = save_results['google_civic_election_id']
             else:
-                status += "NOT_REACHING_OUT_TO_VOTE_USA "
+                status += "NOT_REACHING_OUT_TO_VOTE_USA_TEXT_NOT_LONG_ENOUGH "
         elif default_election_data_source_is_google_civic:
             # Reach out to Google and populate ballot items in the database with fresh ballot data
             google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(  # DEBUG=1

@@ -2813,6 +2813,8 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
                 election_day_text = election.election_day_text
                 election_description_text = election.election_name
                 status += "NEXT_ELECTION_FOUND_FOR_STATE: " + str(google_civic_election_id) + " "
+            elif not election_results['success']:
+                status += "RETRIEVE_ELECTION_FOR_STATE_FAILED: [[" + str(election_results['status']) + "]] "
             else:
                 status += "NEXT_ELECTION_NOT_FOUND "
 
