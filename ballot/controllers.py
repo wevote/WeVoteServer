@@ -1348,6 +1348,7 @@ def choose_election_and_prepare_ballot_data(
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
     elif positive_value_exists(ballot_location_shortcut):
         results = choose_voter_ballot_saved_from_existing_ballot_location_shortcut(
@@ -1355,12 +1356,14 @@ def choose_election_and_prepare_ballot_data(
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
     else:
         results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
 
     # If here, then we need to either:
@@ -1378,6 +1381,7 @@ def choose_election_and_prepare_ballot_data(
     status += results['status']
     if results['voter_ballot_saved_found']:
         # Return voter_ballot_saved
+        results['status'] = status
         return results
 
     from ballot.controllers_ballot_from_offices_held import generate_ballot_data_from_offices_held
@@ -1387,6 +1391,7 @@ def choose_election_and_prepare_ballot_data(
         voter_address=voter_address)
     status += results['status']
     if results['use_office_held_ballot'] and positive_value_exists(results['offices_held_for_location_id']):
+        results['status'] = status
         results['status'] += 'USING_OFFICES_HELD_BALLOT '
         return results
 
@@ -1421,7 +1426,6 @@ def generate_ballot_data(
     voter_address_exists = \
         voter_address and hasattr(voter_address, 'voter_id') and positive_value_exists(voter_address.voter_id)
     voter_ballot_saved_manager = VoterBallotSavedManager()
-    status = ""
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
         positive_value_exists(ballot_location_shortcut)
 

@@ -237,7 +237,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'normalized_state': '',
             'normalized_zip': '',
             'success': voter_address_retrieve_results['success'],
-            'status': voter_address_retrieve_results['status'],
+            'status': status,
             'address_found': voter_address_retrieve_results['address_found'],
             'guess_if_no_address_saved': guess_if_no_address_saved,
         }
@@ -365,7 +365,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'normalized_state': '',
                     'normalized_zip': '',
                     'success': voter_address_retrieve_results['success'],
-                    'status': voter_address_retrieve_results['status'],
+                    'status': status,
                     'address_found': voter_address_retrieve_results['address_found'],
                     'guess_if_no_address_saved': guess_if_no_address_saved,
                 }
