@@ -2924,10 +2924,14 @@ class BallotReturnedManager(models.Manager):
                     google_civic_election_id=google_civic_election_id)
                 try:
                     ballot_returned = ballot_returned_query.first()
-                    status += "SUBSTITUTED_BALLOT_DISTANCE4: " + str(ballot_returned.distance) + " "
+                    if ballot_returned is None or not hasattr(ballot_returned, 'distance'):
+                        status += "BALLOT_RETURNED_NOT_FOUND "
+                    else:
+                        status += "SUBSTITUTED_BALLOT_DISTANCE4: " + str(ballot_returned.distance) + " "
                 except Exception as e:
                     ballot_returned = None
-                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_BALLOT_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
+                    status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_BALLOT_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " \
+                              + str(e) + ' '
                 # ballot_returned_list = list(ballot_returned_query)
                 # if len(ballot_returned_list):
                 #     ballot_returned = ballot_returned_list[0]

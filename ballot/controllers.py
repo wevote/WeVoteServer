@@ -1348,6 +1348,7 @@ def choose_election_and_prepare_ballot_data(
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
     elif positive_value_exists(ballot_location_shortcut):
         results = choose_voter_ballot_saved_from_existing_ballot_location_shortcut(
@@ -1355,12 +1356,14 @@ def choose_election_and_prepare_ballot_data(
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
     else:
         results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
         status += results['status']
         if results['voter_ballot_saved_found']:
             # Return voter_ballot_saved
+            results['status'] = status
             return results
 
     # If here, then we need to either:
@@ -1378,6 +1381,7 @@ def choose_election_and_prepare_ballot_data(
     status += results['status']
     if results['voter_ballot_saved_found']:
         # Return voter_ballot_saved
+        results['status'] = status
         return results
 
     from ballot.controllers_ballot_from_offices_held import generate_ballot_data_from_offices_held
@@ -1387,6 +1391,7 @@ def choose_election_and_prepare_ballot_data(
         voter_address=voter_address)
     status += results['status']
     if results['use_office_held_ballot'] and positive_value_exists(results['offices_held_for_location_id']):
+        results['status'] = status
         results['status'] += 'USING_OFFICES_HELD_BALLOT '
         return results
 
@@ -1421,7 +1426,6 @@ def generate_ballot_data(
     voter_address_exists = \
         voter_address and hasattr(voter_address, 'voter_id') and positive_value_exists(voter_address.voter_id)
     voter_ballot_saved_manager = VoterBallotSavedManager()
-    status = ""
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
         positive_value_exists(ballot_location_shortcut)
 
@@ -1458,19 +1462,19 @@ def generate_ballot_data(
                     election_day_text = election.election_day_text
                     election_description_text = election.election_name
             save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                voter_id,
-                ballot_returned_results['google_civic_election_id'],
-                ballot_returned_results['state_code'],
-                election_day_text,
-                election_description_text,
-                text_for_map_search,
-                ballot_returned_results['substituted_address_nearby'],
-                is_from_substituted_address,
-                is_from_test_address,
-                ballot_returned_results['polling_location_we_vote_id_source'],
-                ballot_returned_results['ballot_location_display_name'],
-                ballot_returned_results['ballot_returned_we_vote_id'],
-                ballot_returned_results['ballot_location_shortcut'],
+                voter_id=voter_id,
+                google_civic_election_id=ballot_returned_results['google_civic_election_id'],
+                state_code=ballot_returned_results['state_code'],
+                election_day_text=election_day_text,
+                election_description_text=election_description_text,
+                original_text_for_map_search=text_for_map_search,
+                substituted_address_nearby=ballot_returned_results['substituted_address_nearby'],
+                is_from_substituted_address=is_from_substituted_address,
+                is_from_test_ballot=is_from_test_address,
+                polling_location_we_vote_id_source=ballot_returned_results['polling_location_we_vote_id_source'],
+                ballot_location_display_name=ballot_returned_results['ballot_location_display_name'],
+                ballot_returned_we_vote_id=ballot_returned_results['ballot_returned_we_vote_id'],
+                ballot_location_shortcut=ballot_returned_results['ballot_location_shortcut'],
                 substituted_address_city=ballot_returned_results['substituted_address_city'],
                 substituted_address_state=ballot_returned_results['substituted_address_state'],
                 substituted_address_zip=ballot_returned_results['substituted_address_zip'],

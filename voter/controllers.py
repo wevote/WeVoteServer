@@ -4204,7 +4204,7 @@ def voter_retrieve_for_api(  # voterRetrieve
                     voter.save()
                     status += "ORGANIZATION_CREATED "
                 except Exception as e:
-                    status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER2 "
+                    status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER2: " + str(e) + " "
 
         if repair_twitter_link_to_voter_caching_now:
             # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done
