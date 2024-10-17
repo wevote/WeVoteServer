@@ -2818,7 +2818,7 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             else:
                 status += "NEXT_ELECTION_NOT_FOUND "
 
-    # Load up ballot_returned so we can use below functions
+    # Load up ballot_returned, so we can use below functions
     ballot_returned_manager = BallotReturnedManager()
     if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
         results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(

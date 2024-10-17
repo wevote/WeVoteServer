@@ -727,7 +727,8 @@ class ElectionManager(models.Manager):
             if positive_value_exists(require_include_in_list_for_voters):
                 election_list_query = election_list_query.filter(include_in_list_for_voters=True)
             if positive_value_exists(without_state_code):
-                election_list_query = election_list_query.filter(Q(state_code__isnull=True) | Q(state_code__exact=''))
+                election_list_query = election_list_query.filter(
+                    Q(state_code__isnull=True) | Q(state_code__exact='') | Q(state_code__iexact='na'))
             elif positive_value_exists(state_code):
                 election_list_query = election_list_query.filter(state_code__iexact=state_code)
             if not positive_value_exists(include_test_election):
@@ -906,17 +907,18 @@ class ElectionManager(models.Manager):
             "", without_state_code=without_state_code,
             require_include_in_list_for_voters=require_include_in_list_for_voters)
         national_election_list = upcoming_national_elections_results['election_list']
-        filtered_national_election_list = []
-        for national_election in national_election_list:
-            # Does this national election have any ballot items for state_code?
-            results = ballot_item_list_manager.count_ballot_items(
-                national_election.google_civic_election_id, state_code)
-            ballot_item_count = results['ballot_item_list_count']
-            if positive_value_exists(ballot_item_count):
-                filtered_national_election_list.append(national_election)
+        # 2024-10-17 We no longer want to require data to find next election for state
+        # filtered_national_election_list = []
+        # for national_election in national_election_list:
+        #     # Does this national election have any ballot items for state_code?
+        #     results = ballot_item_list_manager.count_ballot_items(
+        #         national_election.google_civic_election_id, state_code)
+        #     ballot_item_count = results['ballot_item_list_count']
+        #     if positive_value_exists(ballot_item_count):
+        #         filtered_national_election_list.append(national_election)
 
-        combined_election_list = state_election_list + filtered_national_election_list
-        # Find earliest election (next election)
+        combined_election_list = state_election_list + national_election_list  # filtered_national_election_list
+        # Find the earliest election (next election)
         election = None
         election_found = False
         earliest_election_day_text = None
