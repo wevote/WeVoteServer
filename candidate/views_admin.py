@@ -73,8 +73,8 @@ from .controllers import add_twitter_handle_to_next_candidate_spot, analyze_cand
     fetch_ballotpedia_urls_to_retrieve_for_photos_count, \
     retrieve_candidate_photos, retrieve_next_or_most_recent_office_for_candidate, \
     save_google_search_link_to_candidate_table, save_image_to_candidate_table
-from .models import CandidateCampaign, CandidateListManager, CandidateChangeLog, CandidateManager, \
-    CandidatesArePossibleDuplicates, CandidateToOfficeLink, \
+from .models import CandidateCampaign, CandidateListManager, CandidateChangeLog, CandidateCTCLAlternateMap, \
+    CandidateManager, CandidatesArePossibleDuplicates, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS, KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \
     PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
@@ -2374,6 +2374,20 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         # Was a candidate_merge_possibility_found?
         candidate_on_stage.candidate_merge_possibility_found = True  # TODO DALE Make dynamic
 
+        # CTCL ids linked to this candidate
+        ctcl_uuid_list = []
+        if positive_value_exists(candidate_on_stage.ctcl_uuid):
+            ctcl_uuid_list.append(candidate_on_stage.ctcl_uuid)
+            try:
+                queryset = CandidateCTCLAlternateMap.objects.using('readonly')\
+                    .filter(ctcl_uuid_primary=candidate_on_stage.ctcl_uuid)
+                alternate_list = queryset.values_list('ctcl_uuid_alternate', flat=True)
+                for alternate_uuid in alternate_list:
+                    if alternate_uuid not in ctcl_uuid_list:
+                        ctcl_uuid_list.append(alternate_uuid)
+            except Exception as e:
+                pass
+
         twitter_link_possibility_list = []
         try:
             t8 = time()
@@ -2502,13 +2516,14 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_contact_form_url':       candidate_contact_form_url,
             'change_log_list':                  change_log_list,
             # 'contest_office_we_vote_id':        contest_office_we_vote_id,
-			'contest_office_name_dict':
+            'contest_office_name_dict':
             {
                 'label':    'Contest Office Name (Cached)',
                 'id':       'contest_office_name_id',
                 'name':     'contest_office_name',
                 'value':     contest_office_name if contest_office_name else candidate_on_stage.contest_office_name
             },
+            'ctcl_uuid_list': ctcl_uuid_list,
             'district_name_dict':              
             {
                 'label':    'District Name (Cached)',

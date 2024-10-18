@@ -745,16 +745,21 @@ def groom_and_store_google_civic_candidates_json_2021(
                 candidate = results['candidate']
                 candidate_we_vote_id = candidate.we_vote_id
                 if use_ctcl:
-                    if positive_value_exists(candidate_ctcl_uuid) and not positive_value_exists(candidate.ctcl_uuid):
-                        candidate.ctcl_uuid = candidate_ctcl_uuid
-                        try:
-                            candidate.save()
-                            if candidate_ctcl_uuid not in existing_candidate_objects_dict:
-                                existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
-                        except Exception as e:
-                            status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
-                    elif candidate_ctcl_uuid not in existing_candidate_objects_dict:
-                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
+                    if positive_value_exists(candidate_ctcl_uuid):
+                        if positive_value_exists(candidate.ctcl_uuid):
+                            # If here, we know the incoming ctcl_uuid doesn't match the other candidate found in our db
+                            #  So we want to create a new candidate record. If truly a duplicate, we will merge later.
+                            create_candidate = True
+                        else:
+                            candidate.ctcl_uuid = candidate_ctcl_uuid
+                            try:
+                                candidate.save()
+                                if candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                                    existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
+                            except Exception as e:
+                                status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
+                        if candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                            existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
                 elif use_vote_usa:
                     if positive_value_exists(vote_usa_politician_id) \
                             and not positive_value_exists(candidate.vote_usa_politician_id):
@@ -799,7 +804,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                     # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                     #  updating candidate_name via subsequent Google Civic imports
                     updated_candidate_values['candidate_name'] = candidate_name
-                    # We store the literal spelling here so we can match in the future, even if we change candidate_name
+                    # We store the literal spelling here, so we can match in future, even if we change candidate_name
                     updated_candidate_values['google_civic_candidate_name'] = candidate_name
                 if positive_value_exists(election_year_integer):
                     updated_candidate_values['candidate_year'] = election_year_integer
@@ -815,8 +820,10 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['candidate_twitter_handle'] = candidate_twitter_handle
                 if positive_value_exists(candidate_url):
                     updated_candidate_values['candidate_url'] = candidate_url
-                # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
+                # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest,
                 #  so we may need to update the candidate to a new contest_office_id
+                if positive_value_exists(candidate_ctcl_uuid):
+                    updated_candidate_values['ctcl_uuid'] = candidate_ctcl_uuid
                 if positive_value_exists(contest_office_id):
                     updated_candidate_values['contest_office_id'] = contest_office_id
                 if positive_value_exists(contest_office_we_vote_id):

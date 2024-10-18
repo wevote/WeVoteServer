@@ -5,6 +5,7 @@
 import xml.etree.ElementTree as ElementTree
 from .models import CandidateSelection, CTCLApiCounterManager
 from ballot.models import BallotReturnedManager
+from candidate.models import CandidateCTCLAlternateMap
 from config.base import get_environment_variable
 from datetime import datetime
 from electoral_district.controllers import electoral_district_import_from_xml_data
@@ -250,6 +251,102 @@ def create_candidate_selection_rows(xml_root, batch_set_id=0):
         'candidate_selection':          candidate_selection,
         'number_of_batch_rows':         number_of_batch_rows
     }
+    return results
+
+
+def merge_candidate_ctcl_uuids(candidate1_ctcl_uuid='', candidate2_ctcl_uuid='', new_master_ctcl_uuid=''):
+    ctcl_uuid_map_bulk_update_list = []
+    ctcl_uuid_map_bulk_id_delete_list = []
+    ctcl_uuid_stored_for_candidate1 = []
+    status = ''
+    success = True
+    if positive_value_exists(candidate1_ctcl_uuid):
+        queryset = CandidateCTCLAlternateMap.objects.filter(ctcl_uuid_primary=candidate1_ctcl_uuid)
+        candidate1_ctcl_alternate_map_list = list(queryset)
+        if candidate1_ctcl_uuid == new_master_ctcl_uuid:
+            # If here we don't need to migrate these CTCL UUIDs
+            for one_ctcl_uuid_map in candidate1_ctcl_alternate_map_list:
+                if one_ctcl_uuid_map.ctcl_uuid_alternate not in ctcl_uuid_stored_for_candidate1:
+                    ctcl_uuid_stored_for_candidate1.append(one_ctcl_uuid_map.ctcl_uuid_alternate)
+        else:
+            # If here we need to migrate to the new_master_ctcl_uuid
+            for one_ctcl_uuid_map in candidate1_ctcl_alternate_map_list:
+                if one_ctcl_uuid_map.ctcl_uuid_alternate in ctcl_uuid_stored_for_candidate1:
+                    # We want to delete
+                    ctcl_uuid_map_bulk_id_delete_list.append(one_ctcl_uuid_map.id)
+                else:
+                    one_ctcl_uuid_map.ctcl_uuid_primary = new_master_ctcl_uuid
+                    ctcl_uuid_map_bulk_update_list.append(one_ctcl_uuid_map)
+                    ctcl_uuid_stored_for_candidate1.append(one_ctcl_uuid_map.ctcl_uuid_alternate)
+
+    if positive_value_exists(candidate2_ctcl_uuid):
+        queryset = CandidateCTCLAlternateMap.objects.filter(ctcl_uuid_primary=candidate2_ctcl_uuid)
+        candidate2_ctcl_alternate_map_list = list(queryset)
+        if candidate2_ctcl_uuid == new_master_ctcl_uuid:
+            # If here we don't need to migrate these CTCL UUIDs since we are moving new_master_ctcl_uuid to candidate1
+            for one_ctcl_uuid_map in candidate2_ctcl_alternate_map_list:
+                if one_ctcl_uuid_map.ctcl_uuid_alternate not in ctcl_uuid_stored_for_candidate1:
+                    ctcl_uuid_stored_for_candidate1.append(one_ctcl_uuid_map.ctcl_uuid_alternate)
+        else:
+            # If here we need to migrate to the new_master_ctcl_uuid
+            for one_ctcl_uuid_map in candidate2_ctcl_alternate_map_list:
+                if one_ctcl_uuid_map.ctcl_uuid_alternate in ctcl_uuid_stored_for_candidate1:
+                    # We want to delete
+                    ctcl_uuid_map_bulk_id_delete_list.append(one_ctcl_uuid_map.id)
+                else:
+                    one_ctcl_uuid_map.ctcl_uuid_primary = new_master_ctcl_uuid
+                    ctcl_uuid_map_bulk_update_list.append(one_ctcl_uuid_map)
+                    ctcl_uuid_stored_for_candidate1.append(one_ctcl_uuid_map.ctcl_uuid_alternate)
+
+    # Finally, make sure this gets stored in CandidateCTCLAlternateMap if needed
+    if positive_value_exists(candidate1_ctcl_uuid) and candidate1_ctcl_uuid != new_master_ctcl_uuid:
+        if candidate1_ctcl_uuid not in ctcl_uuid_stored_for_candidate1:
+            try:
+                CandidateCTCLAlternateMap.objects.create(
+                    ctcl_uuid_primary=new_master_ctcl_uuid,
+                    ctcl_uuid_alternate=candidate1_ctcl_uuid,
+                )
+                status += "CANDIDATE1_CTCL_UUID_CREATE_SUCCESS "
+            except Exception as e:
+                status += "FAILED_CANDIDATE1_CTCL_UUID_CREATE: " + str(e) + ' '
+                success = False
+    if positive_value_exists(candidate2_ctcl_uuid) and candidate2_ctcl_uuid != new_master_ctcl_uuid:
+        if candidate2_ctcl_uuid not in ctcl_uuid_stored_for_candidate1:
+            try:
+                CandidateCTCLAlternateMap.objects.create(
+                    ctcl_uuid_primary=new_master_ctcl_uuid,
+                    ctcl_uuid_alternate=candidate2_ctcl_uuid,
+                )
+                status += "CANDIDATE2_CTCL_UUID_CREATE_SUCCESS "
+            except Exception as e:
+                status += "FAILED_CANDIDATE2_CTCL_UUID_CREATE: " + str(e) + ' '
+                success = False
+
+    ctcl_map_success = True
+    if len(ctcl_uuid_map_bulk_update_list) > 0:
+        try:
+            ctcl_maps_migrated = CandidateCTCLAlternateMap.objects.bulk_update(
+                ctcl_uuid_map_bulk_update_list,
+                ['ctcl_uuid_primary'])
+            status += "CTCL_UUIDs_MIGRATED: " + str(ctcl_maps_migrated) + ' '
+        except Exception as e:
+            ctcl_map_success = False
+            status += "FAILED_BULK_UPDATE: " + str(e) + ' '
+            success = False
+
+    if ctcl_map_success and len(ctcl_uuid_map_bulk_id_delete_list) > 0:
+        try:
+            ctcl_maps_deleted = \
+                CandidateCTCLAlternateMap.objects.filter(id__in=ctcl_uuid_map_bulk_id_delete_list).delete()
+            status += "CTCL_UUIDs_DELETED: " + str(ctcl_maps_deleted) + ' '
+        except Exception as e:
+            status += "FAILED_BULK_DELETE: " + str(e) + ' '
+            success = False
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+
     return results
 
 
