@@ -108,6 +108,13 @@ th, td {
                         &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
                             target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
                     {% endif %}
+
+                    {% if ctcl_uuid_list %}
+                        &nbsp;&nbsp;
+                        CTCL ID(s):
+                        {% include "candidate/value_list_horizontal_display.html" with value_list=ctcl_uuid_list %}
+                    {% endif %}
+
                     {% if path_list %}
                         <div>
                         <div style="color: darkgray">

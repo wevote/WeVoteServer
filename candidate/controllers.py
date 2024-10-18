@@ -686,6 +686,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     if candidate1_results['candidate_found']:
         candidate1_on_stage = candidate1_results['candidate']
         candidate1_id = candidate1_on_stage.id
+        candidate1_ctcl_uuid = candidate1_on_stage.ctcl_uuid
     else:
         results = {
             'success': False,
@@ -700,6 +701,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     if candidate2_results['candidate_found']:
         candidate2_on_stage = candidate2_results['candidate']
         candidate2_id = candidate2_on_stage.id
+        candidate2_ctcl_uuid = candidate2_on_stage.ctcl_uuid
     else:
         results = {
             'success': False,
@@ -708,6 +710,29 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
             'candidate': None,
         }
         return results
+
+    # Merge CTCL UUIDs
+    from import_export_ctcl.controllers import merge_candidate_ctcl_uuids
+    try:
+        if 'ctcl_uuid' in admin_merge_choices:
+            new_master_ctcl_uuid = admin_merge_choices['ctcl_uuid']
+        elif positive_value_exists(candidate1_ctcl_uuid):
+            new_master_ctcl_uuid = candidate1_ctcl_uuid
+        elif positive_value_exists(candidate2_ctcl_uuid):
+            new_master_ctcl_uuid = candidate2_ctcl_uuid
+        else:
+            new_master_ctcl_uuid = None
+        if positive_value_exists(new_master_ctcl_uuid):
+            candidate1_on_stage.ctcl_uuid = new_master_ctcl_uuid
+            ctcl_results = merge_candidate_ctcl_uuids(
+                candidate1_ctcl_uuid=candidate1_ctcl_uuid,
+                candidate2_ctcl_uuid=candidate2_ctcl_uuid,
+                new_master_ctcl_uuid=new_master_ctcl_uuid)
+            status += ctcl_results['status']
+        else:
+            status += "COULD_NOT_MERGE_CTCL_UUIDS: No valid CTCL UUID found. "
+    except Exception as e:
+        status += "COULD_NOT_UPDATE_CTCL_UUIDS: " + str(e) + " "
 
     # TODO: Migrate images?
 

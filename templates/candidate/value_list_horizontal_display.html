@@ -1,0 +1,10 @@
+{# templates/candidate/value_list_horizontal_display.html #}
+
+{% for value in value_list %}
+    {% if value %}
+        <span style="color: darkgray">
+        {{ value }}
+        &nbsp;&nbsp;
+        </span>
+    {% endif %}
+{% endfor %}
