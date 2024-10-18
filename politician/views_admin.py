@@ -1594,8 +1594,8 @@ def politician_duplicates_list_view(request):
         queryset = queryset.exclude(
             Q(politician2_we_vote_id__isnull=True) | Q(politician2_we_vote_id=''))
         possible_duplicates_count = queryset.count()
-        if not positive_value_exists(show_all):
-            duplicates_list = list(queryset[:200])
+        if positive_value_exists(show_all):
+            duplicates_list = list(queryset)
         else:
             duplicates_list = list(queryset[:1000])
     except ObjectDoesNotExist:
