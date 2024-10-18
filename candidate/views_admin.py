@@ -5011,8 +5011,8 @@ def candidate_duplicates_list_view(request):
         queryset = queryset.exclude(
             Q(candidate2_we_vote_id__isnull=True) | Q(candidate2_we_vote_id=''))
         possible_duplicates_count = queryset.count()
-        if not positive_value_exists(show_all):
-            duplicates_list = list(queryset[:200])
+        if positive_value_exists(show_all):
+            duplicates_list = list(queryset)
         else:
             duplicates_list = list(queryset[:1000])
     except ObjectDoesNotExist:
@@ -5060,9 +5060,9 @@ def candidate_duplicates_list_view(request):
         'messages_on_stage':            messages_on_stage,
         'google_civic_election_id':     google_civic_election_id,
         'duplicates_list':              duplicates_list_modified,
-        'candidate_search':            candidate_search,
+        'candidate_search':             candidate_search,
         'show_all':                     show_all,
-        'show_candidates_with_email':  show_candidates_with_email,
+        'show_candidates_with_email':   show_candidates_with_email,
         'show_related_candidates':      show_related_candidates,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
