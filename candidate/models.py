@@ -3130,10 +3130,10 @@ class CandidateManager(models.Manager):
                         .filter(ctcl_uuid_alternate=candidate_ctcl_uuid)
                     primary_list = list(queryset)
                     if len(primary_list) > 0:
-                        # Jump over to the primary ctcl_uuid
+                        # Replaced incoming variable with actual primary ctcl_uuid
                         candidate_ctcl_uuid = primary_list[0].ctcl_uuid_primary
                 except Exception as e:
-                    pass
+                    status += "FAILED_RETRIEVING_CTCL_ALTERNATE_MAP_BY_UUID: " + str(e) + " "
                 if positive_value_exists(read_only):
                     candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
                         ctcl_uuid=candidate_ctcl_uuid)
