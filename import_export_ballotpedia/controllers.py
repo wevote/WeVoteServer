@@ -692,7 +692,7 @@ def get_photo_url_from_ballotpedia(
         if is_placeholder_photo:
             success = False
             # status += results['status']
-            status += "IS_BALLOTPEDIA_SILHOUETTE: " + photo_url
+            status += "IS_BALLOTPEDIA_SILHOUETTE: " + photo_url + " "
             logger.info("Placeholder/Silhouette: " + photo_url)
             error_message_to_print += \
                 'Failed to retrieve Ballotpedia picture:  The Ballotpedia URL is for placeholder/Silhouette image.'
