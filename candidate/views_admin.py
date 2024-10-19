@@ -3180,6 +3180,7 @@ def candidate_edit_process_view(request):
         except Exception as e:
             status += "PROBLEM_RETRIEVING_CANDIDATE_DUPLICATES: " + str(e) + " "
 
+    retrieve_candidate_again_because_of_external_change = False
     try:
         if existing_candidate_found:
             # We have found a duplicate for this election
@@ -3620,18 +3621,29 @@ def candidate_edit_process_view(request):
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
 
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
+
+            # #########################################
+            # After this point, if we make any changes to the Candidate, outside of this flow, we
+            #  should retrieve the latest candidate from the database before saving again so we don't overwrite changes
+            #  made outside of this flow.
             t4 = time()
-            if (ballotpedia_candidate_url_changed
-                or not positive_value_exists(candidate_on_stage.ballotpedia_photo_url)) \
-                and positive_value_exists(ballotpedia_candidate_url) \
-                    and 'ballotpedia.org' in ballotpedia_candidate_url:
+            retrieve_photo_from_ballotpedia = False  # Checkbox from interface to trigger fresh retrieve
+            ballotpedia_candidate_url_exists = positive_value_exists(ballotpedia_candidate_url) \
+                and 'ballotpedia.org' in ballotpedia_candidate_url
+            ballotpedia_photo_already_saved = positive_value_exists(candidate_on_stage.ballotpedia_photo_url)
+            retrieve_photo_from_ballotpedia_now = \
+                ballotpedia_candidate_url_exists and \
+                (retrieve_photo_from_ballotpedia or not ballotpedia_photo_already_saved)
+            if retrieve_photo_from_ballotpedia_now:
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
+                retrieve_candidate_again_because_of_external_change = True
             t5 = time()
             time_difference3 = t5 - t4
             performance_snapshot["get_photo_url_from_ballotpedia"] = "took {:.6f} seconds, ".format(time_difference3)
+
             if (wikipedia_url_changed or not positive_value_exists(candidate_on_stage.wikipedia_photo_url)) \
                     and positive_value_exists(wikipedia_url):
                 # update_candidate_wikipedia_image(candidate_on_stage, request, messages)
@@ -3639,6 +3651,7 @@ def candidate_edit_process_view(request):
                     incoming_object=candidate_on_stage,
                     save_to_database=True,
                 )
+                retrieve_candidate_again_because_of_external_change = True
 
             # # Now add Candidate to Office Link
             # if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) and \
@@ -3658,7 +3671,6 @@ def candidate_edit_process_view(request):
     # if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
     #     results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
 
-    retrieve_candidate_from_database = False
     if positive_value_exists(refresh_from_twitter):
         status += "REFRESH_FROM_TWITTER "
         results = refresh_twitter_candidate_details(candidate_on_stage)
@@ -3666,7 +3678,7 @@ def candidate_edit_process_view(request):
             status += results['status']
         else:
             status += results['status']
-        retrieve_candidate_from_database = True
+        retrieve_candidate_again_because_of_external_change = True
     # elif profile_image_type_currently_active == 'UNKNOWN':
     #     # Prevent Twitter from updating
     #     pass
@@ -3679,15 +3691,15 @@ def candidate_edit_process_view(request):
             status += results['status']
         else:
             status += results['status']
-        retrieve_candidate_from_database = True
+        retrieve_candidate_again_because_of_external_change = True
     else:
         status += "DID_NOT_START_REFRESH_TWITTER "
 
-    if retrieve_candidate_from_database:
+    if retrieve_candidate_again_because_of_external_change:
         # Because we updated the candidate, through the refresh_twitter_candidate_details process,
         #  we want to retrieve the latest from database because we need to save the candidate below.
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
-        messages.add_message(request, messages.INFO, 'Twitter refreshed: ' + status)
+        messages.add_message(request, messages.INFO, 'CandidateCampaign retrieved again: ' + status)
 
     # ##################################################
     # Change log and volunteer scoring

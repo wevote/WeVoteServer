@@ -6,8 +6,7 @@ from wevote_settings.models import RemoteRequestHistoryManager
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
-    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
-    get_candidate_links_from_ballotpedia
+    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import date
@@ -17,7 +16,6 @@ from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from election.models import Election, ElectionManager
-from import_export_ballotpedia.controllers import get_photo_url_from_ballotpedia
 from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 
 from polling_location.models import PollingLocation
@@ -25,7 +23,6 @@ from volunteer_task.models import VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE, Voluntee
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
-from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_BALLOTPEDIA_PHOTOS
 
 logger = wevote_functions.admin.get_logger(__name__)
 

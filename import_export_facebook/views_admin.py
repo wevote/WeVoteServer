@@ -117,7 +117,7 @@ def get_photo_url_from_facebook_graphapi(
         is_placeholder_photo = results.get('is_silhouette')
         if is_placeholder_photo:
             # status += results['status']
-            status += "IS_PLACEHOLDER_PHOTO "
+            status += "IS_PLACEHOLDER_PHOTO: " + photo_url + " "
             logger.info("Placeholder/Silhouette: " + photo_url)
             if add_messages:
                 messages.add_message(
