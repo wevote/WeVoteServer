@@ -646,6 +646,7 @@ def get_photo_url_from_ballotpedia(
             #     incoming_object.ballotpedia_photo_url_is_broken = True
             #     incoming_object.save()
         elif results.get('is_broken'):
+            status += "PAGE_BROKEN_OR_NEEDS_DISAMBIGUATION: " + str(ballotpedia_page_url) + " "
             if is_candidate or is_politician:
                 incoming_object_changes = True
                 incoming_object.ballotpedia_photo_url = None
@@ -690,7 +691,7 @@ def get_photo_url_from_ballotpedia(
         is_broken_photo = results.get('is_broken')
         is_placeholder_photo = results.get('is_silhouette')
         if is_placeholder_photo:
-            success = False
+            # success = False
             # status += results['status']
             status += "IS_BALLOTPEDIA_SILHOUETTE: " + photo_url + " "
             logger.info("Placeholder/Silhouette: " + photo_url)
@@ -730,6 +731,10 @@ def get_photo_url_from_ballotpedia(
                         ballotpedia_photo_saved = True
                     else:
                         status += save_results['status']
+        elif is_broken_photo:
+            status += "BALLOTPEDIA_PHOTO_IS_BROKEN: " + ballotpedia_page_url + " "
+        else:
+            status += "BALLOTPEDIA_PHOTO_NOT_FOUND_NOR_SILHOUETTE: " + ballotpedia_page_url + " "
 
         if ballotpedia_photo_saved:
             status += "SAVED_BALLOTPEDIA_IMAGE: " + ballotpedia_page_url + " "
@@ -742,6 +747,7 @@ def get_photo_url_from_ballotpedia(
                     number_of_results=1,
                     status="CANDIDATE_BALLOTPEDIA_URL_PARSED_HTTP:" + ballotpedia_page_url)
         elif is_broken_photo or is_placeholder_photo:
+            # Status updated above
             pass
         else:
             success = False

@@ -3994,9 +3994,10 @@ def candidate_edit_process_view(request):
                                     '&show_candidates_with_twitter_options=1' +
                                     '&page=' + str(page))
 
-    if performance_dict:
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
-                                    "?performance_dict=" + str(performance_dict))
+    # TODO: Commented out because this is crashing currently because the performance_dict variable was renamed
+    # if performance_dict:
+    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+    #                                 "?performance_dict=" + str(performance_dict))
 
     if remove_duplicate_process:
         return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
