@@ -174,7 +174,7 @@ def augment_officials_list_with_office_data(incoming_officials_list=[]):
     #                         existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string][ctcl_office_uuid] = \
     #                             contest_office
     #                 except Exception as e:
-    #                     status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
+    #                     status += "SAVING_CTCL_UUID_OFFICE_FAILED: " + str(e) + ' '
     #         elif use_vote_usa:
     #             if allowed_to_create_office_helds and not positive_value_exists(contest_office.vote_usa_office_id):
     #                 contest_office.vote_usa_office_id = vote_usa_office_id

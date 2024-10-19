@@ -11,7 +11,7 @@
 from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import CandidateManager, CandidateListManager
+from candidate.models import CandidateCTCLAlternateMap, CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 from django.utils.timezone import localtime, now
 from election.models import ElectionManager
@@ -748,8 +748,33 @@ def groom_and_store_google_civic_candidates_json_2021(
                     if positive_value_exists(candidate_ctcl_uuid):
                         if positive_value_exists(candidate.ctcl_uuid):
                             # If here, we know the incoming ctcl_uuid doesn't match the other candidate found in our db
-                            #  So we want to create a new candidate record. If truly a duplicate, we will merge later.
-                            create_candidate = True
+                            # If certain fields for the incoming candidate perfectly match this existing candidate,
+                            #  add the ctcl_uuid to the existing candidate record
+                            try:
+                                candidate_name_match = candidate.candidate_name == candidate_name
+                            except Exception as e:
+                                candidate_name_match = False
+                            # Dale 2024-10-19 I looked at only considering it to be a match:
+                            #  - If at least one matched: facebook_handle, candidate_twitter_handle, or candidate_url
+                            #  - Deny if there is a mismatch: party
+                            # ...but decided that a name exact match is sufficient.
+                            if candidate_name_match:
+                                # Map new ctcl_uuid to the existing candidate record
+                                try:
+                                    CandidateCTCLAlternateMap.objects.create(
+                                        ctcl_uuid_primary=candidate.ctcl_uuid,
+                                        ctcl_uuid_alternate=candidate_ctcl_uuid,
+                                    )
+                                    status += "CANDIDATE_CTCL_UUID_MAPPING_SUCCESS "
+                                    if candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
+                                except Exception as e:
+                                    status += "FAILED_CTCL_UUID_MAPPING_CREATE: " + str(e) + ' '
+                                    success = False
+                            else:
+                                # If not enough fields match, create a new candidate record.
+                                #  If truly a duplicate, we will merge later.
+                                create_candidate = True
                         else:
                             candidate.ctcl_uuid = candidate_ctcl_uuid
                             try:
@@ -1530,7 +1555,7 @@ def groom_and_store_google_civic_office_json_2021(
                             existing_offices_by_election_dict[google_civic_election_id_string][ctcl_office_uuid] = \
                                 contest_office
                     except Exception as e:
-                        status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
+                        status += "SAVING_CTCL_UUID_WITH_CONTEST_OFFICE_FAILED: " + str(e) + ' '
             elif use_vote_usa:
                 if allowed_to_create_offices and not positive_value_exists(contest_office.vote_usa_office_id):
                     contest_office.vote_usa_office_id = vote_usa_office_id
@@ -3348,7 +3373,7 @@ def groom_and_store_google_civic_measure_json_2021(
                         if positive_value_exists(ctcl_measure_uuid):
                             existing_measure_objects_dict[ctcl_measure_uuid] = contest_measure
                     except Exception as e:
-                        status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
+                        status += "SAVING_CTCL_UUID_WITH_CONTEST_MEASURE_FAILED: " + str(e) + ' '
                         success = False
             elif use_vote_usa:
                 if allowed_to_create_measures and not positive_value_exists(contest_measure.vote_usa_measure_id):
