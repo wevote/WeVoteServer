@@ -17,6 +17,13 @@
 {% if candidate_option1 and candidate_option2 %}
 <table>
     <tr>
+        <td>
+          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge Candidates" name="merge" class="btn btn-primary" /></td>
+    </tr>
+    <tr>
         <th>&nbsp;</th>
         <th>Candidate Option 1</th>
         <th>Candidate Option 2</th>

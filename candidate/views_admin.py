@@ -4425,7 +4425,7 @@ def candidate_merge_process_view(request):
 
 
 @login_required
-def find_and_merge_duplicate_candidates_view(request):
+def find_and_merge_duplicate_candidates_view(request):  # find_duplicate_candidates
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -4439,7 +4439,6 @@ def find_and_merge_duplicate_candidates_view(request):
     status = ""
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
-    election_manager = ElectionManager()
 
     retrieve_by_candidate_year = False
     retrieve_by_election_id_list = False
