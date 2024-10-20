@@ -750,8 +750,19 @@ def groom_and_store_google_civic_candidates_json_2021(
                             # If here, we know the incoming ctcl_uuid doesn't match the other candidate found in our db
                             # If certain fields for the incoming candidate perfectly match this existing candidate,
                             #  add the ctcl_uuid to the existing candidate record
+                            found_candidate_name = candidate.candidate_name
+                            new_candidate_name = candidate_name
                             try:
-                                candidate_name_match = candidate.candidate_name == candidate_name
+                                found_candidate_name = candidate.candidate_name.strip().lower()
+                                new_candidate_name = candidate_name.strip().lower()
+                            except Exception as e:
+                                pass
+                            try:
+                                if positive_value_exists(found_candidate_name) and \
+                                        positive_value_exists(new_candidate_name):
+                                    candidate_name_match = found_candidate_name == new_candidate_name
+                                else:
+                                    candidate_name_match = False
                             except Exception as e:
                                 candidate_name_match = False
                             # Dale 2024-10-19 I looked at only considering it to be a match:
