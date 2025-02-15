@@ -8,6 +8,8 @@ from django.db import models
 from exception.models import handle_record_found_more_than_one_exception, handle_exception, \
     handle_record_not_saved_exception, handle_record_not_deleted_exception
 from PIL import Image, ImageOps
+from pathlib import Path
+from cairosvg import svg2png
 from urllib.request import urlretrieve
 from urllib.error import HTTPError
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -2076,8 +2078,7 @@ class WeVoteImageManager(models.Manager):
             image_height=0,
             image_type='',
             image_offset_x=0,
-            image_offset_y=0,
-            convert_image_to_jpg=True):
+            image_offset_y=0):
         """
         Resize image and save it to the same location
         Note re the facebook background:  We are scaling and sizing here to match the size of the html pane on the
@@ -2088,33 +2089,55 @@ class WeVoteImageManager(models.Manager):
         :param image_type:
         :param image_offset_x:
         :param image_offset_y:
-        :param convert_image_to_jpg:
         :return:
         """
-        try:
-            image_local_path = "/tmp/" + image_local_path
-            original_image = Image.open(image_local_path)
-            image = ImageOps.exif_transpose(original_image)
+        image_local_path = "/tmp/" + image_local_path
+        path_obj = Path(image_local_path)
+        image_stem = path_obj.stem
+        image_format = path_obj.suffix
+        destination = None
+        image = None
+        resized_image_created = False
+
+        if image_format:
+            image_format = image_format[1:].lower()
+            if image_format == "svg":
+                image_format = "png"
+                destination = "/tmp/" + image_stem + "." + image_format
+                svg2png(url=image_local_path, write_to=destination)
+                image = Image.open(destination)
+            else:
+                try:
+                    image = Image.open(image_local_path)
+                except Exception as e:
+                    exception_message = "resize_we_vote_master_image failed"
+                    handle_exception(e, logger=logger, exception_message=exception_message)
+
+            image = ImageOps.exif_transpose(image)
+        
             if image_type == TWITTER_BACKGROUND_IMAGE_NAME or image_type == TWITTER_BANNER_IMAGE_NAME:
                 image = image.resize((image_width, image_height), Image.Resampling.LANCZOS)
             elif image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:
                 centering_x = 0.5
                 centering_y = ((image.height - image_offset_y) * 0.5) / image.height
-                image = ImageOps.fit(image, (image_width, image_height), Image.Resampling.LANCZOS,
-                                     centering=(centering_x, centering_y))
+                image = ImageOps.fit(image, (image_width, image_height), Image.Resampling.LANCZOS, centering=(centering_x, centering_y))
             else:
                 image = ImageOps.fit(image, (image_width, image_height), Image.Resampling.LANCZOS, centering=(0.5, 0.5))
-            if convert_image_to_jpg:
-                image = image.convert('RGB')
-                image.save(image_local_path, quality=95, subsampling=0)
+            
+            if image_format == "png":
+                image_format = "jpeg"
+                image = image.convert("RGB")
+                destination = "/tmp/" + image_stem + "." + image_format
+                image.save(destination, quality=95, subsampling=0)
+            elif image_format == "gif":
+                image.save(image_local_path, save_all=True, loop=0)
+            elif image_format == "tiff":
+                image.save(image_local_path, save_all=True)
             else:
                 image.save(image_local_path)
+        
             resized_image_created = True
-        except Exception as e:
-            resized_image_created = False
-            exception_message = "resize_we_vote_master_image failed"
-            handle_exception(e, logger=logger, exception_message=exception_message)
-
+        
         return resized_image_created
 
     @staticmethod
