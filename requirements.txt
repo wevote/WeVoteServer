@@ -64,7 +64,7 @@ scikit-learn~=1.5.0     # recommend engine - comment out if initial installation
 sendgrid==6.9.7
 simplejson==3.17.2
 six==1.16.0
-setuptools==70.0.0    # Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages)
+setuptools==78.1.1    # Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages)
 social-auth-app-django==5.4.1
 social-auth-core==4.4.1
 sqlalchemy==2.0.35
