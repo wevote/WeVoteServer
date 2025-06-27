@@ -22,6 +22,11 @@ RUN useradd wevote && mkdir -p /var/log/wevote /wevote && chown wevote:wevote /v
 # copy all repo files to container
 COPY . /wevote/code
 
+# create migrations directories
+RUN for d in `find /wevote/code -name models.py -exec dirname {} \;`; do \
+    mkdir -p $d/migrations && chown wevote:wevote $d/migrations; \
+done
+
 # define docker runtime
 WORKDIR /wevote/code
 USER wevote
