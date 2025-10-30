@@ -90,3 +90,4 @@ selenium==4.25.0
 langdetect==1.0.9
 tldextract==5.1.2
 ipwhois==1.2.0
+dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
