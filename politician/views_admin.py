@@ -3595,6 +3595,7 @@ def politician_edit_process_view(request):
     t0 = time()
     from politician.controllers import find_candidates_to_link_to_this_politician
 
+    # Note, this returns a queryset which is evaluated when converted to a list
     related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_on_stage)
 
     performance_list.append({

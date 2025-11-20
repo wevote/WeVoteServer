@@ -528,7 +528,7 @@ def find_candidates_to_link_to_this_politician(politician=None):
         related_candidate_list = related_candidate_list.order_by('candidate_name')[:20]
     except Exception as e:
         related_candidate_list = []
-    return related_candidate_list
+    return list(related_candidate_list)
 
 
 def find_representatives_to_link_to_this_politician(politician=None):
