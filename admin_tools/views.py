@@ -11,6 +11,8 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.template.response import TemplateResponse
+import requests
 
 import wevote_functions
 from ballot.models import BallotReturned, VoterBallotSaved
@@ -1832,7 +1834,6 @@ def login_we_vote(request):
         'messages_on_stage':    messages_on_stage,
     }
     response = render(request, 'registration/login_we_vote.html', template_values)
-
     # If login with facebook then save facebook details in facebookAuthResponse and facebookLinkToVoter
     if facebook_data:
         facebook_user_data = getattr(facebook_data, 'user', None)
@@ -1973,6 +1974,9 @@ def statistics_summary_view(request):
 def sync_data_with_master_servers_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
+    fast_load_start_token_id = request.COOKIES.get("X-Fast-Load-Start-Token-Id", None)
+    fast_load_start_token_key = request.COOKIES.get("X-Fast-Load-Start-Token-Key", None)
+
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1989,11 +1993,15 @@ def sync_data_with_master_servers_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    fast_load_start_token_valid = False
+    fast_load_start_token_valid = positive_value_exists(fast_load_start_token_id) and positive_value_exists(fast_load_start_token_key)
+
     template_values = {
         'election_list':                election_list,
         'google_civic_election_id':     google_civic_election_id,
         'state_list':                   sorted_state_list,
         'state_code':                   state_code,
+        'fast_load_start_token_valid':  fast_load_start_token_valid,
 
         'ballot_items_sync_url':        BALLOT_ITEMS_SYNC_URL,
         'ballot_returned_sync_url':     BALLOT_RETURNED_SYNC_URL,
@@ -2009,6 +2017,38 @@ def sync_data_with_master_servers_view(request):
         'positions_sync_url':           POSITIONS_SYNC_URL,
         'voter_guides_sync_url':        VOTER_GUIDES_SYNC_URL,
     }
-    response = render(request, 'admin_tools/sync_data_with_master_dashboard.html', template_values)
+    response = TemplateResponse(request, 'admin_tools/sync_data_with_master_dashboard.html', template_values)
+
+    if request.POST:
+        input_username = request.POST.get('username').strip()
+        password = request.POST.get('password')
+        
+        # host = 'http://localhost:8000'
+        host = 'https://api.wevoteusa.org'
+        auth_url = f"{host}/login_we_vote/"
+
+        session = requests.Session()
+        _call_login_url = session.get(auth_url)
+        csrf_token = session.cookies.get('csrftoken')
+
+        auth_data = {
+            'username': input_username,  # Email address
+            'password': password,
+            'create_token': 'true',
+            'X-TOKEN-TYPE': 'single_use',
+            'X-TOKEN-KEY': 'token_key',
+            'X-TOKEN-EXPIRATION': '1200',  # 20 minutes
+        }
+
+        headers = {
+            'X-CSRFToken': csrf_token,
+            'Referer': auth_url,  # Django CSRF middleware expects this
+        }
+
+        auth_response = session.post(auth_url, data=auth_data, headers=headers)
+        
+        response.set_cookie('X-Fast-Load-Start-Token-Id', auth_response.url, max_age=300, httponly=True, secure=True, samesite='Lax')
+        response.set_cookie('X-Fast-Load-Start-Token-Key', auth_response.url, max_age=300, httponly=True, secure=True, samesite='Lax')
+        template_values['fast_load_start_token_valid'] = True
 
     return response

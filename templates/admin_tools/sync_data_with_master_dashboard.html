@@ -36,6 +36,14 @@
 </div>
 <br>
 
+<h2>Retrieve Fast Load Authentication</h2>
+{% if not fast_load_start_token_valid %}
+    <p> If you do not sign in with WeVote credentials, you will not be authorized to sync data with the master servers.</p>
+    {% include "admin_tools/email_login_form.html" %}
+{% else %}
+    <h4 style="color: green;"> You are authenticated!</h4>
+{% endif %}
+
 <h1>Sync Data With Master We Vote Servers</h1>
 
 <p style="padding: 10px 0 5px 25px; font-size: 18px;">

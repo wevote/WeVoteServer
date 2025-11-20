@@ -1,0 +1,28 @@
+
+{% block content %}
+{% if login_url %}
+    <form method="post" action="{{ login_url }}">
+{% else %}
+    <form method="post" action="">
+{% endif %}
+    {% csrf_token %}
+    <div class="control-group">
+        <label class="control-label" for="username">Sign in with Email</label>
+        <div class="controls">
+            <input type="text" id="username" name="username" placeholder="Email" style="width: 250px;" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+            <input type="password" name="password" id="password" placeholder="Password" style="width: 250px;">
+        </div>
+    </div>
+    <div>&nbsp;</div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Sign in with Email</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

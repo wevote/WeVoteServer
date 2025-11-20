@@ -277,6 +277,7 @@ def fetch_data_from_api(url, params, max_retries=1000, timeout=8):
                 return response.json()
             else:
                 logger.warning(f"\nAPI request failed with status code {response.status_code}, retrying...")
+                # add token here for retry
         except requests.Timeout:
             logger.error(f"Request timed out, retrying...\n{url} params: {params}")
         except requests.RequestException as e:
