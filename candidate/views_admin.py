@@ -1680,8 +1680,8 @@ def candidate_new_search_process_view(request):
     politician_list_found = False
     if positive_value_exists(politician_list) and len(politician_list) > 0:
         politician_list_found = True
-        from politician.controllers import find_candidates_to_link_to_this_politician
-        related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_list[0])
+        from politician.controllers import queryset_find_candidates_to_link_to_this_politician
+        related_candidate_list = queryset_find_candidates_to_link_to_this_politician(politician=politician_list[0])
         for candidate in candidate_list:
             candidate_we_vote_id_list.append(candidate.we_vote_id)
         for candidate in related_candidate_list:
