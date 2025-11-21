@@ -197,6 +197,7 @@ INSTALLED_APPS = (
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
+    'wevote_tokens', # Used for token authentication
 )
 
 MIDDLEWARE = [
