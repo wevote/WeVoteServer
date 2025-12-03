@@ -45,33 +45,35 @@ from volunteer_task.controllers import change_tracking, change_tracking_boolean
 from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
     VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager
+from wevote_functions import functions_test_links
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     generate_random_string, get_voter_api_device_id, \
-    normalize_bluesky_handle, normalize_threads_handle,\
+    normalize_bluesky_handle, normalize_threads_handle, \
     normalize_tiktok_url, positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
     convert_we_vote_date_string_to_date_as_integer, generate_localized_datetime_from_obj, DATE_FORMAT_YMD_HMS
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
-    fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
+    fetch_duplicate_politician_count, figure_out_politician_conflict_values, \
     generate_campaignx_for_politician, politician_save_photo_from_file_reader, \
     update_politician_details_from_candidate, \
-    merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
+    merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianChangeLog, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN, \
     RecommendedPoliticianLinkByPolitician
 from politician.controllers_generate_color import generate_background, validate_hex
+from politician.enums import SpeedStatistics
+
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 TWITTER_API_ON = positive_value_exists(get_environment_variable("TWITTER_API_ON", no_exception=True))
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
-from wevote_functions import functions_test_links
-from politician.enums import SpeedStatistics
 
 logger = wevote_functions.admin.get_logger(__name__)
+
 
 @login_required
 def politician_url_test_view(request):
@@ -120,6 +122,7 @@ def politician_url_test_view(request):
     # Otherwise, run the test
     result = functions_test_links.test_urls(urls_to_test, politician_name)
     return HttpResponse(json.dumps(result), content_type='application/json')
+
 
 @login_required
 def compare_two_politicians_for_merge_view(request):
@@ -191,49 +194,8 @@ def find_and_merge_duplicate_politicians_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
     state_code = request.GET.get('state_code', "")
     status = ""
-    politician_manager = PoliticianManager()
-
-    # ################################
-    # Assemble a list of politicians that we already think might be duplicates
-    queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
-    if positive_value_exists(state_code):
-        queryset = queryset.filter(state_code__iexact=state_code)
-    queryset = queryset.exclude(politician1_we_vote_id=None)
-    queryset = queryset.exclude(politician2_we_vote_id=None)
-    queryset_politician1 = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
-    exclude_politician1_we_vote_id_list = list(queryset_politician1)
-    queryset_politician2 = queryset.values_list('politician2_we_vote_id', flat=True).distinct()
-    exclude_politician2_we_vote_id_list = list(queryset_politician2)
-    exclude_politician_we_vote_id_list = \
-        list(set(exclude_politician1_we_vote_id_list + exclude_politician2_we_vote_id_list))
-
-    # ################################
-    # Retrieve list of politicians to compare
-    politician_query = Politician.objects.using('readonly').all()
-    politician_query = politician_query.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
-    if positive_value_exists(state_code):
-        politician_query = politician_query.filter(state_code__iexact=state_code)
-    politician_list = list(politician_query)
-
-    # # Loop through to see how many have possible duplicates
-    # if positive_value_exists(find_number_of_duplicates):
-    #     duplicate_count = 0
-    #     ignore_politician_id_list = []
-    #     for we_vote_politician in politician_list:
-    #         # Note that we don't reset the ignore_politician_list, so we don't search for a duplicate both directions
-    #         ignore_politician_id_list.append(we_vote_politician.we_vote_id)
-    #         duplicate_count_temp = fetch_duplicate_politician_count(
-    #             we_vote_politician, ignore_politician_id_list)
-    #         duplicate_count += duplicate_count_temp
-    #
-    #     if positive_value_exists(duplicate_count):
-    #         messages.add_message(request, messages.INFO,
-    #                              "There are approximately {duplicate_count} "
-    #                              "possible duplicates."
-    #                              "".format(duplicate_count=duplicate_count))
 
     # ################################
     # When this search is run, give scoreboard credit to the volunteer who started this search
@@ -248,67 +210,16 @@ def find_and_merge_duplicate_politicians_view(request):
         status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
-    # Loop through all the politicians in this election
-    for we_vote_politician in politician_list:
-        if we_vote_politician.we_vote_id in exclude_politician_we_vote_id_list:
-            continue
-        # Start ignore list with entries already reviewed
-        ignore_politician_id_list = exclude_politician_we_vote_id_list
-        # Add current entry to ignore list
-        ignore_politician_id_list.append(we_vote_politician.we_vote_id)
-        # Now check for others we have already labeled as "not a duplicate"
-        not_a_duplicate_list = politician_manager.fetch_politicians_are_not_duplicates_list_we_vote_ids(
-            we_vote_politician.we_vote_id)
-        ignore_politician_id_list += not_a_duplicate_list
-
-        results = find_duplicate_politician(we_vote_politician, ignore_politician_id_list, read_only=True)
-
-        # If we find politicians to merge, store them for review
-        if results['politician_merge_possibility_found']:
-            politician_option1_for_template = we_vote_politician
-            politician_option2_for_template = results['politician_merge_possibility']
-
-            # Can we automatically merge these politicians?
-            merge_results = merge_if_duplicate_politicians(
-                politician_option1_for_template,
-                politician_option2_for_template,
-                results['politician_merge_conflict_values'])
-
-            if merge_results['politicians_merged']:
-                politician = merge_results['politician']
-                if politician.we_vote_id not in exclude_politician_we_vote_id_list:
-                    exclude_politician_we_vote_id_list.append(politician.we_vote_id)
-                if we_vote_politician.we_vote_id not in exclude_politician_we_vote_id_list:
-                    exclude_politician_we_vote_id_list.append(we_vote_politician.we_vote_id)
-                PoliticiansArePossibleDuplicates.objects.create(
-                    politician1_we_vote_id=politician.we_vote_id,
-                    politician2_we_vote_id=None,
-                    state_code=state_code,
-                )
-                PoliticiansArePossibleDuplicates.objects.create(
-                    politician1_we_vote_id=we_vote_politician.we_vote_id,
-                    politician2_we_vote_id=None,
-                    state_code=state_code,
-                )
-                messages.add_message(request, messages.INFO,
-                                     "Politician {politician_name} automatically merged."
-                                     "".format(politician_name=politician.politician_name))
-            else:
-                # Add an entry showing that this is a possible match
-                PoliticiansArePossibleDuplicates.objects.create(
-                    politician1_we_vote_id=we_vote_politician.we_vote_id,
-                    politician2_we_vote_id=politician_option2_for_template.we_vote_id,
-                    state_code=state_code,
-                )
-                if politician_option2_for_template.we_vote_id not in exclude_politician_we_vote_id_list:
-                    exclude_politician_we_vote_id_list.append(politician_option2_for_template.we_vote_id)
-        else:
-            # No matches found
-            PoliticiansArePossibleDuplicates.objects.create(
-                politician1_we_vote_id=we_vote_politician.we_vote_id,
-                politician2_we_vote_id=None,
-                state_code=state_code,
-            )
+    from politician.controllers_data_cleaning import find_and_merge_duplicate_politicians
+    results = find_and_merge_duplicate_politicians(state_code=state_code)
+    if results['politicians_merged_found']:
+        politicians_merged_list = results['politicians_merged_list']
+        for politician in politicians_merged_list:
+            messages.add_message(request, messages.INFO,
+                                 "Politician {politician_name} automatically merged."
+                                 "".format(politician_name=politician.politician_name))
+    else:
+        status += "No politicians found to merge."
 
     return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
                                 "?state_code={state_code}"
@@ -1031,6 +942,12 @@ def politician_merge_process_view(request):
             )
             queryset.delete()
             messages.add_message(request, messages.INFO, 'Prior politicians skipped, and not merged.')
+
+            we_vote_ids_to_update = [politician1_we_vote_id, politician2_we_vote_id]
+            Politician.objects.filter(we_vote_id__in=we_vote_ids_to_update) \
+                .update(duplicate_check_last_completed=None)
+            status += f"DUPLICATE_CHECK_COMPLETE_SET_FOR-{len(we_vote_ids_to_update)}-POLITICIANS "
+
             if positive_value_exists(voter_we_vote_id):
                 try:
                     # Give the volunteer who entered this credit
@@ -1106,6 +1023,12 @@ def politician_merge_process_view(request):
             politician2_we_vote_id=politician2_we_vote_id,
         )
         queryset.delete()
+
+        # Now set the flag so this politician gets checked against other politicians for duplicates
+        Politician.objects.filter(we_vote_id=politician.we_vote_id) \
+            .update(duplicate_check_last_completed=None)
+        status += f"RESET_DUPLICATE_CHECK_FOR-{politician.we_vote_id}-POLITICIAN "
+
         if positive_value_exists(voter_we_vote_id):
             try:
                 # Give the volunteer who entered this credit
@@ -1245,9 +1168,9 @@ def politician_new_view(request):
         },
         'birth_date_dict':
         {
-        'label':    'Birthdate (format Feb. 16, 1955)',
-        'id':       'birth_date_id',
-        'name':     'birth_date',
+            'label':    'Birthdate (format Feb. 16, 1955)',
+            'id':       'birth_date_id',
+            'name':     'birth_date',
             'value':     birth_date
         },
         'first_name_dict':
@@ -1534,6 +1457,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     facebook_url = request.GET.get('facebook_url', False)
     facebook_url2 = request.GET.get('facebook_url2', False)
     facebook_url3 = request.GET.get('facebook_url3', False)
+    find_candidates_to_link_to_this_politician_on = \
+        request.GET.get('find_candidates_to_link_to_this_politician_on', False)
     first_name = request.GET.get('first_name', False)
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
     google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
@@ -1787,8 +1712,18 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         # Find Candidates to Link to this Politician
         # Finding Candidates that *might* be "children" of this politician
         t0 = time()
-        from politician.controllers import find_candidates_to_link_to_this_politician
-        related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_on_stage)
+        # find_candidates_to_link_to_this_politician_on = False  # Turned off for now because this is a slow operation
+        # TODO: Connect this to a variable on the Politician Edit page that turns this on.
+        find_candidates_to_link_none_found = False
+        related_candidate_list = []
+        if positive_value_exists(find_candidates_to_link_to_this_politician_on):
+            from politician.controllers import find_candidates_to_link_to_this_politician
+            related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_on_stage)
+            if len(related_candidate_list) == 0:
+                find_candidates_to_link_to_this_politician_on = False
+                find_candidates_to_link_none_found = True
+            else:
+                find_candidates_to_link_none_found = False
 
         # Find possible duplicate politicians
         duplicate_politician_list = []
@@ -2030,13 +1965,12 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             for performance_item in performance_dict_list:
                 performance_item.update(SpeedStatistics[performance_item['enum_key']].value)
 
-
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
         else:
             web_app_root_url = 'https://quality.WeVote.US'
         template_values = {
-            'test_render_speed_performance':time(),
+            'test_render_speed_performance': time(),
             'ballotpedia_politician_name_dict':
             {
                 'label':    'Name from Ballotpedia',
@@ -2065,6 +1999,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'facebook_url':                 facebook_url,
             'facebook_url2':                facebook_url2,
             'facebook_url3':                facebook_url3,
+            'find_candidates_to_link_none_found':    find_candidates_to_link_none_found,
+            'find_candidates_to_link_to_this_politician_on':    find_candidates_to_link_to_this_politician_on,
             'first_name_dict':
             {
                 'label':    'First Name',
@@ -2202,7 +2138,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             },
             'rating_list':                  rating_list,
             'related_campaignx_list':       related_campaignx_list,
-            'related_candidate_list':       related_candidate_list,
+            # 'related_candidate_list':       related_candidate_list,
             'related_representative_list':  related_representative_list,
             'state_code':                   state_code,
             'state_code_dict':
@@ -2266,6 +2202,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     response.content += f'<div id="renderLoadTimePlaceholder">{(time() - t0):.4f}</>'.encode('utf-8')
 
     return response
+
 
 @login_required
 def politicians_not_duplicates_view(request):
@@ -2482,6 +2419,8 @@ def politician_edit_process_view(request):
     facebook_url = request.POST.get('facebook_url', False)
     facebook_url2 = request.POST.get('facebook_url2', False)
     facebook_url3 = request.POST.get('facebook_url3', False)
+    find_candidates_to_link_to_this_politician_on = \
+        request.POST.get('find_candidates_to_link_to_this_politician_on', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
     if positive_value_exists(google_civic_candidate_name):
         google_civic_candidate_name = google_civic_candidate_name.strip()
@@ -3240,7 +3179,6 @@ def politician_edit_process_view(request):
                 'time_difference': round(time() - t0, 4),
             })
 
-
             # If new seo_friendly_path is provided, check to make sure it is not already in use
             # If seo_friendly_path is not provided, only create a new one if politician_on_stage.seo_friendly_path
             #  doesn't already exist.
@@ -3417,7 +3355,7 @@ def politician_edit_process_view(request):
             # Process ballotpedia_politician_url field
             t0 = time()
             update_ballotpedia_politician_url = ballotpedia_politician_url_changed or \
-                    not positive_value_exists(politician_on_stage.ballotpedia_photo_url)
+                not positive_value_exists(politician_on_stage.ballotpedia_photo_url)
             if update_ballotpedia_politician_url and positive_value_exists(ballotpedia_politician_url):
                 results = get_photo_url_from_ballotpedia(
                     incoming_object=politician_on_stage,
@@ -3592,49 +3530,53 @@ def politician_edit_process_view(request):
     # ##################################
     # Find Candidates to Link to this Politician
     # Finding Candidates that *might* be "children" of this politician
-    t0 = time()
-    from politician.controllers import find_candidates_to_link_to_this_politician
+    # find_candidates_to_link_to_this_politician_on = False  # Turned off for now because this is a slow operation
+    # TODO: Connect this to a variable on the Politician Edit page that turns this on.
+    related_candidate_list = []
+    if positive_value_exists(find_candidates_to_link_to_this_politician_on):
+        t0 = time()
+        from politician.controllers import find_candidates_to_link_to_this_politician
 
-    related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_on_stage)
+        related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_on_stage)
 
-    performance_list.append({
-        'enum_key': 'RET_CANDIDATES_TO_LINK',
-        'time_difference': round(time() - t0, 4),
-    })
+        performance_list.append({
+            'enum_key': 'RET_CANDIDATES_TO_LINK',
+            'time_difference': round(time() - t0, 4),
+        })
 
-    # ##################################
-    # Link Candidates to this Politician
-    t0 = time()
-    # Transaction ensures all candidate saves and position_list_manager updates are committed together
-    with transaction.atomic():
-        for candidate in related_candidate_list:
-            if positive_value_exists(candidate.id):
-                variable_name = "link_candidate_" + str(candidate.id) + "_to_politician"
-                link_candidate = positive_value_exists(request.POST.get(variable_name, False))
-                if positive_value_exists(link_candidate) and positive_value_exists(politician_we_vote_id):
-                    candidate.politician_id = politician_id
-                    candidate.politician_we_vote_id = politician_we_vote_id
-                    candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
-                    if not positive_value_exists(candidate.vote_usa_politician_id) and \
-                            positive_value_exists(vote_usa_politician_id):
-                        candidate.vote_usa_politician_id = vote_usa_politician_id
-                    candidate.save()
-                    # Now update positions
-                    results = position_list_manager.update_politician_we_vote_id_in_all_positions(
-                        candidate_we_vote_id=candidate.we_vote_id,
-                        new_politician_id=politician_id,
-                        new_politician_we_vote_id=politician_we_vote_id)
+    # # ##################################
+    # # Link Candidates to this Politician
+    # t0 = time()
+    # # Transaction ensures all candidate saves and position_list_manager updates are committed together
+    # with transaction.atomic():
+    #     for candidate in related_candidate_list:
+    #         if positive_value_exists(candidate.id):
+    #             variable_name = "link_candidate_" + str(candidate.id) + "_to_politician"
+    #             link_candidate = positive_value_exists(request.POST.get(variable_name, False))
+    #             if positive_value_exists(link_candidate) and positive_value_exists(politician_we_vote_id):
+    #                 candidate.politician_id = politician_id
+    #                 candidate.politician_we_vote_id = politician_we_vote_id
+    #                 candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
+    #                 if not positive_value_exists(candidate.vote_usa_politician_id) and \
+    #                         positive_value_exists(vote_usa_politician_id):
+    #                     candidate.vote_usa_politician_id = vote_usa_politician_id
+    #                 candidate.save()
+    #                 # Now update positions
+    #                 results = position_list_manager.update_politician_we_vote_id_in_all_positions(
+    #                     candidate_we_vote_id=candidate.we_vote_id,
+    #                     new_politician_id=politician_id,
+    #                     new_politician_we_vote_id=politician_we_vote_id)
 
                     messages.add_message(request, messages.INFO,
-                                        'Candidate linked, number of positions changed: {number_changed}'
-                                        ''.format(number_changed=results['number_changed']))
+                                         'Candidate linked, number of positions changed: {number_changed}'
+                                         ''.format(number_changed=results['number_changed']))
                 else:
                     pass
 
-    performance_list.append({
-        'enum_key': 'LINK_CANDIDATES',
-        'time_difference': round(time() - t0, 4),
-    })
+    # performance_list.append({
+    #     'enum_key': 'LINK_CANDIDATES',
+    #     'time_difference': round(time() - t0, 4),
+    # })
 
     # ##################################
     # Find Representatives to Link to this Politician
@@ -3973,12 +3915,15 @@ def politician_edit_process_view(request):
         'performance_process_dict': json.dumps(performance_dict)
     })
 
+    if find_candidates_to_link_to_this_politician_on:
+        url_variables += "&find_candidates_to_link_to_this_politician_on=true"
+
     if politician_id:
-        return HttpResponseRedirect(reverse('politician:politician_edit', args=(
-        politician_id,)) + url_variables + "&" + performance_process_dict_encoded)
+        return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)) +
+                                    url_variables + "&" + performance_process_dict_encoded)
     else:
-        return HttpResponseRedirect(
-            reverse('politician:politician_new', args=()) + url_variables + "&" + performance_process_dict_encoded)
+        return HttpResponseRedirect(reverse('politician:politician_new', args=()) +
+                                    url_variables + "&" + performance_process_dict_encoded)
 
     # if politician_id:
     #     return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
@@ -4440,7 +4385,7 @@ def update_politicians_from_candidates_view(request):
             if one_candidate.politician_we_vote_id not in candidate_list_by_politician_we_vote_id:
                 candidate_list_by_politician_we_vote_id[one_candidate.politician_we_vote_id] = one_candidate
 
-    # Loop through all the politicians in this year, and update them with some politician data
+    # Loop through all the politicians in this year, and update them with some data from the new candidate entry
     politician_update_errors = 0
     politicians_updated = 0
     politicians_without_changes = 0

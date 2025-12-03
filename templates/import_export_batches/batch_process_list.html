@@ -117,6 +117,18 @@ OFF:
         </a>
         &nbsp;&nbsp;
         {% endfor %}
+        &nbsp;&nbsp;
+    <br />
+        Deduplication Scripts:
+        &nbsp;&nbsp;
+        {% for item in batch_process_system_deduplication_script_items %}
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=DEDUPLICATION_SCRIPTS_{{ item.upper }}&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_general_maintenance_on %}<span>{% else %}<span style="text-decoration: line-through">{% endif %}
+            {% if item.is_on %}Turn OFF {{ item.title }}{% else %}<strong>Turn ON {{ item.title }}</strong>{% endif %}
+        </span>
+        </a>
+        &nbsp;&nbsp;
+        {% endfor %}
     </li>
     <li>
         <a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
@@ -216,11 +228,19 @@ OFF:
         {% if kind_of_processes_to_show == "BALLOT_ITEMS" %} selected="selected"{% endif %}>
             Ballot Items</option>
     
+        {% for item in batch_process_system_deduplication_script_items %}
+            <option value="{{ item.kind_of_process }}"
+                {% if kind_of_processes_to_show == item.kind_of_process %} selected="selected"{% endif %}
+            >
+                Deduplication: {{ item.title }}
+            </option>
+        {% endfor %}
+    
         {% for item in batch_process_system_maintenance_script_items %}
             <option value="{{ item.kind_of_process }}"
                 {% if kind_of_processes_to_show == item.kind_of_process %} selected="selected"{% endif %}
             >
-                Maintenance Scripts: {{ item.title }}
+                Maintenance: {{ item.title }}
             </option>
         {% endfor %}
     

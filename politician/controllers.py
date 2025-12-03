@@ -445,7 +445,7 @@ def find_campaignx_list_to_link_to_this_politician(politician=None):
     return related_list
 
 
-def find_candidates_to_link_to_this_politician(politician=None):
+def queryset_find_candidates_to_link_to_this_politician(politician=None):
     """
     Find Candidates to Link to this Politician
     Finding Candidates that *might* be "children" of this politician
@@ -455,10 +455,11 @@ def find_candidates_to_link_to_this_politician(politician=None):
     """
     if not hasattr(politician, 'we_vote_id'):
         return []
+    related_candidate_list = []
     from candidate.models import CandidateCampaign
     try:
-        related_candidate_list = CandidateCampaign.objects.using('readonly').all()
-        related_candidate_list = related_candidate_list.exclude(
+        queryset = CandidateCampaign.objects.using('readonly').all()
+        queryset = queryset.exclude(
             politician_we_vote_id=politician.we_vote_id)
 
         filters = []
@@ -523,11 +524,13 @@ def find_candidates_to_link_to_this_politician(politician=None):
             for item in filters:
                 final_filters |= item
 
-            related_candidate_list = related_candidate_list.filter(final_filters)
+            queryset = queryset.filter(final_filters)
 
-        related_candidate_list = related_candidate_list.order_by('candidate_name')[:20]
+        queryset = queryset.order_by('candidate_name')[:20]
+        related_candidate_list = list(queryset)
     except Exception as e:
         related_candidate_list = []
+    
     return related_candidate_list
 
 

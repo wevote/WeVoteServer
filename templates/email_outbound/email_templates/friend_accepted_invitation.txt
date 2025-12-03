@@ -5,7 +5,7 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-{% if sender_name %}{{ sender_name }}{% else %}Your friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% endif %} has accepted your invitation to be friends on We Vote.
+{% if sender_name %}{{ sender_name }}{% else %}Your friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% endif %} has accepted your invitation to be friends on WeVote.
 {% if invitation_message %}
 "{{ invitation_message }}"{% endif %}
 
@@ -15,11 +15,11 @@ See All Of Your Friends
 
 {% endif %}
 Thank you,
-The We Vote Team
+The WeVote Team
 
 
 
 ========================================
-This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe.
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from WeVote, please follow the link below to unsubscribe.
 {{ recipient_unsubscribe_url }}
-We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612
+WeVote, Attention: Community Team, 1440 Broadway Ste 200, #158, Oakland, CA 94612

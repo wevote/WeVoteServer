@@ -25,11 +25,25 @@
                 {% for stat in stats %}
                     <tr>
                         {% if stat.name %}
-                            <td>{{ stat.name }}</td>
-                            <td>{{ stat.time_difference|floatformat:4 }}</td>
-                            <td style="font-weight: 300; color: #666; text-align: left;">
-                                {{ stat.description }}
-                            </td>
+                            {% if "subsnapshot" in stat.name|lower %}
+                                {% with stat.name|cut:"Subsnapshot_" as short_name %}
+                                    <td style="color:#777; font-size:0.8em; line-height:1;">
+                                        Nested Snapshot: {{ short_name }}
+                                    </td>
+                                    <td style="color:#777; font-size:0.8em; line-height:1;">
+                                        {{ stat.time_difference|floatformat:4 }}
+                                    </td>
+                                    <td style="font-weight:100; color:#888; text-align:left; font-size:0.8em; line-height:1;">
+                                        {{ stat.description }}
+                                    </td>
+                                {% endwith %}
+                            {% else %}
+                                <td>{{ stat.name }}</td>
+                                <td>{{ stat.time_difference|floatformat:4 }}</td>
+                                <td style="font-weight:300; color:#666; text-align:left;">
+                                    {{ stat.description }}
+                                </td>
+                            {% endif %}
                         {% else %}
                             <td colspan="3">{{ stat }}</td>
                         {% endif %}

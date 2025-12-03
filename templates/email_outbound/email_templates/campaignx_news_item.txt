@@ -21,10 +21,10 @@ Click to see or share: {{ campaignx_news_item_url }}
 ========================================
 You supported this campaign{% if speaker_voter_name %} from {{ speaker_voter_name }}{% endif %}{% if date_supported %} on {{ date_supported }}{% endif %}.
 
-This message was sent to {{ recipient_voter_email }} via the nonpartisan website WeVote.US. We Vote did not create this campaign, is not responsible for its content, and does not support or oppose any political candidate or party. If you don't want to receive emails from this campaign, please follow the link below to unsubscribe:
+This message was sent to {{ recipient_voter_email }} via the nonpartisan website WeVote.US. WeVote did not create this campaign, is not responsible for its content, and does not support or oppose any political candidate or party. If you don't want to receive emails from this campaign, please follow the link below to unsubscribe:
 {{ recipient_unsubscribe_url }}
 
-We Vote
+WeVote
 Attention: Campaigns Team
-1423 Broadway PMB 158,
+1440 Broadway Ste 200, #158,
 Oakland, CA 94612

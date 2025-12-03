@@ -1487,7 +1487,12 @@ def voter_list_view(request):
         voter_id = voter.id
         voter_id = convert_to_int(voter_id)
 
+    # ################################################
+    # Maintenance script section START
+    # ################################################
+
     # If there is an entry in the VoterIssuesLookup table for a voter_we_vote_id, mark the voter table
+    # VoterIssuesLookup is a table for rapid lookup (analytics) of how many voters follow each Issue / Value / Topic.
     voter_issues_lookup_repair = True
     if voter_issues_lookup_repair and run_scripts:
         voter_issues_query = VoterIssuesLookup.objects.using('readonly').all()
@@ -1703,6 +1708,10 @@ def voter_list_view(request):
                 "".format(total_to_convert_after=total_to_convert_after))
         if positive_value_exists(voter_is_signed_in_status):
             messages.add_message(request, messages.INFO, voter_is_signed_in_status)
+
+    # ################################################
+    # Maintenance script section END
+    # ################################################
 
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):

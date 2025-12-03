@@ -14,7 +14,6 @@ from candidate.models import PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKN
     PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from organization.models import Organization
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from tag.models import Tag
 from wevote_functions.functions import candidate_party_display, convert_to_int, convert_to_political_party_constant, \
     display_full_name_with_correct_capitalization, extract_first_name_from_full_name, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
@@ -135,6 +134,63 @@ POSITION_CHOICES = (
 )
 
 
+class DeduplicationNeededForStateToday(models.Model):
+    date_now_as_integer = models.PositiveIntegerField(db_index=True, null=True, unique=True)
+    ak_deduplication_needed = models.BooleanField(default=True)
+    al_deduplication_needed = models.BooleanField(default=True)
+    ar_deduplication_needed = models.BooleanField(default=True)
+    az_deduplication_needed = models.BooleanField(default=True)
+    ca_deduplication_needed = models.BooleanField(default=True)
+    co_deduplication_needed = models.BooleanField(default=True)
+    ct_deduplication_needed = models.BooleanField(default=True)
+    dc_deduplication_needed = models.BooleanField(default=True)
+    de_deduplication_needed = models.BooleanField(default=True)
+    fl_deduplication_needed = models.BooleanField(default=True)
+    ga_deduplication_needed = models.BooleanField(default=True)
+    hi_deduplication_needed = models.BooleanField(default=True)
+    ia_deduplication_needed = models.BooleanField(default=True)
+    id_deduplication_needed = models.BooleanField(default=True)
+    il_deduplication_needed = models.BooleanField(default=True)
+    in_deduplication_needed = models.BooleanField(default=True)
+    ks_deduplication_needed = models.BooleanField(default=True)
+    ky_deduplication_needed = models.BooleanField(default=True)
+    la_deduplication_needed = models.BooleanField(default=True)
+    ma_deduplication_needed = models.BooleanField(default=True)
+    md_deduplication_needed = models.BooleanField(default=True)
+    me_deduplication_needed = models.BooleanField(default=True)
+    mi_deduplication_needed = models.BooleanField(default=True)
+    mn_deduplication_needed = models.BooleanField(default=True)
+    mo_deduplication_needed = models.BooleanField(default=True)
+    ms_deduplication_needed = models.BooleanField(default=True)
+    mt_deduplication_needed = models.BooleanField(default=True)
+    na_deduplication_needed = models.BooleanField(default=True)  # For national
+    nc_deduplication_needed = models.BooleanField(default=True)
+    nd_deduplication_needed = models.BooleanField(default=True)
+    ne_deduplication_needed = models.BooleanField(default=True)
+    nh_deduplication_needed = models.BooleanField(default=True)
+    nj_deduplication_needed = models.BooleanField(default=True)
+    nm_deduplication_needed = models.BooleanField(default=True)
+    nv_deduplication_needed = models.BooleanField(default=True)
+    ny_deduplication_needed = models.BooleanField(default=True)
+    oh_deduplication_needed = models.BooleanField(default=True)
+    ok_deduplication_needed = models.BooleanField(default=True)
+    or_deduplication_needed = models.BooleanField(default=True)
+    pa_deduplication_needed = models.BooleanField(default=True)
+    pr_deduplication_needed = models.BooleanField(default=True)  # Puerto Rico
+    ri_deduplication_needed = models.BooleanField(default=True)
+    sc_deduplication_needed = models.BooleanField(default=True)
+    sd_deduplication_needed = models.BooleanField(default=True)
+    tn_deduplication_needed = models.BooleanField(default=True)
+    tx_deduplication_needed = models.BooleanField(default=True)
+    ut_deduplication_needed = models.BooleanField(default=True)
+    va_deduplication_needed = models.BooleanField(default=True)
+    vt_deduplication_needed = models.BooleanField(default=True)
+    wa_deduplication_needed = models.BooleanField(default=True)
+    wi_deduplication_needed = models.BooleanField(default=True)
+    wv_deduplication_needed = models.BooleanField(default=True)
+    wy_deduplication_needed = models.BooleanField(default=True)
+
+
 class Politician(models.Model):
     # We are relying on built-in Python id field
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
@@ -151,7 +207,12 @@ class Politician(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default=None)
-    # See this url for properties: https://docs.python.org/2/library/functions.html#property
+    duplicate_check_last_completed = models.DateTimeField(null=True)
+    # See these related fields in CandidateCampaign table:
+    # updated_from_politician_completed_first = models.DateTimeField(null=True)
+    # updated_from_politician_completed_second = models.DateTimeField(null=True)
+    # updates_to_politician_completed = models.DateTimeField(null=True)  # Research date_last_updated_from_candidate
+
     first_name = models.CharField(verbose_name="first name",
                                   max_length=255, default=None, null=True, blank=True)
     middle_name = models.CharField(verbose_name="middle name",
@@ -233,7 +294,6 @@ class Politician(models.Model):
                                           max_length=200, null=True, unique=False)
     icpsr_id = models.CharField(verbose_name="icpsr unique identifier",
                                 max_length=200, null=True, unique=False)
-    tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
     opposers_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
@@ -2258,7 +2318,7 @@ class PoliticianManager(models.Manager):
 
         # twitter handle does not exist, next look up against other data that might match
         if keep_looking_for_duplicates and positive_value_exists(politician_name):
-            # Search by Candidate name exact match
+            # Search by Politician name exact match
             try:
                 if positive_value_exists(read_only):
                     queryset = Politician.objects.using('readonly').all()
@@ -2506,6 +2566,21 @@ class PoliticianManager(models.Manager):
         politicians_are_not_duplicates_list1 = []
         politicians_are_not_duplicates_list2 = []
         status = ""
+        success = True
+        error_results = {
+            'success':                                          False,
+            'status':                                           status,
+            'politicians_are_not_duplicates_list_found':        False,
+            'politicians_are_not_duplicates_list':              [],
+            'politicians_are_not_duplicates_list_we_vote_ids':  [],
+        }
+
+        if not positive_value_exists(politician_we_vote_id):
+            status += "NOT_DUPLICATES_POLITICIAN_WE_VOTE_ID_NOT_PROVIDED "
+            error_results['status'] = status
+            error_results['success'] = False
+            return error_results
+
         try:
             if positive_value_exists(read_only):
                 politicians_are_not_duplicates_list_query = \
@@ -2517,15 +2592,15 @@ class PoliticianManager(models.Manager):
                     politician1_we_vote_id=politician_we_vote_id,
                 )
             politicians_are_not_duplicates_list1 = list(politicians_are_not_duplicates_list_query)
-            success = True
             status += "POLITICIANS_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
         except PoliticiansAreNotDuplicates.DoesNotExist:
             # No data found. Try again below
-            success = True
             status += 'NO_POLITICIANS_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
         except Exception as e:
-            success = False
             status += "POLITICIANS_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1: " + str(e) + ' '
+            error_results['status'] = status
+            error_results['success'] = False
+            return error_results
 
         if success:
             try:
@@ -2540,14 +2615,15 @@ class PoliticianManager(models.Manager):
                             politician2_we_vote_id=politician_we_vote_id,
                         )
                 politicians_are_not_duplicates_list2 = list(politicians_are_not_duplicates_list_query)
-                success = True
                 status += "POLITICIANS_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
             except PoliticiansAreNotDuplicates.DoesNotExist:
-                success = True
                 status += 'NO_POLITICIANS_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
             except Exception as e:
                 success = False
                 status += "POLITICIANS_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2: " + str(e) + ' '
+                error_results['status'] = status
+                error_results['success'] = success
+                return error_results
 
         politicians_are_not_duplicates_list = \
             politicians_are_not_duplicates_list1 + politicians_are_not_duplicates_list2
@@ -2555,9 +2631,11 @@ class PoliticianManager(models.Manager):
         politicians_are_not_duplicates_list_we_vote_ids = []
         for one_entry in politicians_are_not_duplicates_list:
             if one_entry.politician1_we_vote_id != politician_we_vote_id:
-                politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician1_we_vote_id)
-            elif one_entry.politician2_we_vote_id != politician_we_vote_id:
-                politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician2_we_vote_id)
+                if one_entry.politician1_we_vote_id not in politicians_are_not_duplicates_list_we_vote_ids:
+                    politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician1_we_vote_id)
+            if one_entry.politician2_we_vote_id != politician_we_vote_id:
+                if one_entry.politician2_we_vote_id not in politicians_are_not_duplicates_list_we_vote_ids:
+                    politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician2_we_vote_id)
         results = {
             'success':                                          success,
             'status':                                           status,
@@ -2865,33 +2943,3 @@ class PoliticianSEOFriendlyPath(models.Model):
     base_pathname_string = models.CharField(max_length=255, null=True)
     pathname_modifier = models.CharField(max_length=10, null=True)
     final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
-
-
-class PoliticianTagLink(models.Model):
-    """
-    A confirmed (undisputed) link between tag & item of interest.
-    """
-    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
-                            on_delete=models.deletion.DO_NOTHING)
-    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
-                                   on_delete=models.deletion.DO_NOTHING)
-    # measure_id
-    # office_id
-    # issue_id
-
-
-class PoliticianTagLinkDisputed(models.Model):
-    """
-    This is a highly disputed link between tag & item of interest. Generated from 'tag_added', and tag results
-    are only shown to people within the cloud of the voter who posted
-
-    We split off how things are tagged to avoid conflict wars between liberals & conservatives
-    (Deal with some tags visible in some networks, and not in others - ex/ #ObamaSucks)
-    """
-    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
-                            on_delete=models.deletion.DO_NOTHING)
-    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
-                                   on_delete=models.deletion.DO_NOTHING)
-    # measure_id
-    # office_id
-    # issue_id

@@ -2148,7 +2148,7 @@ def candidate_politician_match(candidate):
         elif results['politician_found']:
             politician = results['politician']
             politician_found = True
-            # Save politician_we_vote_id in candidate
+            # Save latest politician information in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
             candidate.seo_friendly_path = politician.seo_friendly_path
@@ -2230,10 +2230,9 @@ def candidate_politician_match(candidate):
         }
         return results
     elif results['politician_found']:
-        # Save this politician_we_vote_id with the candidate
+        # Save latest politician information in candidate
         politician = results['politician']
         politician_found = True
-        # Save politician_we_vote_id in candidate
         candidate.politician_we_vote_id = politician.we_vote_id
         candidate.politician_id = politician.id
         candidate.seo_friendly_path = politician.seo_friendly_path
@@ -2265,7 +2264,7 @@ def candidate_politician_match(candidate):
         politician_found = create_results['politician_found']
         status += create_results['status']
         if create_results['politician_found']:
-            # Save politician_we_vote_id in candidate
+            # Save politician information in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
             candidate.seo_friendly_path = politician.seo_friendly_path

@@ -110,6 +110,7 @@ urlpatterns = [
                     namespace="support_oppose_deciding")),
     re_path(r'^stripe_donations/', include(('stripe_donations.urls', 'stripe'), namespace="stripe_donations")),
     re_path(r'^tag/', include(('tag.urls', 'tag'), namespace="tag")),
+    re_path(r'^tinymce/', include("tinymce.urls")),
     re_path(r'^twitter/', include(('import_export_twitter.urls', 'twitter'), namespace="twitter")),
     re_path(r'^twitter2/', include(('twitter.urls', 'twitter2'), namespace="twitter2")),
     re_path(r'^volunteer/', include(('volunteer_task.urls', 'volunteer'), namespace="volunteer_task")),

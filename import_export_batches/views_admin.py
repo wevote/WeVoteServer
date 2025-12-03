@@ -26,7 +26,7 @@ from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_b
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager, BallotReturnedManager, MEASURE, CANDIDATE, POLITICIAN
 import csv
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -35,7 +35,7 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from election.models import Election, ElectionManager
 from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
@@ -55,6 +55,7 @@ from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, positive_value_exists, STATE_CODE_MAP
+import pytz
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1532,6 +1533,16 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_system_representatives_on'
     elif kind_of_process == 'CALCULATE_ANALYTICS':
         setting_name = 'batch_process_system_calculate_analytics_on'
+    elif kind_of_process == 'DEDUPLICATION_SCRIPTS_CAMPAIGNX':
+        setting_name = 'batch_process_deduplication_scripts_campaignx_on'
+    elif kind_of_process == 'DEDUPLICATION_SCRIPTS_CANDIDATE':
+        setting_name = 'batch_process_deduplication_scripts_candidate_on'
+    elif kind_of_process == 'DEDUPLICATION_SCRIPTS_CHALLENGE':
+        setting_name = 'batch_process_deduplication_scripts_challenge_on'
+    elif kind_of_process == 'DEDUPLICATION_SCRIPTS_ORGANIZATION':
+        setting_name = 'batch_process_deduplication_scripts_organization_on'
+    elif kind_of_process == 'DEDUPLICATION_SCRIPTS_POLITICIAN':
+        setting_name = 'batch_process_deduplication_scripts_politician_on'
     elif kind_of_process == 'GENERAL_MAINTENANCE':
         setting_name = 'batch_process_system_general_maintenance_on'
     elif kind_of_process == 'GENERATE_VOTER_GUIDES':
@@ -1546,12 +1557,16 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_maintenance_scripts_office_on'
     elif kind_of_process == 'MAINTENANCE_SCRIPTS_OFFICE_HELD':
         setting_name = 'batch_process_maintenance_scripts_office_held_on'
+    elif kind_of_process == 'MAINTENANCE_SCRIPTS_ORGANIZATION':
+        setting_name = 'batch_process_maintenance_scripts_organization_on'
     elif kind_of_process == 'MAINTENANCE_SCRIPTS_POLITICIAN':
         setting_name = 'batch_process_maintenance_scripts_politician_on'
     elif kind_of_process == 'MAINTENANCE_SCRIPTS_POSITION':
         setting_name = 'batch_process_maintenance_scripts_position_on'
     elif kind_of_process == 'MAINTENANCE_SCRIPTS_REPRESENTATIVE':
         setting_name = 'batch_process_maintenance_scripts_representative_on'
+    elif kind_of_process == 'MAINTENANCE_SCRIPTS_VOTER':
+        setting_name = 'batch_process_maintenance_scripts_voter_on'
     elif kind_of_process == 'MATCH_POLITICIANS_TO_ORGANIZATIONS':
         setting_name = 'batch_process_system_match_politicians_to_organizations_on'
     elif kind_of_process == 'RETRIEVE_FROM_BALLOTPEDIA':
@@ -1711,29 +1726,19 @@ def batch_process_list_view(request):
             elif kind_of_processes_to_show == "GENERATE_VOTER_GUIDES":
                 processes = ['GENERATE_VOTER_GUIDES']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_CAMPAIGNX":
-                processes = ['MAINTENANCE_SCRIPTS_CAMPAIGNX']
+            elif kind_of_processes_to_show in [
+                    'DEDUPLICATION_SCRIPTS_CAMPAIGNX', 'DEDUPLICATION_SCRIPTS_CANDIDATE',
+                    'DEDUPLICATION_SCRIPTS_CHALLENGE',
+                    'DEDUPLICATION_SCRIPTS_ORGANIZATION', 'DEDUPLICATION_SCRIPTS_POLITICIAN']:
+                processes = [kind_of_processes_to_show]
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_CANDIDATE":
-                processes = ['MAINTENANCE_SCRIPTS_CANDIDATE']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_CHALLENGE":
-                processes = ['MAINTENANCE_SCRIPTS_CHALLENGE']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_OFFICE":
-                processes = ['MAINTENANCE_SCRIPTS_OFFICE']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_OFFICE_HELD":
-                processes = ['MAINTENANCE_SCRIPTS_OFFICE_HELD']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_POLITICIAN":
-                processes = ['MAINTENANCE_SCRIPTS_POLITICIAN']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_POSITION":
-                processes = ['MAINTENANCE_SCRIPTS_POSITION']
-                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
-            elif kind_of_processes_to_show == "MAINTENANCE_SCRIPTS_REPRESENTATIVE":
-                processes = ['MAINTENANCE_SCRIPTS_REPRESENTATIVE']
+            elif kind_of_processes_to_show in [
+                    'MAINTENANCE_SCRIPTS_CAMPAIGNX', 'MAINTENANCE_SCRIPTS_CANDIDATE', 'MAINTENANCE_SCRIPTS_CHALLENGE',
+                    'MAINTENANCE_SCRIPTS_OFFICE', 'MAINTENANCE_SCRIPTS_OFFICE_HELD',
+                    'MAINTENANCE_SCRIPTS_ORGANIZATION', 'MAINTENANCE_SCRIPTS_POLITICIAN',
+                    'MAINTENANCE_SCRIPTS_POSITION', 'MAINTENANCE_SCRIPTS_REPRESENTATIVE',
+                    'MAINTENANCE_SCRIPTS_VOTER']:
+                processes = [kind_of_processes_to_show]
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
             elif kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS":
                 processes = ['MATCH_POLITICIANS_TO_ORGANIZATIONS']
@@ -1943,7 +1948,8 @@ def batch_process_list_view(request):
 
     messages_on_stage = get_messages(request)
 
-    from wevote_settings.models import fetch_batch_process_system_by_maintenance_scripts_type_on, \
+    from wevote_settings.models import fetch_batch_process_system_by_deduplication_scripts_type_on, \
+        fetch_batch_process_system_by_maintenance_scripts_type_on, \
         fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
         fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
         fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_general_maintenance_on, \
@@ -1963,8 +1969,21 @@ def batch_process_list_view(request):
         ballot_returned_voter_oldest_date = ballot_returned_list_manager.fetch_oldest_date_last_updated(
             google_civic_election_id, state_code, for_voter=True)
 
+    batch_process_system_deduplication_script_items_raw = [
+        'CampaignX', 'Candidate', 'Challenge', 'Organization', 'Politician']
+    batch_process_system_deduplication_script_items = []
+    for item_name in batch_process_system_deduplication_script_items_raw:
+        is_on = fetch_batch_process_system_by_deduplication_scripts_type_on(item_name.lower())
+        batch_process_system_deduplication_script_items.append({
+            'is_on': is_on,
+            'kind_of_process': "DEDUPLICATION_SCRIPTS_" + item_name.upper(),
+            'title': item_name.replace('_', ' '),
+            'upper': item_name.upper(),
+        })
+
     batch_process_system_maintenance_script_items_raw = [
-        'CampaignX', 'Candidate', 'Challenge', 'Office', 'Office_Held', 'Politician', 'Position', 'Representative']
+        'CampaignX', 'Candidate', 'Challenge', 'Office', 'Office_Held', 'Organization', 'Politician', 'Position',
+        'Representative', 'Voter']
     batch_process_system_maintenance_script_items = []
     for item_name in batch_process_system_maintenance_script_items_raw:
         is_on = fetch_batch_process_system_by_maintenance_scripts_type_on(item_name.lower())
@@ -2005,6 +2024,7 @@ def batch_process_list_view(request):
         'batch_process_system_api_refresh_on':          fetch_batch_process_system_api_refresh_on(),
         'batch_process_system_ballot_items_on':         fetch_batch_process_system_ballot_items_on(),
         'batch_process_system_calculate_analytics_on':  fetch_batch_process_system_calculate_analytics_on(),
+        'batch_process_system_deduplication_script_items': batch_process_system_deduplication_script_items,
         'batch_process_system_general_maintenance_on':  fetch_batch_process_system_general_maintenance_on(),
         'batch_process_system_generate_voter_guides_on': fetch_batch_process_system_generate_voter_guides_on(),
         'batch_process_system_maintenance_script_items': batch_process_system_maintenance_script_items,
@@ -2301,9 +2321,19 @@ def batch_process_log_entry_list_view(request):
     batch_process_log_entry_search = request.GET.get('batch_process_log_entry_search', '')
     batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
     batch_process_chunk_id = convert_to_int(request.GET.get('batch_process_chunk_id', 0))
-
+    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
+    after_datetime = request.GET.get('after_datetime',"")
+    before_datetime = request.GET.get('before_datetime',"")
+    offset = request.GET.get("timezone_offset")
+    page = int(request.GET.get('page', 0))  # Default to page 0
+    batch_process_log_entry_list_count = 0
     batch_process_log_entry_list_found = False
     batch_process_log_entry_list = []
+    batch_process_log_entry_pagelist = []
+    items_per_page = 25  # Number of items per page
+    hide_pagination = False
+    has_previous_page = False
+    has_next_page = False 
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
@@ -2312,6 +2342,31 @@ def batch_process_log_entry_list_view(request):
     else:
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
+
+    def parse_input_datetime(dt_str, offset_min_str):
+        if not dt_str:
+            return None
+
+        try:
+            # Parse the user-selected naive datetime
+            naive = datetime.strptime(dt_str.strip(), "%Y-%m-%dT%H:%M")
+
+            # Convert offset string to minutes
+            offset_minutes = int(offset_min_str)
+
+            # Create timezone aware datetime in user's local timezone
+            user_tz = timezone(timedelta(minutes=-offset_minutes))
+            aware_local = naive.replace(tzinfo=user_tz)
+
+            # Convert to UTC (for DB comparison)
+            return aware_local.astimezone(timezone.utc)
+
+        except Exception as e:
+            print("PARSE ERROR:", e)
+            return None
+
+    after_dt = parse_input_datetime(after_datetime, offset)
+    before_dt = parse_input_datetime(before_datetime, offset)
 
     try:
         batch_process_queryset = BatchProcessLogEntry.objects.all()
@@ -2370,6 +2425,53 @@ def batch_process_log_entry_list_view(request):
 
                     batch_process_queryset = batch_process_queryset.filter(final_filters)
 
+        if positive_value_exists(kind_of_processes_to_show):
+            if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS":
+                activity_notice_processes = ['ACTIVITY_NOTICE_PROCESS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=activity_notice_processes)
+            elif kind_of_processes_to_show == "ANALYTICS_ACTION":
+                analytics_processes = [
+                    'AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID',
+                    'AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT',
+                    'CALCULATE_ORGANIZATION_DAILY_METRICS',
+                    'CALCULATE_ORGANIZATION_ELECTION_METRICS',
+                    'CALCULATE_SITEWIDE_DAILY_METRICS',
+                    'CALCULATE_SITEWIDE_VOTER_METRICS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=analytics_processes)
+            elif kind_of_processes_to_show == "API_REFRESH_REQUEST":
+                api_refresh_processes = ['API_REFRESH_REQUEST']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=api_refresh_processes)
+            elif kind_of_processes_to_show == "BALLOT_ITEMS":
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'REFRESH_BALLOT_ITEMS_FROM_VOTERS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+            elif kind_of_processes_to_show == "GENERATE_VOTER_GUIDES":
+                processes = ['GENERATE_VOTER_GUIDES']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS":
+                processes = ['MATCH_POLITICIANS_TO_ORGANIZATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "REPRESENTATIVES":
+                processes = ['RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "RETRIEVE_FROM_BALLOTPEDIA":
+                processes = ['RETRIEVE_FROM_BALLOTPEDIA']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "SEARCH_TWITTER":
+                search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
+            elif kind_of_processes_to_show == "UPDATE_TWITTER_DATA":
+                batch_process_queryset = batch_process_queryset.filter(
+                    kind_of_process__in=['UPDATE_TWITTER_DATA_FROM_TWITTER'])
+                
+        if after_dt is not None:
+            batch_process_queryset = batch_process_queryset.filter(date_added__gte=after_dt)
+
+        if before_dt is not None:
+            batch_process_queryset = batch_process_queryset.filter(date_added__lte=before_dt)
+
         batch_process_log_entry_list_count = batch_process_queryset.count()
 
         batch_process_queryset = batch_process_queryset[:200]
@@ -2389,6 +2491,21 @@ def batch_process_log_entry_list_view(request):
         success = False
         handle_exception(e, logger=logger, exception_message=status)
 
+    # Pagination
+    start_index = 0
+    if batch_process_log_entry_list_count > 0:
+        start_index = page * items_per_page
+        end_index = start_index + items_per_page
+        batch_process_log_entry_pagelist = batch_process_log_entry_list[start_index:end_index]
+        hide_pagination = batch_process_log_entry_list_count <= items_per_page
+        has_previous_page = page > 0
+        has_next_page = end_index < batch_process_log_entry_list_count
+    else:
+        batch_process_log_entry_pagelist = batch_process_log_entry_list
+        hide_pagination = True
+        has_previous_page = False
+        has_next_page = False
+     
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
         this_election_found = False
@@ -2418,17 +2535,40 @@ def batch_process_log_entry_list_view(request):
 
     messages_on_stage = get_messages(request)
 
+    query_params = {
+        "show_all_elections": show_all_elections,
+        "state_code": state_code or "",
+        "batch_process_log_entry_search": batch_process_log_entry_search or "",
+        "batch_process_id": batch_process_id,
+        "batch_process_chunk_id": batch_process_chunk_id,
+        "after_datetime": after_datetime,
+        "before_datetime": before_datetime,
+        "kind_of_processes_to_show": kind_of_processes_to_show or "",
+    }
+    clean_params = {k: v for k, v in query_params.items() if v not in [None, ""]}
+    checkbox_url_variables = urlencode(clean_params)
+    previous_page_url = f"?page={page - 1}&{checkbox_url_variables}"
+    next_page_url = f"?page={page + 1}&{checkbox_url_variables}"
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'batch_process_id':         batch_process_id,
         'batch_process_chunk_id':   batch_process_chunk_id,
-        'batch_process_log_entry_list':       batch_process_log_entry_list,
+        'batch_process_log_entry_list':       batch_process_log_entry_pagelist,
         'batch_process_log_entry_search':     batch_process_log_entry_search,
         'election_list':            election_list,
         'state_code':               state_code,
         'show_all_elections':       show_all_elections,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
+        'has_previous_page':        has_previous_page,
+        'has_next_page':            has_next_page,
+        'hide_pagination':          hide_pagination,
+        'previous_page_url':        previous_page_url,
+        'next_page_url':            next_page_url,
+        'current_page_number':      page,
+        'batch_process_log_entry_list_count': batch_process_log_entry_list_count,
+        'kind_of_processes_to_show': kind_of_processes_to_show,
     }
     return render(request, 'import_export_batches/batch_process_log_entry_list.html', template_values)
 

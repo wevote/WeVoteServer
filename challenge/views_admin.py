@@ -877,10 +877,10 @@ def challenge_list_view(request):
     # Maintenance script section START
     # ################################################
 
-    clean_challenges_with_dead_politician_we_vote_id = True
+    clean_challenges_with_stale_politician_we_vote_id = True
     # If a Challenge entry has a politician_we_vote_id which no longer exists, remove the seo_friendly_path
     #  so that entry doesn't block the use of that seo_friendly_path
-    if clean_challenges_with_dead_politician_we_vote_id:
+    if clean_challenges_with_stale_politician_we_vote_id:
         number_to_update = 5000  # Set to 5,000 at a time
         politician_we_vote_id_list = []
         total_to_update_after = 0
@@ -933,7 +933,7 @@ def challenge_list_view(request):
             except Exception as e:
                 messages.add_message(
                     request, messages.ERROR,
-                    "ERROR with clean_challenges_with_dead_politician_we_vote_id: {e} "
+                    "ERROR with clean_challenges_with_stale_politician_we_vote_id: {e} "
                     "politician_we_vote_ids_not_found_list: {politician_we_vote_ids_not_found_list}"
                     "".format(e=e,
                               politician_we_vote_ids_not_found_list=politician_we_vote_ids_not_found_list))

@@ -24,11 +24,11 @@ See Home Page
 ========================================
 
 Thank you,
-The We Vote Team
+The WeVote Team
 
 
 
 ========================================
-This message was sent to {{ recipient_email_address }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
+This message was sent to {{ recipient_email_address }}. If you don't want to receive emails from WeVote, please follow the link below to unsubscribe:
 {{ recipient_unsubscribe_url }}
-We Vote, Attention: Campaigns Team, 1423 Broadway PMB 158, Oakland, CA 94612
+WeVote, Attention: Campaigns Team, 1440 Broadway Ste 200, #158, Oakland, CA 94612

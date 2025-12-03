@@ -1,16 +1,16 @@
 Hello,
 
-To sign into We Vote, please enter the following code on the page where you requested your sign in code:
+To sign into WeVote, please enter the following code on the page where you requested your sign in code:
 {{ secret_numerical_code }}
 
-If you did not request this link to We Vote, please do not follow the link. You can notify us that there was a problem by forwarding this email to info@WeVote.US.
+If you did not request this link to WeVote, please do not follow the link. You can notify us that there was a problem by forwarding this email to info@WeVote.US.
 
 Thank you,
-The We Vote Team
+The WeVote Team
 
 
 
 ========================================
-This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from WeVote, please follow the link below to unsubscribe:
 {{ recipient_unsubscribe_url }}
-We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612
+WeVote, Attention: Community Team, 1440 Broadway Ste 200, #158, Oakland, CA 94612
