@@ -255,14 +255,14 @@ def email_template_edit_view(request):
         selected_folder_id = int(default_folder_id)
 
     template_values = {
-        # 'election':                                 election,
-        # 'election_list':                            election_list,
-        'email_template':                           email_template,
-        'folder_list':                              EmailTemplateFolder.objects.filter(deleted=False).order_by('email_template_name'),
-        'selected_folder_id':                        selected_folder_id,
-        'google_civic_election_id':                 google_civic_election_id,
-        'state_code':                               state_code,
-        # 'state_list':                               sorted_state_list,
+        # 'election':               election,
+        # 'election_list':          election_list,
+        'email_template':           email_template,
+        'folder_list':              EmailTemplateFolder.objects.filter(deleted=False).order_by('email_template_name'),
+        'selected_folder_id':       selected_folder_id,
+        'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
+        # 'state_list':             sorted_state_list,
     }
     return render(request, 'email_outbound/email_template_edit.html', template_values)
 
@@ -349,6 +349,7 @@ def email_template_edit_process_view(request):
         args=()) + "?google_civic_election_id=" + str(google_civic_election_id) + \
         "&state_code=" + str(state_code) + "&" + performance_process_dict_encoded
     return HttpResponseRedirect(redirect_url)
+
 
 @login_required
 def email_template_list_process_view(request):

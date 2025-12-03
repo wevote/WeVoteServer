@@ -128,7 +128,8 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
             for chunk in response.iter_content(chunk_size=(1024*1024)):
                 if chunk:
                     tf.write(chunk)
-        
+        # Force the python buffer to be written to the file            
+        tf.flush()
         if tf.tell() != global_stats['table_size']:
             raise Exception(f"Downloaded {int(tf.tell()/1024)} Kb, expected {int(global_stats['table_size']/1024)} Kb")
 
@@ -139,6 +140,7 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         print("!!Problem occurred Downloading file:", e)
         results['success'] = False,
         results['error string'] = str(e)
+        tf.close()
         return results
 
     try:
@@ -155,6 +157,7 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         print("!!Problem occurred getting variables for db:", e)
         results['success'] = False,
         results['error string'] = str(e)
+        tf.close()
         return results
 
     try:

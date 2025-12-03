@@ -14,7 +14,7 @@
 <div class="container mt-5 p-4 bg-white rounded shadow-sm border" style="max-width: 800px;">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">
-      <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" class="text-primary text-decoration-none">Email Templates</a> › {% if email_template %}Edit Email{% else %}New Email{% endif %}
+      <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" class="text-primary text-decoration-none">Email Templates</a> › {% if email_template %}Edit Template{% else %}New Template{% endif %}
     </h4>
     <div>
       <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" class="btn btn-outline-secondary me-2">Cancel</a>

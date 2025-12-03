@@ -9,20 +9,20 @@
 
 <h1>Duplicate Politicians</h1>
 
-    <ul>
     {% if state_code %}
+    <ul>
         <li>
             <a href="{% url 'politician:delete_all_duplicates' %}?state_code={{ state_code }}">
             Delete all duplicate politician data for this state</a>
         </li>
-    {% endif %}
         <li>
             <a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}">
             Find and merge duplicate politicians</a> (about 3 minutes)
         </li>
     </ul>
+    {% endif %}
 
-<br /><br />
+<br />
 
 <form name="state_code_form" method="get" action="{% url 'politician:duplicates_list' %}">
     {% csrf_token %}

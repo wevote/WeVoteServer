@@ -297,6 +297,20 @@ def fetch_batch_process_system_ballot_items_on():
     return fetch_batch_process_system_on_by_process_name('batch_process_system_ballot_items_on')
 
 
+def fetch_batch_process_system_by_deduplication_scripts_type_on(script_type=''):
+    if script_type == 'campaignx':
+        return fetch_batch_process_system_on_by_process_name('batch_process_deduplication_scripts_campaignx_on')
+    elif script_type == 'candidate':
+        return fetch_batch_process_system_on_by_process_name('batch_process_deduplication_scripts_candidate_on')
+    elif script_type == 'challenge':
+        return fetch_batch_process_system_on_by_process_name('batch_process_deduplication_scripts_challenge_on')
+    elif script_type == 'organization':
+        return fetch_batch_process_system_on_by_process_name('batch_process_deduplication_scripts_organization_on')
+    elif script_type == 'politician':
+        return fetch_batch_process_system_on_by_process_name('batch_process_deduplication_scripts_politician_on')
+    return False
+
+
 def fetch_batch_process_system_by_maintenance_scripts_type_on(script_type=''):
     if script_type == 'campaignx':
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_campaignx_on')
@@ -308,12 +322,16 @@ def fetch_batch_process_system_by_maintenance_scripts_type_on(script_type=''):
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_office_on')
     elif script_type == 'office_held':
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_office_held_on')
+    elif script_type == 'organization':
+        return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_organization_on')
     elif script_type == 'politician':
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_politician_on')
     elif script_type == 'position':
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_position_on')
     elif script_type == 'representative':
         return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_representative_on')
+    elif script_type == 'voter':
+        return fetch_batch_process_system_on_by_process_name('batch_process_maintenance_scripts_voter_on')
     return False
 
 

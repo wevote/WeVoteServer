@@ -9,19 +9,19 @@
 
 <h1>Duplicate Endorsers{% if state_code %} - {{ state_code|upper }}{% endif %}{% if possible_duplicates_count %} - {{ possible_duplicates_count }}{% endif %}</h1>
 
-    <ul>
     {% if state_code %}
+    <ul>
         <li>
             <a href="{% url 'organization:delete_all_duplicates' %}?state_code={{ state_code }}">
             Delete all duplicate endorsers data for this state</a>
         </li>
-    {% endif %}
         <li>
             <a href="{% url 'organization:find_and_merge_duplicate_organizations' %}?state_code={{ state_code }}">
             Find and merge duplicate endorsers</a> (about 3 minutes)
         </li>
     </ul>
-    
+    {% endif %}
+
 <br /><br />
 
 <form name="state_code_form" method="get" action="{% url 'organization:duplicates_list' %}">

@@ -807,7 +807,25 @@
         </tr>
     {% endfor %}
     </table>
-<input name="submit_text" type="submit" value="{% if politician %}Link These Candidates to This Politician{% endif %}" />
+    <input type="hidden"
+           name="find_candidates_to_link_to_this_politician_on"
+           value="1" >
+    <input name="submit_text" type="submit" value="{% if politician %}Link These Candidates to This Politician{% endif %}" />
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+{% else %}
+    <h4>Candidates That Might Match This Politician</h4>
+    <input id="find_candidates_to_link_to_this_politician_on_id"
+           type="hidden"
+           name="find_candidates_to_link_to_this_politician_on"
+           value="0" >
+    {% if find_candidates_to_link_none_found %}
+        <p>No candidates found to link to this politician.</p>
+    {% endif %}
+    <input name="submit_text"
+           type="submit"
+           value="{% if politician %}Find Candidates that Might Need to be Linked{% endif %}"
+           id="find_candidates_submit_btn" />
     <p>&nbsp;</p>
     <p>&nbsp;</p>
 {% endif %}
@@ -1400,13 +1418,10 @@
 {% endif %}{# End of if politician #}
 
 <script>
-    $(function() {
-        $('#state_code_id').change(function() {
-            this.form.submit();
-        });
+    document.getElementById('find_candidates_submit_btn').addEventListener('click', function() {
+        document.getElementById('find_candidates_to_link_to_this_politician_on_id').value = '1';
     });
 </script>
-
 <style>
     .animated {
         -webkit-transition: height 0.2s;
