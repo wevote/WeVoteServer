@@ -63,12 +63,40 @@
         <textarea id="message" name="message" class="form-control" rows="10">{% if email_template %}{{ email_template.message }}{% endif %}</textarea>
     </div>
 
+    <!-- Customization tokens -->
+    <div class="mb-4">
+      <h5>Customization Tokens</h5>
+      <p class="text-muted">Click a token to copy it so you can paste it into the message above.</p>
+
+      <div class="token-grid">
+        {% for token in token_list %}
+          <button type="button" class="btn btn-outline-secondary btn-sm token-btn"
+                  data-token="{{ token }}"
+                  style="min-width: 240px; text-align: left;">
+            {{ token }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
     <input type="hidden" name="email_template_id" value="{% if email_template %}{{ email_template.id }}{% endif %}">
     <input type="hidden" name="selected_folder_id" value="{{ selected_folder_id }}">
   </form>
 </div>
+<style>
+  .token-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+  }
+
+  .token-btn.copied {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+  }
+</style>
 
 <!-- Use TinyMCE via Local -->
 {% load static %}
@@ -136,5 +164,20 @@
       }
     });
   });
+</script>
+
+<!-- Customization tokens copy script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.token-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const token = btn.dataset.token;
+      navigator.clipboard.writeText(token).then(() => {
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 800);
+      });
+    });
+  });
+});
 </script>
 {% endblock %}
