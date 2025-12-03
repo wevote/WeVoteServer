@@ -154,6 +154,8 @@
 {% endblock %}
 
 {% block extrabody %}
+<!-- Use TinyMCE via Local -->
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
 <style>
   .recipient-chip {
     display: inline-block;
@@ -485,5 +487,69 @@
   window.loadCampaign = function(campaignId) {
     window.location.href = '{% url "email_outbound:email_campaign_edit" %}?id=' + campaignId + '&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}';
   }
+
+  // Initialize TinyMCE for email body
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.tinymce) {
+      console.log('TinyMCE did not load from static.');
+      return;
+    } else {
+      console.log('tinymce loaded (self-hosted)');
+    }
+    if (tinymce.get('email_body')) tinymce.get('email_body').remove();
+
+    tinymce.init({
+      selector: '#email_body',
+      license_key: 'gpl',
+      menubar: true,
+      plugins: 'advlist autolink lists link image charmap preview anchor ' +
+               'searchreplace visualblocks code fullscreen insertdatetime media ' +
+               'table help wordcount',
+      toolbar: 'undo redo | blocks fontsize | ' +
+               'bold italic underline strikethrough | forecolor backcolor | ' +
+               'alignleft aligncenter alignright alignjustify | ' +
+               'outdent indent | bullist numlist | ' +
+               'link image media table | removeformat code fullscreen help',
+      toolbar_mode: 'wrap',
+      height: 500,
+      branding: false,
+      promotion: false,
+      content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
+      link_default_target: '_blank',
+      link_assume_external_targets: true,
+      block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre',
+      font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt',
+      extended_valid_elements: '*[*]',
+      valid_children: '+body[style]',
+      images_upload_handler: function (blobInfo, success, failure) {
+        var reader = new FileReader();
+        reader.onload = function() { success(reader.result); };
+        reader.onerror = function() { failure('Image upload failed'); };
+        reader.readAsDataURL(blobInfo.blob());
+      },
+      file_picker_types: 'image',
+      file_picker_callback: function(callback, value, meta) {
+        if (meta.filetype === 'image') {
+          var input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.onchange = function() {
+            var file = this.files[0];
+            var reader = new FileReader();
+            reader.onload = function() {
+              callback(reader.result, { alt: file.name });
+            };
+            reader.readAsDataURL(file);
+          };
+          input.click();
+        }
+      },
+      setup: function(editor) {
+        editor.on('init', function() {
+          console.log('TinyMCE initialized successfully');
+        });
+      }
+    });
+  });
 </script>
 {% endblock %}

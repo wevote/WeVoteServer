@@ -135,7 +135,9 @@ def email_campaign_edit_view(request):
             email_campaign = EmailCampaign.objects.get(id=campaign_id)
             
             # Load recipients for this campaign
-            recipients = EmailCampaignRecipient.objects.filter(email_campaign_id=campaign_id)
+            recipients = EmailCampaignRecipient.objects.filter(email_campaign_id=campaign_id).only(
+                'id', 'voter_we_vote_id', 'recipient_name'
+            )
             campaign_recipients = []
             for recipient in recipients:
                 if recipient.voter_we_vote_id:
@@ -254,6 +256,15 @@ def email_template_edit_view(request):
     elif default_folder_id:
         selected_folder_id = int(default_folder_id)
 
+    # customization tokens
+    TOKEN_LIST = [
+        "[official email]",
+        "[person first name]",
+        "[person last name]",
+        "[person full name]",
+        "[personal email]",
+        ]
+
     template_values = {
         # 'election':               election,
         # 'election_list':          election_list,
@@ -262,6 +273,7 @@ def email_template_edit_view(request):
         'selected_folder_id':       selected_folder_id,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
+        'token_list':               TOKEN_LIST,
         # 'state_list':             sorted_state_list,
     }
     return render(request, 'email_outbound/email_template_edit.html', template_values)
