@@ -44,7 +44,7 @@ pillow==11.1.0
 pip-tools==7.4.1
 pipdeptree==2.26.1
 polars~=0.19.17         # recommend engine - comment out if initial installation is failing
-protobuf>=3.18.3        # not directly required, pinned by Snyk to avoid a vulnerability
+protobuf>=6.33.5        # not directly required, pinned by Snyk to avoid a vulnerability
 psycopg2-binary==2.9.10
 py3dns==4.0.1
 pyarrow                 # recommend engine - comment out if initial installation is failing
