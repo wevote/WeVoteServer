@@ -5,7 +5,7 @@ cachecontrol==0.13.1
 # cairosvg==2.7.1
 certifi>=2025.1.31      # Keep updated. Root certificates are used by requests.
 cloudscraper==1.2.68
-cryptography==44.0.1
+cryptography==46.0.5
 dj-database-url==2.1.0
 django==5.0.13
 django-bootstrap3==15.0.0
