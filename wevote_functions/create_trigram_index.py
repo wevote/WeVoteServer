@@ -1,0 +1,145 @@
+# wevote_functions/create_trigram_index.py
+# Brought to you by We Vote. Be good.
+# -*- coding: UTF-8 -*-
+
+import hashlib
+import logging
+
+from django.db import connection, transaction
+from django.db.models import CharField, TextField
+from django.conf import settings
+
+
+logger = logging.getLogger(__name__)
+
+POSTGRES_INDEX_NAME_LIMIT = 63
+
+
+def add_trigram_index(model, fields):
+    """
+    model: Django model class
+    fields: list[str]
+    """
+
+    if connection.vendor != "postgresql":
+        logger.error("Trigram index attempted on non-PostgreSQL database.")
+        raise RuntimeError("Trigram indexes require PostgreSQL.")
+
+    table_name = model._meta.db_table
+    logger.info(
+        "Starting trigram index creation | table=%s | fields=%s",
+        table_name,
+        fields,
+    )
+
+    try:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                _ensure_extensions(cursor)
+
+                for field_name in fields:
+                    field = _get_valid_field(model, field_name)
+
+                    index_name = _generate_safe_index_name(
+                        table_name, field.column
+                    )
+
+                    if _index_exists(cursor, index_name):
+                        logger.info(
+                            "Index already exists, skipping | index=%s",
+                            index_name,
+                        )
+                        continue
+
+                    create_index_sql = f"""
+                        CREATE INDEX {index_name}
+                        ON {table_name}
+                        USING gist ({field.column} gist_trgm_ops);
+                    """
+
+                    logger.info(
+                        "Creating trigram index | index=%s | table=%s | column=%s",
+                        index_name,
+                        table_name,
+                        field.column,
+                    )
+
+                    cursor.execute(create_index_sql)
+
+        logger.info("Trigram index creation completed successfully.")
+
+    except Exception as e:
+        logger.exception(
+            "Failed to create trigram index | table=%s | fields=%s",
+            table_name,
+            fields,
+        )
+        raise
+
+
+# ---------------------------------------------------------
+# Internal Helpers
+# ---------------------------------------------------------
+
+def _ensure_extensions(cursor):
+    logger.info("Ensuring PostgreSQL extensions exist (pg_trgm, btree_gist)")
+    cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+    cursor.execute("CREATE EXTENSION IF NOT EXISTS btree_gist;")
+
+
+def _get_valid_field(model, field_name):
+    try:
+        field = model._meta.get_field(field_name)
+    except Exception:
+        logger.error("Field not found | field=%s", field_name)
+        raise ValueError(f"Field '{field_name}' not found")
+
+    if not isinstance(field, (CharField, TextField)):
+        logger.error(
+            "Invalid field type for trigram | field=%s | type=%s",
+            field_name,
+            field.__class__.__name__,
+        )
+        raise ValueError(
+            f"Field '{field_name}' must be CharField or TextField"
+        )
+
+    return field
+
+
+def _index_exists(cursor, index_name):
+    cursor.execute(
+        """
+        SELECT 1
+        FROM pg_indexes
+        WHERE indexname = %s;
+        """,
+        [index_name],
+    )
+    exists = cursor.fetchone() is not None
+
+    if exists:
+        logger.debug("Index existence check: FOUND | index=%s", index_name)
+    else:
+        logger.debug("Index existence check: NOT FOUND | index=%s", index_name)
+
+    return exists
+
+
+def _generate_safe_index_name(table_name, column_name):
+    base_name = f"{table_name}_{column_name}_trgm_idx"
+
+    if len(base_name) <= POSTGRES_INDEX_NAME_LIMIT:
+        return base_name
+
+    hash_suffix = hashlib.md5(base_name.encode()).hexdigest()[:8]
+    trimmed = base_name[: POSTGRES_INDEX_NAME_LIMIT - 9]
+    safe_name = f"{trimmed}_{hash_suffix}"
+
+    logger.debug(
+        "Index name truncated due to 63-char limit | original=%s | new=%s",
+        base_name,
+        safe_name,
+    )
+
+    return safe_name
