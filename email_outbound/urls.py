@@ -9,6 +9,8 @@ urlpatterns = [
     re_path(r'^$', views_admin.email_campaign_list_view, name='email_campaign_list', ),
     re_path(r'^audience_builder_drawer_html/$', views_admin.audience_builder_drawer_html_view,
             name='audience_builder_drawer_html'),
+    re_path(r'^audience_builder_drawer_preview_html/$', views_admin.audience_builder_drawer_preview_html_view,
+            name='audience_builder_drawer_preview_html'),
     re_path(r'^audience_builder_edit/$', views_admin.audience_builder_edit_view, name='audience_builder_edit'),
     re_path(r'^audience_builder_edit_process/$', views_admin.audience_builder_edit_process_view,
             name='audience_builder_edit_process'),

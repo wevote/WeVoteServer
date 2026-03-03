@@ -187,6 +187,7 @@ function openSavedAudiencesDrawer(audienceBuilderId = '') {
     const audienceBuilderNameContent = document.getElementById('audience_builder_name_id');
     const drawer = document.getElementById('savedAudiencesDrawer');
     const drawerContent = document.getElementById('audienceBuilderDrawerHTML');
+    const drawerPreviewContent = document.getElementById('audienceBuilderDrawerPreviewHTML');
     const overlay = document.getElementById('savedAudiencesOverlay');
 
     if (drawer && overlay) {
@@ -236,6 +237,44 @@ function openSavedAudiencesDrawer(audienceBuilderId = '') {
             drawerContent.innerHTML = '<div class="error-message">Failed to load audience builder. Please try again.</div>';
         });
     }
+    if (drawerPreviewContent) {
+        return getAudienceBuilderPreviewHTML(audienceBuilderId, drawerPreviewContent);
+    }
+}
+
+function getAudienceBuilderPreviewHTML(audienceBuilderId, drawerPreviewContent) {
+    // Show loading state
+    drawerPreviewContent.innerHTML = '<div class="loading-spinner">Loading preview...</div>';
+
+    // Fetch the HTML from the server
+    const url = '/email/audience_builder_drawer_preview_html' + '?audience_builder_id=' + audienceBuilderId;
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+            console.log(response.json());
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            drawerPreviewContent.innerHTML = data.html;
+        } else {
+            drawerPreviewContent.innerHTML = '<div class="error-message">Error loading content: ' + data.status + '</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching audience builder preview HTML:', error);
+        drawerPreviewContent.innerHTML = '<div class="error-message">Failed to load audience builder preview. Please try again.</div>';
+    });
 }
 
 // Close the drawer
@@ -264,56 +303,19 @@ function setupDrawerFormSubmission() {
 
             const formData = new FormData(form);
             const drawerContent = document.getElementById('audienceBuilderDrawerHTML');
+            const drawerPreviewContent = document.getElementById('audienceBuilderDrawerPreviewHTML');
 
-            // Show loading state
             if (drawerContent) {
+                // Show loading state
                 drawerContent.innerHTML = '<div class="loading-spinner">Saving and reloading...</div>';
+                submitAudienceBuilderForm(drawerContent, form, formData);
             }
-
-            // Submit form via fetch
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update the drawer content with the returned HTML
-                    if (drawerContent && data.html) {
-                        drawerContent.innerHTML = data.html;
-                        initializeResizeHandle();
-                    }
-
-                    // Show success message if provided
-                    if (data.message) {
-                        showDrawerMessage(data.message, 'success');
-                    }
-                } else {
-                    // Show error message
-                    if (drawerContent) {
-                        drawerContent.innerHTML = '<div class="error-message">Error: ' + (data.status || 'Unknown error') + '</div>';
-                    }
-                    if (data.message) {
-                        showDrawerMessage(data.message, 'error');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error);
-                if (drawerContent) {
-                    drawerContent.innerHTML = '<div class="error-message">Failed to save. Please try again.</div>';
-                }
-                showDrawerMessage('Failed to save audience builder', 'error');
-            });
+            if (drawerPreviewContent) {
+                const audienceBuilderIdContent = document.getElementById('audience_builder_id_id');
+                const audienceBuilderId = audienceBuilderIdContent.value;
+                // console.log('getAudienceBuilderPreviewHTML, audienceBuilderId:', audienceBuilderId);
+                getAudienceBuilderPreviewHTML(audienceBuilderId, drawerPreviewContent);
+            }
         });
     }
 }
@@ -345,57 +347,68 @@ function submitAddDeleteButtonFromDrawer(buttonElement) {
         formData.append(buttonName, buttonValue);
 
         const drawerContent = document.getElementById('audienceBuilderDrawerHTML');
+        const drawerPreviewContent = document.getElementById('audienceBuilderDrawerPreviewHTML');
 
-        // Show loading state
         if (drawerContent) {
+            // Show loading state
             drawerContent.innerHTML = '<div class="loading-spinner">Saving and reloading...</div>';
+            submitAudienceBuilderForm(drawerContent, form, formData);
         }
-
-        // Submit form via fetch
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update the drawer content with the returned HTML
-                if (drawerContent && data.html) {
-                    drawerContent.innerHTML = data.html;
-                    initializeResizeHandle();
-                }
-
-                // Show success message if provided
-                if (data.message) {
-                    showDrawerMessage(data.message, 'success');
-                }
-            } else {
-                // Show error message
-                if (drawerContent) {
-                    drawerContent.innerHTML = '<div class="error-message">Error: ' + (data.status || 'Unknown error') + '</div>';
-                }
-                if (data.message) {
-                    showDrawerMessage(data.message, 'error');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error submitting form:', error);
-            if (drawerContent) {
-                drawerContent.innerHTML = '<div class="error-message">Failed to save. Please try again.</div>';
-            }
-            showDrawerMessage('Failed to save audience builder', 'error');
-        });
+        if (drawerPreviewContent) {
+            const audienceBuilderIdContent = document.getElementById('audience_builder_id_id');
+            const audienceBuilderId = audienceBuilderIdContent.value;
+            // console.log('getAudienceBuilderPreviewHTML, audienceBuilderId:', audienceBuilderId);
+            getAudienceBuilderPreviewHTML(audienceBuilderId, drawerPreviewContent);
+        }
     }
+}
+
+function submitAudienceBuilderForm(drawerContent, form, formData) {
+    // Submit form via fetch
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+            console.log(response.json());
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Update the drawer content with the returned HTML
+            if (drawerContent && data.html) {
+                drawerContent.innerHTML = data.html;
+                initializeResizeHandle();
+            }
+
+            // Show success message if provided
+            if (data.message) {
+                showDrawerMessage(data.message, 'success');
+            }
+        } else {
+            // Show error message
+            if (drawerContent) {
+                drawerContent.innerHTML = '<div class="error-message">Error: ' + (data.status || 'Unknown error') + '</div>';
+            }
+            if (data.message) {
+                showDrawerMessage(data.message, 'error');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting form:', error);
+        if (drawerContent) {
+            drawerContent.innerHTML = '<div class="error-message">Failed to save. Please try again.</div>';
+        }
+        showDrawerMessage('Failed to save audience builder', 'error');
+    });
 }
 
 // For choosing from among all of the Filter types: Audience type, Election date, Political party, etc.

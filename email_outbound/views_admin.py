@@ -24,6 +24,7 @@ from wevote_functions.validate_email import validate_email
 
 from .controllers_email_campaign import audience_builder_data_retrieve, augment_email_campaign_recipient, \
     render_audience_builder_html
+from .controllers_audience_builder_preview import render_audience_builder_preview_html
 from .models import EmailCampaign, EmailTemplate, EmailTemplateFolder, EmailCampaignRecipient, \
     AudienceBuilderFolder, AudienceBuilder, AudienceFilter, AudienceFilterChain, EMAIL_TEMPLATE_CUSTOMIZATION_TOKENS, \
     OPERATOR_AND, OPERATOR_EXCLUDE, OPERATOR_INCLUDE, OPERATOR_OR
@@ -868,6 +869,64 @@ def audience_builder_drawer_html_view(request):
                 'audience_builder_id': audience_builder_id,
                 'audience_builder_name': audience_builder_name,
                 'html': html_results['audience_builder_html'],
+                'status': html_results['status'],
+                'success': True,
+            })
+        else:
+            return JsonResponse({
+                'audience_builder_id': audience_builder_id,
+                'audience_builder_name': audience_builder_name,
+                'html': '',
+                'status': html_results['status'],
+                'success': False,
+            }, status=500)
+    else:
+        return JsonResponse({
+            'audience_builder_id': audience_builder_id,
+            'audience_builder_name': audience_builder_name,
+            'html': '',
+            'status': status,
+            'success': False,
+        }, status=500)
+
+
+def audience_builder_drawer_preview_html_view(request):
+    """
+    Returns HTML fragment for the preview shown in the audience builder drawer
+    """
+    status = ""
+    success = True
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return JsonResponse({'success': False, 'status': 'PERMISSION_DENIED'}, status=403)
+
+    audience_builder_id = request.POST.get('audience_builder_id', request.GET.get('audience_builder_id', None))
+    audience_builder_name = ''
+
+    results = audience_builder_data_retrieve(audience_builder_id)
+    status += results['status']
+
+    if results['success']:
+        audience_builder = results['audience_builder']
+        if hasattr(audience_builder, 'audience_builder_name'):
+            audience_builder_name = audience_builder.audience_builder_name
+        audience_filter_chain_dict = results['audience_filter_chain_dict']
+        audience_filter_dict = results['audience_filter_dict']
+
+        html_results = render_audience_builder_preview_html(
+            audience_builder=audience_builder,
+            audience_filter_chain_dict=audience_filter_chain_dict,
+            audience_filter_dict=audience_filter_dict,
+            request=request,
+        )
+
+        if html_results['success']:
+            return JsonResponse({
+                'audience_builder_id': audience_builder_id,
+                'audience_builder_name': audience_builder_name,
+                'html': html_results['audience_builder_preview_html'],
                 'status': html_results['status'],
                 'success': True,
             })

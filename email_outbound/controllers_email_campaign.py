@@ -17,6 +17,7 @@ from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 from wevote_functions.functions_date import get_current_year_as_integer
+from .controllers_audience_builder_preview import generate_preview_list_from_audience_builder
 from .models import CUSTOMIZATION_TOKEN_CONVERSION_FROM_JAZZ_HR, \
     EmailCampaign, EmailCampaignRecipient, EmailManager, EmailScheduled, \
     EMAIL_TEMPLATE_CUSTOMIZATION_TOKENS, TO_BE_PROCESSED
@@ -524,10 +525,17 @@ def email_campaign_send(
     return results
 
 
-def generate_email_campaign_recipients_from_audience_builder(email_campaign_id=''):
+def generate_email_campaign_recipients_from_audience_builder(audience_builder_id=0, email_campaign_id=''):
+    """
+    Use this function to create email_campaign_recipients in preparation for sending emails.
+
+    :param audience_builder_id: ID of the audience builder
+    :param email_campaign_id: ID of the email campaign to generate recipients for
+    """
     status = ""
     success = True
 
+    results = generate_preview_list_from_audience_builder(audience_builder_id=audience_builder_id)
     try:
         email_campaign = EmailCampaign.objects.get(id=email_campaign_id)
     except EmailCampaign.DoesNotExist:

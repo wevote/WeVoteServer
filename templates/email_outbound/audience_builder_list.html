@@ -23,7 +23,7 @@
 <style>
   .wv-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .wv-spacer { flex:1; }
-  .wv-section { margin-top: 18px; }
+  .audience-builder-section { margin-top: 18px; }
   .wv-muted { color:#64748b; font-size: 0.95rem; }
   details.wv-accordion { border:1px solid #e5e7eb; border-radius:10px; padding:10px; background:#fff; }
   details.wv-accordion + details.wv-accordion { margin-top:10px; }
@@ -76,7 +76,7 @@
   </form>
 </div>
 {# ---------------- ACTIVE FOLDERS ---------------- #}
-<div class="wv-section">
+<div class="audience-builder-section">
   {% for f in folders_active %}
       {% with list=audience_builders_by_folder|get_value_from_dict:f.id %}
         <details class="wv-accordion" open>
@@ -216,7 +216,7 @@
 </div>
 
 {# ---------------- ARCHIVED FOLDERS ---------------- #}
-<div class="wv-section">
+<div class="audience-builder-section">
   <details class="wv-accordion">
     <summary class="wv-accordion-head">
         <div class="wv-accordion-title" >
@@ -298,7 +298,7 @@
 </div>
 
 {# ---------------- ARCHIVED AUDIENCE BUILDER LIST ---------------- #}
-<div class="wv-section">
+<div class="audience-builder-section">
   <details class="wv-accordion">
     <summary class="wv-accordion-head">
         <div class="wv-accordion-title" >

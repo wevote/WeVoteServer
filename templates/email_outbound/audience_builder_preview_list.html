@@ -1,0 +1,258 @@
+{# templates/email_outbound/audience_builder_preview_list.html #}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .wv-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  /* Dropdown menu (used by kebab ••• on each row) */
+  .wv-dropdown { position:relative; display:inline-block; }
+  .wv-dropdown-menu { position:absolute; right:0; top:110%; min-width:180px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px; display:none; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+  .wv-dropdown.open .wv-dropdown-menu { display:block; }
+  .wv-kebab { border:none; border-radius:8px; background:transparent; padding:6px 10px; cursor:pointer; font-size:1.2rem; color:#64748b; transition:all 0.15s; opacity:0; visibility:hidden; outline:none; }
+  .wv-kebab:focus { outline:none; box-shadow:none; }
+  .recipients-table tbody tr:hover .wv-kebab { opacity:1; visibility:visible; }
+  .wv-kebab:hover { color:#475569; }
+  .wv-menu-btn { width:100%; text-align:left; border:none; background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:1.5rem; }
+  .wv-menu-btn:hover { background:#f1f5f9; }
+  .wv-dropdown-divider { height:1px; background:#e5e7eb; margin:6px 0; }
+
+  /* Override btn-secondary */
+  .btn.btn-secondary {
+    background: #fff;
+    color: #337ab7;
+    border-color: #337ab7;
+  }
+  .btn.btn-secondary:hover {
+    background: #f0f4f8;
+  }
+
+  /* Search bar */
+  .search-container {
+    margin-bottom: 16px;
+    position: relative;
+    max-width: 520px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    font-size: 1.4rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+  }
+
+  .search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Table */
+  .recipients-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    table-layout: auto;
+  }
+
+  .recipients-table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  .recipients-table thead th:first-child {
+    width: 250px;
+  }
+
+  .recipients-table thead th:nth-child(2),
+  .recipients-table thead th:nth-child(3),
+  .recipients-table thead th:nth-child(4),
+  .recipients-table thead th:nth-child(5) {
+    width: 120px;
+  }
+
+  .recipients-table thead th:last-child {
+    width: 50px;
+    max-width: 50px;
+  }
+
+  /* Drafts table has only 4 columns, so adjust accordingly */
+  [data-content="drafts"] .recipients-table thead th:nth-child(2),
+  [data-content="drafts"] .recipients-table thead th:nth-child(3) {
+    width: 120px;
+  }
+
+  .recipients-table tbody td {
+    padding: 8px 12px;
+    font-size: 1.5rem;
+    border-bottom: 1.5px solid #cbd5e1;
+    color: #1e293b !important;
+  }
+
+  .recipients-table tbody td:last-child {
+    text-align: left;
+  }
+
+  .recipients-table tbody tr {
+    transition: background-color 0.15s;
+  }
+
+  .recipients-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+
+  .recipient-link {
+    color: #337ab7;
+    text-decoration: underline;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+
+  .recipient-link:hover {
+    color: #23527c;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .text-danger {
+    color: #dc2626;
+  }
+
+  .text-muted {
+    color: #334155;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    font-size: 1.25rem;
+  }
+</style>
+
+<div class="wv-row" style="margin-top:10px;">
+
+<div class="wv-section">
+  <!-- Search -->
+  <div class="search-container">
+    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input type="text"
+           id="search-recipients"
+           class="search-input"
+           placeholder="Search recipients">
+  </div>
+    {% if preview_list_length %}
+        ({{ preview_list_length }} recipients found)
+    {% endif %}
+
+
+  <!-- Active Tab (Sent Campaigns) -->
+  <div class="tab-content active" data-content="active">
+    <table class="recipients-table">
+      <thead>
+        <tr>
+          <th>Recipient name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>State</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if preview_list %}
+          {% for recipient in preview_list %}
+          <tr class="recipient-row" data-name="{{ recipient.email_recipient_name|lower }}">
+            <td>{{ recipient.name }}</td>
+            <td>{{ recipient.phone }}</td>
+            <td>{{ recipient.email }}</td>
+            <td>{{ recipient.type }}</td>
+            <td>{{ recipient.state_code }}</td>
+            <td>
+              <div class="wv-dropdown">
+                <button type="button" class="wv-kebab js-dd">•••</button>
+                <div class="wv-dropdown-menu">
+                  <a class="wv-menu-btn" style="display:block; text-decoration:none; color:inherit;" href="{% url 'email_outbound:email_campaign_edit' %}?id={{ recipient.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                    Edit
+                  </a>
+                  <button class="wv-menu-btn">Duplicate</button>
+                  <button class="wv-menu-btn">Archive</button>
+                  <div class="wv-dropdown-divider"></div>
+                  <button class="wv-menu-btn text-danger">Delete</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="empty-state">
+              No recipients found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-recipients');
+
+  // Search — scoped to active tab only
+  searchInput.addEventListener('input', function(e) {
+    filterCampaigns(e.target.value.toLowerCase());
+  });
+
+  function filterCampaigns(searchTerm) {
+    const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+    activeTab.querySelectorAll('.recipient-row').forEach(row => {
+      const name = row.dataset.name || '';
+      row.style.display = name.includes(searchTerm) ? '' : 'none';
+    });
+  }
+
+  // Dropdown (kebab menu on each row)
+  document.querySelectorAll('.js-dd').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wrap = btn.closest('.wv-dropdown');
+      document.querySelectorAll('.wv-dropdown').forEach(d => {
+        if (d !== wrap) d.classList.remove('open');
+      });
+      wrap.classList.toggle('open');
+    });
+  });
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.wv-dropdown').forEach(d => d.classList.remove('open'));
+  });
+});
+</script>
+
+{% endblock %}

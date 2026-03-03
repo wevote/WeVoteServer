@@ -1220,8 +1220,13 @@ def extract_vote_usa_measure_id(raw_vote_usa_measure_id):
 
 def extract_vote_usa_office_id(raw_vote_usa_office_id):
     if positive_value_exists(raw_vote_usa_office_id):
+        raw_vote_usa_office_id = raw_vote_usa_office_id.strip()
         if '|' in raw_vote_usa_office_id:
             parts = raw_vote_usa_office_id.split("|")
+            vote_usa_office_id = parts[1]
+        elif '}' in raw_vote_usa_office_id:
+            # A typo has been found in incoming data from Vote USA
+            parts = raw_vote_usa_office_id.split("}")
             vote_usa_office_id = parts[1]
         else:
             vote_usa_office_id = raw_vote_usa_office_id
@@ -1233,8 +1238,14 @@ def extract_vote_usa_office_id(raw_vote_usa_office_id):
 def augment_vote_usa_office_id(vote_usa_office_id, primary_party=''):
     if positive_value_exists(primary_party):
         primary_party_suffix = ""
-        if primary_party.lower() == 'democratic party':
+        if primary_party.lower() == 'conservative party':
+            primary_party_suffix = 'PC'
+        elif primary_party.lower() == 'democratic party':
             primary_party_suffix = 'PD'
+        elif primary_party.lower() == 'green party':
+            primary_party_suffix = 'PG'
+        elif primary_party.lower() == 'independent party':
+            primary_party_suffix = 'PI'
         elif primary_party.lower() == 'libertarian party':
             primary_party_suffix = 'PL'
         elif primary_party.lower() == 'republican party':

@@ -1336,6 +1336,12 @@ def groom_and_store_google_civic_office_json_2021(
     # ballot_placement: A number specifying the position of this contest on the voter's ballot.
     google_ballot_placement = common_results['ballot_placement']
     primary_party = common_results['primary_party']  # If this is a partisan election, the name of the party it is for.
+    if not primary_party:
+        status += "PRIMARY_PARTY_MISSING "
+    elif primary_party not in [
+        'Conservative Party', 'Democratic Party', 'Green Party', 'Libertarian Party', 'Other Party', 'Republican Party',
+    ]:
+        status += "UNRECOGNIZED_PRIMARY_PARTY: " + str(primary_party) + " "
 
     ctcl_office_uuid = None
     vote_usa_office_id = None
