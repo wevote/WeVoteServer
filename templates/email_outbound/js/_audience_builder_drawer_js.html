@@ -184,6 +184,7 @@ function initializeResizeHandle() {
 function openSavedAudiencesDrawer(audienceBuilderId = '') {
     // console.log('openSavedAudiencesDrawer audience builder ID:', audienceBuilderId);
     const audienceBuilderIdContent = document.getElementById('audience_builder_id_id');
+    const audienceBuilderIdDisplay = document.getElementById('audience_builder_id_display');
     const audienceBuilderNameContent = document.getElementById('audience_builder_name_id');
     const drawer = document.getElementById('savedAudiencesDrawer');
     const drawerContent = document.getElementById('audienceBuilderDrawerHTML');
@@ -204,6 +205,7 @@ function openSavedAudiencesDrawer(audienceBuilderId = '') {
         // Show loading state
         drawerContent.innerHTML = '<div class="loading-spinner">Loading audience builder...</div>';
         audienceBuilderIdContent.value = audienceBuilderId;
+        audienceBuilderIdDisplay.textContent = audienceBuilderId;
         audienceBuilderNameContent.value = 'Loading...';
 
         // Fetch the HTML from the server

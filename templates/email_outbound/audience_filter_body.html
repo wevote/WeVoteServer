@@ -10,20 +10,37 @@
         >
             <option value="" {% if not audience_filter.audience_filter_type %}selected{% endif %}>-- Select a filter --</option>
             <optgroup label="🗳️ Election">
-                <option value="FILTER_TYPE_AUDIENCE_TYPE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_AUDIENCE_TYPE" %}selected{% endif %}>Audience type</option>
+                <option value="FILTER_TYPE_AUDIENCE_TYPE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_AUDIENCE_TYPE" %}selected{% endif %}
+                        disabled
+                >Audience type</option>
                 <option value="FILTER_TYPE_ELECTION_DATE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_ELECTION_DATE" %}selected{% endif %}>Election date</option>
-{#                <option value="FILTER_TYPE_POLITICAL_PARTY" {% if audience_filter.audience_filter_type == "FILTER_TYPE_POLITICAL_PARTY" %}selected{% endif %}>Political party</option>#}
-                <option value="FILTER_TYPE_STATE_CODE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_STATE_CODE" %}selected{% endif %}>State</option>
+                <option value="FILTER_TYPE_POLITICAL_PARTY" {% if audience_filter.audience_filter_type == "FILTER_TYPE_POLITICAL_PARTY" %}selected{% endif %}
+                        disabled
+                >Political party</option>
+                <option value="FILTER_TYPE_STATE_CODE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_STATE_CODE" %}selected{% endif %}
+                        disabled
+                >State</option>
             </optgroup>
             <optgroup label="🎯 Engagement">
-                <option value="FILTER_TYPE_HAS_BEEN_CONTACTED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_BEEN_CONTACTED" %}selected{% endif %}>Has been contacted</option>
-                <option value="FILTER_TYPE_HAS_OPENED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_OPENED" %}selected{% endif %}>Has opened message</option>
-                <option value="FILTER_TYPE_HAS_SIGNED_IN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_SIGNED_IN" %}selected{% endif %}>Has signed in</option>
-                <option value="FILTER_TYPE_HAS_CLAIMED_POLITICIAN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_CLAIMED_POLITICIAN" %}selected{% endif %}>Has claimed politician</option>
+                <option value="FILTER_TYPE_HAS_BEEN_CONTACTED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_BEEN_CONTACTED" %}selected{% endif %}
+                        disabled
+                >Has been contacted</option>
+                <option value="FILTER_TYPE_HAS_OPENED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_OPENED" %}selected{% endif %}
+                        disabled
+                >Has opened message</option>
+                <option value="FILTER_TYPE_HAS_SIGNED_IN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_SIGNED_IN" %}selected{% endif %}
+                        disabled
+                >Has signed in</option>
+                <option value="FILTER_TYPE_HAS_CLAIMED_POLITICIAN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_CLAIMED_POLITICIAN" %}selected{% endif %}
+                        disabled
+                >Has claimed politician</option>
             </optgroup>
             <optgroup label="🏠 Communication">
-                <option value="FILTER_TYPE_EMAIL_ADDRESS" {% if audience_filter.audience_filter_type == "FILTER_TYPE_EMAIL_ADDRESS" %}selected{% endif %}>Email address</option>
-                <option value="FILTER_TYPE_PHONE_NUMBER" {% if audience_filter.audience_filter_type == "FILTER_TYPE_PHONE_NUMBER" %}selected{% endif %}>Phone number</option>
+                <option value="FILTER_TYPE_EMAIL_ADDRESS" {% if audience_filter.audience_filter_type == "FILTER_TYPE_EMAIL_ADDRESS" %}selected{% endif %}
+                >Email address</option>
+                <option value="FILTER_TYPE_PHONE_NUMBER" {% if audience_filter.audience_filter_type == "FILTER_TYPE_PHONE_NUMBER" %}selected{% endif %}
+                        disabled
+                >Phone number</option>
             </optgroup>
         </select>
     </div>
@@ -112,16 +129,16 @@
                 <option value="ELECTION_IS_ON"
                         {% if audience_filter.election_modifier == "ELECTION_IS_ON" %}selected{% endif %}
                 >is on</option>
-                <option value="ELECTION_IS_ON_OR_AFTER"
+                <option value="ELECTION_IS_ON_OR_AFTER" disabled
                          {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_AFTER" %}selected{% endif %}
                 >is on or after</option>
-                <option value="ELECTION_IS_AFTER"
+                <option value="ELECTION_IS_AFTER" disabled
                          {% if audience_filter.election_modifier == "ELECTION_IS_AFTER" %}selected{% endif %}
                 >is after</option>
-                <option value="ELECTION_IS_BEFORE"
+                <option value="ELECTION_IS_BEFORE" disabled
                          {% if audience_filter.election_modifier == "ELECTION_IS_BEFORE" %}selected{% endif %}
                 >is before</option>
-                <option value="ELECTION_IS_ON_OR_BEFORE"
+                <option value="ELECTION_IS_ON_OR_BEFORE" disabled
                          {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_BEFORE" %}selected{% endif %}
                 >is on or before</option>
             </select>
@@ -168,13 +185,13 @@
                  display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_EMAIL_ADDRESS' %}block{% else %}none{% endif %};"
     >
         <select class="form-select" name="email_address_modifier_{{ audience_filter.id }}">
-            <option value="EMAIL_ADDRESS_CONTAINS"
+            <option value="EMAIL_ADDRESS_CONTAINS" disabled
                     {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_CONTAINS" %}selected{% endif %}
             >contains</option>
             <option value="EMAIL_ADDRESS_EXISTS"
                     {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_EXISTS" %}selected{% endif %}
             >exists</option>
-            <option value="EMAIL_ADDRESS_IS_MISSING"
+            <option value="EMAIL_ADDRESS_IS_MISSING" disabled
                     {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_IS_MISSING" %}selected{% endif %}
             >is missing</option>
         </select>

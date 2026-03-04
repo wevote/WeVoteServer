@@ -375,6 +375,7 @@ class EmailCampaign(models.Model):
     """
     An email campaign that we assemble, and then send
     """
+    audience_builder_id = models.PositiveIntegerField(default=0, null=False)
     date_last_updated = models.DateTimeField(auto_now=True, db_index=True)
     deleted = models.BooleanField(default=False)
     email_body_template_raw = models.TextField(null=True, blank=True)  # We keep a copy for history

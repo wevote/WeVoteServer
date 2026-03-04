@@ -1630,9 +1630,20 @@ class ContestMeasureListManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_measure_count_for_election_and_state(google_civic_election_id=0, state_code=''):
+    def retrieve_measure_count_for_election_and_state(
+            google_civic_election_id=0,
+            state_code='',
+            google_civic_election_id_list=None,
+    ):
+        """Return the number of measures for the supplied election(s) and state.
+
+        We allow either a single election id or a list of ids so that callers
+        can provide the same list they used for filtering.  If both a single id
+        and a list are provided the list takes precedence.
+        """
         status = ''
-        if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
+                and not positive_value_exists(google_civic_election_id_list):
             status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
             results = {
                 'success':                  False,
@@ -1645,16 +1656,21 @@ class ContestMeasureListManager(models.Manager):
 
         try:
             measure_queryset = ContestMeasure.objects.using('readonly').all()
-            if positive_value_exists(google_civic_election_id):
-                google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
-                measure_queryset = measure_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            # apply election filter(s)
+            if positive_value_exists(google_civic_election_id_list):
+                # trust the caller-provided list over a single id
+                measure_queryset = measure_queryset.filter(
+                    google_civic_election_id__in=google_civic_election_id_list)
+            elif positive_value_exists(google_civic_election_id):
+                measure_queryset = measure_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
             measure_count = measure_queryset.count()
             success = True
             status += "MEASURE_COUNT_FOUND "
         except ContestMeasure.DoesNotExist:
-            # No candidates found. Not a problem.
+            # No measures found. Not a problem.
             status += 'NO_MEASURES_FOUND_DoesNotExist '
             measure_count = 0
             success = True

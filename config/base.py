@@ -189,7 +189,6 @@ INSTALLED_APPS = (
     'stripe_ip_history',
     'support_oppose_deciding',
     'tag',
-    'tinymce',
     'twitter',  # See also import_export_twitter
     'volunteer_task',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py

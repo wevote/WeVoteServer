@@ -572,8 +572,20 @@ def measure_list_view(request):
     state_list_modified = {}
     contest_measure_list_manager = ContestMeasureListManager()
     for one_state_code, one_state_name in state_list.items():
-        count_result = contest_measure_list_manager.retrieve_measure_count_for_election_and_state(
-            google_civic_election_id, one_state_code)
+        # figure out which election filter(s) to use for the counts
+        if positive_value_exists(google_civic_election_id):
+            # specific election selected, ignore the list
+            count_result = contest_measure_list_manager.retrieve_measure_count_for_election_and_state(
+                google_civic_election_id, one_state_code)
+        elif not positive_value_exists(show_all_elections):
+            # limit to upcoming elections only (google_civic_election_id_list was built above)
+            count_result = contest_measure_list_manager.retrieve_measure_count_for_election_and_state(
+                0, one_state_code, google_civic_election_id_list)
+        else:
+            # show_all_elections: count across every election
+            count_result = contest_measure_list_manager.retrieve_measure_count_for_election_and_state(
+                0, one_state_code)
+
         state_name_modified = one_state_name
         if positive_value_exists(count_result['measure_count']):
             state_name_modified += " - " + str(count_result['measure_count'])

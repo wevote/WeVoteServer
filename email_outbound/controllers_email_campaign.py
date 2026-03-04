@@ -10,77 +10,20 @@ from django.template.loader import render_to_string
 
 from election.models import Election
 from email_outbound.functions import convert_html_to_plain_text
-from email_outbound.models import AudienceBuilder, AudienceFilter, AudienceFilterChain
 from organization.controllers import transform_web_app_url
 from politician.models import Politician
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 from wevote_functions.functions_date import get_current_year_as_integer
-from .controllers_audience_builder_preview import generate_preview_list_from_audience_builder
-from .models import CUSTOMIZATION_TOKEN_CONVERSION_FROM_JAZZ_HR, \
+from .models import AudienceBuilder, AudienceFilter, AudienceFilterChain, \
+    CUSTOMIZATION_TOKEN_CONVERSION_FROM_JAZZ_HR, \
     EmailCampaign, EmailCampaignRecipient, EmailManager, EmailScheduled, \
     EMAIL_TEMPLATE_CUSTOMIZATION_TOKENS, TO_BE_PROCESSED
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-
-
-def audience_builder_data_retrieve(audience_builder_id):
-    audience_builder = {}
-    audience_filter_chain_dict = {}
-    audience_filter_dict = {}
-    audience_filter_list = []
-    status = ''
-    success = True
-
-    if not positive_value_exists(audience_builder_id):
-        status += "AUDIENCE_BUILDER_ID_REQUIRED "
-        success = True
-        return {
-            'audience_builder': audience_builder,
-            'audience_filter_chain_dict': audience_filter_chain_dict,
-            'audience_filter_dict': audience_filter_dict,
-            'audience_filter_list': audience_filter_list,
-            'status': status,
-            'success': success,
-        }
-
-    try:
-        audience_builder = AudienceBuilder.objects.get(id=audience_builder_id)
-    except Exception as e:
-        status += f"ERROR_RETRIEVING_AUDIENCE_BUILDER: {e} "
-        success = False
-
-    if success:
-        try:
-            queryset = AudienceFilter.objects.filter(audience_builder_id=audience_builder_id)
-            audience_filter_list = list(queryset)
-            for audience_filter in audience_filter_list:
-                audience_filter_dict[audience_filter.id] = audience_filter
-        except Exception as e:
-            status += f"ERROR_RETRIEVING_AUDIENCE_FILTER: {e} "
-            success = False
-
-    if success:
-        try:
-            queryset = AudienceFilterChain.objects.filter(audience_builder_id=audience_builder_id)
-            audience_filter_chain_list = list(queryset)
-            for audience_filter_chain in audience_filter_chain_list:
-                audience_filter_chain_dict[audience_filter_chain.id] = audience_filter_chain
-        except Exception as e:
-            status += f"ERROR_RETRIEVING_AUDIENCE_FILTER_CHAIN: {e} "
-            success = False
-
-    return {
-        'audience_builder':             audience_builder,
-        'audience_filter_chain_dict':   audience_filter_chain_dict,
-        'audience_filter_dict':         audience_filter_dict,
-        'audience_filter_list':         audience_filter_list,
-        'status':                       status,
-        'success':                      success,
-    }
 
 
 def augment_email_campaign_recipient(
@@ -523,66 +466,6 @@ def email_campaign_send(
         'status':   status,
     }
     return results
-
-
-def generate_email_campaign_recipients_from_audience_builder(audience_builder_id=0, email_campaign_id=''):
-    """
-    Use this function to create email_campaign_recipients in preparation for sending emails.
-
-    :param audience_builder_id: ID of the audience builder
-    :param email_campaign_id: ID of the email campaign to generate recipients for
-    """
-    status = ""
-    success = True
-
-    results = generate_preview_list_from_audience_builder(audience_builder_id=audience_builder_id)
-    try:
-        email_campaign = EmailCampaign.objects.get(id=email_campaign_id)
-    except EmailCampaign.DoesNotExist:
-        status += "EMAIL_CAMPAIGN_NOT_FOUND_GENERATE_RECIPIENTS "
-        return {
-            'status':   status,
-            'success':  False,
-        }
-    except Exception as e:
-        status += f'GENERATE_RECIPIENTS_PROBLEM_RETRIEVING_EMAIL_CAMPAIGN: {e}'
-        return {
-            'status':   status,
-            'success':  False,
-        }
-
-    # Get the email body & subject templates for this campaign
-    # TODO: Is this necessary for generating recipients?
-    try:
-        email_body_template = email_campaign.email_body_template_raw
-        email_subject_template = email_campaign.email_subject_template_raw
-    except Exception as e:
-        status += f'PROBLEM_RETRIEVING_EMAIL_TEMPLATE_RAW: {e}'
-        return {
-            'status':   status,
-            'success':  False,
-        }
-
-    # Get all specific recipients for this email campaign, prior to adding recipients formulaically
-    try:
-        queryset = EmailCampaignRecipient.objects.filter(
-            email_campaign_id=email_campaign_id)
-        # It turns out we don't want to exclude the EmailCampaignRecipient objects that have already been scheduled yet,
-        #  so we can know to not add them from the AudienceBuilder searches.
-        # # Filter out recipient entries that have already been sent
-        # queryset = queryset.exclude(email_campaign_recipient_id__in=already_scheduled_recipient_ids)
-        email_campaign_recipient_list = list(queryset)
-    except Exception as e:
-        status += f'Problem retrieving email campaign recipients. {e}'
-        return {
-            'status': status,
-            'success': False,
-        }
-
-    return {
-        'status': status,
-        'success': success,
-    }
 
 
 def reorganize_audience_filter_chains(audience_builder):

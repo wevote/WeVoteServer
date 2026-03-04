@@ -29,12 +29,12 @@
                 class="form-select form-select-sm me-0"
                 style="width: auto;">
           <option value="now">Now</option>
-          <option value="tomorrow_9">Tomorrow at 9:00 AM</option>
-          <option value="tomorrow_16">Tomorrow at 4:00 PM</option>
-          <option value="day2_9">Day after tomorrow</option>
-          <option value="day3_9">Day after that</option>
-          <option value="saved" style="display: none;"></option>
-          <option value="custom">Custom…</option>
+          <option value="tomorrow_9" disabled>Tomorrow at 9:00 AM</option>
+          <option value="tomorrow_16" disabled>Tomorrow at 4:00 PM</option>
+          <option value="day2_9" disabled>Day after tomorrow</option>
+          <option value="day3_9" disabled>Day after that</option>
+          <option value="saved" style="display: none;" disabled></option>
+          <option value="custom" disabled>Custom…</option>
         </select>
         <input type="datetime-local" id="scheduled-datetime" class="form-control form-control-sm me-2" style="width: auto; display: none !important;">&nbsp;
         <button type="submit" id="send-campaign-btn" class="btn btn-success">Send</button> <!-- Also submits email-campaign-form //-->
@@ -80,7 +80,7 @@
                        name="from_email_name"
                        class="form-control"
                        value="{% if email_campaign %}{{ email_campaign.from_email_name|default_if_none:"" }}{% endif %}"
-                       placeholder="Default is We Vote">
+                       placeholder="Default is WeVote">
             </div>
         </div>
 
@@ -93,10 +93,25 @@
 
     <!-- Recipients Section -->
     <div class="mb-3">
-      <label class="form-label">Search Recipients</label>
       <div class="d-flex gap-2 mb-2">
-        <input type="text" id="recipient_search" class="form-control" placeholder="Search by name or email..." style="flex: 1;">
-        <button type="button" class="btn border border-secondary text-secondary bg-transparent" id="search_btn" style="white-space: nowrap;">Add Recipient</button>
+          <div>
+              <label class="form-label">Add Audience ID</label>
+              <div class="d-flex gap-2 mb-2">
+                <input type="text"
+                       name="audience_builder_id"
+                       class="form-control"
+                       value="{% if email_campaign and email_campaign.audience_builder_id != 0 %}{{ email_campaign.audience_builder_id|default_if_none:"" }}{% endif %}"
+                       placeholder="ID of Audience Builder..." style="flex: 1;"
+                >
+              </div>
+          </div>
+          <div class="col-md-4">
+              <label class="form-label">Add Individual Recipients</label>
+              <div class="d-flex gap-2 mb-2">
+                <input type="text" id="recipient_search" class="form-control" placeholder="Search by name or email..." style="flex: 1;">
+                <button type="button" class="btn border border-secondary text-secondary bg-transparent" id="search_btn" style="white-space: nowrap;">Add Recipient</button>
+              </div>
+          </div>
       </div>
       
       <div id="search_results" class="border rounded p-2 mb-2" style="max-height: 300px; overflow-y: auto; display: none;">
@@ -135,7 +150,7 @@
 
     <!-- Email Preview/Editor -->
     <div class="mb-3">
-      <textarea id="email_body" name="email_body" class="form-control" rows="10">{% if email_campaign %}{{ email_campaign.email_body_template_raw }}{% endif %}</textarea>
+      <textarea id="email_body" name="email_body" class="form-control js-tinymce" rows="10">{% if email_campaign %}{{ email_campaign.email_body_template_raw }}{% endif %}</textarea>
       <small class="text-muted">This will auto-populate when you select a template above. You can edit it before sending.</small>
     </div>
 
@@ -171,8 +186,11 @@
 {% endblock %}
 
 {% block extrabody %}
-<!-- Use TinyMCE via Local -->
-<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<!-- Use TinyMCE -->
+<script src="https://quality.wevote.us/javascript/api-server/tinymce/tinymce.min.js"></script>
+  <script>
+    {% include "email_outbound/js/_tinymce_loader_js.html" %}
+  </script>
 <style>
   .recipient-chip {
     display: inline-block;
@@ -735,69 +753,6 @@
     window.location.href = '{% url "email_outbound:email_campaign_edit" %}?id=' + campaignId + '&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}';
   }
 
-  // Initialize TinyMCE for email body
-  document.addEventListener('DOMContentLoaded', function () {
-    if (!window.tinymce) {
-      console.log('TinyMCE did not load from static.');
-      return;
-    } else {
-      console.log('tinymce loaded (self-hosted)');
-    }
-    if (tinymce.get('email_body')) tinymce.get('email_body').remove();
-
-    tinymce.init({
-      selector: '#email_body',
-      license_key: 'gpl',
-      menubar: true,
-      plugins: 'advlist autolink lists link image charmap preview anchor ' +
-               'searchreplace visualblocks code fullscreen insertdatetime media ' +
-               'table help wordcount',
-      toolbar: 'undo redo | blocks fontsize | ' +
-               'bold italic underline strikethrough | forecolor backcolor | ' +
-               'alignleft aligncenter alignright alignjustify | ' +
-               'outdent indent | bullist numlist | ' +
-               'link image media table | removeformat code fullscreen help',
-      toolbar_mode: 'wrap',
-      height: 500,
-      branding: false,
-      promotion: false,
-      content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
-      link_default_target: '_blank',
-      link_assume_external_targets: true,
-      block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre',
-      font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt',
-      extended_valid_elements: '*[*]',
-      valid_children: '+body[style]',
-      images_upload_handler: function (blobInfo, success, failure) {
-        var reader = new FileReader();
-        reader.onload = function() { success(reader.result); };
-        reader.onerror = function() { failure('Image upload failed'); };
-        reader.readAsDataURL(blobInfo.blob());
-      },
-      file_picker_types: 'image',
-      file_picker_callback: function(callback, value, meta) {
-        if (meta.filetype === 'image') {
-          var input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.onchange = function() {
-            var file = this.files[0];
-            var reader = new FileReader();
-            reader.onload = function() {
-              callback(reader.result, { alt: file.name });
-            };
-            reader.readAsDataURL(file);
-          };
-          input.click();
-        }
-      },
-      setup: function(editor) {
-        editor.on('init', function() {
-          console.log('TinyMCE initialized successfully');
-        });
-      }
-    });
-  });
 </script>
 
 <!-- Customization tokens copy script -->

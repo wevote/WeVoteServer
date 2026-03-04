@@ -19,12 +19,12 @@ from django.urls import reverse
 from admin_tools.views import redirect_to_sign_in_page
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_functions.validate_email import validate_email
 
-from .controllers_email_campaign import audience_builder_data_retrieve, augment_email_campaign_recipient, \
+from .controllers_email_campaign import augment_email_campaign_recipient, \
     render_audience_builder_html
-from .controllers_audience_builder_preview import render_audience_builder_preview_html
+from .controllers_audience_builder import audience_builder_data_retrieve, render_audience_builder_preview_html
 from .models import EmailCampaign, EmailTemplate, EmailTemplateFolder, EmailCampaignRecipient, \
     AudienceBuilderFolder, AudienceBuilder, AudienceFilter, AudienceFilterChain, EMAIL_TEMPLATE_CUSTOMIZATION_TOKENS, \
     OPERATOR_AND, OPERATOR_EXCLUDE, OPERATOR_INCLUDE, OPERATOR_OR
@@ -82,13 +82,15 @@ def email_campaign_edit_process_view(request):
     status = ""
 
     # Get form data
+    audience_builder_id = request.POST.get('audience_builder_id', 0)
+    audience_builder_id = convert_to_int(audience_builder_id)
     campaign_title = request.POST.get('campaign_title', '').strip()
     email_template_id = request.POST.get('email_template_id', 0)
-    recipient_ids = request.POST.get('recipient_ids', '')
     email_subject = request.POST.get('email_subject', '').strip()
     email_body = request.POST.get('email_body', '')
     email_campaign_id = request.POST.get('email_campaign_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    recipient_ids = request.POST.get('recipient_ids', '')
     state_code = request.POST.get('state_code', '')
     send_button_clicked = request.POST.get('send_button_clicked', '')
     send_time_option = request.POST.get('send_time_option', 'now')
@@ -108,6 +110,7 @@ def email_campaign_edit_process_view(request):
     if email_campaign_id:
         try:
             email_campaign = EmailCampaign.objects.get(id=email_campaign_id)
+            email_campaign.audience_builder_id = audience_builder_id
             email_campaign.email_campaign_name = campaign_title
             email_campaign.email_template_id = email_template_id
             email_campaign.email_subject_template_raw = email_subject
@@ -122,6 +125,7 @@ def email_campaign_edit_process_view(request):
             status += 'Email campaign updated.'
         except EmailCampaign.DoesNotExist:
             email_campaign = EmailCampaign.objects.create(
+                audience_builder_id=audience_builder_id,
                 email_campaign_name=campaign_title,
                 email_template_id=email_template_id,
                 email_subject_template_raw=email_subject,
@@ -135,6 +139,7 @@ def email_campaign_edit_process_view(request):
     else:
         try:
             email_campaign = EmailCampaign.objects.create(
+                audience_builder_id=audience_builder_id,
                 email_campaign_name=campaign_title,
                 email_template_id=email_template_id,
                 email_subject_template_raw=email_subject,
@@ -340,10 +345,13 @@ def email_campaign_edit_process_view(request):
 
     if positive_value_exists(send_button_clicked):
         # Prepare the EmailCampaignRecipients from the AudienceBuilder
-        from email_outbound.controllers_email_campaign import generate_email_campaign_recipients_from_audience_builder
-        # Here when we generate the campaign recipients from audience_builders, and we populate them with rich data
-        generate_results = generate_email_campaign_recipients_from_audience_builder(
-            email_campaign_id=email_campaign_id)
+        if positive_value_exists(audience_builder_id):
+            from email_outbound.controllers_audience_builder import \
+                generate_email_campaign_recipients_from_audience_builder
+            # Here when we generate the campaign recipients from audience_builders, and we populate them with rich data
+            generate_results = generate_email_campaign_recipients_from_audience_builder(
+                audience_builder_id=audience_builder_id,
+                email_campaign_id=email_campaign_id)
 
         # Send the email
         from email_outbound.controllers_email_campaign import email_campaign_send
