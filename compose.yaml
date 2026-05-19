@@ -67,7 +67,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_SQS_WEB_QUEUE_URL=http://localstack:4566/000000000000/job-queue.fifo
       - PYDEVD_DISABLE_FILE_VALIDATION=1
-      - DEV_SERVER_TYPE=${DEV_SERVER:-runsslserver}
+      - DEV_SERVER_TYPE=${DEV_SERVER:-runserver}
       - DEV_SERVER_DOMAIN=${DEV_SERVER_DOMAIN:-wevotedeveloper.com}
       - DEV_SERVER_PORT=${DEV_SERVER_PORT:-8000}
       - DEV_SERVER_SSL_CERT=${DEV_SERVER_SSL_CERT:-cert/wevotedeveloper.com.crt}
