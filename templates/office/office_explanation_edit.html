@@ -8,291 +8,324 @@
 
 {% block content %}
 
-<h1>Edit Office Explanation</h1>
-<hr />
+  <h1>Edit Office Explanation</h1>
+  <hr />
 
-<form action="{% url 'office:office_explanation_edit_process' %}" method="post" class="form-horizontal">
-{% csrf_token %}
+  <form action="{% url 'office:office_explanation_edit_process' %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
 
-<input type="hidden" name="we_vote_id" value="{% if office_explanation %}{{ office_explanation.we_vote_id }}{% else %}{{ we_vote_id|default_if_none:"" }}{% endif %}">
+    <input type="hidden"
+           name="we_vote_id"
+           value="{% if office_explanation %}{{ office_explanation.we_vote_id }}{% else %}{{ we_vote_id|default_if_none:"" }}{% endif %}">
 
-<div class="form-group">
-    <label for="office_explanation_name_id" class="col-sm-3 control-label">Office Explanation Name</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="office_explanation_name_id" class="col-sm-3 control-label">Office Explanation Name</label>
+      <div class="col-sm-8">
         <input type="text"
                name="office_explanation_name"
                id="office_explanation_name_id"
                class="form-control"
                value="{% if office_explanation %}{{ office_explanation.office_explanation_name|default_if_none:"" }}{% else %}{{ office_explanation_name|default_if_none:"" }}{% endif %}" />
-               {% if office_explanation %}{{ office_explanation.office_explanation_name }}{% else %}{{ '' }}{% endif %}
+        {% if office_explanation %}
+          {{ office_explanation.office_explanation_name }}
+        {% else %}
+          {{ '' }}
+        {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="office_explanation_id" class="col-sm-3 control-label">Office Explanation</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="office_explanation_id" class="col-sm-3 control-label">Office Explanation</label>
+      <div class="col-sm-8">
         <textarea name="office_explanation"
                   id="office_explanation_id"
                   class="form-control animated"
                   placeholder="Enter office explanation">{% if office_explanation %}{{ office_explanation.office_explanation|default_if_none:"" }}{% else %}{{ office_explanation_text|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-  <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-  <div class="col-sm-8">
-    <select name="state_code" id="state_code_id" class="form-control">
-      <option value="">-- Select a state --</option>
-      {% for code in state_codes %}
-          <option value="{{ code }}" {% if office_explanation.state_code == code %}selected{% endif %}>
-            {{ code }}
-          </option>
-      {% endfor %}
-    </select>
+    <div class="form-group">
+      <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+      <div class="col-sm-8">
+        <select name="state_code" id="state_code_id" class="form-control">
+          <option value="">-- Select a state --</option>
+          {% for code in state_codes %}
+            <option value="{{ code }}"
+                    {% if office_explanation.state_code == code %}selected{% endif %}>{{ code }}</option>
+          {% endfor %}
+        </select>
 
-    {# optional: show current value text #}
-    {% if office_explanation %}{{ office_explanation.state_code }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}
-  </div>
-</div>
+        {# optional: show current value text #}
+        {% if office_explanation %}
+          {{ office_explanation.state_code }}
+        {% else %}
+          {{ state_code|default_if_none:"" }}
+        {% endif %}
+      </div>
+    </div>
 
-<div class="form-group">
-    <label for="video_url_horizontal_id" class="col-sm-3 control-label">Video URL (Horizontal)</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="video_url_horizontal_id" class="col-sm-3 control-label">Video URL (Horizontal)</label>
+      <div class="col-sm-8">
         <input type="text"
                name="video_url_horizontal"
                id="video_url_horizontal_id"
                class="form-control"
                value="{% if office_explanation %}{{ office_explanation.video_url_horizontal|default_if_none:"" }}{% else %}{{ video_url_horizontal|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="video_url_square_id" class="col-sm-3 control-label">Video URL (Square)</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="video_url_square_id" class="col-sm-3 control-label">Video URL (Square)</label>
+      <div class="col-sm-8">
         <input type="text"
                name="video_url_square"
                id="video_url_square_id"
                class="form-control"
                value="{% if office_explanation %}{{ office_explanation.video_url_square|default_if_none:"" }}{% else %}{{ video_url_square|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="video_url_vertical_id" class="col-sm-3 control-label">Video URL (Vertical)</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="video_url_vertical_id" class="col-sm-3 control-label">Video URL (Vertical)</label>
+      <div class="col-sm-8">
         <input type="text"
                name="video_url_vertical"
                id="video_url_vertical_id"
                class="form-control"
                value="{% if office_explanation %}{{ office_explanation.video_url_vertical|default_if_none:"" }}{% else %}{{ video_url_vertical|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-{# Optional: show date_last_updated read-only if desired #}
-{% if office_explanation and office_explanation.date_last_updated %}
-<div class="form-group">
-    <label class="col-sm-3 control-label">Last Updated</label>
-    <div class="col-sm-8" style="padding-top: 7px;">
-        {{ office_explanation.date_last_updated }}
-    </div>
-</div>
-{% endif %}
+    {# Optional: show date_last_updated read-only if desired #}
+    {% if office_explanation and office_explanation.date_last_updated %}
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Last Updated</label>
+        <div class="col-sm-8" style="padding-top: 7px;">{{ office_explanation.date_last_updated }}</div>
+      </div>
+    {% endif %}
 
-<p>
-  <a href="{% url 'office:office_explanations_list' %}">cancel</a>
-  <input type="submit"
-         value="{% if office_explanation %}Update Office Explanation{% else %}Save New Office Explanation{% endif %}"
-         class="btn btn-primary" />
-</p>
-</form>
+    <p>
+      <a href="{% url 'office:office_explanations_list' %}">cancel</a>
+      <input type="submit"
+             value="{% if office_explanation %}Update Office Explanation{% else %}Save New Office Explanation{% endif %}"
+             class="btn btn-primary" />
+    </p>
+  </form>
 
-{% if office_explanation %}
-<form action="{% url "office:office_explanation_delete_process" office_explanation.we_vote_id %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="office_explanation_id" value="{{ office_explanation.id|default_if_none:0|default:0 }}">
-  <input type="hidden" name="state_code" value="{{ office_explanation.state_code|default_if_none:''|default:'' }}">
-  <button type="submit" class="btn btn-danger">Delete Office Explanation</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" />
-      Check to confirm that you want to permanently delete this office explanation
-  </label>
-</form>
-<br />
-{% endif %}
+  {% if office_explanation %}
+    <form action="{% url "office:office_explanation_delete_process" office_explanation.we_vote_id %}"
+          method="post"
+          class="form-horizontal">
+      {% csrf_token %}
+      <input type="hidden"
+             name="office_explanation_id"
+             value="{{ office_explanation.id|default_if_none:0|default:0 }}">
+      <input type="hidden"
+             name="state_code"
+             value="{{ office_explanation.state_code|default_if_none:''|default:'' }}">
+      <button type="submit" class="btn btn-danger">Delete Office Explanation</button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="confirm_delete_id">
+        <input type="checkbox"
+               name="confirm_delete"
+               id="confirm_delete_id"
+               value="1" />
+        Check to confirm that you want to permanently delete this office explanation
+      </label>
+    </form>
+    <br />
+  {% endif %}
 
-<hr />
+  <hr />
 
-{# Optional list table, following your Measure template pattern #}
-{% if office_explanation_list %}
-    <br /><br />
+  {# Optional list table, following your Measure template pattern #}
+  {% if office_explanation_list %}
+    <br />
+    <br />
     <h5>Existing Office Explanations</h5>
     <table border="1" cellpadding="5" cellspacing="5">
+      <tr>
+        <td>Name</td>
+        <td>State</td>
+        <td>We Vote ID</td>
+        <td>&nbsp;</td>
+      </tr>
+      {% for one in office_explanation_list %}
         <tr>
-            <td>Name</td>
-            <td>State</td>
-            <td>We Vote ID</td>
-            <td>&nbsp;</td>
+          <td>
+            <a href="{% url 'office:office_explanation_summary' one.we_vote_id %}">{{ one.office_explanation_name }}</a>
+          </td>
+          <td>{{ one.state_code }}</td>
+          <td>{{ one.we_vote_id }}</td>
+          <td>
+            <a href="{% url 'office:office_explanation_edit_process' one.we_vote_id %}"
+               style="font-size: .65em">edit</a>
+          </td>
         </tr>
-    {% for one in office_explanation_list %}
-        <tr>
-            <td><a href="{% url 'office:office_explanation_summary' one.we_vote_id %}">{{ one.office_explanation_name }}</a></td>
-            <td>{{ one.state_code }}</td>
-            <td>{{ one.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_explanation_edit_process' one.we_vote_id %}" style="font-size: .65em">edit</a></td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
-{# --- Video Preview (defaults to horizontal) --- #}
-<div class="form-group clearfix">
-  <label class="col-sm-3 control-label">Video Preview</label>
-  <div class="col-sm-8">
-    <div style="border:1px solid #ddd; padding:10px; border-radius:4px;">
-      <div style="margin-bottom:8px; font-size:.9em;">
-        Previewing:
-        <button type="button" class="btn btn-default btn-xs" id="preview_horizontal_btn">Horizontal</button>
-        <button type="button" class="btn btn-default btn-xs" id="preview_square_btn">Square</button>
-        <button type="button" class="btn btn-default btn-xs" id="preview_vertical_btn">Vertical</button>
-      </div>
-
-      <div id="video_preview_wrapper" style="width:100%; max-width:720px;">
-        <div id="video_preview_aspect" style="position:relative; width:100%; padding-top:56.25%;">
-          <iframe
-            id="video_preview_iframe"
-            src=""
-            referrerpolicy="origin-when-cross-origin"
-            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          ></iframe>
+  {# --- Video Preview (defaults to horizontal) --- #}
+  <div class="form-group clearfix">
+    <label class="col-sm-3 control-label">Video Preview</label>
+    <div class="col-sm-8">
+      <div style="border:1px solid #ddd; padding:10px; border-radius:4px;">
+        <div style="margin-bottom:8px; font-size:.9em;">
+          Previewing:
+          <button type="button"
+                  class="btn btn-default btn-xs"
+                  id="preview_horizontal_btn">Horizontal</button>
+          <button type="button" class="btn btn-default btn-xs" id="preview_square_btn">Square</button>
+          <button type="button"
+                  class="btn btn-default btn-xs"
+                  id="preview_vertical_btn">Vertical</button>
         </div>
 
-        <div id="video_preview_empty" style="display:none; padding:10px; color:#666; font-size:.9em;">
-          Enter a video URL above to see a preview.
+        <div id="video_preview_wrapper" style="width:100%; max-width:720px;">
+          <div id="video_preview_aspect"
+               style="position:relative;
+                      width:100%;
+                      padding-top:56.25%">
+            <iframe id="video_preview_iframe"
+                    src=""
+                    referrerpolicy="origin-when-cross-origin"
+                    style="position:absolute;
+                           top:0;
+                           left:0;
+                           width:100%;
+                           height:100%;
+                           border:0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </div>
+
+          <div id="video_preview_empty"
+               style="display:none;
+                      padding:10px;
+                      color:#666;
+                      font-size:.9em">Enter a video URL above to see a preview.</div>
         </div>
       </div>
     </div>
   </div>
-</div>
-<!--    Link ContestOffice(s) to this OfficeExplanation  -->
-<hr /><br />
-<form name="contest_office_search_form"
-      method="get"
-      action="{% url 'office:office_explanation_edit' office_explanation.we_vote_id %}"
-      class="form-horizontal"
-      style="margin-bottom: 12px;">
+  <!--    Link ContestOffice(s) to this OfficeExplanation  -->
+  <hr />
+  <br />
+  <form name="contest_office_search_form"
+        method="get"
+        action="{% url 'office:office_explanation_edit' office_explanation.we_vote_id %}"
+        class="form-horizontal"
+        style="margin-bottom: 12px">
     <div class="form-group">
-        <label class="col-sm-3 control-label">Link to Contest Office(s)</label>
-        <div class="col-sm-8">
-            <div style="display:flex; gap:8px; align-items:center;">
-                <input
-                        type="text"
-                        name="contest_office_search"
-                        id="contest_office_search_id"
-                        class="form-control"
-                        value="{{ contest_office_search|default_if_none:'' }}"
-                        placeholder="Search by office name, state, or We Vote ID"
-                />
-                <button type="submit" class="btn btn-default" name="contest_office_search_submit" value="1">
-                    Search
-                </button>
-                {% if contest_office_search %}
-                <a class="btn btn-link"
-                   href="{% url 'office:office_explanation_edit' office_explanation.we_vote_id %}">
-                    clear
-                </a>
-                {% endif %}
-            </div>
+      <label class="col-sm-3 control-label">Link to Contest Office(s)</label>
+      <div class="col-sm-8">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text"
+                 name="contest_office_search"
+                 id="contest_office_search_id"
+                 class="form-control"
+                 value="{{ contest_office_search|default_if_none:'' }}"
+                 placeholder="Search by office name, state, or We Vote ID" />
+          <button type="submit"
+                  class="btn btn-default"
+                  name="contest_office_search_submit"
+                  value="1">Search</button>
+          {% if contest_office_search %}
+            <a class="btn btn-link"
+               href="{% url 'office:office_explanation_edit' office_explanation.we_vote_id %}">clear</a>
+          {% endif %}
         </div>
+      </div>
     </div>
-</form>
+  </form>
 
-<form name="contest_office_link_form"
-      method="post"
-      action="{% url 'office:office_explanation_edit_process' %}"
-      class="form-horizontal">
+  <form name="contest_office_link_form"
+        method="post"
+        action="{% url 'office:office_explanation_edit_process' %}"
+        class="form-horizontal">
 
     {% csrf_token %}
 
     {# Identify which OfficeExplanation we’re linking to #}
-    <input type="hidden" name="we_vote_id" value="{{ office_explanation.we_vote_id }}">
+    <input type="hidden"
+           name="we_vote_id"
+           value="{{ office_explanation.we_vote_id }}">
 
     {# Optional: preserve the search term so after POST you can redirect back with it #}
-    <input type="hidden" name="contest_office_search" value="{{ contest_office_search|default_if_none:'' }}">
+    <input type="hidden"
+           name="contest_office_search"
+           value="{{ contest_office_search|default_if_none:'' }}">
 
     <div class="form-group">
-        <label class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-8">
+      <label class="col-sm-3 control-label">&nbsp;</label>
+      <div class="col-sm-8">
 
-            {% if contest_office_search %}
-            {% if contest_office_list %}
+        {% if contest_office_search %}
+          {% if contest_office_list %}
             <table class="table table-sm table-hover" style="margin-top: 10px;">
-                <thead>
+              <thead>
                 <tr>
-                    <th style="width: 36px;">Select</th>
-                    <th>Contest Office Name</th>
-                    <th>State</th>
-                    <th>We Vote ID</th>
-                    <th>Current Linked OfficeExplanation</th>
+                  <th style="width: 36px;">Select</th>
+                  <th>Contest Office Name</th>
+                  <th>State</th>
+                  <th>We Vote ID</th>
+                  <th>Current Linked OfficeExplanation</th>
                 </tr>
-                </thead>
-                <tbody>
+              </thead>
+              <tbody>
                 {% for contest_office in contest_office_list %}
-                <tr>
+                  <tr>
                     <td>
-                        <input
-                                type="checkbox"
-                                name="selected_contest_office_we_vote_ids"
-                                value="{{ contest_office.we_vote_id }}"
-                                aria-label="Select {{ contest_office.office_name }}"
-                        />
+                      <input type="checkbox"
+                             name="selected_contest_office_we_vote_ids"
+                             value="{{ contest_office.we_vote_id }}"
+                             aria-label="Select {{ contest_office.office_name }}" />
                     </td>
                     <td>{{ contest_office.office_name|default:"(no name)" }}</td>
                     <td>{{ contest_office.state_code|default:"" }}</td>
                     <td>{{ contest_office.we_vote_id|default:"" }}</td>
                     <td>{{ contest_office.office_explanation_we_vote_id|default:"(none)" }}</td>
-                </tr>
+                  </tr>
                 {% endfor %}
-                </tbody>
+              </tbody>
             </table>
 
             <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
-                <div>
-                    <strong>Link to Office Explanation</strong>
-                    <div style="font-size: .9em; opacity: .85;">
-                        Selected contest offices will be updated so their
-                        <code>office_explanation_we_vote_id</code> equals this OfficeExplanation’s <code>we_vote_id</code>.
-                    </div>
+              <div>
+                <strong>Link to Office Explanation</strong>
+                <div style="font-size: .9em; opacity: .85;">
+                  Selected contest offices will be updated so their
+                  <code>office_explanation_we_vote_id</code> equals this OfficeExplanation’s <code>we_vote_id</code>.
                 </div>
+              </div>
 
-                <div style="margin-left:auto;">
-                    <button type="submit"
-                            class="btn btn-primary"
-                            name="link_contest_offices_submit"
-                            value="1">
-                        Save
-                    </button>
-                </div>
+              <div style="margin-left:auto;">
+                <button type="submit"
+                        class="btn btn-primary"
+                        name="link_contest_offices_submit"
+                        value="1">Save</button>
+              </div>
             </div>
 
-            {% else %}
-            <div class="alert alert-warning" style="margin-top: 8px;">
-                No results found. Try a different search term.
-            </div>
-            {% endif %}
-            {% else %}
-            <div style="margin-top: 8px; font-size: .95em;">
-                <em>(Search to find contest offices to link)</em>
-            </div>
-            {% endif %}
+          {% else %}
+            <div class="alert alert-warning" style="margin-top: 8px;">No results found. Try a different search term.</div>
+          {% endif %}
+        {% else %}
+          <div style="margin-top: 8px; font-size: .95em;">
+            <em>(Search to find contest offices to link)</em>
+          </div>
+        {% endif %}
 
-        </div>
+      </div>
     </div>
-</form>
+  </form>
 
-<script>
+  <script>
   (function() {
 
     // Get video URL input elements
@@ -403,23 +436,23 @@
     // Initial render: default to horizontal
     renderPreview();
   })();
-</script>
+  </script>
 
 
-<style>
+  <style>
     .animated {
         -webkit-transition: height 0.2s;
         -moz-transition: height 0.2s;
         transition: height 0.2s;
     }
-</style>
+  </style>
 
-<script>
+  <script>
     $(function(){
         const { autosize } = window;
         autosize($('.normal'));
         autosize($('.animated'));
      }(window.$, window.autosize));
-</script>
+  </script>
 
 {% endblock content %}

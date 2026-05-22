@@ -1,59 +1,79 @@
 <!-- Saved Audiences Drawer Component -->
 <!-- Overlay backdrop - click to close -->
-<div id="savedAudiencesOverlay" class="drawer-overlay" onclick="closeSavedAudiencesDrawer()"></div>
+<div id="savedAudiencesOverlay"
+     class="drawer-overlay"
+     onclick="closeSavedAudiencesDrawer()"></div>
 
 <!-- Main drawer container -->
 <div id="savedAudiencesDrawer" class="saved-audiences-drawer">
-    <form id="audience-builder-form" method="post" action="{% url 'email_outbound:audience_builder_edit_process' %}">
+  <form id="audience-builder-form"
+        method="post"
+        action="{% url 'email_outbound:audience_builder_edit_process' %}">
     {% csrf_token %}
-    <input type="hidden" id="audience_builder_id_id" name="audience_builder_id" value="{% if audience_builder_id %}{{ audience_builder_id }}{% endif %}">
+    <input type="hidden"
+           id="audience_builder_id_id"
+           name="audience_builder_id"
+           value="{% if audience_builder_id %}{{ audience_builder_id }}{% endif %}">
 
     <!-- Fixed header section -->
     <div class="drawer-header" id="drawerHeader">
-        <!-- Title and buttons on same row -->
-        <div class="drawer-title-row">
-            <div>
-                <h1 class="drawer-title">Audience Builder</h1>
-            </div>
-            <div class="drawer-actions">
-                <button class="btn btn-default" onclick="closeSavedAudiencesDrawer()" type="button">Close</button>
-                <button class="btn btn-primary" onclick="setupDrawerFormSubmission()" type="submit">Save audience</button>
-            </div>
+      <!-- Title and buttons on same row -->
+      <div class="drawer-title-row">
+        <div>
+          <h1 class="drawer-title">Audience Builder</h1>
         </div>
+        <div class="drawer-actions">
+          <button class="btn btn-default"
+                  onclick="closeSavedAudiencesDrawer()"
+                  type="button">Close</button>
+          <button class="btn btn-primary"
+                  onclick="setupDrawerFormSubmission()"
+                  type="submit">Save audience</button>
+        </div>
+      </div>
 
-        <p class="drawer-subtitle">Use the options below to choose who will receive this email campaign.</p>
+      <p class="drawer-subtitle">Use the options below to choose who will receive this email campaign.</p>
     </div>
 
     <!-- Main content area -->
     <div class="drawer-content" id="drawerContent">
 
-        <div class="mb-3">
-            <label for="audience_builder_name_id" class="form-label">Audience builder name (id: <span id="audience_builder_id_display"></span>) <span class="text-danger">*</span></label>
-            <input type="text" id="audience_builder_name_id" name="audience_builder_name" class="form-control" value="" required>
-        </div>
-        <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerHTML -->
-        <div id="audienceBuilderDrawerHTML">
-            <p class="drawer-content-placeholder"><em>Logic builder content will be added here...</em></p>
-        </div>
+      <div class="mb-3">
+        <label for="audience_builder_name_id" class="form-label">
+          Audience builder name (id: <span id="audience_builder_id_display"></span>) <span class="text-danger">*</span>
+        </label>
+        <input type="text"
+               id="audience_builder_name_id"
+               name="audience_builder_name"
+               class="form-control"
+               value=""
+               required>
+      </div>
+      <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerHTML -->
+      <div id="audienceBuilderDrawerHTML">
+        <p class="drawer-content-placeholder">
+          <em>Logic builder content will be added here...</em>
+        </p>
+      </div>
     </div>
     <!-- Preview section -->
     <div class="preview-section" id="previewSection">
-        <!-- Draggable divider -->
-        <div class="resize-handle" id="resizeHandle">
-            <div class="resize-handle-bar">• • •</div>
-        </div>
+      <!-- Draggable divider -->
+      <div class="resize-handle" id="resizeHandle">
+        <div class="resize-handle-bar">• • •</div>
+      </div>
 
-        <div class="preview-header">
-            <h2 class="preview-title">
-                Preview
-            </h2>
+      <div class="preview-header">
+        <h2 class="preview-title">Preview</h2>
+      </div>
+      <div class="preview-content">
+        <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerPreviewHTML -->
+        <div id="audienceBuilderDrawerPreviewHTML">
+          <p class="preview-content-placeholder">
+            <em>Preview content will be added here...</em>
+          </p>
         </div>
-        <div class="preview-content">
-            <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerPreviewHTML -->
-            <div id="audienceBuilderDrawerPreviewHTML">
-                <p class="preview-content-placeholder"><em>Preview content will be added here...</em></p>
-            </div>
-        </div>
+      </div>
     </div>
-    </form>
+  </form>
 </div>

@@ -51,9 +51,7 @@
         </option>
         {% for key, share_type in share_types %}
           <option value="{{ key }}"
-                  {% if key|lower == share_type_filter|lower %}selected="selected"{% endif %}>
-            {{ share_type }}
-          </option>
+                  {% if key|lower == share_type_filter|lower %}selected="selected"{% endif %}>{{ share_type }}</option>
         {% endfor %}
       </select>
     {% endif %}

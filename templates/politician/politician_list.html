@@ -3,288 +3,370 @@
 
 {% block title %}Politicians{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Politicians</h1>
+  <h1>Politicians</h1>
 
-    <ul>
-        <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>
-        <li><a href="{% url 'politician:politicians_data_cleaning' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Data Cleaning <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;
-            <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Possible Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a>
-            <a href="{% url 'politician:create_trigram_gist_idx' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Add Trigram_Gist <span class="glyphicon glyphicon-new-window"></span></a>
-        </li>
+  <ul>
+    <li>
+      <a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a>
+    </li>
+    <li>
+      <a href="{% url 'politician:politicians_data_cleaning' %}?state_code={{ state_code }}"
+         target="_blank">
+        Data Cleaning <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;
+        <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}"
+           target="_blank">
+        Possible Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a>
+        <a href="{% url 'politician:create_trigram_gist_idx' %}?state_code={{ state_code }}"
+           target="_blank">
+        Add Trigram_Gist <span class="glyphicon glyphicon-new-window"></span></a>
+      </li>
     </ul>
 
-<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
-    <input type="hidden" name="page" id="page_input" value="{{ current_page_number }}">
-    <input type="hidden" name="sort_by" value="{{ sort_by }}">
-    {% csrf_token %}
-    {% if state_code != "" %}
-    <a href="#" onclick="showAllStates(); return false;">
-        show all states</a>
-    {% endif %}
+    <form name="state_code_form"
+          method="get"
+          action="{% url 'politician:politician_list' %}">
+      <input type="hidden"
+             name="page"
+             id="page_input"
+             value="{{ current_page_number }}">
+      <input type="hidden" name="sort_by" value="{{ sort_by }}">
+      {% csrf_token %}
+      {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
 
-    {% if state_list %}
-    <select id="state_code_id" name="state_code" onchange="this.form.submit()">
-        <option value="" {% if not state_code %}selected{% endif %}>-- Select a State --</option>
-        {% for key, state in state_list %}
-        <option value="{{ key }}" {% if key|lower == state_code|lower %}selected{% endif %}>
-            {{ state }}
-        </option>
-        {% endfor %}
-    </select>
-    {% endif %}{# End of if state_list #}
+      {% if state_list %}
+        <select id="state_code_id" name="state_code" onchange="this.form.submit()">
+          <option value="" {% if not state_code %}selected{% endif %}>-- Select a State --</option>
+          {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %}selected{% endif %}>{{ state }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      {# End of if state_list #}
 
-    {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
-         <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
-    {% endif %}
-    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
-    <input id="politician_search_submit" type="submit" value="Search for Politician" />
-    &nbsp;&nbsp;
-    <label for="show_politicians_with_email_id">
-      <input type="checkbox" name="show_politicians_with_email" id="show_politicians_with_email_id" value="1"
-             {% if show_politicians_with_email %}checked{% endif %} /> Has Email
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_all_id">
-      <input type="checkbox" name="show_all" id="show_all_id" value="1"
-             {% if show_all %}checked{% endif %} /> Show up to 200 politicians
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_battleground_id">
-      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
-             {% if show_battleground %}checked{% endif %} /> Battleground races
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="show_related_candidates_id">
-      <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
-             {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="show_ocd_id_state_mismatch_id">
-      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
-             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="organization_manual_intervention_needed_id">
-      <input type="checkbox" name="organization_manual_intervention_needed" id="organization_manual_intervention_needed_id" value="1"
-             {% if organization_manual_intervention_needed %}checked{% endif %} /> Org intervention needed
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="hide_politicians_with_photos_id">
-      <input type="checkbox" name="hide_politicians_with_photos" id="hide_politicians_with_photos_id" value="1"
-             {% if hide_politicians_with_photos %}checked{% endif %} /> Missing Photo
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="was_candidate_recently_id">
-      <input type="checkbox" name="was_candidate_recently" id="was_candidate_recently_id" value="1"
-             {% if was_candidate_recently %}checked{% endif %} /> Was Candidate Recently
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="exclude_politician_analysis_done_id">
-      <input type="checkbox" name="exclude_politician_analysis_done" id="exclude_politician_analysis_done_id" value="1"
-             {% if exclude_politician_analysis_done %}checked{% endif %} /> Exclude Analyzed
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="show_politicians_with_claimed_profile_id">
-      <input type="checkbox" name="show_politicians_with_claimed_profile" id="show_politicians_with_claimed_profile_id" value="1"
-             {% if show_politicians_with_claimed_profile %}checked{% endif %} /> Is Claimed Profile
-    </label>
-</form>
-<!-- Pagination Section -->
-{% if not hide_pagination %}
-<span class="float-right">
-    {% if has_previous_page %}
-        <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
-    {% endif %}
-    Page {{ current_page_number|add:1 }}
-    {% if has_next_page %}
-        | <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>
-    {% endif %}
-</span>
-{% endif %}
-
-{% if politician_list %}
-    <table class="table">
-      <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>
-                <a href="?{{ request.GET.urlencode|cut:'&sort_by=twitter'|cut:'&sort_by=politician' }}&sort_by=politician">
-                    {% if sort_by == "politician" %}<strong>Politician Name</strong>{% else %}Politician Name{% endif %}
-                </a>
-            </th>
-            <th>State</th>
-            <th>ID - We Vote ID</th>
-            <th>
-                {% if sort_by == "twitter" %}
-                    <a href="?{{ request.GET.urlencode|cut:'&sort_by=twitter' }}">
-                        Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
-                    </a>
-                    {% else %}
-                    <a href="?{{ request.GET.urlencode|cut:'&sort_by=politician' }}&sort_by=twitter">
-                        Twitter (click to sort)
-                    </a>
-                {% endif %}
-            </th>
-            <th>Email(s)</th>
-            <th>Website(s)</th>
-{#            <th>Candidates Linked</th>#}
-        {% if show_related_candidates %}
-            <th>Related Candidates?</th>
+      {% if politician_search %}
+        <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
+          <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
+          {% endif %}
+          <input type="text"
+                 name="politician_search"
+                 id="politician_search_id"
+                 value="{{ politician_search }}" />
+          <input id="politician_search_submit"
+                 type="submit"
+                 value="Search for Politician" />
+          &nbsp;&nbsp;
+          <label for="show_politicians_with_email_id">
+            <input type="checkbox"
+                   name="show_politicians_with_email"
+                   id="show_politicians_with_email_id"
+                   value="1"
+                   {% if show_politicians_with_email %}checked{% endif %} />
+            Has Email
+          </label>
+          &nbsp;&nbsp;
+          <label for="show_all_id">
+            <input type="checkbox"
+                   name="show_all"
+                   id="show_all_id"
+                   value="1"
+                   {% if show_all %}checked{% endif %} />
+            Show up to 200 politicians
+          </label>
+          &nbsp;&nbsp;
+          <label for="show_battleground_id">
+            <input type="checkbox"
+                   name="show_battleground"
+                   id="show_battleground_id"
+                   value="1"
+                   {% if show_battleground %}checked{% endif %} />
+            Battleground races
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="show_related_candidates_id">
+            <input type="checkbox"
+                   name="show_related_candidates"
+                   id="show_related_candidates_id"
+                   value="1"
+                   {% if show_related_candidates %}checked{% endif %} />
+            Show related candidates count
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="show_ocd_id_state_mismatch_id">
+            <input type="checkbox"
+                   name="show_ocd_id_state_mismatch"
+                   id="show_ocd_id_state_mismatch_id"
+                   value="1"
+                   {% if show_ocd_id_state_mismatch %}checked{% endif %} />
+            Show OCD ID/State mismatch
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="organization_manual_intervention_needed_id">
+            <input type="checkbox"
+                   name="organization_manual_intervention_needed"
+                   id="organization_manual_intervention_needed_id"
+                   value="1"
+                   {% if organization_manual_intervention_needed %}checked{% endif %} />
+            Org intervention needed
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="hide_politicians_with_photos_id">
+            <input type="checkbox"
+                   name="hide_politicians_with_photos"
+                   id="hide_politicians_with_photos_id"
+                   value="1"
+                   {% if hide_politicians_with_photos %}checked{% endif %} />
+            Missing Photo
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="was_candidate_recently_id">
+            <input type="checkbox"
+                   name="was_candidate_recently"
+                   id="was_candidate_recently_id"
+                   value="1"
+                   {% if was_candidate_recently %}checked{% endif %} />
+            Was Candidate Recently
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="exclude_politician_analysis_done_id">
+            <input type="checkbox"
+                   name="exclude_politician_analysis_done"
+                   id="exclude_politician_analysis_done_id"
+                   value="1"
+                   {% if exclude_politician_analysis_done %}checked{% endif %} />
+            Exclude Analyzed
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="show_politicians_with_claimed_profile_id">
+            <input type="checkbox"
+                   name="show_politicians_with_claimed_profile"
+                   id="show_politicians_with_claimed_profile_id"
+                   value="1"
+                   {% if show_politicians_with_claimed_profile %}checked{% endif %} />
+            Is Claimed Profile
+          </label>
+        </form>
+        <!-- Pagination Section -->
+        {% if not hide_pagination %}
+          <span class="float-right">
+            {% if has_previous_page %}
+              <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
+            {% endif %}
+            Page {{ current_page_number|add:1 }}
+            {% if has_next_page %}| <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>{% endif %}
+          </span>
         {% endif %}
-        </tr>
-      </thead>
-    {% for politician in politician_list %}
-        <tr>
-            <td>{{ forloop.counter|add:start_index }}</td>
-            <td{% if politician.profile_image_background_color %}
-                    style="padding-left: 0; padding-right: 0;"
-                {% endif %}>
-                {% if politician.we_vote_hosted_profile_image_url_tiny %}
-                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                    <img
-                      {% if politician.profile_image_background_color %}
-                          style="
-                              border-left: 10px solid {{ politician.profile_image_background_color }};
-                              border-right: 10px solid {{ politician.profile_image_background_color }};"
-                      {% endif %}
-                      src='{{ politician.we_vote_hosted_profile_image_url_tiny }}'
-                      height="48px" />
-                </a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   class="u-no-break"
-                   target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
-                {% if politician.political_party %}
-                    <span style="color: #999;">({{ politician.political_party }})</span>
-                {% endif %}
-                {% if politician.is_claimed_profile %}
-                    <span> 
-                        <i class="material-icons" style="color: #6B6B6B; font-size: 18px;" title="Claimed on {{ politician.is_claimed_profile_date_time|date:'F j, Y' }}">verified</i>
-                    </span> 
-                {% endif %}
-                {% if politician.seo_friendly_path %}
+
+        {% if politician_list %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>
+                  <a href="?{{ request.GET.urlencode|cut:'&sort_by=twitter'|cut:'&sort_by=politician' }}&sort_by=politician">
+                    {% if sort_by == "politician" %}
+                      <strong>Politician Name</strong>
+                    {% else %}
+                      Politician Name
+                    {% endif %}
+                  </a>
+                </th>
+                <th>State</th>
+                <th>ID - We Vote ID</th>
+                <th>
+                  {% if sort_by == "twitter" %}
+                    <a href="?{{ request.GET.urlencode|cut:'&sort_by=twitter' }}">
+                      Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
+                    </a>
+                  {% else %}
+                    <a href="?{{ request.GET.urlencode|cut:'&sort_by=politician' }}&sort_by=twitter">Twitter (click to sort)</a>
+                  {% endif %}
+                </th>
+                <th>Email(s)</th>
+                <th>Website(s)</th>
+                {#            <th>Candidates Linked</th>#}
+                {% if show_related_candidates %}<th>Related Candidates?</th>{% endif %}
+              </tr>
+            </thead>
+            {% for politician in politician_list %}
+              <tr>
+                <td>{{ forloop.counter|add:start_index }}</td>
+                <td {% if politician.profile_image_background_color %}style="padding-left: 0; padding-right: 0;"{% endif %}>
+                  {% if politician.we_vote_hosted_profile_image_url_tiny %}
+                    <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">
+                      <img {% if politician.profile_image_background_color %} style=" border-left: 10px solid {{ politician.profile_image_background_color }}; border-right: 10px solid {{ politician.profile_image_background_color }};" {% endif %}
+                           src='{{ politician.we_vote_hosted_profile_image_url_tiny }}'
+                           height="48px" />
+                    </a>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                     class="u-no-break"
+                     target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                  {% if politician.political_party %}<span style="color: #999;">({{ politician.political_party }})</span>{% endif %}
+                  {% if politician.is_claimed_profile %}
+                    <span>
+                      <i class="material-icons"
+                         style="color: #6B6B6B;
+                                font-size: 18px"
+                         title="Claimed on {{ politician.is_claimed_profile_date_time|date:'F j, Y' }}">verified</i>
+                    </span>
+                  {% endif %}
+                  {% if politician.seo_friendly_path %}
                     <br />
                     <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-"
-                       style="color: #999; font-weight: 300;"
+                       style="color: #999;
+                              font-weight: 300"
                        target="_blank">/{{ politician.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}
-            </td>
-            <td>
-                {{ politician.state_code|default_if_none:"" }}
-                {% if politician.linked_representative_list %}
+                  {% endif %}
+                </td>
+                <td>
+                  {{ politician.state_code|default_if_none:"" }}
+                  {% if politician.linked_representative_list %}
                     <br />
                     {% for representative in politician.linked_representative_list %}
-                        <span style="color: #999">{{ representative.ocd_division_id }}&nbsp;</span>&nbsp;
+                      <span style="color: #999">{{ representative.ocd_division_id }}&nbsp;</span>&nbsp;
                     {% endfor %}
-                {% endif %}
-            </td>
-            <td>
-                {{ politician.id }} - {{ politician.we_vote_id }}
-                &nbsp;&nbsp;
-                {% if politician.linked_representative_we_vote_id_list %}
+                  {% endif %}
+                </td>
+                <td>
+                  {{ politician.id }} - {{ politician.we_vote_id }}
+                  &nbsp;&nbsp;
+                  {% if politician.linked_representative_we_vote_id_list %}
                     <br />
                     {% for representative_we_vote_id in politician.linked_representative_we_vote_id_list %}
-                        <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
+                      <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
                     {% endfor %}
                     &nbsp;&nbsp;
-                {% endif %}
-                {% if politician.organization_we_vote_id %}
+                  {% endif %}
+                  {% if politician.organization_we_vote_id %}
                     {{ politician.organization_we_vote_id|default_if_none:"" }}
                     &nbsp;&nbsp;
-                {% endif %}
-                {% if politician.linked_campaignx_we_vote_id %}
+                  {% endif %}
+                  {% if politician.linked_campaignx_we_vote_id %}
                     <a href="{% url 'campaign:campaignx_summary' politician.linked_campaignx_we_vote_id %}"
-                       target="_blank">
-                        {{ politician.linked_campaignx_we_vote_id }}
-                    </a>
+                       target="_blank">{{ politician.linked_campaignx_we_vote_id }}</a>
                     &nbsp;&nbsp;
-                {% endif %}
-                {% if politician.vote_usa_politician_id %}
+                  {% endif %}
+                  {% if politician.vote_usa_politician_id %}
                     {{ politician.vote_usa_politician_id|default_if_none:"" }}
                     &nbsp;&nbsp;
+                  {% endif %}
+                  {% if politician.vote_smart_id %}
+                    <br />
+                    VS: {{ politician.vote_smart_id|default_if_none:"" }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if politician.politician_twitter_handle %}
+                    <a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
+                       target="_blank">{{ politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    <br />
+                    ({{ politician.twitter_followers_count|intcomma }} followers)
+                  {% endif %}
+                  {% if politician.politician_twitter_handle2 %}
+                    <br />
+                    <a href="https://twitter.com/{{ politician.politician_twitter_handle2 }}"
+                       target="_blank">{{ politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                  {% endif %}
+                  {% if politician.politician_twitter_handle3 %}
+                    <br />
+                    <a href="https://twitter.com/{{ politician.politician_twitter_handle3 }}"
+                       target="_blank">{{ politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                  {% endif %}
+                  {% if politician.politician_twitter_handle4 %}
+                    <br />
+                    <a href="https://twitter.com/{{ politician.politician_twitter_handle4 }}"
+                       target="_blank">{{ politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                  {% endif %}
+                  {% if politician.politician_twitter_handle5 %}
+                    <br />
+                    <a href="https://twitter.com/{{ politician.politician_twitter_handle5 }}"
+                       target="_blank">{{ politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if politician.politician_email %}{{ politician.politician_email }}&nbsp;{% endif %}
+                  {% if politician.politician_email2 %}{{ politician.politician_email2 }}&nbsp;{% endif %}
+                  {% if politician.politician_email3 %}{{ politician.politician_email3 }}&nbsp;{% endif %}
+                  {% if politician.politician_phone_number %}{{ politician.politician_phone_number }}&nbsp;{% endif %}
+                  {% if politician.politician_phone_number2 %}{{ politician.politician_phone_number2 }}&nbsp;{% endif %}
+                  {% if politician.politician_phone_number3 %}{{ politician.politician_phone_number3 }}&nbsp;{% endif %}
+                  {% if politician.politician_ultimate_election_date %}
+                    <span style="color: #999;">{{ politician.politician_ultimate_election_date }}</span>&nbsp;
+                  {% endif %}
+                </td>
+                <td>
+                  {% if politician.politician_url %}
+                    <a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>
+                  {% endif %}
+                  {% if politician.politician_url2 %}
+                    <br />
+                    <a href="{{ politician.politician_url2 }}" target="_blank">{{ politician.politician_url2 }}</a>
+                  {% endif %}
+                  {% if politician.politician_url3 %}
+                    <br />
+                    <a href="{{ politician.politician_url3 }}" target="_blank">{{ politician.politician_url3 }}</a>
+                  {% endif %}
+                  {% if politician.politician_url4 %}
+                    <br />
+                    <a href="{{ politician.politician_url4 }}" target="_blank">{{ politician.politician_url4 }}</a>
+                  {% endif %}
+                  {% if politician.politician_url5 %}
+                    <br />
+                    <a href="{{ politician.politician_url5 }}" target="_blank">{{ politician.politician_url5 }}</a>
+                  {% endif %}
+                  {% if politician.facebook_url %}
+                    <a href="{{ politician.facebook_url }}" target="_blank">{{ politician.facebook_url }}</a>
+                  {% endif %}
+                  {% if politician.facebook_url2 %}
+                    <br />
+                    <a href="{{ politician.facebook_url2 }}" target="_blank">{{ politician.facebook_url2 }}</a>
+                  {% endif %}
+                  {% if politician.facebook_url3 %}
+                    <br />
+                    <a href="{{ politician.facebook_url3 }}" target="_blank">{{ politician.facebook_url3 }}</a>
+                  {% endif %}
+                  {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=politician %}
+                </td>
+                {#            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>#}
+                {% if show_related_candidates %}
+                  <td>
+                    {% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}
+                  </td>
                 {% endif %}
-                {% if politician.vote_smart_id %}
-                    <br />VS: {{ politician.vote_smart_id|default_if_none:"" }}
-                {% endif %}
-           </td>
-            <td>
-                {% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
-                    target="_blank">{{ politician.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
-                ({{ politician.twitter_followers_count|intcomma }} followers){% endif %}
-                {% if politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle2 }}"
-                    target="_blank">{{ politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle3 }}"
-                    target="_blank">{{ politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle4 }}"
-                    target="_blank">{{ politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle5 }}"
-                    target="_blank">{{ politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-            </td>
-            <td>
-                {% if politician.politician_email %}{{ politician.politician_email }}&nbsp;{% endif %}
-                {% if politician.politician_email2 %}{{ politician.politician_email2 }}&nbsp;{% endif %}
-                {% if politician.politician_email3 %}{{ politician.politician_email3 }}&nbsp;{% endif %}
-                {% if politician.politician_phone_number %}{{ politician.politician_phone_number }}&nbsp;{% endif %}
-                {% if politician.politician_phone_number2 %}{{ politician.politician_phone_number2 }}&nbsp;{% endif %}
-                {% if politician.politician_phone_number3 %}{{ politician.politician_phone_number3 }}&nbsp;{% endif %}
-                {% if politician.politician_ultimate_election_date %}<span style="color: #999;">{{ politician.politician_ultimate_election_date }}</span>&nbsp;{% endif %}
-            </td>
-            <td>
-                {% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}
-                {% if politician.politician_url2 %}<br /><a href="{{ politician.politician_url2 }}" target="_blank">{{ politician.politician_url2 }}</a>{% endif %}
-                {% if politician.politician_url3 %}<br /><a href="{{ politician.politician_url3 }}" target="_blank">{{ politician.politician_url3 }}</a>{% endif %}
-                {% if politician.politician_url4 %}<br /><a href="{{ politician.politician_url4 }}" target="_blank">{{ politician.politician_url4 }}</a>{% endif %}
-                {% if politician.politician_url5 %}<br /><a href="{{ politician.politician_url5 }}" target="_blank">{{ politician.politician_url5 }}</a>{% endif %}
-                {% if politician.facebook_url %}<a href="{{ politician.facebook_url }}" target="_blank">{{ politician.facebook_url }}</a>{% endif %}
-                {% if politician.facebook_url2 %}<br /><a href="{{ politician.facebook_url2 }}" target="_blank">{{ politician.facebook_url2 }}</a>{% endif %}
-                {% if politician.facebook_url3 %}<br /><a href="{{ politician.facebook_url3 }}" target="_blank">{{ politician.facebook_url3 }}</a>{% endif %}
-            {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=politician %}
-            </td>
-{#            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>#}
-        {% if show_related_candidates %}
-            <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <!-- Pagination Section -->
+          {% if not hide_pagination %}
+            <span class="float-right">
+              {% if has_previous_page %}
+                <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
+              {% endif %}
+              Page {{ current_page_number|add:1 }}
+              {% if has_next_page %}| <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>{% endif %}
+            </span>
+          {% endif %}
+
+          <p></p>
+        {% else %}
+          <p>(no politicians found)</p>
+          <p>
+            <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a>
+            <br />
+          </p>
         {% endif %}
-        </tr>
-    {% endfor %}
-    </table>
-    <!-- Pagination Section -->
-{% if not hide_pagination %}
-<span class="float-right">
-    {% if has_previous_page %}
-    <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
-    {% endif %}
-    Page {{ current_page_number|add:1 }}
-    {% if has_next_page %}
-        | <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>
-    {% endif %}
-</span>
-{% endif %}
 
-    <p></p>
-{% else %}
-    <p>(no politicians found)</p>
-    <p>
-        <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
-    </p>
-{% endif %}
-
-<script>
+        <script>
     function displayLoadingBanner() {
         const banner = document.getElementById('FilterPopupMessage');
         if (banner) {
@@ -384,6 +466,6 @@
         });
     });
 
-</script>
+        </script>
 
-{% endblock %}
+      {% endblock %}

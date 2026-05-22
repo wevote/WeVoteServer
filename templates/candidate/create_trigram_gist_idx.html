@@ -5,45 +5,51 @@
 
 {% block content %}
 
-<h1>Create Trigram Gist Index</h1>
+  <h1>Create Trigram Gist Index</h1>
 
-<div style="background-color: #e7f3ff; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
-    <p><strong>Please specify field name for creating trigram gist index.</strong></p>
-</div>
+  <div style="background-color: #e7f3ff;
+              padding: 10px;
+              border-radius: 4px;
+              margin-bottom: 20px">
+    <p>
+      <strong>Please specify field name for creating trigram gist index.</strong>
+    </p>
+  </div>
 
-<form method="POST">
+  <form method="POST">
     {% csrf_token %}
-    <label>Index Field </label>
+    <label>Index Field</label>
     <select name="index_field" required>
-        <option value="">-- Select a field --</option>
-        <option value="candidate_name">Candidate Name</option>
-        <option value="contest_office_name" hidden>Contest Office Name</option>
-        <option value="district_name" hidden>District Name</option>
-        <option value="google_civic_candidate_name">Google Civic Candidate Name</option>
-        <option value="party" hidden>Party</option>
+      <option value="">-- Select a field --</option>
+      <option value="candidate_name">Candidate Name</option>
+      <option value="contest_office_name" hidden>Contest Office Name</option>
+      <option value="district_name" hidden>District Name</option>
+      <option value="google_civic_candidate_name">Google Civic Candidate Name</option>
+      <option value="party" hidden>Party</option>
     </select>
 
     <button type="submit">Submit</button>
-</form>
+  </form>
 
 
-{% if status_message %}
-    <div class="alert alert-{{ status_type|default:'info' }} alert-dismissible fade in" role="alert">
-        <strong>
-            {% if status_type == 'success' %}
-                Success!
-            {% elif status_type == 'info' %}
-                Info!
-            {% elif status_type == 'error' %}
-                Error!
-            {% endif %}
-        </strong> {{ status_message }}
+  {% if status_message %}
+    <div class="alert alert-{{ status_type|default:'info' }} alert-dismissible fade in"
+         role="alert">
+      <strong>
+        {% if status_type == 'success' %}
+          Success!
+        {% elif status_type == 'info' %}
+          Info!
+        {% elif status_type == 'error' %}
+          Error!
+        {% endif %}
+      </strong> {{ status_message }}
     </div>
-{% endif %}
+  {% endif %}
 
-<p>
+  <p>
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ page }}">
     < Back to Candidates</a>
-</p>
+  </p>
 
 {% endblock %}

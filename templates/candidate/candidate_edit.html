@@ -1,15 +1,21 @@
 {# templates/candidate/candidate_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if candidate %}{{ candidate.candidate_name  }}: Candidate Edit Page{% else %}New Candidate{% endif %}{% endblock %}
+{% block title %}
+  {% if candidate %}
+    {{ candidate.candidate_name }}: Candidate Edit Page
+  {% else %}
+    New Candidate
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/speed_statistics_banner.html" with performance_dict=performance_dict %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/speed_statistics_banner.html" with performance_dict=performance_dict %}
 
 
-<style>
+  <style>
 span.wrap_word { word-break: break-word; }
 table, th, td {
   border: 1px solid lightgray;
@@ -18,1095 +24,1346 @@ table, th, td {
 th, td {
   padding: 3px;
 }
-</style>
-<a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ page }}">
-    < Back to Candidates</a>
+  </style>
+  <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ page }}">
+  < Back to Candidates</a>
 
-<h1>
-    {% if candidate %}Edit Candidate:
-        {% if candidate.we_vote_hosted_profile_image_url_medium %}
-            <div style='display: inline-block; height: 48px; width: 96px; background:{{ candidate.profile_image_background_color }}'> 
-                <img src='{{ candidate.we_vote_hosted_profile_image_url_medium }}' style='margin-left: 25%;'/>
-            </div> 
-        {% endif %}
-        {{ candidate.candidate_name }}
-    {% else %}New Candidate{% endif %}
-</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-
-<form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal">
-{% csrf_token %}
-
-<input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
-<input type="hidden" name="redirect_to_candidate_list" value="0">
-
-<p>{# There is another submit button at bottom of form #}
-{% if candidate %}
-    <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-      cancel</a>
-{% else %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-      cancel</a>
-{% endif %}
-<input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" class="btn-primary" /></p>
-
-<div class="row form-group">
-    <label for="candidate_name_id" class="pl-4 control-label">
-      Candidate Name
-      {% if candidate %}
-        <div>
-          {% if candidate.seo_friendly_path %}
-            <a href="{{ web_app_root_url }}/{{ candidate.seo_friendly_path }}/-/" target="_blank">
-            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
-            </a>
-          {% elif candidate.politician_we_vote_id %}
-            <a href="{{ web_app_root_url }}/{{ candidate.politician_we_vote_id }}/p/" target="_blank">
-            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
-            </a>
-          {% else %}
-            <a href="{{ web_app_root_url }}/candidate/{{ candidate.we_vote_id }}" target="_blank">
-            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
-            </a>
-          {% endif %}
+  <h1>
+    {% if candidate %}
+      Edit Candidate:
+      {% if candidate.we_vote_hosted_profile_image_url_medium %}
+        <div style='display: inline-block;
+                    height: 48px;
+                    width: 96px;
+                    background:{{ candidate.profile_image_background_color }}'>
+          <img src='{{ candidate.we_vote_hosted_profile_image_url_medium }}'
+               style='margin-left: 25%' />
         </div>
-        {% if candidate.supporters_count %}
-            <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ candidate.supporters_count }}</div>
-        {% endif %}
       {% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
+      {{ candidate.candidate_name }}
+    {% else %}
+      New Candidate
+    {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
+
+
+  <form action="{% url 'candidate:candidate_edit_process' %}"
+        id="candidate_edit"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
+
+    <input type="hidden"
+           name="candidate_id"
+           value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="redirect_to_candidate_list" value="0">
+
+    <p>
+      {# There is another submit button at bottom of form #}
+      {% if candidate %}
+        <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        cancel</a>
+      {% else %}
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        cancel</a>
+      {% endif %}
+      <input name="submit_text"
+             type="submit"
+             value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}"
+             class="btn-primary" />
+    </p>
+
+    <div class="row form-group">
+      <label for="candidate_name_id" class="pl-4 control-label">
+        Candidate Name
+        {% if candidate %}
+          <div>
+            {% if candidate.seo_friendly_path %}
+              <a href="{{ web_app_root_url }}/{{ candidate.seo_friendly_path }}/-/"
+                 target="_blank">
+                View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            {% elif candidate.politician_we_vote_id %}
+              <a href="{{ web_app_root_url }}/{{ candidate.politician_we_vote_id }}/p/"
+                 target="_blank">
+                View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            {% else %}
+              <a href="{{ web_app_root_url }}/candidate/{{ candidate.we_vote_id }}"
+                 target="_blank">
+                View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            {% endif %}
+          </div>
+          {% if candidate.supporters_count %}
+            <div class="u-no-break" style="color: darkgray; font-size: 10px;">
+              supporters_count: {{ candidate.supporters_count }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </label>
+      <div class="col">
+        <input type="text"
+               name="candidate_name"
+               id="candidate_name_id"
+               class="form-control"
                value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
         <div>
-            {% if candidate %}
-               {% if candidate.candidate_name_normalized|length|get_digit:"-1" > 0 %}
-                    <span style='display: inline-block; width: 42%; text-align: left; padding-left: 6px'>
-                        <span id='hidden_name' style="display:none;">{{ candidate.candidate_name_normalized }}</span>
-                        <button type="button" id="update_name_id" name="update_name" style="border-width: 1px">
-                            Change name to <span style='font-weight: 900; margin-left: 1px'>{{ candidate.candidate_name_normalized }}</span>
-                        </button>
-                    </span>
-               {% endif %}
-               <div>
-                    {{ candidate.we_vote_id }}
-               
-                    {% if candidate.politician_we_vote_id %}
-                        &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
-                        <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                            target="_blank">
-                        {{ candidate.politician_we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
-                    {% else %}
-                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
-                    {% endif %}
-                    {% if candidate.ocd_division_id %}
-                        &nbsp;&nbsp;&nbsp;
-                        <span class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</span>
-                    {% endif %}
-                    {% if candidate.candidate_merge_possibility_found %}
-                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                            target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
-                    {% endif %}
-
-                    {% if ctcl_uuid_list %}
-                        &nbsp;&nbsp;
-                        CTCL ID(s):
-                        {% include "candidate/value_list_horizontal_display.html" with value_list=ctcl_uuid_list %}
-                    {% endif %}
-
-                    {% if path_list %}
-                        <div>
-                        <div style="color: darkgray">
-                            {{ candidate.seo_friendly_path }}
-                        </div>
-                        {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
-                        </div>
-                    {% else %}
-                        <div style="color: darkgray">
-                        No alternate URL paths found.
-                        </div>
-                    {% endif %}
-                </div>
-            {% else %}
-                {{ we_vote_id }}
-                {% if politician_we_vote_id and politician_we_vote_id != "False" and politician_we_vote_id != False %}
-                    &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id FOUND: {{ politician_we_vote_id }}
-                    <input type="hidden" name="politician_we_vote_id" value="{{ politician_we_vote_id }}">
-                {% else %}
-                    <input name="look_for_politician" type="submit" value="Look for Politician" />
-                {% endif %}
+          {% if candidate %}
+            {% if candidate.candidate_name_normalized|length|get_digit:"-1" > 0 %}
+              <span style='display: inline-block;
+                           width: 42%;
+                           text-align: left;
+                           padding-left: 6px'>
+                <span id='hidden_name' style="display:none;">{{ candidate.candidate_name_normalized }}</span>
+                <button type="button"
+                        id="update_name_id"
+                        name="update_name"
+                        style="border-width: 1px">
+                  Change name to <span style='font-weight: 900; margin-left: 1px'>{{ candidate.candidate_name_normalized }}</span>
+                </button>
+              </span>
             {% endif %}
+            <div>
+              {{ candidate.we_vote_id }}
+
+              {% if candidate.politician_we_vote_id %}
+                &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
+                <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ candidate.politician_we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
+              {% else %}
+                &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
+              {% endif %}
+              {% if candidate.ocd_division_id %}
+                &nbsp;&nbsp;&nbsp;
+                <span class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</span>
+              {% endif %}
+              {% if candidate.candidate_merge_possibility_found %}
+                &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
+   target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
+              {% endif %}
+
+              {% if ctcl_uuid_list %}
+                &nbsp;&nbsp;
+                CTCL ID(s):
+                {% include "candidate/value_list_horizontal_display.html" with value_list=ctcl_uuid_list %}
+              {% endif %}
+
+              {% if path_list %}
+                <div>
+                  <div style="color: darkgray">{{ candidate.seo_friendly_path }}</div>
+                  {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+                </div>
+              {% else %}
+                <div style="color: darkgray">No alternate URL paths found.</div>
+              {% endif %}
+            </div>
+          {% else %}
+            {{ we_vote_id }}
+            {% if politician_we_vote_id and politician_we_vote_id != "False" and politician_we_vote_id != False %}
+              &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id FOUND: {{ politician_we_vote_id }}
+              <input type="hidden"
+                     name="politician_we_vote_id"
+                     value="{{ politician_we_vote_id }}">
+            {% else %}
+              <input name="look_for_politician" type="submit" value="Look for Politician" />
+            {% endif %}
+          {% endif %}
         </div>
+      </div>
     </div>
-</div>
 
 
-<div class="row form-group">
-    <label for="profile_image_type_currently_active_id" class="pl-4 control-label">
-        Candidate Photo Choice<br />
+    <div class="row form-group">
+      <label for="profile_image_type_currently_active_id"
+             class="pl-4 control-label">
+        Candidate Photo Choice
+        <br />
         <span style="color: darkgray">{{ candidate.profile_image_type_currently_active }}</span>
-    </label>
-    <div class="col">
-    {# UNKNOWN IMAGE #}
+      </label>
+      <div class="col">
+        {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
-                {% if candidate.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
-                />
-        {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
+          <input type="radio"
+                 name="profile_image_type_currently_active"
+                 value="UNKNOWN"
+                 {% if candidate.profile_image_type_currently_active == 'UNKNOWN' %}checked{% endif %} />
+          {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
             <span style="text-decoration: line-through">Unknown</span>
-        {% else %}
+          {% else %}
             Unknown
-        {% endif %}
+          {% endif %}
         </span>
-    {# UPLOADED IMAGE #}
+        {# UPLOADED IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
-                {% if candidate.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
-                />
-            Uploaded
-        {% if candidate.we_vote_hosted_profile_uploaded_image_url_tiny %}
+          <input type="radio"
+                 name="profile_image_type_currently_active"
+                 value="UPLOADED"
+                 {% if candidate.profile_image_type_currently_active == 'UPLOADED' %}checked{% endif %} />
+          Uploaded
+          {% if candidate.we_vote_hosted_profile_uploaded_image_url_tiny %}
             <img src='{{ candidate.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
             <label for="candidate_photo_file_delete_id">
-              <input type="checkbox" name="candidate_photo_file_delete" id="candidate_photo_file_delete_id" value="1" />
-                delete&nbsp;&nbsp;&nbsp;
+              <input type="checkbox"
+                     name="candidate_photo_file_delete"
+                     id="candidate_photo_file_delete_id"
+                     value="1" />
+              delete&nbsp;&nbsp;&nbsp;
             </label>
-        {% else %}
+          {% else %}
             (add on politician)
-        {% endif %}
+          {% endif %}
         </span>
-    {# FACEBOOK IMAGE #}
+        {# FACEBOOK IMAGE #}
         {% if candidate.we_vote_hosted_profile_facebook_image_url_tiny %}
-        <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
-                {% if candidate.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="FACEBOOK"
+                   {% if candidate.profile_image_type_currently_active == 'FACEBOOK' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_facebook_image_url_tiny }}' />
             Facebook
-        </span>
+          </span>
         {% endif %}
-    {# TWITTER IMAGE #}
+        {# TWITTER IMAGE #}
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
-        <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
-                {% if candidate.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="TWITTER"
+                   {% if candidate.profile_image_type_currently_active == 'TWITTER' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
             Twitter
-        </span>
+          </span>
         {% endif %}
-    {# BALLOTPEDIA IMAGE #}
+        {# BALLOTPEDIA IMAGE #}
         {% if candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny %}
-        <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="BALLOTPEDIA"
-                {% if candidate.profile_image_type_currently_active == 'BALLOTPEDIA' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="BALLOTPEDIA"
+                   {% if candidate.profile_image_type_currently_active == 'BALLOTPEDIA' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny }}' />
             Ballotpedia
-        {% endif %}
+          {% endif %}
         </span>
-    {# LINKEDIN IMAGE #}
+        {# LINKEDIN IMAGE #}
         {% if candidate.we_vote_hosted_profile_linkedin_image_url_tiny %}
-        <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="LINKEDIN"
-                {% if candidate.profile_image_type_currently_active == 'LINKEDIN' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="LINKEDIN"
+                   {% if candidate.profile_image_type_currently_active == 'LINKEDIN' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_linkedin_image_url_tiny }}' />
             LinkedIn
-        {% endif %}
+          {% endif %}
         </span>
-    {# VOTE_USA IMAGE #}
+        {# VOTE_USA IMAGE #}
         {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
-        <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
-                {% if candidate.profile_image_type_currently_active == 'VOTE_USA' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="VOTE_USA"
+                   {% if candidate.profile_image_type_currently_active == 'VOTE_USA' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
             Vote USA
-        {% endif %}
+          {% endif %}
         </span>
-    {# WIKIPEDIA IMAGE #}
+        {# WIKIPEDIA IMAGE #}
         {% if candidate.we_vote_hosted_profile_wikipedia_image_url_tiny %}
-        <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="WIKIPEDIA"
-                {% if candidate.profile_image_type_currently_active == 'WIKIPEDIA' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="WIKIPEDIA"
+                   {% if candidate.profile_image_type_currently_active == 'WIKIPEDIA' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_wikipedia_image_url_tiny }}' />
             Wikipedia
-        {% endif %}
+          {% endif %}
         </span>
+      </div>
     </div>
-</div>
-<div class="col">
-<div class="row form-group">
-    
-{% if candidate.we_vote_hosted_profile_image_url_large %}
-    <label for="profile_image_background_color_id" class="pl-3 control-label">Background Color</label>
     <div class="col">
-        <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
-               value="{% if candidate %}{{ candidate.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
-        <input name="regenerate_color" id="regenerate_color_id" type="checkbox"/>
-        <label for="regenerate_color_id">&nbsp;Regenerate default color</label>
-    </div>
-{% endif %}
-    
-    <label for="profile_image_background_color_id" class="pl-3 control-label">Candidate Year</label>
-    <div class="col">
-        <input type="text" name="candidate_year" id="candidate_year_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_year|default_if_none:"" }}{% else %}{{ candidate_year }}{% endif %}" />
-    </div>
-</div>
-</div>
+      <div class="row form-group">
 
-<input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
-<div class="row form-group">
-    <label for="google_civic_election_id_id" class="pl-4 control-label">
-        Candidate to Office Link
-        (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
-        <span style="color: slategray; font-weight: 400;">
-        {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
-            <br />
+        {% if candidate.we_vote_hosted_profile_image_url_large %}
+          <label for="profile_image_background_color_id" class="pl-3 control-label">Background Color</label>
+          <div class="col">
+            <input type="text"
+                   name="profile_image_background_color"
+                   id="profile_image_background_color_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
+            <input name="regenerate_color" id="regenerate_color_id" type="checkbox" />
+            <label for="regenerate_color_id">&nbsp;Regenerate default color</label>
+          </div>
         {% endif %}
-        {% if candidate.candidate_year %}
+
+        <label for="profile_image_background_color_id" class="pl-3 control-label">Candidate Year</label>
+        <div class="col">
+          <input type="text"
+                 name="candidate_year"
+                 id="candidate_year_id"
+                 class="form-control"
+                 value="{% if candidate %}{{ candidate.candidate_year|default_if_none:"" }}{% else %}{{ candidate_year }}{% endif %}" />
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
+    <div class="row form-group">
+      <label for="google_civic_election_id_id" class="pl-4 control-label">
+        Candidate to Office Link
+        (<span onclick="showElement('candidate_to_office_link_table_add');"
+      style="color: royalblue">add</span>)
+        <span style="color: slategray; font-weight: 400;">
+          {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}<br />{% endif %}
+          {% if candidate.candidate_year %}
             {{ candidate.candidate_year }}
             &nbsp;&nbsp;&nbsp;
-        {% else %}
+          {% else %}
             {{ candidate.date_last_updated }}
             &nbsp;&nbsp;&nbsp;
-        {% endif %}
-        {% if candidate.candidate_ultimate_election_date %}
-            {{ candidate.candidate_ultimate_election_date }}
-        {% endif %}
-        {% if candidate.contest_office_name or candidate.district_name %}
-            <br />
-        {% endif %}
-        {% if candidate.contest_office_name %}
+          {% endif %}
+          {% if candidate.candidate_ultimate_election_date %}{{ candidate.candidate_ultimate_election_date }}{% endif %}
+          {% if candidate.contest_office_name or candidate.district_name %}<br />{% endif %}
+          {% if candidate.contest_office_name %}
             {{ candidate.contest_office_name }}
-            {% if candidate.district_name %}
-                &nbsp;|&nbsp;
-            {% endif %}
-        {% endif %}
-        {% if candidate.district_name %}
-            {{ candidate.district_name }}
-        {% endif %}
-        {% if candidate_to_office_link_list|length == 2 %}
+            {% if candidate.district_name %}&nbsp;|&nbsp;{% endif %}
+          {% endif %}
+          {% if candidate.district_name %}{{ candidate.district_name }}{% endif %}
+          {% if candidate_to_office_link_list|length == 2 %}
             <br />
             {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
-                <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+              <br />
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
             {% endif %}
-        {% elif candidate_to_office_link_list|length == 3 %}
+          {% elif candidate_to_office_link_list|length == 3 %}
             <br />
             {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
-                <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices 1 &amp; 2 <span class="glyphicon glyphicon-new-window"></span></a><br />
+              <br />
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">Compare Offices 1 &amp; 2 <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
             {% endif %}
             {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
-                <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices 1 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+              <br />
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">Compare Offices 1 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
             {% endif %}
             {% if candidate_to_office_link_list.1.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
-                <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+              <br />
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
             {% endif %}
-        {% endif %}
-        {% if candidate.is_battleground_race %}
-            <br /><strong>Competitive Race</strong>
-        {% endif %}
+          {% endif %}
+          {% if candidate.is_battleground_race %}
+            <br />
+            <strong>Competitive Race</strong>
+          {% endif %}
         </span>
-    </label>
-    <div class="col">
-    {% if office_name %}
-        Adding Candidate to: {{ office_name }}
-        <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
-    {% endif %}
-    <table>
-    {% for candidate_to_office_link in candidate_to_office_link_list %}
-        <tr>
-            <td>
-                id: {{ candidate_to_office_link.id }}
-            </td>
-            <td>
+      </label>
+      <div class="col">
+        {% if office_name %}
+          Adding Candidate to: {{ office_name }}
+          <input type="hidden"
+                 name="contest_office_id"
+                 value="{{ contest_office_id }}">
+        {% endif %}
+        <table>
+          {% for candidate_to_office_link in candidate_to_office_link_list %}
+            <tr>
+              <td>id: {{ candidate_to_office_link.id }}</td>
+              <td>
                 {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
                 ({{ candidate_to_office_link.google_civic_election_id }})
-            </td>
-            <td>
-                {{ candidate_to_office_link.state_code }}
-            </td>
-            <td>
-            {% if candidate_to_office_link.office and candidate_to_office_link.contest_office_we_vote_id %}
-                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
-            {% else %}
-                Missing contest_office_we_vote_id
-            {% endif %}
-                {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
-                {% if candidate_to_office_link.office.ctcl_uuid %}<br /><span style="font-size: 10px;">{{ candidate_to_office_link.office.ctcl_uuid }}</span>{% endif %}
-            </td>
-            <td>
+              </td>
+              <td>{{ candidate_to_office_link.state_code }}</td>
+              <td>
+                {% if candidate_to_office_link.office and candidate_to_office_link.contest_office_we_vote_id %}
+                  <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                     target="_blank">
+                    {% if candidate_to_office_link.office.office_name %}
+                      {{ candidate_to_office_link.office.office_name }}
+                    {% else %}
+                      MISSING OFFICE OBJECT
+                    {% endif %}
+                  ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
+                {% else %}
+                  Missing contest_office_we_vote_id
+                {% endif %}
+                {% if candidate_to_office_link.office.vote_usa_office_id %}
+                  <br />
+                  {{ candidate_to_office_link.office.vote_usa_office_id }}
+                {% endif %}
+                {% if candidate_to_office_link.office.ctcl_uuid %}
+                  <br />
+                  <span style="font-size: 10px;">{{ candidate_to_office_link.office.ctcl_uuid }}</span>
+                {% endif %}
+              </td>
+              <td>
                 <label for="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id">
-                    delete
-                    <input type="checkbox"
-                           name="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}"
-                           id="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id"
-                           value=1
-                    />
+                  delete
+                  <input type="checkbox"
+                         name="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}"
+                         id="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id"
+                         value="1" />
                 </label>
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
-    <table id="candidate_to_office_link_table_add" style="display: none;">
-        <thead>
-            <tr>
-                <th>Election Id</th>
-                <th>State</th>
-                <th>Office We Vote Id</th>
-                <th>Office Held We Vote Id</th>
+              </td>
             </tr>
-        </thead>
-        <tr>
+          {% endfor %}
+        </table>
+        <table id="candidate_to_office_link_table_add" style="display: none;">
+          <thead>
+            <tr>
+              <th>Election Id</th>
+              <th>State</th>
+              <th>Office We Vote Id</th>
+              <th>Office Held We Vote Id</th>
+            </tr>
+          </thead>
+          <tr>
             <td>
-                <input type="text" name="candidate_to_office_link_add_election"
-                       style="width: 125px; border: 1px solid lightgray;"/>
+              <input type="text"
+                     name="candidate_to_office_link_add_election"
+                     style="width: 125px;
+                            border: 1px solid lightgray" />
             </td>
             <td>
-                <input type="text" name="candidate_to_office_link_add_state_code"
-                       style="width: 40px; border: 1px solid lightgray;" value="{% if candidate %}{{ candidate.state_code }}{% endif %}"/>
+              <input type="text"
+                     name="candidate_to_office_link_add_state_code"
+                     style="width: 40px;
+                            border: 1px solid lightgray"
+                     value="{% if candidate %}{{ candidate.state_code }}{% endif %}" />
             </td>
             <td>
-                <input type="text" name="candidate_to_office_link_add_office_we_vote_id"
-                       style="width: 125px; border: 1px solid lightgray;"/>
+              <input type="text"
+                     name="candidate_to_office_link_add_office_we_vote_id"
+                     style="width: 125px;
+                            border: 1px solid lightgray" />
             </td>
             <td>
-                <input type="text" name="candidate_to_office_link_add_office_held_we_vote_id"
-                       style="width: 150px; border: 1px solid lightgray;"/>
+              <input type="text"
+                     name="candidate_to_office_link_add_office_held_we_vote_id"
+                     style="width: 150px;
+                            border: 1px solid lightgray" />
             </td>
-        </tr>
-    </table>
+          </tr>
+        </table>
+      </div>
     </div>
-</div>
 
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=contest_office_name_dict field_dict_2=district_name_dict %}
+    {% include "../form_inputs/two_form_groups.html" with field_dict_1=contest_office_name_dict field_dict_2=district_name_dict %}
 
-{% if state_code_from_election == "" %}
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{{ state_code|default_if_none:"" }}" />
-    </div>
-</div>
-{% endif %}
+    {% if state_code_from_election == "" %}
+      <div class="form-group">
+        <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="state_code"
+                 id="state_code_id"
+                 class="form-control"
+                 value="{{ state_code|default_if_none:"" }}" />
+        </div>
+      </div>
+    {% endif %}
 
 
     {% if candidate %}
-<div class="row form-group">
-    <label for="google_search_image_file_id" class="pl-4 control-label">Search Google for Links to Candidate</label>
-    <div class="col d-flex align-items-end">
-        (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
-    {% if google_search_possibility_list %}
-        (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
-        (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">mark all as "Not a Match"</a>)
-        {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
-        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1#google_search_users_for_candidate_table">Show more Google search users</a>
-        {% elif google_search_possibility_list|length > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
-        {% endif %}
-    {% endif %}
-    </div>
-</div>
+      <div class="row form-group">
+        <label for="google_search_image_file_id" class="pl-4 control-label">Search Google for Links to Candidate</label>
+        <div class="col d-flex align-items-end">
+          (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
+          {% if google_search_possibility_list %}
+            (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
+            (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">mark all as "Not a Match"</a>)
+            {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
+            {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
+              <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1#google_search_users_for_candidate_table">Show more Google search users</a>
+            {% elif google_search_possibility_list|length > 1 %}
+              <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
     {% endif %}
 
-<div class="row form-group">
-    <label for="candidate_withdrawal_date_id" class="pl-4 control-label  d-flex align-items-center">Candidate Has Withdrawn From Election</label>
-    <div class="col">
+    <div class="row form-group">
+      <label for="candidate_withdrawal_date_id"
+             class="pl-4 control-label  d-flex align-items-center">Candidate Has Withdrawn From Election</label>
+      <div class="col">
         <span style="float: left; padding: 8px 10px 0 0;">
-            <input type="radio" name="withdrawn_from_election" value="True"
-                {% if candidate.withdrawn_from_election %} checked {% endif %}
-                onclick="document.getElementById('candidate_withdrawal_date_id').style.color='black'"> True
+          <input type="radio"
+                 name="withdrawn_from_election"
+                 value="True"
+                 {% if candidate.withdrawn_from_election %}checked{% endif %}
+                 onclick="document.getElementById('candidate_withdrawal_date_id').style.color='black'">
+          True
         </span>
         <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="withdrawn_from_election" value="False"
-                {% if not candidate.withdrawn_from_election %} checked {% endif %}
-                onclick="document.getElementById('candidate_withdrawal_date_id').style.color='white'"> False
+          <input type="radio"
+                 name="withdrawn_from_election"
+                 value="False"
+                 {% if not candidate.withdrawn_from_election %}checked{% endif %}
+                 onclick="document.getElementById('candidate_withdrawal_date_id').style.color='white'">
+          False
         </span>
-        <input type="text" name="withdrawal_date" id="candidate_withdrawal_date_id" class="form-control"
-            value="{{ candidate.withdrawal_date|date:'Y-m-d' }}"
-            style="width: 125px; float: left; {% if not candidate.withdrawn_from_election %} color: white {% endif %} "/>
+        <input type="text"
+               name="withdrawal_date"
+               id="candidate_withdrawal_date_id"
+               class="form-control"
+               value="{{ candidate.withdrawal_date|date:'Y-m-d' }}"
+               style="width: 125px;
+                      float: left;
+                      {% if not candidate.withdrawn_from_election %}color: white{% endif %}" />
         <span style="float: left; padding: 0 0 0 10px;">
           Use YYYY-MM-DD format
-        &nbsp;&nbsp;&nbsp;
-          <label for="do_not_display_on_ballot_id" class="control-label">Don't Display Candidate on Ballot:&nbsp;
-              <input type="checkbox" name="do_not_display_on_ballot" id="do_not_display_on_ballot_id"
-                 value=1
-                 {% if candidate.do_not_display_on_ballot %}checked{% endif %} />
+          &nbsp;&nbsp;&nbsp;
+          <label for="do_not_display_on_ballot_id" class="control-label">
+            Don't Display Candidate on Ballot:&nbsp;
+            <input type="checkbox"
+                   name="do_not_display_on_ballot"
+                   id="do_not_display_on_ballot_id"
+                   value="1"
+                   {% if candidate.do_not_display_on_ballot %}checked{% endif %} />
           </label>
         </span>
+      </div>
     </div>
-</div>
 
-{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
+    {% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
 
-{% include "../form_inputs/three_form_groups.html" with field_dict_1=ballotpedia_candidate_name_dict field_dict_2=state_code_dict field_dict_3=party_dict %}
+    {% include "../form_inputs/three_form_groups.html" with field_dict_1=ballotpedia_candidate_name_dict field_dict_2=state_code_dict field_dict_3=party_dict %}
 
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_id_dict field_dict_2=vote_usa_office_id_dict %}
+    {% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_id_dict field_dict_2=vote_usa_office_id_dict %}
 
-<a name="twitter_link_possibility_list" />
+    <a name="twitter_link_possibility_list" />
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="candidate_twitter_handle_id" class="pl-4 control-label">
-        {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
-            <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
-        {% endif %}
-        Twitter Handle
-    </label>
-    <div class="col">
-        <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
-    {% if candidate.candidate_twitter_handle %}
-        <input type="checkbox" name="twitter_handle_updates_failing" id="twitter_handle_updates_failing_id" value="1"
-                {% if candidate.twitter_handle_updates_failing %}checked{% endif %} />
-        <label for="twitter_handle_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing{% if candidate.twitter_handle_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span>{% endif %}</label><br />
-        <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
-           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
-        {% if TWITTER_API_ON %}
-            <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">Refresh Twitter Details</a>
-            &nbsp;&nbsp;&nbsp;
-        {% endif %}
-        <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
-        Twitter Name: {{ candidate.twitter_name }}<br />
-        Twitter Description: {{ candidate.twitter_description }}<br />
-        Twitter Location: {{ candidate.twitter_location }}<br />
-        Twitter Followers: {{ candidate.twitter_followers_count|intcomma }}<br />
-    {% endif %}
-    </div>
-</div>
-{# Dale 2024-02-03 Turned off because Twitter Search API is too expensive #}
-{#    {% if candidate %}#}
-{#    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)#}
-{#    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)#}
-{#    {% endif %}#}
-{% if candidate.twitter_url %}
-{#<div class="row">#}
-{#<div class="col">#}
-    {% include "../form_inputs/one_form_group.html" with field_dict_1=twitter_url_dict %}
-{#</div>#}
-{#</div>#}
-{% endif %}
-<div class="row">
-<div class="col">
-    {% if twitter_link_possibility_list %}
-    <div class="form-group pull-right">
-        <label for="which_marking_id" class="control-label">
-          <span class="u-no-break">Mark selected rows as:</span>
-        </label>
-        <select id="which_marking_id" name="which_marking">
-            {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-            <option value="not_a_match">Not a Match</option>
-            <option value="possible_match">Possible Match</option>
-        </select>
-        <input type="submit" value="Save" class="btn btn-primary" />
-    </div>
-    <table border="1" cellpadding="5" cellspacing="5" class="table">
-        <tr>
-            <th>#</th>
-            <th>score</th>
-            <th></th>
-            <th>name</th>
-            <th>username</th>
-            <th>location / utc_offset</th>
-            <th>followers count</th>
-            <th>description</th>
-            <th>
-              all
-              <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>
-            </th>
-        </tr>
-    {% for one_row in twitter_link_possibility_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-              {% if one_row.not_a_match %}
-                <img src="/static/red_cross.png" height="16px"/>
-                <span class="u-no-break">no match</span>
-                <br />
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="candidate_twitter_handle_id" class="pl-4 control-label">
+            {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
+              <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+            {% endif %}
+            Twitter Handle
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="candidate_twitter_handle"
+                   id="candidate_twitter_handle_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
+            {% if candidate.candidate_twitter_handle %}
+              <input type="checkbox"
+                     name="twitter_handle_updates_failing"
+                     id="twitter_handle_updates_failing_id"
+                     value="1"
+                     {% if candidate.twitter_handle_updates_failing %}checked{% endif %} />
+              <label for="twitter_handle_updates_failing_id"
+                     style="font-weight: normal !important">
+                Twitter Updates Failing
+                {% if candidate.twitter_handle_updates_failing %}
+                  . <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span>
+                {% endif %}
+              </label>
+              <br />
+              <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
+                 target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+              {% if TWITTER_API_ON %}
+                <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">Refresh Twitter Details</a>
+                &nbsp;&nbsp;&nbsp;
               {% endif %}
-              {{ one_row.likelihood_score|default_if_none:"n/a" }}
-            </td>
-            <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
-            <td>{{ one_row.twitter_name }}</td>
-            <td>
-              <a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }} <span class="glyphicon glyphicon-new-window"></span></a><br />
-              {% if not one_row.not_a_match %}
-                <input id="choose_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('candidate_twitter_handle_id').value = '{{ one_row.twitter_handle }}';document.getElementById('candidate_edit').submit();" />
+              <a href="{% url 'import_export_twitter:delete_images_view' %}?candidate_id={{ candidate.id }}">Delete Cached Images</a>
+              <br />
+              Twitter Name: {{ candidate.twitter_name }}
+              <br />
+              Twitter Description: {{ candidate.twitter_description }}
+              <br />
+              Twitter Location: {{ candidate.twitter_location }}
+              <br />
+              Twitter Followers: {{ candidate.twitter_followers_count|intcomma }}
+              <br />
+            {% endif %}
+          </div>
+        </div>
+        {# Dale 2024-02-03 Turned off because Twitter Search API is too expensive #}
+        {#    {% if candidate %}#}
+        {#    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)#}
+        {#    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)#}
+        {#    {% endif %}#}
+        {% if candidate.twitter_url %}
+          {#<div class="row">#}
+          {#<div class="col">#}
+          {% include "../form_inputs/one_form_group.html" with field_dict_1=twitter_url_dict %}
+          {#</div>#}
+          {#</div>#}
+        {% endif %}
+        <div class="row">
+          <div class="col">
+            {% if twitter_link_possibility_list %}
+              <div class="form-group pull-right">
+                <label for="which_marking_id" class="control-label">
+                  <span class="u-no-break">Mark selected rows as:</span>
+                </label>
+                <select id="which_marking_id" name="which_marking">
+                  {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+                  <option value="not_a_match">Not a Match</option>
+                  <option value="possible_match">Possible Match</option>
+                </select>
+                <input type="submit" value="Save" class="btn btn-primary" />
+              </div>
+              <table border="1" cellpadding="5" cellspacing="5" class="table">
+                <tr>
+                  <th>#</th>
+                  <th>score</th>
+                  <th></th>
+                  <th>name</th>
+                  <th>username</th>
+                  <th>location / utc_offset</th>
+                  <th>followers count</th>
+                  <th>description</th>
+                  <th>
+                    all
+                    <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1" />
+                  </th>
+                </tr>
+                {% for one_row in twitter_link_possibility_list %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      {% if one_row.not_a_match %}
+                        <img src="/static/red_cross.png" height="16px" />
+                        <span class="u-no-break">no match</span>
+                        <br />
+                      {% endif %}
+                      {{ one_row.likelihood_score|default_if_none:"n/a" }}
+                    </td>
+                    <td>
+                      <img src='{{ one_row.twitter_profile_image_url_https }}' />
+                    </td>
+                    <td>{{ one_row.twitter_name }}</td>
+                    <td>
+                      <a href="https://twitter.com/{{ one_row.twitter_handle }}"
+                         target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }} <span class="glyphicon glyphicon-new-window"></span></a>
+                      <br />
+                      {% if not one_row.not_a_match %}
+                        <input id="choose_{{ forloop.counter }}"
+                               type="button"
+                               value="Choose and Update"
+                               onclick="document.getElementById('candidate_twitter_handle_id').value = '{{ one_row.twitter_handle }}';document.getElementById('candidate_edit').submit();" />
+                      {% endif %}
+                    </td>
+                    <td>
+                      {{ one_row.twitter_location|default_if_none:"n/a" }}
+                      {% if one_row.twitter_utc_offset %}{{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}
+                    </td>
+                    <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>
+                    <td>
+                      {{ one_row.twitter_description|default_if_none:"n/a" }}
+                      {% if one_row.twitter_url %}
+                        <a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <input type="checkbox"
+                             name="select_for_marking_checks[]"
+                             id="select_for_marking_id"
+                             value="{{ one_row.id }}" />
+                    </td>
+                  </tr>
+                {% endfor %}
+              </table>
+            {% endif %}
+
+            {% if twitter_link_possibility_list|length == 1 %}
+              <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_twitter_search_results=1">Show more Twitter search results</a>
+            {% elif twitter_link_possibility_list|length > 1 %}
+              <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_twitter_search_results=0">Show fewer Twitter search results</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="row form-group">
+          <label for="candidate_twitter_handle2_id" class="control-label">Twitter Handle 2</label>
+          <div class="col">
+            <input type="text"
+                   name="candidate_twitter_handle2"
+                   id="candidate_twitter_handle2_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.candidate_twitter_handle2|default_if_none:"" }}{% else %}{{ candidate_twitter_handle2|default_if_none:"" }}{% endif %}" />
+            {% if candidate.candidate_twitter_handle2 %}
+              <input type="checkbox"
+                     name="twitter_handle2_updates_failing"
+                     id="twitter_handle2_updates_failing_id"
+                     value="1"
+                     {% if candidate.twitter_handle2_updates_failing %}checked{% endif %} />
+              <label for="twitter_handle2_updates_failing_id"
+                     style="font-weight: normal !important">
+                Twitter Handle 2 Updates Failing
+                {% if candidate.twitter_handle2_updates_failing %}
+                  . <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span>
+                {% endif %}
+              </label>
+              <br />
+              <a href="https://twitter.com/{{ candidate.candidate_twitter_handle2|iriencode }}"
+                 target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+              <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle2 }}">Make Primary Handle</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="row form-group">
+          <label for="candidate_twitter_handle3_id" class="control-label">Twitter Handle 3</label>
+          <div class="col">
+            <input type="text"
+                   name="candidate_twitter_handle3"
+                   id="candidate_twitter_handle3_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.candidate_twitter_handle3|default_if_none:"" }}{% else %}{{ candidate_twitter_handle3|default_if_none:"" }}{% endif %}" />
+            {% if candidate.candidate_twitter_handle3 %}
+              <a href="https://twitter.com/{{ candidate.candidate_twitter_handle3|iriencode }}"
+                 target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+              <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle3 }}">Make Primary Handle</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="candidate_url_id" class="pl-4 control-label">
+            Candidate Website
+            {% if candidate.candidate_url %}
+              <a href="{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="candidate_url"
+                   id="candidate_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="row form-group">
+          <label for="candidate_contact_form_url_id" class="control-label">
+            Candidate Contact Form
+            {% if candidate.candidate_contact_form_url %}
+              <a href="{{ candidate.candidate_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="candidate_contact_form_url"
+                   id="candidate_contact_form_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.candidate_contact_form_url|default_if_none:"" }}{% else %}{{ candidate_contact_form_url|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="facebook_url_id" class="pl-4 control-label">
+            Facebook URL
+            {% if candidate.facebook_url %}
+              <a href="{{ candidate.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="facebook_url"
+                   id="facebook_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
+            {% if candidate.facebook_url %}
+              <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}"
+                 id="facebook_a_tag">Refresh Facebook Photo</a>
+              {% if candidate.facebook_url_is_broken %}
+                <b> &nbsp;&nbsp; The previous attempt at getting a photo from this link failed, it may be a broken link</b>
               {% endif %}
-            </td>
-            <td>
-              {{ one_row.twitter_location|default_if_none:"n/a" }}
-              {% if one_row.twitter_utc_offset %} {{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}
-            </td>
-            <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>
-            <td>
-              {{ one_row.twitter_description|default_if_none:"n/a" }}
-              {% if one_row.twitter_url %}<a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-            </td>
-            <td>
-                <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ one_row.id }}"/>
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
-    {% endif %}
+              {% if candidate.facebook_profile_image_url_https %}
+                (<a href="{{ candidate.facebook_profile_image_url_https|default_if_none:"" }}"
+   target="_blank">see photo in new window</a>)
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
 
-    {% if twitter_link_possibility_list|length == 1 %}
-        <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_twitter_search_results=1">Show more Twitter search results</a>
-    {% elif twitter_link_possibility_list|length > 1 %}
-        <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_twitter_search_results=0">Show fewer Twitter search results</a>
-    {% endif %}
+      <div class="col">
+        <div class="row form-group">
+          <label for="instagram_handle_id" class="control-label">
+            Instagram Handle
+            {% if candidate.instagram_handle %}
+              <a href="https://www.instagram.com/{{ candidate.instagram_handle }}"
+                 target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="instagram_handle"
+                   id="instagram_handle_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.instagram_handle|default_if_none:"" }}{% else %}{{ instagram_handle|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-</div>
 
-<div class="col">
-<div class="row form-group">
-    <label for="candidate_twitter_handle2_id" class="control-label">Twitter Handle 2</label>
-    <div class="col">
-        <input type="text" name="candidate_twitter_handle2" id="candidate_twitter_handle2_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_twitter_handle2|default_if_none:"" }}{% else %}{{ candidate_twitter_handle2|default_if_none:"" }}{% endif %}" />
-    {% if candidate.candidate_twitter_handle2 %}
-        <input type="checkbox" name="twitter_handle2_updates_failing" id="twitter_handle2_updates_failing_id" value="1"
-                {% if candidate.twitter_handle2_updates_failing %}checked{% endif %} />
-        <label for="twitter_handle2_updates_failing_id" style="font-weight: normal !important;">Twitter Handle 2 Updates Failing{% if candidate.twitter_handle2_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span>{% endif %}</label><br />
-        <a href="https://twitter.com/{{ candidate.candidate_twitter_handle2|iriencode }}"
-           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
-        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle2 }}">Make Primary Handle</a>
-    {% endif %}
+    {% include "../form_inputs/one_form_group.html" with field_dict_1=bluesky_handle_dict %}
+
+    {% include "../form_inputs/one_form_group.html" with field_dict_1=threads_handle_dict %}
+
+    {% include "../form_inputs/one_form_group.html" with field_dict_1=tiktok_url_dict %}
+
+    {% include "../form_inputs/three_form_groups.html" with field_dict_1=linkedin_url_dict field_dict_2=candidate_email_dict field_dict_3=candidate_phone_dict %}
+
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="ballotpedia_candidate_url_id" class="pl-4 control-label">
+            Ballotpedia Candidate Page
+            {% if candidate.ballotpedia_candidate_url %}
+              (<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>)
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="ballotpedia_candidate_url"
+                   id="ballotpedia_candidate_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
+            {% if candidate.ballotpedia_photo_url_is_placeholder %}Image is Placeholder{% endif %}
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="candidate_twitter_handle3_id" class="control-label">Twitter Handle 3</label>
-    <div class="col">
-        <input type="text" name="candidate_twitter_handle3" id="candidate_twitter_handle3_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_twitter_handle3|default_if_none:"" }}{% else %}{{ candidate_twitter_handle3|default_if_none:"" }}{% endif %}" />
-    {% if candidate.candidate_twitter_handle3 %}
-        <a href="https://twitter.com/{{ candidate.candidate_twitter_handle3|iriencode }}"
-           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
-        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle3 }}">Make Primary Handle</a>
-    {% endif %}
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="candidate_url_id" class="pl-4 control-label">
-        Candidate Website
-        {% if candidate.candidate_url %}
-        <a href="{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="candidate_contact_form_url_id" class="control-label">
-        Candidate Contact Form
-        {% if candidate.candidate_contact_form_url %}
-        <a href="{{ candidate.candidate_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="candidate_contact_form_url" id="candidate_contact_form_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_contact_form_url|default_if_none:"" }}{% else %}{{ candidate_contact_form_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="facebook_url_id" class="pl-4 control-label">
-        Facebook URL
-        {% if candidate.facebook_url %}
-        <a href="{{ candidate.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
-      {% if candidate.facebook_url %}
-      <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}"
-         id="facebook_a_tag"
-      >
-            Refresh Facebook Photo</a>
-          {% if candidate.facebook_url_is_broken %}
-            <b> &nbsp;&nbsp; The previous attempt at getting a photo from this link failed, it may be a broken link</b>
-          {% endif %}
-          {% if candidate.facebook_profile_image_url_https %}
-          (<a href="{{ candidate.facebook_profile_image_url_https|default_if_none:"" }}" target="_blank">see photo in new window</a>)
-          {% endif %}
-      {% endif %}
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="instagram_handle_id" class="control-label">
-        Instagram Handle
-        {% if candidate.instagram_handle %}
-        <a href="https://www.instagram.com/{{ candidate.instagram_handle }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="instagram_handle" id="instagram_handle_id" class="form-control"
-               value="{% if candidate %}{{ candidate.instagram_handle|default_if_none:"" }}{% else %}{{ instagram_handle|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-{% include "../form_inputs/one_form_group.html" with field_dict_1=bluesky_handle_dict %}
-
-{% include "../form_inputs/one_form_group.html" with field_dict_1=threads_handle_dict %}
-
-{% include "../form_inputs/one_form_group.html" with field_dict_1=tiktok_url_dict %}
-
-{% include "../form_inputs/three_form_groups.html" with field_dict_1=linkedin_url_dict field_dict_2=candidate_email_dict field_dict_3=candidate_phone_dict %}
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_candidate_url_id" class="pl-4 control-label">
-        Ballotpedia Candidate Page
-        {% if candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="ballotpedia_candidate_url" id="ballotpedia_candidate_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
-        {% if candidate.ballotpedia_photo_url_is_placeholder %}Image is Placeholder{% endif %}
-    </div>
-</div>
-</div>
-</div>
 
 
-<div class="row form-group">
-    <label for="ballotpedia_candidate_summary_id" class="pl-4 control-label">Ballotpedia Candidate Summary</label>
-    <div class="col">
+    <div class="row form-group">
+      <label for="ballotpedia_candidate_summary_id" class="pl-4 control-label">Ballotpedia Candidate Summary</label>
+      <div class="col">
         <textarea name="ballotpedia_candidate_summary"
                   class="form-control animated"
                   id="ballotpedia_candidate_summary_id"
                   placeholder="Candidate summary">{% if candidate %}{{ candidate.ballotpedia_candidate_summary|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_summary|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="row form-group">
-    <label for="ballot_guide_official_statement_id" class="pl-4 control-label">Official Candidate Statement</label>
-    <div class="col">
+    <div class="row form-group">
+      <label for="ballot_guide_official_statement_id" class="pl-4 control-label">Official Candidate Statement</label>
+      <div class="col">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
                   id="ballot_guide_official_statement_id"
                   placeholder="Enter official candidate statement">{% if candidate %}{{ candidate.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="wikipedia_url_id" class="pl-4 control-label">
-        Wikipedia URL
-        {% if candidate and candidate.wikipedia_url %}(<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>){% endif %}
-    </label>
-    <div class="col">
-        <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="wikipedia_url_id" class="pl-4 control-label">
+            Wikipedia URL
+            {% if candidate and candidate.wikipedia_url %}
+              (<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>)
+            {% endif %}
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="wikipedia_url"
+                   id="wikipedia_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
+          </div>
+          <div class="col">
+            <input type="text"
+                   name="wikipedia_photo_url"
+                   id="wikipedia_photo_url_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url|default_if_none:"" }}{% endif %}" />
+            {% if candidate.wikipedia_photo_does_not_exist %}Image is Missing{% endif %}
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="col">
-        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url|default_if_none:"" }}{% endif %}" />
-        {% if candidate.wikipedia_photo_does_not_exist %}Image is Missing{% endif %}
+
+    {% include "../form_inputs/four_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict field_dict_3=ballotpedia_candidate_id_dict field_dict_4=ballotpedia_person_id_dict %}
+
+    <div class="row">
+      <div class="col">
+        <div class="row form-group">
+          <label for="photo_url_from_vote_usa_id" class="pl-4 control-label">
+            {% if candidate.photo_url_from_vote_usa %}<img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />{% endif %}
+            Vote USA Image
+          </label>
+          <div class="col">
+            <input type="text"
+                   name="photo_url_from_vote_usa"
+                   id="photo_url_from_vote_usa_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.photo_url_from_vote_usa|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="row form-group">
+          <label for="vote_smart_id_id" class="control-label">Vote Smart Id</label>
+          <div class="col">
+            <input type="text"
+                   name="vote_smart_id"
+                   id="vote_smart_id_id"
+                   class="form-control"
+                   value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-</div>
-</div>
 
-{% include "../form_inputs/four_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict field_dict_3=ballotpedia_candidate_id_dict field_dict_4=ballotpedia_person_id_dict %}
+    {#<div class="form-group">#}
+    {#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
+    {#    <div class="col-sm-8">#}
+    {#        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"#}
+    {#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
+    {#    </div>#}
+    {#</div>#}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="photo_url_from_vote_usa_id" class="pl-4 control-label">
-        {% if candidate.photo_url_from_vote_usa %}
-            <img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />
-        {% endif %}
-        Vote USA Image</label>
-    <div class="col">
-        <input type="text" name="photo_url_from_vote_usa" id="photo_url_from_vote_usa_id" class="form-control"
-               value="{% if candidate %}{{ candidate.photo_url_from_vote_usa|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+    {% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
 
-<div class="col">
-<div class="row form-group">
-    <label for="vote_smart_id_id" class="control-label">Vote Smart Id</label>
-    <div class="col">
-        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-{#<div class="form-group">#}
-{#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
-{#    <div class="col-sm-8">#}
-{#        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"#}
-{#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
-{#    </div>#}
-{#</div>#}
-
-{% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
-
-<div class="row form-group">
-    <label for="analysis_comment_id" class="pl-4 control-label">
-        Candidate Analysis
-    </label>
-    <div class="col">
+    <div class="row form-group">
+      <label for="analysis_comment_id" class="pl-4 control-label">Candidate Analysis</label>
+      <div class="col">
         <textarea name="candidate_analysis_comment"
                   class="form-control animated"
                   id="candidate_analysis_comment_id"
                   placeholder="Note about candidate..."></textarea>
-        <input type="checkbox" name="candidate_analysis_done" id="candidate_analysis_done_id" value="1"
-                {% if candidate.candidate_analysis_done %}checked{% endif %} />
-        <label for="candidate_analysis_done_id" style="font-weight: normal !important;">
-            Candidate Analysis Complete.
-            {% if candidate.candidate_analysis_done %}
+        <input type="checkbox"
+               name="candidate_analysis_done"
+               id="candidate_analysis_done_id"
+               value="1"
+               {% if candidate.candidate_analysis_done %}checked{% endif %} />
+        <label for="candidate_analysis_done_id"
+               style="font-weight: normal !important">
+          Candidate Analysis Complete.
+          {% if candidate.candidate_analysis_done %}
             <span style="color: darkgray">This is checked because one of our team has researched this candidate and could not find more information.</span>
-            {% else %}
+          {% else %}
             <span style="color: darkgray">Check this box only if you have fully researched this candidate, and cannot find more information.</span>
-            {% endif %}
+          {% endif %}
         </label>
+      </div>
     </div>
-</div>
 
-<p>{# There is another submit button at top of form #}
-{% if candidate %}
-    <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-      cancel</a>
-{% else %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-      cancel</a>
-{% endif %}
-<input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" class="btn-primary" /></p>
-</form>
-    
-{% if candidate %}
-<form action="{% url "candidate:candidate_delete_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="candidate_id" value="{{ candidate.id|default_if_none:''|default:'' }}">
-  <input type="hidden" name="google_civic_election_id" 
-         value="{{google_civic_election_id|default_if_none:0|default:0 }}">
-  <input type="hidden" name="state_code" value="{{ state_code|default_if_none:''|default:'' }}">
-  <input type="hidden" name="page" value="{{ page|default_if_none:''|default:'' }}">
-  <button type="submit" class="btn btn-danger">Delete Candidate</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> 
-      Check to confirm that you want to permanently delete this candidate
-  </label>
-</form>
-  <br />
-{% endif %}
-    
-{% if change_log_list %}
+    <p>
+      {# There is another submit button at top of form #}
+      {% if candidate %}
+        <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        cancel</a>
+      {% else %}
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        cancel</a>
+      {% endif %}
+      <input name="submit_text"
+             type="submit"
+             value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}"
+             class="btn-primary" />
+    </p>
+  </form>
+
+  {% if candidate %}
+    <form action="{% url "candidate:candidate_delete_process" %}"
+          method="post"
+          class="form-horizontal">
+      {% csrf_token %}
+      <input type="hidden"
+             name="candidate_id"
+             value="{{ candidate.id|default_if_none:''|default:'' }}">
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id|default_if_none:0|default:0 }}">
+      <input type="hidden"
+             name="state_code"
+             value="{{ state_code|default_if_none:''|default:'' }}">
+      <input type="hidden"
+             name="page"
+             value="{{ page|default_if_none:''|default:'' }}">
+      <button type="submit" class="btn btn-danger">Delete Candidate</button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="confirm_delete_id">
+        <input type="checkbox"
+               name="confirm_delete"
+               id="confirm_delete_id"
+               value="1" />
+        Check to confirm that you want to permanently delete this candidate
+      </label>
+    </form>
     <br />
-<div class="form-group">
-    {% include "candidate/change_log_list.html" with change_log_list=change_log_list %}
-</div>
-{% endif %}
-<br />
+  {% endif %}
+
+  {% if change_log_list %}
+    <br />
+    <div class="form-group">{% include "candidate/change_log_list.html" with change_log_list=change_log_list %}</div>
+  {% endif %}
+  <br />
 
 
-{% if related_candidate_list %}
+  {% if related_candidate_list %}
     <h3>Possible Duplicate Candidates for {{ candidate.candidate_name }}</h3>
     <div style="margin-bottom: 15px;">
-            <label for="use_trigram_match_id">
-                <input type="checkbox" name="use_trigram_match" id="use_trigram_match_id" value="1" />
-                <strong>Use Trigram-Based Fuzzy Matching</strong> (finds candidates with similar names even with spelling variations)
-            </label>
-            {% if use_trigram_match %}
-                <span style="color: #0066cc; margin-left: 20px;">✓ Currently viewing fuzzy matching results</span>
-            {% else %}
-                <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>
-            {% endif %}
-        </div>
-    <table class="table">
-    <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Candidate Name</th>
-            <th>We Vote ID</th>
-            <th>Year</th>
-            <th>State</th>
-            <th>Other IDs</th>
-        </tr>
-    </thead>
-        <tr>
-            <td>CURRENT</td>
-            <td width="48px">
-            {% if candidate.we_vote_hosted_profile_image_url_medium %}
-                <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}" width="48px">
-            {% endif %}
-            </td>
-            <td>
-              {% if candidate.candidates_match_root_candidate %}
-                <strong>{{ candidate.candidate_name }}</strong>
-              {% else %}
-                {{ candidate.candidate_name }}
-              {% endif %}
-            </td>
-            <td>
-                {{ candidate.we_vote_id }} (this candidate)
-                {% if candidate.politician_we_vote_id %}
-                    - 
-                    <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}
-            </td>
-            <td>{{ candidate.candidate_year }}</td>
-            <td>{{ candidate.state_code|upper }}</td>
-            <td>
-                {% if candidate.candidate_twitter_handle %}Twitter: {{ candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if candidate.ballotpedia_race_id %}BP Race: {{ candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if candidate.ballotpedia_candidate_id %}BP Cand: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if candidate.ballotpedia_candidate_url %}<br />{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% endif %}
-                {% if candidate.wikipedia_url %}<br />{{ candidate.wikipedia_url|default_if_none:"" }}{% endif %}
-                {% if candidate.candidate_url %}<br />{{ candidate.candidate_url|default_if_none:"" }}{% endif %}
-            </td>
-        </tr>
-    {% for found_candidate in related_candidate_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td width="48px">
-            {% if found_candidate.we_vote_hosted_profile_image_url_medium %}
-                <img src="{{ found_candidate.we_vote_hosted_profile_image_url_medium }}" width="48px">
-            {% endif %}
-            </td>
-            <td>
-              {% if found_candidate.candidates_match_root_candidate %}
-                <strong>{{ found_candidate.candidate_name }}</strong>
-              {% else %}
-                {{ found_candidate.candidate_name }}
-              {% endif %}
-              <br />
-              (<a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>)
-                <form action="{% url 'candidate:candidate_merge_process' %}" method="post" target="_blank">
-                    {% csrf_token %}
-                    <input type="submit" value="Not Duplicate" name="skip" />
-                    <input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
-                    <input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
-                    <input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ found_candidate.state_code }}{% endif %}" />
-                    <input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate.google_civic_election_id }}{% endif %}" />
-                    <input type="hidden" name="candidate1_we_vote_id" value="{{ candidate.we_vote_id }}" />
-                    <input type="hidden" name="candidate2_we_vote_id" value="{{ found_candidate.we_vote_id }}" />
-                </form>
-            </td>
-            <td>
-                {{ found_candidate.we_vote_id }}
-                <a href="{% url 'candidate:candidate_edit' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                {% if found_candidate.politician_we_vote_id %}
-                    - 
-                    <a href="{% url 'politician:politician_we_vote_id_edit' found_candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ found_candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}
-            </td>
-            <td>{{ found_candidate.candidate_year }}</td>
-            <td>{{ found_candidate.state_code|upper }}</td>
-            <td>
-                {% if found_candidate.candidate_twitter_handle %}Twitter: {{ found_candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if found_candidate.ballotpedia_race_id %}BP Race: {{ found_candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if found_candidate.ballotpedia_candidate_id %}BP Cand: {{ found_candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;{% endif %}
-                {% if candidate.ballotpedia_candidate_url %}<br />{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% endif %}
-                {% if candidate.wikipedia_url %}<br />{{ candidate.wikipedia_url|default_if_none:"" }}{% endif %}
-                {% if candidate.candidate_url %}<br />{{ candidate.candidate_url|default_if_none:"" }}{% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-<br/>
-
-{% if candidate %}
-<a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos (from Twitter, Vote Smart - TODO work in progress)</a>, <a href="{% url 'image:images_for_one_candidate' candidate.we_vote_id %}" target="_blank">See images (in new window)</a>,
-    <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
-    {% if candidate.candidate_photo_url %}
-        <img src='{{ candidate.candidate_photo_url }}' />
-        <br />
-    {% endif %}
-
-    {% if candidate.we_vote_hosted_profile_image_url_tiny %}
-        we_vote_hosted_profile_image_url_tiny: {{ candidate.we_vote_hosted_profile_image_url_tiny }}<br />
-        <img src="{{ candidate.we_vote_hosted_profile_image_url_tiny }}"><br />
-        <br />
-    {% endif %}
-
-    {% if candidate.we_vote_hosted_profile_image_url_medium %}
-        we_vote_hosted_profile_image_url_medium: {{ candidate.we_vote_hosted_profile_image_url_medium }}<br />
-        <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}"><br />
-        <br />
-    {% endif %}
-
-    {% if candidate.we_vote_hosted_profile_image_url_large %}
-        we_vote_hosted_profile_image_url_large: <a href="{{ candidate.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ candidate.we_vote_hosted_profile_image_url_large }}</a><br />
-        <br />
-    {% endif %}
-
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
-
-    <h4>We Vote Positions Related to {{ candidate.candidate_name  }}</h4>
-    {% if candidate.vote_smart_id %}
-        <p><a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a></p>
-    {% endif %}
-
-        <p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}" target="_blank">
-            Add Position (start with Endorser taking the Position)</a> (open in new window)</p>
-
-    <a name="positions"></a>
-    {% if candidate_position_list %}
+      <label for="use_trigram_match_id">
+        <input type="checkbox"
+               name="use_trigram_match"
+               id="use_trigram_match_id"
+               value="1" />
+        <strong>Use Trigram-Based Fuzzy Matching</strong> (finds candidates with similar names even with spelling variations)
+      </label>
+      {% if use_trigram_match %}
+        <span style="color: #0066cc; margin-left: 20px;">✓ Currently viewing fuzzy matching results</span>
+      {% else %}
+        <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>
+      {% endif %}
+    </div>
     <table class="table">
       <thead>
         <tr>
-            <th></th>
-            <th>Endorser Position</th>
-            <th>Stance (w/ source)</th>
-            <th>Election</th>
-            <th>Election Date</th>
-{#            <th>Rating Time Span</th>#}
+          <th>&nbsp;</th>
+          <th>&nbsp;</th>
+          <th>Candidate Name</th>
+          <th>We Vote ID</th>
+          <th>Year</th>
+          <th>State</th>
+          <th>Other IDs</th>
         </tr>
       </thead>
-
-        {% for candidate_position in candidate_position_list %}
-        {% if not candidate_position.id %}
+      <tr>
+        <td>CURRENT</td>
+        <td width="48px">
+          {% if candidate.we_vote_hosted_profile_image_url_medium %}
+            <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}"
+                 width="48px">
+          {% endif %}
+        </td>
+        <td>
+          {% if candidate.candidates_match_root_candidate %}
+            <strong>{{ candidate.candidate_name }}</strong>
+          {% else %}
+            {{ candidate.candidate_name }}
+          {% endif %}
+        </td>
+        <td>
+          {{ candidate.we_vote_id }} (this candidate)
+          {% if candidate.politician_we_vote_id %}
+            -
+            <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank">{{ candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+          {% endif %}
+        </td>
+        <td>{{ candidate.candidate_year }}</td>
+        <td>{{ candidate.state_code|upper }}</td>
+        <td>
+          {% if candidate.candidate_twitter_handle %}
+            Twitter: {{ candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;
+          {% endif %}
+          {% if candidate.ballotpedia_race_id %}
+            BP Race: {{ candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;
+          {% endif %}
+          {% if candidate.ballotpedia_candidate_id %}
+            BP Cand: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;
+          {% endif %}
+          {% if candidate.ballotpedia_candidate_url %}
+            <br />
+            {{ candidate.ballotpedia_candidate_url|default_if_none:"" }}
+          {% endif %}
+          {% if candidate.wikipedia_url %}
+            <br />
+            {{ candidate.wikipedia_url|default_if_none:"" }}
+          {% endif %}
+          {% if candidate.candidate_url %}
+            <br />
+            {{ candidate.candidate_url|default_if_none:"" }}
+          {% endif %}
+        </td>
+      </tr>
+      {% for found_candidate in related_candidate_list %}
         <tr>
-            <td colspan="3">
-            (missing candidate_position.id)
-            </td>
+          <td>{{ forloop.counter }}</td>
+          <td width="48px">
+            {% if found_candidate.we_vote_hosted_profile_image_url_medium %}
+              <img src="{{ found_candidate.we_vote_hosted_profile_image_url_medium }}"
+                   width="48px">
+            {% endif %}
+          </td>
+          <td>
+            {% if found_candidate.candidates_match_root_candidate %}
+              <strong>{{ found_candidate.candidate_name }}</strong>
+            {% else %}
+              {{ found_candidate.candidate_name }}
+            {% endif %}
+            <br />
+            (<a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+   target="_blank"
+   class="u-no-break">compare for merge&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>)
+            <form action="{% url 'candidate:candidate_merge_process' %}"
+                  method="post"
+                  target="_blank">
+              {% csrf_token %}
+              <input type="submit" value="Not Duplicate" name="skip" />
+              <input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
+              <input type="hidden"
+                     name="remove_duplicate_process"
+                     value="{{ remove_duplicate_process }}" />
+              <input type="hidden"
+                     name="state_code"
+                     value="{% if state_code %}{{ state_code }}{% else %}{{ found_candidate.state_code }}{% endif %}" />
+              <input type="hidden"
+                     name="google_civic_election_id"
+                     value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate.google_civic_election_id }}{% endif %}" />
+              <input type="hidden"
+                     name="candidate1_we_vote_id"
+                     value="{{ candidate.we_vote_id }}" />
+              <input type="hidden"
+                     name="candidate2_we_vote_id"
+                     value="{{ found_candidate.we_vote_id }}" />
+            </form>
+          </td>
+          <td>
+            {{ found_candidate.we_vote_id }}
+            <a href="{% url 'candidate:candidate_edit' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% if found_candidate.politician_we_vote_id %}
+              -
+              <a href="{% url 'politician:politician_we_vote_id_edit' found_candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">{{ found_candidate.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </td>
+          <td>{{ found_candidate.candidate_year }}</td>
+          <td>{{ found_candidate.state_code|upper }}</td>
+          <td>
+            {% if found_candidate.candidate_twitter_handle %}
+              Twitter: {{ found_candidate.candidate_twitter_handle|default_if_none:"" }} &nbsp;&nbsp;
+            {% endif %}
+            {% if found_candidate.ballotpedia_race_id %}
+              BP Race: {{ found_candidate.ballotpedia_race_id|default_if_none:"" }} &nbsp;&nbsp;
+            {% endif %}
+            {% if found_candidate.ballotpedia_candidate_id %}
+              BP Cand: {{ found_candidate.ballotpedia_candidate_id|default_if_none:"" }} &nbsp;&nbsp;
+            {% endif %}
+            {% if candidate.ballotpedia_candidate_url %}
+              <br />
+              {{ candidate.ballotpedia_candidate_url|default_if_none:"" }}
+            {% endif %}
+            {% if candidate.wikipedia_url %}
+              <br />
+              {{ candidate.wikipedia_url|default_if_none:"" }}
+            {% endif %}
+            {% if candidate.candidate_url %}
+              <br />
+              {{ candidate.candidate_url|default_if_none:"" }}
+            {% endif %}
+          </td>
         </tr>
-        {% else %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if candidate_position.organization_id %}
-                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
-                {{ candidate_position.organization.organization_name }} (edit position)</a>
-                {% elif candidate_position.organization_we_vote_id %}
-                <a href="{% url 'organization:organization_we_vote_id_position_edit' candidate_position.organization_we_vote_id candidate_position.we_vote_id %}">
-                {{ candidate_position.organization.organization_name }} (edit position)</a>
-                {% else %}
+      {% endfor %}
+    </table>
+  {% endif %}
+  <br />
+
+  {% if candidate %}
+    <a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos (from Twitter, Vote Smart - TODO work in progress)</a>, <a href="{% url 'image:images_for_one_candidate' candidate.we_vote_id %}"
+    target="_blank">See images (in new window)</a>,
+    <a href="{% url 'import_export_twitter:delete_images_view' %}?candidate_id={{ candidate.id }}">Delete Cached Images</a>
+    <br />
+    {% if candidate.candidate_photo_url %}
+      <img src='{{ candidate.candidate_photo_url }}' />
+      <br />
+    {% endif %}
+
+    {% if candidate.we_vote_hosted_profile_image_url_tiny %}
+      we_vote_hosted_profile_image_url_tiny: {{ candidate.we_vote_hosted_profile_image_url_tiny }}
+      <br />
+      <img src="{{ candidate.we_vote_hosted_profile_image_url_tiny }}">
+      <br />
+      <br />
+    {% endif %}
+
+    {% if candidate.we_vote_hosted_profile_image_url_medium %}
+      we_vote_hosted_profile_image_url_medium: {{ candidate.we_vote_hosted_profile_image_url_medium }}
+      <br />
+      <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}">
+      <br />
+      <br />
+    {% endif %}
+
+    {% if candidate.we_vote_hosted_profile_image_url_large %}
+      we_vote_hosted_profile_image_url_large: <a href="{{ candidate.we_vote_hosted_profile_image_url_large }}"
+    target="_blank">{{ candidate.we_vote_hosted_profile_image_url_large }}</a>
+      <br />
+      <br />
+    {% endif %}
+
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+
+    <h4>We Vote Positions Related to {{ candidate.candidate_name }}</h4>
+    {% if candidate.vote_smart_id %}
+      <p>
+        <a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a>
+      </p>
+    {% endif %}
+
+    <p>
+      <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}"
+         target="_blank">Add Position (start with Endorser taking the Position)</a> (open in new window)
+      </p>
+
+      <a name="positions"></a>
+      {% if candidate_position_list %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Endorser Position</th>
+              <th>Stance (w/ source)</th>
+              <th>Election</th>
+              <th>Election Date</th>
+              {#            <th>Rating Time Span</th>#}
+            </tr>
+          </thead>
+
+          {% for candidate_position in candidate_position_list %}
+            {% if not candidate_position.id %}
+              <tr>
+                <td colspan="3">(missing candidate_position.id)</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  {% if candidate_position.organization_id %}
+                    <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
+                    {{ candidate_position.organization.organization_name }} (edit position)</a>
+                  {% elif candidate_position.organization_we_vote_id %}
+                    <a href="{% url 'organization:organization_we_vote_id_position_edit' candidate_position.organization_we_vote_id candidate_position.we_vote_id %}">
+                    {{ candidate_position.organization.organization_name }} (edit position)</a>
+                  {% else %}
                     (not an org)
-                {% endif %}
-                {% if candidate_position.organization.twitter_followers_count %}
+                  {% endif %}
+                  {% if candidate_position.organization.twitter_followers_count %}
                     <br />
                     <span style="color: darkgray" class="u-no-break">(<i class="fa fa-twitter"></i> {{ candidate_position.organization.twitter_followers_count|intcomma }} Twitter Followers)</span>
-                {% endif %}
-            </td>
-            <td>{{ candidate_position.get_stance_display }}
-                {% if candidate_position.statement_text %}
-                <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
-                {% endif %}
-{#                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}#}
-                {% if candidate_position.more_info_url %}
+                  {% endif %}
+                </td>
+                <td>
+                  {{ candidate_position.get_stance_display }}
+                  {% if candidate_position.statement_text %}
+                    <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
+                  {% endif %}
+                  {#                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}#}
+                  {% if candidate_position.more_info_url %}
                     <br />
                     <a href="{{ candidate_position.more_info_url }}"
                        target="_blank"
-                       class="u-no-break"
-                    >{{ candidate_position.more_info_url }} <span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}
-            </td>
-            <td>{{ candidate_position.election.google_civic_election_id }}</td>
-            <td>{{ candidate_position.election.election_day_text }}</td>
-{#            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>#}
-        </tr>
-        {% endif %}
-        {% endfor %}
+                       class="u-no-break">{{ candidate_position.more_info_url }} <span class="glyphicon glyphicon-new-window"></span></a>
+                  {% endif %}
+                </td>
+                <td>{{ candidate_position.election.google_civic_election_id }}</td>
+                <td>{{ candidate_position.election.election_day_text }}</td>
+                {#            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>#}
+              </tr>
+            {% endif %}
+          {% endfor %}
 
         </table>
-    {% else %}
+      {% else %}
         <p>(no positions found)</p>
-    {% endif %}
+      {% endif %}
 
-    {% if candidate.vote_smart_id and candidate.vote_smart_id != False and candidate.vote_smart_id != 'False' and candidate.vote_smart_id != None and candidate.vote_smart_id != 'None' %}
+      {% if candidate.vote_smart_id and candidate.vote_smart_id != False and candidate.vote_smart_id != 'False' and candidate.vote_smart_id != None and candidate.vote_smart_id != 'None' %}
         <h4>Vote Smart Ratings</h4>
-        <p><a href="{% url 'import_export_vote_smart:import_one_candidate_ratings' candidate.vote_smart_id %}">Import Vote Smart Ratings for this Candidate</a></p>
+        <p>
+          <a href="{% url 'import_export_vote_smart:import_one_candidate_ratings' candidate.vote_smart_id %}">Import Vote Smart Ratings for this Candidate</a>
+        </p>
 
         {% if rating_list %}
-            <table border="1">
+          <table border="1">
             <tr>
-                <td></td>
-                <td>ratingId</td>
-                <td>sigId</td>
-                <td>ratingName</td>
-                <td>timeSpan</td>
-                <td>candidateId</td>
-                <td>rating</td>
+              <td></td>
+              <td>ratingId</td>
+              <td>sigId</td>
+              <td>ratingName</td>
+              <td>timeSpan</td>
+              <td>candidateId</td>
+              <td>rating</td>
             </tr>
 
             {% for special_interest_group_rating in rating_list %}
-            <tr>
+              <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ special_interest_group_rating.ratingId }}</td>
-                <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group_rating.sigId %}" target="_blank">
-                    {{ special_interest_group_rating.sigId }}</a></td>
+                <td>
+                  <a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group_rating.sigId %}"
+                     target="_blank">{{ special_interest_group_rating.sigId }}</a>
+                </td>
                 <td>{{ special_interest_group_rating.ratingName }}</td>
                 <td>{{ special_interest_group_rating.timeSpan }}</td>
                 <td>{{ special_interest_group_rating.candidateId }}</td>
                 <td>{{ special_interest_group_rating.rating }}</td>
-            </tr>
+              </tr>
             {% endfor %}
 
-            </table>
+          </table>
         {% else %}
-            <p>(no special interest group ratings found)</p>
+          <p>(no special interest group ratings found)</p>
         {% endif %}
-    {% endif %}{# End of if candidate.vote_smart_id #}
-    <br />
+      {% endif %}
+      {# End of if candidate.vote_smart_id #}
+      <br />
 
-    {% if candidate.twitter_profile_image_url_https_original %}
-        <img src="{{ candidate.twitter_profile_image_url_https_original }}"><br />
-        Twitter Image (Original)<br />
-    {% endif %}
+      {% if candidate.twitter_profile_image_url_https_original %}
+        <img src="{{ candidate.twitter_profile_image_url_https_original }}">
+        <br />
+        Twitter Image (Original)
+        <br />
+      {% endif %}
 
-    {% if candidate.twitter_profile_banner_url_https %}
-        <img src="{{ candidate.twitter_profile_banner_url_https }}"><br />
-        Twitter Banner<br />
-    {% endif %}
-{% else %}
+      {% if candidate.twitter_profile_banner_url_https %}
+        <img src="{{ candidate.twitter_profile_banner_url_https }}">
+        <br />
+        Twitter Banner
+        <br />
+      {% endif %}
+    {% else %}
 
-{# Only show other candidates running for this office when we are entering a new candidate #}
-{% if candidate_list %}
-<h5>Existing Candidates</h5>
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
+      {# Only show other candidates running for this office when we are entering a new candidate #}
+      {% if candidate_list %}
+        <h5>Existing Candidates</h5>
+        <table border="1" cellpadding="5" cellspacing="5">
+          <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>Candidate Name</td>
@@ -1119,57 +1376,78 @@ th, td {
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
             <td>&nbsp;</td>
-        </tr>
-    {% for candidate in candidate_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
+          </tr>
+          {% for candidate in candidate_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
                 {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                  <a href="{% url 'candidate:candidate_edit' candidate.id %}">
                     <img src='{{ candidate.candidate_photo_url }}' height="48px" />
-                </a>
+                  </a>
                 {% endif %}
-            </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
-            <td>{{ candidate.get_candidate_state }}</td>
-            <td>{{ candidate.election.election_name }}</td>
-            <td>
-        {% if candidate.office and candidate.office.id %}
-            <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
-        {% else %}
-            (office missing)
-        {% endif %}
-            </td>
-            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                    target="_blank"><i class="fa fa-twitter"></i> {{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
-            <td>{% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>{% endif %}</td>
-            <td>{{ candidate.id }}</td>
-            <td>{{ candidate.we_vote_id }}
+              </td>
+              <td>
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a>
+              </td>
+              <td>{{ candidate.get_candidate_state }}</td>
+              <td>{{ candidate.election.election_name }}</td>
+              <td>
+                {% if candidate.office and candidate.office.id %}
+                  <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+                {% else %}
+                  (office missing)
+                {% endif %}
+              </td>
+              <td>
+                {% if candidate.candidate_twitter_handle %}
+                  <a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                     target="_blank"><i class="fa fa-twitter"></i> {{ candidate.candidate_twitter_handle }}</a>
+                  <br />
+                  ({{ candidate.twitter_followers_count|intcomma }} followers)
+                {% endif %}
+              </td>
+              <td>
+                {% if candidate.candidate_url %}
+                  <a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>
+                {% endif %}
+              </td>
+              <td>
+                {% if candidate.candidate_contact_form_url %}
+                  <a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a>
+                {% endif %}
+              </td>
+              <td>{{ candidate.id }}</td>
+              <td>
+                {{ candidate.we_vote_id }}
                 {% if candidate.politician_we_vote_id %}
-                    <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}"
-                       target="_blank">
+                  <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}"
+                     target="_blank">
                     {{ candidate.politician_we_vote_id }}
                     <span class="glyphicon glyphicon-new-window"></span></a>
                 {% else %}
-                    <a href="{% url 'candidate:candidate_politician_match' %}?candidate_we_vote_id=candidate.we_vote_id" target="_blank">Match to Politician  <span class="glyphicon glyphicon-new-window"></span></a>
+                  <a href="{% url 'candidate:candidate_politician_match' %}?candidate_we_vote_id=candidate.we_vote_id"
+                     target="_blank">Match to Politician  <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
-            </td>
-            <td>{{ candidate.vote_smart_id }}</td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
-        </tr>
-    {% endfor %}
-    </table>
+              </td>
+              <td>{{ candidate.vote_smart_id }}</td>
+              <td>
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}"
+                   style="font-size: .65em">(edit)</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
 
-    <p></p>
-{% else %}
-    {# Don't display anything if there aren't any other candidates captured for this office yet #}
-{% endif %}
+        <p></p>
+      {% else %}
+        {# Don't display anything if there aren't any other candidates captured for this office yet #}
+      {% endif %}
 
-{% endif %}{# End of if candidate #}
+    {% endif %}
+    {# End of if candidate #}
 
-<script>
+    <script>
     $(function() {
         $('#toggle_all_id').change(function() {
             var inputs = document.getElementsByName("select_for_marking_checks[]");
@@ -1182,16 +1460,16 @@ th, td {
             }
         });
     });
-</script>
+    </script>
 
-<style>
+    <style>
     .animated {
         -webkit-transition: height 0.2s;
         -moz-transition: height 0.2s;
         transition: height 0.2s;
     }
-</style>
-<script>
+    </style>
+    <script>
     function hideElement(elementId) {
       var x = document.getElementById(elementId);
       x.style.display = "none";
@@ -1240,7 +1518,7 @@ th, td {
       
     });
   });
-</script>
+    </script>
 
 
-{% endblock %}
+  {% endblock %}
