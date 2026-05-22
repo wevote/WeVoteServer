@@ -3,10 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
+from datetime import timedelta
 
 from django.db.models import Q
 from django.db.models.functions import Length
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 
 from candidate.models import CandidateListManager, CandidateCampaign
@@ -43,6 +45,7 @@ def audience_builder_data_retrieve(audience_builder_id):
 
     try:
         audience_builder = AudienceBuilder.objects.get(id=audience_builder_id)
+        status += f"AUDIENCE_BUILDER_RETRIEVED: {audience_builder.audience_builder_name} "
     except Exception as e:
         status += f"ERROR_RETRIEVING_AUDIENCE_BUILDER: {e} "
         success = False
@@ -61,6 +64,7 @@ def audience_builder_data_retrieve(audience_builder_id):
         try:
             queryset = AudienceFilterChain.objects.filter(audience_builder_id=audience_builder_id)
             audience_filter_chain_list = list(queryset)
+            status += f"AUDIENCE_FILTER_CHAIN_RETRIEVED: {len(audience_filter_chain_list)} chains "
             for audience_filter_chain in audience_filter_chain_list:
                 audience_filter_chain_dict[audience_filter_chain.id] = audience_filter_chain
         except Exception as e:
@@ -157,7 +161,7 @@ def generate_email_campaign_recipients_from_audience_builder(audience_builder_id
             'success':  False,
         }
     except Exception as e:
-        status += f'GENERATE_RECIPIENTS_PROBLEM_RETRIEVING_EMAIL_CAMPAIGN: {e}'
+        status += f'GENERATE_RECIPIENTS_PROBLEM_RETRIEVING_EMAIL_CAMPAIGN: {e} '
         return {
             'status':   status,
             'success':  False,
@@ -177,8 +181,9 @@ def generate_email_campaign_recipients_from_audience_builder(audience_builder_id
         # and store the email_address value in prior_recipient_email_address_simple_list in lower case
         for email_campaign_recipient in email_campaign_recipient_list:
             prior_recipient_email_address_simple_list.append(email_campaign_recipient.email_address.lower())
+        status += f'PRIOR_RECIPIENT_EMAIL_ADDRESS_SIMPLE_LIST: {prior_recipient_email_address_simple_list} '
     except Exception as e:
-        status += f'Problem retrieving email campaign recipients. {e}'
+        status += f'PROBLEM_RETRIEVING_PRIOR_EMAIL_CAMPAIGN_RECIPIENTS: {e} '
         return {
             'status': status,
             'success': False,
@@ -198,8 +203,10 @@ def generate_email_campaign_recipients_from_audience_builder(audience_builder_id
         audience_builder_name = audience_builder.audience_builder_name
         audience_filter_chain_dict = results['audience_filter_chain_dict']
         audience_filter_dict = results['audience_filter_dict']
+        status += f'AUDIENCE_BUILDER_NAME: {audience_builder_name} '
     else:
         audience_builder_id = None
+        status += "AUDIENCE_BUILDER_DATA_RETRIEVE_FAILED "
         success = False
         return {
             'status': status,
@@ -292,12 +299,14 @@ def generate_email_campaign_recipients_from_audience_builder(audience_builder_id
     }
 
 
-def generate_preview_list_from_politician_list(politician_list=[]):
+def generate_preview_list_from_politician_list(politician_list=[], max_list_length=0):
+    preview_count = 0
     preview_list = []
     status = ""
     success = True
 
     for politician in politician_list:
+        preview_count += 1
         state_code = politician.state_code if hasattr(politician, 'state_code') else ''
         state_code_upper = state_code.upper() if state_code else ''
         preview_dict = {
@@ -314,6 +323,11 @@ def generate_preview_list_from_politician_list(politician_list=[]):
             'type': 'POLITICIAN',
             'state_code': state_code_upper,
         }
+        if max_list_length > 0:
+            if preview_count == max_list_length:
+                status += "MAX_PREVIEW_LIST_LENGTH_REACHED: " + str(max_list_length) + " "
+            if preview_count > max_list_length:
+                break
         preview_list.append(preview_dict)
         # In addition to these values, we also add additional values from other data types,
         #  including office_we_vote_id, and politician_passkey
@@ -331,10 +345,10 @@ def generate_preview_list_from_politician_list(politician_list=[]):
 
 
 def generate_preview_list_from_audience_builder(
-        additional_politician_we_vote_id_list=[],
         audience_builder={},
         audience_filter_chain_dict={},
         audience_filter_dict={},
+        max_list_length=0,
         request=None):
     only_include_politicians_sent_any_of_these_campaigns = []
     only_include_politicians_sent_all_of_these_campaigns = []
@@ -347,11 +361,14 @@ def generate_preview_list_from_audience_builder(
     # Probably want to call this routine independently for each audience_filter_chain
     results = assemble_basic_dictionaries_from_audience_filters(audience_filter_dict)
     status += results['status']
+    audience_type_is_politician = results['audience_type_is_politician']
     election_modifier_dict = results['election_modifier_dict']
     email_address_modifier_dict = results['email_address_modifier_dict']
+    has_claimed_politician_modifier_dict = results['has_claimed_politician_modifier_dict']
     was_sent_campaign_list_dict = results['was_sent_campaign_list_dict']
     was_sent_campaign_modifier_dict = results['was_sent_campaign_modifier_dict']
 
+    # FILTER_TYPE_EMAIL_ADDRESS
     # Loop through email_address_modifier_dict and if any of the values equal 'EMAIL_ADDRESS_EXISTS',
     #  then set only_include_entries_with_email_address to True
     only_include_entries_with_email_address = False
@@ -359,6 +376,33 @@ def generate_preview_list_from_audience_builder(
         if email_address_modifier == 'EMAIL_ADDRESS_EXISTS':
             only_include_entries_with_email_address = True
             break
+
+    # FILTER_TYPE_HAS_CLAIMED_POLITICIAN
+    do_not_include_is_claimed_politicians = False
+    is_claimed_profile_date_time_window_length = None
+    only_include_is_claimed_politicians = False
+    for audience_filter_id, has_claimed_politician_modifier in has_claimed_politician_modifier_dict.items():
+        if has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE':
+            only_include_is_claimed_politicians = True
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_LAST_DAY':
+            only_include_is_claimed_politicians = True
+            is_claimed_profile_date_time_window_length = timedelta(days=1)
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_LAST_3_DAYS':
+            only_include_is_claimed_politicians = True
+            is_claimed_profile_date_time_window_length = timedelta(days=3)
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_LAST_WEEK':
+            only_include_is_claimed_politicians = True
+            is_claimed_profile_date_time_window_length = timedelta(weeks=1)
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_LAST_MONTH':
+            only_include_is_claimed_politicians = True
+            is_claimed_profile_date_time_window_length = timedelta(days=30)
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_LAST_YEAR':
+            only_include_is_claimed_politicians = True
+            is_claimed_profile_date_time_window_length = timedelta(days=365)
+        elif has_claimed_politician_modifier == 'HAS_CLAIMED_POLITICIAN_NEVER':
+            do_not_include_is_claimed_politicians = True
+
+    # FILTER_TYPE_WAS_SENT_CAMPAIGN
     for audience_filter_id, was_sent_campaign_modifier in was_sent_campaign_modifier_dict.items():
         # WAS_SENT_CAMPAIGN_ANY = only_include_politicians_sent_any_of_these_campaigns
         # WAS_SENT_CAMPAIGN_ALL = only_include_politicians_sent_all_of_these_campaigns
@@ -409,9 +453,12 @@ def generate_preview_list_from_audience_builder(
     # Retrieve candidates and politicians from the database based on google_civic_election_id_dict
     # This routine will be called per audience_filter_chain
     results = retrieve_db_objects_for_audience_filter_chain(
-        additional_politician_we_vote_id_list=additional_politician_we_vote_id_list,
+        audience_type_is_politician=audience_type_is_politician,
+        do_not_include_is_claimed_politicians=do_not_include_is_claimed_politicians,
         google_civic_election_id_list=google_civic_election_id_list,
+        is_claimed_profile_date_time_window_length=is_claimed_profile_date_time_window_length,
         only_include_entries_with_email_address=only_include_entries_with_email_address,
+        only_include_is_claimed_politicians=only_include_is_claimed_politicians,
         only_include_politicians_sent_any_of_these_campaigns=only_include_politicians_sent_any_of_these_campaigns,
         only_include_politicians_sent_all_of_these_campaigns=only_include_politicians_sent_all_of_these_campaigns,
         only_include_politicians_who_were_not_sent_at_least_one_of_these_campaigns=
@@ -426,12 +473,16 @@ def generate_preview_list_from_audience_builder(
     politician_list_length = results['politician_list_length']
     # candidate_ids_by_audience_filter_dict = results['candidate_ids_by_audience_filter_dict']
     # politician_ids_by_audience_filter_dict = results['politician_ids_by_audience_filter_dict']
+    status += results['status']
 
     # We will need to pay attention to which rules come in under a single filter chain
     # For now, we treat all filters as if they are all part of the same filter chain
 
-    results = generate_preview_list_from_politician_list(politician_list=politician_list)
+    results = generate_preview_list_from_politician_list(
+        politician_list=politician_list,
+        max_list_length=max_list_length)
     preview_list = results['preview_list']
+    status += results['status']
 
     results = augment_preview_list_with_candidate_info(
         campaignx_dict=campaignx_dict,
@@ -440,6 +491,7 @@ def generate_preview_list_from_audience_builder(
         google_civic_election_id=google_civic_election_id,  # Not set up to deal with an election list yet
         preview_list=preview_list)
     preview_list = results['preview_list']
+    status += results['status']
 
     return {
         'preview_list': preview_list,
@@ -453,6 +505,7 @@ def assemble_basic_dictionaries_from_audience_filters(audience_filter_dict):
     status = ''
     success = True
 
+    audience_type_is_politician = False
     # Cycle through all filters in audience_filter_dict and find entries with audience_filter_type
     #  equal to 'FILTER_TYPE_ELECTION_DATE', and return the google_civic_election_id and the election_modifier value.
     election_modifier_dict = {}  # Key is audience_filter_id, value is election_modifier
@@ -463,20 +516,28 @@ def assemble_basic_dictionaries_from_audience_filters(audience_filter_dict):
     #  election, where google_civic_election_id_expanded_dict is all the elections based on google_civic_election_id
     #  and beyond.
     google_civic_election_id_expanded_dict = {}  # Key is audience_filter_id, value is list of google_civic_election_ids
+    has_claimed_politician_modifier_dict = {}  # Key is audience_filter_id, value is has_claimed_politician_modifier
     was_sent_campaign_list_dict = {}  # Key is audience_filter_id, value was_sent_campaign_list (a list of campaign ids)
     was_sent_campaign_modifier_dict = {}  # Key is audience_filter_id, value is was_sent_campaign_modifier
 
     for filter_id, audience_filter in audience_filter_dict.items():
         if hasattr(audience_filter, 'audience_filter_type'):
+            if audience_filter.audience_filter_type == 'FILTER_TYPE_AUDIENCE_TYPE':
+                # When we start working with multiple audience_filter_chains, we will need to treat this differently.
+                if positive_value_exists(audience_filter.audience_type_politician):
+                    audience_type_is_politician = True
             if audience_filter.audience_filter_type == 'FILTER_TYPE_ELECTION_DATE':
                 if positive_value_exists(audience_filter.google_civic_election_id):
                     google_civic_election_id_dict[audience_filter.id] = audience_filter.google_civic_election_id
-
                     if positive_value_exists(audience_filter.election_modifier):
                         election_modifier_dict[audience_filter.id] = audience_filter.election_modifier
             if audience_filter.audience_filter_type == 'FILTER_TYPE_EMAIL_ADDRESS':
                 if positive_value_exists(audience_filter.email_address_modifier):
                     email_address_modifier_dict[audience_filter.id] = audience_filter.email_address_modifier
+            if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_CLAIMED_POLITICIAN':
+                if positive_value_exists(audience_filter.has_claimed_politician_modifier):
+                    has_claimed_politician_modifier_dict[audience_filter.id] = \
+                        audience_filter.has_claimed_politician_modifier
             if audience_filter.audience_filter_type == 'FILTER_TYPE_WAS_SENT_CAMPAIGN':
                 if positive_value_exists(audience_filter.was_sent_campaign_modifier):
                     # audience_filter.was_sent_campaign_list is a list of campaign ids formatted as
@@ -509,11 +570,14 @@ def assemble_basic_dictionaries_from_audience_filters(audience_filter_dict):
                 # We will need to do a search in the election database table to get elections before and after this one
                 pass
 
+    # We will need parallel dicts for candidates, voters, and organizations (re: audience_type_politician_dict)
     return {
+        'audience_type_is_politician': audience_type_is_politician,
         'election_modifier_dict': election_modifier_dict,
         'email_address_modifier_dict': email_address_modifier_dict,
         'google_civic_election_id_dict': google_civic_election_id_dict,
         'google_civic_election_id_expanded_dict': google_civic_election_id_expanded_dict,
+        'has_claimed_politician_modifier_dict': has_claimed_politician_modifier_dict,
         'status': status,
         'success': success,
         'was_sent_campaign_list_dict': was_sent_campaign_list_dict,
@@ -522,9 +586,12 @@ def assemble_basic_dictionaries_from_audience_filters(audience_filter_dict):
 
 
 def retrieve_db_objects_for_audience_filter_chain(
-        additional_politician_we_vote_id_list=[],
+        audience_type_is_politician=False,
+        do_not_include_is_claimed_politicians=False,
         google_civic_election_id_list=[],
+        is_claimed_profile_date_time_window_length=None,
         only_include_entries_with_email_address=False,
+        only_include_is_claimed_politicians=False,
         only_include_politicians_sent_any_of_these_campaigns=[],
         only_include_politicians_sent_all_of_these_campaigns=[],
         only_include_politicians_who_were_not_sent_at_least_one_of_these_campaigns=[],
@@ -549,8 +616,9 @@ def retrieve_db_objects_for_audience_filter_chain(
     }
 
     politician_we_vote_id_list_from_election_list = []
+    are_politician_we_vote_ids_expected_from_election_list = False
     if len(google_civic_election_id_list) > 0:
-
+        are_politician_we_vote_ids_expected_from_election_list = True
         candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
@@ -564,25 +632,14 @@ def retrieve_db_objects_for_audience_filter_chain(
                 Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id="")
             )
             candidate_list = list(candidate_query)
-            candidate_query = candidate_query.values_list('politician_we_vote_id', flat=True).distinct()
             # Create a candidate_dictionary with politician_we_vote_id as key and candidate object as value
             candidate_dict = {candidate.politician_we_vote_id: candidate for candidate in candidate_list}
 
-            politician_we_vote_id_list_from_election_list = list(candidate_query)
+            candidate_query_limited = candidate_query.values_list('politician_we_vote_id', flat=True).distinct()
+            politician_we_vote_id_list_from_election_list = list(candidate_query_limited)
         except Exception as e:
             success = False
             status += "COULD_NOT_RETRIEVE_POLITICIAN_LIST: " + str(e) + ' '
-
-    if additional_politician_we_vote_id_list and positive_value_exists(len(additional_politician_we_vote_id_list)):
-        if politician_we_vote_id_list_from_election_list and \
-                positive_value_exists(len(politician_we_vote_id_list_from_election_list)):
-            # Merge the politician_we_vote_id_list_from_election_list and additional_politician_we_vote_id_list lists
-            politician_we_vote_id_list = list(set(politician_we_vote_id_list_from_election_list +
-                                                  additional_politician_we_vote_id_list))
-        else:
-            politician_we_vote_id_list = additional_politician_we_vote_id_list
-    else:
-        politician_we_vote_id_list = politician_we_vote_id_list_from_election_list
 
     # Now adjust the politician_we_vote_id_list based on "Was sent campaign(s)" filters
     # only_include_politicians_sent_any_of_these_campaigns = [],
@@ -610,25 +667,23 @@ def retrieve_db_objects_for_audience_filter_chain(
     # WAS_NOT_SENT_CAMPAIGN_ANY = only_include_politicians_who_were_sent_none_of_these_campaigns
     # WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE = only_include_politicians_who_were_not_sent_at_least_one_of_these_campaigns
 
+    are_politician_we_vote_ids_expected_from_any_campaigns = False
+    politician_we_vote_id_list_sent_any_of_these_campaigns = []
     if positive_value_exists(len(only_include_politicians_sent_any_of_these_campaigns)):
+        are_politician_we_vote_ids_expected_from_any_campaigns = True
         try:
             queryset = EmailCampaignRecipient.objects.using('readonly').all()
             queryset = queryset.filter(email_campaign_id__in=only_include_politicians_sent_any_of_these_campaigns)
             queryset = queryset.values_list('politician_we_vote_id', flat=True).distinct()
             politician_we_vote_id_list_sent_any_of_these_campaigns = list(queryset)
-            if positive_value_exists(len(politician_we_vote_id_list_sent_any_of_these_campaigns)):
-                # politician_we_vote_id_list should be the values that are in both politician_we_vote_id_list
-                #  and politician_we_vote_id_list_sent_any_of_these_campaigns
-                politician_we_vote_id_list = list(set(politician_we_vote_id_list) &
-                                                  set(politician_we_vote_id_list_sent_any_of_these_campaigns))
-            else:
-                # No politicians found who received any of these campaigns.
-                politician_we_vote_id_list = []
         except Exception as e:
             success = False
             status += "COULD_NOT_RETRIEVE_RECIPIENTS__WAS_SENT_CAMPAIGN_ANY: " + str(e) + ' '
 
+    are_politician_we_vote_ids_expected_from_all_campaigns = False
+    politician_we_vote_id_list_sent_all_of_these_campaigns = []
     if positive_value_exists(len(only_include_politicians_sent_all_of_these_campaigns)):
+        are_politician_we_vote_ids_expected_from_all_campaigns = True
         dict_of_recipient_lists_of_each_campaign = {}
         for campaign_id in only_include_politicians_sent_all_of_these_campaigns:
             try:
@@ -643,30 +698,17 @@ def retrieve_db_objects_for_audience_filter_chain(
         #  within dict_of_recipient_lists_of_each_campaign
         politician_we_vote_id_list_sent_all_of_these_campaigns = list(
             set.intersection(*dict_of_recipient_lists_of_each_campaign.values()))
-        if positive_value_exists(len(politician_we_vote_id_list_sent_all_of_these_campaigns)):
-            # politician_we_vote_id_list should be the values that are in both politician_we_vote_id_list
-            #  and politician_we_vote_id_list_sent_all_of_these_campaigns
-            politician_we_vote_id_list = list(set(politician_we_vote_id_list) &
-                                              set(politician_we_vote_id_list_sent_all_of_these_campaigns))
-        else:
-            # No politicians found who received all of these campaigns.
-            politician_we_vote_id_list = []
 
+    are_politician_we_vote_ids_expected_from_none_campaigns = False
+    politician_we_vote_id_list_to_remove_sent_none = []
     if positive_value_exists(len(only_include_politicians_who_were_sent_none_of_these_campaigns)):
+        are_politician_we_vote_ids_expected_from_none_campaigns = True
         try:
             queryset = EmailCampaignRecipient.objects.using('readonly').all()
             queryset = queryset.filter(
                 email_campaign_id__in=only_include_politicians_who_were_sent_none_of_these_campaigns)
             queryset = queryset.values_list('politician_we_vote_id', flat=True).distinct()
-            politician_we_vote_id_list_sent_at_least_one = list(queryset)
-            if positive_value_exists(len(politician_we_vote_id_list_sent_at_least_one)):
-                # Remove from politician_we_vote_id_list any politician_we_vote_ids
-                #  in politician_we_vote_id_list_sent_at_least_one
-                politician_we_vote_id_list = list(set(politician_we_vote_id_list) -
-                                                  set(politician_we_vote_id_list_sent_at_least_one))
-            else:
-                # Leave politician_we_vote_id_list as is
-                pass
+            politician_we_vote_id_list_to_remove_sent_none = list(queryset)
         except Exception as e:
             success = False
             status += "COULD_NOT_RETRIEVE_RECIPIENTS__WAS_NOT_SENT_CAMPAIGN_ANY: " + str(e) + ' '
@@ -692,8 +734,54 @@ def retrieve_db_objects_for_audience_filter_chain(
     #         success = False
     #         status += "COULD_NOT_RETRIEVE_RECIPIENTS__WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE: " + str(e) + ' '
 
-    politician_we_vote_id_list_found = len(politician_we_vote_id_list) > 0
-    if len(politician_we_vote_id_list) == 0:
+    # Generating the "big list" of politician_we_vote_ids
+    politician_we_vote_id_list = []
+    politician_we_vote_id_list_required = \
+        are_politician_we_vote_ids_expected_from_all_campaigns or \
+        are_politician_we_vote_ids_expected_from_any_campaigns or \
+        are_politician_we_vote_ids_expected_from_none_campaigns
+    if are_politician_we_vote_ids_expected_from_election_list:
+        # We are getting the "big list" of politician_we_vote_ids from the election list
+        politician_we_vote_id_list = politician_we_vote_id_list_from_election_list
+    elif politician_we_vote_id_list_required or audience_type_is_politician:
+        # We need to get the "big list" of politician_we_vote_ids from "Audience type is Politician"
+        #  captured in FILTER_TYPE_AUDIENCE_TYPE
+        queryset = Politician.objects.all()
+        queryset = queryset.values_list('we_vote_id', flat=True).distinct()
+        politician_we_vote_id_list = list(queryset)
+
+    # Do the logical combination of politician_we_vote_id_lists into single list
+    if are_politician_we_vote_ids_expected_from_none_campaigns:
+        if positive_value_exists(len(politician_we_vote_id_list_to_remove_sent_none)):
+            # Remove from politician_we_vote_id_list any politician_we_vote_ids
+            #  in politician_we_vote_id_list_sent_at_least_one
+            politician_we_vote_id_list = list(set(politician_we_vote_id_list) -
+                                              set(politician_we_vote_id_list_to_remove_sent_none))
+        else:
+            # Leave politician_we_vote_id_list as is
+            pass
+
+    if are_politician_we_vote_ids_expected_from_all_campaigns:
+        if positive_value_exists(len(politician_we_vote_id_list_sent_all_of_these_campaigns)):
+            # politician_we_vote_id_list should be the values that are in both politician_we_vote_id_list
+            #  and politician_we_vote_id_list_sent_all_of_these_campaigns
+            politician_we_vote_id_list = list(set(politician_we_vote_id_list) &
+                                              set(politician_we_vote_id_list_sent_all_of_these_campaigns))
+        else:
+            # No politicians found who received all of these campaigns.
+            politician_we_vote_id_list = []
+
+    if are_politician_we_vote_ids_expected_from_any_campaigns:
+        if positive_value_exists(len(politician_we_vote_id_list_sent_any_of_these_campaigns)):
+            # politician_we_vote_id_list should be the values that are in both politician_we_vote_id_list
+            #  and politician_we_vote_id_list_sent_any_of_these_campaigns
+            politician_we_vote_id_list = list(set(politician_we_vote_id_list) &
+                                              set(politician_we_vote_id_list_sent_any_of_these_campaigns))
+        else:
+            # No politicians found who received any of these campaigns.
+            politician_we_vote_id_list = []
+
+    if politician_we_vote_id_list_required and len(politician_we_vote_id_list) == 0:
         status += 'NO_POLITICIANS_FOUND_IN_AUDIENCE_FILTER_CHAIN '
         error_results['politician_list_length'] = politician_list_length
         error_results['status'] = status
@@ -702,7 +790,8 @@ def retrieve_db_objects_for_audience_filter_chain(
 
     try:
         queryset = Politician.objects.all()
-        queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
+        if are_politician_we_vote_ids_expected_from_election_list or len(politician_we_vote_id_list) > 0:
+            queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
         if positive_value_exists(only_include_entries_with_email_address):
             queryset = queryset.annotate(politician_email_address_length=Length('politician_email_address'))
             queryset = queryset.annotate(politician_email_length=Length('politician_email'))
@@ -714,6 +803,15 @@ def retrieve_db_objects_for_audience_filter_chain(
                 Q(politician_email2_length__gt=2) |
                 Q(politician_email3_length__gt=2)
             )
+        if positive_value_exists(do_not_include_is_claimed_politicians):
+            queryset = queryset.exclude(is_claimed_profile=True)
+        elif positive_value_exists(only_include_is_claimed_politicians):
+            queryset = queryset.filter(is_claimed_profile=True)
+            if positive_value_exists(is_claimed_profile_date_time_window_length):
+                # Calculate the cutoff datetime
+                cutoff_datetime = timezone.now() - is_claimed_profile_date_time_window_length
+                # Only include politicians whose profile was claimed after the cutoff date
+                queryset = queryset.filter(is_claimed_profile_date_time__gte=cutoff_datetime)
         politician_list_length = queryset.count()
         queryset = queryset.order_by('-date_last_updated')
         politician_list = list(queryset)
@@ -789,6 +887,7 @@ def render_audience_builder_preview_html(
         audience_builder=audience_builder,
         audience_filter_chain_dict=audience_filter_chain_dict,
         audience_filter_dict=audience_filter_dict,
+        max_list_length=500,
         request=request,
     )
     preview_list = results['preview_list']

@@ -9,6 +9,7 @@ from PIL import Image, ImageOps
 import re
 from datetime import datetime
 from django.db.models import Q
+from django.contrib.postgres.search import TrigramSimilarity
 from django.http import HttpResponse
 from exception.models import handle_exception
 import json
@@ -18,10 +19,10 @@ from candidate.controllers import add_name_to_next_spot, copy_field_value_from_o
     generate_candidate_dict_list_from_candidate_object_list, move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager, PROFILE_IMAGE_TYPE_FACEBOOK, \
     PROFILE_IMAGE_TYPE_UNKNOWN, \
-    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_VOTE_USA
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_VOTE_USA, CandidateCampaign
 from email_outbound.models import EmailAddress
 from image.controllers import cache_image_object_to_aws, create_resized_images
-from office.models import ContestOfficeManager, ContestOfficeListManager
+from office.models import ContestOfficeManager, ContestOfficeListManager, ContestOffice
 from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
 from organization.models import Organization, OrganizationManager
 from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
@@ -39,7 +40,8 @@ from wevote_functions.functions import candidate_party_display, convert_to_int, 
     convert_to_political_party_constant, extract_instagram_handle_from_text_string, \
     generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer, generate_date_as_integer, \
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
+    convert_we_vote_date_string_to_date_as_integer, generate_date_as_integer, \
     generate_localized_datetime_from_obj, DATE_FORMAT_YMD_HMS
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -445,10 +447,11 @@ def find_campaignx_list_to_link_to_this_politician(politician=None):
     return related_list
 
 
-def find_candidates_to_link_to_this_politician(politician=None):
+def find_candidates_to_link_to_this_politician(politician=None,use_trigram_match=False):
     """
     Find Candidates to Link to this Politician
     Finding Candidates that *might* be "children" of this politician
+    Uses PostgreSQL trigram (pg_trgm) for fast, fuzzy name matching.
 
     :param politician:
     :return:
@@ -463,10 +466,13 @@ def find_candidates_to_link_to_this_politician(politician=None):
             politician_we_vote_id=politician.we_vote_id)
 
         filters = []
-        new_filter = \
+               
+        # Use icontains for FILTERING (fast B-tree index), trigram only for ORDERING if requested
+        if positive_value_exists(politician.first_name) and positive_value_exists(politician.last_name):
+            new_filter = \
             Q(candidate_name__icontains=politician.first_name) & \
             Q(candidate_name__icontains=politician.last_name)
-        filters.append(new_filter)
+            filters.append(new_filter)
 
         if positive_value_exists(politician.politician_twitter_handle):
             new_filter = (
@@ -526,7 +532,15 @@ def find_candidates_to_link_to_this_politician(politician=None):
 
             queryset = queryset.filter(final_filters)
 
-        queryset = queryset.order_by('candidate_name')[:20]
+        # Apply trigram ordering ONLY for ranking (not filtering) on already filtered results
+        if use_trigram_match:
+            queryset = queryset.annotate(
+                trigram_match=TrigramSimilarity('candidate_name', politician.politician_name)
+            )
+            queryset = queryset.order_by('-trigram_match', 'candidate_name')
+        else:
+            queryset = queryset.order_by('candidate_name')
+        queryset = queryset[:20]
         related_candidate_list = list(queryset)
     except Exception as e:
         related_candidate_list = []
@@ -849,6 +863,9 @@ def generate_politician_dict_from_politician_object(politician=None):
     else:
         politician_description = ''
     instagram_handle = extract_instagram_handle_from_text_string(politician.instagram_handle)
+    is_claimed_profile_date_time = ''
+    if positive_value_exists(politician.is_claimed_profile_date_time):
+        is_claimed_profile_date_time = politician.is_claimed_profile_date_time.strftime(DATE_FORMAT_YMD_HMS)
     politician_dict = {
         'ballot_guide_official_statement':  politician.ballot_guide_official_statement,
         'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
@@ -856,6 +873,7 @@ def generate_politician_dict_from_politician_object(politician=None):
         'final_election_date_in_past':      final_election_date_in_past,
         'instagram_handle':                 instagram_handle,
         'is_claimed_profile':               positive_value_exists(politician.is_claimed_profile),
+        'is_claimed_profile_date_time':     is_claimed_profile_date_time,
         'linked_campaignx_we_vote_id':      politician.linked_campaignx_we_vote_id,
         'opposers_count':                   politician.opposers_count,
         'political_party':                  candidate_party_display(politician.political_party),
@@ -1939,6 +1957,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
 
     politician_found = False
     politician_owner_list = []
+    save_politician = False
     seo_friendly_path_list = []
     voter_is_politician_owner = False
     voter_signed_in_with_email = False
@@ -1962,7 +1981,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
                 politician_we_vote_id=politician_we_vote_id,
                 seo_friendly_path=seo_friendly_path,
                 voter_we_vote_id=voter_we_vote_id,
-                read_only=True,
+                read_only=False,
             )
             if not results['success']:
                 status += "POLITICIAN_RETRIEVE_ERROR1: "
@@ -1972,6 +1991,10 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
             voter_is_politician_owner = True
             politician = results['politician']
             # politician_owner_list = results['politician_owner_list']
+            if voter_is_politician_owner and not politician.is_claimed_profile:
+                politician.is_claimed_profile = True
+                politician.is_claimed_profile_date = datetime.now()
+                save_politician = True
     else:
         results = politician_manager.retrieve_politician(
             politician_we_vote_id=politician_we_vote_id,
@@ -2298,6 +2321,9 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
                 one_seo_friendly_path_object.final_pathname_string not in seo_friendly_path_list:
             seo_friendly_path_list.append(one_seo_friendly_path_object.final_pathname_string)
 
+    if save_politician:
+        politician.save()
+
     generate_results = generate_politician_dict_from_politician_object(politician=politician)
     results = generate_results['politician_dict']
     results.update({
@@ -2505,7 +2531,13 @@ def politician_save_for_api(  # politicianSave
                 politician.profile_image_background_color = generate_background(politician)
                 politician_changed = True
 
-        # Now we want to resize to a large version
+        # If we are saving the politician from an API call, then it means the voter has claimed the profile.
+        if not positive_value_exists(politician.is_claimed_profile):
+            # Updates data like calculate_if_is_claimed_profile
+            politician.is_claimed_profile = True
+            politician.is_claimed_profile_date_time = datetime.now()
+            politician_changed = True
+
         if politician_changed:
             try:
                 politician.save()
@@ -3496,13 +3528,13 @@ def update_parallel_fields_with_years_in_related_objects(
                     is_battleground_race = None
                 if is_battleground_race is not None:
                     office_we_vote_id_list = []
+                    candidates_to_update = []  # List for bulk update
                     for candidate in candidate_list:
                         if positive_value_exists(update_candidate):
-                            try:
-                                candidate.is_battleground_race = is_battleground_race
-                                candidate.save()
-                            except Exception as e:
-                                status += "COULD_NOT_SAVE_CANDIDATE2: " + str(e) + " "
+                            # Modify object in memory
+                            candidate.is_battleground_race = is_battleground_race
+                            candidates_to_update.append(candidate)
+
                         # For each Candidate we update, update the last ContestOffice for that year
                         link_results = candidate_manager.retrieve_candidate_to_office_link(
                             candidate_we_vote_id=candidate.we_vote_id)
@@ -3513,6 +3545,14 @@ def update_parallel_fields_with_years_in_related_objects(
                             candidate_to_office_link_list = link_results['candidate_to_office_link_list']
                             for candidate_to_office_link in candidate_to_office_link_list:
                                 office_we_vote_id_list.append(candidate_to_office_link.contest_office_we_vote_id)
+
+                    # Perform Candidate Bulk Save
+                    if len(candidates_to_update) > 0:
+                        try:
+                            CandidateCampaign.objects.bulk_update(candidates_to_update, ['is_battleground_race'])
+                        except Exception as e:
+                            status += "BULK_COULD_NOT_SAVE_CANDIDATES: " + str(e) + " "
+
                     # Now update all related offices for this candidate in this year
                     if len(office_we_vote_id_list) > 0 and update_office:
                         office_results = office_list_manager.retrieve_offices(
@@ -3520,31 +3560,31 @@ def update_parallel_fields_with_years_in_related_objects(
                             return_list_of_objects=True)
                         if office_results['success']:
                             office_list = office_results['office_list_objects']
+                            offices_to_update = []  # List for bulk update
                             latest_election_day_text_as_integer = 0
                             if len(office_list) > 0:
-                                # Just pick one to start with in case "get_election_day_text()" returns nothing
                                 latest_office_we_vote_id = office_list[0].we_vote_id
                             else:
                                 latest_office_we_vote_id = ''
-                            # Filter out primary office races
+
+                            # Filter out primary office races to find the latest office
                             for office in office_list:
                                 election_day_text = office.get_election_day_text()
                                 if positive_value_exists(election_day_text):
-                                    date_as_integer = \
-                                        convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                                    date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
                                     if date_as_integer > latest_election_day_text_as_integer:
                                         latest_election_day_text_as_integer = date_as_integer
                                         latest_office_we_vote_id = office.we_vote_id
+
+                            # Prepare offices for bulk update
                             for office in office_list:
-                                if office.we_vote_id is latest_office_we_vote_id:
+                                if office.we_vote_id == latest_office_we_vote_id:
                                     if update_office:
-                                        try:
-                                            office.is_battleground_race = is_battleground_race
-                                            office.save()
-                                        except Exception as e:
-                                            status += "COULD_NOT_SAVE_OFFICE: " + str(e) + " "
+                                        office.is_battleground_race = is_battleground_race
+                                        offices_to_update.append(office)
+
                                     if positive_value_exists(office.office_held_we_vote_id) and \
-                                            office.office_held_we_vote_id not in office_held_we_vote_id_list:
+                                        office.office_held_we_vote_id not in office_held_we_vote_id_list:
                                         office_held_we_vote_id_list.append(office.office_held_we_vote_id)
                                     under_results = update_candidates_under_this_office(
                                         field_key_root=field_key_root,
@@ -3552,9 +3592,16 @@ def update_parallel_fields_with_years_in_related_objects(
                                         years_false_list=years_false_list,
                                         years_true_list=years_true_list)
                                     if under_results['success']:
-                                        office_held_we_vote_id_list = \
-                                            list(set(office_held_we_vote_id_list +
-                                                     under_results['office_held_we_vote_id_list']))
+                                        office_held_we_vote_id_list = list(set(office_held_we_vote_id_list +
+                                                                               under_results[
+                                                                                   'office_held_we_vote_id_list']))
+
+                            # Perform Office Bulk Save
+                            if len(offices_to_update) > 0:
+                                try:
+                                    ContestOffice.objects.bulk_update(offices_to_update, ['is_battleground_race'])
+                                except Exception as e:
+                                    status += "BULK_COULD_NOT_SAVE_OFFICE: " + str(e) + " "
 
     # For each Representative we dealt with, update OfficeHeld
     if success and positive_value_exists(office_held_we_vote_id_list) and update_office_held:

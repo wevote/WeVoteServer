@@ -6,3 +6,4 @@ awslocal sqs create-queue \
   --attributes FifoQueue=true,ContentBasedDeduplication=true
 
 awslocal s3 mb s3://wevote-images
+awslocal s3 mb s3://wevote-temporary

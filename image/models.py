@@ -2135,20 +2135,28 @@ class WeVoteImageManager(models.Manager):
         try:
             image = Image.open(original_image_local_path)
             media_type = image.get_format_mimetype()
-            # Color
-            if image.has_transparency_data:
-                image = image.convert('RGBA')
-            else:
-                image = image.convert('RGB')
-            # GPS
-            exif = image.getexif()
-            gps_ifd = exif.get_ifd(ExifTags.IFD.GPSInfo)
-            gps_ifd.clear()
-            # Pillow still cannot handle animated images
-            # Forward those to a CDN
+
+            # Check for animated formats FIRST — before any convert() call
+            # convert() strips all animation frames, so we skip it for gif/webp
             if media_type in {'image/gif', 'image/webp'}:
-                pass
+                # Pillow cannot reliably resize animated images frame by frame
+                # The proper long-term fix is Fastly CDN handling, but for now
+                # the pragmatic fix is to copy the original file as-is for animated
+                # formats instead of trying to resize
+                # Copy the original file as-is to preserve all animation frames.
+                import shutil
+                shutil.copy2(original_image_local_path, converted_image_local_path)
             else:
+                # Color conversion (safe for non-animated formats)
+                if image.has_transparency_data:
+                    image = image.convert('RGBA')
+                else:
+                    image = image.convert('RGB')
+                # GPS EXIF stripping
+                exif = image.getexif()
+                gps_ifd = exif.get_ifd(ExifTags.IFD.GPSInfo)
+                gps_ifd.clear()
+                # Resize
                 centering_x = 0.5
                 target_size = (image_width, image_height)
                 if image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:
@@ -2161,13 +2169,14 @@ class WeVoteImageManager(models.Manager):
                     image.save(converted_image_local_path, quality=95, subsampling=0)
                 else:
                     image.save(converted_image_local_path)
-            
+
         except Exception as e:
             exception_message = "FAILED_TO_RESIZE_IMAGE: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=exception_message)
 
         finally:
-            image.close()
+            if image:
+                image.close()
         
         resized_image_created = True
         
@@ -2212,9 +2221,16 @@ class WeVoteImageManager(models.Manager):
         """
         try:
             image_local_path = "/tmp/" + image_local_path
-            python_image_library_image.save(image_local_path, format=python_image_library_image.format)
+            image_format = python_image_library_image.format
+
+            # Preserve animation frames for GIF and WEBP
+            if image_format and image_format.lower() in {'gif', 'webp'}:
+                python_image_library_image.save(image_local_path, format=image_format, save_all=True)
+            else:
+                python_image_library_image.save(image_local_path, format=image_format)
+
             image_stored = True
-        except HTTPError as error:  # something wrong with url
+        except HTTPError as error:
             image_stored = False
             exception_message = "store_image_locally failed because of http error"
             handle_exception(error, logger=logger, exception_message=exception_message)

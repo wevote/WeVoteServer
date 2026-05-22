@@ -162,6 +162,8 @@ urlpatterns = [
                   re_path(r'^fastLoadStatusUpdate/', views_retrieve_tables.fast_load_status_update_view,
                           name='fastLoadStatusUpdate'),
                   re_path(r'retrieveSQLTables/', views_retrieve_tables.retrieve_sql_tables, name='retrieveSQLTables'),
+                  re_path(r'retrieveFastLoadTableStatistics/', views_retrieve_tables.fast_load_table_statistics_view,
+                          name='retrieveFastLoadTableStatistics'),
                   re_path(r'retrieveSQLTablesRowCount/', views_retrieve_tables.retrieve_sql_tables_row_count,
                           name='retrieveSQLTablesRowCount'),
                   re_path(r'retrieveMaxID/', views_retrieve_tables.retrieve_max_id, name='retrieveMaxID'),

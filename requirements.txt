@@ -6,6 +6,7 @@ cachecontrol==0.13.1
 certifi>=2025.1.31      # Keep updated. Root certificates are used by requests.
 cloudscraper==1.2.68
 cryptography==44.0.1
+debugpy==1.8.20
 dj-database-url==2.1.0
 django==5.0.13
 django-bootstrap3==15.0.0
@@ -33,6 +34,7 @@ gunicorn==23.0.0
 httplib2==0.22.0
 idna>=3.7               # not directly required, pinned by Snyk to avoid a vulnerability
 locust==2.32.3
+lxml>=5.0.0
 nameparser==1.1.3
 nltk>=3.9               # recommend engine - comment out if initial installation is failing
 numpy==2.4.2           # recommend engine - comment out if initial installation is failing
@@ -50,11 +52,11 @@ protobuf>=3.18.3        # not directly required, pinned by Snyk to avoid a vulne
 psycopg2-binary==2.9.10
 py3dns==4.0.1
 pyarrow                 # recommend engine - comment out if initial installation is failing
-pyasn1==0.4.8
-pyasn1-modules==0.2.8
+pyasn1==0.6.3
+pyasn1-modules>=0.3.0
 pygeoip==0.3.2
 pyjwkest==1.4.2
-pyjwt==2.8.0
+pyjwt==2.12.0
 pyparsing==2.4.7
 python-dateutil~=2.8.2
 python-magic==0.4.24     # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
@@ -66,7 +68,7 @@ robot-detection==0.4
 rsa==4.7.2
 ruff==0.15.14
 sendgrid==6.9.7
-simplejson==3.17.2
+simplejson>=3.17.2
 six==1.16.0
 # setuptools==70.0.0    Removed in Py 3.12, but still needed by some slow to update packages)
 social-auth-app-django==5.4.1

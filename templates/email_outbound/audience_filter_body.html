@@ -1,528 +1,502 @@
 {# templates/email_outbound/audience_filter_body.html #}
 
 <div class="audience-filter-dropdowns-flex">
-  <div>
-    <select class="form-select"
-            id="audience-filter-type-select-{{ audience_filter.id }}"
-            name="audience_filter_type_{{ audience_filter.id }}"
-            onchange="toggleAudienceFilterType(this, '{{ audience_filter.id }}')"
-            style="color: #6c757d">
-      <option value=""
-              {% if not audience_filter.audience_filter_type %}selected{% endif %}>-- Select a filter --</option>
-      <optgroup label="🗳️ Election">
-        <option value="FILTER_TYPE_AUDIENCE_TYPE"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_AUDIENCE_TYPE" %}selected{% endif %}
-                disabled>Audience type</option>
-        <option value="FILTER_TYPE_ELECTION_DATE"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_ELECTION_DATE" %}selected{% endif %}>
-          Election date
-        </option>
-        <option value="FILTER_TYPE_POLITICAL_PARTY"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_POLITICAL_PARTY" %}selected{% endif %}
-                disabled>Political party</option>
-        <option value="FILTER_TYPE_STATE_CODE"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_STATE_CODE" %}selected{% endif %}
-                disabled>State</option>
-      </optgroup>
-      <optgroup label="🎯 Engagement">
-        <option value="FILTER_TYPE_HAS_BEEN_CONTACTED"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_BEEN_CONTACTED" %}selected{% endif %}
-                disabled>Has been contacted</option>
-        <option value="FILTER_TYPE_WAS_SENT_CAMPAIGN"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_WAS_SENT_CAMPAIGN" %}selected{% endif %}>
-          Was sent campaign(s)
-        </option>
-        <option value="FILTER_TYPE_HAS_OPENED"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_OPENED" %}selected{% endif %}
-                disabled>Has opened message</option>
-        <option value="FILTER_TYPE_HAS_SIGNED_IN"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_SIGNED_IN" %}selected{% endif %}
-                disabled>Has signed in</option>
-        <option value="FILTER_TYPE_HAS_CLAIMED_POLITICIAN"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_CLAIMED_POLITICIAN" %}selected{% endif %}
-                disabled>Has claimed politician</option>
-      </optgroup>
-      <optgroup label="🏠 Communication">
-        <option value="FILTER_TYPE_EMAIL_ADDRESS"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_EMAIL_ADDRESS" %}selected{% endif %}>
-          Email address
-        </option>
-        <option value="FILTER_TYPE_PHONE_NUMBER"
-                {% if audience_filter.audience_filter_type == "FILTER_TYPE_PHONE_NUMBER" %}selected{% endif %}
-                disabled>Phone number</option>
-      </optgroup>
-    </select>
-  </div>
-  {# FILTER_TYPE_AUDIENCE_TYPE #}
-  <div id="audience-type-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_AUDIENCE_TYPE' %}block{% else %}none{% endif %}">
-    <select class="form-select"
-            name="audience_type_modifier_{{ audience_filter.id }}">
-      <option value="AUDIENCE_TYPE_IS"
-              {% if audience_filter.audience_type_modifier == "AUDIENCE_TYPE_IS" %}selected{% endif %}>is</option>
-      <option value="AUDIENCE_TYPE_IS_NOT"
-              {% if audience_filter.audience_type_modifier == "AUDIENCE_TYPE_IS_NOT" %}selected{% endif %}>
-        is not
-      </option>
-    </select>
-
-    <div class="audience-filter-dropdown">
-      <button type="button"
-              class="audience-filter-dropdown-button"
-              id="audience-type-button-{{ audience_filter.id }}"
-              onclick="toggleDropdown('{{ audience_filter.id }}', 'audience-type-dropdown-')">
-        {% if audience_types_selected_string %}
-          {{ audience_types_selected_string }}
-        {% else %}
-          -- Select types --
-        {% endif %}
-      </button>
-      <div class="audience-filter-dropdown-content"
-           id="audience-type-dropdown-{{ audience_filter.id }}">
-        <a href="javascript:void(0)"
-           class="audience-filter-clear-all-link"
-           onclick="clearAllAudienceTypes('{{ audience_filter.id }}')">Clear all</a>
-        <div style="clear: both;"></div>
-        <div class="audience-filter-audience-type-option">
-          <input type="checkbox"
-                 id="politician-{{ audience_filter.id }}"
-                 name="audience_type_politician_{{ audience_filter.id }}"
-                 value="POLITICIAN"
-                 {% if audience_filter.audience_type_politician %}checked{% endif %}
-                 onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
-          <label for="politician-{{ audience_filter.id }}">Politician</label>
-        </div>
-        <div class="audience-filter-audience-type-option">
-          <input type="checkbox"
-                 id="candidate-{{ audience_filter.id }}"
-                 name="audience_type_candidate_{{ audience_filter.id }}"
-                 value="CANDIDATE"
-                 {% if audience_filter.audience_type_candidate %}checked{% endif %}
-                 onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
-          <label for="candidate-{{ audience_filter.id }}">Candidate</label>
-        </div>
-        <div class="audience-filter-audience-type-option">
-          <input type="checkbox"
-                 id="organization-{{ audience_filter.id }}"
-                 name="audience_type_organization_{{ audience_filter.id }}"
-                 value="ORGANIZATION"
-                 {% if audience_filter.audience_type_organization %}checked{% endif %}
-                 onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
-          <label for="organization-{{ audience_filter.id }}">Organization</label>
-        </div>
-        <div class="audience-filter-audience-type-option">
-          <input type="checkbox"
-                 id="voter-{{ audience_filter.id }}"
-                 name="audience_type_voter_{{ audience_filter.id }}"
-                 value="VOTER"
-                 {% if audience_filter.audience_type_voter %}checked{% endif %}
-                 onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
-          <label for="voter-{{ audience_filter.id }}">Voter</label>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {# FILTER_TYPE_ELECTION_DATE #}
-  <div id="election-date-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_ELECTION_DATE' %}flex{% else %}none{% endif %};
-              justify-content: flex-start;
-              align-items: center;
-              width: 100%">
     <div>
-      <select class="form-select" name="election_modifier_{{ audience_filter.id }}">
-        <option value="ELECTION_IS_ON"
-                {% if audience_filter.election_modifier == "ELECTION_IS_ON" %}selected{% endif %}>is on</option>
-        <option value="ELECTION_IS_ON_OR_AFTER"
-                disabled
-                {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_AFTER" %}selected{% endif %}>
-          is on or after
-        </option>
-        <option value="ELECTION_IS_AFTER"
-                disabled
-                {% if audience_filter.election_modifier == "ELECTION_IS_AFTER" %}selected{% endif %}>is after</option>
-        <option value="ELECTION_IS_BEFORE"
-                disabled
-                {% if audience_filter.election_modifier == "ELECTION_IS_BEFORE" %}selected{% endif %}>
-          is before
-        </option>
-        <option value="ELECTION_IS_ON_OR_BEFORE"
-                disabled
-                {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_BEFORE" %}selected{% endif %}>
-          is on or before
-        </option>
-      </select>
+        <select class="form-select"
+                id="audience-filter-type-select-{{ audience_filter.id }}"
+                name="audience_filter_type_{{ audience_filter.id }}"
+                onchange="toggleAudienceFilterType(this, '{{ audience_filter.id }}')"
+                style="color: #6c757d;"
+        >
+            <option value="" {% if not audience_filter.audience_filter_type %}selected{% endif %}>-- Select a filter --</option>
+            <optgroup label="🗳️ Election">
+                <option value="FILTER_TYPE_AUDIENCE_TYPE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_AUDIENCE_TYPE" %}selected{% endif %}
+                        disabled
+                >Audience type</option>
+                <option value="FILTER_TYPE_ELECTION_DATE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_ELECTION_DATE" %}selected{% endif %}>Election date</option>
+                <option value="FILTER_TYPE_POLITICAL_PARTY" {% if audience_filter.audience_filter_type == "FILTER_TYPE_POLITICAL_PARTY" %}selected{% endif %}
+                        disabled
+                >Political party</option>
+                <option value="FILTER_TYPE_STATE_CODE" {% if audience_filter.audience_filter_type == "FILTER_TYPE_STATE_CODE" %}selected{% endif %}
+                        disabled
+                >State</option>
+            </optgroup>
+            <optgroup label="🎯 Engagement">
+                <option value="FILTER_TYPE_HAS_BEEN_CONTACTED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_BEEN_CONTACTED" %}selected{% endif %}
+                        disabled
+                >Has been contacted</option>
+                <option value="FILTER_TYPE_WAS_SENT_CAMPAIGN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_WAS_SENT_CAMPAIGN" %}selected{% endif %}
+                >Was sent campaign(s)</option>
+                <option value="FILTER_TYPE_HAS_OPENED" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_OPENED" %}selected{% endif %}
+                        disabled
+                >Has opened message</option>
+                <option value="FILTER_TYPE_HAS_SIGNED_IN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_SIGNED_IN" %}selected{% endif %}
+                        disabled
+                >Has signed in</option>
+                <option value="FILTER_TYPE_HAS_CLAIMED_POLITICIAN" {% if audience_filter.audience_filter_type == "FILTER_TYPE_HAS_CLAIMED_POLITICIAN" %}selected{% endif %}
+                >Has claimed politician</option>
+            </optgroup>
+            <optgroup label="🏠 Communication">
+                <option value="FILTER_TYPE_EMAIL_ADDRESS" {% if audience_filter.audience_filter_type == "FILTER_TYPE_EMAIL_ADDRESS" %}selected{% endif %}
+                >Email address</option>
+                <option value="FILTER_TYPE_PHONE_NUMBER" {% if audience_filter.audience_filter_type == "FILTER_TYPE_PHONE_NUMBER" %}selected{% endif %}
+                        disabled
+                >Phone number</option>
+            </optgroup>
+        </select>
     </div>
-
-    <div class="audience-filter-dropdown"
+{# FILTER_TYPE_AUDIENCE_TYPE #}
+    <div id="audience-type-options-{{ audience_filter.id }}"
          style="margin-left: 8px;
-                width: 100%">
-      <button type="button"
-              class="audience-filter-dropdown-button"
-              id="election-date-button-{{ audience_filter.id }}"
-              onclick="toggleDropdown('{{ audience_filter.id }}', 'election-date-dropdown-')">
-        {% if audience_filter.google_civic_election_id and election_name_selected %}
-          {{ election_name_selected }}
-        {% else %}
-          -- Select election --
-        {% endif %}
-      </button>
-      <div class="audience-filter-dropdown-content"
-           id="election-date-dropdown-{{ audience_filter.id }}">
-        <div style="clear: both;"></div>
-        {% for election in election_list %}
-          <div class="audience-filter-election-date-option">
-            <input type="radio"
-                   id="election-date-{{ audience_filter.id }}-{{ election.google_civic_election_id }}"
-                   name="google_civic_election_id_{{ audience_filter.id }}"
-                   value="{{ election.google_civic_election_id }}"
-                   style="display: none"
-                   onchange="updateElectionDateButtonText('{{ audience_filter.id }}', '{{ election.election_name }}', '{{ election.google_civic_election_id }}')" />
-            <label for="election-date-{{ audience_filter.id }}-{{ election.google_civic_election_id }}"
-                   id="election-date-label-{{ audience_filter.id }}-{{ election.google_civic_election_id }}"
-                   style="cursor: pointer;
-                          font-weight: {% if audience_filter.google_civic_election_id|slugify == election.google_civic_election_id|slugify %}600{% else %}normal{% endif %}">
-              {{ election.election_day_text }}: {{ election.election_name }}
-            </label>
-          </div>
-        {% endfor %}
-      </div>
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_AUDIENCE_TYPE' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="audience_type_modifier_{{ audience_filter.id }}">
+            <option value="AUDIENCE_TYPE_IS"
+                    {% if audience_filter.audience_type_modifier == "AUDIENCE_TYPE_IS" %}selected{% endif %}
+            >is</option>
+            <option value="AUDIENCE_TYPE_IS_NOT"
+                    {% if audience_filter.audience_type_modifier == "AUDIENCE_TYPE_IS_NOT" %}selected{% endif %}
+            >is not</option>
+        </select>
+
+        <div class="audience-filter-dropdown">
+            <button type="button" 
+                    class="audience-filter-dropdown-button" 
+                    id="audience-type-button-{{ audience_filter.id }}"
+                    onclick="toggleDropdown('{{ audience_filter.id }}', 'audience-type-dropdown-')">
+                {% if audience_types_selected_string %}
+                    {{ audience_types_selected_string }}
+                {% else %}
+                -- Select types --
+                {% endif %}
+            </button>
+            <div class="audience-filter-dropdown-content" id="audience-type-dropdown-{{ audience_filter.id }}">
+                <a href="javascript:void(0)" 
+                   class="audience-filter-clear-all-link" 
+                   onclick="clearAllAudienceTypes('{{ audience_filter.id }}')">
+                    Clear all
+                </a>
+                <div style="clear: both;"></div>
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="politician-{{ audience_filter.id }}" 
+                           name="audience_type_politician_{{ audience_filter.id }}" 
+                           value="POLITICIAN"
+                           {% if audience_filter.audience_type_politician %}checked{% endif %}
+                           onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
+                    <label for="politician-{{ audience_filter.id }}">Politician</label>
+                </div>
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="candidate-{{ audience_filter.id }}" 
+                           name="audience_type_candidate_{{ audience_filter.id }}" 
+                           value="CANDIDATE"
+                           {% if audience_filter.audience_type_candidate %}checked{% endif %}
+                           onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
+                    <label for="candidate-{{ audience_filter.id }}">Candidate</label>
+                </div>
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="organization-{{ audience_filter.id }}" 
+                           name="audience_type_organization_{{ audience_filter.id }}" 
+                           value="ORGANIZATION"
+                           {% if audience_filter.audience_type_organization %}checked{% endif %}
+                           onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
+                    <label for="organization-{{ audience_filter.id }}">Organization</label>
+                </div>
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="voter-{{ audience_filter.id }}" 
+                           name="audience_type_voter_{{ audience_filter.id }}" 
+                           value="VOTER"
+                           {% if audience_filter.audience_type_voter %}checked{% endif %}
+                           onchange="updateAudienceTypeButtonText('{{ audience_filter.id }}')">
+                    <label for="voter-{{ audience_filter.id }}">Voter</label>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  {# FILTER_TYPE_EMAIL_ADDRESS #}
-  <div id="email-address-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_EMAIL_ADDRESS' %}block{% else %}none{% endif %}">
-    <select class="form-select"
-            name="email_address_modifier_{{ audience_filter.id }}">
-      <option value="EMAIL_ADDRESS_CONTAINS"
-              disabled
-              {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_CONTAINS" %}selected{% endif %}>
-        contains
-      </option>
-      <option value="EMAIL_ADDRESS_EXISTS"
-              {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_EXISTS" %}selected{% endif %}>
-        exists
-      </option>
-      <option value="EMAIL_ADDRESS_IS_MISSING"
-              disabled
-              {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_IS_MISSING" %}selected{% endif %}>
-        is missing
-      </option>
-    </select>
-  </div>
+{# FILTER_TYPE_ELECTION_DATE #}
+    <div id="election-date-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_ELECTION_DATE' %}flex{% else %}none{% endif %};
+                 justify-content: flex-start;
+                 align-items: center;
+                 width: 100%;"
+    >
+        <div>
+            <select class="form-select" name="election_modifier_{{ audience_filter.id }}">
+                <option value="ELECTION_IS_ON"
+                        {% if audience_filter.election_modifier == "ELECTION_IS_ON" %}selected{% endif %}
+                >is on</option>
+                <option value="ELECTION_IS_ON_OR_AFTER" disabled
+                         {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_AFTER" %}selected{% endif %}
+                >is on or after</option>
+                <option value="ELECTION_IS_AFTER" disabled
+                         {% if audience_filter.election_modifier == "ELECTION_IS_AFTER" %}selected{% endif %}
+                >is after</option>
+                <option value="ELECTION_IS_BEFORE" disabled
+                         {% if audience_filter.election_modifier == "ELECTION_IS_BEFORE" %}selected{% endif %}
+                >is before</option>
+                <option value="ELECTION_IS_ON_OR_BEFORE" disabled
+                         {% if audience_filter.election_modifier == "ELECTION_IS_ON_OR_BEFORE" %}selected{% endif %}
+                >is on or before</option>
+            </select>
+        </div>
 
-  {# FILTER_TYPE_HAS_BEEN_CONTACTED #}
-  <div id="has-been-contacted-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_BEEN_CONTACTED' %}flex{% else %}none{% endif %};
-              justify-content: flex-start;
-              align-items: center;
-              width: 100%">
-    <div>
-      <select class="form-select"
-              name="has_been_contacted_modifier_{{ audience_filter.id }}">
-        <option value="HAS_BEEN_CONTACTED_NEVER"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_NEVER" %}selected{% endif %}>
-          never
-        </option>
-        <option value="HAS_BEEN_CONTACTED_AT_LEAST_ONCE"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_AT_LEAST_ONCE" %}selected{% endif %}>
-          at least once
-        </option>
-        <option value="HAS_BEEN_CONTACTED_LAST_DAY"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_DAY" %}selected{% endif %}>
-          in the last day
-        </option>
-        <option value="HAS_BEEN_CONTACTED_LAST_3_DAYS"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_3_DAYS" %}selected{% endif %}>
-          in the last 3 days
-        </option>
-        <option value="HAS_BEEN_CONTACTED_LAST_WEEK"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_WEEK" %}selected{% endif %}>
-          in the last week
-        </option>
-        <option value="HAS_BEEN_CONTACTED_LAST_MONTH"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_MONTH" %}selected{% endif %}>
-          in the last month
-        </option>
-        <option value="HAS_BEEN_CONTACTED_LAST_YEAR"
-                {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_YEAR" %}selected{% endif %}>
-          in the last year
-        </option>
-      </select>
+        <div class="audience-filter-dropdown" style="margin-left: 8px; width: 100%;">
+            <button type="button" 
+                    class="audience-filter-dropdown-button" 
+                    id="election-date-button-{{ audience_filter.id }}"
+                    onclick="toggleDropdown('{{ audience_filter.id }}', 'election-date-dropdown-')"
+            >
+                {% if audience_filter.google_civic_election_id and election_name_selected %}
+                    {{ election_name_selected }}
+                {% else %}
+                    -- Select election --
+                {% endif %}
+            </button>
+            <div class="audience-filter-dropdown-content" id="election-date-dropdown-{{ audience_filter.id }}">
+                <div style="clear: both;"></div>
+            {% for election in election_list %}
+                <div class="audience-filter-election-date-option">
+                    <input type="radio" 
+                           id="election-date-{{ audience_filter.id }}-{{ election.google_civic_election_id }}" 
+                           name="google_civic_election_id_{{ audience_filter.id }}" 
+                           value="{{ election.google_civic_election_id }}"
+                           style="display: none;"
+                           onchange="updateElectionDateButtonText('{{ audience_filter.id }}', '{{ election.election_name }}', '{{ election.google_civic_election_id }}')"
+                    />
+                    <label for="election-date-{{ audience_filter.id }}-{{ election.google_civic_election_id }}"
+                            id="election-date-label-{{ audience_filter.id }}-{{ election.google_civic_election_id }}" 
+                            style="cursor: pointer;
+                            font-weight: {% if audience_filter.google_civic_election_id|slugify == election.google_civic_election_id|slugify %}600{% else %}normal{% endif %};
+                            "
+                    >{{ election.election_day_text }}: {{ election.election_name }}</label>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
-  </div>
 
-  {# FILTER_TYPE_HAS_CLAIMED_POLITICIAN #}
-  <div id="has-claimed-politician-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_CLAIMED_POLITICIAN' %}flex{% else %}none{% endif %};
-              justify-content: flex-start;
-              align-items: center;
-              width: 100%">
-    <div>
-      <select class="form-select"
-              name="has_claimed_politician_modifier_{{ audience_filter.id }}">
-        <option value="HAS_CLAIMED_POLITICIAN_NEVER"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_NEVER" %}selected{% endif %}>
-          never
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE" %}selected{% endif %}>
-          at least once
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_LAST_DAY"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_DAY" %}selected{% endif %}>
-          in the last day
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_LAST_3_DAYS"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_3_DAYS" %}selected{% endif %}>
-          in the last 3 days
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_LAST_WEEK"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_WEEK" %}selected{% endif %}>
-          in the last week
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_LAST_MONTH"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_MONTH" %}selected{% endif %}>
-          in the last month
-        </option>
-        <option value="HAS_CLAIMED_POLITICIAN_LAST_YEAR"
-                {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_YEAR" %}selected{% endif %}>
-          in the last year
-        </option>
-      </select>
+{# FILTER_TYPE_EMAIL_ADDRESS #}
+    <div id="email-address-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_EMAIL_ADDRESS' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="email_address_modifier_{{ audience_filter.id }}">
+            <option value="EMAIL_ADDRESS_CONTAINS" disabled
+                    {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_CONTAINS" %}selected{% endif %}
+            >contains</option>
+            <option value="EMAIL_ADDRESS_EXISTS"
+                    {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_EXISTS" %}selected{% endif %}
+            >exists</option>
+            <option value="EMAIL_ADDRESS_IS_MISSING" disabled
+                    {% if audience_filter.email_address_modifier == "EMAIL_ADDRESS_IS_MISSING" %}selected{% endif %}
+            >is missing</option>
+        </select>
     </div>
-  </div>
 
-  {# FILTER_TYPE_WAS_SENT_CAMPAIGN #}
-  <div id="was-sent-campaign-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_WAS_SENT_CAMPAIGN' %}block{% else %}none{% endif %}">
-    <select class="form-select"
-            name="was_sent_campaign_modifier_{{ audience_filter.id }}">
-      <option value="WAS_SENT_CAMPAIGN_ANY"
-              {% if audience_filter.was_sent_campaign_modifier == "WAS_SENT_CAMPAIGN_ANY" %}selected{% endif %}>
-        any
-      </option>
-      <option value="WAS_SENT_CAMPAIGN_ALL"
-              {% if audience_filter.was_sent_campaign_modifier == "WAS_SENT_CAMPAIGN_ALL" %}selected{% endif %}>
-        all
-      </option>
-      <option value="WAS_NOT_SENT_CAMPAIGN_ANY"
-              {% if audience_filter.was_sent_campaign_modifier == "WAS_NOT_SENT_CAMPAIGN_ANY" %}selected{% endif %}>
-        none
-      </option>
-      {#            <option value="WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE"#}
-      {#                    {% if audience_filter.was_sent_campaign_modifier == "WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE" %}selected{% endif %}#}
-      {#            >not all (missed at least one)</option>#}
-    </select>
-
-    <div class="audience-filter-dropdown">
-      <button type="button"
-              class="audience-filter-dropdown-button"
-              id="was-sent-campaign-button-{{ audience_filter.id }}"
-              onclick="toggleDropdown('{{ audience_filter.id }}', 'was-sent-campaign-dropdown-')">
-        {% if was_sent_campaign_selected_string %}
-          {{ was_sent_campaign_selected_string }}
-        {% else %}
-          -- Select campaign(s) --
-        {% endif %}
-      </button>
-      <div class="audience-filter-dropdown-content"
-           id="was-sent-campaign-dropdown-{{ audience_filter.id }}">
-        <a href="javascript:void(0)"
-           class="audience-filter-clear-all-link"
-           onclick="clearAllWasSentCampaign('{{ audience_filter.id }}')">Clear all</a>
-        <div style="clear: both;"></div>
-        {% for email_campaign in campaign_list %}
-          <div class="audience-filter-audience-type-option">
-            <input type="checkbox"
-                   id="was-sent-campaign-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   name="was_sent_campaign_{{ audience_filter.id }}[]"
-                   value="{{ email_campaign.id }}"
-                   {% if email_campaign.id|stringformat:"s" in was_sent_campaign_selected %}checked{% endif %}
-                   onchange="updateWasSentCampaignButtonText('{{ audience_filter.id }}')">
-            <label for="was-sent-campaign-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   id="was-sent-campaign-label-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   style="cursor: pointer;
-                          font-weight: {% if email_campaign.id|stringformat:"s" in was_sent_campaign_selected %}600{% else %}normal{% endif %}">
-              {{ email_campaign.email_campaign_name }}
-              {% if email_campaign.date_sent %}(sent){% endif %}
-            </label>
-          </div>
-        {% endfor %}
-      </div>
+{# FILTER_TYPE_HAS_BEEN_CONTACTED #}
+    <div id="has-been-contacted-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_BEEN_CONTACTED' %}flex{% else %}none{% endif %};
+                 justify-content: flex-start;
+                 align-items: center;
+                 width: 100%;"
+    >
+        <div>
+            <select class="form-select" name="has_been_contacted_modifier_{{ audience_filter.id }}">
+                <option value="HAS_BEEN_CONTACTED_NEVER"
+                        {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_NEVER" %}selected{% endif %}
+                >never</option>
+                <option value="HAS_BEEN_CONTACTED_AT_LEAST_ONCE"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_AT_LEAST_ONCE" %}selected{% endif %}
+                >at least once</option>
+                <option value="HAS_BEEN_CONTACTED_LAST_DAY"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_DAY" %}selected{% endif %}
+                >in the last day</option>
+                <option value="HAS_BEEN_CONTACTED_LAST_3_DAYS"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_3_DAYS" %}selected{% endif %}
+                >in the last 3 days</option>
+                <option value="HAS_BEEN_CONTACTED_LAST_WEEK"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_WEEK" %}selected{% endif %}
+                >in the last week</option>
+                <option value="HAS_BEEN_CONTACTED_LAST_MONTH"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_MONTH" %}selected{% endif %}
+                >in the last month</option>
+                <option value="HAS_BEEN_CONTACTED_LAST_YEAR"
+                         {% if audience_filter.has_been_contacted_modifier == "HAS_BEEN_CONTACTED_LAST_YEAR" %}selected{% endif %}
+                >in the last year</option>
+            </select>
+        </div>
     </div>
-  </div>
 
-  {# FILTER_TYPE_HAS_OPENED #}
-  <div id="has-opened-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_OPENED' %}block{% else %}none{% endif %}">
-    <select class="form-select"
-            name="has_opened_modifier_{{ audience_filter.id }}">
-      <option value="HAS_OPENED_ANY"
-              {% if audience_filter.has_opened_modifier == "HAS_OPENED_ANY" %}selected{% endif %}>any</option>
-      <option value="HAS_OPENED_ALL"
-              {% if audience_filter.has_opened_modifier == "HAS_OPENED_ALL" %}selected{% endif %}>all</option>
-      <option value="HAS_NOT_OPENED_ANY"
-              {% if audience_filter.has_opened_modifier == "HAS_NOT_OPENED_ANY" %}selected{% endif %}>none</option>
-      <option value="HAS_NOT_OPENED_AT_LEAST_ONE"
-              {% if audience_filter.has_opened_modifier == "HAS_NOT_OPENED_AT_LEAST_ONE" %}selected{% endif %}>
-        not all (missed at least one)
-      </option>
-    </select>
-
-    <div class="audience-filter-dropdown">
-      <button type="button"
-              class="audience-filter-dropdown-button"
-              id="has-opened-button-{{ audience_filter.id }}"
-              onclick="toggleDropdown('{{ audience_filter.id }}', 'has-opened-dropdown-')">
-        {% if has_opened_selected_string %}
-          {{ has_opened_selected_string }}
-        {% else %}
-          -- Select campaign(s) --
-        {% endif %}
-      </button>
-      <div class="audience-filter-dropdown-content"
-           id="has-opened-dropdown-{{ audience_filter.id }}">
-        <a href="javascript:void(0)"
-           class="audience-filter-clear-all-link"
-           onclick="clearAllHasOpened('{{ audience_filter.id }}')">Clear all</a>
-        <div style="clear: both;"></div>
-        {% for email_campaign in campaign_list %}
-          <div class="audience-filter-audience-type-option">
-            <input type="checkbox"
-                   id="has-opened-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   name="has_opened_{{ audience_filter.id }}[]"
-                   value="{{ email_campaign.id }}"
-                   {% if email_campaign.id|stringformat:"s" in has_opened_selected %}checked{% endif %}
-                   onchange="updateHasOpenedButtonText('{{ audience_filter.id }}')">
-            <label for="has-opened-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   id="has-opened-label-{{ audience_filter.id }}-{{ email_campaign.id }}"
-                   style="cursor: pointer;
-                          font-weight: {% if email_campaign.id|stringformat:"s" in has_opened_selected %}600{% else %}normal{% endif %}">
-              {{ email_campaign.email_campaign_name }}
-              {% if email_campaign.date_sent %}(sent){% endif %}
-            </label>
-          </div>
-        {% endfor %}
-      </div>
+{# FILTER_TYPE_HAS_CLAIMED_POLITICIAN #}
+    <div id="has-claimed-politician-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_CLAIMED_POLITICIAN' %}flex{% else %}none{% endif %};
+                 justify-content: flex-start;
+                 align-items: center;
+                 width: 100%;"
+    >
+        <div>
+            <select class="form-select" name="has_claimed_politician_modifier_{{ audience_filter.id }}">
+                <option value="HAS_CLAIMED_POLITICIAN_NEVER"
+                        {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_NEVER" %}selected{% endif %}
+                >never</option>
+                <option value="HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE" %}selected{% endif %}
+                >at least once</option>
+                <option value="HAS_CLAIMED_POLITICIAN_LAST_DAY"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_DAY" %}selected{% endif %}
+                >in the last day</option>
+                <option value="HAS_CLAIMED_POLITICIAN_LAST_3_DAYS"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_3_DAYS" %}selected{% endif %}
+                >in the last 3 days</option>
+                <option value="HAS_CLAIMED_POLITICIAN_LAST_WEEK"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_WEEK" %}selected{% endif %}
+                >in the last week</option>
+                <option value="HAS_CLAIMED_POLITICIAN_LAST_MONTH"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_MONTH" %}selected{% endif %}
+                >in the last month</option>
+                <option value="HAS_CLAIMED_POLITICIAN_LAST_YEAR"
+                         {% if audience_filter.has_claimed_politician_modifier == "HAS_CLAIMED_POLITICIAN_LAST_YEAR" %}selected{% endif %}
+                >in the last year</option>
+            </select>
+        </div>
     </div>
-  </div>
 
-  {# FILTER_TYPE_HAS_SIGNED_IN #}
-  <div id="has-signed-in-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_SIGNED_IN' %}flex{% else %}none{% endif %};
-              justify-content: flex-start;
-              align-items: center;
-              width: 100%">
-    <div>
-      <select class="form-select"
-              name="has_signed_in_modifier_{{ audience_filter.id }}">
-        <option value="HAS_SIGNED_IN_NEVER"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_NEVER" %}selected{% endif %}>
-          never
-        </option>
-        <option value="HAS_SIGNED_IN_AT_LEAST_ONCE"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_AT_LEAST_ONCE" %}selected{% endif %}>
-          at least once
-        </option>
-        <option value="HAS_SIGNED_IN_LAST_DAY"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_DAY" %}selected{% endif %}>
-          in the last day
-        </option>
-        <option value="HAS_SIGNED_IN_LAST_3_DAYS"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_3_DAYS" %}selected{% endif %}>
-          in the last 3 days
-        </option>
-        <option value="HAS_SIGNED_IN_LAST_WEEK"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_WEEK" %}selected{% endif %}>
-          in the last week
-        </option>
-        <option value="HAS_SIGNED_IN_LAST_MONTH"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_MONTH" %}selected{% endif %}>
-          in the last month
-        </option>
-        <option value="HAS_SIGNED_IN_LAST_YEAR"
-                {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_YEAR" %}selected{% endif %}>
-          in the last year
-        </option>
-      </select>
+{# FILTER_TYPE_WAS_SENT_CAMPAIGN #}
+    <div id="was-sent-campaign-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_WAS_SENT_CAMPAIGN' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="was_sent_campaign_modifier_{{ audience_filter.id }}">
+            <option value="WAS_SENT_CAMPAIGN_ANY"
+                    {% if audience_filter.was_sent_campaign_modifier == "WAS_SENT_CAMPAIGN_ANY" %}selected{% endif %}
+            >any</option>
+            <option value="WAS_SENT_CAMPAIGN_ALL"
+                    {% if audience_filter.was_sent_campaign_modifier == "WAS_SENT_CAMPAIGN_ALL" %}selected{% endif %}
+            >all</option>
+            <option value="WAS_NOT_SENT_CAMPAIGN_ANY"
+                    {% if audience_filter.was_sent_campaign_modifier == "WAS_NOT_SENT_CAMPAIGN_ANY" %}selected{% endif %}
+            >none</option>
+{#            <option value="WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE"#}
+{#                    {% if audience_filter.was_sent_campaign_modifier == "WAS_NOT_SENT_CAMPAIGN_AT_LEAST_ONE" %}selected{% endif %}#}
+{#            >not all (missed at least one)</option>#}
+        </select>
+
+        <div class="audience-filter-dropdown">
+            <button type="button" 
+                    class="audience-filter-dropdown-button" 
+                    id="was-sent-campaign-button-{{ audience_filter.id }}"
+                    onclick="toggleDropdown('{{ audience_filter.id }}', 'was-sent-campaign-dropdown-')">
+                {% if was_sent_campaign_selected_string %}
+                    {{ was_sent_campaign_selected_string }}
+                {% else %}
+                -- Select campaign(s) --
+                {% endif %}
+            </button>
+            <div class="audience-filter-dropdown-content" id="was-sent-campaign-dropdown-{{ audience_filter.id }}">
+                <a href="javascript:void(0)" 
+                   class="audience-filter-clear-all-link" 
+                   onclick="clearAllWasSentCampaign('{{ audience_filter.id }}')">
+                    Clear all
+                </a>
+                <div style="clear: both;"></div>
+            {% for email_campaign in campaign_list %}
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="was-sent-campaign-{{ audience_filter.id }}-{{ email_campaign.id }}" 
+                           name="was_sent_campaign_{{ audience_filter.id }}[]" 
+                           value="{{ email_campaign.id }}"
+                           {% if email_campaign.id|stringformat:"s" in was_sent_campaign_selected %}checked{% endif %}
+                           onchange="updateWasSentCampaignButtonText('{{ audience_filter.id }}')">
+                    <label for="was-sent-campaign-{{ audience_filter.id }}-{{ email_campaign.id }}"
+                            id="was-sent-campaign-label-{{ audience_filter.id }}-{{ email_campaign.id }}" 
+                            style="cursor: pointer;
+                            font-weight: {% if email_campaign.id|stringformat:"s" in was_sent_campaign_selected %}600{% else %}normal{% endif %};
+                            "
+                    >
+                        {{ email_campaign.email_campaign_name }}
+                    {% if email_campaign.date_sent %}
+                        (sent)
+                    {% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
-  </div>
 
-  {# FILTER_TYPE_PHONE_NUMBER #}
-  <div id="phone-number-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_PHONE_NUMBER' %}block{% else %}none{% endif %}">
-    <select class="form-select"
-            name="phone_number_modifier_{{ audience_filter.id }}">
-      <option value="PHONE_NUMBER_EXISTS"
-              {% if audience_filter.phone_number_modifier == "PHONE_NUMBER_EXISTS" %}selected{% endif %}>
-        exists
-      </option>
-      <option value="PHONE_NUMBER_IS_MISSING"
-              {% if audience_filter.phone_number_modifier == "PHONE_NUMBER_IS_MISSING" %}selected{% endif %}>
-        is missing
-      </option>
-    </select>
-  </div>
+{# FILTER_TYPE_HAS_OPENED #}
+    <div id="has-opened-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_OPENED' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="has_opened_modifier_{{ audience_filter.id }}">
+            <option value="HAS_OPENED_ANY"
+                    {% if audience_filter.has_opened_modifier == "HAS_OPENED_ANY" %}selected{% endif %}
+            >any</option>
+            <option value="HAS_OPENED_ALL"
+                    {% if audience_filter.has_opened_modifier == "HAS_OPENED_ALL" %}selected{% endif %}
+            >all</option>
+            <option value="HAS_NOT_OPENED_ANY"
+                    {% if audience_filter.has_opened_modifier == "HAS_NOT_OPENED_ANY" %}selected{% endif %}
+            >none</option>
+            <option value="HAS_NOT_OPENED_AT_LEAST_ONE"
+                    {% if audience_filter.has_opened_modifier == "HAS_NOT_OPENED_AT_LEAST_ONE" %}selected{% endif %}
+            >not all (missed at least one)</option>
+        </select>
 
-  {# FILTER_TYPE_POLITICAL_PARTY #}
-
-  {# FILTER_TYPE_STATE_CODE #}
-  <div id="state-code-options-{{ audience_filter.id }}"
-       style="margin-left: 8px;
-              display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_STATE_CODE' %}block{% else %}none{% endif %}">
-    <select class="form-select" name="state_modifier_{{ audience_filter.id }}">
-      <option value="STATE_IS"
-              {% if audience_filter.state_modifier == "STATE_IS" %}selected{% endif %}>is</option>
-      <option value="STATE_IS_NOT"
-              {% if audience_filter.state_modifier == "STATE_IS_NOT" %}selected{% endif %}>is not</option>
-    </select>
-
-    <div class="audience-filter-dropdown">
-      <button type="button"
-              class="audience-filter-dropdown-button"
-              id="state-code-button-{{ audience_filter.id }}"
-              onclick="toggleDropdown('{{ audience_filter.id }}', 'state-code-dropdown-')">
-        {% if state_codes_selected_string %}
-          {{ state_codes_selected_string }}
-        {% else %}
-          -- Select state(s) --
-        {% endif %}
-      </button>
-      <div class="audience-filter-dropdown-content"
-           id="state-code-dropdown-{{ audience_filter.id }}">
-        <a href="javascript:void(0)"
-           class="audience-filter-clear-all-link"
-           onclick="clearAllStateCodes('{{ audience_filter.id }}')">Clear all</a>
-        <div style="clear: both;"></div>
-        {% for state_code, state_name in state_code_map.items %}
-          <div class="audience-filter-audience-type-option">
-            <input type="checkbox"
-                   id="state-code-{{ audience_filter.id }}-{{ state_code }}"
-                   name="state_code_{{ audience_filter.id }}[]"
-                   value="{{ state_code }}"
-                   {% if state_code in state_codes_selected %}checked{% endif %}
-                   onchange="updateStateCodeButtonText('{{ audience_filter.id }}')">
-            <label for="state-code-{{ audience_filter.id }}-{{ state_code }}"
-                   id="state-code-label-{{ audience_filter.id }}-{{ state_code }}"
-                   style="cursor: pointer;
-                          font-weight: {% if state_code in state_codes_selected %}600{% else %}normal{% endif %}">
-              {{ state_code }} - {{ state_name }}
-            </label>
-          </div>
-        {% endfor %}
-      </div>
+        <div class="audience-filter-dropdown">
+            <button type="button" 
+                    class="audience-filter-dropdown-button" 
+                    id="has-opened-button-{{ audience_filter.id }}"
+                    onclick="toggleDropdown('{{ audience_filter.id }}', 'has-opened-dropdown-')">
+                {% if has_opened_selected_string %}
+                    {{ has_opened_selected_string }}
+                {% else %}
+                -- Select campaign(s) --
+                {% endif %}
+            </button>
+            <div class="audience-filter-dropdown-content" id="has-opened-dropdown-{{ audience_filter.id }}">
+                <a href="javascript:void(0)" 
+                   class="audience-filter-clear-all-link" 
+                   onclick="clearAllHasOpened('{{ audience_filter.id }}')">
+                    Clear all
+                </a>
+                <div style="clear: both;"></div>
+            {% for email_campaign in campaign_list %}
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="has-opened-{{ audience_filter.id }}-{{ email_campaign.id }}" 
+                           name="has_opened_{{ audience_filter.id }}[]" 
+                           value="{{ email_campaign.id }}"
+                           {% if email_campaign.id|stringformat:"s" in has_opened_selected %}checked{% endif %}
+                           onchange="updateHasOpenedButtonText('{{ audience_filter.id }}')">
+                    <label for="has-opened-{{ audience_filter.id }}-{{ email_campaign.id }}"
+                            id="has-opened-label-{{ audience_filter.id }}-{{ email_campaign.id }}" 
+                            style="cursor: pointer;
+                            font-weight: {% if email_campaign.id|stringformat:"s" in has_opened_selected %}600{% else %}normal{% endif %};
+                            "
+                    >
+                        {{ email_campaign.email_campaign_name }}
+                    {% if email_campaign.date_sent %}
+                        (sent)
+                    {% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
-  </div>
+
+{# FILTER_TYPE_HAS_SIGNED_IN #}
+    <div id="has-signed-in-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_HAS_SIGNED_IN' %}flex{% else %}none{% endif %};
+                 justify-content: flex-start;
+                 align-items: center;
+                 width: 100%;"
+    >
+        <div>
+            <select class="form-select" name="has_signed_in_modifier_{{ audience_filter.id }}">
+                <option value="HAS_SIGNED_IN_NEVER"
+                        {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_NEVER" %}selected{% endif %}
+                >never</option>
+                <option value="HAS_SIGNED_IN_AT_LEAST_ONCE"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_AT_LEAST_ONCE" %}selected{% endif %}
+                >at least once</option>
+                <option value="HAS_SIGNED_IN_LAST_DAY"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_DAY" %}selected{% endif %}
+                >in the last day</option>
+                <option value="HAS_SIGNED_IN_LAST_3_DAYS"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_3_DAYS" %}selected{% endif %}
+                >in the last 3 days</option>
+                <option value="HAS_SIGNED_IN_LAST_WEEK"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_WEEK" %}selected{% endif %}
+                >in the last week</option>
+                <option value="HAS_SIGNED_IN_LAST_MONTH"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_MONTH" %}selected{% endif %}
+                >in the last month</option>
+                <option value="HAS_SIGNED_IN_LAST_YEAR"
+                         {% if audience_filter.has_signed_in_modifier == "HAS_SIGNED_IN_LAST_YEAR" %}selected{% endif %}
+                >in the last year</option>
+            </select>
+        </div>
+    </div>
+
+{# FILTER_TYPE_PHONE_NUMBER #}
+    <div id="phone-number-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_PHONE_NUMBER' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="phone_number_modifier_{{ audience_filter.id }}">
+            <option value="PHONE_NUMBER_EXISTS"
+                    {% if audience_filter.phone_number_modifier == "PHONE_NUMBER_EXISTS" %}selected{% endif %}
+            >exists</option>
+            <option value="PHONE_NUMBER_IS_MISSING"
+                    {% if audience_filter.phone_number_modifier == "PHONE_NUMBER_IS_MISSING" %}selected{% endif %}
+            >is missing</option>
+        </select>
+    </div>
+
+{# FILTER_TYPE_POLITICAL_PARTY #}
+
+{# FILTER_TYPE_STATE_CODE #}
+    <div id="state-code-options-{{ audience_filter.id }}"
+         style="margin-left: 8px;
+                 display: {% if audience_filter.audience_filter_type == 'FILTER_TYPE_STATE_CODE' %}block{% else %}none{% endif %};"
+    >
+        <select class="form-select" name="state_modifier_{{ audience_filter.id }}">
+            <option value="STATE_IS"
+                    {% if audience_filter.state_modifier == "STATE_IS" %}selected{% endif %}
+            >is</option>
+            <option value="STATE_IS_NOT"
+                    {% if audience_filter.state_modifier == "STATE_IS_NOT" %}selected{% endif %}
+            >is not</option>
+        </select>
+
+        <div class="audience-filter-dropdown">
+            <button type="button" 
+                    class="audience-filter-dropdown-button" 
+                    id="state-code-button-{{ audience_filter.id }}"
+                    onclick="toggleDropdown('{{ audience_filter.id }}', 'state-code-dropdown-')">
+                {% if state_codes_selected_string %}
+                    {{ state_codes_selected_string }}
+                {% else %}
+                -- Select state(s) --
+                {% endif %}
+            </button>
+            <div class="audience-filter-dropdown-content" id="state-code-dropdown-{{ audience_filter.id }}">
+                <a href="javascript:void(0)" 
+                   class="audience-filter-clear-all-link" 
+                   onclick="clearAllStateCodes('{{ audience_filter.id }}')">
+                    Clear all
+                </a>
+                <div style="clear: both;"></div>
+            {% for state_code, state_name in state_code_map.items %}
+                <div class="audience-filter-audience-type-option">
+                    <input type="checkbox" 
+                           id="state-code-{{ audience_filter.id }}-{{ state_code }}" 
+                           name="state_code_{{ audience_filter.id }}[]" 
+                           value="{{ state_code }}"
+                           {% if state_code in state_codes_selected %}checked{% endif %}
+                           onchange="updateStateCodeButtonText('{{ audience_filter.id }}')">
+                    <label for="state-code-{{ audience_filter.id }}-{{ state_code }}"
+                            id="state-code-label-{{ audience_filter.id }}-{{ state_code }}" 
+                            style="cursor: pointer;
+                            font-weight: {% if state_code in state_codes_selected %}600{% else %}normal{% endif %};
+                            "
+                    >{{ state_code }} - {{ state_name }}</label>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
 
 </div>
+

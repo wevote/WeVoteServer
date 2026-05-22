@@ -91,12 +91,16 @@ def change_tracking(
         if positive_value_exists(existing_value) else ''
     if positive_value_exists(new_value) and \
             incoming_value_lower_case != existing_value_lower_case:
-        change_description += "ADDED: " + changes_found_key_name + " " \
+        change_description += "ADDED [" + changes_found_key_name + "]: " \
                               + str(new_value) + " "
         change_description_changed = True
         changes_found_dict[changes_found_key_base + '_added'] = True
+        if positive_value_exists(existing_value):
+            change_description += "REPLACED [" + changes_found_key_name + "]: " \
+                                  + str(existing_value) + " "
+            changes_found_dict[changes_found_key_base + '_removed'] = True
     elif incoming_value_lower_case != existing_value_lower_case:
-        change_description += "REMOVED: " + changes_found_key_name + " " \
+        change_description += "CLEARED [" + changes_found_key_name + "]: " \
                               + str(existing_value) + " "
         change_description_changed = True
         changes_found_dict[changes_found_key_base + '_removed'] = True

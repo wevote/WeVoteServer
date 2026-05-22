@@ -55,6 +55,7 @@ from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS
     VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, VoterDeviceLinkManager, VoterManager, voter_has_authority
 from voter_guide.models import VoterGuide
+from wevote_functions.create_trigram_index import create_trigram_index
 from wevote_functions.functions import convert_to_int, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, \
     get_voter_api_device_id, get_voter_device_id, list_intersection, normalize_bluesky_handle, normalize_threads_handle, normalize_tiktok_url, \
@@ -1363,17 +1364,25 @@ def candidate_list_view(request):
         }
         performance_list.append(performance_snapshot)
 
-    if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
+    if positive_value_exists(google_civic_election_id) and \
+        positive_value_exists(state_code) and \
+        election and \
+        positive_value_exists(election.election_day_text):
         from import_export_vote_usa.controllers import VOTE_USA_API_KEY, VOTE_USA_CANDIDATE_QUERY_URL
         vote_usa_candidates_for_this_state = \
             VOTE_USA_CANDIDATE_QUERY_URL + \
             "?accessKey={access_key}&electionDay={election_day}&state={state_code}".format(
                 access_key=VOTE_USA_API_KEY,
-                election_day='2022-11-08',
+                election_day=election.election_day_text,
                 state_code=state_code,
             )
     else:
         vote_usa_candidates_for_this_state = ''
+        if positive_value_exists(google_civic_election_id) and election and not positive_value_exists(election.election_day_text):
+            logger.error(
+                "Election day missing for election_id: %s",
+                google_civic_election_id
+        )
 
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
@@ -1422,7 +1431,6 @@ def candidate_list_view(request):
         'vote_usa_candidates_for_this_state':       vote_usa_candidates_for_this_state,
         'web_app_root_url':                         web_app_root_url,
         'wikipedia_urls_without_picture_urls':      wikipedia_urls_without_picture_urls,
-
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 
@@ -2105,6 +2113,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     state_code = request.GET.get('state_code', "")
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
     show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
+    use_trigram_match = positive_value_exists(request.GET.get('use_trigram_match', False))
     withdrawal_date = request.GET.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.GET.get('withdrawn_from_election', False))
     do_not_display_on_ballot = positive_value_exists(request.GET.get('do_not_display_on_ballot', False))
@@ -2346,7 +2355,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         from candidate.controllers import find_possible_duplicate_candidates_to_merge_with_this_candidate
         t0 = time()
         related_candidate_list = \
-            find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=candidate_on_stage)
+            find_possible_duplicate_candidates_to_merge_with_this_candidate(
+                candidate=candidate_on_stage,
+                use_trigram_match=use_trigram_match)
         t1 = time()
 
         performance_snapshot = {
@@ -2361,6 +2372,12 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         queryset = queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
+        if positive_value_exists(candidate_on_stage.we_vote_hosted_profile_image_url_large):
+            if candidate_on_stage.profile_image_background_color_needed is not False:
+                candidate_on_stage.profile_image_background_color = generate_background(candidate_on_stage)
+                candidate_on_stage.profile_image_background_color_needed = False
+                candidate_on_stage.save()
+                messages.add_message(request, messages.INFO, "Background color generated")
         t1 = time()
 
         performance_snapshot = {
@@ -2506,6 +2523,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'performance_process_dict':         performance_process_dict,
             'rating_list':                      rating_list,
             'related_candidate_list':           related_candidate_list,
+            'use_trigram_match':                use_trigram_match,
             'state_code':                       state_code,
             'state_code_dict':              
             {
@@ -2777,7 +2795,7 @@ def candidate_edit_process_view(request):
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
-    regenerate_color = request.POST.get('regenerate_color', False)
+    regenerate_color = positive_value_exists(request.POST.get('regenerate_color', False))
     reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
@@ -2891,7 +2909,7 @@ def candidate_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Deleted Candidate-to-Office Link.')
             # Now give volunteer credit
             changes_found_dict['is_link_to_office_removed'] = True
-            change_description += "REMOVED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
+            change_description += "CLEARED [Link to Office]: " + candidate_to_office_link.contest_office_we_vote_id + " "
             change_description_changed = True
     t1 = time()
     performance_snapshot = {
@@ -3333,6 +3351,7 @@ def candidate_edit_process_view(request):
                         candidate_on_stage.we_vote_hosted_profile_image_url_large = None
                         candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
                         candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
+                        candidate_on_stage.profile_image_background_color_needed = True
                         results = organize_object_photo_fields_based_on_image_type_currently_active(
                             object_with_photo_fields=candidate_on_stage)
                         if results['success']:
@@ -3491,10 +3510,8 @@ def candidate_edit_process_view(request):
             elif profile_image_background_color is not False:
                 if profile_image_background_color == '':
                     candidate_on_stage.profile_image_background_color = None
-                    candidate_on_stage.profile_image_background_color_needed = False
                 elif validate_hex(profile_image_background_color):
                     candidate_on_stage.profile_image_background_color = profile_image_background_color
-                    candidate_on_stage.profile_image_background_color_needed = False
                 else:
                     messages.add_message(request, messages.ERROR,
                                          'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
@@ -3642,6 +3659,7 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.we_vote_hosted_profile_image_url_large = None
                     candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
                     candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
+                    candidate_on_stage.profile_image_background_color_needed = True
             if profile_image_type_currently_active is not False:
                 results = organize_object_photo_fields_based_on_image_type_currently_active(
                     object_with_photo_fields=candidate_on_stage,
@@ -3650,9 +3668,7 @@ def candidate_edit_process_view(request):
                 if results['success']:
                     candidate_on_stage = results['object_with_photo_fields']
                     if results['profile_image_default_updated']:
-                        # regenerate_color = True
-                        candidate_on_stage.profile_image_background_color = generate_background(candidate_on_stage)
-                        candidate_on_stage.profile_image_background_color_needed = False
+                        candidate_on_stage.profile_image_background_color_needed = True
                     if positive_value_exists(results['save_changes']):
                         changes_found_dict['is_photo_added'] = True
 
@@ -5701,3 +5717,46 @@ def update_profile_image_background_color_view_for_candidates(request):
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=())
                                 + "?show_this_year_of_candidates=" + str(candidate_year)
                                 + "&state_code=" + str(state_code))
+
+
+@login_required
+def create_trigram_gist_idx_view(request):
+    """
+    Create a trigram index on the CandidateCampaign table to speed up searches.
+    """
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status_message = None
+    status_type = None
+    indexes_created = []
+    indexes_already_existed = []
+
+    try:
+        # In the future, we might want to allow the user to specify the model and fields
+        if request.method == "POST":
+            # field value coming from form input
+            field_name = request.POST.get("index_field")
+            model = CandidateCampaign
+            fields = [field_name] if field_name else []
+
+            if not fields:
+                raise Exception("No field provided for index creation.")
+            results = create_trigram_index(model, fields)
+        
+            status_message = results['status']
+            status_type = results.get('status_level', 'error' if not results['success'] else 'success')
+            indexes_created = results.get('indexes_created', [])
+            indexes_already_existed = results.get('indexes_already_existed', [])
+    except Exception as e:
+        status_message = f"Failed to create trigram index: {e}"
+        status_type = "error"
+
+    template_variables = {
+        'status_message': status_message,
+        'status_type': status_type,
+        'indexes_created': indexes_created,
+        'indexes_already_existed': indexes_already_existed,
+    }
+    return render(request, 'candidate/create_trigram_gist_idx.html', template_variables)

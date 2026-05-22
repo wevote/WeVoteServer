@@ -18,6 +18,7 @@ from import_export_google_civic.controllers import \
 from measure.models import ContestMeasureListManager, ContestMeasureManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
+from politician.models import Politician
 import pytz
 from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
@@ -2322,6 +2323,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                 ballot_item_display_name = contest_office.office_name
                 office_id = contest_office.id
                 office_we_vote_id = contest_office.we_vote_id
+                primary_party = contest_office.primary_party
                 race_office_level = contest_office.ballotpedia_race_office_level
                 state_code = contest_office.state_code
                 if positive_value_exists(state_code):
@@ -2409,6 +2411,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                         'google_civic_election_id':     google_civic_election_id,
                         # 'id':                           office_id,
                         'kind_of_ballot_item':          kind_of_ballot_item,
+                        'primary_party':                primary_party,
                         'race_office_level':            race_office_level,
                         'state_code':                   state_code_lower_case,
                         'we_vote_id':                   office_we_vote_id,
@@ -2859,6 +2862,7 @@ def generate_ballot_item_list_from_object_list(
         google_civic_election_id='',
         voter_device_id=''):
     ballot_items_to_display = []
+    politician_dict = {}
     results = {}
     status = ''
     success = True
@@ -2883,6 +2887,30 @@ def generate_ballot_item_list_from_object_list(
             measure_list_objects = results['measure_list_objects']
             for one_measure in measure_list_objects:
                 measure_results_dict[one_measure.we_vote_id] = one_measure
+
+    # Retrieve all politicians needed below with a single query
+    politician_we_vote_id_list = []
+    for ballot_item in ballot_item_object_list:
+        if positive_value_exists(ballot_item.contest_office_we_vote_id):
+            try:
+                results = candidate_list_object.retrieve_all_candidates_for_office(
+                    office_we_vote_id=ballot_item.contest_office_we_vote_id, read_only=True)
+                if results['candidate_list_found']:
+                    candidate_list = results['candidate_list']
+                    for one_candidate in candidate_list:
+                        if positive_value_exists(one_candidate.politician_we_vote_id):
+                            politician_we_vote_id_list.append(one_candidate.politician_we_vote_id)
+            except Exception as e:
+                status += "FAILED_TO_GET_CANDIDATES_SO_WE_CAN_RETRIEVE_POLITICIAN_LIST_IN_ADVANCE: " + str(e) + " "
+
+    if len(politician_we_vote_id_list) > 0:
+        try:
+            queryset = Politician.objects.using('readonly').filter(we_vote_id__in=politician_we_vote_id_list)
+            politician_list = list(queryset)
+            for one_politician in politician_list:
+                politician_dict[one_politician.we_vote_id] = one_politician
+        except Exception as e:
+            status += "FAILED_TO_RETRIEVE_POLITICIAN_LIST_IN_ADVANCE: " + str(e) + " "
 
     # Now prepare the full list for json result
     status += "BALLOT_ITEM_LIST_FOUND "
@@ -2915,17 +2943,25 @@ def generate_ballot_item_list_from_object_list(
                 candidates_to_display = []
                 if results['candidate_list_found']:
                     candidate_list = results['candidate_list']
-                    for candidate in candidate_list:
-                        candidate_dict_results = generate_candidate_dict_from_candidate_object(
-                            candidate=candidate,
-                            google_civic_election_id=google_civic_election_id,
-                            office_id=office_id,
-                            office_name=office_name,
-                            office_we_vote_id=office_we_vote_id,
-                        )
-                        if candidate_dict_results['success']:
-                            candidate_dict = candidate_dict_results['candidate_dict']
-                            candidates_to_display.append(candidate_dict)
+                    # update candidate support and oppose counts in bulk
+                    from candidate.controllers import refresh_candidate_supporters_count_from_politician
+                    refresh_candidate_results = \
+                        refresh_candidate_supporters_count_from_politician(candidate_list, politician_dict)
+                    if refresh_candidate_results['success']:
+                        candidate_list = refresh_candidate_results['candidate_list_updated']
+                        for candidate in candidate_list:
+                            candidate_dict_results = generate_candidate_dict_from_candidate_object(
+                                candidate=candidate,
+                                google_civic_election_id=google_civic_election_id,
+                                office_id=office_id,
+                                office_name=office_name,
+                                office_we_vote_id=office_we_vote_id,
+                            )
+                            if candidate_dict_results['success']:
+                                candidate_dict = candidate_dict_results['candidate_dict']
+                                candidates_to_display.append(candidate_dict)
+                    else:
+                        status += refresh_candidate_results['status']
             except Exception as e:
                 status += 'FAILED retrieve_all_candidates_for_office. ' + str(e) + " "
                 candidates_to_display = []

@@ -1,4 +1,4 @@
-# README for Installation with Docker
+# README for Installation with Docker with SSL
 [Back to root README](../README.md)
 
 Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
@@ -14,16 +14,14 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
   cd WeVoteServer
   ```
 
-### 2. Create an environment file called `.env` to provide required settings. Example:
+### 2. Create an environment file called `.env` to provide required settings. Suggested initial values:
 
   ```
-  DATABASE_PASSWORD=MyDBpassword
-  DJANGO_SUPERUSER_EMAIL=email@test.com
-  DJANGO_SUPERUSER_PASSWORD=MyAdminPassword
-
-  # You can optionally override the default values for database user and name
-  # DATABASE_USER=postgres
-  # DATABASE_NAME=wevoteserverdb
+DATABASE_PASSWORD=admin
+DJANGO_SUPERUSER_EMAIL=anyone@wevoteeducation.org
+DJANGO_SUPERUSER_PASSWORD=admin
+DATABASE_USER=postgres
+DATABASE_NAME=wevoteserverdb
   ```
 
 ### 3. Create Docker network
@@ -55,7 +53,7 @@ Once the containers are running, you can now access the API at [http://localhost
 
 ### 5. Remove containers and data
 
-To stop and remove all containers and saved data (including database data), run the following command. Only do this if you want to completely remove your development environment or start over from scratch.
+To stop and remove all containers and saved data (including all of your database data), run the following command. Only do this if you want to completely remove your development environment or start over from scratch.  You may need to do this if you manually dropped tables or the database, because Docker will not recreate parts, only the whole.
 ```
 docker compose down -v
 ```
@@ -64,28 +62,12 @@ You can also remove the wevote docker network:
 docker network rm wevote
 ```
 
-## PgAdmin
-#### 1. Access PgAdmin Container
-Go to `localhost:8080` in your local web browser to access the `PgAdmin` container UI.
-### 2. Register New Server
-1. Select `Add New Server` on the homepage.  
-<img width="692" height="135" alt="582966431-c6ad5816-26dc-4b5d-a745-c2bbcb0cefbc" src="https://github.com/user-attachments/assets/c0772396-ac83-4537-9a10-8bcfcf5a7c7c" />
-
-3. Server name is `environment_variables.json` value for `DATABASE_NAME`
-<img width="696" height="547" alt="582966836-f78e03dc-4a91-4a70-a0c8-740fd57a9bbd" src="https://github.com/user-attachments/assets/579b6665-60c2-4fa3-b727-3b885e95366a" />
-
-5. Set up server connection
-* Host name/address: `db` _(or the contianer name set here: https://github.com/mjacquot1/WeVoteServer/blob/61ccbd45ba9c87960269ea65dc0e8eeca6f0bf03/compose.yaml#L4_
-* Port: `5432` 
-* Maintenance database: `postgres`
-* Username: `environment_variables.json` value for `DATABASE_USER`
-* Password: Whatever password was used when setup up your postgres superuser as in these instructions: https://github.com/mjacquot1/WeVoteServer/blob/develop/docs/README_API_INSTALL_POSTGRES_MAC.md
-<img width="704" height="560" alt="image" src="https://github.com/user-attachments/assets/b94a3349-2bb7-40c4-b38c-994223dd93c7" />
-
-_If necessary, run `ALTER USER  postgres  WITH PASSWORD '<your-password-here>';` for a password change_
-
-6. Click Save
-
+### 6. Rebuild all the layers -- needed if you work on the entrypoint, compose.yaml, or Dockerfile.dev
+The changes you makein entrypoint, compose.yaml, Dockerfile.dev, requirements.txt, .env, environment_variables.json
+will not go into effect in your containers unless you rebuild all the layers with the following command:
+```
+docker compose build --no-cache
+```
 
 ## Resources
 
@@ -98,5 +80,8 @@ _If necessary, run `ALTER USER  postgres  WITH PASSWORD '<your-password-here>';`
 2. PostgreSQL
 
     - [Official Docker Image](https://hub.docker.com/_/postgres)
+
+3. Pgadmin4
+2026-05-14 21:55:46,305: ERROR  pgadmin:        400 Bad Request: The CSRF session token is missing.
 
 [Back to root README](../README.md)

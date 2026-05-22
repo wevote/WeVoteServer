@@ -1,7 +1,7 @@
 # email_outbound/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import logging
 from datetime import date, timedelta
 from django.apps import apps
 from django.db import IntegrityError, models
@@ -11,6 +11,7 @@ from wevote_functions.functions import convert_to_int, extract_email_addresses_f
     positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_email_integer, fetch_site_unique_id_prefix
 
+logger = logging.getLogger(__name__)
 
 FILTER_TYPE_AUDIENCE_TYPE = 'FILTER_TYPE_AUDIENCE_TYPE'
 # We are not implementing "Election Type" at this time
@@ -37,12 +38,14 @@ AUDIENCE_FILTER_TYPE_CHOICES = (
     (FILTER_TYPE_STATE_CODE, 'State code'),
     (FILTER_TYPE_WAS_SENT_CAMPAIGN, 'Was sent campaign'),
 )
+# FILTER_TYPE_AUDIENCE_TYPE
 AUDIENCE_TYPE_IS = 'AUDIENCE_TYPE_IS'
 AUDIENCE_TYPE_IS_NOT = 'AUDIENCE_TYPE_IS_NOT'
 AUDIENCE_TYPE_MODIFIER_CHOICES = (
     (AUDIENCE_TYPE_IS, 'is'),
     (AUDIENCE_TYPE_IS_NOT, 'is not'),
 )
+# FILTER_TYPE_ELECTION_DATE
 ELECTION_IS_AFTER = 'ELECTION_IS_AFTER'
 ELECTION_IS_BEFORE = 'ELECTION_IS_BEFORE'
 ELECTION_IS_ON = 'ELECTION_IS_ON'
@@ -55,6 +58,7 @@ ELECTION_MODIFIER_CHOICES = (
     (ELECTION_IS_ON_OR_AFTER, 'is on or after'),
     (ELECTION_IS_ON_OR_BEFORE, 'is on or before'),
 )
+# FILTER_TYPE_EMAIL_ADDRESS
 EMAIL_ADDRESS_CONTAINS = 'EMAIL_ADDRESS_CONTAINS'
 EMAIL_ADDRESS_EXISTS = 'EMAIL_ADDRESS_EXISTS'
 EMAIL_ADDRESS_IS_MISSING = 'EMAIL_ADDRESS_IS_MISSING'
@@ -63,6 +67,7 @@ EMAIL_ADDRESS_MODIFIER_CHOICES = (
     (EMAIL_ADDRESS_EXISTS, 'exists'),
     (EMAIL_ADDRESS_IS_MISSING, 'is missing'),
 )
+# FILTER_TYPE_HAS_BEEN_CONTACTED
 HAS_BEEN_CONTACTED_AT_LEAST_ONCE = 'HAS_BEEN_CONTACTED_AT_LEAST_ONCE'
 HAS_BEEN_CONTACTED_LAST_DAY = 'HAS_BEEN_CONTACTED_LAST_DAY'
 HAS_BEEN_CONTACTED_LAST_3_DAYS = 'HAS_BEEN_CONTACTED_LAST_3_DAYS'
@@ -79,6 +84,7 @@ HAS_BEEN_CONTACTED_MODIFIER_CHOICES = (
     (HAS_BEEN_CONTACTED_LAST_YEAR, 'in last year'),
     (HAS_BEEN_CONTACTED_NEVER, 'never'),
 )
+# FILTER_TYPE_HAS_CLAIMED_POLITICIAN
 HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE = 'HAS_CLAIMED_POLITICIAN_AT_LEAST_ONCE'
 HAS_CLAIMED_POLITICIAN_LAST_DAY = 'HAS_CLAIMED_POLITICIAN_LAST_DAY'
 HAS_CLAIMED_POLITICIAN_LAST_3_DAYS = 'HAS_CLAIMED_POLITICIAN_LAST_3_DAYS'
@@ -95,7 +101,7 @@ HAS_CLAIMED_POLITICIAN_MODIFIER_CHOICES = (
     (HAS_CLAIMED_POLITICIAN_LAST_YEAR, 'in last year'),
     (HAS_CLAIMED_POLITICIAN_NEVER, 'never'),
 )
-# Has Opened Email Campaign filters
+# Has Opened Email Campaign filters FILTER_TYPE_HAS_OPENED
 HAS_OPENED_ANY = 'HAS_OPENED_ANY'
 HAS_OPENED_ALL = 'HAS_OPENED_ALL'
 HAS_NOT_OPENED_ANY = 'HAS_NOT_OPENED_ANY'
@@ -106,6 +112,7 @@ HAS_OPENED_MODIFIER_CHOICES = (
     (HAS_NOT_OPENED_ANY, 'none'),
     (HAS_NOT_OPENED_AT_LEAST_ONE, 'not all (missed at least one)'),
 )
+# FILTER_TYPE_HAS_SIGNED_IN
 HAS_SIGNED_IN_AT_LEAST_ONCE = 'HAS_SIGNED_IN_AT_LEAST_ONCE'
 HAS_SIGNED_IN_LAST_DAY = 'HAS_SIGNED_IN_LAST_DAY'
 HAS_SIGNED_IN_LAST_3_DAYS = 'HAS_SIGNED_IN_LAST_3_DAYS'
@@ -122,7 +129,7 @@ HAS_SIGNED_IN_MODIFIER_CHOICES = (
     (HAS_SIGNED_IN_LAST_YEAR, 'in last year'),
     (HAS_SIGNED_IN_NEVER, 'never'),
 )
-# Was Sent Campaign filters
+# Was Sent Campaign filters FILTER_TYPE_WAS_SENT_CAMPAIGN
 WAS_SENT_CAMPAIGN_ANY = 'WAS_SENT_CAMPAIGN_ANY'
 WAS_SENT_CAMPAIGN_ALL = 'WAS_SENT_CAMPAIGN_ALL'
 WAS_NOT_SENT_CAMPAIGN_ANY = 'WAS_NOT_SENT_CAMPAIGN_ANY'
@@ -223,7 +230,6 @@ EMAIL_PORT = get_environment_variable("EMAIL_PORT", no_exception=True)
 EMAIL_USE_TLS = get_environment_variable("EMAIL_USE_TLS", no_exception=True)
 
 EMAIL_TEMPLATE_CUSTOMIZATION_TOKENS = [
-    "[email_footer]",
     "[job_title]",
     "[my_first_name]",
     "[my_last_name]",
@@ -402,6 +408,7 @@ class EmailCampaign(models.Model):
     emails_sent = models.BooleanField(default=False)
     from_email = models.TextField(null=True, blank=True)
     from_email_name = models.CharField(db_index=True, max_length=255, null=True, unique=False)
+    include_footer = models.BooleanField(default=True)
     is_for_politician = models.BooleanField(default=False)
     is_for_staff = models.BooleanField(default=False)
     is_for_voter = models.BooleanField(default=False)

@@ -105,10 +105,10 @@ def retrieve_sql_files_from_master_server(request):
             response_headers = TokensManager.convert_headers_to_dict(fetch_data_response.headers)
             if 'token_authentication' in response_headers:
                 token_authentication = response_headers['token_authentication']
-                print(f"Token authentication: {token_authentication}")
+                # print(f"Token authentication: {token_authentication}")
                 if token_authentication['success']:
                     token_creation = response_headers['token_creation']
-                    print(f"Token creation: {token_creation}")
+                    # print(f"Token creation: {token_creation}")
                     if token_creation['success']:
                         token_headers[TokenHeaders.AUTHORIZATION.value] = f"Bearer {token_creation['token_info']['token_pk']}"
                         token_headers[TokenHeaders.TOKEN_KEY.value] = token_headers[TokenHeaders.TOKEN_NEW_KEY.value]
@@ -124,7 +124,7 @@ def retrieve_sql_files_from_master_server(request):
                   f"received at {int(time.time()-global_stats['global_t0'])} seconds")
 
             global_stats['table_name_text'] = ('<b>Loading</b>&nbsp;&nbsp;<i>' + table_name +
-                                          '</i>&nbsp;&nbsp;from s3 on the <b>local</b> server')
+                                          '</i>&nbsp;&nbsp;from local disk to the <b>local</b> server')
             # restore_one_file_to_local_server(aws_s3_file_url, 'ballot_ballotitem')
             restore_one_file_to_local_server(aws_s3_file_url, table_name)
             global_stats['step'] += 1
@@ -217,6 +217,7 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
             env['PGPASSWORD'] = db_pass
 
         table_restore_result = subprocess.run(command_list, env=env, capture_output=True, text=True)
+        # print(*command_list)
         # Any return code other than 0 is an error
         if table_restore_result.returncode != 0:
             raise RuntimeError(f"pg_restore failed: {table_restore_result.stderr}")

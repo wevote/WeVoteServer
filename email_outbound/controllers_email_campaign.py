@@ -329,6 +329,8 @@ def delete_audience_filter_chain_and_children(audience_builder, audience_filter_
 def email_campaign_send(
         email_campaign={},
         email_campaign_id=''):
+    emails_scheduled = 0
+    emails_sent = 0
     status = ""
     success = True
 
@@ -336,6 +338,8 @@ def email_campaign_send(
         status += "EMAIL_CAMPAIGN_ID_REQUIRED "
         return {
             'email_campaign': email_campaign,
+            'emails_scheduled': emails_scheduled,
+            'emails_sent': emails_sent,
             'status':   status,
             'success':  False,
         }
@@ -347,6 +351,8 @@ def email_campaign_send(
             status += "SEND_EMAIL_CAMPAIGN_NOT_FOUND "
             return {
                 'email_campaign': email_campaign,
+                'emails_scheduled': emails_scheduled,
+                'emails_sent': emails_sent,
                 'status':   status,
                 'success':  False,
             }
@@ -354,6 +360,8 @@ def email_campaign_send(
             status += f'PROBLEM_RETRIEVING_EMAIL_CAMPAIGN: {e}'
             return {
                 'email_campaign': email_campaign,
+                'emails_scheduled': emails_scheduled,
+                'emails_sent': emails_sent,
                 'status':   status,
                 'success':  False,
             }
@@ -370,10 +378,13 @@ def email_campaign_send(
             email_campaign_id=email_campaign_id)
         queryset = queryset.values_list('email_campaign_recipient_id', flat=True)
         already_scheduled_recipient_ids = list(queryset)
+        status += f'ALREADY_SCHEDULED_RECIPIENTS: {len(already_scheduled_recipient_ids)} '
     except Exception as e:
         status += f'PROBLEM_RETRIEVING_EMAIL_SCHEDULED: {e}'
         return {
             'email_campaign': email_campaign,
+            'emails_scheduled': emails_scheduled,
+            'emails_sent': emails_sent,
             'status':   status,
             'success':  False,
         }
@@ -384,29 +395,31 @@ def email_campaign_send(
         queryset = EmailCampaignRecipient.objects.filter(
             email_campaign_id=email_campaign_id)
         # Filter out recipient entries that have already been sent
-        queryset = queryset.exclude(id__in=already_scheduled_recipient_ids)
+        if len(already_scheduled_recipient_ids) > 0:
+            queryset = queryset.exclude(id__in=already_scheduled_recipient_ids)
         email_campaign_recipient_list = list(queryset)
+        status += f'EMAIL_CAMPAIGN_RECIPIENTS: {len(email_campaign_recipient_list)} '
     except Exception as e:
         status += f'PROBLEM_RETRIEVING_EMAIL_CAMPAIGN_RECIPIENT: {e}'
         return {
+            'emails_scheduled': emails_scheduled,
+            'emails_sent': emails_sent,
             'status':   status,
             'success':  False,
         }
 
-    email_manager = EmailManager()
-
-    emails_scheduled = 0
-    emails_sent = 0
     recipient_bulk_update_list = []
     recipient_bulk_update_fields = []
     recipient_email_subscription_secret_key = ''  # Temp
 
     # build attachments and email body for inline attachments
     # This process is done here to avoid reading files multiple times per recipient
-    email_body_parsed, prepared_attachments = build_prepared_campaign_attachments(body=email_body_raw, email_campaign=email_campaign)
+    email_body_parsed, prepared_attachments = build_prepared_campaign_attachments(
+        body=email_body_raw, email_campaign=email_campaign)
     for email_campaign_recipient in email_campaign_recipient_list:
         results = schedule_email_campaign_recipient(
             email_body_raw=email_body_parsed,
+            email_campaign=email_campaign,
             email_campaign_recipient=email_campaign_recipient,
             email_subject_raw=email_subject_raw,
             recipient_bulk_update_list=recipient_bulk_update_list,
@@ -421,15 +434,18 @@ def email_campaign_send(
 
         if email_scheduled_saved:
             emails_scheduled += 1
-            # Temporarily turn off sending emails when on local machine, and comment out 3 lines after  this
+            # UNCOMMENT WHEN TESTING ON LOCAL MACHINE
             # email_scheduled_sent = True  # Mock that we actually sent the email
-            # pass the prepared attachments here
+
+            # TURN OFF WHEN TESTING ON LOCAL MACHINE
+            email_manager = EmailManager()
             send_results = email_manager.send_scheduled_email(
                 email_scheduled,
                 prepared_attachments=prepared_attachments
             )
             email_scheduled_sent = send_results['email_scheduled_sent']
             status += send_results['status'] + " "
+
             if email_scheduled_sent:
                 emails_sent += 1
             else:
@@ -470,6 +486,8 @@ def email_campaign_send(
             success = False
 
     results = {
+        'emails_scheduled': emails_scheduled,
+        'emails_sent': emails_sent,
         'success':  success,
         'status':   status,
     }
@@ -745,13 +763,13 @@ def save_all_audience_filter_changes(audience_filter_dict={}, request=None):
 
 
 def schedule_email_campaign_recipient(
+        email_campaign=None,
         email_campaign_recipient=None,
         email_body_raw=None,
         email_subject_raw=None,
         recipient_bulk_update_list=[],
         recipient_bulk_update_fields=[],
         template_variables_in_json=None):
-    email_manager = EmailManager()
     status = ""
     template_variables_in_json = {}
 
@@ -765,6 +783,7 @@ def schedule_email_campaign_recipient(
 
     email_template_results = merge_email_campaign_recipient_with_template(
         email_body_raw=email_body_raw,
+        email_campaign=email_campaign,
         email_campaign_recipient=email_campaign_recipient,
         email_subject_raw=email_subject_raw,
         template_variables_in_json=template_variables_in_json)
@@ -772,6 +791,7 @@ def schedule_email_campaign_recipient(
         subject = email_template_results['subject']
         message_text = email_template_results['message_text']
         message_html = email_template_results['message_html']
+        email_manager = EmailManager()
         schedule_email_results = email_manager.schedule_email_from_email_campaign_recipient(
             email_campaign_recipient=email_campaign_recipient,
             subject=subject,
@@ -816,10 +836,10 @@ def schedule_email_campaign_recipient(
 
 def merge_email_campaign_recipient_with_template(
         email_body_raw=None,
+        email_campaign=None,
         email_campaign_recipient=None,
         email_subject_raw=None,
         template_variables_in_json={}):
-    email_manager = EmailManager()
     success = True
     status = ''
 
@@ -890,15 +910,13 @@ def merge_email_campaign_recipient_with_template(
                 f'{open_tracking_code}/" width="1" height="1" alt="" />'
             )  # WV-2447 "Open Tracking for Email Campaign System" should go here
             email_footer_html = \
-                "<br /><br />This email uses tracking to understand whether messages are opened " \
-                "so we can improve our communications. Learn more: " \
+                "<br /><br />We use open tracking to better understand engagement. Learn more: " \
                 "<a href='https://wevote.us/privacy'>Privacy Policy</a>." \
                 "{open_tracking_pixel_html}<br />".format(
                     open_tracking_pixel_html=open_tracking_pixel_html,
                 )
         else:
             email_footer_html = ""
-        token_replacements['[email_footer]'] = email_footer_html
 
         # Add link to subscription key
 
@@ -990,7 +1008,7 @@ def merge_email_campaign_recipient_with_template(
 
         # Sender name parts
 
-        # Unsubscribe link
+        # Unsubscribe link is included in email_footer_html
 
     # Override with values from template_variables_in_json if provided
     if template_variables_in_json:
@@ -1006,6 +1024,9 @@ def merge_email_campaign_recipient_with_template(
             subject = subject.replace(token, str(replacement_value))
         if token in message_html:
             message_html = message_html.replace(token, str(replacement_value))
+
+    if email_campaign.include_footer:
+        message_html += email_footer_html
 
     # Convert HTML to plain text for the text version of the email
     message_text = convert_html_to_plain_text(message_html)

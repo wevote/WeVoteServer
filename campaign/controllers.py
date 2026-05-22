@@ -1,7 +1,9 @@
 # campaign/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from django.db import transaction
 
+from politician.models import PoliticianManager
 from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, CampaignXNewsItem, CampaignXOwner, \
     CampaignXPolitician, CampaignXSupporter, CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CAMPAIGNX_UNIQUE_IDENTIFIERS, \
     FINAL_ELECTION_DATE_COOL_DOWN
@@ -482,6 +484,10 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     campaignx = results['campaignx']
     campaignx_owner_list = results['campaignx_owner_list']
     seo_friendly_path_list = results['seo_friendly_path_list']
+
+    refresh_campaignx_results = refresh_campaignx_supporters_count_from_politician_object(campaignx)
+    if not refresh_campaignx_results['success']:
+        status += refresh_campaignx_results['status']
 
     if hasattr(campaignx, 'we_vote_id'):
         # We need to know all the politicians this voter can vote for, so we can figure out
@@ -1231,6 +1237,76 @@ def refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(campaignx_w
     }
     return results
 
+
+def refresh_campaignx_supporters_count_from_politician_object(one_campaignx):
+    """
+    Pass in a CampaignX model instance to sync counts from its linked politician.
+    """
+    error_message_to_print = ''
+    status = ''
+    success = True
+    update_message = ''
+    politician_manager = PoliticianManager()
+
+    if not one_campaignx or not hasattr(one_campaignx, 'we_vote_id'):
+        return {
+            'success': False,
+            'status': 'INVALID_CAMPAIGNX_OBJECT',
+            'error_message_to_print': 'The object passed is not a valid CampaignX instance.',
+        }
+
+    try:
+        # Wrap in atomic transaction
+        with transaction.atomic():
+            if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                # Retrieve with row locking (read_only=False, for_update=True)
+                pol_results = politician_manager.retrieve_politician(
+                    politician_we_vote_id=one_campaignx.linked_politician_we_vote_id,
+                    read_only=False,
+                    for_update=True)
+
+                if pol_results['politician_found']:
+                    politician = pol_results['politician']
+                    supporters_count = politician.supporters_count
+                    opposers_count = politician.opposers_count
+
+                    changes_found = False
+                    if opposers_count != one_campaignx.opposers_count:
+                        one_campaignx.opposers_count = opposers_count
+                        changes_found = True
+                    if supporters_count != one_campaignx.supporters_count:
+                        one_campaignx.supporters_count = supporters_count
+                        changes_found = True
+
+                    if changes_found:
+                        # Save changes
+                        one_campaignx.save()
+                        update_message = "CampaignX updated from Politician counts."
+                    else:
+                        update_message = "No changes found; counts already match."
+                else:
+                    success = False
+                    status = "POLITICIAN_NOT_FOUND"
+                    error_message_to_print = "Politician not found for ID: " + str(
+                        one_campaignx.linked_politician_we_vote_id)
+            else:
+                success = False
+                status = "NO_LINKED_POLITICIAN"
+                error_message_to_print = "CampaignX {id} has no linked_politician_we_vote_id.".format(
+                    id=one_campaignx.we_vote_id)
+
+    except Exception as e:
+        success = False
+        status = "ERROR_REFRESHING_CAMPAIGNX_OBJECT"
+        error_message_to_print = str(e)
+
+    results = {
+        'error_message_to_print': error_message_to_print,
+        'status': status,
+        'success': success,
+        'update_message': update_message,
+    }
+    return results
 
 def refresh_campaignx_supporters_count_in_all_children(request=None, campaignx_we_vote_id_list=[]):
     # Now push updates to campaignx entries out to candidates and politicians linked to the campaignx entries

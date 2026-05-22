@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import debugpy
 
 def log(line: str):
     print(line, flush=True)
@@ -22,9 +23,9 @@ def load_environment_file(file: str) -> bool:
                 if key not in os.environ:
                     os.environ[key] = str(value)
     except json.JSONDecodeError:
-        print(f"Error decoding JSON from {file}")
-    except Exception as e:
-        print(f"An error occurred while loading config variables: {e}")
+        log(f"Error decoding JSON from {file}")
+    except Exception as err:
+        log(f"An error occurred while loading config variables: {err}")
     return True
 
 
@@ -37,8 +38,26 @@ log("Running 'manage.py migrate'")
 os.system("python manage.py migrate")
 log("Running 'manage.py createsuperuser'")
 os.system("python manage.py createsuperuser --noinput")
+initial_dev_user = os.environ.get('DEV_VOTER_INITIAL_USER', "Samuel Adams samuel@adams.com ale")
+log(f"Running 'manage.py create_dev_user {initial_dev_user}'")
+os.system("python manage.py create_dev_user " + initial_dev_user)
 
+# Start debugpy listener
+try:
+    log("Starting debugpy on 0.0.0.0:5678")
+    debugpy.listen(("0.0.0.0", 5678))
 
-sys.exit(subprocess.call(sys.argv[1:]))
+    log("Debugger is ready and waiting for VS Code or PyCharm to attach...")
+except Exception as e:
+    log(f"Error starting debugpy: {e}")
 
-
+if os.environ.get('DEV_SERVER_TYPE', 'runserver') == 'runsslserver':
+    new_args = ['python', 'manage.py',
+                os.environ.get('DEV_SERVER_TYPE', 'runserver'),
+                f"{os.environ.get('DEV_SERVER_DOMAIN', 'localhost')}:{os.environ.get('DEV_SERVER_PORT', '8000')}",
+                '--certificate', os.environ.get('DEV_SERVER_SSL_CERT', 'cert/wevotedeveloper.com.crt'),
+                '--key', os.environ.get('DEV_SERVER_SSL_KEY', 'cert/wevotedeveloper.com_key.txt')]
+else:
+    new_args = sys.argv[1:]
+log(f"Running app startup command: {' '.join(new_args)}")
+sys.exit(subprocess.call(new_args))

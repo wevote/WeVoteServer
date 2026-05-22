@@ -2,11 +2,9 @@ import os
 import re
 import urllib.request
 from datetime import datetime, date
-
+import requests
 from django.db import connection
-from django.utils.timezone import localtime
-
-from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD_T_HMSMS_Z
+import pytz
 
 
 def staticUserAgent():
@@ -49,22 +47,27 @@ def scrape_url(site_url, with_soup=True):
     }
 
 
-def get_git_commit_date():
-    scrape_res = scrape_url(get_git_commit_hash(True), False)
-    html = scrape_res['all_html']
+def get_git_params():
+    hash_url = get_git_commit_hash(True)
+    date = 'Not found'
+    link = 'Not found'
+    sha = 'Not found'
     try:
-        pattern = re.compile(r'\"committedDate\":\"(.*?)\'')
-        reg = re.search(pattern, html)
-        date_string = "Not found"
-        if date and reg.group(1):
-            match = reg.group(1)
-            date_string_bad_tz = match.split("\"")[0]  # '2025-10-11T17:33:07.000-07:00'
-            date_string = ''.join(date_string_bad_tz.rsplit(':', 1))  # '2025-10-11T17:33:07.000-0700'
-            utc_time = datetime.strptime(date_string, DATE_FORMAT_YMD_T_HMSMS_Z)
-            date_string = localtime(utc_time).strftime(DATE_FORMAT_YMD_HMS)
-        return date_string
+        hash_payload = requests.get(hash_url).json()
+        # print(hash_payload)
+        dateISO = hash_payload['commit']['author']['date'];
+        d = datetime.fromisoformat(dateISO).replace(tzinfo=pytz.utc)
+        date = d.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%m-%d-%Y %I:%M %p')
+
+        link = hash_payload['html_url']
+        sha = hash_payload['sha']
     except Exception as e:
-        return 'Not found: ' + str(e)
+        pass
+    return {
+        "date": date,
+        "link": link,
+        "sha": sha,
+    }
 
 
 def get_python_version():
@@ -90,7 +93,7 @@ def get_git_commit_hash(full):
     except:
         hash = 'git_commit_hash-file-not-found'
     if full:
-        return "https://github.com/wevote/WeVoteServer/commit/" + hash
+        return "https://api.github.com/repos/wevote/WeVoteServer/commits/" + hash
     return hash
 
 

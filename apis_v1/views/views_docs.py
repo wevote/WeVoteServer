@@ -93,7 +93,7 @@ from apis_v1.documentation_source import \
 from config.base import get_environment_variable
 from voter.models import voter_setup
 from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
-from wevote_functions.utils import get_git_commit_date
+from wevote_functions.utils import get_git_params
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -161,10 +161,12 @@ def apis_index_doc_view(request):
     store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
 
     messages_on_stage = get_messages(request)
+    git_params = get_git_params()
+    date = git_params['date']
     template_values = {
         'next': next,
         'messages_on_stage': messages_on_stage,
-        'git_commit_date':   get_git_commit_date(),
+        'git_commit_date':  date,
     }
     response = render(request, 'apis_v1/apis_index.html', template_values)
 
@@ -1179,6 +1181,14 @@ def retrieve_sql_tables_row_count_doc_view(request):
         retrieve_issues_to_follow_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
+def fast_load_table_statistics_view(request):
+    """
+    Show documentation about retrieveFastLoadTableStatistics
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = retrieve_issues_to_follow_doc. \
+        retrieve_fast_load_table_statistics_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 def save_analytics_action_doc_view(request):
     """

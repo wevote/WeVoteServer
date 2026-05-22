@@ -1,0 +1,49 @@
+{# templates/politician/create_trigram_gist_idx.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Create Trigram Gist Index{% endblock %}
+
+{% block content %}
+
+<h1>Create Trigram Gist Index</h1>
+
+<div style="background-color: #e7f3ff; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+    <p><strong>Please specify field name for creating trigram gist index.</strong></p>
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <label>Index Field </label>
+    <select name="index_field" required>
+        <option value="">-- Select a field --</option>
+        <option value="politician_name">Politician Name</option>
+        <option value="first_name" hidden>First Name</option>
+        <option value="last_name" hidden>Last Name</option>
+        <option value="google_civic_candidate_name" >Google Civic Candidate Name</option>
+        <option value="ballotpedia_politician_name" hidden>Ballotpedia Politician Name</option>
+        <option value="political_party" hidden>Political Party</option>
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+{% if status_message %}
+    <div class="alert alert-{{ status_type|default:'info' }} alert-dismissible fade in" role="alert">
+        <strong>
+            {% if status_type == 'success' %}
+                Success!
+            {% elif status_type == 'info' %}
+                Info!
+            {% elif status_type == 'error' %}
+                Error!
+            {% endif %}
+        </strong> {{ status_message }}
+    </div>
+{% endif %}
+
+<p>
+    <a href="{% url 'politician:politician_list' %}">
+    < Back to Politicians</a>
+</p>
+
+{% endblock %}

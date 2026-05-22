@@ -21,6 +21,10 @@ class SpeedStatistics(Enum):
         "name": "Find Candidate children of this politician",
         "description": "Retrieve CandidateCampaign objects for this politician",
     }
+    RET_CANDIDATES_MATCH = {
+        "name": "Find possible Candidate duplicates of this politician",
+        "description": "Retrieve CandidateCampaign objects for this politician",
+    }
     RET_DUPLICATE_POLITICIANS = {
         "name": "Find possible duplicate politicians",
         "description": "Retrieve Politician objects for this politician",

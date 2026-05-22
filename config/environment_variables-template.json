@@ -17,7 +17,7 @@
   "DATABASE_USER":                  "postgres",
   "DATABASE_PASSWORD":              "admin",
   "DATABASE_HOST":                  "",
-  "DATABASE_PORT":                  "",
+  "DATABASE_PORT":                  "5678",
 
   "_comment":                       "read-only database settings for local.py",
   "DATABASE_ENGINE_READONLY":       "django.db.backends.postgresql_psycopg2",
@@ -25,7 +25,7 @@
   "DATABASE_USER_READONLY":         "postgres",
   "DATABASE_PASSWORD_READONLY":     "admin",
   "DATABASE_HOST_READONLY":         "",
-  "DATABASE_PORT_READONLY":         "",
+  "DATABASE_PORT_READONLY":         "5678",
 
   "_comment":                       "analytics database settings for local.py",
   "DATABASE_ENGINE_ANALYTICS":      "django.db.backends.postgresql_psycopg2",
@@ -33,7 +33,19 @@
   "DATABASE_USER_ANALYTICS":        "postgres",
   "DATABASE_PASSWORD_ANALYTICS":    "admin",
   "DATABASE_HOST_ANALYTICS":        "",
-  "DATABASE_PORT_ANALYTICS":        "",
+  "DATABASE_PORT_ANALYTICS":        "5678",
+
+  "_comment":                       "profile for pgadmin",
+  "PG_ADMIN_EMAIL":                 "fake_email@wevoteeducation.org",
+  "PG_ADMIN_PASSWORD":              "admin",
+
+  "_comment":                       "Docker Settings",
+  "DEV_SERVER_TYPE":                "runsslserver",
+  "DEV_SERVER_DOMAIN":              "wevotedeveloper.com",
+  "DEV_SERVER_PORT":                "8000",
+  "DEV_SERVER_SSL_CERT":            "cert/wevotedeveloper.com.crt",
+  "DEV_SERVER_SSL_KEY":             "cert/wevotedeveloper.com_key.txt",
+  "DEV_VOTER_INITIAL_USER":         "Samuel Adams samuel@adams.com ale",
 
   "_comment":                       "The connection string for Elastic Search database",
   "ELASTIC_SEARCH_CONNECTION_STRING": "",

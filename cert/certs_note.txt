@@ -1,0 +1,6 @@
+This directory needs two files in order for your server to run in SSL HTTPS mode:
+
+wevotedeveloper.com_key.txt
+wevotedeveloper.com.crt
+
+Get them from Dale

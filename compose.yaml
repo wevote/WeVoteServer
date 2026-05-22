@@ -1,4 +1,4 @@
-name: wevote
+name: wevoteserver
 
 services:
   db:
@@ -37,6 +37,8 @@ services:
       start_period: 30s
   
   api:
+    extra_hosts:
+      - ${DEV_SERVER_DOMAIN:-wevotedeveloper.com}:0.0.0.0
     build:
       dockerfile: docker/Dockerfile.dev
     depends_on:
@@ -44,6 +46,8 @@ services:
         condition: service_healthy
       localstack:
         condition: service_healthy
+    # Note: DATABASE_HOST=db does not indicate the name of the host, it is used to associate the api service with the db service
+    # Note: DEV_SERVER_TYPE should be 'runserver' for HTTP, and 'runsslserver' for HTTPS
     environment:
       - DATABASE_NAME=${DATABASE_NAME:-wevoteserverdb}
       - DATABASE_NAME_READONLY=${DATABASE_NAME:-wevoteserverdb}
@@ -62,12 +66,32 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_SQS_WEB_QUEUE_URL=http://localstack:4566/000000000000/job-queue.fifo
+      - PYDEVD_DISABLE_FILE_VALIDATION=1
+      - DEV_SERVER_TYPE=${DEV_SERVER:-runsslserver}
+      - DEV_SERVER_DOMAIN=${DEV_SERVER_DOMAIN:-wevotedeveloper.com}
+      - DEV_SERVER_PORT=${DEV_SERVER_PORT:-8000}
+      - DEV_SERVER_SSL_CERT=${DEV_SERVER_SSL_CERT:-cert/wevotedeveloper.com.crt}
+      - DEV_SERVER_SSL_KEY=${DEV_SERVER_SSL_KEY:-cert/wevotedeveloper.com_key.txt}
     volumes:
       - .:/wevote/code
     networks:
       - wevote
     ports:
-      - "127.0.0.1:8000:8000" # this allows access to the WeVote API at localhost:8000
+      - "127.0.0.1:8000:8000" # WeVote API at http://localhost:8000 or https://wevotedeveloper.com:8000
+      - "127.0.0.1:5678:5678" # debugpy port for remote debugging
+
+  pgadmin:
+    image: dpage/pgadmin4:8.4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL:-fake_email@wevoteeducation.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASSWORD:-admin}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+#      - "127.0.0.1:9000:80" # pgadmin4 at http://localhost:9000  (80, 8080, and 443 should be left free for developer experiments)
+    networks:
+      - wevote
 
 networks:
   wevote:
@@ -78,3 +102,4 @@ networks:
 volumes:
   localstack:
   postgres_data:
+  pgadmin_data:

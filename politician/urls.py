@@ -10,6 +10,8 @@ urlpatterns = [
     re_path(r'^$', views_admin.politician_list_view, name='politician_list',),
     re_path(r'^compare_two_politicians/$',
             views_admin.compare_two_politicians_for_merge_view, name='compare_two_politicians_for_merge'),
+    re_path(r'^create_trigram_gist_idx/$',
+            views_admin.create_trigram_gist_idx_view, name='create_trigram_gist_idx'),
     re_path(r'^data_cleaning/$', views_data_cleaning.politicians_data_cleaning_view, name='politicians_data_cleaning'),
     re_path(r'^find_duplicate_politicians/$',
             views_admin.find_and_merge_duplicate_politicians_view, name='find_and_merge_duplicate_politicians'),

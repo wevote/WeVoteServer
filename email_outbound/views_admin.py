@@ -107,6 +107,8 @@ def email_campaign_edit_process_view(request):
     email_body = request.POST.get('email_body', '')
     email_campaign_id = request.POST.get('email_campaign_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    include_footer = request.POST.get('include_footer', False)
+    include_footer = positive_value_exists(include_footer)
     recipient_ids = request.POST.get('recipient_ids', '')
     state_code = request.POST.get('state_code', '')
     send_button_clicked = request.POST.get('send_button_clicked', '')
@@ -133,6 +135,7 @@ def email_campaign_edit_process_view(request):
             email_campaign.email_template_id = email_template_id
             email_campaign.email_subject_template_raw = email_subject
             email_campaign.email_body_template_raw = email_body
+            email_campaign.include_footer = include_footer
             email_campaign.scheduled_send_time = scheduled_send_time
             email_campaign.save()
             
@@ -140,7 +143,7 @@ def email_campaign_edit_process_view(request):
             # # TODO: We want to update this to only delete entries below that have been removed from the form
             # deleted_count, result_dict = EmailCampaignRecipient.objects.filter(
             # email_campaign_id=email_campaign.id).delete()
-            status += 'Email campaign updated.'
+            status += 'EMAIL_CAMPAIGN_UPDATED '
         except EmailCampaign.DoesNotExist:
             email_campaign = EmailCampaign.objects.create(
                 audience_builder_id=audience_builder_id,
@@ -174,30 +177,36 @@ def email_campaign_edit_process_view(request):
 
     # if creating an email campaign move attachments from draft to campaign folder
     if draft_uuid and email_campaign and email_campaign_id:
-        with transaction.atomic():
-            qs = EmailAttachments.objects.select_for_update().filter(
-                draft_uuid=draft_uuid,
-                email_campaign__isnull=True,
-                email_template__isnull=True,
-            )
-            for att in qs:
-                new_key = build_s3_key(
-                    campaign_id=int(email_campaign_id),
-                    template_id=None,
-                    draft_uuid=None,
-                    original_filename=att.original_name,
+        try:
+            with transaction.atomic():
+                qs = EmailAttachments.objects.select_for_update().filter(
+                    draft_uuid=draft_uuid,
+                    email_campaign__isnull=True,
+                    email_template__isnull=True,
                 )
-                if EmailAttachments.objects.filter(s3_key=att.s3_key).count() == 1:
+                for att in qs:
+                    new_key = build_s3_key(
+                        campaign_id=int(email_campaign_id),
+                        template_id=None,
+                        draft_uuid=None,
+                        original_filename=att.original_name,
+                    )
+                    if EmailAttachments.objects.filter(s3_key=att.s3_key).count() == 1:
 
-                    move_s3_object(old_key=att.s3_key, new_key=new_key)
-                    att.s3_key = new_key
+                        move_s3_object(old_key=att.s3_key, new_key=new_key)
+                        att.s3_key = new_key
 
-                att.email_campaign = email_campaign
-                att.draft_uuid = None
-                att.save(update_fields=["s3_key", "email_campaign", "draft_uuid"])
+                    att.email_campaign = email_campaign
+                    att.draft_uuid = None
+                    att.save(update_fields=["s3_key", "email_campaign", "draft_uuid"])
+        except Exception as e:
+            status += f'ERROR_MOVING_DRAFT_ATTACHMENTS: {e} '
 
     # clean up previously saved inline images removed before hitting save
-    cleanup_unused_inline_attachments(html=email_body, email_campaign=email_campaign)
+    try:
+        cleanup_unused_inline_attachments(html=email_body, email_campaign=email_campaign)
+    except Exception as e:
+        status += f'ERROR_CLEANING_UP_INLINE_IMAGES: {e} '
 
     # Find all existing manually entered recipients for this email_campaign so we can remove them if they don't come in
     manually_added_recipients = []
@@ -227,8 +236,6 @@ def email_campaign_edit_process_view(request):
         else:
             status += "SENDER_VOTER_NOT_FOUND "
             messages.add_message(request, messages.ERROR, 'Could not identify sender voter.')
-
-    # TODO: Consider collecting some ids in a pre-processing loop?
 
     campaignx_list_dict = {}
     politicians_dict = {}
@@ -362,12 +369,15 @@ def email_campaign_edit_process_view(request):
                     voters_dict=voters_dict)
                 if results['success'] and results['save_changes']:
                     recipient_object = results['email_campaign_recipient']
-                    status += "AUGMENTED_RECIPIENT_SUCCESS "
+                    status += results['status'] + "AUGMENTED_RECIPIENT_SUCCESS "
                     campaignx_list_dict = results['campaignx_list_dict']
                     politicians_dict = results['politicians_dict']
                     voters_dict = results['voters_dict']
 
                     recipient_object.save()
+                    status += "SAVED_RECIPIENT_OBJECT_SUCCESS "
+                else:
+                    status += results['status'] + "AUGMENTED_RECIPIENT_FAILED "
 
                 # And now remove this object from manually_added_recipients. Any manually_added_recipients entries
                 #  that remain after this loop can be deleted from the database.
@@ -397,16 +407,21 @@ def email_campaign_edit_process_view(request):
             generate_results = generate_email_campaign_recipients_from_audience_builder(
                 audience_builder_id=audience_builder_id,
                 email_campaign_id=email_campaign_id)
+            status += generate_results['status']
 
         # Send the email
         from email_outbound.controllers_email_campaign import email_campaign_send
         send_results = email_campaign_send(email_campaign=email_campaign, email_campaign_id=email_campaign_id)
+        emails_scheduled = send_results['emails_scheduled']
+        status += send_results['status']
 
-        if send_results['success']:
-            messages.add_message(request, messages.SUCCESS, 'Email sent!')
+        if positive_value_exists(emails_scheduled):
+            status += "EMAILS_SCHEDULED: " + str(emails_scheduled) + " "
+            status += " Email sent! "
+            messages.add_message(request, messages.SUCCESS, status)
             # email_campaign = send_results['email_campaign']
         else:
-            messages.add_message(request, messages.ERROR, 'Error sending email: ' + send_results['status'])
+            messages.add_message(request, messages.ERROR, 'Error sending email: ' + status)
         redirect_url = reverse('email_outbound:email_campaign_edit') + \
             "?id=" + str(email_campaign_id) + \
             "&google_civic_election_id=" + str(google_civic_election_id) + \

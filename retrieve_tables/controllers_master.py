@@ -299,6 +299,45 @@ def fast_load_status_update(request):
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 
+# Similar to getPostgresTableStatistics in weconnect-server
+def fast_load_table_statistics(request):
+    logger.error("fast_load_table_statistics entrypoint: " + str(request))
+    # breakpoint()
+    conn = get_psycopg2_connection()
+    with (conn.cursor() as cursor):
+        sql = 'SELECT schemaname, relname AS table_name, n_live_tup AS estimated_row_count FROM pg_stat_user_tables ORDER BY n_live_tup DESC;'
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        try:
+            html = (
+                '<!DOCTYPE html>'
+                '<html>'
+                '<head>'
+                    '<title>Postgres DB Row Counts</title>'
+                    '<style>'
+                        'table { border-collapse: collapse; width: 50%; margin-left: 20px  }'
+                        'th, td { border: 1px solid black; padding: 2px; text-align: left; }'
+                        ':link, :visited { color: #039be5; outline: 0; text-decoration: none; padding-left: 20px; }'
+                    '</style>'
+                '</head>'
+                '<body>'
+                    '<a href="/apis/v1/docs/" >&lt; back to index</a>'
+                    '<div style="height: 20px;"></div>'
+                    '<table>'
+                        '<tr>'
+                            '<th>Table</th>'
+                            '<th>Row Count</th>'
+                        '</tr>')
+            for row in rows:
+                html += '<tr><td>%s</td><td>%s</td></tr>' %  (row[1], row[2])
+            html += '</table></body></html>'
+        except Exception as e:
+            html = e
+            logger.error(e)
+    conn.close()
+    return HttpResponse(html)
+
+
 
 def make_filename_and_command(table_name):
     db_name = get_environment_variable('DATABASE_NAME')

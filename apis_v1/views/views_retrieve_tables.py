@@ -9,7 +9,7 @@ from wevote_tokens.utils import TokensManager
 import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.controllers_master import fast_load_status_retrieve, get_total_row_count, get_max_id, \
-    retrieve_sql_tables_as_csv, backup_one_table_to_s3_controller
+    retrieve_sql_tables_as_csv, backup_one_table_to_s3_controller, fast_load_table_statistics
 from retrieve_tables.controllers_master import fast_load_status_update
 from wevote_functions.functions import get_voter_api_device_id
 from wevote_tokens.models.single_use_tokens import SingleUseTokenManager, Scope
@@ -69,6 +69,9 @@ def fast_load_status_retrieve_view(request):   # fastLoadStatusRetrieve
 
 def fast_load_status_update_view(request):   # fastLoadStatusUpdate
     return fast_load_status_update(request)
+
+def fast_load_table_statistics_view(request):   #
+    return fast_load_table_statistics(request)  # similar to getPostgresTableStatistics in weconnect_server
 
 
 def retrieve_max_id(request):                   # retrieveMaxID

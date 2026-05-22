@@ -214,9 +214,17 @@ class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
             #             we_vote_id,
             #             "{issue_name}".format(issue_name=issue_name))
             # change_description_augmented = change_description_augmented\
+            #     .replace("ADDED", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
+            # change_description_augmented = change_description_augmented\
             #     .replace("ADD", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
             # change_description_augmented = change_description_augmented\
+            #     .replace("CLEARED", "<span style=\'color: #A9A9A9;\'>CLEARED</span><br />")
+            # change_description_augmented = change_description_augmented\
+            #     .replace("REMOVED", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
+            # change_description_augmented = change_description_augmented\
             #     .replace("REMOVE", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
+            # change_description_augmented = change_description_augmented\
+            #     .replace("REPLACED", "<span style=\'color: #A9A9A9;\'>REPLACED</span><br />")
             return change_description_augmented
         else:
             return ''

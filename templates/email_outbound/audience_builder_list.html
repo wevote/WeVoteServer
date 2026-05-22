@@ -123,6 +123,7 @@
                     <div>
                       <span onclick="openSavedAudiencesDrawer('{{ audience_builder_in_folder.id }}')" style="color: #337AB7; cursor: pointer; font-size: 1.2em;">
                           <strong>{{ audience_builder_in_folder.audience_builder_name }}</strong>
+                          (id: {{ audience_builder_in_folder.id }})
                       </span>
                       {% if audience_builder_in_folder.subject %}<span class="wv-muted">— {{ audience_builder_in_folder.subject }}</span>{% endif %}
                     </div>
@@ -185,6 +186,7 @@
             <div>
               <span onclick="openSavedAudiencesDrawer('{{ audience_builder_unfiled.id }}')" style="color: #337AB7; cursor: pointer; font-size: 1.2em;">
                 <strong>{{ audience_builder_unfiled.audience_builder_name }}</strong>
+                (id: {{ audience_builder_unfiled.id }})
               </span>
               {% if audience_builder_unfiled.subject %}<span class="wv-muted">— {{ audience_builder_unfiled.subject }}</span>{% endif %}
             </div>
@@ -263,6 +265,7 @@
                       <div class="wv-item">
                         <div>
                           <strong>{{ one_audience_builder.audience_builder_name }}</strong>
+                          (id: {{ one_audience_builder.id }})
                           {% if one_audience_builder.subject %}<span class="wv-muted">— {{ one_audience_builder.subject }}</span>{% endif %}
                         </div>
                         <div class="wv-actions">
@@ -324,6 +327,7 @@
           <div class="wv-item">
             <div>
               <strong>{{ archived_audience_builder.audience_builder_name }}</strong>
+              (id: {{ archived_audience_builder.id }})
               {% if archived_audience_builder.audience_builder_folder_id %}
                   {% with folder_name=all_folders_by_id|get_value_from_dict:archived_audience_builder.audience_builder_folder_id %}
                     <span class="wv-tag" title="Original folder">From: {{ folder_name }}</span>

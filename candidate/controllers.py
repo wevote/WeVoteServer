@@ -5,9 +5,12 @@ import datetime as the_other_datetime
 import json
 import urllib.request
 from socket import timeout
+
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils.timezone import now
+from django.contrib.postgres.search import TrigramSimilarity
 import wevote_functions.admin
 from apis_v1.views.views_extension import process_pdf_to_html
 from ballot.models import CANDIDATE
@@ -21,7 +24,7 @@ from import_export_vote_smart.controllers import retrieve_and_match_candidate_fr
     retrieve_candidate_photo_from_vote_smart
 from office.models import ContestOfficeListManager, ContestOfficeManager
 from organization.models import ORGANIZATION_WEBSITES_TO_EXCLUDE_FROM_SCRAPER
-from politician.models import PoliticianManager
+from politician.models import Politician, PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
@@ -1440,6 +1443,8 @@ def candidates_query_for_api(  # candidatesQuery
     candidates_returned_count = 0
     candidates_total_count = 0
     candidate_dict_list = []
+    politician_dict = {}
+    politician_we_vote_id_list = []
     required_variables_missing = False
     retrieve_mode = ''
     status = ''
@@ -1511,6 +1516,7 @@ def candidates_query_for_api(  # candidatesQuery
             success = results['success']
             status = results['status']
             candidate_list = results['candidate_list_objects']
+
         except Exception as e:
             status = 'FAILED retrieve_all_candidates_for_upcoming_election. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -1519,6 +1525,33 @@ def candidates_query_for_api(  # candidatesQuery
 
     # If we need to do a single query to get data used by entire candidate list
     #  (like candidate_to_office_link_list), then do it here before generating dicts from candidate_list
+
+    if len(candidate_list) > 0:
+        # update candidate support and oppose counts in bulk
+        for candidate in candidate_list:
+            if positive_value_exists(candidate.politician_we_vote_id) and \
+                    candidate.politician_we_vote_id not in politician_dict:
+                politician_we_vote_id_list.append(candidate.politician_we_vote_id)
+        # Get Politician values
+        if len(politician_we_vote_id_list) > 0:
+            try:
+                queryset = Politician.objects.filter(we_vote_id__in=politician_we_vote_id_list)
+                politician_list = list(queryset)
+                if len(politician_list) > 0:
+                    for one_politician in politician_list:
+                        politician_dict[one_politician.we_vote_id] = one_politician
+            except Exception as e:
+                status += "PROBLEM_RETRIEVING_POLITICIANS: " + str(e) + " "
+                pass
+        refresh_candidate_results = refresh_candidate_supporters_count_from_politician(
+            candidate_list=candidate_list,
+            politician_dict=politician_dict,
+        )
+        if refresh_candidate_results['success']:
+            candidate_list = refresh_candidate_results['candidate_list_updated']
+        else:
+            print('refresh_candidate_results did not work in candidates_query_for_api ')
+            status += refresh_candidate_results['status']
 
     if success:
         # Moved to an update script on the WeVoteServer Candidates admin listing page
@@ -1861,6 +1894,7 @@ def generate_candidate_dict_from_candidate_object(
         'seo_friendly_path':                candidate.seo_friendly_path,
         'state_code':                       candidate.state_code,
         'supporters_count':                 candidate.supporters_count,
+        'opposers_count':                   candidate.opposers_count,
         'twitter_url':                      candidate.twitter_url,
         'twitter_handle':                   candidate.fetch_twitter_handle(),
         'twitter_description':              candidate.twitter_description
@@ -1879,6 +1913,95 @@ def generate_candidate_dict_from_candidate_object(
         'success':          success,
     }
     return results
+
+
+def refresh_candidate_supporters_count_from_politician(candidate_list=[], politician_dict={}):
+    error_message_to_print = ''
+    status = ''
+    success = True
+    update_message = ''
+    candidate_bulk_update_list = []
+    candidate_list_updated = []
+    candidate_updates_made = 0
+
+    politician_manager = PoliticianManager()
+
+    if not candidate_list:
+        return {
+            'candidate_list_updated': [],
+            'error_message_to_print': "No candidates provided.",
+            'status': "NO_CANDIDATES_PROVIDED",
+            'success': True,
+            'update_message': "",
+        }
+
+    try:
+        with transaction.atomic():
+            # Check if we need to fetch politicians in bulk
+            if not politician_dict:
+                politician_dict = {}
+                # Collect all unique politician IDs needed for this candidate list
+                politician_we_vote_ids = [
+                    c.politician_we_vote_id for c in candidate_list
+                    if positive_value_exists(c.politician_we_vote_id)
+                ]
+
+                if politician_we_vote_ids:
+                    politician_query = Politician.objects.filter(
+                        we_vote_id__in=politician_we_vote_ids
+                    )
+                    for politician in politician_query:
+                        politician_dict[politician.we_vote_id] = politician
+
+            # Iterate through candidates and update counts from the dict
+            for one_candidate in candidate_list:
+                if positive_value_exists(one_candidate.politician_we_vote_id):
+                    if one_candidate.politician_we_vote_id in politician_dict:
+                        politician = politician_dict[one_candidate.politician_we_vote_id]
+
+                        supporters_count = politician.supporters_count
+                        opposers_count = politician.opposers_count
+
+                        changes_found = False
+                        # Check if counts differ
+                        if opposers_count != one_candidate.opposers_count:
+                            one_candidate.opposers_count = opposers_count
+                            changes_found = True
+                        if supporters_count != one_candidate.supporters_count:
+                            one_candidate.supporters_count = supporters_count
+                            changes_found = True
+
+                        if changes_found:
+                            candidate_bulk_update_list.append(one_candidate)
+                            candidate_updates_made += 1
+                    else:
+                        status += "POLITICIAN_NOT_FOUND_FOR: " + str(one_candidate.we_vote_id) + " "
+                else:
+                    status += "NO_POLITICIAN_LINK_EXISTS : "
+
+                # Build up the return list
+                candidate_list_updated.append(one_candidate)
+
+            # Perform the bulk update for candidates
+            if len(candidate_bulk_update_list) > 0:
+                CandidateCampaign.objects.bulk_update(
+                    candidate_bulk_update_list, ['opposers_count', 'supporters_count'])
+
+                update_message += \
+                    "{candidate_updates_made:,} Candidate entries updated from Politician counts. " \
+                    "".format(candidate_updates_made=candidate_updates_made)
+
+    except Exception as e:
+        status += "ERROR_IN_REFRESH_ATOMIC_BLOCK: {e} ".format(e=e)
+        success = False
+
+    return {
+        'candidate_list_updated': candidate_list_updated,
+        'error_message_to_print': error_message_to_print,
+        'status': status,
+        'success': success,
+        'update_message': update_message,
+    }
 
 
 def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
@@ -3090,12 +3213,22 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
     return results
 
 
-def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=None):
+def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=None, use_trigram_match=False):
     """
     Find Candidates that might be duplicates to see if we want to merge them with this Candidate
+    
+    Supports two query methods:
+    - Trigram-based fuzzy matching on names with similarity threshold (use_trigram_match=True)
+    - Exact matching logic (use_trigram_match=False) - default method
+    
+    Threshold values for trigram similarity:
+    - 0.1: Very loose matching (high recall, low precision)
+    - 0.3: Standard fuzzy matching (balanced)
+    - 0.5: Stricter matching (lower recall, higher precision)
+    - 0.7: Very strict matching (high precision, low recall)
 
-    :param candidate:
-    :return:
+    :param candidate: Candidate object to find duplicates for
+    :return: List of up to 20 potential duplicate candidates
     """
     if not hasattr(candidate, 'we_vote_id'):
         return []
@@ -3104,6 +3237,9 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
     results = candidate_manager.retrieve_candidates_are_not_duplicates_list(candidate.we_vote_id, read_only=True)
     candidates_are_not_duplicates_list_we_vote_ids = results['candidates_are_not_duplicates_list_we_vote_ids']
     candidates_are_not_duplicates_list_we_vote_ids.append(candidate.we_vote_id)
+    # Local variables for query control
+    #use_trigram_match = False
+    threshold = 0.5  # Standard fuzzy matching threshold (0.0-1.0 scale)
     try:
         queryset = CandidateCampaign.objects.using('readonly').all()
         queryset = queryset.exclude(we_vote_id__in=candidates_are_not_duplicates_list_we_vote_ids)
@@ -3131,54 +3267,47 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
         # "OR" filters below
         filters = []
 
-        new_filter = \
-            Q(candidate_name__iexact=last_name) | \
-            Q(ballotpedia_candidate_name__iexact=last_name)
+        if positive_value_exists(last_name):
+            new_filter = (
+                Q(candidate_name__iexact=last_name) |
+                Q(ballotpedia_candidate_name__iexact=last_name)
+            )
         filters.append(new_filter)
 
-        # new_filter = \
-        #     Q(candidate_name__icontains=first_name) & \
-        #     Q(candidate_name__icontains=last_name)
-        # filters.append(new_filter)
-
-        # new_filter = \
-        #     Q(ballotpedia_candidate_name__icontains=first_name) & \
-        #     Q(ballotpedia_candidate_name__icontains=last_name)
-        # filters.append(new_filter)
-
-        new_filter = (
+        if positive_value_exists(candidate.candidate_name):
+            new_filter = (
                 Q(candidate_name__iexact=candidate.candidate_name) |
                 Q(ballotpedia_candidate_name__iexact=candidate.candidate_name) |
                 Q(google_civic_candidate_name__iexact=candidate.candidate_name) |
                 Q(google_civic_candidate_name2__iexact=candidate.candidate_name) |
                 Q(google_civic_candidate_name3__iexact=candidate.candidate_name)
-        )
+            )
         filters.append(new_filter)
 
         if positive_value_exists(candidate.google_civic_candidate_name):
             new_filter = (
-                    Q(candidate_name__iexact=candidate.google_civic_candidate_name) |
-                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name) |
-                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name) |
-                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name)
+                Q(candidate_name__iexact=candidate.google_civic_candidate_name) |
+                Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name) |
+                Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name) |
+                Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name)
             )
             filters.append(new_filter)
 
         if positive_value_exists(candidate.google_civic_candidate_name2):
             new_filter = (
-                    Q(candidate_name__iexact=candidate.google_civic_candidate_name2) |
-                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name2) |
-                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name2) |
-                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name2)
+                Q(candidate_name__iexact=candidate.google_civic_candidate_name2) |
+                Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name2) |
+                Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name2) |
+                Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name2)
             )
             filters.append(new_filter)
 
         if positive_value_exists(candidate.google_civic_candidate_name3):
             new_filter = (
-                    Q(candidate_name__iexact=candidate.google_civic_candidate_name3) |
-                    Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name3) |
-                    Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name3) |
-                    Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name3)
+                Q(candidate_name__iexact=candidate.google_civic_candidate_name3) |
+                Q(google_civic_candidate_name__iexact=candidate.google_civic_candidate_name3) |
+                Q(google_civic_candidate_name2__iexact=candidate.google_civic_candidate_name3) |
+                Q(google_civic_candidate_name3__iexact=candidate.google_civic_candidate_name3)
             )
             filters.append(new_filter)
 
@@ -3224,7 +3353,16 @@ def find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=No
 
             queryset = queryset.filter(final_filters)
 
-        queryset = queryset.order_by('candidate_name')[:20]
+        # Apply trigram ordering ONLY for ranking (not filtering) on already filtered results
+        if use_trigram_match:
+            # Annotate with trigram similarity AFTER filtering for better performance
+            queryset = queryset.annotate(
+                combined_similarity=TrigramSimilarity('candidate_name', candidate.candidate_name)
+            )
+            queryset = queryset.order_by('-combined_similarity', 'candidate_name')
+        else:
+            queryset = queryset.order_by('candidate_name')
+        queryset = queryset[:20]
         related_candidate_list = list(queryset)
     except Exception as e:
         related_candidate_list = []

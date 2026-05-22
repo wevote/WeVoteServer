@@ -10,6 +10,8 @@ urlpatterns = [
     # views_admin
     re_path(r'^$', views_admin.candidate_list_view, name='candidate_list',),
     re_path(r'^create/$', views_admin.candidate_create_process_view, name='candidate_create_process'),
+    re_path(r'^create_trigram_gist_idx/$',
+            views_admin.create_trigram_gist_idx_view, name='create_trigram_gist_idx'),
     re_path(r'^data_cleaning/$', views_data_cleaning.candidates_data_cleaning_view, name='candidates_data_cleaning'),
     re_path(r'^create_us_house_candidates/$',
             views_admin.create_us_house_candidates_view, name='create_us_house_candidates'),

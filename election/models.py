@@ -335,7 +335,6 @@ class ElectionManager(models.Manager):
         if success and not election_found:
             try:
                 updated_values = {
-                    # 'ctcl_uuid':          ctcl_uuid,  # Added below
                     'election_day_text':    election_day_text,
                 }
                 if positive_value_exists(state_code):

@@ -1,8 +1,6 @@
 # admin_tools/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-import os
-import sys
 
 from django.shortcuts import render
 from django.contrib import messages
@@ -46,8 +44,8 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
     voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
-from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, get_git_commit_hash, \
-    get_git_commit_date, get_pg_dump_version
+from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, \
+    get_pg_dump_version, get_git_params
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -131,13 +129,14 @@ def admin_home_view(request):
     shared_links_click_without_reclick_count = \
         share_manager.fetch_shared_link_clicked_shared_links_click_without_reclick_count()
 
+    git_params = get_git_params()
     template_values = {
         'google_civic_election_id':           google_civic_election_id,
         'python_version':                     get_python_version(),
         'node_version':                       get_node_version(),
-        'git_commit_hash':                    get_git_commit_hash(False),
-        'git_commit_hash_url':                get_git_commit_hash(True),
-        'git_commit_date':                    get_git_commit_date(),
+        'git_commit_hash':                    git_params['sha'],
+        'git_commit_hash_url':                git_params['link'],
+        'git_commit_date':                    git_params['date'],
         'postgres_version':                   get_postgres_version(),
         'pg_dump_version':                    get_pg_dump_version(),
         'SERVER_IS_SOURCE_OF_TRUTH':          SERVER_IS_SOURCE_OF_TRUTH,

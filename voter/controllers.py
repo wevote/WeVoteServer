@@ -4769,24 +4769,27 @@ def voter_save_photo_from_file_reader(
                     byte_data = svg2png(bytestring=byte_data)
                 except Exception as e:
                     status += "PROBLEM_CONVERTING_SVG_TO_PNG: {error} ".format(error=e)
+
             image_data_source = BytesIO(byte_data)
-            image = None
-            image_types_to_check = ["gif", "tiff"]
-            if img_dict and img_dict["type"] and any(
-                    image_type in img_dict["type"].lower() for image_type in image_types_to_check):
-                image = Image.open(image_data_source)
-                image_data_destination = BytesIO()
-                image.save(image_data_destination, format="WEBP", save_all=True, loop=0)
-                image = Image.open(image_data_destination)
-            else:
-                image = Image.open(image_data_source)
+            image = Image.open(image_data_source)
+
             format_to_cache = image.format
             if format_to_cache and format_to_cache.lower() == "mpo":
-                # An MPO file is a stereoscopic image consisting of two overlapping 2D images in JPG format
                 format_to_cache = "JPEG"
-            python_image_library_image = ImageOps.exif_transpose(image)
-            image_copy = python_image_library_image.copy()
-            image_copy.thumbnail((PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT), Image.Resampling.LANCZOS)
+
+            # Check if animated BEFORE any processing that would strip frames
+            is_animated = getattr(image, 'n_frames', 1) > 1
+
+            if is_animated:
+                # Skip exif_transpose and thumbnail — both strip animation frames
+                python_image_library_image = image
+            else:
+                python_image_library_image = ImageOps.exif_transpose(image)
+                image_copy = python_image_library_image.copy()
+                image_copy.thumbnail(
+                    (PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT),
+                    Image.Resampling.LANCZOS)
+
             python_image_library_image.format = format_to_cache
             image_data_found = True
         except Exception as e:

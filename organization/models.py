@@ -3784,6 +3784,7 @@ class OrganizationsArePossibleDuplicates(models.Model):
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
 
+
 class OrganizationChangeLog(models.Model):  # OrganizationLogEntry would be another name
     """
     What changes were made, and by whom?
@@ -3808,9 +3809,18 @@ class OrganizationChangeLog(models.Model):  # OrganizationLogEntry would be anot
                         we_vote_id,
                         "{issue_name}".format(issue_name=issue_name))
             change_description_augmented = change_description_augmented\
+                .replace("ADDED", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
+            change_description_augmented = change_description_augmented\
                 .replace("ADD", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
             change_description_augmented = change_description_augmented\
+                .replace("CLEARED", "<span style=\'color: #A9A9A9;\'>CLEARED</span><br />")
+            # REMOVED code is here for backwards compatibility
+            change_description_augmented = change_description_augmented\
+                .replace("REMOVED", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
+            change_description_augmented = change_description_augmented\
                 .replace("REMOVE", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
+            change_description_augmented = change_description_augmented\
+                .replace("REPLACED", "<span style=\'color: #A9A9A9;\'>REPLACED</span><br />")
             return change_description_augmented
         else:
             return ''

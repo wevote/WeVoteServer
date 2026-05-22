@@ -7,7 +7,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 # install python dependencies
 COPY requirements.txt /tmp
-RUN pip install -r /tmp/requirements.txt --no-cache-dir
+RUN pip install -r /tmp/requirements.txt --no-cache-dir && \
+    pip install debugpy
 
 # copy entrypoint script
 COPY docker/dev/entrypoint /usr/local/bin/docker-entrypoint
@@ -19,6 +20,9 @@ RUN useradd wevote && mkdir -p /var/log/wevote /wevote && chown wevote:wevote /v
 WORKDIR /wevote/code
 USER wevote
 EXPOSE 8000
+EXPOSE 9000
+EXPOSE 5678
+EXPOSE 5432
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
