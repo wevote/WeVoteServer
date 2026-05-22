@@ -3,111 +3,122 @@
 
 {% block title %}Offices Held By Elected Representatives{% endblock %}
 
-{%  block content %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Offices Currently Held By Elected Representatives</h1>
+  <h1>Offices Currently Held By Elected Representatives</h1>
 
-<p>
+  <p>
     <a href="{% url 'office_held:office_held_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        Add New Office Held</a>,
-    <a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      Add New Office Held</a>,
+      <a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         See 'OfficesHeldForLocation' List</a>,
-    <a href="{% url 'office_held:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+        <a href="{% url 'office_held:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
         Repair OCD ID Mismatches</a>
-</p>
+      </p>
 
-<form name="organization_position_choose_election" method="get" action="{% url 'office_held:office_held_list' %}">
-{% csrf_token %}
+      <form name="organization_position_choose_election"
+            method="get"
+            action="{% url 'office_held:office_held_list' %}">
+        {% csrf_token %}
 
-{% if state_code != "" %}
-<a href="#" onclick="showAllStates(); return false;">
-    show all states</a>
-{% endif %}
+        {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
 
-{% if state_list %}
-<select id="state_code_id" name="state_code">
-    <option value="">
-        -- Filter by State Served --</option>
-{% for key, state in state_list %}
-    <option value="{{ key }}"
-            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-        {{ state }}</option>
-{% endfor %}
-</select>
-{% if state_code != "" %}
-<a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-    Show all Offices Held in this state</a>
-{% endif %}
-{% endif %}
-    &nbsp;&nbsp;
-    <label for="show_battleground_id">
-      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
-             {% if show_battleground %}checked{% endif %} /> Show battleground races
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label for="show_ocd_id_state_mismatch_id">
-      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
-             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
-    </label>
-<br/><br/>
-{% if office_held_search %}
-    <a href="#" onclick="clearSearch(); return false">clear search</a>&nbsp;
-    <!-- <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        {% if state_list %}
+          <select id="state_code_id" name="state_code">
+            <option value="">-- Filter by State Served --</option>
+            {% for key, state in state_list %}
+              <option value="{{ key }}"
+                      {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+            {% endfor %}
+          </select>
+          {% if state_code != "" %}
+            <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+            Show all Offices Held in this state</a>
+          {% endif %}
+        {% endif %}
+        &nbsp;&nbsp;
+        <label for="show_battleground_id">
+          <input type="checkbox"
+                 name="show_battleground"
+                 id="show_battleground_id"
+                 value="1"
+                 {% if show_battleground %}checked{% endif %} />
+          Show battleground races
+        </label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <label for="show_ocd_id_state_mismatch_id">
+          <input type="checkbox"
+                 name="show_ocd_id_state_mismatch"
+                 id="show_ocd_id_state_mismatch_id"
+                 value="1"
+                 {% if show_ocd_id_state_mismatch %}checked{% endif %} />
+          Show OCD ID/State mismatch
+        </label>
+        <br />
+        <br />
+        {% if office_held_search %}
+          <a href="#" onclick="clearSearch(); return false">clear search</a>&nbsp;
+          <!-- <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
          clear search</a>&nbsp; -->
-{% endif %}
-<input type="text" name="office_held_search" id="office_held_search_id" value="{{ office_held_search }}" style="width: 450px" />
-<input type="submit" value="Search for Office Held" />
-{# End of if state_list #}
+        {% endif %}
+        <input type="text"
+               name="office_held_search"
+               id="office_held_search_id"
+               value="{{ office_held_search }}"
+               style="width: 450px" />
+        <input type="submit" value="Search for Office Held" />
+        {# End of if state_list #}
 
-{% if office_held_list %}
-    {% if google_civic_election_id %}
-    <ul>
-        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank" >
-        Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)</li>
-    </ul>
+        {% if office_held_list %}
+          {% if google_civic_election_id %}
+            <ul>
+              <li>
+                Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+    target="_blank">Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)
+              </li>
+            </ul>
 
-    {% endif %}
-{% endif %}
+          {% endif %}
+        {% endif %}
 
-{% if office_held_list %}
-    <br/>
-    <table class="table">
-      <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>Office Held Name</th>
-            <th>District</th>
-            <th>State</th>
-            <th>IDs</th>
-        </tr>
-      </thead>
-    {% for office_held in office_held_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}</a>
-                {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=office_held %}
-            </td>
-            <td>{{ office_held.district_name|default_if_none:"" }}</td>
-            <td>{{ office_held.state_code|default_if_none:"" }}</td>
-            <td>
-                {{ office_held.we_vote_id|default_if_none:"" }} - {{ office_held.id|default_if_none:"" }}
-                {% if office_held.ocd_division_id %} - {{ office_held.ocd_division_id|default_if_none:"" }}{% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
+        {% if office_held_list %}
+          <br />
+          <table class="table">
+            <thead>
+              <tr>
+                <th>&nbsp;</th>
+                <th>Office Held Name</th>
+                <th>District</th>
+                <th>State</th>
+                <th>IDs</th>
+              </tr>
+            </thead>
+            {% for office_held in office_held_list %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}</a>
+                  {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=office_held %}
+                </td>
+                <td>{{ office_held.district_name|default_if_none:"" }}</td>
+                <td>{{ office_held.state_code|default_if_none:"" }}</td>
+                <td>
+                  {{ office_held.we_vote_id|default_if_none:"" }} - {{ office_held.id|default_if_none:"" }}
+                  {% if office_held.ocd_division_id %}- {{ office_held.ocd_division_id|default_if_none:"" }}{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
 
-    <p></p>
-    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices Held</a></p> #}
-{% else %}
-    <p>(no office helds found)</p>
-{% endif %}
-</form>
+          <p></p>
+          {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank">Export Offices Held</a></p> #}
+        {% else %}
+          <p>(no office helds found)</p>
+        {% endif %}
+      </form>
 
-<script>
+      <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -177,6 +188,6 @@
       }
     }, 1000);
 
-</script>
+      </script>
 
-{% endblock %}
+    {% endblock %}

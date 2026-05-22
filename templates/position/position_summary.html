@@ -1,24 +1,32 @@
 {# templates/position/position_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if position %}Position Summary{% else %}No Position Found{% endif %}{% endblock %}
+{% block title %}
+  {% if position %}
+    Position Summary
+  {% else %}
+    No Position Found
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-<a href="{% url 'position:position_list' %}">< Back to Positions</a>
+  <a href="{% url 'position:position_list' %}">< Back to Positions</a>
 
-{% if position %}
+  {% if position %}
 
     <h1>Position Summary</h1>
-    <p>Position ID: {{ position.we_vote_id }}<br />
+    <p>
+      Position ID: {{ position.we_vote_id }}
+      <br />
 
     </p>
 
-{% else %}
+  {% else %}
 
     <h1>No Position Found</h1>
     Please visit the <a href="{% url 'position:position_list' %}">Position List</a> page.
 
-{% endif %}
+  {% endif %}
 
 {% endblock %}

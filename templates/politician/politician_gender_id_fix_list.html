@@ -3,25 +3,44 @@
 
 {% block title %}Gender Identification{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-<h1>Set politician gender identification </h1>
-<p>There are <b>{{ number_of_rows }}</b> politicians without a gender specified in our database.
-    Gender guesses are made by comparing the politician's first name with a database of names and likely genders.  You can override incorrect or indeterminate (...?...) guesses before saving.</p>
-<style>
- input[type=button] { margin: 10px 8px 16px 8px; }
-</style>
-<div style="margin-left: 10px; border: thin solid black; padding: 2px 6px 2px 2px; white-space: nowrap; overflow: hidden; display: inline-block">
+  <h1>Set politician gender identification</h1>
+  <p>
+    There are <b>{{ number_of_rows }}</b> politicians without a gender specified in our database.
+    Gender guesses are made by comparing the politician's first name with a database of names and likely genders.  You can override incorrect or indeterminate (...?...) guesses before saving.
+  </p>
+  <style>input[type=button] { margin: 10px 8px 16px 8px; }</style>
+  <div style="margin-left: 10px;
+              border: thin solid black;
+              padding: 2px 6px 2px 2px;
+              white-space: nowrap;
+              overflow: hidden;
+              display: inline-block">
     <span style="padding: 0 10px 4px 6px">Show Politicians with &quot;Unknown&quot; genders</span>
-    <input type="radio" id="radio_button_show_unknowns" name="show_unknowns_choice" onClick="updateShowUnknowns()" />
-</div>
-<br />
-<input class="btn-success" type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
-<input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
-<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
-<input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
+    <input type="radio"
+           id="radio_button_show_unknowns"
+           name="show_unknowns_choice"
+           onClick="updateShowUnknowns()" />
+  </div>
+  <br />
+  <input class="btn-success"
+         type="button"
+         id="button_save_and_load"
+         value="Save any changes, then load the next 15" />
+  <input type="button"
+         id="button_load_no_save_prev"
+         value="< Load the previous 15 without saving"
+         onClick="goToPrevPage(0)" />
+  <input type="button"
+         id="button_load_no_save"
+         value="Load the next 15 without saving >"
+         onClick="goToNextPage(0, true)" />
+  <input type="button"
+         value="Return to {{ person_text }} page"
+         onclick="window.location.href='{{ return_link }}'" />
 
-{% csrf_token %}
+  {% csrf_token %}
   <table class="table">
     <thead>
       <tr>
@@ -41,36 +60,49 @@
       <tr class="person_row">
         <td>{{ forloop.counter|add:index_offset }}</td>
         <td>
-            {% if person.we_vote_hosted_profile_image_url_medium %}
-            <a href="{{person.politician_url}}" target="_blank">
-              <img src="{{ person.we_vote_hosted_profile_image_url_medium }}" width="48px" height="48px" />
+          {% if person.we_vote_hosted_profile_image_url_medium %}
+            <a href="{{ person.politician_url }}" target="_blank">
+              <img src="{{ person.we_vote_hosted_profile_image_url_medium }}"
+                   width="48px"
+                   height="48px" />
             </a>
-            {% endif %}
+          {% endif %}
         </td>
         <td>
-          <a href="{{person.politician_url}}" target="_blank">{{ person.person_name }}</a>
-          <a href="{{person.search_url}}" target="_blank">(search)</a>
+          <a href="{{ person.politician_url }}" target="_blank">{{ person.person_name }}</a>
+          <a href="{{ person.search_url }}" target="_blank">(search)</a>
         </td>
         <td id="hiddenName" style="display: none">{{ person.person_name }}</td>
         <td>{{ person.displayable_guess }}</td>
         <td class="from_db" style="display: none">{{ person.gender_guess }}</td>
         <td>
-                <label>
-                    <select name="gender_choices" id="gender_choices" class="filter-selectbox" onChange="selectOnClick('{{ person.we_vote_id }}')">
-                      <option value="MALE" {% if person.gender_guess == 'male' or  person.gender_guess == 'male' %}selected="selected"{% endif %}>Male</option>
-                      <option value="FEMALE" {% if person.gender_guess == 'female' or  person.gender_guess == 'mostly_female' %}selected="selected"{% endif %}>Female</option>
-                      <option value="GENDER_NEUTRAL">Nonbinary</option>
-                      <option value="UNKNOWN" {% if person.gender_guess == 'unknown' %}selected="selected"{% endif %}>Unknown</option>
-                      <option value="UNKNOWN">Save Unknown</option>
-                    </select>
-                </label>
-            </td>
+          <label>
+            <select name="gender_choices"
+                    id="gender_choices"
+                    class="filter-selectbox"
+                    onChange="selectOnClick('{{ person.we_vote_id }}')">
+              <option value="MALE"
+                      {% if person.gender_guess == 'male' or  person.gender_guess == 'male' %}selected="selected"{% endif %}>
+                Male
+              </option>
+              <option value="FEMALE"
+                      {% if person.gender_guess == 'female' or  person.gender_guess == 'mostly_female' %}selected="selected"{% endif %}>
+                Female
+              </option>
+              <option value="GENDER_NEUTRAL">Nonbinary</option>
+              <option value="UNKNOWN"
+                      {% if person.gender_guess == 'unknown' %}selected="selected"{% endif %}>Unknown</option>
+              <option value="UNKNOWN">Save Unknown</option>
+            </select>
+          </label>
+        </td>
         <td>
-              <span id="{{ person.we_vote_id }}"
-                style="{% if person.gender_guess != 'unknown' %}padding: 4px; background: #ffff00{% endif %}">
-                {% if person.gender_guess != 'unknown' %}Needs saving{% endif %}
-              </span>
-            </td>
+          <span id="{{ person.we_vote_id }}"
+                style="{% if person.gender_guess != 'unknown' %}padding: 4px;
+                       background: #ffff00{% endif %}">
+            {% if person.gender_guess != 'unknown' %}Needs saving{% endif %}
+          </span>
+        </td>
         <td>{{ person.party }}</td>
         <td>{{ person.state_code }}</td>
         <td class="we_vote_id">{{ person.we_vote_id }}</td>
@@ -80,7 +112,7 @@
   </table>
 
 
-<script>
+  <script>
   function selectOnClick(clicked) {
     let saveTextEl = $('#' + clicked);
     saveTextEl.css({padding: '4px', background: '#ffff00'});
@@ -224,6 +256,6 @@
       }
     });
   });
-</script>
+  </script>
 
 {% endblock %}

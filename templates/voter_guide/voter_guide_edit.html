@@ -1,129 +1,173 @@
 {# templates/voter_guide/voter_guide_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if voter_guide %}{{ voter_guide.display_name  }}{% else %}New Candidate{% endif %}{% endblock %}
+{% block title %}
+  {% if voter_guide %}
+    {{ voter_guide.display_name }}
+  {% else %}
+    New Candidate
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-<style>
-span.wrap_word { word-break: break-word; }
-</style>
-<a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    < Back to Voter Guides</a>
+{% block content %}
+  {% load template_filters %}
+  <style>span.wrap_word { word-break: break-word; }</style>
+  <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+  < Back to Voter Guides</a>
 
-<h1>{% if voter_guide %}Edit Voter Guide "{{ voter_guide.display_name }}"{% else %}New Voter Guide{% endif %}</h1>
+  <h1>
+    {% if voter_guide %}
+      Edit Voter Guide "{{ voter_guide.display_name }}"
+    {% else %}
+      New Voter Guide
+    {% endif %}
+  </h1>
   <p>NOTE: THIS FORM DOESN'T SAVE YET -- VIEW ONLY</p>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
 
-<form action="{% url 'voter_guide:voter_guide_edit_process' %}" id="voter_guide_edit" method="post" class="form-horizontal">
-{% csrf_token %}
+  <form action="{% url 'voter_guide:voter_guide_edit_process' %}"
+        id="voter_guide_edit"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
 
-<input type="hidden" name="voter_guide_id" value="{% if voter_guide %}{{ voter_guide.id }}{% else %}0{% endif %}">
-<input type="hidden" name="redirect_to_voter_guide_list" value="0">
+    <input type="hidden"
+           name="voter_guide_id"
+           value="{% if voter_guide %}{{ voter_guide.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="redirect_to_voter_guide_list" value="0">
 
-<div class="form-group">
-    <label for="display_name_id" class="col-sm-3 control-label">Voter Guide Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="display_name" id="display_name_id" class="form-control"
+    <div class="form-group">
+      <label for="display_name_id" class="col-sm-3 control-label">Voter Guide Name</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="display_name"
+               id="display_name_id"
+               class="form-control"
                value="{% if voter_guide %}{{ voter_guide.display_name|default_if_none:"" }}{% else %}{{ display_name|default_if_none:"" }}{% endif %}" />
         {% if voter_guide %}
-            {{ voter_guide.we_vote_id }}
+          {{ voter_guide.we_vote_id }}
         {% else %}
-            {{ we_vote_id }}
+          {{ we_vote_id }}
         {% endif %}
+      </div>
     </div>
-</div>
 
-<input type="hidden" name="google_civic_election_id" value="{% if voter_guide %}{{ voter_guide.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
-<div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Election Id</label>
-    <div class="col-sm-8">
-    {% if voter_guide %}
-        {# We don't currently offer a way to edit the google_civic_election_id once a voter_guide is saved. #}
-        {{ voter_guide.google_civic_election_id }}{% if voter_guide.election %} ({{ voter_guide.election.election_name }}){% endif %}
-    {% else %}
-        <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control"
-               value="{{ google_civic_election_id|default_if_none:"" }}" />
-    {% endif %}
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{% if voter_guide %}{{ voter_guide.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
+    <div class="form-group">
+      <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Election Id</label>
+      <div class="col-sm-8">
+        {% if voter_guide %}
+          {# We don't currently offer a way to edit the google_civic_election_id once a voter_guide is saved. #}
+          {{ voter_guide.google_civic_election_id }}
+          {% if voter_guide.election %}({{ voter_guide.election.election_name }}){% endif %}
+        {% else %}
+          <input type="text"
+                 name="google_civic_election_id"
+                 id="google_civic_election_id_id"
+                 class="form-control"
+                 value="{{ google_civic_election_id|default_if_none:"" }}" />
+        {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="election_day_text_id" class="col-sm-3 control-label">Election Day Text</label>
-    <div class="col-sm-8">
-        <input type="text" name="election_day_text" id="election_day_text_id" class="form-control"
+    <div class="form-group">
+      <label for="election_day_text_id" class="col-sm-3 control-label">Election Day Text</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="election_day_text"
+               id="election_day_text_id"
+               class="form-control"
                value="{% if voter_guide %}{{ voter_guide.election_day_text|default_if_none:"" }}{% else %}{{ election_day_text|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-{% if state_code_from_election == "" %}
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{{ state_code|default_if_none:"" }}" />
-    </div>
-</div>
-{% endif %}
+    {% if state_code_from_election == "" %}
+      <div class="form-group">
+        <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="state_code"
+                 id="state_code_id"
+                 class="form-control"
+                 value="{{ state_code|default_if_none:"" }}" />
+        </div>
+      </div>
+    {% endif %}
 
-<div class="form-group">
-    <label for="google_civic_display_name_id" class="col-sm-3 control-label">Voter Guide Owner Type</label>
-    <div class="col-sm-8">
-        <input type="text" name="voter_guide_owner_type" id="voter_guide_owner_type_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_display_name_id" class="col-sm-3 control-label">Voter Guide Owner Type</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="voter_guide_owner_type"
+               id="voter_guide_owner_type_id"
+               class="form-control"
                value="{% if voter_guide %}{{ voter_guide.voter_guide_owner_type|default_if_none:"" }}{% else %}{{ voter_guide_owner_type|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
-    <div class="col-sm-8">
-        <input type="text" name="twitter_handle" id="twitter_handle_id" class="form-control"
+    <div class="form-group">
+      <label for="twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="twitter_handle"
+               id="twitter_handle_id"
+               class="form-control"
                value="{% if voter_guide %}{{ voter_guide.twitter_handle|default_if_none:"" }}{% else %}{{ twitter_handle|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="twitter_description_id" class="col-sm-3 control-label">Twitter Description</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="twitter_description_id" class="col-sm-3 control-label">Twitter Description</label>
+      <div class="col-sm-8">
         <textarea name="twitter_description"
                   class="form-control animated"
                   id="twitter_description_id"
                   placeholder="Enter official statement">{% if voter_guide %}{{ voter_guide.twitter_description|default_if_none:"" }}{% else %}{{ twitter_description|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<p><a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    cancel</a>
-<input name="submit_text" type="submit" value="{% if voter_guide %}Update Voter Guide{% else %}Save New Voter Guide{% endif %}" /></p>
-</form>
+    <p>
+      <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      cancel</a>
+      <input name="submit_text"
+             type="submit"
+             value="{% if voter_guide %}Update Voter Guide{% else %}Save New Voter Guide{% endif %}" />
+    </p>
+  </form>
 
-<br />
+  <br />
 
 
-<script>
+  <script>
     $(function() {
         $('#contest_office_id').change(function() {
             this.form.submit();
         });
     });
-</script>
+  </script>
 
-<style>
+  <style>
     .animated {
         -webkit-transition: height 0.2s;
         -moz-transition: height 0.2s;
         transition: height 0.2s;
     }
-</style>
-<script>
+  </style>
+  <script>
     $(function(){
         const { autosize } = window;
         autosize($('.normal'));
         autosize($('.animated'));
      }(window.$, window.autosize));
 
-</script>
+  </script>
 
 
 {% endblock %}

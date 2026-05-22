@@ -1,184 +1,227 @@
 {# templates/office/office_held_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office_held %}{{ office_held.office_held_name }}
-                {% if office_held.district_id %}
-                    - District {{ office_held.district_id }}
-                {% endif %}
-                {% if office_held.state_code %}
-                    - {{ office_held.state_code }}
-                {% endif %}
-    Summary{% else %}No Office Held Found{% endif %}{% endblock %}
+{% block title %}
+  {% if office_held %}
+    {{ office_held.office_held_name }}
+    {% if office_held.district_id %}- District {{ office_held.district_id }}{% endif %}
+    {% if office_held.state_code %}- {{ office_held.state_code }}{% endif %}
+    Summary
+  {% else %}
+    No Office Held Found
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load humanize %}
+{% block content %}
+  {% load humanize %}
 
-<a href="{% url 'office_held:office_held_list' %}?state_code={{ state_code }}">< Back to Offices Held</a>
+  <a href="{% url 'office_held:office_held_list' %}?state_code={{ state_code }}">< Back to Offices Held</a>
 
-{% if office_held %}
+  {% if office_held %}
 
-    <h1>{{ office_held.office_held_name }}{% if office_held.district_id %} - District {{ office_held.district_id }}{% endif %}{% if office_held.state_code %} - {{ office_held.state_code }}{% endif %}
-</h1>
+    <h1>
+      {{ office_held.office_held_name }}
+      {% if office_held.district_id %}- District {{ office_held.district_id }}{% endif %}
+      {% if office_held.state_code %}- {{ office_held.state_code }}{% endif %}
+    </h1>
 
     <table>
-    <tr>
-      <td>We Vote ID:</td>
-      <td>
-        <strong>{{ office_held.we_vote_id }}</strong>
-        (<a href="{% url 'office_held:office_held_delete_process' %}?office_held_id={{ office_held.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
-      </td>
-    </tr>
+      <tr>
+        <td>We Vote ID:</td>
+        <td>
+          <strong>{{ office_held.we_vote_id }}</strong>
+          (<a href="{% url 'office_held:office_held_delete_process' %}?office_held_id={{ office_held.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+        </td>
+      </tr>
 
-    {% if office_held.district_name %}
-    <tr>
-      <td>District Name:</td>
-      <td>
-        <strong>{{ office_held.district_name }}</strong>
-      </td>
-    </tr>
-    {% endif %}
+      {% if office_held.district_name %}
+        <tr>
+          <td>District Name:</td>
+          <td>
+            <strong>{{ office_held.district_name }}</strong>
+          </td>
+        </tr>
+      {% endif %}
 
-    <tr>
-      <td>OCD Division ID:</td>
-      <td><strong>{{ office_held.ocd_division_id }}</strong></td>
-    </tr>
+      <tr>
+        <td>OCD Division ID:</td>
+        <td>
+          <strong>{{ office_held.ocd_division_id }}</strong>
+        </td>
+      </tr>
 
-    <tr>
-      <td>District ID:</td>
-      <td><strong>{{ office_held.district_id }}</strong></td>
-    </tr>
+      <tr>
+        <td>District ID:</td>
+        <td>
+          <strong>{{ office_held.district_id }}</strong>
+        </td>
+      </tr>
 
-    {% if office_held.office_held_twitter_handle %}
-    <tr>
-      <td>Twitter Handle:</td>
-      <td>
-          <a href="https://twitter.com/{{ office_held.office_held_twitter_handle|iriencode }}"
-             target="_blank">{{ office_held.office_held_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-      </td>
-    </tr>
-    {% endif %}
+      {% if office_held.office_held_twitter_handle %}
+        <tr>
+          <td>Twitter Handle:</td>
+          <td>
+            <a href="https://twitter.com/{{ office_held.office_held_twitter_handle|iriencode }}"
+               target="_blank">{{ office_held.office_held_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+        </tr>
+      {% endif %}
 
-    {% if office_held.office_held_facebook_url %}
-    <tr>
-      <td>Facebook:</td>
-      <td>
-          <a href="{{ office_held.office_held_facebook_url|iriencode }}"
-             target="_blank">{{ office_held.office_held_facebook_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-      </td>
-    </tr>
-    {% endif %}
-    {% if office_held.office_held_url %}
-    <tr>
-      <td>Website:</td>
-      <td>
-          <a href="{{ office_held.office_held_url|iriencode }}"
-             target="_blank">{{ office_held.office_held_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-      </td>
-    </tr>
-    {% endif %}
-    <tr>
-      <td>Years with Data:</td>
-      <td>
+      {% if office_held.office_held_facebook_url %}
+        <tr>
+          <td>Facebook:</td>
+          <td>
+            <a href="{{ office_held.office_held_facebook_url|iriencode }}"
+               target="_blank">{{ office_held.office_held_facebook_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+        </tr>
+      {% endif %}
+      {% if office_held.office_held_url %}
+        <tr>
+          <td>Website:</td>
+          <td>
+            <a href="{{ office_held.office_held_url|iriencode }}" target="_blank">{{ office_held.office_held_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td>Years with Data:</td>
+        <td>
           <strong>
-        {% if office_held.year_with_data_2023 %}2023 {% endif %}
-        {% if office_held.year_with_data_2024 %}2024 {% endif %}
-        {% if office_held.year_with_data_2025 %}2025 {% endif %}
-        {% if office_held.year_with_data_2026 %}2026 {% endif %}
+            {% if office_held.year_with_data_2023 %}2023{% endif %}
+            {% if office_held.year_with_data_2024 %}2024{% endif %}
+            {% if office_held.year_with_data_2025 %}2025{% endif %}
+            {% if office_held.year_with_data_2026 %}2026{% endif %}
           </strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Is Battleground Race:</td>
-      <td>
+        </td>
+      </tr>
+      <tr>
+        <td>Is Battleground Race:</td>
+        <td>
           <strong>
-        {% if office_held.is_battleground_race_2019 %}2019 {% endif %}
-        {% if office_held.is_battleground_race_2020 %}2020 {% endif %}
-        {% if office_held.is_battleground_race_2021 %}2021 {% endif %}
-        {% if office_held.is_battleground_race_2022 %}2022 {% endif %}
-        {% if office_held.is_battleground_race_2023 %}2023 {% endif %}
-        {% if office_held.is_battleground_race_2024 %}2024 {% endif %}
-        {% if office_held.is_battleground_race_2025 %}2025 {% endif %}
-        {% if office_held.is_battleground_race_2026 %}2026 {% endif %}
+            {% if office_held.is_battleground_race_2019 %}2019{% endif %}
+            {% if office_held.is_battleground_race_2020 %}2020{% endif %}
+            {% if office_held.is_battleground_race_2021 %}2021{% endif %}
+            {% if office_held.is_battleground_race_2022 %}2022{% endif %}
+            {% if office_held.is_battleground_race_2023 %}2023{% endif %}
+            {% if office_held.is_battleground_race_2024 %}2024{% endif %}
+            {% if office_held.is_battleground_race_2025 %}2025{% endif %}
+            {% if office_held.is_battleground_race_2026 %}2026{% endif %}
           </strong>
-      </td>
-    </tr>
+        </td>
+      </tr>
 
-    {% if office_held.office_url %}
-    <tr>
-      <td>Office Held Website:</td>
-      <td><strong>{{ office_held.office_url }}</strong></td>
-    </tr>
-    {% endif %}
+      {% if office_held.office_url %}
+        <tr>
+          <td>Office Held Website:</td>
+          <td>
+            <strong>{{ office_held.office_url }}</strong>
+          </td>
+        </tr>
+      {% endif %}
 
-    {% if office_held.office_held_description %}
-    <tr>
-      <td>Office Held Description:</td>
-      <td>{{ office_held.office_held_description }}</td>
-    </tr>
-    {% endif %}
+      {% if office_held.office_held_description %}
+        <tr>
+          <td>Office Held Description:</td>
+          <td>{{ office_held.office_held_description }}</td>
+        </tr>
+      {% endif %}
     </table>
 
     <p>
       <br />
-      <a href="{% url 'office_held:office_held_edit' office_held.id %}">edit</a><br />
+      <a href="{% url 'office_held:office_held_edit' office_held.id %}">edit</a>
+      <br />
     </p>
     <table class="table">
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>Representative Name</td>
+        <td>Party</td>
+        <td>State</td>
+        <td>Twitter Handle</td>
+        <td>Ids</td>
+        <td>Website(s)</td>
+        <td>&nbsp;</td>
+      </tr>
+      {% for representative in representative_list %}
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Representative Name</td>
-            <td>Party</td>
-            <td>State</td>
-            <td>Twitter Handle</td>
-            <td>Ids</td>
-            <td>Website(s)</td>
-            <td>&nbsp;</td>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            {% if representative.we_vote_hosted_profile_image_url_medium %}
+              <a href="{% url 'representative:representative_edit' representative.id %}">
+                <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}'
+                     height="48px" />
+              </a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            <br />
+            <span class="u-no-break">In office:
+              {% if representative.year_in_office_2023 %}2023{% endif %}
+              {% if representative.year_in_office_2024 %}2024{% endif %}
+              {% if representative.year_in_office_2025 %}2025{% endif %}
+              {% if representative.year_in_office_2026 %}2026{% endif %}
+            </span>
+          </td>
+          <td>{{ representative.political_party|default_if_none:"" }}</td>
+          <td>{{ representative.state_code|default_if_none:"" }}</td>
+          <td>
+            {% if representative.representative_twitter_handle %}
+              <a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+                 target="_blank">{{ representative.representative_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
+              ({{ representative.twitter_followers_count|intcomma }} followers)
+            {% endif %}
+          </td>
+          <td>
+            {% if representative.we_vote_id %}
+              {{ representative.we_vote_id|default_if_none:"" }}
+              <br />
+            {% endif %}
+            {% if representative.office_held_we_vote_id %}
+              {{ representative.office_held_we_vote_id|default_if_none:"" }}
+              <br />
+            {% endif %}
+            {% if representative.politician_we_vote_id %}
+              {{ representative.politician_we_vote_id|default_if_none:"" }}
+              <br />
+            {% endif %}
+            {% if representative.ctcl_uuid %}
+              CTCL: <span style="font-size: 10px;">{{ representative.ctcl_uuid|default_if_none:"" }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if representative.representative_url %}
+              <a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
+            {% endif %}
+            {% if representative.representative_url2 %}
+              <a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
+            {% endif %}
+            {% if representative.representative_url3 %}
+              <a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
+            {% endif %}
+            {% if representative.wikipedia_url %}
+              <a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               style="font-size: .65em">(edit)</a>
+          </td>
         </tr>
-    {% for representative in representative_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if representative.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'representative:representative_edit' representative.id %}">
-                    <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}' height="48px" />
-                </a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                <br />
-                <span class="u-no-break">In office:
-        {% if representative.year_in_office_2023 %}2023 {% endif %}
-        {% if representative.year_in_office_2024 %}2024 {% endif %}
-        {% if representative.year_in_office_2025 %}2025 {% endif %}
-        {% if representative.year_in_office_2026 %}2026 {% endif %}
-                </span>
-            </td>
-            <td>{{ representative.political_party|default_if_none:"" }}</td>
-            <td>{{ representative.state_code|default_if_none:"" }}</td>
-            <td>{% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
-                    target="_blank">{{ representative.representative_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />
-                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td>
-                {% if representative.we_vote_id %}{{ representative.we_vote_id|default_if_none:"" }}<br />{% endif %}
-                {% if representative.office_held_we_vote_id %}{{ representative.office_held_we_vote_id|default_if_none:"" }}<br />{% endif %}
-                {% if representative.politician_we_vote_id %}{{ representative.politician_we_vote_id|default_if_none:"" }}<br />{% endif %}
-                {% if representative.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ representative.ctcl_uuid|default_if_none:"" }}</span>{% endif %}
-            </td>
-            <td>
-                {% if representative.representative_url %}<a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
-                {% if representative.representative_url2 %}<a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
-                {% if representative.representative_url3 %}<a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
-                {% if representative.wikipedia_url %}<a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-            </td>
-            <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
 
     <p></p>
-{% else %}
+  {% else %}
     <p>(no Office Held found)</p>
-{% endif %}
+  {% endif %}
 
 {% endblock %}

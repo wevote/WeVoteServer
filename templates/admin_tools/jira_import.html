@@ -4,122 +4,142 @@
 {% block title %}JIRA Import Tool{% endblock %}
 
 {% block content %}
-<h1>JIRA Import Tool</h1>
+  <h1>JIRA Import Tool</h1>
 
-<p><a href="{% url 'admin_tools:admin_home' %}">&larr; Back to Admin Menu</a></p>
+  <p>
+    <a href="{% url 'admin_tools:admin_home' %}">&larr; Back to Admin Menu</a>
+  </p>
 
-{% if messages %}
-<div>
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
+  {% if messages %}
+    <div>
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-{# ---- Credentials banner ---- #}
-{% if missing_vars %}
-<div class="alert alert-danger">
-    <strong>JIRA credentials incomplete.</strong>
-    The following environment variables are not set:
-    <ul>
+  {# ---- Credentials banner ---- #}
+  {% if missing_vars %}
+    <div class="alert alert-danger">
+      <strong>JIRA credentials incomplete.</strong>
+      The following environment variables are not set:
+      <ul>
         {% for var in missing_vars %}
-        <li><code>{{ var }}</code></li>
+          <li>
+            <code>{{ var }}</code>
+          </li>
         {% endfor %}
-    </ul>
-    Preview (parse only) will still work. Import requires all four credentials.
-</div>
-{% else %}
-<div class="alert alert-success">
-    <strong>JIRA credentials are configured.</strong>
-    Both Preview and Import are available.
-</div>
-{% endif %}
+      </ul>
+      Preview (parse only) will still work. Import requires all four credentials.
+    </div>
+  {% else %}
+    <div class="alert alert-success">
+      <strong>JIRA credentials are configured.</strong>
+      Both Preview and Import are available.
+    </div>
+  {% endif %}
 
-{# ---- Upload form ---- #}
-<h2>Upload Election Spreadsheet</h2>
-<p>Upload an Arkansas-style <code>.xlsx</code> file to preview or import its data into JIRA.</p>
+  {# ---- Upload form ---- #}
+  <h2>Upload Election Spreadsheet</h2>
+  <p>
+    Upload an Arkansas-style <code>.xlsx</code> file to preview or import its data into JIRA.
+  </p>
 
-<form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="form-group">
-        <label for="excel_file">Excel File (.xlsx)</label>
-        <input type="file" id="excel_file" name="excel_file" accept=".xlsx" required class="form-control">
+      <label for="excel_file">Excel File (.xlsx)</label>
+      <input type="file"
+             id="excel_file"
+             name="excel_file"
+             accept=".xlsx"
+             required
+             class="form-control">
     </div>
     <br>
     <button type="submit" name="action" value="preview" class="btn btn-default">
-        Preview (parse only — no JIRA connection)
+      Preview (parse only — no JIRA connection)
     </button>
     &nbsp;
-    <button type="submit" name="action" value="import" class="btn btn-primary"
-        {% if missing_vars %}disabled title="Set all JIRA credentials before importing"{% endif %}>
-        Import to JIRA
+    <button type="submit"
+            name="action"
+            value="import"
+            class="btn btn-primary"
+            {% if missing_vars %}disabled title="Set all JIRA credentials before importing"{% endif %}>
+      Import to JIRA
     </button>
-</form>
+  </form>
 
-{# ---- Preview results ---- #}
-{% if action == 'preview' and preview_summary %}
-<hr>
-<h2>Preview Results</h2>
-<p>
-    <strong>Total Epics:</strong> {{ preview_summary.total_epics }}&nbsp;&nbsp;
-    <strong>Total Candidates:</strong> {{ preview_summary.totals.total_candidates }}&nbsp;&nbsp;
-    <strong>Total Sub-tasks:</strong> {{ preview_summary.totals.total_sub_tasks }}
-</p>
-<table class="table table-bordered table-condensed" style="width: auto; margin-left: 20px;">
-    <thead>
+  {# ---- Preview results ---- #}
+  {% if action == 'preview' and preview_summary %}
+    <hr>
+    <h2>Preview Results</h2>
+    <p>
+      <strong>Total Epics:</strong> {{ preview_summary.total_epics }}&nbsp;&nbsp;
+      <strong>Total Candidates:</strong> {{ preview_summary.totals.total_candidates }}&nbsp;&nbsp;
+      <strong>Total Sub-tasks:</strong> {{ preview_summary.totals.total_sub_tasks }}
+    </p>
+    <table class="table table-bordered table-condensed"
+           style="width: auto;
+                  margin-left: 20px">
+      <thead>
         <tr>
-            <th>Epic Title</th>
-            <th>Election Date</th>
-            <th>Election ID</th>
-            <th>Candidates</th>
-            <th>Sub-tasks</th>
+          <th>Epic Title</th>
+          <th>Election Date</th>
+          <th>Election ID</th>
+          <th>Candidates</th>
+          <th>Sub-tasks</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {% for epic in preview_summary.epics %}
-        <tr>
+          <tr>
             <td>{{ epic.epic_title }}</td>
             <td>{{ epic.election_date }}</td>
             <td>{{ epic.election_id }}</td>
             <td>{{ epic.total_candidates }}</td>
             <td>{{ epic.total_sub_tasks }}</td>
-        </tr>
+          </tr>
         {% endfor %}
-    </tbody>
-</table>
-{% endif %}
+      </tbody>
+    </table>
+  {% endif %}
 
-{# ---- Import results ---- #}
-{% if action == 'import' and import_stats %}
-<hr>
-<h2>Import Results</h2>
-<table class="table table-bordered table-condensed" style="width: auto; margin-left: 20px;">
-    <thead>
+  {# ---- Import results ---- #}
+  {% if action == 'import' and import_stats %}
+    <hr>
+    <h2>Import Results</h2>
+    <table class="table table-bordered table-condensed"
+           style="width: auto;
+                  margin-left: 20px">
+      <thead>
         <tr>
-            <th>Item Type</th>
-            <th>Created</th>
-            <th>Failed</th>
+          <th>Item Type</th>
+          <th>Created</th>
+          <th>Failed</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         <tr>
-            <td>Epics</td>
-            <td>{{ import_stats.epics_created }}</td>
-            <td>{{ import_stats.epics_failed }}</td>
-        </tr>
-        <tr>
-            <td>Stories (Candidates)</td>
-            <td>{{ import_stats.stories_created }}</td>
-            <td>{{ import_stats.stories_failed }}</td>
+          <td>Epics</td>
+          <td>{{ import_stats.epics_created }}</td>
+          <td>{{ import_stats.epics_failed }}</td>
         </tr>
         <tr>
-            <td>Sub-tasks</td>
-            <td>{{ import_stats.subtasks_created }}</td>
-            <td>{{ import_stats.subtasks_failed }}</td>
+          <td>Stories (Candidates)</td>
+          <td>{{ import_stats.stories_created }}</td>
+          <td>{{ import_stats.stories_failed }}</td>
         </tr>
-    </tbody>
-</table>
-<p><em>Total duration: {{ import_stats.total_duration_ms|floatformat:0 }} ms</em></p>
-{% endif %}
+        <tr>
+          <td>Sub-tasks</td>
+          <td>{{ import_stats.subtasks_created }}</td>
+          <td>{{ import_stats.subtasks_failed }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <em>Total duration: {{ import_stats.total_duration_ms|floatformat:0 }} ms</em>
+    </p>
+  {% endif %}
 
 {% endblock %}

@@ -1,337 +1,462 @@
 {# templates/campaign/campaignx_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if campaignx %}{{ campaignx.campaign_title  }}{% else %}New Campaign{% endif %}{% endblock %}
+{% block title %}
+  {% if campaignx %}
+    {{ campaignx.campaign_title }}
+  {% else %}
+    New Campaign
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load humanize %}
-{% load template_filters %}
-<style>
+{% block content %}
+  {% load humanize %}
+  {% load template_filters %}
+  <style>
     span.nobr { white-space: nowrap; }
     select.form-control {
       height: auto !important;
     }
-</style>
-<a href="{% url 'campaign:campaignx_list' %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Cancel and Back to List</a>
+  </style>
+  <a href="{% url 'campaign:campaignx_list' %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Cancel and Back to List</a>
 
-<h1>{% if campaignx %}Campaign: {{ campaignx.campaign_title }}{% else %}Missing Campaign{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-
-{% if campaignx %}
-{% else %}
-    <p>This form only allows editing an existing CampaignX.</p>
-{% endif %}
-
-<form action="{% url "campaign:campaignx_edit_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
-    <input type="hidden" name="campaignx_owner_organization_we_vote_id" value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
-    <input type="hidden" name="campaignx_search" value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
-    <input type="hidden" name="campaignx_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% endif %}">
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">
+  <h1>
     {% if campaignx %}
-        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+      Campaign: {{ campaignx.campaign_title }}
     {% else %}
-        <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+      Missing Campaign
     {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
-    </div>
-</div>
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
-<div class="form-group">
-    <label for="campaign_title_id" class="col-sm-3 control-label">Campaign Title</label>
-    <div class="col-sm-8">
-        <input type="text" name="campaign_title" id="campaign_title_id" class="form-control"
+
+  {% if campaignx %}
+  {% else %}
+    <p>This form only allows editing an existing CampaignX.</p>
+  {% endif %}
+
+  <form action="{% url "campaign:campaignx_edit_process" %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
+    <input type="hidden"
+           name="campaignx_owner_organization_we_vote_id"
+           value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden"
+           name="campaignx_search"
+           value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
+    <input type="hidden"
+           name="campaignx_we_vote_id"
+           value="{% if campaignx %}{{ campaignx.we_vote_id }}{% endif %}">
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label">
+        {% if campaignx %}
+          <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+        {% else %}
+          <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+        {% endif %}
+      </label>
+      <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">
+          {% if campaignx %}
+            Update Campaign
+          {% else %}
+            CANNOT SAVE
+          {% endif %}
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="campaign_title_id" class="col-sm-3 control-label">Campaign Title</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="campaign_title"
+               id="campaign_title_id"
+               class="form-control"
                value="{% if campaignx %}{{ campaignx.campaign_title }}{% else %}{{ campaign_title }}{% endif %}" />
         {% if campaignx %}
-            {{ campaignx.we_vote_id }}
-            {% if campaignx.ocd_id_state_mismatch_found %}
-                &nbsp;&nbsp;&nbsp;
-                <input type="checkbox" name="ocd_id_state_mismatch_resolved" id="ocd_id_state_mismatch_resolved_id" value="1"
-                    {% if campaignx.ocd_id_state_mismatch_resolved %}checked{% endif %} />&nbsp;OCD ID Issue Resolved
-            {% endif %}
-            {% if campaignx and campaignx.linked_politician_we_vote_id %}
-                <br />
-                <span style="color: darkgray;">
-                    This campaign ('{{ campaignx.campaign_title }}') was generated for this politician (state_code: {{ politician_state_code }}):
-                </span>
-                <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
-                   target="_blank">
-                    {{ campaignx.linked_politician_we_vote_id }}
-                    <span class="glyphicon glyphicon-new-window"></span>
-                </a>
-            {% endif %}
+          {{ campaignx.we_vote_id }}
+          {% if campaignx.ocd_id_state_mismatch_found %}
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox"
+                   name="ocd_id_state_mismatch_resolved"
+                   id="ocd_id_state_mismatch_resolved_id"
+                   value="1"
+                   {% if campaignx.ocd_id_state_mismatch_resolved %}checked{% endif %} />
+            &nbsp;OCD ID Issue Resolved
+          {% endif %}
+          {% if campaignx and campaignx.linked_politician_we_vote_id %}
+            <br />
+            <span style="color: darkgray;">
+              This campaign ('{{ campaignx.campaign_title }}') was generated for this politician (state_code: {{ politician_state_code }}):
+            </span>
+            <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
+               target="_blank">
+              {{ campaignx.linked_politician_we_vote_id }}
+              <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+          {% endif %}
         {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="linked_politician_we_vote_id_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="linked_politician_we_vote_id_id" class="col-sm-3 control-label">
         Politician WeVote ID
         {% if campaignx and campaignx.linked_politician_we_vote_id %}
-        <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
-           target="_blank">
+          <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
+             target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
-        </a>
+          </a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="linked_politician_we_vote_id" id="linked_politician_we_vote_id_id" class="form-control"
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="linked_politician_we_vote_id"
+               id="linked_politician_we_vote_id_id"
+               class="form-control"
                value="{% if campaignx %}{{ campaignx.linked_politician_we_vote_id }}{% else %}{{ linked_politician_we_vote_id }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_we_vote_id_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="organization_we_vote_id_id" class="col-sm-3 control-label">
         Organization WeVote ID
         {% if campaignx.organization_we_vote_id %}
-            <a href="{% url 'organization:organization_edit_we_vote_id' campaignx.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+          <a href="{% url 'organization:organization_edit_we_vote_id' campaignx.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+             target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
-            </a>
+          </a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_we_vote_id" id="organization_we_vote_id_id" class="form-control"
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_we_vote_id"
+               id="organization_we_vote_id_id"
+               class="form-control"
                value="{% if campaignx %}{{ campaignx.organization_we_vote_id }}{% else %}{{ organization_we_vote_id }}{% endif %}" />
+      </div>
     </div>
-</div>
 
 
-{% if campaignx %}
-<div class="form-group">
-    <label for="seo_friendly_path_id" class="col-sm-3 control-label">
-        SEO Friendly Path
-        {% if campaignx.seo_friendly_path %}
-            <a href="{{ web_app_root_url }}/c/{{ campaignx.seo_friendly_path }}" target="_blank">
-            <span class="glyphicon glyphicon-new-window"></span>
-            </a>
-        {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"{% if campaignx.linked_politician_we_vote_id %} disabled{% endif %}
-               value="{% if campaignx %}{{ campaignx.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
-    {% if campaignx.linked_politician_we_vote_id %}
-        <span style="color: darkgray">Since this Campaign is hard-linked to a politician, please edit the SEO Friendly Path on the Politician record.</span>
-    {% endif %}
-    {% if path_list %}
-        {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
-    {% else %}
-        <div style="color: darkgray">
-        No alternate URL paths found.
-        </div>
-    {% endif %}
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Campaign Description</label>
-    <div class="col-sm-8 ">
-        <textarea
-            name="campaign_description"
-            class="form-control animated"
-            id="campaign_description_id"
-            placeholder="Campaign description..."
-            rows="8">{{ campaignx.campaign_description|default_if_none:"" }}</textarea>
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Politician List Serialized</label>
-    <div class="col-sm-8 ">
-        <textarea
-            name="politician_starter_list_serialized"
-            class="form-control animated"
-            id="politician_starter_list_serialized_id"
-            placeholder="Politician List Serialized..."
-            rows="2">{{ campaignx.politician_starter_list_serialized|default_if_none:"" }}</textarea>
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="final_election_date_as_integer_id" class="col-sm-3 control-label">Election Date</label>
-    <div class="col-sm-8">
-        <input type="text" name="final_election_date_as_integer" id="final_election_date_as_integer_id" class="form-control"
-               value="{% if campaignx %}{{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% else %}{{ final_election_date_as_integer|default_if_none:"" }}{% endif %}" />
-        The last election any of the candidates are in. In YYYYMMDD format. This campaign won't be promoted after this date.
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">CampaignX Owner: Team Review Mode</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="is_in_team_review_mode" id="is_in_team_review_mode_id" value="1"
-                {% if campaignx.is_in_team_review_mode %}checked{% endif %} />
-        <label for="is_in_team_review_mode_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, owner/team still reviewing, so don't list on any site. Campaign can still be visited with direct link by anyone. Uncheck when ready to promote.</span></label>
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">CampaignX Owner: Allow Promotion</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="is_ok_to_promote_on_we_vote" id="is_ok_to_promote_on_we_vote_id" value="1"
-                {% if campaignx.is_ok_to_promote_on_we_vote %}checked{% endif %} />
-        <label for="is_ok_to_promote_on_we_vote_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, campaign may be promoted on WeVote.US. Uncheck if the campaign owner(s) don&apos;t want promotion.</span></label>
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Is Not Promoted By We Vote?</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="is_not_promoted_by_we_vote" id="is_not_promoted_by_we_vote_id" value="1"
-                {% if campaignx.is_not_promoted_by_we_vote %}checked{% endif %} />
-        <label for="is_not_promoted_by_we_vote_id" style="font-weight: normal !important;">Do not show in lists on WeVote.US</label>
-        <textarea name="is_not_promoted_by_we_vote_reason"
-                  class="form-control animated"
-                  id="is_not_promoted_by_we_vote_reason_id"
-                  placeholder="If not promoted by We Vote, why? (This text is visible to Campaign Owner.)">{{ campaignx.is_not_promoted_by_we_vote_reason|default_if_none:"" }}</textarea>
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Is Blocked By We Vote?</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="is_blocked_by_we_vote" id="is_blocked_by_we_vote_id" value="1"
-                {% if campaignx.is_blocked_by_we_vote %}checked{% endif %} />
-        <label for="is_blocked_by_we_vote_id" style="font-weight: normal !important;">Prevent ability to see on WeVote.US</label>
-        <textarea name="is_blocked_by_we_vote_reason"
-                  class="form-control animated"
-                  id="is_blocked_by_we_vote_reason_id"
-                  placeholder="If blocked by We Vote, why? (This text is visible to Campaign Owner.)">{{ campaignx.is_blocked_by_we_vote_reason|default_if_none:"" }}</textarea>
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Don&apos;t Require Minimum 5 Supporters</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="supporters_count_minimum_ignored" id="supporters_count_minimum_ignored_id" value="1"
-                {% if campaignx.supporters_count_minimum_ignored %}checked{% endif %} />
-        <label for="supporters_count_minimum_ignored_id" style="font-weight: normal !important;"><span style="color: darkgray">If checked, promote campaign on WeVote.US before 5 people have supported. Uncheck to require 5 supporters.</span></label>
-    </div>
-</div>
-
-{% if campaignx.in_draft_mode %}
-<div class="form-group">
-    <label class="col-sm-3 control-label">Take Out Of Draft Mode</label>
-    <div class="col-sm-8 ">
-        <input type="checkbox" name="take_out_of_draft_mode" id="take_out_of_draft_mode_id" value="1" />
-        <label for="take_out_of_draft_mode_id" style="font-weight: normal !important;"><span style="color: darkgray">Check to take campaign out of draft mode.</span></label>
-    </div>
-</div>
-{% endif %}
-
-{% endif %}
-
-
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">
     {% if campaignx %}
-        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
-    {% else %}
-        <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+      <div class="form-group">
+        <label for="seo_friendly_path_id" class="col-sm-3 control-label">
+          SEO Friendly Path
+          {% if campaignx.seo_friendly_path %}
+            <a href="{{ web_app_root_url }}/c/{{ campaignx.seo_friendly_path }}"
+               target="_blank">
+              <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+          {% endif %}
+        </label>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="seo_friendly_path"
+                 id="seo_friendly_path_id"
+                 class="form-control"
+                 {% if campaignx.linked_politician_we_vote_id %}disabled{% endif %}
+                 value="{% if campaignx %}{{ campaignx.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
+          {% if campaignx.linked_politician_we_vote_id %}
+            <span style="color: darkgray">Since this Campaign is hard-linked to a politician, please edit the SEO Friendly Path on the Politician record.</span>
+          {% endif %}
+          {% if path_list %}
+            {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+          {% else %}
+            <div style="color: darkgray">No alternate URL paths found.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Campaign Description</label>
+        <div class="col-sm-8 ">
+          <textarea name="campaign_description"
+                    class="form-control animated"
+                    id="campaign_description_id"
+                    placeholder="Campaign description..."
+                    rows="8">{{ campaignx.campaign_description|default_if_none:"" }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Politician List Serialized</label>
+        <div class="col-sm-8 ">
+          <textarea name="politician_starter_list_serialized"
+                    class="form-control animated"
+                    id="politician_starter_list_serialized_id"
+                    placeholder="Politician List Serialized..."
+                    rows="2">{{ campaignx.politician_starter_list_serialized|default_if_none:"" }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="final_election_date_as_integer_id"
+               class="col-sm-3 control-label">Election Date</label>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="final_election_date_as_integer"
+                 id="final_election_date_as_integer_id"
+                 class="form-control"
+                 value="{% if campaignx %}{{ campaignx.final_election_date_as_integer|default_if_none:"" }}{% else %}{{ final_election_date_as_integer|default_if_none:"" }}{% endif %}" />
+          The last election any of the candidates are in. In YYYYMMDD format. This campaign won't be promoted after this date.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">CampaignX Owner: Team Review Mode</label>
+        <div class="col-sm-8 ">
+          <input type="checkbox"
+                 name="is_in_team_review_mode"
+                 id="is_in_team_review_mode_id"
+                 value="1"
+                 {% if campaignx.is_in_team_review_mode %}checked{% endif %} />
+          <label for="is_in_team_review_mode_id"
+                 style="font-weight: normal !important">
+            <span style="color: darkgray">If checked, owner/team still reviewing, so don't list on any site. Campaign can still be visited with direct link by anyone. Uncheck when ready to promote.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">CampaignX Owner: Allow Promotion</label>
+        <div class="col-sm-8 ">
+          <input type="checkbox"
+                 name="is_ok_to_promote_on_we_vote"
+                 id="is_ok_to_promote_on_we_vote_id"
+                 value="1"
+                 {% if campaignx.is_ok_to_promote_on_we_vote %}checked{% endif %} />
+          <label for="is_ok_to_promote_on_we_vote_id"
+                 style="font-weight: normal !important">
+            <span style="color: darkgray">If checked, campaign may be promoted on WeVote.US. Uncheck if the campaign owner(s) don&apos;t want promotion.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Is Not Promoted By We Vote?</label>
+        <div class="col-sm-8 ">
+          <input type="checkbox"
+                 name="is_not_promoted_by_we_vote"
+                 id="is_not_promoted_by_we_vote_id"
+                 value="1"
+                 {% if campaignx.is_not_promoted_by_we_vote %}checked{% endif %} />
+          <label for="is_not_promoted_by_we_vote_id"
+                 style="font-weight: normal !important">Do not show in lists on WeVote.US</label>
+          <textarea name="is_not_promoted_by_we_vote_reason"
+                    class="form-control animated"
+                    id="is_not_promoted_by_we_vote_reason_id"
+                    placeholder="If not promoted by We Vote, why? (This text is visible to Campaign Owner.)">{{ campaignx.is_not_promoted_by_we_vote_reason|default_if_none:"" }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Is Blocked By We Vote?</label>
+        <div class="col-sm-8 ">
+          <input type="checkbox"
+                 name="is_blocked_by_we_vote"
+                 id="is_blocked_by_we_vote_id"
+                 value="1"
+                 {% if campaignx.is_blocked_by_we_vote %}checked{% endif %} />
+          <label for="is_blocked_by_we_vote_id"
+                 style="font-weight: normal !important">Prevent ability to see on WeVote.US</label>
+          <textarea name="is_blocked_by_we_vote_reason"
+                    class="form-control animated"
+                    id="is_blocked_by_we_vote_reason_id"
+                    placeholder="If blocked by We Vote, why? (This text is visible to Campaign Owner.)">{{ campaignx.is_blocked_by_we_vote_reason|default_if_none:"" }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">Don&apos;t Require Minimum 5 Supporters</label>
+        <div class="col-sm-8 ">
+          <input type="checkbox"
+                 name="supporters_count_minimum_ignored"
+                 id="supporters_count_minimum_ignored_id"
+                 value="1"
+                 {% if campaignx.supporters_count_minimum_ignored %}checked{% endif %} />
+          <label for="supporters_count_minimum_ignored_id"
+                 style="font-weight: normal !important">
+            <span style="color: darkgray">If checked, promote campaign on WeVote.US before 5 people have supported. Uncheck to require 5 supporters.</span>
+          </label>
+        </div>
+      </div>
+
+      {% if campaignx.in_draft_mode %}
+        <div class="form-group">
+          <label class="col-sm-3 control-label">Take Out Of Draft Mode</label>
+          <div class="col-sm-8 ">
+            <input type="checkbox"
+                   name="take_out_of_draft_mode"
+                   id="take_out_of_draft_mode_id"
+                   value="1" />
+            <label for="take_out_of_draft_mode_id"
+                   style="font-weight: normal !important">
+              <span style="color: darkgray">Check to take campaign out of draft mode.</span>
+            </label>
+          </div>
+        </div>
+      {% endif %}
+
     {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
+
+
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label">
+        {% if campaignx %}
+          <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+        {% else %}
+          <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+        {% endif %}
+      </label>
+      <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">
+          {% if campaignx %}
+            Update Campaign
+          {% else %}
+            CANNOT SAVE
+          {% endif %}
+        </button>
+      </div>
     </div>
-</div>
-</form>
+  </form>
 
-<div style='clear:both'></div>
+  <div style='clear:both'></div>
 
 
-{% if campaignx %}
-  <br />
-  <br />
+  {% if campaignx %}
+    <br />
+    <br />
     {% if campaignx.we_vote_hosted_campaign_photo_large_url %}
-        <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}"><br />
-        Large<br />
+      <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}">
+      <br />
+      Large
+      <br />
     {% endif %}
     {% if campaignx.we_vote_hosted_profile_image_url_large %}
-        <img src="{{ campaignx.we_vote_hosted_profile_image_url_large }}"><br />
-        Politician Photo Large<br />
+      <img src="{{ campaignx.we_vote_hosted_profile_image_url_large }}">
+      <br />
+      Politician Photo Large
+      <br />
     {% endif %}
-{% endif %}
+  {% endif %}
 
-{% if related_campaignx_list %}
+  {% if related_campaignx_list %}
     <h4>Possibly Related Campaigns</h4>
     <table class="table">
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>Campaign Title</td>
+        <td>SEO Friendly Path</td>
+        <td>Id</td>
+      </tr>
+      {% for related_campaignx in related_campaignx_list %}
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Campaign Title</td>
-            <td>SEO Friendly Path</td>
-            <td>Id</td>
-        </tr>
-    {% for related_campaignx in related_campaignx_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if related_campaignx.we_vote_hosted_campaign_photo_medium_url %}
-                <a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-                    <img src='{{ related_campaignx.we_vote_hosted_campaign_photo_medium_url }}' height="48px" />
-                </a>
-                {% elif related_campaignx.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-                    <img src='{{ related_campaignx.we_vote_hosted_profile_image_url_medium }}' height="48px" />
-                </a>
-                {% endif %}
-            </td>
-            <td><a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-                {{ related_campaignx.campaign_title }} <span class="glyphicon glyphicon-new-window"></span></a>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            {% if related_campaignx.we_vote_hosted_campaign_photo_medium_url %}
+              <a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">
+                <img src='{{ related_campaignx.we_vote_hosted_campaign_photo_medium_url }}'
+                     height="48px" />
+              </a>
+            {% elif related_campaignx.we_vote_hosted_profile_image_url_medium %}
+              <a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">
+                <img src='{{ related_campaignx.we_vote_hosted_profile_image_url_medium }}'
+                     height="48px" />
+              </a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'campaign:campaignx_summary' related_campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">
+            {{ related_campaignx.campaign_title }} <span class="glyphicon glyphicon-new-window"></span></a>
             &nbsp;
-                <br />
-                {{ related_campaignx.supporters_count|intcomma }} supporters
-                &nbsp;&nbsp;
-                <a href="{% url 'campaign:compare_two_campaigns_for_merge' %}?campaignx1_we_vote_id={{ campaignx.we_vote_id }}&campaignx2_we_vote_id={{ related_campaignx.we_vote_id }}" target="_blank">
-                    compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td class="padded">
-                {% if related_campaignx.seo_friendly_path %}<a href="https://quality.wevote.us/c/{{ related_campaignx.seo_friendly_path }}" target="_blank" target="_blank">{{ related_campaignx.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}</td>
-            </td>
-            <td>{{ related_campaignx.id }} &nbsp;
-                {{ related_campaignx.we_vote_id }}
-                {% if related_campaignx.linked_politician_we_vote_id %}
-                    {{ related_campaignx.linked_politician_we_vote_id }}
-                {% else %}
-                    ("pol"&nbsp;missing)
-                {% endif %}
-            </td>
-        </tr>
+            <br />
+            {{ related_campaignx.supporters_count|intcomma }} supporters
+            &nbsp;&nbsp;
+            <a href="{% url 'campaign:compare_two_campaigns_for_merge' %}?campaignx1_we_vote_id={{ campaignx.we_vote_id }}&campaignx2_we_vote_id={{ related_campaignx.we_vote_id }}"
+               target="_blank">
+            compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+          <td class="padded">
+            {% if related_campaignx.seo_friendly_path %}
+              <a href="https://quality.wevote.us/c/{{ related_campaignx.seo_friendly_path }}"
+                 target="_blank"
+                 target="_blank">{{ related_campaignx.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+          </td>
+        </td>
+        <td>
+          {{ related_campaignx.id }} &nbsp;
+          {{ related_campaignx.we_vote_id }}
+          {% if related_campaignx.linked_politician_we_vote_id %}
+            {{ related_campaignx.linked_politician_we_vote_id }}
+          {% else %}
+            ("pol"&nbsp;missing)
+          {% endif %}
+        </td>
+      </tr>
     {% endfor %}
-    </table>
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
+  </table>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
 {% endif %}
 
-<form action="{% url "campaign:compare_two_campaigns_for_merge" %}" method="get" class="form-horizontal" target="_blank">
-    <input type="hidden" name="campaignx1_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
-    <input type="text" name="campaignx2_we_vote_id" placeholder="Enter We Vote ID for other campaign" size="40" />
-    <button type="submit" class="btn btn-default">Compare with Specific Campaign</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<form action="{% url "campaign:compare_two_campaigns_for_merge" %}"
+      method="get"
+      class="form-horizontal"
+      target="_blank">
+  <input type="hidden"
+         name="campaignx1_we_vote_id"
+         value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+  <input type="text"
+         name="campaignx2_we_vote_id"
+         placeholder="Enter We Vote ID for other campaign"
+         size="40" />
+  <button type="submit" class="btn btn-default">Compare with Specific Campaign</button>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </form>
 
 
 {% if campaignx %}
   <br />
   <br />
-<form action="{% url "campaign:campaignx_delete_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="campaignx_we_vote_id" 
-         value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
-  <input type="hidden" name="google_civic_election_id" 
-         value="{{ campaignx.google_civic_election_id|default_if_none:''|default:''}}">
-  <input type="hidden" name="campaignx_owner_organization_we_vote_id" 
-         value="{{ campaignx_owner_organization_we_vote_id|default_if_none:''|default:'' }}">
-  <input type="hidden" name="campaignx_search" value="{{ campaignx_search|default_if_none:''|default:'' }}">
-  <button type="submit" class="btn btn-danger">Delete Campaign</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this campaign
-  </label>
-</form>
+  <form action="{% url "campaign:campaignx_delete_process" %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
+    <input type="hidden"
+           name="campaignx_we_vote_id"
+           value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ campaignx.google_civic_election_id|default_if_none:''|default:'' }}">
+    <input type="hidden"
+           name="campaignx_owner_organization_we_vote_id"
+           value="{{ campaignx_owner_organization_we_vote_id|default_if_none:''|default:'' }}">
+    <input type="hidden"
+           name="campaignx_search"
+           value="{{ campaignx_search|default_if_none:''|default:'' }}">
+    <button type="submit" class="btn btn-danger">Delete Campaign</button>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="confirm_delete_id">
+      <input type="checkbox"
+             name="confirm_delete"
+             id="confirm_delete_id"
+             value="1" />
+      Check to confirm that you want to permanently delete this campaign
+    </label>
+  </form>
   <br />
   <br />
 {% endif %}

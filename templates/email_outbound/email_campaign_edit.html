@@ -5,265 +5,328 @@
 {% block title %}Email Campaigns › New Campaign{% endblock %}
 
 {% block content %}
-{% include "admin_tools/loading_banner.html" %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+  <a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     &lt; Back to Email Campaigns
-</a>
+  </a>
 
-<div class="container-fluid mt-4" style="max-width: 1400px;">
-  <div class="row">
-    <!-- Campaign Form -->
-    <div class="col-md-12">
-<div class="p-4 bg-white rounded shadow-sm border">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">
-      Email Campaigns › {% if email_campaign %}Edit Campaign{% else %}New Email Campaign{% endif %}
-    </h4>
-    <div>
-      <a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&draft_uuid={{ draft_uuid }}" class="btn btn-outline-secondary me-2">Cancel</a>
-    {% if emails_sent %}
-        <button type="input" form="email-campaign-form" class="btn btn-secondary me-2" disabled>ALREADY SENT</button>
-    {% else %}
-      <button type="submit" form="email-campaign-form" class="btn btn-primary me-2">Save Draft</button>
-    {% endif %}
-    </div>
-    {% if emails_sent %}
-        {% if email_campaign.date_sent %}
-            Sent on {{ email_campaign.date_sent|date:"F j, Y, g:ia" }}
-        {% endif %}
-    {% else %}
-    <div>
-        <select name="send-time" id="send-time-select"
-                class="form-select form-select-sm me-0"
-                style="width: auto;">
-          <option value="now">Now</option>
-          <option value="tomorrow_9" disabled>Tomorrow at 9:00 AM</option>
-          <option value="tomorrow_16" disabled>Tomorrow at 4:00 PM</option>
-          <option value="day2_9" disabled>Day after tomorrow</option>
-          <option value="day3_9" disabled>Day after that</option>
-          <option value="saved" style="display: none;" disabled></option>
-          <option value="custom" disabled>Custom…</option>
-        </select>
-        <input type="datetime-local" id="scheduled-datetime" class="form-control form-control-sm me-2" style="width: auto; display: none !important;">&nbsp;
-        <button type="submit" id="send-campaign-btn" class="btn btn-success">Send</button> <!-- Also submits email-campaign-form //-->
-    </div>
-    {% endif %}
-  </div>
-
-  <form id="email-campaign-form" method="post" action="{% url 'email_outbound:email_campaign_edit_process' %}">
-    {% csrf_token %}
-
-    <!-- Campaign Name -->
-    <div class="mb-3 d-flex align-items-center gap-3">
-        <label for="campaign_title"
-               class="form-label mb-0"
-               style="white-space: nowrap; min-width: 150px;"
-        >Campaign Name <span class="text-danger">*</span></label>
-        <input type="text"
-               id="campaign_title"
-               name="campaign_title"
-               class="form-control"
-               value="{% if email_campaign %}{{ email_campaign.email_campaign_name|default_if_none:"" }}{% endif %}"
-               placeholder="Enter campaign name"
-               required>
-    </div>
-
-    <!-- From Email and From Name (Side by Side) -->
+  <div class="container-fluid mt-4" style="max-width: 1400px;">
     <div class="row">
-        <div class="col-md-4">
-            <div class="mb-3">
-                <label for="from_email_id" class="form-label">From Email</label>
-                <input type="text"
-                       id="from_email_id"
-                       name="from_email"
-                       class="form-control"
-                       value="{% if email_campaign %}{{ email_campaign.from_email|default_if_none:"" }}{% endif %}"
-                       placeholder="Default is info@wevote.us">
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="mb-3">
-                <label for="from_email_name_id" class="form-label">From Name</label>
-                <input type="text"
-                       id="from_email_name_id"
-                       name="from_email_name"
-                       class="form-control"
-                       value="{% if email_campaign %}{{ email_campaign.from_email_name|default_if_none:"" }}{% endif %}"
-                       placeholder="Default is WeVote">
-            </div>
-        </div>
-
-        <div class="col-md-4">
-    {% if not emails_sent %}
-        {% include "components/selection_tree/selection_tree.html" with selection_type="Email Template" selection_tree_data=folder_tree %}
-    {% endif %}
-        </div>
-    </div>
-
-    <!-- Display attachments -->
-    <ul id="existingAttachments" class="list-group">
-        {% for att in email_campaign.attachments.all %}
-          <li class="list-group-item d-flex justify-content-between align-items-center" data-att-id="{{ att.id }}">
-            {% if att.is_inline %}
-              <div class="d-flex flex-row align-items-center" >
-                <div class="d-flex flex-column mr-3">
-                  <span class="fw-semibold">{{ att.original_name|default:"file" }}</span>
-                  <small class="muted">{{ att.created }}</small>
-                </div>
-                <span><b>(Inline)</b></span>
-              </div>
-            {% else %}
-              <div class="d-flex flex-column">
-                <span class="fw-semibold">{{ att.original_name|default:"file" }}</span>
-                <small class="muted">{{ att.created }}</small>
-              </div>
-            {% endif %}
-            <div class="d-flex gap-2">
-              <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'email_outbound:email_attachment_download' attachment_id=att.id %}">
-                Download
-              </a>
-
-              {% if not att.is_inline %}
-                <button type="button" class="btn btn-sm btn-outline-danger"
-                        onclick="deleteCampaignAttachment({{ att.id }})">
-                  Delete
-                </button>
+      <!-- Campaign Form -->
+      <div class="col-md-12">
+        <div class="p-4 bg-white rounded shadow-sm border">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">
+              Email Campaigns ›
+              {% if email_campaign %}
+                Edit Campaign
+              {% else %}
+                New Email Campaign
+              {% endif %}
+            </h4>
+            <div>
+              <a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&draft_uuid={{ draft_uuid }}"
+                 class="btn btn-outline-secondary me-2">Cancel</a>
+              {% if emails_sent %}
+                <button type="input"
+                        form="email-campaign-form"
+                        class="btn btn-secondary me-2"
+                        disabled>ALREADY SENT</button>
+              {% else %}
+                <button type="submit" form="email-campaign-form" class="btn btn-primary me-2">Save Draft</button>
               {% endif %}
             </div>
-          </li>
-        {% empty %}
-          <li class="list-group-item muted">No attachments yet.</li>
-        {% endfor %}
-    </ul>
-
-
-    {# Upload buttons for attachments   #}
-    <div class="d-flex flex-column gap-3">
-      <div class="d-flex gap-2 align-items-center mb-2">
-        <label class="btn btn-primary mb-0">
-          Choose files
-          <input id="attachmentInput" type="file" name="attachments" multiple class="d-none">
-        </label>
-
-        <button id="uploadBtn" type="button" class="btn btn-outline-primary" disabled>
-          <span id="btnText">Upload selected</span>
-          <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-        </button>
-      </div>
-
-      <ul id="fileList" class="list-group list-group-flush small"></ul>
-    </div>
-
-
-    <!-- Recipients Section -->
-    <div class="mb-3">
-      <div class="d-flex gap-2 mb-2">
-          <div>
-              <label class="form-label">Add Audience ID</label>
-              <div class="d-flex gap-2 mb-2">
-                <input type="text"
-                       id="audience_builder_id_id"
-                       name="audience_builder_id"
-                       class="form-control"
-                       value="{% if email_campaign and email_campaign.audience_builder_id != 0 %}{{ email_campaign.audience_builder_id|default_if_none:"" }}{% endif %}"
-                       placeholder="ID of Audience Builder..." style="flex: 1;"
-                >
+            {% if emails_sent %}
+              {% if email_campaign.date_sent %}Sent on {{ email_campaign.date_sent|date:"F j, Y, g:ia" }}{% endif %}
+            {% else %}
+              <div>
+                <select name="send-time"
+                        id="send-time-select"
+                        class="form-select form-select-sm me-0"
+                        style="width: auto">
+                  <option value="now">Now</option>
+                  <option value="tomorrow_9" disabled>Tomorrow at 9:00 AM</option>
+                  <option value="tomorrow_16" disabled>Tomorrow at 4:00 PM</option>
+                  <option value="day2_9" disabled>Day after tomorrow</option>
+                  <option value="day3_9" disabled>Day after that</option>
+                  <option value="saved" style="display: none;" disabled></option>
+                  <option value="custom" disabled>Custom…</option>
+                </select>
+                <input type="datetime-local"
+                       id="scheduled-datetime"
+                       class="form-control form-control-sm me-2"
+                       style="width: auto;
+                              display: none !important">
+                &nbsp;
+                <button type="submit" id="send-campaign-btn" class="btn btn-success">Send</button>
+                <!-- Also submits email-campaign-form //-->
               </div>
+            {% endif %}
           </div>
-       {% if not emails_sent %}
-          <div class="col-md-4">
-              <label class="form-label">Add Individual Recipients</label>
-              <div class="d-flex gap-2 mb-2">
-                <input type="text" id="recipient_search" class="form-control" placeholder="Search by name or email..." style="flex: 1;">
-                <button type="button" class="btn border border-secondary text-secondary bg-transparent" id="search_btn" style="white-space: nowrap;">Add Recipient</button>
+
+          <form id="email-campaign-form"
+                method="post"
+                action="{% url 'email_outbound:email_campaign_edit_process' %}">
+            {% csrf_token %}
+
+            <!-- Campaign Name -->
+            <div class="mb-3 d-flex align-items-center gap-3">
+              <label for="campaign_title"
+                     class="form-label mb-0"
+                     style="white-space: nowrap;
+                            min-width: 150px">
+                Campaign Name <span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     id="campaign_title"
+                     name="campaign_title"
+                     class="form-control"
+                     value="{% if email_campaign %}{{ email_campaign.email_campaign_name|default_if_none:"" }}{% endif %}"
+                     placeholder="Enter campaign name"
+                     required>
+            </div>
+
+            <!-- From Email and From Name (Side by Side) -->
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="from_email_id" class="form-label">From Email</label>
+                  <input type="text"
+                         id="from_email_id"
+                         name="from_email"
+                         class="form-control"
+                         value="{% if email_campaign %}{{ email_campaign.from_email|default_if_none:"" }}{% endif %}"
+                         placeholder="Default is info@wevote.us">
+                </div>
               </div>
-          </div>
-       {% endif %}
-      </div>
-      
-      <div id="search_results" class="border rounded p-2 mb-2" style="max-height: 300px; overflow-y: auto; display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="text-muted small">Select recipients to add</span>
-          <button type="button" class="btn btn-sm btn-primary" id="add_selected_btn">Add Selected</button>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="from_email_name_id" class="form-label">From Name</label>
+                  <input type="text"
+                         id="from_email_name_id"
+                         name="from_email_name"
+                         class="form-control"
+                         value="{% if email_campaign %}{{ email_campaign.from_email_name|default_if_none:"" }}{% endif %}"
+                         placeholder="Default is WeVote">
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                {% if not emails_sent %}
+                  {% include "components/selection_tree/selection_tree.html" with selection_type="Email Template" selection_tree_data=folder_tree %}
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Display attachments -->
+            <ul id="existingAttachments" class="list-group">
+              {% for att in email_campaign.attachments.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    data-att-id="{{ att.id }}">
+                  {% if att.is_inline %}
+                    <div class="d-flex flex-row align-items-center">
+                      <div class="d-flex flex-column mr-3">
+                        <span class="fw-semibold">{{ att.original_name|default:"file" }}</span>
+                        <small class="muted">{{ att.created }}</small>
+                      </div>
+                      <span><b>(Inline)</b></span>
+                    </div>
+                  {% else %}
+                    <div class="d-flex flex-column">
+                      <span class="fw-semibold">{{ att.original_name|default:"file" }}</span>
+                      <small class="muted">{{ att.created }}</small>
+                    </div>
+                  {% endif %}
+                  <div class="d-flex gap-2">
+                    <a class="btn btn-sm btn-outline-primary"
+                       href="{% url 'email_outbound:email_attachment_download' attachment_id=att.id %}">Download</a>
+
+                    {% if not att.is_inline %}
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger"
+                              onclick="deleteCampaignAttachment({{ att.id }})">Delete</button>
+                    {% endif %}
+                  </div>
+                </li>
+              {% empty %}
+                <li class="list-group-item muted">No attachments yet.</li>
+              {% endfor %}
+            </ul>
+
+
+            {# Upload buttons for attachments   #}
+            <div class="d-flex flex-column gap-3">
+              <div class="d-flex gap-2 align-items-center mb-2">
+                <label class="btn btn-primary mb-0">
+                  Choose files
+                  <input id="attachmentInput"
+                         type="file"
+                         name="attachments"
+                         multiple
+                         class="d-none">
+                </label>
+
+                <button id="uploadBtn" type="button" class="btn btn-outline-primary" disabled>
+                  <span id="btnText">Upload selected</span>
+                  <span id="btnSpinner"
+                        class="spinner-border spinner-border-sm d-none"
+                        role="status"></span>
+                </button>
+              </div>
+
+              <ul id="fileList" class="list-group list-group-flush small">
+              </ul>
+            </div>
+
+
+            <!-- Recipients Section -->
+            <div class="mb-3">
+              <div class="d-flex gap-2 mb-2">
+                <div>
+                  <label class="form-label">Add Audience ID</label>
+                  <div class="d-flex gap-2 mb-2">
+                    <input type="text"
+                           id="audience_builder_id_id"
+                           name="audience_builder_id"
+                           class="form-control"
+                           value="{% if email_campaign and email_campaign.audience_builder_id != 0 %}{{ email_campaign.audience_builder_id|default_if_none:"" }}{% endif %}"
+                           placeholder="ID of Audience Builder..."
+                           style="flex: 1">
+                  </div>
+                </div>
+                {% if not emails_sent %}
+                  <div class="col-md-4">
+                    <label class="form-label">Add Individual Recipients</label>
+                    <div class="d-flex gap-2 mb-2">
+                      <input type="text"
+                             id="recipient_search"
+                             class="form-control"
+                             placeholder="Search by name or email..."
+                             style="flex: 1">
+                      <button type="button"
+                              class="btn border border-secondary text-secondary bg-transparent"
+                              id="search_btn"
+                              style="white-space: nowrap">Add Recipient</button>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div id="search_results"
+                   class="border rounded p-2 mb-2"
+                   style="max-height: 300px;
+                          overflow-y: auto;
+                          display: none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Select recipients to add</span>
+                  <button type="button" class="btn btn-sm btn-primary" id="add_selected_btn">Add Selected</button>
+                </div>
+                <div id="search_results_list"></div>
+              </div>
+
+              <div class="border rounded p-3"
+                   style="min-height: 100px;
+                          background-color: #f8f9fa">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>Selected Recipients (<span id="recipient_count">0</span>)</strong>
+                  {% if not emails_sent %}
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            id="clear_all_btn">Clear All</button>
+                  {% endif %}
+                </div>
+                <div id="selected_recipients"></div>
+              </div>
+
+              <input type="hidden" name="recipient_ids" id="recipient_ids_input" value="">
+            </div>
+
+            <!-- Subject Line -->
+            <div class="mb-3 d-flex align-items-center gap-3">
+              <label for="email_subject"
+                     class="form-label mb-0"
+                     style="white-space: nowrap;
+                            min-width: 150px">
+                Subject<span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     id="email_subject"
+                     name="email_subject"
+                     class="form-control"
+                     value="{% if email_campaign %}{{ email_campaign.email_subject_template_raw|default_if_none:"" }}{% endif %}"
+                     placeholder="Enter email subject"
+                     required>
+            </div>
+
+            <!-- Email Preview/Editor -->
+            <div class="mb-3">
+              <textarea id="email_body"
+                        name="email_body"
+                        class="form-control js-tinymce"
+                        rows="10">{% if email_campaign %}{{ email_campaign.email_body_template_raw }}{% endif %}</textarea>
+              <small class="text-muted">This will auto-populate when you select a template above. You can edit it before sending.</small>
+            </div>
+
+            <!-- Customization tokens -->
+            <div class="mb-4">
+              <h5>Customization Tokens</h5>
+              <p class="text-muted">Click a token to copy it so you can paste it into the message above.</p>
+
+              <div class="token-grid">
+                {% for token in token_list %}
+                  <button type="button"
+                          class="btn btn-outline-secondary btn-sm token-btn"
+                          data-token="{{ token }}"
+                          style="min-width: 240px;
+                                 text-align: left">{{ token }}</button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Hidden Context Inputs -->
+            <input type="hidden"
+                   name="google_civic_election_id"
+                   value="{{ google_civic_election_id }}">
+            <input type="hidden" name="state_code" value="{{ state_code }}">
+            <input type="hidden"
+                   name="email_campaign_id"
+                   id="email_campaign_id"
+                   value="{% if email_campaign %}{{ email_campaign.id }}{% endif %}">
+            <input type="hidden"
+                   name="draft_uuid"
+                   id="draft_uuid"
+                   value="{{ draft_uuid }}">
+            <input type="hidden"
+                   name="selected_template_id"
+                   value="{{ selected_template_id }}">
+            <input type="hidden"
+                   name="send_button_clicked"
+                   id="send_button_clicked_id"
+                   value="0">
+            <input type="hidden"
+                   name="send_time_option"
+                   id="send_time_option_input"
+                   value="{% if email_campaign.scheduled_send_time %}scheduled{% else %}now{% endif %}">
+            <input type="hidden"
+                   name="scheduled_send_time"
+                   id="scheduled_send_time_input"
+                   value="{% if email_campaign.scheduled_send_time %}{{ email_campaign.scheduled_send_time|date:'Y-m-d\TH:i' }}{% endif %}">
+          </form>
         </div>
-        <div id="search_results_list"></div>
       </div>
-      
-      <div class="border rounded p-3" style="min-height: 100px; background-color: #f8f9fa;">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <strong>Selected Recipients (<span id="recipient_count">0</span>)</strong>
-        {% if not emails_sent %}
-          <button type="button" class="btn btn-sm btn-outline-danger" id="clear_all_btn">Clear All</button>
-        {% endif %}
-        </div>
-        <div id="selected_recipients"></div>
-      </div>
-      
-      <input type="hidden" name="recipient_ids" id="recipient_ids_input" value="">
+      <!-- end col-md-12 -->
     </div>
-
-    <!-- Subject Line -->
-    <div class="mb-3 d-flex align-items-center gap-3">
-      <label for="email_subject"
-             class="form-label mb-0"
-             style="white-space: nowrap; min-width: 150px;"
-      >Subject<span class="text-danger">*</span></label>
-      <input type="text" 
-             id="email_subject" 
-             name="email_subject" 
-             class="form-control" 
-             value="{% if email_campaign %}{{ email_campaign.email_subject_template_raw|default_if_none:"" }}{% endif %}"
-             placeholder="Enter email subject"
-             required>
-    </div>
-
-    <!-- Email Preview/Editor -->
-    <div class="mb-3">
-      <textarea id="email_body" name="email_body" class="form-control js-tinymce" rows="10">{% if email_campaign %}{{ email_campaign.email_body_template_raw }}{% endif %}</textarea>
-      <small class="text-muted">This will auto-populate when you select a template above. You can edit it before sending.</small>
-    </div>
-
-    <!-- Customization tokens -->
-    <div class="mb-4">
-      <h5>Customization Tokens</h5>
-      <p class="text-muted">Click a token to copy it so you can paste it into the message above.</p>
-
-      <div class="token-grid">
-        {% for token in token_list %}
-          <button type="button" class="btn btn-outline-secondary btn-sm token-btn"
-                  data-token="{{ token }}"
-                  style="min-width: 240px; text-align: left;">
-            {{ token }}
-          </button>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Hidden Context Inputs -->
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="email_campaign_id" id="email_campaign_id" value="{% if email_campaign %}{{ email_campaign.id }}{% endif %}">
-    <input type="hidden" name="draft_uuid" id="draft_uuid" value="{{ draft_uuid }}">
-    <input type="hidden" name="selected_template_id" value="{{ selected_template_id }}">
-    <input type="hidden" name="send_button_clicked" id="send_button_clicked_id" value="0">
-    <input type="hidden" name="send_time_option" id="send_time_option_input" value="{% if email_campaign.scheduled_send_time %}scheduled{% else %}now{% endif %}">
-    <input type="hidden" name="scheduled_send_time" id="scheduled_send_time_input" value="{% if email_campaign.scheduled_send_time %}{{ email_campaign.scheduled_send_time|date:'Y-m-d\TH:i' }}{% endif %}">
-  </form>
-</div>
-    </div><!-- end col-md-12 -->
-  </div><!-- end row -->
-</div><!-- end container-fluid -->
+    <!-- end row -->
+  </div>
+  <!-- end container-fluid -->
 {% endblock %}
 
 {% block extrabody %}
-<!-- Use TinyMCE -->
-<script src="https://quality.wevote.us/javascript/api-server/tinymce/tinymce.min.js"></script>
-  <script>
-    {% include "email_outbound/js/_tinymce_loader_js.html" %}
-  </script>
-<style>
+  <!-- Use TinyMCE -->
+  <script src="https://quality.wevote.us/javascript/api-server/tinymce/tinymce.min.js"></script>
+  <script>{% include "email_outbound/js/_tinymce_loader_js.html" %}</script>
+  <style>
   .recipient-chip {
     display: inline-block;
     background-color: #007bff;
@@ -289,9 +352,9 @@
   .search-result-item input[type="checkbox"] {
     margin-right: 8px;
   }
-</style>
+  </style>
 
-<script>
+  <script>
   // Store folder data from Django template
   // const folderData = JSON.parse('{{ folder_list_json|escapejs }}');
   const selectedRecipientDictList = []
@@ -642,7 +705,7 @@
                 li.dataset.attId = att.id;
                 const downloadUrl = "{% url 'email_outbound:email_attachment_download' attachment_id=0 %}".replace('0', att.id);
                 li.innerHTML = att.is_inline ? `
-                  <div class="d-flex flex-row align-items-center" >
+                  <div class="d-flex flex-row align-items-center">
                     <div class="d-flex flex-column mr-3">
                       <span class="fw-semibold">${att.name}</span>
                       <small class="muted">Just now</small>
@@ -985,7 +1048,7 @@
         li.dataset.attId = att.id;
         const downloadUrl = "{% url 'email_outbound:email_attachment_download' attachment_id=0 %}".replace('0', att.id);
         li.innerHTML = att.is_inline ? `
-          <div class="d-flex flex-row align-items-center" >
+          <div class="d-flex flex-row align-items-center">
             <div class="d-flex flex-column mr-3">
               <span class="fw-semibold">${att.name}</span>
               <small class="muted">Just now</small>
@@ -1029,10 +1092,10 @@
       uploadBtn.disabled = true;
     }
   });
-</script>
+  </script>
 
-<!-- Customization tokens copy script -->
-<script>
+  <!-- Customization tokens copy script -->
+  <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.token-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1044,5 +1107,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
-</script>
+  </script>
 {% endblock %}

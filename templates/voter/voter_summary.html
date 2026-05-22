@@ -1,18 +1,21 @@
 {# templates/voter/voter_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if voter %}
+{% block title %}
+  {% if voter %}
     {{ voter.get_full_name }} Summary
-{% else %}No Voter Found
-{% endif %}{% endblock %}
+  {% else %}
+    No Voter Found
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
 
-<a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
+  <a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
 
-{% if voter %}
+  {% if voter %}
 
     <h1>{{ voter.get_full_name }} Summary</h1>
 
@@ -26,142 +29,180 @@
       <tr>
         <td>Linked Organization IDs:&nbsp;</td>
         <td>
-        {% if voter.linked_organization_we_vote_id %}
-          <strong><a href="{% url 'organization:organization_we_vote_id_position_list' voter.linked_organization_we_vote_id %}">{{ voter.linked_organization_we_vote_id }} </a></strong>
-        {% endif %}
+          {% if voter.linked_organization_we_vote_id %}
+            <strong><a href="{% url 'organization:organization_we_vote_id_position_list' voter.linked_organization_we_vote_id %}">{{ voter.linked_organization_we_vote_id }} </a></strong>
+          {% endif %}
         </td>
       </tr>
       <tr>
         <td>Admin?:</td>
-        <td><strong>{% if voter.is_admin %}Yes{% else %}No{% endif %}</strong></td>
-      </tr>
-      {% if voter.twitter_screen_name %}
-      <tr>
-        <td>Twitter Screen Name:</td>
         <td>
-          <strong>{{ voter.twitter_screen_name }}</strong>
+          <strong>
+            {% if voter.is_admin %}
+              Yes
+            {% else %}
+              No
+            {% endif %}
+          </strong>
         </td>
       </tr>
+      {% if voter.twitter_screen_name %}
+        <tr>
+          <td>Twitter Screen Name:</td>
+          <td>
+            <strong>{{ voter.twitter_screen_name }}</strong>
+          </td>
+        </tr>
       {% endif %}
       <tr>
         <td>&nbsp;</td>
-        <td><a href="{% url 'voter:voter_edit' voter.id %}">edit</a></td>
+        <td>
+          <a href="{% url 'voter:voter_edit' voter.id %}">edit</a>
+        </td>
       </tr>
     </table>
     <br />
     <br />
 
     {% if voter_address_list %}
-    This is a summary of VoterAddress entries for this voter.
-    <table border="1" cellpadding="10">
+      This is a summary of VoterAddress entries for this voter.
+      <table border="1" cellpadding="10">
         <tr>
-            <td></td>
-            <td>Address</td>
-            <td>Election</td>
-            <td>BallotReturned</td>
+          <td></td>
+          <td>Address</td>
+          <td>Election</td>
+          <td>BallotReturned</td>
         </tr>
-    {% for voter_address in voter_address_list %}
-        <tr>
+        {% for voter_address in voter_address_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter_address.text_for_map_search }}</td>
             <td>
               {% if voter_address.google_civic_election_id %}
-              <a href="{% url "election:election_summary_by_google_id" voter_address.google_civic_election_id %}" target="_blank">
-              {{ voter_address.google_civic_election_id }}
-              </a>
+                <a href="{% url "election:election_summary_by_google_id" voter_address.google_civic_election_id %}"
+                   target="_blank">{{ voter_address.google_civic_election_id }}</a>
               {% endif %}
             </td>
             <td>
               {% if voter_address.ballot_returned_we_vote_id %}
-              <a href="{% url "ballot:ballot_item_list_edit_by_we_vote_id" voter_address.ballot_returned_we_vote_id %}" target="_blank">{{ voter_address.ballot_returned_we_vote_id }}</a>
+                <a href="{% url "ballot:ballot_item_list_edit_by_we_vote_id" voter_address.ballot_returned_we_vote_id %}"
+                   target="_blank">{{ voter_address.ballot_returned_we_vote_id }}</a>
               {% endif %}
             </td>
-        </tr>
-    {% endfor %}
-    </table>
+          </tr>
+        {% endfor %}
+      </table>
     {% endif %}
 
     {% if voter.we_vote_hosted_profile_image_url_tiny %}
-        we_vote_hosted_profile_image_url_tiny: {{ voter.we_vote_hosted_profile_image_url_tiny }}<br />
-        <img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}"><br />
-        <br />
+      we_vote_hosted_profile_image_url_tiny: {{ voter.we_vote_hosted_profile_image_url_tiny }}
+      <br />
+      <img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}">
+      <br />
+      <br />
     {% endif %}
 
     {% if voter.we_vote_hosted_profile_image_url_medium %}
-        we_vote_hosted_profile_image_url_medium: {{ voter.we_vote_hosted_profile_image_url_medium }}<br />
-        <img src="{{ voter.we_vote_hosted_profile_image_url_medium }}"><br />
-        <br />
+      we_vote_hosted_profile_image_url_medium: {{ voter.we_vote_hosted_profile_image_url_medium }}
+      <br />
+      <img src="{{ voter.we_vote_hosted_profile_image_url_medium }}">
+      <br />
+      <br />
     {% endif %}
 
     {% if voter.we_vote_hosted_profile_image_url_large %}
-        we_vote_hosted_profile_image_url_large: <a href="{{ voter.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ voter.we_vote_hosted_profile_image_url_large }}</a><br />
-        <br />
+      we_vote_hosted_profile_image_url_large: <a href="{{ voter.we_vote_hosted_profile_image_url_large }}"
+    target="_blank">{{ voter.we_vote_hosted_profile_image_url_large }}</a>
+      <br />
+      <br />
     {% endif %}
 
     <br />
     <h3>{{ voter.get_full_name }} Has Shared</h3>
-<form name="show_this_year_form" method="get" action="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}">
-    {% csrf_token %}
-    <input type="hidden" name="sort_by" value="{{ sort_by }}">
-    <input type="hidden" name="show_all" value="{{ show_all }}">
-    <input type="hidden" name="show_more" value="{{ show_more }}">
+    <form name="show_this_year_form"
+          method="get"
+          action="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}">
+      {% csrf_token %}
+      <input type="hidden" name="sort_by" value="{{ sort_by }}">
+      <input type="hidden" name="show_all" value="{{ show_all }}">
+      <input type="hidden" name="show_more" value="{{ show_more }}">
 
-    {#  #}
-    <label for="exclude_remind_contact_id">
-      <input type="checkbox" name="exclude_remind_contact" id="exclude_remind_contact_id" value="1"
-             {% if exclude_remind_contact %}checked{% endif %} /> Exclude Remind Contact&nbsp;&nbsp;&nbsp;
-    </label>
+      {#  #}
+      <label for="exclude_remind_contact_id">
+        <input type="checkbox"
+               name="exclude_remind_contact"
+               id="exclude_remind_contact_id"
+               value="1"
+               {% if exclude_remind_contact %}checked{% endif %} />
+        Exclude Remind Contact&nbsp;&nbsp;&nbsp;
+      </label>
 
-    {#  #}
-    <label for="show_shares_with_zero_clicks_id">
-      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
-             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
-    </label>
+      {#  #}
+      <label for="show_shares_with_zero_clicks_id">
+        <input type="checkbox"
+               name="show_shares_with_zero_clicks"
+               id="show_shares_with_zero_clicks_id"
+               value="1"
+               {% if show_shares_with_zero_clicks %}checked{% endif %} />
+        Show Zero Clicks&nbsp;&nbsp;&nbsp;
+      </label>
 
-    {#  #}
-    <label for="limit_to_last_90_days_id">
-      <input type="checkbox" name="limit_to_last_90_days" id="limit_to_last_90_days_id" value="1"
-             {% if limit_to_last_90_days %}checked{% endif %} /> Last 90 days only&nbsp;&nbsp;&nbsp;
-    </label>
+      {#  #}
+      <label for="limit_to_last_90_days_id">
+        <input type="checkbox"
+               name="limit_to_last_90_days"
+               id="limit_to_last_90_days_id"
+               value="1"
+               {% if limit_to_last_90_days %}checked{% endif %} />
+        Last 90 days only&nbsp;&nbsp;&nbsp;
+      </label>
 
-    {% if election_years_available %}
-    <select {% if limit_to_last_90_days %}disabled {% endif %}id="show_this_year_id" name="show_this_year">
-        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
-        {% if show_this_year|convert_to_int > 0 %}
-            -- Stop Limiting to {{ show_this_year }} --
-        {% else %}
-            -- Show Specific Year --
+      {% if election_years_available %}
+        <select {% if limit_to_last_90_days %}disabled{% endif %}
+                id="show_this_year_id"
+                name="show_this_year">
+          <option value="0"
+                  {% if 0 == show_this_year|convert_to_int %}selected="selected"{% endif %}>
+            {% if show_this_year|convert_to_int > 0 %}
+              -- Stop Limiting to {{ show_this_year }} --
+            {% else %}
+              -- Show Specific Year --
+            {% endif %}
+          </option>
+          {% for year in election_years_available %}
+            <option value="{{ year }}"
+                    {% if show_this_year|slugify == year|slugify %}selected="selected"{% endif %}>
+              {% if show_this_year|slugify == year|slugify %}Limited To{% endif %}
+              {{ year }}
+            </option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      {# End of if election_years_available #}
+
+      &nbsp;&nbsp;&nbsp;
+      {% if voter_summary_search %}
+        <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
+          clear search</a>&nbsp;
         {% endif %}
-        </option>
-        {% for year in election_years_available %}
-        <option value="{{ year }}"
-                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
-            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
-            {{ year }}</option>
-        {% endfor %}
-    </select>
-    {% endif %}{# End of if election_years_available #}
+        <input type="text"
+               name="voter_summary_search"
+               id="voter_summary_search_id"
+               value="{{ voter_summary_search }}" />
+        <input type="submit" value="Search" />
 
-&nbsp;&nbsp;&nbsp;
-{% if voter_summary_search %}
-    <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
-         clear search</a>&nbsp;
-{% endif %}
-    <input type="text" name="voter_summary_search" id="voter_summary_search_id" value="{{ voter_summary_search }}" />
-    <input type="submit" value="Search" />
+      </form>
 
-</form>
+      {% if voter_who_shares_summary_list %}
+        {% include "share/voter_who_shares_summary_table.html" with voter_who_shares_summary_list=voter_who_shares_summary_list %}
+      {% endif %}
 
-    {% if voter_who_shares_summary_list %}
-    {% include "share/voter_who_shares_summary_table.html" with voter_who_shares_summary_list=voter_who_shares_summary_list %}
+    {% else %}
+
+      <h1>No Voter Found</h1>
+      Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
+
     {% endif %}
-
-{% else %}
-
-    <h1>No Voter Found</h1>
-    Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
-
-{% endif %}
     <script>
         $(function() {
             $('#limit_to_opinions_in_state_code_id').change(function() {
@@ -188,4 +229,4 @@
         });
     </script>
 
-{% endblock %}
+  {% endblock %}

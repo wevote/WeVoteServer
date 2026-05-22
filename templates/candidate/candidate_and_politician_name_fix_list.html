@@ -1,56 +1,73 @@
 {# templates/candidate/candidate_and_politician_name_fix_list.html #}
 {% extends "template_base.html" %}
 
-{%  block content %}
+{% block content %}
 
-<h1>Repair imported {{ person_text }} names</h1>
-<p>Please pay extra attention to highlighted names.</p>
-<p>There are <b>{{ number_of_rows }}</b> names that need repair.</p>
-<style>
- input[type=button] { margin: 10px 8px 16px 8px; }
-</style>
-<input class="btn-success" type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
-<input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
-<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
-<input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
+  <h1>Repair imported {{ person_text }} names</h1>
+  <p>Please pay extra attention to highlighted names.</p>
+  <p>
+    There are <b>{{ number_of_rows }}</b> names that need repair.
+  </p>
+  <style>input[type=button] { margin: 10px 8px 16px 8px; }</style>
+  <input class="btn-success"
+         type="button"
+         id="button_save_and_load"
+         value="Save any changes, then load the next 15" />
+  <input type="button"
+         id="button_load_no_save_prev"
+         value="< Load the previous 15 without saving"
+         onClick="goToPrevPage(0)" />
+  <input type="button"
+         id="button_load_no_save"
+         value="Load the next 15 without saving >"
+         onClick="goToNextPage(0, true)" />
+  <input type="button"
+         value="Return to {{ person_text }} page"
+         onclick="window.location.href='{{ return_link }}'" />
 
-{% csrf_token %}
+  {% csrf_token %}
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th style="width: 40px;">#</th>
-          <th style="width: 350px;">Name in DB</th>
-          <th>Suggested Name</th>
-          <th>Google Civic Candidate Name</th>
-          <th>Office Name</th>
-          <th>Party</th>
-          <th>State</th>
-          <th>We Vote ID</th>
-          <th>Date last updated</th>
-        </tr>
-      </thead>
-        {% for person in people_list %}
-          <tr class="person_row">
-            <td>{{ forloop.counter|add:index_offset }}</td>
-            <td class="from_db">{{ person.person_name }}</td>
-            <td><input type="text"
-                       class="person_name_normalized"
-                       value="{{ person.person_name_normalized }}"
-                       style="width: 250px; {% if person.highlight %} box-shadow: 6px 6px #ffff00; {% endif %}"
-                /></td>
-            <td>{{ person.google_civic_candidate_name }}</td>
-            <td>{{ person.contest_office_name }}</td>
-            <td>{{ person.party }}</td>
-            <td>{{ person.state_code }}</td>
-            <td class="we_vote_id">{{ person.we_vote_id }}</td>
-            <td>{{ person.date_last_updated }}</td>
-            <td><input type="hidden" class="person_name_normalized_before" value="{{ person.person_name_normalized }}"/></td>
-        </tr>
-      {% endfor %}
-    </table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 40px;">#</th>
+        <th style="width: 350px;">Name in DB</th>
+        <th>Suggested Name</th>
+        <th>Google Civic Candidate Name</th>
+        <th>Office Name</th>
+        <th>Party</th>
+        <th>State</th>
+        <th>We Vote ID</th>
+        <th>Date last updated</th>
+      </tr>
+    </thead>
+    {% for person in people_list %}
+      <tr class="person_row">
+        <td>{{ forloop.counter|add:index_offset }}</td>
+        <td class="from_db">{{ person.person_name }}</td>
+        <td>
+          <input type="text"
+                 class="person_name_normalized"
+                 value="{{ person.person_name_normalized }}"
+                 style="width: 250px;
+                        {% if person.highlight %}box-shadow: 6px 6px #ffff00;{% endif %}" />
+        </td>
+        <td>{{ person.google_civic_candidate_name }}</td>
+        <td>{{ person.contest_office_name }}</td>
+        <td>{{ person.party }}</td>
+        <td>{{ person.state_code }}</td>
+        <td class="we_vote_id">{{ person.we_vote_id }}</td>
+        <td>{{ person.date_last_updated }}</td>
+        <td>
+          <input type="hidden"
+                 class="person_name_normalized_before"
+                 value="{{ person.person_name_normalized }}" />
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
 
-<script>
+  <script>
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -149,6 +166,6 @@
 
       });
     });
-</script>
+  </script>
 
 {% endblock %}

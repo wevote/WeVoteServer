@@ -1,212 +1,293 @@
 {# templates/measure/measure_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if measure %}{{ measure.measure_title  }}{% else %}New Measure{% endif %}{% endblock %}
+{% block title %}
+  {% if measure %}
+    {{ measure.measure_title }}
+  {% else %}
+    New Measure
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-<h1>{% if measure %}Edit {{ measure.measure_title }}{% else %}New Measure{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% block content %}
+  {% load template_filters %}
+  <h1>
+    {% if measure %}
+      Edit {{ measure.measure_title }}
+    {% else %}
+      New Measure
+    {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
 
-<form action="{% url "measure:measure_edit_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
+  <form action="{% url "measure:measure_edit_process" %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
 
-<input type="hidden" name="measure_id" value="{% if measure %}{{ measure.id }}{% else %}0{% endif %}">
+    <input type="hidden"
+           name="measure_id"
+           value="{% if measure %}{{ measure.id }}{% else %}0{% endif %}">
 
-<div class="form-group">
-    <label for="measure_title_id" class="col-sm-3 control-label">Measure Title</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="measure_title_id" class="col-sm-3 control-label">Measure Title</label>
+      <div class="col-sm-8">
         <textarea name="measure_title"
                   id="measure_title_id"
                   class="form-control animated"
                   placeholder="Enter measure title">{% if measure %}{{ measure.measure_title|default_if_none:"" }}{% else %}{{ measure_title|default_if_none:"" }}{% endif %}</textarea>
-        {% if measure %}{{ measure.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
+        {% if measure %}
+          {{ measure.we_vote_id }}
+        {% else %}
+          {{ we_vote_id }}
+        {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_measure_title_id" class="col-sm-3 control-label">Measure Title1 (for Google Civic matching)</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_measure_title" id="google_civic_measure_title_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_measure_title_id" class="col-sm-3 control-label">
+        Measure Title1 (for Google Civic matching)
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="google_civic_measure_title"
+               id="google_civic_measure_title_id"
+               class="form-control"
                value="{% if measure %}{{ measure.google_civic_measure_title|default_if_none:"" }}{% else %}{{ google_civic_measure_title|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_measure_title2_id" class="col-sm-3 control-label">Measure Title2</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_measure_title2" id="google_civic_measure_title2_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_measure_title2_id" class="col-sm-3 control-label">Measure Title2</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="google_civic_measure_title2"
+               id="google_civic_measure_title2_id"
+               class="form-control"
                value="{% if measure %}{{ measure.google_civic_measure_title2|default_if_none:"" }}{% else %}{{ google_civic_measure_title2|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_measure_title3_id" class="col-sm-3 control-label">Measure Title3</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_measure_title3" id="google_civic_measure_title3_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_measure_title3_id" class="col-sm-3 control-label">Measure Title3</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="google_civic_measure_title3"
+               id="google_civic_measure_title3_id"
+               class="form-control"
                value="{% if measure %}{{ measure.google_civic_measure_title3|default_if_none:"" }}{% else %}{{ google_civic_measure_title3|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_measure_title4_id" class="col-sm-3 control-label">Measure Title4</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_measure_title4" id="google_civic_measure_title4_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_measure_title4_id" class="col-sm-3 control-label">Measure Title4</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="google_civic_measure_title4"
+               id="google_civic_measure_title4_id"
+               class="form-control"
                value="{% if measure %}{{ measure.google_civic_measure_title4|default_if_none:"" }}{% else %}{{ google_civic_measure_title4|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_measure_title5_id" class="col-sm-3 control-label">Measure Title5</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_measure_title5" id="google_civic_measure_title5_id" class="form-control"
+    <div class="form-group">
+      <label for="google_civic_measure_title5_id" class="col-sm-3 control-label">Measure Title5</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="google_civic_measure_title5"
+               id="google_civic_measure_title5_id"
+               class="form-control"
                value="{% if measure %}{{ measure.google_civic_measure_title5|default_if_none:"" }}{% else %}{{ google_civic_measure_title5|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_measure_name_id" class="col-sm-3 control-label">Measure Name (from Ballotpedia)</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_measure_name" id="ballotpedia_measure_name_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_measure_name_id" class="col-sm-3 control-label">Measure Name (from Ballotpedia)</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_measure_name"
+               id="ballotpedia_measure_name_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_measure_name|default_if_none:"" }}{% else %}{{ ballotpedia_measure_name|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="measure_subtitle_id" class="col-sm-3 control-label">Measure Subtitle</label>
-    <div class="col-sm-8">
-        <input type="text" name="measure_subtitle" id="measure_subtitle_id" class="form-control"
+    <div class="form-group">
+      <label for="measure_subtitle_id" class="col-sm-3 control-label">Measure Subtitle</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="measure_subtitle"
+               id="measure_subtitle_id"
+               class="form-control"
                value="{% if measure %}{{ measure.measure_subtitle|default_if_none:"" }}{% else %}{{ measure_subtitle|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="measure_year_id" class="col-sm-3 control-label">Measure Year</label>
-    <div class="col-sm-8">
-        <input type="text" name="measure_year" id="measure_year_id" class="form-control"
+    <div class="form-group">
+      <label for="measure_year_id" class="col-sm-3 control-label">Measure Year</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="measure_year"
+               id="measure_year_id"
+               class="form-control"
                value="{% if measure %}{{ measure.measure_year|default_if_none:"" }}{% else %}{{ measure_year|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_yes_vote_description_id" class="col-sm-3 control-label">A "yes" vote means...</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="ballotpedia_yes_vote_description_id"
+             class="col-sm-3 control-label">A "yes" vote means...</label>
+      <div class="col-sm-8">
         <textarea name="ballotpedia_yes_vote_description"
                   id="ballotpedia_yes_vote_description_id"
                   class="form-control animated"
                   placeholder="">{% if measure %}{{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}{% else %}{{ ballotpedia_yes_vote_description|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_no_vote_description_id" class="col-sm-3 control-label">A "no" vote means...</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="ballotpedia_no_vote_description_id"
+             class="col-sm-3 control-label">A "no" vote means...</label>
+      <div class="col-sm-8">
         <textarea name="ballotpedia_no_vote_description"
                   id="ballotpedia_no_vote_description_id"
                   class="form-control animated"
                   placeholder="">{% if measure %}{{ measure.ballotpedia_no_vote_description|default_if_none:"" }}{% else %}{{ ballotpedia_no_vote_description|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="measure_text_id" class="col-sm-3 control-label">Measure Text</label>
-    <div class="col-sm-8">
+    <div class="form-group">
+      <label for="measure_text_id" class="col-sm-3 control-label">Measure Text</label>
+      <div class="col-sm-8">
         <textarea name="measure_text"
                   id="measure_text_id"
                   class="form-control animated"
                   placeholder="Enter measure text">{% if measure %}{{ measure.measure_text|default_if_none:"" }}{% else %}{{ measure_text|default_if_none:"" }}{% endif %}</textarea>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="measure_url_id" class="col-sm-3 control-label">Measure Website</label>
-    <div class="col-sm-8">
-        <input type="text" name="measure_url" id="measure_url_id" class="form-control"
+    <div class="form-group">
+      <label for="measure_url_id" class="col-sm-3 control-label">Measure Website</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="measure_url"
+               id="measure_url_id"
+               class="form-control"
                value="{% if measure %}{{ measure.measure_url|default_if_none:"" }}{% else %}{{ measure_url|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_measure_url_id" class="col-sm-3 control-label">Ballotpedia Measure URL</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_measure_url" id="ballotpedia_measure_url_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_measure_url_id" class="col-sm-3 control-label">Ballotpedia Measure URL</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_measure_url"
+               id="ballotpedia_measure_url_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_measure_url|default_if_none:"" }}{% else %}{{ ballotpedia_measure_url|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
-        Google Civic Id
-    </label>
-    <div class="col-sm-8">
-    {% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
-        {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
-        {% endfor %}
-    </select>
-    {% else %}
-        <input type="text" name="google_civic_election_id" id="google_civic_election_id" class="form-control"
-               value="{% if measure %}{{ measure.google_civic_election_id|default_if_none:"" }}{% else %}{{ google_civic_election_id|default_if_none:"" }}{% endif %}" />
-    {% endif %}{# End of if election_list #}
+    <div class="form-group">
+      <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Id</label>
+      <div class="col-sm-8">
+        {% if election_list %}
+          <select id="google_civic_election_id" name="google_civic_election_id">
+            <option value="0"
+                    {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
+              -- Filter by Election --
+            </option>
+            {% for one_election in election_list %}
+              <option value="{{ one_election.google_civic_election_id }}"
+                      {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+                {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+              </option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <input type="text"
+                 name="google_civic_election_id"
+                 id="google_civic_election_id"
+                 class="form-control"
+                 value="{% if measure %}{{ measure.google_civic_election_id|default_if_none:"" }}{% else %}{{ google_civic_election_id|default_if_none:"" }}{% endif %}" />
+        {% endif %}
+        {# End of if election_list #}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_district_id_id" class="col-sm-3 control-label">Ballotpedia District Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_district_id" id="ballotpedia_district_id_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_district_id_id" class="col-sm-3 control-label">Ballotpedia District Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_district_id"
+               id="ballotpedia_district_id_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_district_id|default_if_none:"" }}{% else %}{{ ballotpedia_district_id|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_election_id"
+               id="ballotpedia_election_id_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_election_id|default_if_none:"" }}{% else %}{{ ballotpedia_election_id|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_measure_id_id" class="col-sm-3 control-label">Ballotpedia Measure Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_measure_id" id="ballotpedia_measure_id_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_measure_id_id" class="col-sm-3 control-label">Ballotpedia Measure Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_measure_id"
+               id="ballotpedia_measure_id_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_measure_id|default_if_none:"" }}{% else %}{{ ballotpedia_measure_id|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="ballotpedia_measure_status_id" class="col-sm-3 control-label">Ballotpedia Measure Status</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_measure_status" id="ballotpedia_measure_status_id" class="form-control"
+    <div class="form-group">
+      <label for="ballotpedia_measure_status_id" class="col-sm-3 control-label">Ballotpedia Measure Status</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="ballotpedia_measure_status"
+               id="ballotpedia_measure_status_id"
+               class="form-control"
                value="{% if measure %}{{ measure.ballotpedia_measure_status|default_if_none:"" }}{% else %}{{ ballotpedia_measure_status|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"
+    <div class="form-group">
+      <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="maplight_id"
+               id="maplight_id_id"
+               class="form-control"
                value="{% if measure %}{{ measure.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
+    <div class="form-group">
+      <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="vote_smart_id"
+               id="vote_smart_id_id"
+               class="form-control"
                value="{% if measure %}{{ measure.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<!--
+    <!--
 <div class="form-group">
     <label for="primary_party_id" class="col-sm-3 control-label">Primary Party</label>
     <div class="col-sm-8">
@@ -215,81 +296,104 @@
 </div>
 //-->
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
+    <div class="form-group">
+      <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="state_code"
+               id="state_code_id"
+               class="form-control"
                value="{% if measure %}{{ measure.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
 
-<p><a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
-<input type="submit" value="{% if measure %}Update Measure{% else %}Save New Measure{% endif %}" class="btn btn-primary" /></p>
-</form>
+    <p>
+      <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+      <input type="submit"
+             value="{% if measure %}Update Measure{% else %}Save New Measure{% endif %}"
+             class="btn btn-primary" />
+    </p>
+  </form>
 
-{% if measure %}
-<form action="{% url "measure:measure_delete_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="measure_id" value="{{ measure.id|default_if_none:0|default:0 }}">
-  <input type="hidden" name="google_civic_election_id" 
-         value="{{ google_civic_election_id|default_if_none:0|default:0 }}">
-  <input type="hidden" name="state_code" value="{{ state_code|default_if_none:''|default:'' }}">
-  <button type="submit" class="btn btn-danger">Delete Measure</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> 
-      Check to confirm that you want to permanently delete this measure
-  </label>
-</form>
-  <br />
-{% endif %}
+  {% if measure %}
+    <form action="{% url "measure:measure_delete_process" %}"
+          method="post"
+          class="form-horizontal">
+      {% csrf_token %}
+      <input type="hidden"
+             name="measure_id"
+             value="{{ measure.id|default_if_none:0|default:0 }}">
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id|default_if_none:0|default:0 }}">
+      <input type="hidden"
+             name="state_code"
+             value="{{ state_code|default_if_none:''|default:'' }}">
+      <button type="submit" class="btn btn-danger">Delete Measure</button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="confirm_delete_id">
+        <input type="checkbox"
+               name="confirm_delete"
+               id="confirm_delete_id"
+               value="1" />
+        Check to confirm that you want to permanently delete this measure
+      </label>
+    </form>
+    <br />
+  {% endif %}
 
 
-{% if measure_list %}
+  {% if measure_list %}
     <br />
     <br />
     <h5>Existing Measures</h5>
     <table border="1" cellpadding="5" cellspacing="5">
+      <tr>
+        <td>Measure Title</td>
+        <td>State</td>
+        <td>We Vote ID</td>
+        <td>&nbsp;</td>
+      </tr>
+      {% for measure in measure_list %}
         <tr>
-            <td>Measure Title</td>
-            <td>State</td>
-            <td>We Vote ID</td>
-            <td>&nbsp;</td>
+          <td>
+            <a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ measure.measure_title }}</a>
+          </td>
+          <td>{{ measure.state_code }}</td>
+          <td>{{ measure.we_vote_id }}</td>
+          <td>
+            <a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}"
+               style="font-size: .65em">edit</a>
+          </td>
         </tr>
-    {% for measure in measure_list %}
-        <tr>
-            <td><a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ measure.measure_title }}</a></td>
-            <td>{{ measure.state_code }}</td>
-            <td>{{ measure.we_vote_id }}</td>
-            <td><a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}" style="font-size: .65em">edit</a></td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
 
     <br />
     <br />
-{% else %}
+  {% else %}
     <!-- <p>(no measures found)</p> //-->
-{% endif %}
+  {% endif %}
 
 
 
 
 
-<style>
+  <style>
     .animated {
         -webkit-transition: height 0.2s;
         -moz-transition: height 0.2s;
         transition: height 0.2s;
     }
-</style>
-<script>
+  </style>
+  <script>
     $(function(){
         const { autosize } = window;
         autosize($('.normal'));
         autosize($('.animated'));
      }(window.$, window.autosize));
-</script>
+  </script>
 
 
 {% endblock %}

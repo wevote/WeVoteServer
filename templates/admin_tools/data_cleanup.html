@@ -3,44 +3,50 @@
 
 {% block title %}Data Cleanup Routines{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
+{% block content %}
+  {% load template_filters %}
 
-<h1>Data Cleanup Routines</h1>
+  <h1>Data Cleanup Routines</h1>
 
-{% if election_list %}
-<div class="form-group">
-    <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
-    <div class="col-sm-8">
+  {% if election_list %}
+    <div class="form-group">
+      <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+      <div class="col-sm-8">
         {% for election in election_list %}
-            {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
-                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
-            {% endif %}
+          {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+          {% endif %}
         {% endfor %}
+      </div>
     </div>
-</div>
-{% endif %}{# End of if election_list #}
+  {% endif %}
+  {# End of if election_list #}
 
-<p>
-    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Endorser List Analysis</a><br />
+  <p>
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Endorser List Analysis</a>
     <br />
-    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">Position List Analysis</a><br />
     <br />
-    <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Voter List Analysis</a><br />
+    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">Position List Analysis</a>
     <br />
-    <a href="{% url 'admin_tools:data_voter_statistics' %}">Voter Statistics</a><br />
     <br />
-    <a href="{% url 'admin_tools:data_cleanup_voter_hanging_data_process' %}">Voter Email Cleanup</a><br />
+    <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Voter List Analysis</a>
+    <br />
+    <br />
+    <a href="{% url 'admin_tools:data_voter_statistics' %}">Voter Statistics</a>
+    <br />
+    <br />
+    <a href="{% url 'admin_tools:data_cleanup_voter_hanging_data_process' %}">Voter Email Cleanup</a>
+    <br />
 
-</p>
+  </p>
 
 
-    <script>
+  <script>
         $(function() {
             $('#google_civic_election_id').change(function() {
                 this.form.submit();
             });
         });
-    </script>
+  </script>
 
 {% endblock %}

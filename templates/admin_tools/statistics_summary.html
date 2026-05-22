@@ -4,199 +4,211 @@
 {% block title %}Quick Statistics{% endblock %}
 
 {% block content %}
-{% load humanize %}
+  {% load humanize %}
 
-<h1>Quick Statistics</h1>
-<h1></h1>
+  <h1>Quick Statistics</h1>
+  <h1></h1>
 
-<h4>Twitter / X API Usage As Reported By Twitter</h4>
-    <div style="padding: 10px 2px 10px 20px">
-      <input type="hidden" id="twitter_api_limits" value="{{ twitter_api_limits }} " />
-      <input type="radio" id="limit" name="lim" value="child">
-      <label for="limit">Show API Endpoints where "Remaining Calls" < "Limit"</label>
-      <input type="radio" id="unlimited" name="lim" value="child" style="margin-left: 16px">
-      <label for="unlimited">Show All API Endpoints</label>
-    </div>
-    <table class="table" style="width: 900px">
-        <thead id="twit_stat_rows">
-            <tr>
-                <th>Twitter API Endpoint</th>
-                <th>Remaining</th>
-                <th>Limit</th>
-                <th style="width: 200px">Date Limit Resets</th>
-            </tr>
-        </thead>
-    </table>
-    <br />
+  <h4>Twitter / X API Usage As Reported By Twitter</h4>
+  <div style="padding: 10px 2px 10px 20px">
+    <input type="hidden"
+           id="twitter_api_limits"
+           value="{{ twitter_api_limits }} " />
+    <input type="radio" id="limit" name="lim" value="child">
+    <label for="limit">
+      Show API Endpoints where "Remaining Calls" < "Limit"
+    </label>
+    <input type="radio"
+           id="unlimited"
+           name="lim"
+           value="child"
+           style="margin-left: 16px">
+    <label for="unlimited">Show All API Endpoints</label>
+  </div>
+  <table class="table" style="width: 900px">
+    <thead id="twit_stat_rows">
+      <tr>
+        <th>Twitter API Endpoint</th>
+        <th>Remaining</th>
+        <th>Limit</th>
+        <th style="width: 200px">Date Limit Resets</th>
+      </tr>
+    </thead>
+  </table>
+  <br />
 
-{% if twitter_daily_summary_list %}
-<h4>Twitter / X API Calls (Our Count)</h4>
+  {% if twitter_daily_summary_list %}
+    <h4>Twitter / X API Calls (Our Count)</h4>
     <p>15 most recent days-worth of API calls.</p>
-    <p>We need to track the number of calls to the X API because there are limits to the number of calls we can make per day.</p>
+    <p>
+      We need to track the number of calls to the X API because there are limits to the number of calls we can make per day.
+    </p>
     <table class="table" style="width: 500px">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Total # of Calls</th>
-                <th>Succeeding</th>
-                <th>Failing</th>
-            </tr>
-        </thead>
-       {% for twitter_daily_summary in twitter_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ twitter_daily_summary.date_string }}</td>
-            <td>{{ twitter_daily_summary.total_count|intcomma }}</td>
-            <td>{{ twitter_daily_summary.succeeding_count|intcomma }}</td>
-            <td>{{ twitter_daily_summary.failing_count|intcomma }}</td>
+          <th>Date</th>
+          <th>Total # of Calls</th>
+          <th>Succeeding</th>
+          <th>Failing</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for twitter_daily_summary in twitter_daily_summary_list %}
+        <tr>
+          <td>{{ twitter_daily_summary.date_string }}</td>
+          <td>{{ twitter_daily_summary.total_count|intcomma }}</td>
+          <td>{{ twitter_daily_summary.succeeding_count|intcomma }}</td>
+          <td>{{ twitter_daily_summary.failing_count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
-{% if ctcl_daily_summary_list %}
-<h4>CTCL API Calls</h4>
+  {% if ctcl_daily_summary_list %}
+    <h4>CTCL API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for ctcl_daily_summary in ctcl_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ ctcl_daily_summary.date_string }}</td>
-            <td>{{ ctcl_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for ctcl_daily_summary in ctcl_daily_summary_list %}
+        <tr>
+          <td>{{ ctcl_daily_summary.date_string }}</td>
+          <td>{{ ctcl_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
 
-{% if google_civic_daily_summary_list %}
-<h4>Google API Calls</h4>
-<p>We need to track the number of calls to the Google Civic API because there are limits to
-    the number of calls we can make per day. This also gives us a glimpse into new network activity.</p>
+  {% if google_civic_daily_summary_list %}
+    <h4>Google API Calls</h4>
+    <p>
+      We need to track the number of calls to the Google Civic API because there are limits to
+      the number of calls we can make per day. This also gives us a glimpse into new network activity.
+    </p>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for google_civic_daily_summary in google_civic_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ google_civic_daily_summary.date_string }}</td>
-            <td>{{ google_civic_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for google_civic_daily_summary in google_civic_daily_summary_list %}
+        <tr>
+          <td>{{ google_civic_daily_summary.date_string }}</td>
+          <td>{{ google_civic_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
 
 
-{% if sendgrid_daily_summary_list %}
-<h4>SendGrid API Calls</h4>
+  {% if sendgrid_daily_summary_list %}
+    <h4>SendGrid API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for sendgrid_daily_summary in sendgrid_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ sendgrid_daily_summary.date_string }}</td>
-            <td>{{ sendgrid_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for sendgrid_daily_summary in sendgrid_daily_summary_list %}
+        <tr>
+          <td>{{ sendgrid_daily_summary.date_string }}</td>
+          <td>{{ sendgrid_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
 
-{% if ballotpedia_daily_summary_list or vote_smart_daily_summary_list or vote_usa_daily_summary_list or targetsmart_daily_summary_list %}
+  {% if ballotpedia_daily_summary_list or vote_smart_daily_summary_list or vote_usa_daily_summary_list or targetsmart_daily_summary_list %}
     <h2>Historical APIs</h2>
-{% endif %}
+  {% endif %}
 
-{% if ballotpedia_daily_summary_list %}
+  {% if ballotpedia_daily_summary_list %}
     <h4>Ballotpedia API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ ballotpedia_daily_summary.date_string }}</td>
-            <td>{{ ballotpedia_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
+        <tr>
+          <td>{{ ballotpedia_daily_summary.date_string }}</td>
+          <td>{{ ballotpedia_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
 
-{% if vote_smart_daily_summary_list %}
+  {% if vote_smart_daily_summary_list %}
     <h4>Vote Smart API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for vote_smart_daily_summary in vote_smart_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ vote_smart_daily_summary.date_string }}</td>
-            <td>{{ vote_smart_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for vote_smart_daily_summary in vote_smart_daily_summary_list %}
+        <tr>
+          <td>{{ vote_smart_daily_summary.date_string }}</td>
+          <td>{{ vote_smart_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
-{% endif %}
+  {% endif %}
 
-{% if vote_usa_daily_summary_list %}
-<h4>Vote USA API Calls</h4>
+  {% if vote_usa_daily_summary_list %}
+    <h4>Vote USA API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for vote_usa_daily_summary in vote_usa_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ vote_usa_daily_summary.date_string }}</td>
-            <td>{{ vote_usa_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for vote_usa_daily_summary in vote_usa_daily_summary_list %}
+        <tr>
+          <td>{{ vote_usa_daily_summary.date_string }}</td>
+          <td>{{ vote_usa_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
 
-{% if targetsmart_daily_summary_list %}
-<h4>TargetSmart API Calls</h4>
+  {% if targetsmart_daily_summary_list %}
+    <h4>TargetSmart API Calls</h4>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for targetsmart_daily_summary in targetsmart_daily_summary_list %}
+      <thead>
         <tr>
-            <td>{{ targetsmart_daily_summary.date_string }}</td>
-            <td>{{ targetsmart_daily_summary.count|intcomma }}</td>
+          <th>Date</th>
+          <th># of Calls</th>
         </tr>
-        {% endfor %}
+      </thead>
+      {% for targetsmart_daily_summary in targetsmart_daily_summary_list %}
+        <tr>
+          <td>{{ targetsmart_daily_summary.date_string }}</td>
+          <td>{{ targetsmart_daily_summary.count|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
     <br />
-{% endif %}
+  {% endif %}
 
   <script>
     const lim = $('#limit');
@@ -239,4 +251,4 @@
     });
   </script>
 
-{%  endblock %}
+{% endblock %}

@@ -1,567 +1,724 @@
 {# templates/organization/organization_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Endorser{% endif %}{% endblock %}
+{% block title %}
+  {% if organization %}
+    {{ organization.organization_name }}
+  {% else %}
+    New Endorser
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-<style>
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  <style>
     span.nobr { white-space: nowrap; }
     select.form-control {
       height: auto !important;
     }
-</style>
+  </style>
 
-<h1>
-    {% if organization %}{{ organization.organization_name }}{% else %}New Endorser{% endif %}
-    {% if organization.we_vote_hosted_profile_image_url_large %}
-        <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
+  <h1>
+    {% if organization %}
+      {{ organization.organization_name }}
+    {% else %}
+      New Endorser
     {% endif %}
-</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    {% if organization.we_vote_hosted_profile_image_url_large %}
+      <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
+    {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
 
-{% if organizations_list %}
+  {% if organizations_list %}
     <h3>Is the organization you are adding one of these?</h3>
     <table cellpadding="5" cellspacing="5" border="1">
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Endorser</td>
+        <td>Twitter</td>
+        <td>Facebook</td>
+        <td>Website</td>
+        <td>Wikipedia?</td>
+        <td></td>
+      </tr>
+      {% for possible_organization in organizations_list %}
         <tr>
-            <td></td>
-            <td></td>
-            <td>Endorser</td>
-            <td>Twitter</td>
-            <td>Facebook</td>
-            <td>Website</td>
-            <td>Wikipedia?</td>
-            <td></td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ possible_organization.organization_id }}</td>
+          <td>
+            <a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}"
+               target="_blank">{{ possible_organization.organization_name }}</a> (view in new window)
+          </td>
+          <td>
+            {% if possible_organization.organization_twitter_handle %}
+              {{ possible_organization.organization_twitter_handle }}
+            {% endif %}
+          </td>
+          <td>
+            {% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}
+          </td>
+          <td>
+            {% if possible_organization.organization_instagram_handle %}
+              {{ possible_organization.organization_instagram_handle }}
+            {% endif %}
+          </td>
+          <td>
+            {% if possible_organization.organization_website %}{{ possible_organization.organization_website }}{% endif %}
+          </td>
+          <td>
+            {% if possible_organization.wikipedia_page_id %}
+              <a href="{{ possible_organization.generate_wikipedia_link }}"
+                 target="_blank">W yes</a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'organization:organization_edit' possible_organization.organization_id %}">CHOOSE</a>
+          </td>
         </tr>
-    {% for possible_organization in organizations_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ possible_organization.organization_id }}</td>
-            <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}" target="_blank">{{ possible_organization.organization_name }}</a> (view in new window)</td>
-            <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
-            <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
-            <td>{% if possible_organization.organization_instagram_handle %}{{ possible_organization.organization_instagram_handle }}{% endif %}</td>
-            <td>{% if possible_organization.organization_website %}{{ possible_organization.organization_website }}{% endif %}</td>
-            <td>{% if possible_organization.wikipedia_page_id %}
-                <a href="{{ possible_organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' possible_organization.organization_id %}">CHOOSE</a></td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
     <p></p>
-{% endif %}
+  {% endif %}
 
 
 
-{% if organization %}
-{% else %}
-    <p>If you include the twitter handle and website for this organization below, we will have a better chance of preventing duplicate
-    entries.</p>
-{% endif %}
+  {% if organization %}
+  {% else %}
+    <p>
+      If you include the twitter handle and website for this organization below, we will have a better chance of preventing duplicate
+      entries.
+    </p>
+  {% endif %}
 
-<form action="{% url 'organization:organization_edit_process' %}" method="post" class="form-horizontal" enctype="multipart/form-data">
-{% csrf_token %}
-    <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
+  <form action="{% url 'organization:organization_edit_process' %}"
+        method="post"
+        class="form-horizontal"
+        enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden"
+           name="organization_id"
+           value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
-<div class="form-group">
-    <label class="col-sm-3 control-label">
+    <div class="form-group">
+      <label class="col-sm-3 control-label">
         {% if organization %}
-            <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+          <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
         {% else %}
-            <a href="{% url 'organization:organization_list' %}">cancel</a>
+          <a href="{% url 'organization:organization_list' %}">cancel</a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if organization %}Update Endorser{% else %}Save New Endorser{% endif %}</button>
+      </label>
+      <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">
+          {% if organization %}
+            Update Endorser
+          {% else %}
+            Save New Endorser
+          {% endif %}
+        </button>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
-        Logo Choice<br />
+    <div class="form-group">
+      <label for="profile_image_type_currently_active_id"
+             class="col-sm-3 control-label">
+        Logo Choice
+        <br />
         <span style="color: darkgray">{{ organization.profile_image_type_currently_active }}</span>
-    </label>
-    <div class="col-sm-8">
+      </label>
+      <div class="col-sm-8">
         <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
-                {% if organization.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
-                />
-        {% if organization.we_vote_hosted_profile_twitter_image_url_tiny %}
+          <input type="radio"
+                 name="profile_image_type_currently_active"
+                 value="UNKNOWN"
+                 {% if organization.profile_image_type_currently_active == 'UNKNOWN' %}checked{% endif %} />
+          {% if organization.we_vote_hosted_profile_twitter_image_url_tiny %}
             <span style="text-decoration: line-through">Unknown</span>
-        {% else %}
+          {% else %}
             Unknown
-        {% endif %}
+          {% endif %}
         </span>
         {# Uploaded photo #}
         <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
-                {% if organization.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
-                />
-            Uploaded
-        {% if organization.we_vote_hosted_profile_uploaded_image_url_tiny %}
+          <input type="radio"
+                 name="profile_image_type_currently_active"
+                 value="UPLOADED"
+                 {% if organization.profile_image_type_currently_active == 'UPLOADED' %}checked{% endif %} />
+          Uploaded
+          {% if organization.we_vote_hosted_profile_uploaded_image_url_tiny %}
             <img src='{{ organization.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
             <label for="organization_photo_file_delete_id">
-              <input type="checkbox" name="organization_photo_file_delete" id="organization_photo_file_delete_id" value="1" />
-                delete&nbsp;&nbsp;&nbsp;
+              <input type="checkbox"
+                     name="organization_photo_file_delete"
+                     id="organization_photo_file_delete_id"
+                     value="1" />
+              delete&nbsp;&nbsp;&nbsp;
             </label>
-        {% else %}
+          {% else %}
             <input type="file" name="organization_photo_file" accept="image/*">
-        {% endif %}
+          {% endif %}
         </span>
         {# Facebook photo #}
         {% if organization.we_vote_hosted_profile_facebook_image_url_tiny %}
-        <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
-                {% if organization.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="FACEBOOK"
+                   {% if organization.profile_image_type_currently_active == 'FACEBOOK' %}checked{% endif %} />
             <img src='{{ organization.we_vote_hosted_profile_facebook_image_url_tiny }}' />
             Facebook
-        </span>
+          </span>
         {% endif %}
         {% if organization.we_vote_hosted_profile_twitter_image_url_tiny %}
-        <span style="float: left; padding: 8px 20px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
-                {% if organization.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="TWITTER"
+                   {% if organization.profile_image_type_currently_active == 'TWITTER' %}checked{% endif %} />
             <img src='{{ organization.we_vote_hosted_profile_twitter_image_url_tiny }}' />
             Twitter
-        </span>
+          </span>
         {% endif %}
         {% if organization.we_vote_hosted_profile_vote_usa_image_url_tiny %}
-        <span style="float: left; padding: 8px 25px 0 0;">
-            <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
-                {% if organization.profile_image_type_currently_active == 'VOTE_USA' %} checked {% endif %}
-                />
+          <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio"
+                   name="profile_image_type_currently_active"
+                   value="VOTE_USA"
+                   {% if organization.profile_image_type_currently_active == 'VOTE_USA' %}checked{% endif %} />
             <img src='{{ organization.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
             Vote USA
-        {% endif %}
+          {% endif %}
         </span>
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_name" id="organization_name_id" class="form-control"
+    <div class="form-group">
+      <label for="organization_name_id" class="col-sm-3 control-label">Endorser Name</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_name"
+               id="organization_name_id"
+               class="form-control"
                value="{% if organization %}{{ organization.organization_name }}{% else %}{{ organization_name }}{% endif %}" />
         {% if organization %}
-            {{ organization.we_vote_id }}
-                {% if organization.vote_smart_id %}
-            &nbsp;&nbsp;&nbsp;&nbsp;Vote Smart Id: <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>
-                {% endif %}
-            &nbsp;&nbsp;&nbsp;&nbsp;Internal Id: {{ organization.id }}
-            &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.google.com/search?q={{ organization.organization_name|urlencode }}" target="_blank">Search Google <span class="glyphicon glyphicon-new-window"></span></a>
-            <br />
-            {# Organization Defunct #}
-            <input type="checkbox" name="organization_defunct" id="organization_defunct_id" value="1"
-                    {% if organization.organization_defunct %}checked{% endif %} />
-            <label for="organization_defunct_id" style="font-weight: normal !important;">Defunct. 
-                <span style="color: darkgray">This endorser has been defunct/inactive for 4+ years.</span></label>
+          {{ organization.we_vote_id }}
+          {% if organization.vote_smart_id %}
+            &nbsp;&nbsp;&nbsp;&nbsp;Vote Smart Id: <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}"
+    target="_blank">{{ organization.vote_smart_id }}</a>
+          {% endif %}
+          &nbsp;&nbsp;&nbsp;&nbsp;Internal Id: {{ organization.id }}
+          &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.google.com/search?q={{ organization.organization_name|urlencode }}"
+   target="_blank">Search Google <span class="glyphicon glyphicon-new-window"></span></a>
+          <br />
+          {# Organization Defunct #}
+          <input type="checkbox"
+                 name="organization_defunct"
+                 id="organization_defunct_id"
+                 value="1"
+                 {% if organization.organization_defunct %}checked{% endif %} />
+          <label for="organization_defunct_id" style="font-weight: normal !important;">
+            Defunct.
+            <span style="color: darkgray">This endorser has been defunct/inactive for 4+ years.</span>
+          </label>
         {% endif %}
+      </div>
     </div>
-</div>
 
-{% if organization_types %}
-<div class="form-group">
-    <label for="organization_type_id" class="col-sm-3 control-label">Endorser Type</label>
-    <div class="col-sm-8">
-        <select id="organization_type_id" name="organization_type" class="form-control" style="height: auto !important">
-            <option value="" {% if '' ==  organization_type %} selected="selected" {% endif %}>
-                -- Filter by Endorser Type --</option>
-        {% for key, organization_type in organization_types %}
-            <option value="{{ key }}"
-                    {% if key|lower == organization.organization_type|lower %} selected="selected" {% endif %}>
-            {{ organization_type }}</option>
-        {% endfor %}
-        </select>
-    </div>
-</div>
-{% endif %} {# End of if organization_types #}
+    {% if organization_types %}
+      <div class="form-group">
+        <label for="organization_type_id" class="col-sm-3 control-label">Endorser Type</label>
+        <div class="col-sm-8">
+          <select id="organization_type_id"
+                  name="organization_type"
+                  class="form-control"
+                  style="height: auto !important">
+            <option value=""
+                    {% if '' ==  organization_type %}selected="selected"{% endif %}>
+              -- Filter by Endorser Type --
+            </option>
+            {% for key, organization_type in organization_types %}
+              <option value="{{ key }}"
+                      {% if key|lower == organization.organization_type|lower %}selected="selected"{% endif %}>
+                {{ organization_type }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
+    {# End of if organization_types #}
 
-<div class="form-group" id="politician_we_vote_id_div">
-    <label for="politician_we_vote_id_id" class="col-sm-3 control-label">
-        Politician We Vote Id
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="politician_we_vote_id" id="politician_we_vote_id_id" class="form-control"
+    <div class="form-group" id="politician_we_vote_id_div">
+      <label for="politician_we_vote_id_id" class="col-sm-3 control-label">Politician We Vote Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="politician_we_vote_id"
+               id="politician_we_vote_id_id"
+               class="form-control"
                value="{% if organization %}{{ organization.politician_we_vote_id|default_if_none:"" }}{% else %}{{ politician_we_vote_id|default_if_none:"" }}{% endif %}" />
         {% if organization.politician_we_vote_id %}
-            <a href="{% url 'politician:politician_we_vote_id_edit' organization.politician_we_vote_id %}?" target="_blank">
+          <a href="{% url 'politician:politician_we_vote_id_edit' organization.politician_we_vote_id %}?"
+             target="_blank">
             view politician&nbsp;<span class="glyphicon glyphicon-new-window"></span>
-            </a>&nbsp;&nbsp;
+          </a>&nbsp;&nbsp;
         {% else %}
-        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'organization:organization_politician_match' %}?organization_id={{ organization.id }}">match to politician</a>)
+          &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'organization:organization_politician_match' %}?organization_id={{ organization.id }}">match to politician</a>)
         {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_website_id" class="col-sm-3 control-label">Endorser Website
-    {% if organization.organization_website %}
-    <a href="{{ organization.organization_website }}"
-               target="_blank"
-               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-    {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_website" id="organization_website_id" class="form-control"
+    <div class="form-group">
+      <label for="organization_website_id" class="col-sm-3 control-label">
+        Endorser Website
+        {% if organization.organization_website %}
+          <a href="{{ organization.organization_website }}"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_website"
+               id="organization_website_id"
+               class="form-control"
                value="{% if organization %}{{ organization.organization_website|default_if_none:"" }}{% else %}{{ organization_website }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_contact_form_url_id" class="col-sm-3 control-label">Contact Form Website
-    {% if organization.organization_contact_form_url %}
-    <a href="{{ organization.organization_contact_form_url }}"
-               target="_blank"
-               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-    {% endif %}
-    </label>
-    <div class="col-sm-8">
-    <input type="text" name="organization_contact_form_url" id="organization_contact_form_url_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_contact_form_url|default_if_none:"" }}{% else %}{{ organization_contact_form_url }}{% endif %}" />
+    <div class="form-group">
+      <label for="organization_contact_form_url_id" class="col-sm-3 control-label">
+        Contact Form Website
+        {% if organization.organization_contact_form_url %}
+          <a href="{{ organization.organization_contact_form_url }}"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_contact_form_url"
+               id="organization_contact_form_url_id"
+               class="form-control"
+               value="{% if organization %}{{ organization.organization_contact_form_url|default_if_none:"" }}{% else %}{{ organization_contact_form_url }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_email_id" class="col-sm-3 control-label">Contact Email</label>
-    <div class="col-sm-8">
-    <input type="text" name="organization_email" id="organization_email_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_email|default_if_none:"" }}{% else %}{{ organization_email }}{% endif %}" />
+    <div class="form-group">
+      <label for="organization_email_id" class="col-sm-3 control-label">Contact Email</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_email"
+               id="organization_email_id"
+               class="form-control"
+               value="{% if organization %}{{ organization.organization_email|default_if_none:"" }}{% else %}{{ organization_email }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="bluesky_handle_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="bluesky_handle_id" class="col-sm-3 control-label">
         Bluesky
         {% if organization.bluesky_handle and bluesky_url %}
-            <a href="{{ bluesky_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+          <a href="{{ bluesky_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="bluesky_handle" id="bluesky_handle_id" class="form-control"
-               value="{% if organization %}{{ organization.bluesky_handle|default_if_none:'' }}{% else %}{{ bluesky_handle }}{% endif %}"
-        />
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="bluesky_handle"
+               id="bluesky_handle_id"
+               class="form-control"
+               value="{% if organization %}{{ organization.bluesky_handle|default_if_none:'' }}{% else %}{{ bluesky_handle }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
-        <span {% if twitter_handle_mismatch %} style="color: red;" {% endif %}>
-            Twitter Handle
-            {% if twitter_handle_mismatch %} MISMATCH WITH TWITTER LINK ('{{ twitter_link_to_organization_handle }}' expected){% endif %}
+    <div class="form-group">
+      <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
+        <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>
+          Twitter Handle
+          {% if twitter_handle_mismatch %}
+            MISMATCH WITH TWITTER LINK ('{{ twitter_link_to_organization_handle }}' expected)
+          {% endif %}
         </span>
         {% if organization.organization_twitter_handle %}
-        <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
-                   target="_blank"
-                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+          <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
         {% if organization.organization_twitter_handle %}
-            <br />
-            {{ organization.twitter_followers_count|intcomma }} Followers
+          <br />
+          {{ organization.twitter_followers_count|intcomma }} Followers
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_twitter_handle"
+               id="organization_twitter_handle_id"
+               class="form-control"
                value="{% if organization %}{{ organization.organization_twitter_handle|default_if_none:"" }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
         {% if organization.organization_twitter_handle %}
-            <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"
-                    {% if organization.organization_twitter_updates_failing %}checked{% endif %} />
-            <label for="organization_twitter_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span></label>
+          <input type="checkbox"
+                 name="organization_twitter_updates_failing"
+                 id="organization_twitter_updates_failing_id"
+                 value="1"
+                 {% if organization.organization_twitter_updates_failing %}checked{% endif %} />
+          <label for="organization_twitter_updates_failing_id"
+                 style="font-weight: normal !important">
+            Twitter Updates Failing. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving this handle. Uncheck when fixed.</span>
+          </label>
         {% endif %}
 
+      </div>
     </div>
-</div>
 
-{% if not TWITTER_API_ON %}
-<div class="form-group">
-    <label for="twitter_description_id" class="col-sm-3 control-label">
-        Twitter Description
-    </label>
-    <div class="col-sm-8">
-        <textarea name="twitter_description"
-                  class="form-control animated"
-                  id="twitter_description_id"
-                  placeholder="Twitter Description">{% if organization %}{{ organization.twitter_description|default_if_none:"" }}{% else %}{{ twitter_description }}{% endif %}</textarea>
-    </div>
-</div>
-    
-<div class="form-group">
-    <label for="twitter_followers_count_id" class="col-sm-3 control-label">
-        Twitter Followers Count
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="twitter_followers_count" id="twitter_followers_count_id" class="form-control"
-               value="{% if organization %}{{ organization.twitter_followers_count|default_if_none:0 }}{% else %}{{ twitter_followers_count }}{% endif %}"
-        />
-    </div>
-</div>
-{% endif %}{# if not TWITTER_API_ON #}
+    {% if not TWITTER_API_ON %}
+      <div class="form-group">
+        <label for="twitter_description_id" class="col-sm-3 control-label">Twitter Description</label>
+        <div class="col-sm-8">
+          <textarea name="twitter_description"
+                    class="form-control animated"
+                    id="twitter_description_id"
+                    placeholder="Twitter Description">{% if organization %}{{ organization.twitter_description|default_if_none:"" }}{% else %}{{ twitter_description }}{% endif %}</textarea>
+        </div>
+      </div>
 
-<div class="form-group">
-    <label for="organization_facebook_id" class="col-sm-3 control-label">
+      <div class="form-group">
+        <label for="twitter_followers_count_id" class="col-sm-3 control-label">Twitter Followers Count</label>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="twitter_followers_count"
+                 id="twitter_followers_count_id"
+                 class="form-control"
+                 value="{% if organization %}{{ organization.twitter_followers_count|default_if_none:0 }}{% else %}{{ twitter_followers_count }}{% endif %}" />
+        </div>
+      </div>
+    {% endif %}
+    {# if not TWITTER_API_ON #}
+
+    <div class="form-group">
+      <label for="organization_facebook_id" class="col-sm-3 control-label">
         Facebook URL
         {% if organization.generate_facebook_link %}
-            <a href="{{ organization.generate_facebook_link }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+          <a href="{{ organization.generate_facebook_link }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_facebook" id="organization_facebook_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_facebook|default_if_none:'' }}{% else %}{{ organization_facebook }}{% endif %}"
-        />
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_facebook"
+               id="organization_facebook_id"
+               class="form-control"
+               value="{% if organization %}{{ organization.organization_facebook|default_if_none:'' }}{% else %}{{ organization_facebook }}{% endif %}" />
         {% if organization.organization_facebook %}
-            <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}&reverse_path='organization:organization_position_list'"
-               id="facebook_a_tag"
-            >
-                Refresh Facebook Photo</a>
+          <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}&reverse_path='organization:organization_position_list'"
+             id="facebook_a_tag">Refresh Facebook Photo</a>
         {% endif %}
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_instagram_handle_id" class="col-sm-3 control-label">
-    <span {% if instagram_handle_mismatch %} style="color: red;" {% endif %}>
-        Instagram Handle
-        {% if instagram_handle_mismatch %} MISMATCH WITH INSTAGRAM LINK ('{{ instagram_link_to_organization_handle }}' expected){% endif %}
-    </span>
+    <div class="form-group">
+      <label for="organization_instagram_handle_id" class="col-sm-3 control-label">
+        <span {% if instagram_handle_mismatch %}style="color: red;"{% endif %}>
+          Instagram Handle
+          {% if instagram_handle_mismatch %}
+            MISMATCH WITH INSTAGRAM LINK ('{{ instagram_link_to_organization_handle }}' expected)
+          {% endif %}
+        </span>
         {% if organization.organization_instagram_handle %}
-        <a href="https://instagram.com/{{ organization.organization_instagram_handle }}"
-                   target="_blank"
-                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+          <a href="https://instagram.com/{{ organization.organization_instagram_handle }}"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_instagram_handle" id="organization_instagram_handle_id" class="form-control"
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="organization_instagram_handle"
+               id="organization_instagram_handle_id"
+               class="form-control"
                value="{% if organization %}{{ organization.organization_instagram_handle|default_if_none:'' }}{% else %}{{ organization_instagram_handle|default_if_none:'' }}{% endif %}" />
         {% if organization.organization_instagram_handle %}
-{#            <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"#}
-{#                    {% if organization.organization_instagram_updates_failing %}checked{% endif %} />#}
-{#            <label for="organization_instagram_updates_failing_id" style="font-weight: normal !important;">Instagram Updates Failing. <span style="color: darkgray">Our automated Instagram data update script had trouble retrieving this handle. Uncheck when fixed.</span></label>#}
+          {#            <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"#}
+          {#                    {% if organization.organization_instagram_updates_failing %}checked{% endif %} />#}
+          {#            <label for="organization_instagram_updates_failing_id" style="font-weight: normal !important;">Instagram Updates Failing. <span style="color: darkgray">Our automated Instagram data update script had trouble retrieving this handle. Uncheck when fixed.</span></label>#}
         {% endif %}
 
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="tiktok_url_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="tiktok_url_id" class="col-sm-3 control-label">
         TikTok
         {% if organization.tiktok_url %}
-            <a href="{{ organization.tiktok_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+          <a href="{{ organization.tiktok_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="tiktok_url" id="tiktok_url_id" class="form-control"
-               value="{% if organization %}{{ organization.tiktok_url|default_if_none:'' }}{% else %}{{ tiktok_url }}{% endif %}"
-        />
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="tiktok_url"
+               id="tiktok_url_id"
+               class="form-control"
+               value="{% if organization %}{{ organization.tiktok_url|default_if_none:'' }}{% else %}{{ tiktok_url }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-{% if organization %}
-{#<div class="form-group">#}
-{#    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">Wikipedia Page URL / Page Name</label>#}
-{#    <div class="col-sm-8">#}
-{#        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control" #}
-{#               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier" #}
-{#               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" /> #}
-{#    </div>#}
-{#</div>#}
-{##}
-{#<div class="form-group">#}
-{#    <label for="wikipedia_photo_url_id" class="col-sm-3 control-label">Wikipedia Photo URL</label>#}
-{#    <div class="col-sm-8">#}
-{#        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"#}
-{#               value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />#}
-{#    </div>#}
-{#</div>#}
-{##}
-{#<div class="form-group">#}
-{#    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Endorsements Importer URL</label>#}
-{#    <div class="col-sm-8">#}
-{#        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"#}
-{#               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />#}
-{#            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see importer specification</a>)#}
-{#    </div>#}
-{#</div>#}
+    {% if organization %}
+      {#<div class="form-group">#}
+      {#    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">Wikipedia Page URL / Page Name</label>#}
+      {#    <div class="col-sm-8">#}
+      {#        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control" #}
+      {#               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier" #}
+      {#               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" /> #}
+      {#    </div>#}
+      {#</div>#}
+      {##}
+      {#<div class="form-group">#}
+      {#    <label for="wikipedia_photo_url_id" class="col-sm-3 control-label">Wikipedia Photo URL</label>#}
+      {#    <div class="col-sm-8">#}
+      {#        <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" class="form-control"#}
+      {#               value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />#}
+      {#    </div>#}
+      {#</div>#}
+      {##}
+      {#<div class="form-group">#}
+      {#    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Endorsements Importer URL</label>#}
+      {#    <div class="col-sm-8">#}
+      {#        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"#}
+      {#               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />#}
+      {#            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see importer specification</a>)#}
+      {#    </div>#}
+      {#</div>#}
 
-{% if issue_list %}
-<div class="form-group">
-    <label class="col-sm-3 control-label">
-        Values Analysis
-        <a href="https://help.wevote.us/hc/en-us/articles/360034261733-How-were-the-Values-within-We-Vote-chosen"
-           target="_blank"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        <br />
-        <a href="https://docs.google.com/document/d/18-A_UWIHuq7iR8JWpGtTE3QSSlSoGN0MYwHIGIxw7ZU/edit?tab=t.0#heading=h.ryg639tpp85h"
-           target="_blank"
-           class="u-no-break"
-           style="font-weight: normal!important;"
-        >Guidelines&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-    </label>
-    <div class="col-sm-8 ">
-    <ul class="list-inline">
-    {% for issue in issue_list %}
-      {% if not issue.hide_issue or issue.followed_by_organization %}
-        <li class="list-inline-item">
-        <input type="checkbox" name="selected_issues" id="selected_issues_id_{{ issue.we_vote_id }}" value={{ issue.we_vote_id }}
-                {% if issue.followed_by_organization %}checked{% endif %} />
-        <label for="selected_issues_id_{{ issue.we_vote_id }}" style="font-weight: normal !important;">
-          {% if issue.hide_issue %}
-          <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
-          {% else %}
-          {{ issue.issue_name }}
-          {% endif %}
-        </label>
-        </li>
-      {% endif %}
-    {% endfor %}
-    </ul>
-    </div>
-</div>
-
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Augmentation Status</label>
-    <div class="col-sm-8 ">
-        {# Augmentation Done #}
-        <div style="display: flex;">
-        <div style="margin-right: 4px;">
-            <input type="checkbox" name="augmentation_done" id="augmentation_done_id" value="1"
-                    {% if organization.augmentation_done %}checked{% endif %} />
-        </div>
-        <div>
-            <label for="augmentation_done_id" style="font-weight: normal !important;">Augmentation Done. 
-                <span style="color: darkgray">The latest information about this endorser has been collected.</span></label>
-        </div>
-        </div>
-        {# Values Analysis #}
-        <div style="display: flex;">
-        <div style="margin-right: 4px;">
-            <input type="checkbox" name="issue_analysis_done" id="issue_analysis_done_id" value="1"
-                    {% if organization.issue_analysis_done %}checked{% endif %} />
-        </div>
-        <div>
-            <label for="issue_analysis_done_id" style="font-weight: normal !important;">Values Analysis Done. 
-                <span style="color: darkgray">This endorser has been tagged with the correct issues.</span></label>
-        </div>
-        </div>
-        {# QA: Quality Assurance #}
-        <div style="display: flex;">
-        <div style="margin-right: 4px;">
-            <input type="checkbox" name="qa_done" id="qa_done_id" value="1"
-                    {% if organization.qa_done %}checked{% endif %} />
-        </div>
-        <div>
-            <label for="qa_done_id" style="font-weight: normal !important;">QA Done. 
-                <span style="color: darkgray">This endorser has been reviewed for accuracy by a second person. (Quality Assurance)</span></label>
-        </div>
-        </div>
-        {# Help needed from augmentation or values expert #}
-        <div style="display: flex;">
-        <div style="margin-right: 4px;">
-            <input type="checkbox" name="help_needed" id="help_needed_id" value="1"
-                    {% if organization.help_needed %}checked{% endif %} />
-        </div>
-        <div>
-            <label for="help_needed_id" style="font-weight: normal !important;">Help Needed. 
-                <span style="color: darkgray">Advice needed by expert in either augmentation or Values Analysis.</span></label>
-        </div>
-        </div>
-        <textarea name="issue_analysis_admin_notes"
-                  class="form-control animated"
-                  id="issue_analysis_admin_notes_id"
-                  placeholder="Status of augmentation?">{{ organization.issue_analysis_admin_notes|default_if_none:"" }}</textarea>
-        {% if voter.is_admin and change_log_list %}
+      {% if issue_list %}
+        <div class="form-group">
+          <label class="col-sm-3 control-label">
+            Values Analysis
+            <a href="https://help.wevote.us/hc/en-us/articles/360034261733-How-were-the-Values-within-We-Vote-chosen"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             <br />
-{% include "organization/change_log_list.html" with change_log_list=change_log_list %}
-        {% endif %}
-    </div>
-</div>
-
-{% endif %}
-
-{% endif %}
-
-{% if upcoming_election_list %}
-<div class="form-group">
-    <label for="google_civic_election_id" class="col-sm-3 control-label">Create Voter Guide</label>
-    <div class="col-sm-8">
-        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control" style="height: auto !important">
-            <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-                -- Create Voter Guide for this Election --</option>
-        {% for election in upcoming_election_list %}
-            <option value="{{ election.google_civic_election_id }}"
-                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-        {% endfor %}
-        </select>
-    </div>
-</div>
-{% endif %}
-
-
-{% if state_list %}
-<div class="form-group">
-    <label for="state_served_code_id" class="col-sm-3 control-label">State Served Code</label>
-    <div class="col-sm-8">
-        <select id="state_served_code_id" name="state_served_code" class="form-control">
-            <option value="" {% if '' == state_served_code %} selected="selected"{% endif %}>
-                -- State Served --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_served_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-    </div>
-</div>
-{% endif %}{# End of if state_list #}
+            <a href="https://docs.google.com/document/d/18-A_UWIHuq7iR8JWpGtTE3QSSlSoGN0MYwHIGIxw7ZU/edit?tab=t.0#heading=h.ryg639tpp85h"
+               target="_blank"
+               class="u-no-break"
+               style="font-weight: normal!important">Guidelines&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+          </label>
+          <div class="col-sm-8 ">
+            <ul class="list-inline">
+              {% for issue in issue_list %}
+                {% if not issue.hide_issue or issue.followed_by_organization %}
+                  <li class="list-inline-item">
+                    <input type="checkbox"
+                           name="selected_issues"
+                           id="selected_issues_id_{{ issue.we_vote_id }}"
+                           value="{{ issue.we_vote_id }}"
+                           {% if issue.followed_by_organization %}checked{% endif %} />
+                    <label for="selected_issues_id_{{ issue.we_vote_id }}"
+                           style="font-weight: normal !important">
+                      {% if issue.hide_issue %}
+                        <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
+                      {% else %}
+                        {{ issue.issue_name }}
+                      {% endif %}
+                    </label>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
 
 
-<div class="form-group">
-    <label class="col-sm-3 control-label">
+        <div class="form-group">
+          <label class="col-sm-3 control-label">Augmentation Status</label>
+          <div class="col-sm-8 ">
+            {# Augmentation Done #}
+            <div style="display: flex;">
+              <div style="margin-right: 4px;">
+                <input type="checkbox"
+                       name="augmentation_done"
+                       id="augmentation_done_id"
+                       value="1"
+                       {% if organization.augmentation_done %}checked{% endif %} />
+              </div>
+              <div>
+                <label for="augmentation_done_id" style="font-weight: normal !important;">
+                  Augmentation Done.
+                  <span style="color: darkgray">The latest information about this endorser has been collected.</span>
+                </label>
+              </div>
+            </div>
+            {# Values Analysis #}
+            <div style="display: flex;">
+              <div style="margin-right: 4px;">
+                <input type="checkbox"
+                       name="issue_analysis_done"
+                       id="issue_analysis_done_id"
+                       value="1"
+                       {% if organization.issue_analysis_done %}checked{% endif %} />
+              </div>
+              <div>
+                <label for="issue_analysis_done_id" style="font-weight: normal !important;">
+                  Values Analysis Done.
+                  <span style="color: darkgray">This endorser has been tagged with the correct issues.</span>
+                </label>
+              </div>
+            </div>
+            {# QA: Quality Assurance #}
+            <div style="display: flex;">
+              <div style="margin-right: 4px;">
+                <input type="checkbox"
+                       name="qa_done"
+                       id="qa_done_id"
+                       value="1"
+                       {% if organization.qa_done %}checked{% endif %} />
+              </div>
+              <div>
+                <label for="qa_done_id" style="font-weight: normal !important;">
+                  QA Done.
+                  <span style="color: darkgray">This endorser has been reviewed for accuracy by a second person. (Quality Assurance)</span>
+                </label>
+              </div>
+            </div>
+            {# Help needed from augmentation or values expert #}
+            <div style="display: flex;">
+              <div style="margin-right: 4px;">
+                <input type="checkbox"
+                       name="help_needed"
+                       id="help_needed_id"
+                       value="1"
+                       {% if organization.help_needed %}checked{% endif %} />
+              </div>
+              <div>
+                <label for="help_needed_id" style="font-weight: normal !important;">
+                  Help Needed.
+                  <span style="color: darkgray">Advice needed by expert in either augmentation or Values Analysis.</span>
+                </label>
+              </div>
+            </div>
+            <textarea name="issue_analysis_admin_notes"
+                      class="form-control animated"
+                      id="issue_analysis_admin_notes_id"
+                      placeholder="Status of augmentation?">{{ organization.issue_analysis_admin_notes|default_if_none:"" }}</textarea>
+            {% if voter.is_admin and change_log_list %}
+              <br />
+              {% include "organization/change_log_list.html" with change_log_list=change_log_list %}
+            {% endif %}
+          </div>
+        </div>
+
+      {% endif %}
+
+    {% endif %}
+
+    {% if upcoming_election_list %}
+      <div class="form-group">
+        <label for="google_civic_election_id" class="col-sm-3 control-label">Create Voter Guide</label>
+        <div class="col-sm-8">
+          <select id="google_civic_election_id"
+                  name="google_civic_election_id"
+                  class="form-control"
+                  style="height: auto !important">
+            <option value="0"
+                    {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
+              -- Create Voter Guide for this Election --
+            </option>
+            {% for election in upcoming_election_list %}
+              <option value="{{ election.google_civic_election_id }}"
+                      {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %}selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
+
+
+    {% if state_list %}
+      <div class="form-group">
+        <label for="state_served_code_id" class="col-sm-3 control-label">State Served Code</label>
+        <div class="col-sm-8">
+          <select id="state_served_code_id"
+                  name="state_served_code"
+                  class="form-control">
+            <option value=""
+                    {% if '' == state_served_code %}selected="selected"{% endif %}>-- State Served --</option>
+            {% for key, state in state_list %}
+              <option value="{{ key }}"
+                      {% if key|lower == state_served_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
+    {# End of if state_list #}
+
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label">
         {% if organization %}
-            <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+          <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
         {% else %}
-            <a href="{% url 'organization:organization_list' %}">cancel</a>
+          <a href="{% url 'organization:organization_list' %}">cancel</a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <button type="submit" class="btn btn-primary">{% if organization %}Update Endorser{% else %}Save New Endorser{% endif %}</button>
+      </label>
+      <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary">
+          {% if organization %}
+            Update Endorser
+          {% else %}
+            Save New Endorser
+          {% endif %}
+        </button>
+      </div>
     </div>
-</div>
-</form>
+  </form>
 
 
-{% if organization %}
-  <br />
-  <br />
-<form action="{% url 'organization:organization_delete_process' %}" method="post" class="form-horizontal">
-{% csrf_token %}
-  <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
-  <button type="submit" class="btn btn-danger">Delete Endorser</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <label for="confirm_delete_id">
-    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this organization
-  </label>
-</form>
-{% endif %}
+  {% if organization %}
+    <br />
+    <br />
+    <form action="{% url 'organization:organization_delete_process' %}"
+          method="post"
+          class="form-horizontal">
+      {% csrf_token %}
+      <input type="hidden"
+             name="organization_id"
+             value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
+      <button type="submit" class="btn btn-danger">Delete Endorser</button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="confirm_delete_id">
+        <input type="checkbox"
+               name="confirm_delete"
+               id="confirm_delete_id"
+               value="1" />
+        Check to confirm that you want to permanently delete this organization
+      </label>
+    </form>
+  {% endif %}
   <br />
   <br />
 
 
-{% if organization %}
+  {% if organization %}
     {% if organization.wikipedia_thumbnail_url %}
-        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
-        Thumbnail<br />
+      <img src="{{ organization.wikipedia_thumbnail_url }}">
+      <br />
+      Thumbnail
+      <br />
     {% endif %}
 
     {% if organization.wikipedia_photo_url %}
-        <img src="{{ organization.wikipedia_photo_url }}"><br />
-        Full size<br />
+      <img src="{{ organization.wikipedia_photo_url }}">
+      <br />
+      Full size
+      <br />
     {% endif %}
-{% endif %}
-<script>
+  {% endif %}
+  <script>
   // when you change the facebook url disable the button
   $(function() {
     $('#organization_facebook_id').change(function() {
@@ -578,8 +735,8 @@
 <!--    $('#facebook_a_tag').attr('href', new_href);-->
     {% endif %}
   });
-</script>
-<script>
+  </script>
+  <script>
 $(document).ready(function() {
     function togglePoliticianField() {
         var organizationType = $('#organization_type_id').val();
@@ -596,6 +753,5 @@ $(document).ready(function() {
     // Call the function whenever the organization type changes
     $('#organization_type_id').change(togglePoliticianField);
 });
-</script>
+  </script>
 {% endblock %}
-

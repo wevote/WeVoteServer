@@ -1,71 +1,133 @@
 {# templates/voter/voter_authenticate_manually.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if voter %}
+{% block title %}
+  {% if voter %}
     Authenticate Manually
-    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}
-{% else %}No Voter Found
-{% endif %}{% endblock %}
+    {% if voter.first_name %}{{ voter.first_name }}{% endif %}
+    {% if voter.last_name %}{{ voter.last_name }}{% endif %}
+  {% else %}
+    No Voter Found
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-<p>This page is to help with the initial set up of a database.</p>
+  <p>This page is to help with the initial set up of a database.</p>
 
-{% if voter %}
+  {% if voter %}
 
-    <h1>Authenticate Manually
-        {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
-    voter.id: {{ voter.id }}, voter_api_device_id: {{ voter_api_device_id }}<br />
+    <h1>
+      Authenticate Manually
+      {% if voter.first_name %}{{ voter.first_name }}{% endif %}
+      {% if voter.last_name %}{{ voter.last_name }}{% endif %}
+    </h1>
+    voter.id: {{ voter.id }}, voter_api_device_id: {{ voter_api_device_id }}
+    <br />
 
     <table border="1">
-    <tr>
+      <tr>
         <td>Admin?</td>
-        <td>{% if voter.is_admin %}Yes{% else %}No{% endif %}</td>
-        <td>{% if voter.is_admin %}TURN OFF: {{ unset_this_voter_as_admin }}
-        {% else %}TURN ON: {{ set_this_voter_as_admin }}{% endif %}</td>
-    </tr>
-    <tr>
+        <td>
+          {% if voter.is_admin %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+        <td>
+          {% if voter.is_admin %}
+            TURN OFF: {{ unset_this_voter_as_admin }}
+          {% else %}
+            TURN ON: {{ set_this_voter_as_admin }}
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
         <td>Partner Organization?</td>
-        <td>{% if voter.is_partner_organization %}Yes
-        {% else %}No{% endif %}</td>
-        <td>{% if voter.is_partner_organization %}TURN OFF: {{ unset_as_partner_organization }}
-        {% else %}TURN ON: {{ set_as_partner_organization }}{% endif %}</td>
-    </tr>
-    <tr>
+        <td>
+          {% if voter.is_partner_organization %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+        <td>
+          {% if voter.is_partner_organization %}
+            TURN OFF: {{ unset_as_partner_organization }}
+          {% else %}
+            TURN ON: {{ set_as_partner_organization }}
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
         <td>Political Data Manager?</td>
-        <td>{% if voter.is_political_data_manager %}Yes
-        {% else %}No{% endif %}</td>
-        <td>{% if voter.is_political_data_manager %}TURN OFF: {{ unset_as_political_data_manager }}
-        {% else %}TURN ON: {{ set_as_political_data_manager }}{% endif %}</td>
-    </tr>
-    <tr>
+        <td>
+          {% if voter.is_political_data_manager %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+        <td>
+          {% if voter.is_political_data_manager %}
+            TURN OFF: {{ unset_as_political_data_manager }}
+          {% else %}
+            TURN ON: {{ set_as_political_data_manager }}
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
         <td>Political Data Viewer?</td>
-        <td>{% if voter.is_political_data_viewer %}Yes
-        {% else %}No{% endif %}</td>
-        <td>{% if voter.is_political_data_viewer %}TURN OFF: {{ unset_as_political_data_viewer }}
-        {% else %}TURN ON: {{ set_as_political_data_viewer }}{% endif %}</td>
-    </tr>
-    <tr>
+        <td>
+          {% if voter.is_political_data_viewer %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+        <td>
+          {% if voter.is_political_data_viewer %}
+            TURN OFF: {{ unset_as_political_data_viewer }}
+          {% else %}
+            TURN ON: {{ set_as_political_data_viewer }}
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
         <td>Verified Volunteer?</td>
-        <td>{% if voter.is_verified_volunteer %}Yes
-        {% else %}No{% endif %}</td>
-        <td>{% if voter.is_verified_volunteer %}TURN OFF: {{ unset_as_verified_volunteer }}
-        {% else %}TURN ON: {{ set_as_verified_volunteer }}{% endif %}</td>
-    </tr>
+        <td>
+          {% if voter.is_verified_volunteer %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+        <td>
+          {% if voter.is_verified_volunteer %}
+            TURN OFF: {{ unset_as_verified_volunteer }}
+          {% else %}
+            TURN ON: {{ set_as_verified_volunteer }}
+          {% endif %}
+        </td>
+      </tr>
     </table>
 
-    <p> {% if not is_authenticated %}
-            {% if voter.is_admin %}Since this account has admin authority,
-            <a href="{% url 'voter:authenticate_manually_process' %}">click here to authenticate within Django</a>{% endif %}
+    <p>
+      {% if not is_authenticated %}
+        {% if voter.is_admin %}
+          Since this account has admin authority,
+          <a href="{% url 'voter:authenticate_manually_process' %}">click here to authenticate within Django</a>
         {% endif %}
+      {% endif %}
     </p>
 
 
-{% else %}
+  {% else %}
 
     <h1>No Voter Found</h1>
     Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
 
-{% endif %}
+  {% endif %}
 
 {% endblock %}

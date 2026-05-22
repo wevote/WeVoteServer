@@ -5,66 +5,86 @@
 {% block title %}Email Templates › New Email Template{% endblock %}
 
 {% block content %}
-{% include "admin_tools/loading_banner.html" %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+  <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     &lt; Back to Email Templates
-</a>
+  </a>
 
-<div class="container mt-5 p-4 bg-white rounded shadow-sm border" style="max-width: 800px;">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">
-      <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" class="text-primary text-decoration-none">Email Templates</a> › {% if email_template %}Edit Template{% else %}New Template{% endif %}
-    </h4>
-    <div>
-      <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&draft_uuid={{ draft_uuid }}" class="btn btn-outline-secondary me-2">Cancel</a>
-      <button type="submit" form="email-template-form" class="btn btn-primary">Save</button>
-    </div>
-  </div>
-
-  <form id="email-template-form" method="post" action="{% url 'email_outbound:email_template_edit_process' %}">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label for="email_template_name" class="form-label">Template Name <span class="text-danger">*</span></label>
-        <input type="text" id="email_template_name" name="email_template_name" class="form-control" value="{% if email_template %}{{ email_template.email_template_name }}{% endif %}" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
-        <input type="text" id="subject" name="subject" class="form-control" value="{% if email_template %}{{ email_template.subject }}{% endif %}" required>
+  <div class="container mt-5 p-4 bg-white rounded shadow-sm border"
+       style="max-width: 800px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">
+        <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+           class="text-primary text-decoration-none">Email Templates</a> ›
+        {% if email_template %}
+          Edit Template
+        {% else %}
+          New Template
+        {% endif %}
+      </h4>
+      <div>
+        <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&draft_uuid={{ draft_uuid }}"
+           class="btn btn-outline-secondary me-2">Cancel</a>
+        <button type="submit" form="email-template-form" class="btn btn-primary">Save</button>
+      </div>
     </div>
 
+    <form id="email-template-form"
+          method="post"
+          action="{% url 'email_outbound:email_template_edit_process' %}">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="email_template_name" class="form-label">
+          Template Name <span class="text-danger">*</span>
+        </label>
+        <input type="text"
+               id="email_template_name"
+               name="email_template_name"
+               class="form-control"
+               value="{% if email_template %}{{ email_template.email_template_name }}{% endif %}"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label for="subject" class="form-label">
+          Subject <span class="text-danger">*</span>
+        </label>
+        <input type="text"
+               id="subject"
+               name="subject"
+               class="form-control"
+               value="{% if email_template %}{{ email_template.subject }}{% endif %}"
+               required>
+      </div>
 
 
-    <div class="mb-3">
+
+      <div class="mb-3">
         <label for="folder" class="form-label">Folder</label>
         <select id="folder" name="folder" class="form-select">
-            <option value="">-- Choose folder --</option>
-            {% for folder in folder_list %}
+          <option value="">-- Choose folder --</option>
+          {% for folder in folder_list %}
             <option value="{{ folder.id }}"
-                    {% if selected_folder_id and selected_folder_id == folder.id %}
-                        selected
-                    {% endif %}>
-                {{ folder.email_template_name }}
+                    {% if selected_folder_id and selected_folder_id == folder.id %}selected{% endif %}>
+              {{ folder.email_template_name }}
             </option>
-            {% endfor %}
-            <option value="null"
-                    {% if not selected_folder_id %}
-                        selected
-                    {% endif %}>
-                Unfiled
-            </option>
+          {% endfor %}
+          <option value="null" {% if not selected_folder_id %}selected{% endif %}>Unfiled</option>
         </select>
-    </div>
+      </div>
 
-    <!-- Display attachments -->
-    <h5><b>Attachments</b></h5>
-    <ul id="existingAttachments" class="list-group">
+      <!-- Display attachments -->
+      <h5>
+        <b>Attachments</b>
+      </h5>
+      <ul id="existingAttachments" class="list-group">
         {% for att in email_template.attachments.all %}
-          <li class="list-group-item d-flex justify-content-between align-items-center" data-att-id="{{ att.id }}">
+          <li class="list-group-item d-flex justify-content-between align-items-center"
+              data-att-id="{{ att.id }}">
             {% if att.is_inline %}
-              <div class="d-flex flex-row align-items-center" >
+              <div class="d-flex flex-row align-items-center">
                 <div class="d-flex flex-column mr-3">
                   <span class="fw-semibold">{{ att.original_name|default:"file" }}</span>
                   <small class="muted">{{ att.created }}</small>
@@ -79,70 +99,85 @@
             {% endif %}
             <div class="d-flex gap-2">
               <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'email_outbound:email_attachment_download' attachment_id=att.id %}">
-                Download
-              </a>
+                 href="{% url 'email_outbound:email_attachment_download' attachment_id=att.id %}">Download</a>
 
               {% if not att.is_inline %}
-                <button type="button" class="btn btn-sm btn-outline-danger"
-                        onclick="deleteAttachment({{ att.id }})">
-                  Delete
-                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="deleteAttachment({{ att.id }})">Delete</button>
               {% endif %}
             </div>
           </li>
         {% empty %}
           <li class="list-group-item muted">No attachments yet.</li>
         {% endfor %}
-    </ul>
+      </ul>
 
-    {# Upload buttons for attachments   #}
-    <div class="d-flex flex-column gap-3">
-      <div class="d-flex gap-2 align-items-center mb-2">
-        <label class="btn btn-primary mb-0">
-          Choose files
-          <input id="attachmentInput" type="file" name="attachments" multiple class="d-none">
-        </label>
+      {# Upload buttons for attachments   #}
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex gap-2 align-items-center mb-2">
+          <label class="btn btn-primary mb-0">
+            Choose files
+            <input id="attachmentInput"
+                   type="file"
+                   name="attachments"
+                   multiple
+                   class="d-none">
+          </label>
 
-        <button id="uploadBtn" type="button" class="btn btn-outline-primary" disabled>
-          <span id="btnText">Upload selected</span>
-          <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-        </button>
-      </div>
-
-      <ul id="fileList" class="list-group list-group-flush small"></ul>
-    </div>
-
-    <!-- Message Field -->
-    <div class="mb-3">
-        <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
-        <textarea id="message" name="message" class="form-control js-tinymce" rows="10">{% if email_template %}{{ email_template.message }}{% endif %}</textarea>
-    </div>
-
-    <!-- Customization tokens -->
-    <div class="mb-4">
-      <h5>Customization Tokens</h5>
-      <p class="text-muted">Click a token to copy it so you can paste it into the message above.</p>
-
-      <div class="token-grid">
-        {% for token in token_list %}
-          <button type="button" class="btn btn-outline-secondary btn-sm token-btn"
-                  data-token="{{ token }}"
-                  style="min-width: 240px; text-align: left;">
-            {{ token }}
+          <button id="uploadBtn" type="button" class="btn btn-outline-primary" disabled>
+            <span id="btnText">Upload selected</span>
+            <span id="btnSpinner"
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"></span>
           </button>
-        {% endfor %}
-      </div>
-    </div>
+        </div>
 
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="email_template_id" value="{% if email_template %}{{ email_template.id }}{% endif %}">
-    <input type="hidden" name="selected_folder_id" value="{{ selected_folder_id }}">
-    <input type="hidden" name="draft_uuid" id="draft_uuid" value="{{ draft_uuid }}">
-  </form>
-</div>
-<style>
+        <ul id="fileList" class="list-group list-group-flush small">
+        </ul>
+      </div>
+
+      <!-- Message Field -->
+      <div class="mb-3">
+        <label for="message" class="form-label">
+          Message <span class="text-danger">*</span>
+        </label>
+        <textarea id="message" name="message" class="form-control js-tinymce" rows="10">{% if email_template %}{{ email_template.message }}{% endif %}</textarea>
+      </div>
+
+      <!-- Customization tokens -->
+      <div class="mb-4">
+        <h5>Customization Tokens</h5>
+        <p class="text-muted">Click a token to copy it so you can paste it into the message above.</p>
+
+        <div class="token-grid">
+          {% for token in token_list %}
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm token-btn"
+                    data-token="{{ token }}"
+                    style="min-width: 240px;
+                           text-align: left">{{ token }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id }}">
+      <input type="hidden" name="state_code" value="{{ state_code }}">
+      <input type="hidden"
+             name="email_template_id"
+             value="{% if email_template %}{{ email_template.id }}{% endif %}">
+      <input type="hidden"
+             name="selected_folder_id"
+             value="{{ selected_folder_id }}">
+      <input type="hidden"
+             name="draft_uuid"
+             id="draft_uuid"
+             value="{{ draft_uuid }}">
+    </form>
+  </div>
+  <style>
   .token-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -153,15 +188,13 @@
     background-color: #d4edda;
     border-color: #c3e6cb;
   }
-</style>
+  </style>
 
-<!-- Use TinyMCE  -->
-<script src="https://quality.wevote.us/javascript/api-server/tinymce/tinymce.min.js"></script>
-<script>
-  {% include "email_outbound/js/_tinymce_loader_js.html" %}
-</script>
-<!-- Customization tokens copy script -->
-<script>
+  <!-- Use TinyMCE  -->
+  <script src="https://quality.wevote.us/javascript/api-server/tinymce/tinymce.min.js"></script>
+  <script>{% include "email_outbound/js/_tinymce_loader_js.html" %}</script>
+  <!-- Customization tokens copy script -->
+  <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.token-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -271,7 +304,7 @@ uploadBtn.addEventListener("click", async () => {
       const downloadUrl = "{% url 'email_outbound:email_attachment_download' attachment_id=0 %}".replace('0', att.id);
       li.innerHTML = att.is_inline ?
           `
-          <div class="d-flex flex-row align-items-center" >
+          <div class="d-flex flex-row align-items-center">
             <div class="d-flex flex-column mr-3">
               <span class="fw-semibold">${att.name}</span>
               <small class="muted">Just now</small>
@@ -317,8 +350,8 @@ uploadBtn.addEventListener("click", async () => {
     uploadBtn.disabled = true;
   }
 });
-</script>
+  </script>
 
-});
-</script>
+  });
+  </script>
 {% endblock %}

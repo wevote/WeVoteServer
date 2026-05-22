@@ -3,10 +3,14 @@
 
 {% block title %}Vote Smart Import{% endblock %}
 
-{%  block content %}
-<h1>Vote Smart Import, State Detail</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% block content %}
+  <h1>Vote Smart Import, State Detail</h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
-<p>{{ state.stateId }} {{ state.name }}</p>
+  <p>{{ state.stateId }} {{ state.name }}</p>
 
 {% endblock %}

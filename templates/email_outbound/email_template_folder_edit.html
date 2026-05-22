@@ -3,14 +3,14 @@
 
 {% block title %}Email Templates > New Folder{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
-    
-    <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        < Back to Email Templates</a>
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Email Templates > New Folder</h1>
+  <a href="{% url 'email_outbound:email_template_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+  < Back to Email Templates</a>
+
+  <h1>Email Templates > New Folder</h1>
 
 {% endblock %}

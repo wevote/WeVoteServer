@@ -3,81 +3,103 @@
 
 {% block title %}Politicians Data Cleaning{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Politicians Data Cleaning</h1>
-    <p>Every time this page is visited, regular data cleaning scripts are run, and the results (if any) are printed in a message above.</p>
+  <h1>Politicians Data Cleaning</h1>
+  <p>
+    Every time this page is visited, regular data cleaning scripts are run, and the results (if any) are printed in a message above.
+  </p>
 
-    <ul>
-        <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
-            <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+  <ul>
+    <li>
+      <a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
+         target="_blank">
+        Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+        <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}"
+           target="_blank">
+        Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+      </li>
+      <li>
+        <a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
+           target="_blank">
+          Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
+          &nbsp;&nbsp;
+          <a href="{% url 'politician:update_ultimate_election_date_from_candidates' %}?state_code={{ state_code }}">
+          Update Politician Ultimate Election Dates</a>
         </li>
+
+        {# # 2024-05-15: Causing problems on live servers #}
+        {#        <li><a href="{% url 'politician:update_recommended_politicians' %}?state_code={{ state_code }}"#}
+        {#                        target="_blank" >#}
+        {#            Update recommended politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
         <li>
-            <a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
-               target="_blank" >
-                Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
-            &nbsp;&nbsp;
-            <a href="{% url 'politician:update_ultimate_election_date_from_candidates' %}?state_code={{ state_code }}" >
-                Update Politician Ultimate Election Dates</a>
-        </li>
+          <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false">Repair Politician Names</a>,
+            <a href="{% url 'politician:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+              Repair OCD ID Mismatches</a>,
+              <a href="{% url 'politician:set_missing_gender_ids' %}">Set Missing Politician Gender Ids</a>
+            </li>
+            {% if organization_might_be_needed_count %}
+              <li>
+                <a href="{% url 'politician:match_politicians_to_organizations' %}?state_code={{ state_code }}">Match Politicians to Endorsers
+                  {% if organization_might_be_needed_count %}({{ organization_might_be_needed_count|intcomma }}){% endif %}
+                </a>
+              </li>
+            {% endif %}
+            {% if politicians_need_followers_count %}
+              <li>
+                <a href="{% url 'politician:politicians_data_cleaning' %}?create_followers_on=1&state_code={{ state_code }}"
+                   target="_blank">
+                  Create FollowOrganization Entries for Politicians
+                  {% if politicians_need_followers_count %}({{ politicians_need_followers_count|intcomma }}){% endif %}
+                  <span class="glyphicon glyphicon-new-window"></span></a>
+              </li>
+            {% endif %}
+            <li>
+              <a href="{% url 'politician:update_profile_image_background_color' %}">Update 5,000 Politicians' background colors &#40;may take 10 minutes&#41;</a>
+            </li>
+            <li>
+              <a href="{% url 'politician:update_is_claimed_profile_for_politicians' %}">Update 5,000 Politicians' 'is_claimed_profile'</a>
+            </li>
+          </ul>
 
-{# # 2024-05-15: Causing problems on live servers #}
-{#        <li><a href="{% url 'politician:update_recommended_politicians' %}?state_code={{ state_code }}"#}
-{#                        target="_blank" >#}
-{#            Update recommended politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
-        <li>
-            <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >
-                Repair Politician Names</a>,
-            <a href="{% url 'politician:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
-                Repair OCD ID Mismatches</a>,
-            <a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a>
-        </li>
-    {% if organization_might_be_needed_count %}
-        <li><a href="{% url 'politician:match_politicians_to_organizations' %}?state_code={{ state_code }}" >Match Politicians to Endorsers{% if organization_might_be_needed_count %} ({{ organization_might_be_needed_count|intcomma }}){% endif %}</a></li>
-    {% endif %}
-    {% if politicians_need_followers_count %}
-        <li><a href="{% url 'politician:politicians_data_cleaning' %}?create_followers_on=1&state_code={{ state_code }}" target="_blank" >
-            Create FollowOrganization Entries for Politicians{% if politicians_need_followers_count %} ({{ politicians_need_followers_count|intcomma }}){% endif %} <span class="glyphicon glyphicon-new-window"></span></a></li>
-    {% endif %}
-        <li><a href="{% url 'politician:update_profile_image_background_color' %}" >Update 5,000 Politicians' background colors &#40;may take 10 minutes&#41;</a></li>
-        <li><a href="{% url 'politician:update_is_claimed_profile_for_politicians' %}" >Update 5,000 Politicians' 'is_claimed_profile'</a></li>
-    </ul>
+          <form name="state_code_form"
+                method="get"
+                action="{% url 'politician:politician_list' %}">
+            <input type="hidden"
+                   name="page"
+                   id="page_input"
+                   value="{{ current_page_number }}">
+            {% csrf_token %}
+            {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
 
-<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
-    <input type="hidden" name="page" id="page_input" value="{{ current_page_number }}">
-    {% csrf_token %}
-    {% if state_code != "" %}
-    <a href="#" onclick="showAllStates(); return false;">
-        show all states</a>
-    {% endif %}
+            {% if state_list %}
+              <select id="state_code_id" name="state_code" onchange="this.form.submit()">
+                <option value="" {% if not state_code %}selected{% endif %}>-- Select a State --</option>
+                {% for key, state in state_list %}
+                  <option value="{{ key }}"
+                          {% if key|lower == state_code|lower %}selected{% endif %}>{{ state }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            {# End of if state_list #}
 
-    {% if state_list %}
-    <select id="state_code_id" name="state_code" onchange="this.form.submit()">
-        <option value="" {% if not state_code %}selected{% endif %}>-- Select a State --</option>
-        {% for key, state in state_list %}
-        <option value="{{ key }}" {% if key|lower == state_code|lower %}selected{% endif %}>
-            {{ state }}
-        </option>
-        {% endfor %}
-    </select>
-    {% endif %}{# End of if state_list #}
+            {% if politician_search %}
+              <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
+                <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
+                {% endif %}
+                <input type="text"
+                       name="politician_search"
+                       id="politician_search_id"
+                       value="{{ politician_search }}" />
+                <input id="politician_search_submit"
+                       type="submit"
+                       value="Search for Politician" />
+              </form>
 
-    {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
-         <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
-    {% endif %}
-    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
-    <input id="politician_search_submit" type="submit" value="Search for Politician" />
-</form>
-
-<script>
+              <script>
     function displayLoadingBanner() {
         const banner = document.getElementById('FilterPopupMessage');
         if (banner) {
@@ -117,6 +139,6 @@
         });
     });
 
-</script>
+              </script>
 
-{% endblock %}
+            {% endblock %}

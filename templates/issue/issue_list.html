@@ -3,153 +3,174 @@
 
 {% block title %}Values/Issues{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Values/Issues</h1>
+  <h1>Values/Issues</h1>
 
-<form name="issue_choose_election" method="get" action="{% url 'issue:issue_list' %}">
+  <form name="issue_choose_election"
+        method="get"
+        action="{% url 'issue:issue_list' %}">
     {% csrf_token %}
 
-    <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a><br />
+    <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a>
+    <br />
 
     {% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
+      <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0"
+                {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
+          -- Filter by Election --
+        </option>
         {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
+          <option value="{{ one_election.google_civic_election_id }}"
+                  {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+          </option>
         {% endfor %}
-    </select>
-    {% endif %}{# End of if election_list #}
+      </select>
+    {% endif %}
+    {# End of if election_list #}
 
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+      <input type="checkbox"
+             name="show_all_elections"
+             id="show_all_elections_id"
+             value="1"
+             {% if show_all_elections %}checked{% endif %} />
+      Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
     {% if state_code != "" %}
-        <a href="#" onclick="showAllStates(); return false;">
-            show all states</a>
-        <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
+      <a href="#" onclick="showAllStates(); return false;">show all states</a>
+      <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
             show all states</a> -->
     {% endif %}
     {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
+      <select id="state_code_id" name="state_code">
+        <option value="">-- Filter by State Served --</option>
         {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
+          <option value="{{ key }}"
+                  {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
         {% endfor %}
-        </select>
+      </select>
 
-    {% endif %}{# End of if state_list #}
+    {% endif %}
+    {# End of if state_list #}
 
     <br />
     {% if issue_search %}
-        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+      <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
-        <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
             clear search</a>&nbsp; -->
     {% endif %}
-    <input type="text" name="issue_search" id="issue_search_id" value="{{ issue_search }}" />
+    <input type="text"
+           name="issue_search"
+           id="issue_search_id"
+           value="{{ issue_search }}" />
     <input type="submit" value="Search for Issue" />
 
     &nbsp;&nbsp;&nbsp;
     {% if show_hidden_issues %}
-    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=0">
-        only show issues visible to voters</a>
+      <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=0">
+      only show issues visible to voters</a>
     {% else %}
-    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=1">
-        show hidden issues</a>
+      <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=1">
+      show hidden issues</a>
     {% endif %}
 
     &nbsp;&nbsp;&nbsp;
     <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
        target="_blank">
-        show partisan analysis <span class="glyphicon glyphicon-new-window"></span></a>
+    show partisan analysis <span class="glyphicon glyphicon-new-window"></span></a>
 
-</form>
+  </form>
 
-{% if issue_list %}
+  {% if issue_list %}
     <table class="table">
       <thead>
         <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th>Issue Name</th>
-            <th>Forced Order</th>
-            <th>Linked Org Count</th>
-            <th>Followers Count</th>
-            <th>Issue Description</th>
-        {% if google_civic_election_id %}
-            <th>Voter Guides, This Election, Linked to this Issue</th>
-        {% endif %}
+          <th>&nbsp;</th>
+          <th>&nbsp;</th>
+          <th>Issue Name</th>
+          <th>Forced Order</th>
+          <th>Linked Org Count</th>
+          <th>Followers Count</th>
+          <th>Issue Description</th>
+          {% if google_civic_election_id %}<th>Voter Guides, This Election, Linked to this Issue</th>{% endif %}
         </tr>
       </thead>
-    {% for issue in issue_list %}
+      {% for issue in issue_list %}
         <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if issue.we_vote_hosted_image_url_medium %}
-                    <img src="{{ issue.we_vote_hosted_image_url_medium }}" width="50" height="50" />
-                {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                 class="u-no-break"
-                 target="_blank">
+          <td>{{ forloop.counter }}</td>
+          <td>
+            {% if issue.we_vote_hosted_image_url_medium %}
+              <img src="{{ issue.we_vote_hosted_image_url_medium }}"
+                   width="50"
+                   height="50" />
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               class="u-no-break"
+               target="_blank">
               {% if issue.issue_icon_local_path %}
-                <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="20" width="20" />
+                <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg"
+                     height="20"
+                     width="20" />
               {% endif %}
-              {{ issue.issue_name }} <span class="glyphicon glyphicon-new-window"></span></a>{% if issue.hide_issue %} - <strong>HIDDEN</strong>{% endif %}<br />
-              {% if issue.considered_left %}
+            {{ issue.issue_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+            {% if issue.hide_issue %}- <strong>HIDDEN</strong>{% endif %}
+            <br />
+            {% if issue.considered_left %}
               <span class="glyphicon glyphicon-arrow-left"></span>
-              {% elif issue.considered_right %}
+            {% elif issue.considered_right %}
               <span class="glyphicon glyphicon-arrow-right"></span>
-              {% endif %}
-              {{ issue.we_vote_id }}
-            </td>
-            <td>{{ issue.forced_sort_order|default_if_none:"" }}</td>
-            <td>{{ issue.linked_organization_count|intcomma }}</td>
-            <td>{{ issue.issue_followers_count|intcomma }}</td>
-            <td>{{ issue.issue_description }}</td>
-        {% if google_civic_election_id %}
+            {% endif %}
+            {{ issue.we_vote_id }}
+          </td>
+          <td>{{ issue.forced_sort_order|default_if_none:"" }}</td>
+          <td>{{ issue.linked_organization_count|intcomma }}</td>
+          <td>{{ issue.issue_followers_count|intcomma }}</td>
+          <td>{{ issue.issue_description }}</td>
+          {% if google_civic_election_id %}
             <td>
-                <ol>
+              <ol>
                 {% for organization in issue.linked_organization_list %}
-                    <li><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                           class="u-no-break"
-                           target="_blank">{{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a></li>
+                  <li>
+                    <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       class="u-no-break"
+                       target="_blank">{{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                  </li>
                 {% endfor %}
-                </ol>
+              </ol>
             </td>
-        {% endif %}
+          {% endif %}
         </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
 
     <p>
-        <a href="{% url 'apis_v1:issuesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}" target="_blank" >Export Values/Issues</a><br />
+      <a href="{% url 'apis_v1:issuesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}"
+         target="_blank">Export Values/Issues</a>
+      <br />
     </p>
 
     <p></p>
-{% else %}
+  {% else %}
     <p>(no issues found)</p>
     <p>
-        <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a><br />
+      <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a>
+      <br />
     </p>
-{% endif %}
+  {% endif %}
 
-<script>
+  <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -187,6 +208,6 @@
         });
     });
 
-</script>
+  </script>
 
 {% endblock %}

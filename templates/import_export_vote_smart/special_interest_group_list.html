@@ -3,43 +3,48 @@
 
 {% block title %}Vote Smart Special Interest Groups{% endblock %}
 
-{%  block content %}
-<a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a>
+{% block content %}
+  <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a>
 
-<h1>Vote Smart Special Interest Groups</h1>
-<p>Also see <a href="{% url 'organization:organization_list' %}">We Vote Endorsers</a></p>
+  <h1>Vote Smart Special Interest Groups</h1>
+  <p>
+    Also see <a href="{% url 'organization:organization_list' %}">We Vote Endorsers</a>
+  </p>
 
-<p><a href="{% url 'import_export_vote_smart:import_special_interest_groups' %}">
-        Retrieve Special Interest Groups from Vote Smart Server</a>,
-   <a href="{% url 'import_export_vote_smart:transfer_vote_smart_sigs_to_we_vote_orgs' %}">
-        Transfer Special Interest Groups to We Vote Orgs</a>
-</p>
+  <p>
+    <a href="{% url 'import_export_vote_smart:import_special_interest_groups' %}">
+      Retrieve Special Interest Groups from Vote Smart Server</a>,
+      <a href="{% url 'import_export_vote_smart:transfer_vote_smart_sigs_to_we_vote_orgs' %}">
+      Transfer Special Interest Groups to We Vote Orgs</a>
+    </p>
 
 
-{% if special_interest_group_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    {% if special_interest_group_list %}
+      <table border="1" cellpadding="5" cellspacing="5">
         <tr>
-            <td></td>
-            <td>sigId</td>
-            <td>name</td>
-            <td>stateId</td>
-            <td>url</td>
+          <td></td>
+          <td>sigId</td>
+          <td>name</td>
+          <td>stateId</td>
+          <td>url</td>
         </tr>
-    {% for special_interest_group in special_interest_group_list %}
-        <tr>
+        {% for special_interest_group in special_interest_group_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ special_interest_group.sigId }}</td>
-            <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group.sigId %}">{{ special_interest_group.name }}</a></td>
+            <td>
+              <a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group.sigId %}">{{ special_interest_group.name }}</a>
+            </td>
             <td>{{ special_interest_group.stateId }}</td>
             <td>{{ special_interest_group.url }}</td>
-        </tr>
-    {% endfor %}
-    </table>
+          </tr>
+        {% endfor %}
+      </table>
 
-    <p></p>
-{% else %}
-    <p>(no special interest groups found)</p>
-{% endif %}
+      <p></p>
+    {% else %}
+      <p>(no special interest groups found)</p>
+    {% endif %}
 
     <script>
         $(function() {
@@ -49,4 +54,4 @@
         });
     </script>
 
-{% endblock %}
+  {% endblock %}

@@ -1,126 +1,174 @@
 {# templates/polling_location/polling_location_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if polling_location %}{{ polling_location.location_name|default_if_none:"" }}{% else %}Create Map Point{% endif %}{% endblock %}
+{% block title %}
+  {% if polling_location %}
+    {{ polling_location.location_name|default_if_none:"" }}
+  {% else %}
+    Create Map Point
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-{% if polling_location.id %}
+  {% if polling_location.id %}
     <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">< Back to Map Point Summary</a>
-{% else %}
+  {% else %}
     <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Map Points</a>
-{% endif %}
+  {% endif %}
 
-<h1>{% if polling_location %}Update Map Point: {{ polling_location.location_name|default_if_none:"" }}{% else %}Create Map Point{% endif %}</h1>
+  <h1>
+    {% if polling_location %}
+      Update Map Point: {{ polling_location.location_name|default_if_none:"" }}
+    {% else %}
+      Create Map Point
+    {% endif %}
+  </h1>
 
-<form action="{% url "polling_location:polling_location_edit_process" %}" method="post" class="form-horizontal">
+  <form action="{% url "polling_location:polling_location_edit_process" %}"
+        method="post"
+        class="form-horizontal">
     {% csrf_token %}
 
-<div class="form-group">
-    <label for="location_name_id" class="col-sm-3 control-label">Location Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="location_name" id="location_name_id" class="form-control"
+    <div class="form-group">
+      <label for="location_name_id" class="col-sm-3 control-label">Location Name</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="location_name"
+               id="location_name_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.location_name|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="line1_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="line1_id" class="col-sm-3 control-label">
         Line 1
         (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
-            target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
-    </label>
-    <div class="col-sm-8">
-        <input type="text" name="line1" id="line1_id" class="form-control"
+   target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
+      </label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="line1"
+               id="line1_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.line1|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="line2_id" class="col-sm-3 control-label">Line 2</label>
-    <div class="col-sm-8">
-        <input type="text" name="line2" id="line2_id" class="form-control"
+    <div class="form-group">
+      <label for="line2_id" class="col-sm-3 control-label">Line 2</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="line2"
+               id="line2_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.line2|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="city_id" class="col-sm-3 control-label">City</label>
-    <div class="col-sm-8">
-        <input type="text" name="city" id="city_id" class="form-control"
+    <div class="form-group">
+      <label for="city_id" class="col-sm-3 control-label">City</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="city"
+               id="city_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.city|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State</label>
-    <div class="col-sm-8">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
+    <div class="form-group">
+      <label for="state_code_id" class="col-sm-3 control-label">State</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="state_code"
+               id="state_code_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.state|default_if_none:"" }}{% else %}{{ state_code }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="zip_long_id" class="col-sm-3 control-label">Long Zip</label>
-    <div class="col-sm-8">
-        <input type="text" name="zip_long" id="zip_long_id" class="form-control"
+    <div class="form-group">
+      <label for="zip_long_id" class="col-sm-3 control-label">Long Zip</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="zip_long"
+               id="zip_long_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.zip_long|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="latitude_id" class="col-sm-3 control-label">Latitude</label>
-    <div class="col-sm-8">
-        <input type="text" name="latitude" id="latitude_id" class="form-control"
+    <div class="form-group">
+      <label for="latitude_id" class="col-sm-3 control-label">Latitude</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="latitude"
+               id="latitude_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.latitude|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="longitude_id" class="col-sm-3 control-label">Longitude</label>
-    <div class="col-sm-8">
-        <input type="text" name="longitude" id="longitude_id" class="form-control"
+    <div class="form-group">
+      <label for="longitude_id" class="col-sm-3 control-label">Longitude</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="longitude"
+               id="longitude_id"
+               class="form-control"
                value="{% if polling_location %}{{ polling_location.longitude|default_if_none:"" }}{% endif %}" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="use_for_bulk_retrieve_id" class="col-sm-3 control-label"></label>
-    <div class="col-sm-8">
-      <input type="checkbox" name="use_for_bulk_retrieve" id="use_for_bulk_retrieve_id"
-           value="True"
-           {% if polling_location and polling_location.use_for_bulk_retrieve %}checked{% endif %} />
+    <div class="form-group">
+      <label for="use_for_bulk_retrieve_id" class="col-sm-3 control-label"></label>
+      <div class="col-sm-8">
+        <input type="checkbox"
+               name="use_for_bulk_retrieve"
+               id="use_for_bulk_retrieve_id"
+               value="True"
+               {% if polling_location and polling_location.use_for_bulk_retrieve %}checked{% endif %} />
         Use this map point when doing bulk retrieve of ballots (so we have coverage across the state)
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="polling_location_deleted_id" class="col-sm-3 control-label"></label>
-    <div class="col-sm-8">
-      <input type="checkbox" name="polling_location_deleted" id="polling_location_deleted_id"
-           value="True"
-           {% if polling_location and polling_location.polling_location_deleted %}checked{% endif %} />
+    <div class="form-group">
+      <label for="polling_location_deleted_id" class="col-sm-3 control-label"></label>
+      <div class="col-sm-8">
+        <input type="checkbox"
+               name="polling_location_deleted"
+               id="polling_location_deleted_id"
+               value="True"
+               {% if polling_location and polling_location.polling_location_deleted %}checked{% endif %} />
         Remove this map point from usage
+      </div>
     </div>
-</div>
 
-<input type="hidden" name="polling_location_id" value="{{ polling_location_id }}">
-<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden"
+           name="polling_location_id"
+           value="{{ polling_location_id }}">
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}">
 
-<div class="form-group">
-    <label for="update_ballot_id" class="col-sm-3 control-label">
+    <div class="form-group">
+      <label for="update_ballot_id" class="col-sm-3 control-label">
         {% if polling_location %}
-        <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">cancel</a>
+          <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">cancel</a>
         {% else %}
-        <a href="{% url 'polling_location:polling_location_list' %}">cancel</a>
+          <a href="{% url 'polling_location:polling_location_list' %}">cancel</a>
         {% endif %}
-    </label>
-    <div class="col-sm-8">
-        <input type="submit" value="{% if polling_location %}Update{% else %}Create{% endif %}" class="btn btn-primary" />
+      </label>
+      <div class="col-sm-8">
+        <input type="submit"
+               value="{% if polling_location %}Update{% else %}Create{% endif %}"
+               class="btn btn-primary" />
+      </div>
     </div>
-</div>
 
-</form>
+  </form>
 
 
 {% endblock %}

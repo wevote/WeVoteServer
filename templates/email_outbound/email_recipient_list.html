@@ -5,9 +5,9 @@
 {% block title %}Campaign Recipients{% endblock %}
 
 {% block content %}
-{% include "admin_tools/loading_banner.html" %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<style>
+  <style>
   .wv-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .wv-spacer { flex:1; }
   .wv-section { margin-top: 28px; }
@@ -198,205 +198,206 @@
     color: #94a3b8;
     font-size: 1.25rem;
   }
-</style>
+  </style>
 
-<div class="wv-row" style="margin-top:10px;">
-  <h1 style="margin:0;">{% if email_campaign %}{{ email_campaign.email_campaign_name }} Recipients{% else %}Campaign Recipients{% endif %}</h1>
-  <div class="wv-spacer"></div>
-</div>
-
-<div class="wv-section">
-  <!-- Search -->
-  <div class="search-container">
-    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    <input type="text"
-           id="search-campaigns"
-           class="search-input"
-           placeholder="Search recipients">
+  <div class="wv-row" style="margin-top:10px;">
+    <h1 style="margin:0;">
+      {% if email_campaign %}
+        {{ email_campaign.email_campaign_name }} Recipients
+      {% else %}
+        Campaign Recipients
+      {% endif %}
+    </h1>
+    <div class="wv-spacer"></div>
   </div>
 
-  <!-- Tabs -->
-  <div class="campaigns-tabs">
-    <button class="tab-button active" data-tab="opened">Opened Email</button>
-    <button class="tab-button" data-tab="unopened">Unopened</button>
-    <button class="tab-button" data-tab="bounced">Bounced</button>
-  </div>
+  <div class="wv-section">
+    <!-- Search -->
+    <div class="search-container">
+      <svg class="search-icon"
+           xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text"
+             id="search-campaigns"
+             class="search-input"
+             placeholder="Search recipients">
+    </div>
 
-  <!-- Opened Tab (Emails that have been viewed by the recipient) -->
-  <div class="tab-content active" data-content="opened">
-    <table class="campaigns-table">
-      <thead>
-        <tr>
-          <th colspan="2">Recipient name</th>
-          <th>Links</th>
-          <th>State</th>
-          <th>Email</th>
-          <th># of times opened</th>
-          <th>Last opened</th>
-          <th>Message Sent</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if recipient_open_list %}
-          {% for recipient in recipient_open_list %}
-          <tr class="campaign-row" data-name="{{ recipient.email_address|lower }}">
-            <td style="padding-right: 0;">{{ forloop.counter }}</td>
-            <td>
-                {{ recipient.recipient_full_name }}
-            </td>
-            <td>
-                <a href="{% url 'politician:politician_we_vote_id_edit' recipient.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  edit</a>
-                &nbsp;
-                <a href="https://quality.wevote.us/{{ recipient.politician_seo_friendly_path }}/-/?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  view</a>
-            </td>
-            <td>
-                {{ recipient.email_address }}
-            </td>
-            <td style="text-align: center;">
-                {{ recipient.politician_state_code|upper }}
-            </td>
-            <td style="text-align: center;">
-                {{ recipient.open_tracking_count }}
-            </td>
-            <td style="white-space: nowrap;">
-                {% if recipient.open_tracking_last_open %}
+    <!-- Tabs -->
+    <div class="campaigns-tabs">
+      <button class="tab-button active" data-tab="opened">Opened Email</button>
+      <button class="tab-button" data-tab="unopened">Unopened</button>
+      <button class="tab-button" data-tab="bounced">Bounced</button>
+    </div>
+
+    <!-- Opened Tab (Emails that have been viewed by the recipient) -->
+    <div class="tab-content active" data-content="opened">
+      <table class="campaigns-table">
+        <thead>
+          <tr>
+            <th colspan="2">Recipient name</th>
+            <th>Links</th>
+            <th>State</th>
+            <th>Email</th>
+            <th># of times opened</th>
+            <th>Last opened</th>
+            <th>Message Sent</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if recipient_open_list %}
+            {% for recipient in recipient_open_list %}
+              <tr class="campaign-row" data-name="{{ recipient.email_address|lower }}">
+                <td style="padding-right: 0;">{{ forloop.counter }}</td>
+                <td>{{ recipient.recipient_full_name }}</td>
+                <td>
+                  <a href="{% url 'politician:politician_we_vote_id_edit' recipient.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">edit</a>
+                  &nbsp;
+                  <a href="https://quality.wevote.us/{{ recipient.politician_seo_friendly_path }}/-/?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">view</a>
+                </td>
+                <td>{{ recipient.email_address }}</td>
+                <td style="text-align: center;">{{ recipient.politician_state_code|upper }}</td>
+                <td style="text-align: center;">{{ recipient.open_tracking_count }}</td>
+                <td style="white-space: nowrap;">
+                  {% if recipient.open_tracking_last_open %}
                     {{ recipient.open_tracking_last_open|date:"m/d/Y g:iA"|default:"" }}
-                {% else %}
+                  {% else %}
                     <span class="text-muted">—</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'email_outbound:view_recipient_email' recipient.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  show
-                </a>
-            </td>
-            <td>
-              <div class="wv-dropdown">
-                <button type="button" class="wv-kebab js-dd">•••</button>
-                <div class="wv-dropdown-menu">
-                  <a class="wv-menu-btn" style="display:block; text-decoration:none; color:inherit;" href="{% url 'email_outbound:email_campaign_edit' %}?id={{ campaign.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                    Edit
-                  </a>
-                  <button class="wv-menu-btn">Duplicate</button>
-                  <button class="wv-menu-btn">Archive</button>
-                  <div class="wv-dropdown-divider"></div>
-                  <button class="wv-menu-btn text-danger">Delete</button>
-                </div>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        {% else %}
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'email_outbound:view_recipient_email' recipient.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">show</a>
+                </td>
+                <td>
+                  <div class="wv-dropdown">
+                    <button type="button" class="wv-kebab js-dd">•••</button>
+                    <div class="wv-dropdown-menu">
+                      <a class="wv-menu-btn"
+                         style="display:block;
+                                text-decoration:none;
+                                color:inherit"
+                         href="{% url 'email_outbound:email_campaign_edit' %}?id={{ campaign.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        Edit
+                      </a>
+                      <button class="wv-menu-btn">Duplicate</button>
+                      <button class="wv-menu-btn">Archive</button>
+                      <div class="wv-dropdown-divider"></div>
+                      <button class="wv-menu-btn text-danger">Delete</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="empty-state">No recipients.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Unopened Tab -->
+    <div class="tab-content" data-content="unopened">
+      <table class="campaigns-table">
+        <thead>
           <tr>
-            <td colspan="6" class="empty-state">
-              No recipients.
-            </td>
+            <th colspan="2">Recipient name</th>
+            <th>Links</th>
+            <th>State</th>
+            <th>Email</th>
+            <th>Message Sent</th>
+            <th></th>
           </tr>
-        {% endif %}
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          {% if recipient_not_opened_list %}
+            {% for recipient in recipient_not_opened_list %}
+              <tr class="campaign-row" data-name="{{ recipient.email_address|lower }}">
+                <td style="padding-right: 0;">{{ forloop.counter }}</td>
+                <td>{{ recipient.recipient_full_name }}</td>
+                <td>
+                  <a href="{% url 'politician:politician_we_vote_id_edit' recipient.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">edit</a>
+                  &nbsp;
+                  <a href="https://quality.wevote.us/{{ recipient.politician_seo_friendly_path }}/-/?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">view</a>
+                </td>
+                <td style="text-align: center;">{{ recipient.politician_state_code|upper }}</td>
+                <td>{{ recipient.email_address }}</td>
+                <td>
+                  <a href="{% url 'email_outbound:view_recipient_email' recipient.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                     class="campaign-link"
+                     target="_blank">show</a>
+                </td>
+                <td>—</td>
+                <td>
+                  <div class="wv-dropdown">
+                    <button type="button" class="wv-kebab js-dd">•••</button>
+                    <div class="wv-dropdown-menu">
+                      <a class="wv-menu-btn"
+                         style="display:block;
+                                text-decoration:none;
+                                color:inherit"
+                         href="{% url 'email_outbound:email_campaign_edit' %}?id={{ campaign.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        Edit
+                      </a>
+                      <button class="wv-menu-btn">Duplicate</button>
+                      <div class="wv-dropdown-divider"></div>
+                      <button class="wv-menu-btn text-danger">Delete</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="4" class="empty-state">No unopened emails.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
 
-  <!-- Unopened Tab -->
-  <div class="tab-content" data-content="unopened">
-    <table class="campaigns-table">
-      <thead>
-        <tr>
-          <th colspan="2">Recipient name</th>
-          <th>Links</th>
-          <th>State</th>
-          <th>Email</th>
-          <th>Message Sent</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if recipient_not_opened_list %}
-          {% for recipient in recipient_not_opened_list %}
-          <tr class="campaign-row" data-name="{{ recipient.email_address|lower }}">
-            <td style="padding-right: 0;">{{ forloop.counter }}</td>
-            <td>
-                {{ recipient.recipient_full_name }}
-            </td>
-            <td>
-                <a href="{% url 'politician:politician_we_vote_id_edit' recipient.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  edit</a>
-                &nbsp;
-                <a href="https://quality.wevote.us/{{ recipient.politician_seo_friendly_path }}/-/?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  view</a>
-            </td>
-            <td style="text-align: center;">
-                {{ recipient.politician_state_code|upper }}
-            </td>
-            <td>
-                {{ recipient.email_address }}
-            </td>
-            <td>
-                <a href="{% url 'email_outbound:view_recipient_email' recipient.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   class="campaign-link" target="_blank">
-                  show
-                </a>
-            </td>
-            <td>—</td>
-            <td>
-              <div class="wv-dropdown">
-                <button type="button" class="wv-kebab js-dd">•••</button>
-                <div class="wv-dropdown-menu">
-                  <a class="wv-menu-btn" style="display:block; text-decoration:none; color:inherit;" href="{% url 'email_outbound:email_campaign_edit' %}?id={{ campaign.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                    Edit
-                  </a>
-                  <button class="wv-menu-btn">Duplicate</button>
-                  <div class="wv-dropdown-divider"></div>
-                  <button class="wv-menu-btn text-danger">Delete</button>
-                </div>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        {% else %}
+    <!-- Bounced Tab -->
+    <div class="tab-content" data-content="bounced">
+      <table class="campaigns-table">
+        <thead>
           <tr>
-            <td colspan="4" class="empty-state">
-              No unopened emails.
-            </td>
+            <th>Campaign name</th>
+            <th>Sent</th>
+            <th>Recipients</th>
+            <th>Opened</th>
+            <th>Open rate</th>
+            <th></th>
           </tr>
-        {% endif %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="empty-state">No bounced recipients.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Bounced Tab -->
-  <div class="tab-content" data-content="bounced">
-    <table class="campaigns-table">
-      <thead>
-        <tr>
-          <th>Campaign name</th>
-          <th>Sent</th>
-          <th>Recipients</th>
-          <th>Opened</th>
-          <th>Open rate</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td colspan="6" class="empty-state">
-            No bounced recipients.
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<script>
+  <script>
 document.addEventListener('DOMContentLoaded', function() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
@@ -453,6 +454,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.wv-dropdown').forEach(d => d.classList.remove('open'));
   });
 });
-</script>
+  </script>
 
 {% endblock %}

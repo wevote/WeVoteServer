@@ -3,192 +3,222 @@
 
 {% block title %}Voter List Analysis{% endblock %}
 
-{%  block content %}
-<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
-<br />
-<a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
+{% block content %}
+  <a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
+  <br />
+  <br />
+  <a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
+  <br />
 
-<h1>Voter List Analysis</h1>
+  <h1>Voter List Analysis</h1>
 
-{% if voter_list_with_sign_in_data %}
- <h2>With twitter_id, twitter_screen_name, facebook_id or email</h2>
+  {% if voter_list_with_sign_in_data %}
+    <h2>With twitter_id, twitter_screen_name, facebook_id or email</h2>
     <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}?create_twitter_link_to_voter=1">
-    Create TwitterLinkToVoter for all records that don't have collisions.</a><br />
+    Create TwitterLinkToVoter for all records that don't have collisions.</a>
+    <br />
     <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}?updated_suggested_friends=1">
     Populate Suggested Friends</a>
     <table border="1" cellpadding="10">
+      <tr>
+        <td></td>
+        <td>ID</td>
+        <td>&nbsp;</td>
+        <td>We Vote ID</td>
+        <td>You</td>
+        <td>Voter Table</td>
+        <td>FacebookLinkToVoter</td>
+        <td>TwitterLinkToVoter</td>
+        <td>TwitterLinkToOrg</td>
+        <td>Email</td>
+        <td>Admin</td>
+        <td>Partner Organization</td>
+        <td>Political Data</td>
+        <td>Verified Volunteer</td>
+        <td>linked organization we_vote_id</td>
+        <td>Positions</td>
+        <td>Voter Positions Link to Other Orgs</td>
+        <td>Friends & Invitations</td>
+      </tr>
+      {% for voter in voter_list_with_sign_in_data %}
         <tr>
-            <td></td>
-            <td>ID</td>
-            <td>&nbsp;</td>
-            <td>We Vote ID</td>
-            <td>You</td>
-            <td>Voter Table</td>
-            <td>FacebookLinkToVoter</td>
-            <td>TwitterLinkToVoter</td>
-            <td>TwitterLinkToOrg</td>
-            <td>Email</td>
-            <td>Admin</td>
-            <td>Partner Organization</td>
-            <td>Political Data</td>
-            <td>Verified Volunteer</td>
-            <td>linked organization we_vote_id</td>
-            <td>Positions</td>
-            <td>Voter Positions Link to Other Orgs</td>
-            <td>Friends & Invitations</td>
-        </tr>
-    {% for voter in voter_list_with_sign_in_data %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ voter.id }}</td>
-            <td>{% if voter.we_vote_hosted_profile_image_url_medium %}<img src="{{ voter.we_vote_hosted_profile_image_url_medium }}" alt="" width="48px" />{% endif %}</td>
-            <td>
-                {{ voter.get_full_name|default_if_none:"" }}
-                <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
-                    {{ voter.we_vote_id }}
-                </a><br />
-                {{ voter.text_for_map_search|default_if_none:"" }}
-            </td>
-            <!-- Is this you? //-->
-            <td>
-            {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
-            </td>
-            <!-- Voter table data: Twitter? Facebook? //-->
-            <td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ voter.id }}</td>
+          <td>
+            {% if voter.we_vote_hosted_profile_image_url_medium %}
+              <img src="{{ voter.we_vote_hosted_profile_image_url_medium }}"
+                   alt=""
+                   width="48px" />
+            {% endif %}
+          </td>
+          <td>
+            {{ voter.get_full_name|default_if_none:"" }}
+            <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">{{ voter.we_vote_id }}</a>
+            <br />
+            {{ voter.text_for_map_search|default_if_none:"" }}
+          </td>
+          <!-- Is this you? //-->
+          <td>
+            {% if voter.id == voter_id_signed_in %}
+              *ME*
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Voter table data: Twitter? Facebook? //-->
+          <td>
             {% if voter.twitter_id %}
-                @{{ voter.twitter_screen_name }}<br />
-                tw: {{ voter.twitter_id }}<br />
+              @{{ voter.twitter_screen_name }}
+              <br />
+              tw: {{ voter.twitter_id }}
+              <br />
             {% endif %}
             {% if voter.facebook_id or voter.fb_username %}
-                fb: {{ voter.fb_username|default_if_none:"" }},
-                {{ voter.facebook_id|default_if_none:"" }}
+              fb: {{ voter.fb_username|default_if_none:"" }},
+              {{ voter.facebook_id|default_if_none:"" }}
             {% endif %}
-            <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
-            </td>
-            <!-- FacebookLinkToVoter //-->
-            <td>
+            <a href="{% url 'image:images_for_one_voter' voter.id %}"
+               target="_blank">See images</a>
+          </td>
+          <!-- FacebookLinkToVoter //-->
+          <td>
             {% if voter.duplicate_facebook_data_found %}
-                <strong>DUPLICATE VOTER FACEBOOK DATA FOUND</strong>
+              <strong>DUPLICATE VOTER FACEBOOK DATA FOUND</strong>
             {% elif voter.facebook_id %}
-                {% if not voter.facebook_id_from_link_to_voter %}
-                <a href="{% url 'voter:voter_edit' voter.id %}?create_facebook_link_to_voter=1" target="_blank">
-                Create FacebookLinkToVoter
-                </a>
-                {% endif %}
+              {% if not voter.facebook_id_from_link_to_voter %}
+                <a href="{% url 'voter:voter_edit' voter.id %}?create_facebook_link_to_voter=1"
+                   target="_blank">Create FacebookLinkToVoter</a>
+              {% endif %}
             {% endif %}
-            {% if voter.facebook_id_from_link_to_voter %}
-                fb: {{ voter.facebook_id_from_link_to_voter }}
-            {% endif %}
-            </td>
-            <!-- TwitterLinkToVoter //-->
-            <td>
+            {% if voter.facebook_id_from_link_to_voter %}fb: {{ voter.facebook_id_from_link_to_voter }}{% endif %}
+          </td>
+          <!-- TwitterLinkToVoter //-->
+          <td>
             {% if voter.duplicate_twitter_data_found %}
-                <strong>DUPLICATE VOTER TWITTER DATA FOUND</strong>
+              <strong>DUPLICATE VOTER TWITTER DATA FOUND</strong>
             {% elif voter.twitter_id or voter.twitter_screen_name %}
-                {% if not voter.twitter_id_from_link_to_voter %}
-                <a href="{% url 'voter:voter_edit' voter.id %}?create_twitter_link_to_voter=1" target="_blank">
-                Create TwitterLinkToVoter
-                </a>
-                {% endif %}
+              {% if not voter.twitter_id_from_link_to_voter %}
+                <a href="{% url 'voter:voter_edit' voter.id %}?create_twitter_link_to_voter=1"
+                   target="_blank">Create TwitterLinkToVoter</a>
+              {% endif %}
             {% endif %}
             {% if voter.twitter_id_from_link_to_voter %}
-                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />
-                {{ voter.twitter_id_from_link_to_voter }}
+              @{{ voter.twitter_screen_name_from_link_to_voter }}
+              <br />
+              {{ voter.twitter_id_from_link_to_voter }}
             {% endif %}
-            </td>
-            <!-- TwitterLinkToOrganization //-->
-            <td>
+          </td>
+          <!-- TwitterLinkToOrganization //-->
+          <td>
             {% if voter.twitter_id_from_link_to_organization %}
-                {{ voter.organization_we_vote_id_from_link_to_organization }}<br />
-                @{{ voter.twitter_screen_name_from_link_to_organization }}<br />
-                {{ voter.twitter_id_from_link_to_organization }}
-           {% endif %}
+              {{ voter.organization_we_vote_id_from_link_to_organization }}
+              <br />
+              @{{ voter.twitter_screen_name_from_link_to_organization }}
+              <br />
+              {{ voter.twitter_id_from_link_to_organization }}
+            {% endif %}
             {{ voter.twitter_link_to_organization_twitter_id_source_text }}
-            </td>
-            <!-- Email //-->
-            <td>
+          </td>
+          <!-- Email //-->
+          <td>
             {% if voter.email %}
-                voter.email: {{ voter.email }}<br />
-                {{ voter.primary_email_we_vote_id|default_if_none:"" }}
-                {% if not voter.email_ownership_is_verified %}
-                    NOT_VERIFIED
-                {% endif %}
-                <br />
+              voter.email: {{ voter.email }}
+              <br />
+              {{ voter.primary_email_we_vote_id|default_if_none:"" }}
+              {% if not voter.email_ownership_is_verified %}NOT_VERIFIED{% endif %}
+              <br />
             {% endif %}
             {% if voter.linked_emails %}
-                -------<br />
-                {% for one_email in voter.linked_emails %}
-                    {% if one_email.email_ownership_is_verified %}
-                    <strong>{{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}</strong><br />
-                    {% else %}
-                    {{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}<br />
-                    {% endif %}
-                {% endfor %}
+              -------
+              <br />
+              {% for one_email in voter.linked_emails %}
+                {% if one_email.email_ownership_is_verified %}
+                  <strong>{{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}</strong>
+                  <br />
+                {% else %}
+                  {{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}
+                  <br />
+                {% endif %}
+              {% endfor %}
             {% endif %}
-            </td>
-            <!-- Is site administrator? //-->
-            <td>
-            {% if voter.is_admin %}Y{% else %}{% endif %}
-            </td>
-            <!-- Is partner organization? //-->
-            <td>
-            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
-            </td>
-            <!-- Political data authority? //-->
-            <td>
-            {% if voter.is_political_data_manager %}Manager{% elif voter.is_political_data_viewer %}Viewer{% endif %}
-            </td>
-            <!-- Is verified volunteer? //-->
-            <td>
-            {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
-            </td>
-            <!-- Has linked organization or is_signed_in //-->
-            <td>
+          </td>
+          <!-- Is site administrator? //-->
+          <td>
+            {% if voter.is_admin %}
+              Y
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Is partner organization? //-->
+          <td>
+            {% if voter.is_partner_organization %}
+              Y
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Political data authority? //-->
+          <td>
+            {% if voter.is_political_data_manager %}
+              Manager
+            {% elif voter.is_political_data_viewer %}
+              Viewer
+            {% endif %}
+          </td>
+          <!-- Is verified volunteer? //-->
+          <td>
+            {% if voter.is_verified_volunteer %}
+              Y
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Has linked organization or is_signed_in //-->
+          <td>
             {% if voter.linked_organization_we_vote_id %}
-                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ voter.linked_organization_we_vote_id }}" target="_blank">
-                {{ voter.linked_organization_we_vote_id }}</a>
+              <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ voter.linked_organization_we_vote_id }}"
+                 target="_blank">{{ voter.linked_organization_we_vote_id }}</a>
             {% elif voter.is_signed_in %}
-                <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1" target="_blank">
-                Create Endorser</a>
+              <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1"
+                 target="_blank">Create Endorser</a>
             {% endif %}
-            </td>
-            <td>
-            {% if voter.positions_count %}
-                {{ voter.positions_count }}
-            {% endif %}
-            </td>
-            <td>
-                {% for other_organization in voter.links_to_other_organizations %}
-                    {% if other_organization.we_vote_id != voter.linked_organization_we_vote_id %}
-                    <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ other_organization.we_vote_id }}" target="_blank">
-                    BAD {{ other_organization.we_vote_id }}
-                    </a>
-                    {% endif %}
-                {% endfor %}
-            </td>
-            <td>
+          </td>
+          <td>
+            {% if voter.positions_count %}{{ voter.positions_count }}{% endif %}
+          </td>
+          <td>
+            {% for other_organization in voter.links_to_other_organizations %}
+              {% if other_organization.we_vote_id != voter.linked_organization_we_vote_id %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ other_organization.we_vote_id }}"
+                   target="_blank">BAD {{ other_organization.we_vote_id }}</a>
+              {% endif %}
+            {% endfor %}
+          </td>
+          <td>
             {% if voter.current_friends_count %}
-                Friends:&nbsp;{{ voter.current_friends_count }}<br />
+              Friends:&nbsp;{{ voter.current_friends_count }}
+              <br />
             {% endif %}
             {% if voter.friend_invitations_sent_by_me_count %}
-                From:&nbsp;{{ voter.friend_invitations_sent_by_me_count }}<br />
+              From:&nbsp;{{ voter.friend_invitations_sent_by_me_count }}
+              <br />
             {% endif %}
             {% if voter.friend_invitations_sent_to_me_count %}
-                To: {{ voter.friend_invitations_sent_to_me_count }}<br />
+              To: {{ voter.friend_invitations_sent_to_me_count }}
+              <br />
             {% endif %}
             {% if voter.suggested_friend_list_count %}
-                Sugg: {{ voter.suggested_friend_list_count }}<br />
+              Sugg: {{ voter.suggested_friend_list_count }}
+              <br />
             {% endif %}
             {% if voter.organizations_followed_count %}
-                Foll: {{ voter.organizations_followed_count }}<br />
+              Foll: {{ voter.organizations_followed_count }}
+              <br />
             {% endif %}
-            </td>
+          </td>
         </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
-{% else %}
+  {% else %}
     <p>(no voters found)</p>
-{% endif %}
-<br />
+  {% endif %}
+  <br />
 
 {% endblock %}

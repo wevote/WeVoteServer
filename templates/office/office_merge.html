@@ -1,167 +1,205 @@
 {# templates/office/office_merge.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if contest_office_option1 %}Merge {{ contest_office_option1.office_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+{% block title %}
+  {% if contest_office_option1 %}
+    Merge {{ contest_office_option1.office_name }}
+  {% else %}
+    CANNOT MERGE
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-<a href="{% url 'office:office_list' %}">< Back to Offices</a>
-  <br /></r />
-<a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
-   target="_blank">Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
+{% block content %}
+  <a href="{% url 'office:office_list' %}">< Back to Offices</a>
+  <br />
+  </r />
+  <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
+     target="_blank">Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
 
-<h1>{% if contest_office_option1 %}Merge {{ contest_office_option1.office_name }}{% else %}CANNOT MERGE{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form action="{% url 'office:office_merge_process' %}" method="post">
-{% csrf_token %}
-{% if contest_office_option1 and contest_office_option2 %}
-<table>
-    <tr>
-        <th>&nbsp;</th>
-        <th>Contest Office Option 1</th>
-        <th>Contest Office Option 2</th>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td>
-            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
-            &nbsp;
-            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
-        </td>
-        <td>
-            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
-            &nbsp;
-            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
-        </td>
-    </tr>
-
-{% include "office/office_merge_one_field_decision.html" with field_name="office_name" field_label="Contest Office Name" conflict_status=conflict_values.office_name contest_office1_field_value=contest_office_option1.office_name contest_office2_field_value=contest_office_option2.office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Google Civic Election Id" conflict_status=conflict_values.google_civic_election_id contest_office1_field_value=contest_office_option1.google_civic_election_id contest_office2_field_value=contest_office_option2.google_civic_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;1</td>
-        <td>{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.google_civic_office_name|default_if_none:"" }}</td>
-    </tr>
-{% if contest_office_option1.google_civic_office_name2 or contest_office_option2.google_civic_office_name2 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;2</td>
-        <td>{{ contest_office_option1.google_civic_office_name2|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.google_civic_office_name2|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
-{% if contest_office_option1.google_civic_office_name3 or contest_office_option2.google_civic_office_name3 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;3</td>
-        <td>{{ contest_office_option1.google_civic_office_name3|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.google_civic_office_name3|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
-{% if contest_office_option1.google_civic_office_name4 or contest_office_option2.google_civic_office_name4 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;4</td>
-        <td>{{ contest_office_option1.google_civic_office_name4|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.google_civic_office_name4|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
-{% if contest_office_option1.google_civic_office_name5 or contest_office_option2.google_civic_office_name5 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;5</td>
-        <td>{{ contest_office_option1.google_civic_office_name5|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.google_civic_office_name5|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="we_vote_id" field_label="We Vote Id" conflict_status=conflict_values.we_vote_id contest_office1_field_value=contest_office_option1.we_vote_id contest_office2_field_value=contest_office_option2.we_vote_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="primary_party" field_label="Primary Party" conflict_status=conflict_values.primary_party contest_office1_field_value=contest_office_option1.primary_party contest_office2_field_value=contest_office_option2.primary_party contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-    {% if contest_office_option1.id != None or contest_office_option2.id != None %}
-    <tr>
-        <td>ID</td>
-        <td>{{ contest_office_option1.id|default_if_none:"" }}</td>
-        <td>{{ contest_office_option2.id|default_if_none:"" }}</td>
-    </tr>
+  <h1>
+    {% if contest_office_option1 %}
+      Merge {{ contest_office_option1.office_name }}
+    {% else %}
+      CANNOT MERGE
     {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="CTCL UUID" conflict_status=conflict_values.ctcl_uuid contest_office1_field_value=contest_office_option1.ctcl_uuid contest_office2_field_value=contest_office_option2.ctcl_uuid contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+  <form action="{% url 'office:office_merge_process' %}" method="post">
+    {% csrf_token %}
+    {% if contest_office_option1 and contest_office_option2 %}
+      <table>
+        <tr>
+          <th>&nbsp;</th>
+          <th>Contest Office Option 1</th>
+          <th>Contest Office Option 2</th>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>
+            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}"
+               target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+          <td>
+            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}"
+               target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}"
+               target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
+          </td>
+        </tr>
 
-{% include "office/office_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office Id" conflict_status=conflict_values.vote_usa_office_id contest_office1_field_value=contest_office_option1.vote_usa_office_id contest_office2_field_value=contest_office_option2.vote_usa_office_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="office_name" field_label="Contest Office Name" conflict_status=conflict_values.office_name contest_office1_field_value=contest_office_option1.office_name contest_office2_field_value=contest_office_option2.office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_district_id" field_label="Ballotpedia District Id" conflict_status=conflict_values.ballotpedia_district_id contest_office1_field_value=contest_office_option1.ballotpedia_district_id contest_office2_field_value=contest_office_option2.ballotpedia_district_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Google Civic Election Id" conflict_status=conflict_values.google_civic_election_id contest_office1_field_value=contest_office_option1.google_civic_election_id contest_office2_field_value=contest_office_option2.google_civic_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_election_id" field_label="Ballotpedia Election Id" conflict_status=conflict_values.ballotpedia_election_id contest_office1_field_value=contest_office_option1.ballotpedia_election_id contest_office2_field_value=contest_office_option2.ballotpedia_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        <tr>
+          <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;1</td>
+          <td>{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</td>
+          <td>{{ contest_office_option2.google_civic_office_name|default_if_none:"" }}</td>
+        </tr>
+        {% if contest_office_option1.google_civic_office_name2 or contest_office_option2.google_civic_office_name2 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;2</td>
+            <td>{{ contest_office_option1.google_civic_office_name2|default_if_none:"" }}</td>
+            <td>{{ contest_office_option2.google_civic_office_name2|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+        {% if contest_office_option1.google_civic_office_name3 or contest_office_option2.google_civic_office_name3 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;3</td>
+            <td>{{ contest_office_option1.google_civic_office_name3|default_if_none:"" }}</td>
+            <td>{{ contest_office_option2.google_civic_office_name3|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+        {% if contest_office_option1.google_civic_office_name4 or contest_office_option2.google_civic_office_name4 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;4</td>
+            <td>{{ contest_office_option1.google_civic_office_name4|default_if_none:"" }}</td>
+            <td>{{ contest_office_option2.google_civic_office_name4|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+        {% if contest_office_option1.google_civic_office_name5 or contest_office_option2.google_civic_office_name5 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;5</td>
+            <td>{{ contest_office_option1.google_civic_office_name5|default_if_none:"" }}</td>
+            <td>{{ contest_office_option2.google_civic_office_name5|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia Id" conflict_status=conflict_values.ballotpedia_id contest_office1_field_value=contest_office_option1.ballotpedia_id contest_office2_field_value=contest_office_option2.ballotpedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Office Held Id" conflict_status=conflict_values.ballotpedia_office_id contest_office1_field_value=contest_office_option1.ballotpedia_office_id contest_office2_field_value=contest_office_option2.ballotpedia_office_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="we_vote_id" field_label="We Vote Id" conflict_status=conflict_values.we_vote_id contest_office1_field_value=contest_office_option1.we_vote_id contest_office2_field_value=contest_office_option2.we_vote_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_url" field_label="Ballotpedia Office URL" conflict_status=conflict_values.ballotpedia_office_url contest_office1_field_value=contest_office_option1.ballotpedia_office_url contest_office2_field_value=contest_office_option2.ballotpedia_office_url contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="primary_party" field_label="Primary Party" conflict_status=conflict_values.primary_party contest_office1_field_value=contest_office_option1.primary_party contest_office2_field_value=contest_office_option2.primary_party contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_id" field_label="Ballotpedia Race Id" conflict_status=conflict_values.ballotpedia_race_id contest_office1_field_value=contest_office_option1.ballotpedia_race_id contest_office2_field_value=contest_office_option2.ballotpedia_race_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% if contest_office_option1.id != None or contest_office_option2.id != None %}
+          <tr>
+            <td>ID</td>
+            <td>{{ contest_office_option1.id|default_if_none:"" }}</td>
+            <td>{{ contest_office_option2.id|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_url" field_label="Ballotpedia Race URL" conflict_status=conflict_values.ballotpedia_race_url contest_office1_field_value=contest_office_option1.ballotpedia_race_url contest_office2_field_value=contest_office_option2.ballotpedia_race_url contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="CTCL UUID" conflict_status=conflict_values.ctcl_uuid contest_office1_field_value=contest_office_option1.ctcl_uuid contest_office2_field_value=contest_office_option2.ctcl_uuid contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_office_level" field_label="Race Office Level" conflict_status=conflict_values.ballotpedia_race_office_level contest_office1_field_value=contest_office_option1.ballotpedia_race_office_level contest_office2_field_value=contest_office_option2.ballotpedia_race_office_level contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office Id" conflict_status=conflict_values.vote_usa_office_id contest_office1_field_value=contest_office_option1.vote_usa_office_id contest_office2_field_value=contest_office_option2.vote_usa_office_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_is_marquee" field_label="BP is marquee?" conflict_status=conflict_values.ballotpedia_is_marquee contest_office1_field_value=contest_office_option1.ballotpedia_is_marquee contest_office2_field_value=contest_office_option2.ballotpedia_is_marquee contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_district_id" field_label="Ballotpedia District Id" conflict_status=conflict_values.ballotpedia_district_id contest_office1_field_value=contest_office_option1.ballotpedia_district_id contest_office2_field_value=contest_office_option2.ballotpedia_district_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="is_battleground_race" field_label="Is battleground?" conflict_status=conflict_values.is_battleground_race contest_office1_field_value=contest_office_option1.is_battleground_race contest_office2_field_value=contest_office_option2.is_battleground_race contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_election_id" field_label="Ballotpedia Election Id" conflict_status=conflict_values.ballotpedia_election_id contest_office1_field_value=contest_office_option1.ballotpedia_election_id contest_office2_field_value=contest_office_option2.ballotpedia_election_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="district_id" field_label="District Id" conflict_status=conflict_values.district_id contest_office1_field_value=contest_office_option1.district_id contest_office2_field_value=contest_office_option2.district_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia Id" conflict_status=conflict_values.ballotpedia_id contest_office1_field_value=contest_office_option1.ballotpedia_id contest_office2_field_value=contest_office_option2.ballotpedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="district_name" field_label="District Name" conflict_status=conflict_values.district_name contest_office1_field_value=contest_office_option1.district_name contest_office2_field_value=contest_office_option2.district_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Office Held Id" conflict_status=conflict_values.ballotpedia_office_id contest_office1_field_value=contest_office_option1.ballotpedia_office_id contest_office2_field_value=contest_office_option2.ballotpedia_office_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="district_scope" field_label="District Scope" conflict_status=conflict_values.district_scope contest_office1_field_value=contest_office_option1.district_scope contest_office2_field_value=contest_office_option2.district_scope contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_url" field_label="Ballotpedia Office URL" conflict_status=conflict_values.ballotpedia_office_url contest_office1_field_value=contest_office_option1.ballotpedia_office_url contest_office2_field_value=contest_office_option2.ballotpedia_office_url contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="office_held_name" field_label="Office Held Name" conflict_status=conflict_values.office_held_name contest_office1_field_value=contest_office_option1.office_held_name contest_office2_field_value=contest_office_option2.office_held_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_id" field_label="Ballotpedia Race Id" conflict_status=conflict_values.ballotpedia_race_id contest_office1_field_value=contest_office_option1.ballotpedia_race_id contest_office2_field_value=contest_office_option2.ballotpedia_race_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="maplight_id" field_label="Maplight Id" conflict_status=conflict_values.maplight_id contest_office1_field_value=contest_office_option1.maplight_id contest_office2_field_value=contest_office_option2.maplight_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_url" field_label="Ballotpedia Race URL" conflict_status=conflict_values.ballotpedia_race_url contest_office1_field_value=contest_office_option1.ballotpedia_race_url contest_office2_field_value=contest_office_option2.ballotpedia_race_url contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division Id" conflict_status=conflict_values.ocd_division_id contest_office1_field_value=contest_office_option1.ocd_division_id contest_office2_field_value=contest_office_option2.ocd_division_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_race_office_level" field_label="Race Office Level" conflict_status=conflict_values.ballotpedia_race_office_level contest_office1_field_value=contest_office_option1.ballotpedia_race_office_level contest_office2_field_value=contest_office_option2.ballotpedia_race_office_level contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code contest_office1_field_value=contest_office_option1.state_code contest_office2_field_value=contest_office_option2.state_code contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_is_marquee" field_label="BP is marquee?" conflict_status=conflict_values.ballotpedia_is_marquee contest_office1_field_value=contest_office_option1.ballotpedia_is_marquee contest_office2_field_value=contest_office_option2.ballotpedia_is_marquee contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="number_elected" field_label="Number Elected" conflict_status=conflict_values.number_elected contest_office1_field_value=contest_office_option1.number_elected contest_office2_field_value=contest_office_option2.number_elected contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="is_battleground_race" field_label="Is battleground?" conflict_status=conflict_values.is_battleground_race contest_office1_field_value=contest_office_option1.is_battleground_race contest_office2_field_value=contest_office_option2.is_battleground_race contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="number_voting_for" field_label="Number Voting for" conflict_status=conflict_values.number_voting_for contest_office1_field_value=contest_office_option1.number_voting_for contest_office2_field_value=contest_office_option2.number_voting_for contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="district_id" field_label="District Id" conflict_status=conflict_values.district_id contest_office1_field_value=contest_office_option1.district_id contest_office2_field_value=contest_office_option2.district_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia Id" conflict_status=conflict_values.wikipedia_id contest_office1_field_value=contest_office_option1.wikipedia_id contest_office2_field_value=contest_office_option2.wikipedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+        {% include "office/office_merge_one_field_decision.html" with field_name="district_name" field_label="District Name" conflict_status=conflict_values.district_name contest_office1_field_value=contest_office_option1.district_name contest_office2_field_value=contest_office_option2.district_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-    {% if contest_office_option1.candidates_string or contest_office_option2.candidates_string %}
-    <tr>
-        <td>Candidates</td>
-        <td>{{ contest_office_option1.candidates_string|default_if_none:"" }}&nbsp;&nbsp;&nbsp;</td>
-        <td>{{ contest_office_option2.candidates_string|default_if_none:"" }}</td>
-    </tr>
+        {% include "office/office_merge_one_field_decision.html" with field_name="district_scope" field_label="District Scope" conflict_status=conflict_values.district_scope contest_office1_field_value=contest_office_option1.district_scope contest_office2_field_value=contest_office_option2.district_scope contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="office_held_name" field_label="Office Held Name" conflict_status=conflict_values.office_held_name contest_office1_field_value=contest_office_option1.office_held_name contest_office2_field_value=contest_office_option2.office_held_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="maplight_id" field_label="Maplight Id" conflict_status=conflict_values.maplight_id contest_office1_field_value=contest_office_option1.maplight_id contest_office2_field_value=contest_office_option2.maplight_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division Id" conflict_status=conflict_values.ocd_division_id contest_office1_field_value=contest_office_option1.ocd_division_id contest_office2_field_value=contest_office_option2.ocd_division_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code contest_office1_field_value=contest_office_option1.state_code contest_office2_field_value=contest_office_option2.state_code contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="number_elected" field_label="Number Elected" conflict_status=conflict_values.number_elected contest_office1_field_value=contest_office_option1.number_elected contest_office2_field_value=contest_office_option2.number_elected contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="number_voting_for" field_label="Number Voting for" conflict_status=conflict_values.number_voting_for contest_office1_field_value=contest_office_option1.number_voting_for contest_office2_field_value=contest_office_option2.number_voting_for contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% include "office/office_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia Id" conflict_status=conflict_values.wikipedia_id contest_office1_field_value=contest_office_option1.wikipedia_id contest_office2_field_value=contest_office_option2.wikipedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+        {% if contest_office_option1.candidates_string or contest_office_option2.candidates_string %}
+          <tr>
+            <td>Candidates</td>
+            <td>{{ contest_office_option1.candidates_string|default_if_none:"" }}&nbsp;&nbsp;&nbsp;</td>
+            <td>{{ contest_office_option2.candidates_string|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="{% url 'office:office_list' %}">cancel</a>&nbsp;
+            <input type="submit" value="Skip - Not Duplicates" name="skip" />
+            &nbsp;
+          </td>
+          <td></td>
+          <td>
+            <input type="submit"
+                   value="Merge Contest Offices"
+                   name="merge"
+                   class="btn btn-primary" />
+          </td>
+        </tr>
+      </table>
+      <input type="hidden"
+             name="remove_duplicate_process"
+             value="{{ remove_duplicate_process }}" />
+      <input type="hidden"
+             name="state_code"
+             value="{{ contest_office_option2.state_code }}" />
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ contest_office_option1.google_civic_election_id }}" />
+      <input type="hidden"
+             name="contest_office1_we_vote_id"
+             value="{{ contest_office_option1.we_vote_id }}" />
+      <input type="hidden"
+             name="contest_office2_we_vote_id"
+             value="{{ contest_office_option2.we_vote_id }}" />
+    {% else %}
+      <input type="submit" value="CANNOT MERGE" />
     {% endif %}
+  </form>
 
-    <tr>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td>
-          <a href="{% url 'office:office_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
-        </td>
-        <td></td>
-        <td><input type="submit" value="Merge Contest Offices" name="merge" class="btn btn-primary" /></td>
-    </tr>
-</table>
-<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
-<input type="hidden" name="state_code" value="{{ contest_office_option2.state_code }}" />
-<input type="hidden" name="google_civic_election_id" value="{{ contest_office_option1.google_civic_election_id }}" />
-<input type="hidden" name="contest_office1_we_vote_id" value="{{ contest_office_option1.we_vote_id }}" />
-<input type="hidden" name="contest_office2_we_vote_id" value="{{ contest_office_option2.we_vote_id }}" />
-{% else %}
-<input type="submit" value="CANNOT MERGE" />
-{% endif %}
-</form>
-
-<br />
+  <br />
 
 {% endblock %}

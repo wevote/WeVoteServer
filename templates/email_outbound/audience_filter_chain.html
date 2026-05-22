@@ -1,65 +1,96 @@
 {# templates/email_outbound/audience_filter_chain.html #}
-  
+
 {% load template_filters %}
 
 {% for chain_relative_filter_id_string in chain_relative_filter_id_string_list %}
-    <div style="background: #fff; border: 2px solid #d4e4f7; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+  <div style="background: #fff;
+              border: 2px solid #d4e4f7;
+              border-radius: 8px;
+              padding: 10px;
+              margin-bottom: 10px">
 
     {{ audience_filter_html_dict|get_value_from_dict:chain_relative_filter_id_string|safe }}
-        
+
     {% if chain_relative_filter_id_string_list|length > 1 %}
-    <div style="text-align: right; margin-top: 10px;">
+      <div style="text-align: right; margin-top: 10px;">
         <button onclick="submitAddDeleteButtonFromDrawer(this)"
                 type="button"
                 class="btn btn-link"
-                style="padding: 0; color: #B0B0B0; text-decoration: none; border: none; background: none; cursor: pointer; transition: none;"
+                style="padding: 0;
+                       color: #B0B0B0;
+                       text-decoration: none;
+                       border: none;
+                       background: none;
+                       cursor: pointer;
+                       transition: none"
                 data-name="audience_filter_id_to_delete"
-                data-value="{{ audience_filter_id_dict|get_value_from_dict:chain_relative_filter_id_string}}"
+                data-value="{{ audience_filter_id_dict|get_value_from_dict:chain_relative_filter_id_string }}"
                 title="Delete this rule"
                 onmouseover="this.style.color='#bb2d3b'"
-                onmouseout="this.style.color='#B0B0B0'"
-        >
-            <span class="material-icons" style="font-size: 20px; vertical-align: middle; transition: none;">delete</span>
+                onmouseout="this.style.color='#B0B0B0'">
+          <span class="material-icons"
+                style="font-size: 20px;
+                       vertical-align: middle;
+                       transition: none">delete</span>
         </button>
-    </div>
+      </div>
     {% endif %}
 
-    </div>
-    
-<div style="align-items: center; display: flex; justify-content: space-between;">
-{% if filter_operand_to_follow_dict|get_value_from_dict:chain_relative_filter_id_string %}
-    <div style="margin: 0 0 8px 2px;">
-        <span style="display: inline-block; background-color: #0858A1; color: white; padding: 4px 18px; border-radius: 8px; font-weight: 500; text-transform: lowercase;">
-            {{ filter_operand_to_follow_dict|get_value_from_dict:chain_relative_filter_id_string }}
+  </div>
+
+  <div style="align-items: center;
+              display: flex;
+              justify-content: space-between">
+    {% if filter_operand_to_follow_dict|get_value_from_dict:chain_relative_filter_id_string %}
+      <div style="margin: 0 0 8px 2px;">
+        <span style="display: inline-block;
+                     background-color: #0858A1;
+                     color: white;
+                     padding: 4px 18px;
+                     border-radius: 8px;
+                     font-weight: 500;
+                     text-transform: lowercase">
+          {{ filter_operand_to_follow_dict|get_value_from_dict:chain_relative_filter_id_string }}
         </span>
-    </div>
-{% else %}
-    <button onclick="submitAddDeleteButtonFromDrawer(this)"
-            type="button"
-            class="btn btn-default btn-sm"
-            style="border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; background-color: #fff; color: #333;"
-            data-name="add_audience_filter_after_{{ chain_relative_filter_id_string }}_for_chain_{{ chain_id }}"
-            data-value="1"
-    >
+      </div>
+    {% else %}
+      <button onclick="submitAddDeleteButtonFromDrawer(this)"
+              type="button"
+              class="btn btn-default btn-sm"
+              style="border: 1px solid #ccc;
+                     border-radius: 4px;
+                     padding: 4px 10px;
+                     background-color: #fff;
+                     color: #333"
+              data-name="add_audience_filter_after_{{ chain_relative_filter_id_string }}_for_chain_{{ chain_id }}"
+              data-value="1">
         <span style="font-weight: bold; margin-right: 4px;">+</span> Add "and"
-    </button>
-        
-    <div style="text-align: right; margin-top: 10px;">
+      </button>
+
+      <div style="text-align: right; margin-top: 10px;">
         <button onclick="submitAddDeleteButtonFromDrawer(this)"
                 type="button"
                 class="btn btn-link"
-                style="padding: 0; color: #B0B0B0; text-decoration: none; border: none; background: none; cursor: pointer; transition: none;"
+                style="padding: 0;
+                       color: #B0B0B0;
+                       text-decoration: none;
+                       border: none;
+                       background: none;
+                       cursor: pointer;
+                       transition: none"
                 data-name="audience_filter_chain_id_to_delete"
                 data-value="{{ chain_id }}"
                 title="Delete this rule group"
                 onmouseover="this.style.color='#bb2d3b'"
-                onmouseout="this.style.color='#B0B0B0'"
-        >
-            <span class="material-icons" style="font-size: 20px; vertical-align: middle; transition: none;">delete</span>
+                onmouseout="this.style.color='#B0B0B0'">
+          <span class="material-icons"
+                style="font-size: 20px;
+                       vertical-align: middle;
+                       transition: none">delete</span>
         </button>
-    </div>
-{% endif %}
-</div>
-<!-- END OF audience_filter_chain row -->
+      </div>
+    {% endif %}
+  </div>
+  <!-- END OF audience_filter_chain row -->
 {% endfor %}
 <!-- END OF audience_filter_chain.html -->

@@ -1,134 +1,159 @@
 {# templates/office/office_held_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office_held %}{{ office_held.office_held_name }}
-                {% if office_held.district_id %}
-                    - District {{ office_held.district_id }}
-                {% endif %}
-                {% if office_held.state_code %}
-                    - {{ office_held.state_code }}
-                {% endif %}
-{% else %}Create New Office Held{% endif %}{% endblock %}
+{% block title %}
+  {% if office_held %}
+    {{ office_held.office_held_name }}
+    {% if office_held.district_id %}- District {{ office_held.district_id }}{% endif %}
+    {% if office_held.state_code %}- {{ office_held.state_code }}{% endif %}
+  {% else %}
+    Create New Office Held
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
+{% block content %}
+  {% load template_filters %}
 
-<h1>{% if office_held %}Edit {{ office_held.office_held_name|default_if_none:"" }}
-                {% if office_held.district_id %}
-                    - District {{ office_held.district_id }}
-                {% endif %}
-                {% if office_held.state_code %}
-                    - {{ office_held.state_code }}
-                {% endif %}
+  <h1>
+    {% if office_held %}
+      Edit {{ office_held.office_held_name|default_if_none:"" }}
+      {% if office_held.district_id %}- District {{ office_held.district_id }}{% endif %}
+      {% if office_held.state_code %}- {{ office_held.state_code }}{% endif %}
     {% else %}
-    Create New Office Held{% endif %}</h1>
+      Create New Office Held
+    {% endif %}
+  </h1>
 
-<form action="{% url "office_held:office_held_edit_process" %}" method="post" class="form-horizontal">
-{% csrf_token %}
+  <form action="{% url "office_held:office_held_edit_process" %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
 
-<input type="hidden" name="office_held_id" value="{% if office_held %}{{ office_held.id }}{% else %}0{% endif %}">
-<input type="hidden" name="redirect_to_office_held_list" value="0">
+    <input type="hidden"
+           name="office_held_id"
+           value="{% if office_held %}{{ office_held.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="redirect_to_office_held_list" value="0">
 
-{% if office_held %}
-<p><a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
-{% else %}
-<p><a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
-{% endif %}
-&nbsp;
-<input type="submit" value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" class="btn btn-primary" /></p>
+    {% if office_held %}
+      <p>
+        <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+      {% else %}
+        <p>
+          <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+        {% endif %}
+        &nbsp;
+        <input type="submit"
+               value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}"
+               class="btn btn-primary" />
+      </p>
 
-<div class="row form-group">
-    <label for="office_held_name_id" class="pl-4 control-label">Office Held Name</label>
-    <div class="col">
-        <input type="text" name="office_held_name" id="office_held_name_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_name|default_if_none:"" }}{% else %}{{ office_held_name|default_if_none:"" }}{% endif %}" />
-        {% if office_held %}{{ office_held.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
-        <!--TODO need to implement check office merge possibility -->
-        <!--{% if office_held.office_held_merge_possibility_found %}-->
-            <!--(<a href="{% url 'office:find_duplicate_office' office_held.id %}?google_civic_election_id={{ office_held.google_civic_election_id }}"-->
-                <!--target="_blank">check for duplicate office helds</a> - in new window)-->
-        <!--{% endif %}-->
-        <br />
-        Years with data:
+      <div class="row form-group">
+        <label for="office_held_name_id" class="pl-4 control-label">Office Held Name</label>
+        <div class="col">
+          <input type="text"
+                 name="office_held_name"
+                 id="office_held_name_id"
+                 class="form-control"
+                 value="{% if office_held %}{{ office_held.office_held_name|default_if_none:"" }}{% else %}{{ office_held_name|default_if_none:"" }}{% endif %}" />
+          {% if office_held %}
+            {{ office_held.we_vote_id }}
+          {% else %}
+            {{ we_vote_id }}
+          {% endif %}
+          <!--TODO need to implement check office merge possibility -->
+          <!--{% if office_held.office_held_merge_possibility_found %}-->
+          <!--(<a href="{% url 'office:find_duplicate_office' office_held.id %}?google_civic_election_id={{ office_held.google_civic_election_id }}"
+   -->
+          <!--target="_blank">check for duplicate office helds</a> - in new window)-->
+          <!--{% endif %}-->
+          <br />
+          Years with data:
           <strong>
-        {% if office_held.year_with_data_2023 %}2023 {% endif %}
-        {% if office_held.year_with_data_2024 %}2024 {% endif %}
-        {% if office_held.year_with_data_2025 %}2025 {% endif %}
-        {% if office_held.year_with_data_2026 %}2026 {% endif %}
+            {% if office_held.year_with_data_2023 %}2023{% endif %}
+            {% if office_held.year_with_data_2024 %}2024{% endif %}
+            {% if office_held.year_with_data_2025 %}2025{% endif %}
+            {% if office_held.year_with_data_2026 %}2026{% endif %}
           </strong>
+          <br />
+          {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=office_held %}
+        </div>
+      </div>
+
+      {% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
+
+      {% include "../form_inputs/two_form_groups.html" with field_dict_1=district_name_dict field_dict_2=ocd_division_id_dict %}
+
+      {% if office_held.primary_party %}
+        <div class="row form-group">
+          <label for="primary_party_id" class="pl-4 control-label">Primary Party</label>
+          <div class="col">
+            <input type="text"
+                   name="ocd_division_id"
+                   id="ocd_division_id_id"
+                   class="form-control"
+                   value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
+          </div>
+        </div>
+      {% endif %}
+
+      {% include "../form_inputs/two_form_groups.html" with field_dict_1=state_code_dict field_dict_2=district_id_dict %}
+
+      {% include "../form_inputs/two_form_groups.html" with field_dict_1=office_held_facebook_url_dict field_dict_2=office_held_twitter_handle_dict %}
+
+      {% include "../form_inputs/one_form_group.html" with field_dict_1=office_held_url_dict %}
+
+      <div class="row form-group">
+        <label for="office_held_description_id" class="pl-4 control-label">Office Held Description</label>
+        <div class="col">
+          <textarea name="office_held_description"
+                    id="office_held_description_id"
+                    class="form-control">{% if office_held %}{{ office_held.office_held_description|default_if_none:"" }}{% else %}{{ office_held_description|default_if_none:"" }}{% endif %}</textarea>
+        </div>
+      </div>
+
+
+      {% if office_held %}
+        <p>
+          <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+        {% else %}
+          <p>
+            <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+          {% endif %}
+          &nbsp;
+          <input type="submit"
+                 value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" />
+        </p>
+
+      </form>
+
+
+
+      {% if office_held_list %}
         <br />
-{% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=office_held %}
-    </div>
-</div>
-
-{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
-
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=district_name_dict field_dict_2=ocd_division_id_dict %}
-
-{% if office_held.primary_party %}
-<div class="row form-group">
-    <label for="primary_party_id" class="pl-4 control-label">Primary Party</label>
-    <div class="col">
-		<input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
-		value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
- </div>
-</div>
-{% endif %}
-
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=state_code_dict field_dict_2=district_id_dict %}
-
-{% include "../form_inputs/two_form_groups.html" with field_dict_1=office_held_facebook_url_dict field_dict_2=office_held_twitter_handle_dict %}
-
-{% include "../form_inputs/one_form_group.html" with field_dict_1=office_held_url_dict %}
-
-<div class="row form-group">
-    <label for="office_held_description_id" class="pl-4 control-label">Office Held Description</label>
-    <div class="col">
-        <textarea name="office_held_description" id="office_held_description_id" class="form-control" >{% if office_held %}{{ office_held.office_held_description|default_if_none:"" }}{% else %}{{ office_held_description|default_if_none:"" }}{% endif %}</textarea>
-    </div>
-</div>
-
-
-{% if office_held %}
-<p><a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
-{% else %}
-<p><a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
-{% endif %}
-&nbsp;
-<input type="submit" value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" /></p>
-
-</form>
-
-
-
-{% if office_held_list %}
-    <br />
-    <h4>Existing Offices Held</h4>
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
+        <h4>Existing Offices Held</h4>
+        <table border="1" cellpadding="5" cellspacing="5">
+          <tr>
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Office Held Name</td>
             <td>State</td>
             <td># of Candidates</td>
-        </tr>
-    {% for office_held in office_held_list %}
-        <tr>
-            <td>{{ office_held.id }}</td>
-            <td>{{ office_held.we_vote_id }}</td>
-            <td><a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}
-                {% if office_held.district_id %}
-                    - District {{ office_held.district_id }}
-                {% endif %}
-                {% if office_held.state_code %}
-                    - {{ office_held.state_code }}
-                {% endif %}
-            </a></td>
-            <td>{{ office_held.state_code }}</td>
-            <td>{{ office_held.candidate_count }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
+          </tr>
+          {% for office_held in office_held_list %}
+            <tr>
+              <td>{{ office_held.id }}</td>
+              <td>{{ office_held.we_vote_id }}</td>
+              <td>
+                <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}
+                  {% if office_held.district_id %}- District {{ office_held.district_id }}{% endif %}
+                  {% if office_held.state_code %}- {{ office_held.state_code }}{% endif %}
+                </a>
+              </td>
+              <td>{{ office_held.state_code }}</td>
+              <td>{{ office_held.candidate_count }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
 
-{% endblock %}
+    {% endblock %}

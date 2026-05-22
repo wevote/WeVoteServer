@@ -3,296 +3,437 @@
 
 {% block title %}Voters{% endblock %}
 
-{%  block content %}
-{% load humanize %}
+{% block content %}
+  {% load humanize %}
 
-<br />
-<a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Go to Voter List Analysis ></a><br />
+  <br />
+  <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Go to Voter List Analysis ></a>
+  <br />
 
-<h1>Voters - {{ voter_list_found_count|intcomma }} Found</h1>
+  <h1>Voters - {{ voter_list_found_count|intcomma }} Found</h1>
 
-<div id="dialog-form" title="Create new voter account" style="display: none">
-  <p class="validateTips" style="margin: 10px 0 14px 0">All data entry fields are required, permissions are optional. Suggested password below can be changed by you if desired.</p>
+  <div id="dialog-form"
+       title="Create new voter account"
+       style="display: none">
+    <p class="validateTips" style="margin: 10px 0 14px 0">
+      All data entry fields are required, permissions are optional. Suggested password below can be changed by you if desired.
+    </p>
 
-  <form name="voter_list_form" id="voter_list_form_id">
-    <input type="hidden" name="voter_invitation_first_name" id="voter_invitation_first_name_id" value="{{ voter_invitation_first_name }}" />
-    <input type="hidden" name="voter_invitation_email" id="voter_invitation_email_id" value="{{ voter_invitation_email }}" />
-    <input type="hidden" name="voter_invitation_password" id="voter_invitation_password_id" value="{{ voter_invitation_password }}" />
-    <fieldset>
-      <label for="firstname">First Name</label>
-      <input type="text" name="firstname" id="firstname" class="text ui-widget-content ui-corner-all"
-             style="float: right; padding-left: 5px; width: 70%;"><br />
-      <label for="lastname">Last Name</label>
-      <input type="text" name="lastname" id="lastname" class="text ui-widget-content ui-corner-all"
-             style="float: right; padding-left: 5px; width: 70%;"><br />
-      <label for="email">Email</label>
-      <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all"
-             style="float: right; padding-left: 5px; width: 70%;"><br />
-      <label for="password">Password</label>
-      <input type="text" name="password" id="password" class="text ui-widget-content ui-corner-all"
-             style="float: right; padding-left: 5px; width: 70%;" value="{{ password_proposed }}"><br /><br />
+    <form name="voter_list_form" id="voter_list_form_id">
+      <input type="hidden"
+             name="voter_invitation_first_name"
+             id="voter_invitation_first_name_id"
+             value="{{ voter_invitation_first_name }}" />
+      <input type="hidden"
+             name="voter_invitation_email"
+             id="voter_invitation_email_id"
+             value="{{ voter_invitation_email }}" />
+      <input type="hidden"
+             name="voter_invitation_password"
+             id="voter_invitation_password_id"
+             value="{{ voter_invitation_password }}" />
+      <fieldset>
+        <label for="firstname">First Name</label>
+        <input type="text"
+               name="firstname"
+               id="firstname"
+               class="text ui-widget-content ui-corner-all"
+               style="float: right;
+                      padding-left: 5px;
+                      width: 70%">
+        <br />
+        <label for="lastname">Last Name</label>
+        <input type="text"
+               name="lastname"
+               id="lastname"
+               class="text ui-widget-content ui-corner-all"
+               style="float: right;
+                      padding-left: 5px;
+                      width: 70%">
+        <br />
+        <label for="email">Email</label>
+        <input type="text"
+               name="email"
+               id="email"
+               class="text ui-widget-content ui-corner-all"
+               style="float: right;
+                      padding-left: 5px;
+                      width: 70%">
+        <br />
+        <label for="password">Password</label>
+        <input type="text"
+               name="password"
+               id="password"
+               class="text ui-widget-content ui-corner-all"
+               style="float: right;
+                      padding-left: 5px;
+                      width: 70%"
+               value="{{ password_proposed }}">
+        <br />
+        <br />
 
-      <input type="checkbox" name="checkbox-admin" id="checkbox-admin">
-      <label for="checkbox-admin">Is Admin</label><br />
+        <input type="checkbox" name="checkbox-admin" id="checkbox-admin">
+        <label for="checkbox-admin">Is Admin</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-analytics" id="checkbox-analytics">
-      <label for="checkbox-analytics">Is Analytics Admin</label><br />
+        <input type="checkbox" name="checkbox-analytics" id="checkbox-analytics">
+        <label for="checkbox-analytics">Is Analytics Admin</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-voter-manager" id="checkbox-voter-manager-id">
-      <label for="checkbox-voter-manager-id">Is Voter Manager</label><br />
+        <input type="checkbox"
+               name="checkbox-voter-manager"
+               id="checkbox-voter-manager-id">
+        <label for="checkbox-voter-manager-id">Is Voter Manager</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-datamanager" id="checkbox-datamanager">
-      <label for="checkbox-datamanager"> Is Political Data Manager </label><br />
+        <input type="checkbox" name="checkbox-datamanager" id="checkbox-datamanager">
+        <label for="checkbox-datamanager">Is Political Data Manager</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-dataviewer" id="checkbox-dataviewer">
-      <label for="checkbox-dataviewer">Is Political Data Viewer</label><br />
+        <input type="checkbox" name="checkbox-dataviewer" id="checkbox-dataviewer">
+        <label for="checkbox-dataviewer">Is Political Data Viewer</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-partner" id="checkbox-partner">
-      <label for="checkbox-partner">Is Partner Organization</label><br />
+        <input type="checkbox" name="checkbox-partner" id="checkbox-partner">
+        <label for="checkbox-partner">Is Partner Organization</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-volunteer" id="checkbox-volunteer">
-      <label for="checkbox-volunteer">Is Verified Volunteer</label><br />
+        <input type="checkbox" name="checkbox-volunteer" id="checkbox-volunteer">
+        <label for="checkbox-volunteer">Is Verified Volunteer</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-contributed" id="checkbox-contributed">
-      <label for="checkbox-contributed">Has Contributed</label><br />
+        <input type="checkbox" name="checkbox-contributed" id="checkbox-contributed">
+        <label for="checkbox-contributed">Has Contributed</label>
+        <br />
 
-      <input type="checkbox" name="checkbox-friends" id="checkbox-friends">
-      <label for="checkbox-friends">Has Friends</label><br />
+        <input type="checkbox" name="checkbox-friends" id="checkbox-friends">
+        <label for="checkbox-friends">Has Friends</label>
+        <br />
 
-      <!-- Allow form submission with keyboard without duplicating the dialog button -->
-      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-    </fieldset>
-  </form>
-</div>
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+      </fieldset>
+    </form>
+  </div>
 
-<button id="create-user" style="Margin: 12px 0; font-size: 12pt">Create New Voter Account</button>
-{% if voter_invitation_password %}
+  <button id="create-user" style="Margin: 12px 0; font-size: 12pt">Create New Voter Account</button>
+  {% if voter_invitation_password %}
     {% include "voter/voter_invitation_from_manager.html" with voter_invitation_email=voter_invitation_email voter_invitation_first_name=voter_invitation_first_name voter_invitation_password=voter_invitation_password %}
-{% endif %}
-<br />
-<div>
+  {% endif %}
+  <br />
+  <div>
     <a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>,
     <a href="{% url 'voter:process_maintenance_status_flags' %}">Process Maintenance Status Flags</a>,
     <a href="{% url 'friend:refresh_voter_friend_count' %}">Update friend count,</a>
     <a href="{% url 'friend:current_friends_data_healing' %}">CurrentFriends data healing,</a>
     <a href="{% url 'friend:generate_mutual_friends_for_all_voters' %}">Generate mutual friends</a>
-</div>
-<form name="voter_search_form" method="get" action="{% url 'voter:voter_list' %}">
+  </div>
+  <form name="voter_search_form"
+        method="get"
+        action="{% url 'voter:voter_list' %}">
     {% csrf_token %}
 
     <div style="padding-top: 4px">
       {% if voter_search or issues_selected %}
         <a href="{% url 'voter:voter_list' %}" style="padding-right: 4px">clear search</a>
       {% endif %}
-        <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
-        <input type="submit" value="Search for Voter" />
+      <input type="text"
+             name="voter_search"
+             id="voter_search_id"
+             value="{{ voter_search }}" />
+      <input type="submit" value="Search for Voter" />
     </div>
 
     <div style="padding: 6px 0">
-        <span style="padding: 6px">
-            <label for="is_admin_id">
-                <input type="checkbox" name="is_admin" id="is_admin_id" value="1"
-                     {% if is_admin %}checked{% endif %} /> Is Admin
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_admin_id">
+          <input type="checkbox"
+                 name="is_admin"
+                 id="is_admin_id"
+                 value="1"
+                 {% if is_admin %}checked{% endif %} />
+          Is Admin
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_analytics_admin_id">
-                <input type="checkbox" name="is_analytics_admin" id="is_analytics_admin_id" value="1"
-                       {% if is_analytics_admin %}checked{% endif %} /> Is Analytics Admin
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_analytics_admin_id">
+          <input type="checkbox"
+                 name="is_analytics_admin"
+                 id="is_analytics_admin_id"
+                 value="1"
+                 {% if is_analytics_admin %}checked{% endif %} />
+          Is Analytics Admin
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_voter_manager_id">
-                <input type="checkbox" name="is_voter_manager" id="is_voter_manager_id" value="1"
-                       {% if is_voter_manager %}checked{% endif %} /> Is Voter Manager
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_voter_manager_id">
+          <input type="checkbox"
+                 name="is_voter_manager"
+                 id="is_voter_manager_id"
+                 value="1"
+                 {% if is_voter_manager %}checked{% endif %} />
+          Is Voter Manager
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_partner_organization_id">
-                <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
-                    {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_partner_organization_id">
+          <input type="checkbox"
+                 name="is_partner_organization"
+                 id="is_partner_organization_id"
+                 value="1"
+                 {% if is_partner_organization %}checked{% endif %} />
+          Is Partner Organization
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_political_data_manager_id">
-                <input type="checkbox" name="is_political_data_manager" id="is_political_data_manager_id" value="1"
-                    {% if is_political_data_manager %}checked{% endif %} /> Is Political Data Manager
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_political_data_manager_id">
+          <input type="checkbox"
+                 name="is_political_data_manager"
+                 id="is_political_data_manager_id"
+                 value="1"
+                 {% if is_political_data_manager %}checked{% endif %} />
+          Is Political Data Manager
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_political_data_viewer_id">
-                <input type="checkbox" name="is_political_data_viewer" id="is_political_data_viewer_id" value="1"
-                    {% if is_political_data_viewer %}checked{% endif %} /> Is Political Data Viewer
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_political_data_viewer_id">
+          <input type="checkbox"
+                 name="is_political_data_viewer"
+                 id="is_political_data_viewer_id"
+                 value="1"
+                 {% if is_political_data_viewer %}checked{% endif %} />
+          Is Political Data Viewer
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="is_verified_volunteer_id">
-                <input type="checkbox" name="is_verified_volunteer" id="is_verified_volunteer_id" value="1"
-                    {% if is_verified_volunteer %}checked{% endif %} /> Is Verified Volunteer
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="is_verified_volunteer_id">
+          <input type="checkbox"
+                 name="is_verified_volunteer"
+                 id="is_verified_volunteer_id"
+                 value="1"
+                 {% if is_verified_volunteer %}checked{% endif %} />
+          Is Verified Volunteer
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="has_contributed_id">
-              <input type="checkbox" name="has_contributed" id="has_contributed_id" value="1"
-                     {% if has_contributed %}checked{% endif %} /> Has Contributed
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="has_contributed_id">
+          <input type="checkbox"
+                 name="has_contributed"
+                 id="has_contributed_id"
+                 value="1"
+                 {% if has_contributed %}checked{% endif %} />
+          Has Contributed
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="has_friends_id">
-              <input type="checkbox" name="has_friends" id="has_friends_id" value="1"
-                     {% if has_friends %}checked{% endif %} /> Has Friends
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="has_friends_id">
+          <input type="checkbox"
+                 name="has_friends"
+                 id="has_friends_id"
+                 value="1"
+                 {% if has_friends %}checked{% endif %} />
+          Has Friends
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="show_voter_merge_data_id">
-              <input type="checkbox" name="show_voter_merge_data" id="show_voter_merge_data_id" value="1"
-                     {% if show_voter_merge_data %}checked{% endif %} /> Show Voter Merge Data
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="show_voter_merge_data_id">
+          <input type="checkbox"
+                 name="show_voter_merge_data"
+                 id="show_voter_merge_data_id"
+                 value="1"
+                 {% if show_voter_merge_data %}checked{% endif %} />
+          Show Voter Merge Data
+        </label>
+      </span>
 
-        <span style="padding: 6px">
-            <label for="has_voter_merge_problem_id">
-              <input type="checkbox" name="has_voter_merge_problem" id="has_voter_merge_problem_id" value="1"
-                     {% if has_voter_merge_problem %}checked{% endif %} /> Has Voter Merge Problem
-            </label>
-        </span>
+      <span style="padding: 6px">
+        <label for="has_voter_merge_problem_id">
+          <input type="checkbox"
+                 name="has_voter_merge_problem"
+                 id="has_voter_merge_problem_id"
+                 value="1"
+                 {% if has_voter_merge_problem %}checked{% endif %} />
+          Has Voter Merge Problem
+        </label>
+      </span>
     </div>
-</form>
+  </form>
 
 
-{% if voter_list %}
+  {% if voter_list %}
     <table class="table">
       <thead>
         <tr>
-            <th></th>
-            <th>ID</th>
-            <th>We Vote ID</th>
-            <th>You</th>
-            <th>Friends</th>
-            <th>Tw / Apple / Email / Phone</th>
-            <th>Opt In</th>
-            <th style='text-align: right'>Contributions</th>
-            <th>Roles / Teams</th>
-            <th>Voter Images</th>
+          <th></th>
+          <th>ID</th>
+          <th>We Vote ID</th>
+          <th>You</th>
+          <th>Friends</th>
+          <th>Tw / Apple / Email / Phone</th>
+          <th>Opt In</th>
+          <th style='text-align: right'>Contributions</th>
+          <th>Roles / Teams</th>
+          <th>Voter Images</th>
         </tr>
       </thead>
-    {% for voter in voter_list %}
+      {% for voter in voter_list %}
         <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                <a href="{% url 'voter:voter_summary' voter.id %}">
-                    {% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" /><br />{% endif %}
-                    {{ voter.id }}
-                </a>
-            </td>
-            <td>
-                {{ voter.get_full_name|default_if_none:"" }}
-                (<a href="{% url 'voter:voter_edit' voter.id %}">edit</a>)
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <a href="{% url 'voter:voter_summary' voter.id %}">
+              {% if voter.we_vote_hosted_profile_image_url_tiny %}
+                <img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" />
                 <br />
-                {{ voter.we_vote_id }}
-                {% if voter.linked_organization_we_vote_id %}
-                <a href="{% url 'organization:organization_edit_we_vote_id' voter.linked_organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   class="">
-                {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
-                </a>
-                {% else %}
-                    <span style="color: #888888;">Linked org missing</span>
-                {% endif %}
-                {% if voter.date_last_changed %}
-                    <br />
-                    <span style="color: #888888;">
-                    Last change:
-                    {{ voter.date_last_changed|default_if_none:"" }}
-                    </span>
-                {% endif %}
-            </td>
-            <!-- Is this you? //-->
-            <td>
-            {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
-            </td>
-            <!-- Friend count //-->
-            <td>
-            {% if voter.friend_count %}{{ voter.friend_count }}{% else %}{% endif %}
-            </td>
-            <td>
+              {% endif %}
+              {{ voter.id }}
+            </a>
+          </td>
+          <td>
+            {{ voter.get_full_name|default_if_none:"" }}
+            (<a href="{% url 'voter:voter_edit' voter.id %}">edit</a>)
+            <br />
+            {{ voter.we_vote_id }}
+            {% if voter.linked_organization_we_vote_id %}
+              <a href="{% url 'organization:organization_edit_we_vote_id' voter.linked_organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 class="">{{ voter.linked_organization_we_vote_id|default_if_none:"" }}</a>
+            {% else %}
+              <span style="color: #888888;">Linked org missing</span>
+            {% endif %}
+            {% if voter.date_last_changed %}
+              <br />
+              <span style="color: #888888;">
+                Last change:
+                {{ voter.date_last_changed|default_if_none:"" }}
+              </span>
+            {% endif %}
+          </td>
+          <!-- Is this you? //-->
+          <td>
+            {% if voter.id == voter_id_signed_in %}
+              *ME*
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Friend count //-->
+          <td>
+            {% if voter.friend_count %}
+              {{ voter.friend_count }}
+            {% else %}
+            {% endif %}
+          </td>
+          <td>
             <!-- Email //-->
-            {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
-            {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
+            {% if voter.email %}
+              {{ voter.email }}
+            {% else %}
+            {% endif %}
+            {% if voter.facebook_email %}
+              fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}
+            {% else %}
+            {% endif %}
             <!-- SMS //-->
-            {% if voter.normalized_sms_phone_number %} {{ voter.normalized_sms_phone_number }}{% else %}{% endif %}
+            {% if voter.normalized_sms_phone_number %}
+              {{ voter.normalized_sms_phone_number }}
+            {% else %}
+            {% endif %}
             <!-- From TwitterLinkToVoter //-->
             {% if voter.twitter_handle %}
               @{{ voter.twitter_handle }}
-            {% else %}{% endif %}
-            {% if voter.twitter_handle and voter.signed_in_with_apple %}
-              &nbsp;/&nbsp;
+            {% else %}
             {% endif %}
+            {% if voter.twitter_handle and voter.signed_in_with_apple %}&nbsp;/&nbsp;{% endif %}
             {% if voter.signed_in_with_apple %}Apple{% endif %}
             <!-- Facebook //-->
             <!-- {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %} //-->
-            {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
+            {% if voter.retrieved_facebook_id %}
+              {{ voter.retrieved_facebook_id|default_if_none:"" }}
+              <br />
+            {% endif %}
             <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
-                <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
-                {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
-                {% if voter.signed_in_facebook %} (fb account){% endif %}
-                </span>
-            </td>
-            <!-- Opt In //-->
-            <td>
-            {% if voter.is_opt_in_newsletter %}Yes{% else %}{% endif %}
-            </td>
-            <!-- Amount voter has paid in Membership fees + Donations + "Chip in"s to campaigns //-->
-            <td style='text-align: right'>
-                {{ voter.amount_spent }}
-            </td>
-            <td>
+            <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
+              {% if voter.fb_username %}
+                {{ voter.fb_username }}
+              {% else %}
+              {% endif %}
+              {% if voter.signed_in_facebook %}(fb account){% endif %}
+            </span>
+          </td>
+          <!-- Opt In //-->
+          <td>
+            {% if voter.is_opt_in_newsletter %}
+              Yes
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- Amount voter has paid in Membership fees + Donations + "Chip in"s to campaigns //-->
+          <td style='text-align: right'>{{ voter.amount_spent }}</td>
+          <td>
             <!-- Roles / Teams //-->
             <!-- Is site administrator? //-->
-            {% if voter.is_admin %}Admin, {% else %}{% endif %}
-            {% if voter.is_analytics_admin %}Analytics_Admin, {% else %}{% endif %}
-            {% if voter.is_voter_manager %}Voter Manager, {% else %}{% endif %}
+            {% if voter.is_admin %}
+              Admin,
+            {% else %}
+            {% endif %}
+            {% if voter.is_analytics_admin %}
+              Analytics_Admin,
+            {% else %}
+            {% endif %}
+            {% if voter.is_voter_manager %}
+              Voter Manager,
+            {% else %}
+            {% endif %}
             <!-- Is partner organization? //-->
-            {% if voter.is_partner_organization %}Partner, {% else %}{% endif %}
+            {% if voter.is_partner_organization %}
+              Partner,
+            {% else %}
+            {% endif %}
             <!-- Political data authority? //-->
-            {% if voter.is_political_data_manager %}Data_Manager,
-            {% elif voter.is_political_data_viewer %}Data_Viewer, {% endif %}
+            {% if voter.is_political_data_manager %}
+              Data_Manager,
+            {% elif voter.is_political_data_viewer %}
+              Data_Viewer,
+            {% endif %}
             <!-- Is verified volunteer? //-->
-            {% if voter.is_verified_volunteer %}Verified_Volunteer, {% else %}{% endif %}
-            </td>
-            <!-- See images //-->
-            <td>
-                <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
-                <br />
-                <a href="{% url 'import_export_twitter:delete_images_view' %}?voter_id={{voter.id}}">Delete images</a>
-            </td>
+            {% if voter.is_verified_volunteer %}
+              Verified_Volunteer,
+            {% else %}
+            {% endif %}
+          </td>
+          <!-- See images //-->
+          <td>
+            <a href="{% url 'image:images_for_one_voter' voter.id %}"
+               target="_blank">See images</a>
+            <br />
+            <a href="{% url 'import_export_twitter:delete_images_view' %}?voter_id={{ voter.id }}">Delete images</a>
+          </td>
         </tr>
-    {% if voter.to_voter_merge_status_list %}
-        {% for voter_merge_status in voter.to_voter_merge_status_list %}
-        <tr>
-            <td colspan="1"></td>
-            <td colspan="12">
-{% include "voter/voter_merge_status_table.html" with for_from_voter=0 for_to_voter=1 voter_merge_status=voter_merge_status %}
-            </td>
-        </tr>
-        {% endfor %}
-    {% endif %}
-    {% endfor %}
+        {% if voter.to_voter_merge_status_list %}
+          {% for voter_merge_status in voter.to_voter_merge_status_list %}
+            <tr>
+              <td colspan="1"></td>
+              <td colspan="12">
+                {% include "voter/voter_merge_status_table.html" with for_from_voter=0 for_to_voter=1 voter_merge_status=voter_merge_status %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
     </table>
-{% else %}
+  {% else %}
     <p>(no voters found)</p>
-{% endif %}
-<br />
+  {% endif %}
+  <br />
 
-<script>
+  <script>
     $(function() {
         $('#is_admin_id').change(function() {
             this.form.submit();
@@ -354,12 +495,12 @@
             this.form.submit();
         });
     });
-</script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></script>
-<script src="https://jqueryui.com/resources/demos/style.css"></script>
+  </script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></script>
+  <script src="https://jqueryui.com/resources/demos/style.css"></script>
 
-<script>
+  <script>
   $( function() {
     var dialog, form,
 
@@ -489,5 +630,5 @@
       dialog.dialog( "open" );
     });
   } );
-</script>
+  </script>
 {% endblock %}

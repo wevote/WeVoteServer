@@ -3,147 +3,198 @@
 
 {% block title %}Apple App Store Event List{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
-    
-<a href="{% url 'import_export_apple_app_store:import_export_apple_app_store_index' %}">< Back to Apple App Store Tools</a>
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Apple App Store Event List</h1>
+  <a href="{% url 'import_export_apple_app_store:import_export_apple_app_store_index' %}">< Back to Apple App Store Tools</a>
 
-<br/>
+  <h1>Apple App Store Event List</h1>
+
+  <br />
 
 
-<form name="state_code_form" method="get" action="{% url 'import_export_apple_app_store:apple_app_store_event_list' %}">
+  <form name="state_code_form"
+        method="get"
+        action="{% url 'import_export_apple_app_store:apple_app_store_event_list' %}">
     {% csrf_token %}
 
     {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
+      <select id="state_code_id" name="state_code">
+        <option value="">-- Filter by State Served --</option>
         {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
+          <option value="{{ key }}"
+                  {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
         {% endfor %}
-        </select>
-    {% endif %}{# End of if state_list #}
+      </select>
+    {% endif %}
+    {# End of if state_list #}
 
     {% if years_available %}
-    <select id="show_this_year_id" name="show_this_year">
-        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
-            -- Choose Year --</option>
+      <select id="show_this_year_id" name="show_this_year">
+        <option value="0"
+                {% if 0 == show_this_year|convert_to_int %}selected="selected"{% endif %}>-- Choose Year --</option>
         {% for year in years_available %}
-        <option value="{{ year }}"
-                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
-            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
-            {{ year }}</option>
+          <option value="{{ year }}"
+                  {% if show_this_year|slugify == year|slugify %}selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To{% endif %}
+            {{ year }}
+          </option>
         {% endfor %}
-    </select>
-    {% endif %}{# End of if years_available #}
+      </select>
+    {% endif %}
+    {# End of if years_available #}
     &nbsp;&nbsp;
     {% if apple_app_store_event_search %}
-    <a href="{% url 'import_export_apple_app_store:apple_app_store_event_list' %}?state_code={{ state_code }}&show_apple_app_store_events_with_email={{ show_apple_app_store_events_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
-         clear search</a>&nbsp;
-    {% endif %}
-    <input type="text" name="apple_app_store_event_search" id="apple_app_store_event_search_id" value="{{ apple_app_store_event_search }}" />
-    <input  id="apple_app_store_event_search_submit_id" type="submit" value="Search" />
-    &nbsp;&nbsp;
-    <label for="show_apple_app_store_events_with_email_id">
-      <input type="checkbox" name="show_apple_app_store_events_with_email" id="show_apple_app_store_events_with_email_id" value="1"
-             {% if show_apple_app_store_events_with_email %}checked{% endif %} /> Filter Option 1
-    </label>
-    &nbsp;&nbsp;
-    <label for="missing_politician_id">
-      <input type="checkbox" name="missing_politician" id="missing_politician_id" value="1"
-             {% if missing_politician %}checked{% endif %} /> Filter Option 2
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_battleground_id">
-      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
-             {% if show_battleground %}checked{% endif %} /> Filter Option 3
-    </label>
-   &nbsp;&nbsp;
-    <label for="show_ocd_id_state_mismatch_id">
-      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
-             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Filter Option 4
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_all_id">
-      <input type="checkbox" name="show_all" id="show_all_id" value="1"
-             {% if show_all %}checked{% endif %} /> Filter Option 5
-    </label>
-</form>
-<br/>
+      <a href="{% url 'import_export_apple_app_store:apple_app_store_event_list' %}?state_code={{ state_code }}&show_apple_app_store_events_with_email={{ show_apple_app_store_events_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
+        clear search</a>&nbsp;
+      {% endif %}
+      <input type="text"
+             name="apple_app_store_event_search"
+             id="apple_app_store_event_search_id"
+             value="{{ apple_app_store_event_search }}" />
+      <input id="apple_app_store_event_search_submit_id"
+             type="submit"
+             value="Search" />
+      &nbsp;&nbsp;
+      <label for="show_apple_app_store_events_with_email_id">
+        <input type="checkbox"
+               name="show_apple_app_store_events_with_email"
+               id="show_apple_app_store_events_with_email_id"
+               value="1"
+               {% if show_apple_app_store_events_with_email %}checked{% endif %} />
+        Filter Option 1
+      </label>
+      &nbsp;&nbsp;
+      <label for="missing_politician_id">
+        <input type="checkbox"
+               name="missing_politician"
+               id="missing_politician_id"
+               value="1"
+               {% if missing_politician %}checked{% endif %} />
+        Filter Option 2
+      </label>
+      &nbsp;&nbsp;
+      <label for="show_battleground_id">
+        <input type="checkbox"
+               name="show_battleground"
+               id="show_battleground_id"
+               value="1"
+               {% if show_battleground %}checked{% endif %} />
+        Filter Option 3
+      </label>
+      &nbsp;&nbsp;
+      <label for="show_ocd_id_state_mismatch_id">
+        <input type="checkbox"
+               name="show_ocd_id_state_mismatch"
+               id="show_ocd_id_state_mismatch_id"
+               value="1"
+               {% if show_ocd_id_state_mismatch %}checked{% endif %} />
+        Filter Option 4
+      </label>
+      &nbsp;&nbsp;
+      <label for="show_all_id">
+        <input type="checkbox"
+               name="show_all"
+               id="show_all_id"
+               value="1"
+               {% if show_all %}checked{% endif %} />
+        Filter Option 5
+      </label>
+    </form>
+    <br />
 
-{% if apple_app_store_event_list %}
-    <table class="table">
+    {% if apple_app_store_event_list %}
+      <table class="table">
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Apple App Store Name</td>
-            <td>Office Held Name</td>
-            <td>State</td>
-            <td>Twitter Handle</td>
-            <td>Email(s)</td>
-            <td>ID(s)</td>
-            <td>Website(s)</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>Apple App Store Name</td>
+          <td>Office Held Name</td>
+          <td>State</td>
+          <td>Twitter Handle</td>
+          <td>Email(s)</td>
+          <td>ID(s)</td>
+          <td>Website(s)</td>
         </tr>
-    {% for apple_app_store_event in apple_app_store_event_list %}
-        <tr>
+        {% for apple_app_store_event in apple_app_store_event_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if apple_app_store_event.we_vote_hosted_profile_image_url_medium %}
+              {% if apple_app_store_event.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'import_export_apple_app_store:apple_app_store_event_edit' apple_app_store_event.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}">
-                    <img src='{{ apple_app_store_event.we_vote_hosted_profile_image_url_medium }}' height="48px" />
+                  <img src='{{ apple_app_store_event.we_vote_hosted_profile_image_url_medium }}'
+                       height="48px" />
                 </a>
-                {% endif %}
+              {% endif %}
             </td>
             <td>
-                <a href="{% url 'import_export_apple_app_store:apple_app_store_event_edit' apple_app_store_event.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">
-                    {% if apple_app_store_event.apple_app_store_event_name %}{{ apple_app_store_event.apple_app_store_event_name }}{% else %}no name{% endif %}</a>
-                <br />
+              <a href="{% url 'import_export_apple_app_store:apple_app_store_event_edit' apple_app_store_event.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}"
+                 class="u-no-break">
+                {% if apple_app_store_event.apple_app_store_event_name %}
+                  {{ apple_app_store_event.apple_app_store_event_name }}
+                {% else %}
+                  no name
+                {% endif %}
+              </a>
+              <br />
             </td>
             <td>
-                <a href="{% url 'office_held:office_held_summary' apple_app_store_event.office_held_we_vote_id %}"
-                   style="display: block; width: 200px; word-wrap: break-word;"
-                   target="_blank">{{ apple_app_store_event.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                {% if apple_app_store_event.office_held_we_vote_id %}
-                    {{ apple_app_store_event.office_held_we_vote_id }}
-                {% endif %}
-                {% if apple_app_store_event.ocd_division_id %}
-                    {{ apple_app_store_event.ocd_division_id }}
-                {% endif %}
+              <a href="{% url 'office_held:office_held_summary' apple_app_store_event.office_held_we_vote_id %}"
+                 style="display: block;
+                        width: 200px;
+                        word-wrap: break-word"
+                 target="_blank">{{ apple_app_store_event.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              {% if apple_app_store_event.office_held_we_vote_id %}{{ apple_app_store_event.office_held_we_vote_id }}{% endif %}
+              {% if apple_app_store_event.ocd_division_id %}{{ apple_app_store_event.ocd_division_id }}{% endif %}
             </td>
             <td>{{ apple_app_store_event.state_code }}</td>
             <td>
-                {% if apple_app_store_event.apple_app_store_event_twitter_handle %}<a href="https://twitter.com/{{ apple_app_store_event.apple_app_store_event_twitter_handle }}"
-                    target="_blank">{{ apple_app_store_event.apple_app_store_event_twitter_handle }}</a><br />
-                ({{ apple_app_store_event.twitter_followers_count|intcomma }} followers){% endif %}
+              {% if apple_app_store_event.apple_app_store_event_twitter_handle %}
+                <a href="https://twitter.com/{{ apple_app_store_event.apple_app_store_event_twitter_handle }}"
+                   target="_blank">{{ apple_app_store_event.apple_app_store_event_twitter_handle }}</a>
+                <br />
+                ({{ apple_app_store_event.twitter_followers_count|intcomma }} followers)
+              {% endif %}
             </td>
             <td>
-                {% if apple_app_store_event.apple_app_store_event_email %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email }}</span>&nbsp;{% endif %}
-                {% if apple_app_store_event.apple_app_store_event_email2 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email2 }}</span>&nbsp;{% endif %}
-                {% if apple_app_store_event.apple_app_store_event_email3 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email3 }}</span>&nbsp;{% endif %}
+              {% if apple_app_store_event.apple_app_store_event_email %}
+                <span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email }}</span>&nbsp;
+              {% endif %}
+              {% if apple_app_store_event.apple_app_store_event_email2 %}
+                <span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email2 }}</span>&nbsp;
+              {% endif %}
+              {% if apple_app_store_event.apple_app_store_event_email3 %}
+                <span style="display: block; width: 150px; word-wrap: break-word;">{{ apple_app_store_event.apple_app_store_event_email3 }}</span>&nbsp;
+              {% endif %}
             </td>
+            <td>{{ apple_app_store_event.we_vote_id }}</td>
             <td>
-                {{ apple_app_store_event.we_vote_id }}
+              {% if apple_app_store_event.wikipedia_url %}
+                <span style="display: block; width: 200px; word-wrap: break-word;"><a href="{{ apple_app_store_event.wikipedia_url }}" target="_blank">{{ apple_app_store_event.wikipedia_url }}</a></span>&nbsp;
+              {% endif %}
+              {% if apple_app_store_event.apple_app_store_event_url %}
+                <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url }}"
+   target="_blank">{{ apple_app_store_event.apple_app_store_event_url }}</a></span>&nbsp;
+              {% endif %}
+              {% if apple_app_store_event.apple_app_store_event_url2 %}
+                <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url2 }}"
+   target="_blank">{{ apple_app_store_event.apple_app_store_event_url2 }}</a></span>&nbsp;
+              {% endif %}
+              {% if apple_app_store_event.apple_app_store_event_url3 %}
+                <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url3 }}"
+   target="_blank">{{ apple_app_store_event.apple_app_store_event_url3 }}</a></span>&nbsp;
+              {% endif %}
             </td>
-            <td>
-                {% if apple_app_store_event.wikipedia_url %}<span style="display: block; width: 200px; word-wrap: break-word;"><a href="{{ apple_app_store_event.wikipedia_url }}" target="_blank">{{ apple_app_store_event.wikipedia_url }}</a></span>&nbsp;{% endif %}
-                {% if apple_app_store_event.apple_app_store_event_url %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url }}" target="_blank">{{ apple_app_store_event.apple_app_store_event_url }}</a></span>&nbsp;{% endif %}
-                {% if apple_app_store_event.apple_app_store_event_url2 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url2 }}" target="_blank">{{ apple_app_store_event.apple_app_store_event_url2 }}</a></span>&nbsp;{% endif %}
-                {% if apple_app_store_event.apple_app_store_event_url3 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ apple_app_store_event.apple_app_store_event_url3 }}" target="_blank">{{ apple_app_store_event.apple_app_store_event_url3 }}</a></span>&nbsp;{% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
+          </tr>
+        {% endfor %}
+      </table>
 
-    <p></p>
-{% else %}
-    <p>(no apple_app_store_events found)</p>
-{% endif %}
+      <p></p>
+    {% else %}
+      <p>(no apple_app_store_events found)</p>
+    {% endif %}
 
     <script>
         function displayLoadingBanner() {
@@ -199,4 +250,4 @@
         });
     </script>
 
-{% endblock %}
+  {% endblock %}

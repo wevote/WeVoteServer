@@ -1,10 +1,16 @@
 {# templates/candidate/candidate_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if candidate %}{{ candidate.candidate_name }} Summary{% else %}No Candidate Found{% endif %}{% endblock %}
+{% block title %}
+  {% if candidate %}
+    {{ candidate.candidate_name }} Summary
+  {% else %}
+    No Candidate Found
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-<style>
+{% block content %}
+  <style>
 span.wrap_word { word-break: break-word; }
 table .lightgray_border th, table .lightgray_border td {
   border: 1px solid lightgray;
@@ -13,203 +19,214 @@ table .lightgray_border th, table .lightgray_border td {
 th, td {
   padding: 3px;
 }
-</style>
+  </style>
 
-<a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+  <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
 
-{% if candidate %}
+  {% if candidate %}
 
-<h1>{{ candidate.candidate_name }}</h1>
+    <h1>{{ candidate.candidate_name }}</h1>
 
-<table class="table-condensed">
-    <tr>
-      <td>Candidate We Vote ID:</td>
-      <td>
-        <strong>{{ candidate.we_vote_id }}</strong>
-        (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
-        {% if candidate.politician_we_vote_id %}
+    <table class="table-condensed">
+      <tr>
+        <td>Candidate We Vote ID:</td>
+        <td>
+          <strong>{{ candidate.we_vote_id }}</strong>
+          (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
+          {% if candidate.politician_we_vote_id %}
             <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}"
                target="_blank">
-            {{ candidate.politician_we_vote_id }}
-            <span class="glyphicon glyphicon-new-window"></span></a>
-        {% else %}
-            <a href="{% url 'candidate:candidate_politician_match' %}?candidate_we_vote_id=candidate.we_vote_id" target="_blank">Match to Politician  <span class="glyphicon glyphicon-new-window"></span></a>
-        {% endif %}
-      </td>
-    </tr>
-    <tr>
-      <td>
-      Candidate to Office Link:
-        <span style="color: slategray; font-weight: 400;">
-            {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
-            <br />
-            {% endif %}
+              {{ candidate.politician_we_vote_id }}
+              <span class="glyphicon glyphicon-new-window"></span></a>
+          {% else %}
+            <a href="{% url 'candidate:candidate_politician_match' %}?candidate_we_vote_id=candidate.we_vote_id"
+               target="_blank">Match to Politician  <span class="glyphicon glyphicon-new-window"></span></a>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Candidate to Office Link:
+          <span style="color: slategray; font-weight: 400;">
+            {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}<br />{% endif %}
             {% if candidate.candidate_year %}
-            {{ candidate.candidate_year }}
-            &nbsp;&nbsp;&nbsp;
+              {{ candidate.candidate_year }}
+              &nbsp;&nbsp;&nbsp;
             {% endif %}
-            {% if candidate.candidate_ultimate_election_date %}
-            {{ candidate.candidate_ultimate_election_date }}
-            {% endif %}
+            {% if candidate.candidate_ultimate_election_date %}{{ candidate.candidate_ultimate_election_date }}{% endif %}
             {% if candidate_to_office_link_list|length == 2 %}
-                <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+              <br />
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                 target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
             {% endif %}
-        </span>
-        {% if candidate.is_battleground_race %}
-            <strong>Competitive Race</strong>
-        {% endif %}
-      </td>
-      <td><strong>OLD Google Civic Election ID: {{ candidate.google_civic_election_id }}</strong>
-    <table class="lightgray_border">
-    {% for candidate_to_office_link in candidate_to_office_link_list %}
-        <tr>
-            <td>
-                id: {{ candidate_to_office_link.id }}
-            </td>
-            <td>
-                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
-                ({{ candidate_to_office_link.google_civic_election_id }})
-            </td>
-            <td>
-                {{ candidate_to_office_link.state_code }}
-            </td>
-            <td>
-                {% if candidate_to_office_link.contest_office_we_vote_id %}
-                <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
-                {% else %}
+          </span>
+          {% if candidate.is_battleground_race %}<strong>Competitive Race</strong>{% endif %}
+        </td>
+        <td>
+          <strong>OLD Google Civic Election ID: {{ candidate.google_civic_election_id }}</strong>
+          <table class="lightgray_border">
+            {% for candidate_to_office_link in candidate_to_office_link_list %}
+              <tr>
+                <td>id: {{ candidate_to_office_link.id }}</td>
+                <td>
+                  {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+                  ({{ candidate_to_office_link.google_civic_election_id }})
+                </td>
+                <td>{{ candidate_to_office_link.state_code }}</td>
+                <td>
+                  {% if candidate_to_office_link.contest_office_we_vote_id %}
+                    <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
+                       target="_blank">
+                      {% if candidate_to_office_link.office.office_name %}
+                        {{ candidate_to_office_link.office.office_name }}
+                      {% else %}
+                        MISSING OFFICE OBJECT
+                      {% endif %}
+                    ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
+                  {% else %}
                     Missing contest_office_we_vote_id
-                {% endif %}
-                {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
-                {% if candidate_to_office_link.office.ctcl_uuid %}<br /><span style="font-size: 10px;">{{ candidate_to_office_link.office.ctcl_uuid }}</span>{% endif %}
-            </td>
+                  {% endif %}
+                  {% if candidate_to_office_link.office.vote_usa_office_id %}
+                    <br />
+                    {{ candidate_to_office_link.office.vote_usa_office_id }}
+                  {% endif %}
+                  {% if candidate_to_office_link.office.ctcl_uuid %}
+                    <br />
+                    <span style="font-size: 10px;">{{ candidate_to_office_link.office.ctcl_uuid }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+
+        </td>
+      </tr>
+      <tr>
+        <td>Candidate Year:</td>
+        <td>
+          <strong>{{ candidate.candidate_year }}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Contest Office:</td>
+        <td>
+          <strong>{{ candidate.contest_office_name }}</strong>
+          {% if candidate.contest_office_id %}
+            (<a href="{% url 'office:office_summary' candidate.contest_office_id %}"
+   target="_blank">Go</a>)
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>Office We Vote ID:</td>
+        <td>
+          <strong>{{ candidate.contest_office_we_vote_id }}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Candidate Website:</td>
+        <td>
+          <strong>{{ candidate.candidate_url|default_if_none:"" }}</strong>
+        </td>
+      </tr>
+      <tr>
+        <tr>
+          <td>Candidate Contact Form:</td>
+          <td>
+            <strong>{{ candidate.candidate_contact_form_url|default_if_none:"" }}</strong>
+          </td>
         </tr>
-    {% endfor %}
-    </table>
-
-      </td>
-    </tr>
-    <tr>
-      <td>Candidate Year:</td>
-      <td>
-        <strong>{{ candidate.candidate_year }}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Contest Office:</td>
-      <td>
-        <strong>{{ candidate.contest_office_name }}</strong>
-        {% if candidate.contest_office_id %} (<a href="{% url 'office:office_summary' candidate.contest_office_id %}" target="_blank">Go</a>){% endif %}
-      </td>
-    </tr>
-    <tr>
-      <td>Office We Vote ID:</td>
-      <td>
-        <strong>{{ candidate.contest_office_we_vote_id }}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Candidate Website:</td>
-      <td>
-        <strong>{{ candidate.candidate_url|default_if_none:"" }}</strong>
-      </td>
-    </tr>
-    <tr>
         <tr>
-      <td>Candidate Contact Form:</td>
-      <td>
-        <strong>{{ candidate.candidate_contact_form_url|default_if_none:"" }}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Public Positions:</td>
-      <td>
-        <strong>{{ candidate.public_positions_count }}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Friends Only Positions:</td>
-      <td>
-        <strong>{{ candidate.friends_positions_count }}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td>Bookmarks:</td>
-      <td>
-        <strong>{{ candidate.bookmarks_count }}</strong>
-      </td>
-    </tr>
-</table>
-
-{% if candidate.id %}
-  <p><a href="{% url 'candidate:candidate_edit' candidate.id %}">edit</a></p>
-
-
-{#<h3>Merge with Another Candidate</h3>#}
-{#<form name="find_another_to_merge" method="get" action="{% url 'candidate:candidate_summary' candidate.id %}">#}
-{% endif %}
-
-<h3>We Vote Positions Related to {{ candidate.candidate_name  }}</h3>
-{%  if candidate_position_list %}
-<table class="table">
-      <thead>
-        <tr>
-            <th></th>
-            <th>Endorser Position</th>
-            <th>Stance</th>
-            <th>Election</th>
-            <th>Election Date</th>
-            <th>Rating Time Span</th>
+          <td>Public Positions:</td>
+          <td>
+            <strong>{{ candidate.public_positions_count }}</strong>
+          </td>
         </tr>
-      </thead>
-        {% for candidate_position in candidate_position_list %}
-        {% if not candidate_position.id %}
         <tr>
-            <td colspan="3">
-            (missing candidate_position.id)
-            </td>
+          <td>Friends Only Positions:</td>
+          <td>
+            <strong>{{ candidate.friends_positions_count }}</strong>
+          </td>
         </tr>
-        {% else %}
         <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if candidate_position.organization_id %}
-                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
-                {{ candidate_position.organization.organization_name }} (edit position)</a>
-                {% elif candidate_position.organization_we_vote_id %}
-                <a href="{% url 'organization:organization_we_vote_id_position_edit' candidate_position.organization_we_vote_id candidate_position.we_vote_id %}">
-                {{ candidate_position.organization.organization_name }} (edit position)</a>
-                {% else %}
+          <td>Bookmarks:</td>
+          <td>
+            <strong>{{ candidate.bookmarks_count }}</strong>
+          </td>
+        </tr>
+      </table>
+
+      {% if candidate.id %}
+        <p>
+          <a href="{% url 'candidate:candidate_edit' candidate.id %}">edit</a>
+        </p>
+
+
+        {#<h3>Merge with Another Candidate</h3>#}
+        {#<form name="find_another_to_merge"
+      method="get"
+      action="{% url 'candidate:candidate_summary' candidate.id %}">#}
+      {% endif %}
+
+      <h3>We Vote Positions Related to {{ candidate.candidate_name }}</h3>
+      {% if candidate_position_list %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Endorser Position</th>
+              <th>Stance</th>
+              <th>Election</th>
+              <th>Election Date</th>
+              <th>Rating Time Span</th>
+            </tr>
+          </thead>
+          {% for candidate_position in candidate_position_list %}
+            {% if not candidate_position.id %}
+              <tr>
+                <td colspan="3">(missing candidate_position.id)</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  {% if candidate_position.organization_id %}
+                    <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
+                    {{ candidate_position.organization.organization_name }} (edit position)</a>
+                  {% elif candidate_position.organization_we_vote_id %}
+                    <a href="{% url 'organization:organization_we_vote_id_position_edit' candidate_position.organization_we_vote_id candidate_position.we_vote_id %}">
+                    {{ candidate_position.organization.organization_name }} (edit position)</a>
+                  {% else %}
                     (not an org)
-                {% endif %}
-            </td>
-            <td>{{ candidate_position.get_stance_display }}
-                {% if candidate_position.statement_text %}
-                <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
-                {% endif %}
-{#                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>#}
-            <td>{{ candidate_position.election.google_civic_election_id }}</td>
-            <td>{{ candidate_position.election.election_day_text }}</td>
-            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>
-        </tr>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ candidate_position.get_stance_display }}
+                  {% if candidate_position.statement_text %}
+                    <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
+                  {% endif %}
+                  {#                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>#}
+                  <td>{{ candidate_position.election.google_civic_election_id }}</td>
+                  <td>{{ candidate_position.election.election_day_text }}</td>
+                  <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+
+          </table>
+        {% else %}
+          <p>(no positions found)</p>
         {% endif %}
-        {% endfor %}
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p></p>
+        <p>&nbsp;</p>
+      {% else %}
 
-</table>
-{% else %}
-    <p>(no positions found)</p>
-{% endif %}
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p> </p>
-<p>&nbsp;</p>
-{% else %}
+        <h1>No Candidate Found</h1>
+        Please visit the <a href="{% url 'candidate:candidate_list' %}">Candidate List</a> page.
 
-    <h1>No Candidate Found</h1>
-    Please visit the <a href="{% url 'candidate:candidate_list' %}">Candidate List</a> page.
+      {% endif %}
 
-{% endif %}
-
-{% endblock %}
+    {% endblock %}

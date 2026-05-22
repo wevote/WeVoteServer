@@ -1,200 +1,233 @@
 {# templates/analytics/analytics_action_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}
+{% block title %}Analytics Action{% endblock %}
+
+{% block content %}
+  {% load template_filters %}
+  <p>
+    <a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a>
+  </p>
+
+  <h2>
     Analytics Action
-{% endblock %}
-
-{%  block content %}
-{% load template_filters %}
-<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
-
-<h2>Analytics Action
     {% if voter_we_vote_id %}
-        for One Voter : {{ voter_we_vote_id }}
+      for One Voter : {{ voter_we_vote_id }}
     {% elif organization_we_vote_id %}
-        for One Endorser : {{ organization_we_vote_id }}
+      for One Endorser : {{ organization_we_vote_id }}
     {% endif %}
-</h2>
-    <p>
+  </h2>
+  <p>
     {% if voter_we_vote_id %}
-        Show raw AnalyticsAction entries for one voter.
-        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             show all</a>&nbsp;
-    {% elif organization_we_vote_id %}
+      Show raw AnalyticsAction entries for one voter.
+      <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        show all</a>&nbsp;
+      {% elif organization_we_vote_id %}
         Show raw AnalyticsAction entries for one organization.
         <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             show all</a>&nbsp;
-    {% else %}
-        Show raw AnalyticsAction entries.
-    {% endif %}
-    {% if show_user_agent != '1' %}
-        <a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_user_agent=1">
+          show all</a>&nbsp;
+        {% else %}
+          Show raw AnalyticsAction entries.
+        {% endif %}
+        {% if show_user_agent != '1' %}
+          <a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_user_agent=1">
             Show user agent data</a>.
-    {% endif %}
+          {% endif %}
 
-    </p>
+        </p>
 
-{% if analytics_action_search %}
-    {% if voter_we_vote_id %}
-        <a href="{% url 'analytics:analytics_action_list' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% elif organization_we_vote_id %}
-        <a href="{% url 'analytics:analytics_action_list' organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% else %}
-        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% endif %}
-{% endif %}
-
-{% if voter_we_vote_id %}
-    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' voter_we_vote_id %}">
-        {% csrf_token %}
-        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
-        <input type="submit" value="Search" />
-    </form>
-{% elif organization_we_vote_id %}
-    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' organization_we_vote_id %}">
-        {% csrf_token %}
-        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
-        <input type="submit" value="Search" />
-    </form>
-{% else %}
-    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
-        {% csrf_token %}
-        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
-        <input type="submit" value="Search" />
-    </form>
-{% endif %}
-
-
-<form name="analytics_action_list" method="get" action="{% url 'analytics:analytics_action_list' %}">
-  {% csrf_token %}
-  <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
-  <input type="hidden" name="state_code" value="{{ state_code }}" />
-
-  <div>
-    <div class="form-group">
-        <label for="date_to_process" class="col-sm-3 control-label">Search Start Date YYYYMMDD</label>
-        <div class="col-sm-2">
-            <input type="text" name="date_as_integer" id="date_to_process_id" class="form-control"
-                   value="{{ date_as_integer }}" />
-        </div>
-        <div class="col-sm-2">
-            {{ start_date|default_if_none:"" }}
-        </div>
-    </div>
-  </div>
-  <br />
-  <div>
-    <div class="form-group">
-        <label for="through_date_as_integer_id" class="col-sm-3 control-label">Search Through Date YYYYMMDD</label>
-        <div class="col-sm-2">
-            <input type="text" name="through_date_as_integer" id="through_date_as_integer_id" class="form-control"
-                   value="{{ through_date_as_integer }}" />
-        </div>
-        <div class="col-sm-2">
-            {{ through_date|default_if_none:"" }}
-        </div>
-    </div>
-  </div>
-  <br />
-  <div>
-    <div class="form-group">
-        <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-2">
-            <button type="submit" class="btn btn-default" name="search_daily_metrics_button">Search</button>
-        </div>
-    </div>
-  </div>
-</form>
-
-
-<table border="1" cellpadding="5" cellspacing="5" class="table">
-{% for one_row in analytics_action_list %}
-{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
-    <tr>
-        <th>#</th>
-        <th>id</th>
-        <th>action_constant</th>
-        <th>exact_time</th>
-        <th>date_as_integer</th>
-        <th>voter</th>
-        <th>signed in</th>
-        <th>organization</th>
-        <th>ballot_item we_vote_id</th>
-        <th>state code</th>
-        <th>google civic election id</th>
-        <th>first visit today</th>
-        <th>Is Bot?</th>
-        <th>Device</th>
-        {% if show_user_agent %}
-        <th>User Agent
-            (<a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">hide</a>)
-        </th>
-        {% endif %}
-    </tr>
-{% endif %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ one_row.id }}</td>
-        <td>{{ one_row.display_action_constant_human_readable }}</td>
-        <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
-        <td>
-            {% if voter_we_vote_id or organization_we_vote_id %}
-                <a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
-            {% else %}
-                <a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
-            {% endif %}
-        </td>
-        <td>{% if one_row.is_signed_in %}yes{% endif %}</td>
-        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
-            {% if one_row.organization_we_vote_id %}
-                {% if organization_we_vote_id or voter_we_vote_id %}
-                    (<a href="{% url 'organization:organization_we_vote_id_position_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
-                {% else %}
-                    (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+        {% if analytics_action_search %}
+          {% if voter_we_vote_id %}
+            <a href="{% url 'analytics:analytics_action_list' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+              clear search</a>&nbsp;
+            {% elif organization_we_vote_id %}
+              <a href="{% url 'analytics:analytics_action_list' organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                clear search</a>&nbsp;
+              {% else %}
+                <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                  clear search</a>&nbsp;
                 {% endif %}
-            {% endif %}
-        </td>
-        <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.state_code|default_if_none:"" }}</td>
-        <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
-        <td>{% if one_row.first_visit_today %}first{% endif %}</td>
-        <td>{% if one_row.is_bot %}Y{% endif %}</td>
-        <td>{% if one_row.is_mobile %}Mobile {% endif %}
-            {% if one_row.is_desktop %}Desktop {% endif %}
-            {% if one_row.is_tablet %}Tablet {% endif %}</td>
-        {% if show_user_agent %}
-        <td>{{ one_row.user_agent|default_if_none:"" }}</td>
-        {% endif %}
-    </tr>
-{% endfor %}
-{% if not analytics_action_list %}
-    <tr>
-        <td colspan="23">No sitewide day-to-day metrics found for any organizations.</td>
-    </tr>
-{% endif %}
-</table>
+              {% endif %}
 
-{% if voter_we_vote_id %}
-    For Testing:
-    <a href="{% url 'analytics:augment_voter_analytics_process' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-         Augment this voter's analytics</a>
-{% elif organization_we_vote_id %}
-    For Testing:
-    <a href="{% url 'analytics:organization_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&organization_we_vote_id={{ organization_we_vote_id }}">
-         Update Election Metrics for this Endorser for Election: {{ google_civic_election_id }}</a>
-{% endif %}
-<br />
-<br />
-{% endblock %}{% url 'analytics:organization_election_metrics' %}
+              {% if voter_we_vote_id %}
+                <form name="analytics_form"
+                      method="get"
+                      action="{% url 'analytics:analytics_action_list' voter_we_vote_id %}">
+                  {% csrf_token %}
+                  <input type="text"
+                         name="analytics_action_search"
+                         id="analytics_action_search_id"
+                         value="{{ analytics_action_search }}" />
+                  <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
+                  <input type="submit" value="Search" />
+                </form>
+              {% elif organization_we_vote_id %}
+                <form name="analytics_form"
+                      method="get"
+                      action="{% url 'analytics:analytics_action_list' organization_we_vote_id %}">
+                  {% csrf_token %}
+                  <input type="text"
+                         name="analytics_action_search"
+                         id="analytics_action_search_id"
+                         value="{{ analytics_action_search }}" />
+                  <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
+                  <input type="submit" value="Search" />
+                </form>
+              {% else %}
+                <form name="analytics_form"
+                      method="get"
+                      action="{% url 'analytics:analytics_action_list' %}">
+                  {% csrf_token %}
+                  <input type="text"
+                         name="analytics_action_search"
+                         id="analytics_action_search_id"
+                         value="{{ analytics_action_search }}" />
+                  <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
+                  <input type="submit" value="Search" />
+                </form>
+              {% endif %}
+
+
+              <form name="analytics_action_list"
+                    method="get"
+                    action="{% url 'analytics:analytics_action_list' %}">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="google_civic_election_id"
+                       value="{{ google_civic_election_id }}" />
+                <input type="hidden" name="state_code" value="{{ state_code }}" />
+
+                <div>
+                  <div class="form-group">
+                    <label for="date_to_process" class="col-sm-3 control-label">Search Start Date YYYYMMDD</label>
+                    <div class="col-sm-2">
+                      <input type="text"
+                             name="date_as_integer"
+                             id="date_to_process_id"
+                             class="form-control"
+                             value="{{ date_as_integer }}" />
+                    </div>
+                    <div class="col-sm-2">{{ start_date|default_if_none:"" }}</div>
+                  </div>
+                </div>
+                <br />
+                <div>
+                  <div class="form-group">
+                    <label for="through_date_as_integer_id" class="col-sm-3 control-label">Search Through Date YYYYMMDD</label>
+                    <div class="col-sm-2">
+                      <input type="text"
+                             name="through_date_as_integer"
+                             id="through_date_as_integer_id"
+                             class="form-control"
+                             value="{{ through_date_as_integer }}" />
+                    </div>
+                    <div class="col-sm-2">{{ through_date|default_if_none:"" }}</div>
+                  </div>
+                </div>
+                <br />
+                <div>
+                  <div class="form-group">
+                    <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
+                    <div class="col-sm-2">
+                      <button type="submit"
+                              class="btn btn-default"
+                              name="search_daily_metrics_button">Search</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+              <table border="1" cellpadding="5" cellspacing="5" class="table">
+                {% for one_row in analytics_action_list %}
+                  {% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
+                    <tr>
+                      <th>#</th>
+                      <th>id</th>
+                      <th>action_constant</th>
+                      <th>exact_time</th>
+                      <th>date_as_integer</th>
+                      <th>voter</th>
+                      <th>signed in</th>
+                      <th>organization</th>
+                      <th>ballot_item we_vote_id</th>
+                      <th>state code</th>
+                      <th>google civic election id</th>
+                      <th>first visit today</th>
+                      <th>Is Bot?</th>
+                      <th>Device</th>
+                      {% if show_user_agent %}
+                        <th>
+                          User Agent
+                          (<a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">hide</a>)
+                        </th>
+                      {% endif %}
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ one_row.id }}</td>
+                    <td>{{ one_row.display_action_constant_human_readable }}</td>
+                    <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
+                    <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
+                    <td>
+                      {% if voter_we_vote_id or organization_we_vote_id %}
+                        <a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+                      {% else %}
+                        <a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if one_row.is_signed_in %}yes{% endif %}
+                    </td>
+                    <td>
+                      {{ one_row.organization.organization_name|default_if_none:"n/a" }}
+                      {% if one_row.organization_we_vote_id %}
+                        {% if organization_we_vote_id or voter_we_vote_id %}
+                          (<a href="{% url 'organization:organization_we_vote_id_position_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+   target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                        {% else %}
+                          (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+   target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
+                    <td>{{ one_row.state_code|default_if_none:"" }}</td>
+                    <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
+                    <td>
+                      {% if one_row.first_visit_today %}first{% endif %}
+                    </td>
+                    <td>
+                      {% if one_row.is_bot %}Y{% endif %}
+                    </td>
+                    <td>
+                      {% if one_row.is_mobile %}Mobile{% endif %}
+                      {% if one_row.is_desktop %}Desktop{% endif %}
+                      {% if one_row.is_tablet %}Tablet{% endif %}
+                    </td>
+                    {% if show_user_agent %}<td>{{ one_row.user_agent|default_if_none:"" }}</td>{% endif %}
+                  </tr>
+                {% endfor %}
+                {% if not analytics_action_list %}
+                  <tr>
+                    <td colspan="23">No sitewide day-to-day metrics found for any organizations.</td>
+                  </tr>
+                {% endif %}
+              </table>
+
+              {% if voter_we_vote_id %}
+                For Testing:
+                <a href="{% url 'analytics:augment_voter_analytics_process' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                Augment this voter's analytics</a>
+              {% elif organization_we_vote_id %}
+                For Testing:
+                <a href="{% url 'analytics:organization_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&organization_we_vote_id={{ organization_we_vote_id }}">
+                Update Election Metrics for this Endorser for Election: {{ google_civic_election_id }}</a>
+              {% endif %}
+              <br />
+              <br />
+            {% endblock %}
+            {% url 'analytics:organization_election_metrics' %}

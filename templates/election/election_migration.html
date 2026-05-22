@@ -3,165 +3,175 @@
 
 {% block title %}Migrate Election Data{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-<!-- START organization/templates/election/election_migration.html //-->
+{% block content %}
+  {% load template_filters %}
+  <!-- START organization/templates/election/election_migration.html //-->
 
-<a href="{% url 'election:election_list' %}">< Back to Elections</a>
+  <a href="{% url 'election:election_list' %}">< Back to Elections</a>
 
-<h1>Migrate Election Data</h1>
-  <p>Only select a state if we are moving one state's election from a day where other states are also running an election.
-      When a state code is selected, some data cannot be moved.</p>
-<form action="{% url "election:election_migration" %}" method="post">
-{% csrf_token %}
+  <h1>Migrate Election Data</h1>
+  <p>
+    Only select a state if we are moving one state's election from a day where other states are also running an election.
+    When a state code is selected, some data cannot be moved.
+  </p>
+  <form action="{% url "election:election_migration" %}" method="post">
+    {% csrf_token %}
 
     <table>
+      <tr>
+        <td>From this Election:&nbsp;</td>
+        <td>
+          {% if from_election_id %}
+            <strong>
+              {{ from_election.election_name }} - {{ from_election.google_civic_election_id }} - {{ from_election.election_day_text }}
+            </strong>
+            <input type="hidden" name="from_election_id" value="{{ from_election_id }}" />
+          {% else %}
+            {% if from_election_list %}
+              <select id="from_election_id" name="from_election_id">
+                <option value="0"
+                        {% if 0 == from_election_id|convert_to_int %}selected="selected"{% endif %}>
+                  -- Choose Internal We Vote Election --
+                </option>
+                {% for election in from_election_list %}
+                  <option value="{{ election.google_civic_election_id }}"
+                          {% if election.google_civic_election_id|slugify == from_election_id|slugify %}selected="selected"{% endif %}>
+                    {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                  </option>
+                {% endfor %}
+              </select>
+            {% else %}
+              "From" Election List is Missing
+            {% endif %}
+            {# End of if from_election_list #}
+          {% endif %}
+        </td>
+      </tr>
+      {% if state_list %}
         <tr>
-            <td>From this Election:&nbsp;</td>
-            <td>
-{% if from_election_id %}
-    <strong>
-    {{ from_election.election_name }} - {{ from_election.google_civic_election_id }} - {{ from_election.election_day_text }}
-    </strong>
-    <input type="hidden" name="from_election_id" value="{{ from_election_id }}" />
-{% else %}
-    {% if from_election_list %}
-    <select id="from_election_id" name="from_election_id">
-        <option value="0" {% if 0 == from_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Choose Internal We Vote Election --</option>
-    {% for election in from_election_list %}
-        <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id|slugify == from_election_id|slugify %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-    {% endfor %}
-    </select>
-    {% else %}
-        "From" Election List is Missing
-    {% endif %}{# End of if from_election_list #}
-{% endif %}
-            </td>
+          <td>State to Migrate:&nbsp;</td>
+          <td>
+            <select id="from_state_code_id" name="from_state_code">
+              <option value=""
+                      {% if '' == from_state_code %}selected="selected"{% endif %}>-- Migrate All States --</option>
+              {% for key, state in state_list %}
+                <option value="{{ key|lower }}"
+                        {% if key|lower == from_state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+              {% endfor %}
+            </select>
+          </td>
         </tr>
-    {% if state_list %}
-        <tr>
-            <td>State to Migrate:&nbsp;</td>
-            <td>
-        <select id="from_state_code_id" name="from_state_code">
-            <option value="" {% if '' == from_state_code %} selected="selected"{% endif %}>
-                -- Migrate All States --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key|lower }}"
-                    {% if key|lower == from_state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-                </td>
-        </tr>
-    {% endif %}{# End of if state_list #}
-        <tr>
-            <td colspan="2">&nbsp;</td>
-        </tr>
-        <tr>
-            <td>To this Election:&nbsp;</td>
-            <td>
-{% if to_election_id %}
-    <strong>
-    {{ google_civic_election.election_name }} - {{ google_civic_election.google_civic_election_id }} - {{ google_civic_election.election_day_text }}
-    </strong>
-    <input type="hidden" name="to_election_id" value="{{ to_election_id }}" />
-{% else %}
-    {% if google_civic_election_list %}
-    <select id="to_election_id" name="to_election_id">
-        <option value="0" {% if 0 == to_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Choose Election (Where You are Moving Data) --</option>
-    {% for election in google_civic_election_list %}
-        <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id|slugify == to_election_id|slugify %} selected="selected"{% endif %}>
-            {{ election.election_day_text }} - {{ election.google_civic_election_id }} - {{ election.election_name }}</option>
-    {% endfor %}
-    </select>
-    {% else %}
-        "To" Election List is Missing
-    {% endif %}{# End of if google_civic_election_list #}
-{% endif %}
-            </td>
-        </tr>
+      {% endif %}
+      {# End of if state_list #}
+      <tr>
+        <td colspan="2">&nbsp;</td>
+      </tr>
+      <tr>
+        <td>To this Election:&nbsp;</td>
+        <td>
+          {% if to_election_id %}
+            <strong>
+              {{ google_civic_election.election_name }} - {{ google_civic_election.google_civic_election_id }} - {{ google_civic_election.election_day_text }}
+            </strong>
+            <input type="hidden" name="to_election_id" value="{{ to_election_id }}" />
+          {% else %}
+            {% if google_civic_election_list %}
+              <select id="to_election_id" name="to_election_id">
+                <option value="0"
+                        {% if 0 == to_election_id|convert_to_int %}selected="selected"{% endif %}>
+                  -- Choose Election (Where You are Moving Data) --
+                </option>
+                {% for election in google_civic_election_list %}
+                  <option value="{{ election.google_civic_election_id }}"
+                          {% if election.google_civic_election_id|slugify == to_election_id|slugify %}selected="selected"{% endif %}>
+                    {{ election.election_day_text }} - {{ election.google_civic_election_id }} - {{ election.election_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            {% else %}
+              "To" Election List is Missing
+            {% endif %}
+            {# End of if google_civic_election_list #}
+          {% endif %}
+        </td>
+      </tr>
     </table>
 
 
-{% if from_election_id and to_election_id %}
-    {% if change_now %}
-      <p>
+    {% if from_election_id and to_election_id %}
+      {% if change_now %}
+        <p>
           <a href="{% url 'election:election_summary' from_election.id %}">Go Back to Election</a>
           <input type="submit" value="Analyze Migration Results" />
-      </p>
-    {% else %}
-      <p>
+        </p>
+      {% else %}
+        <p>
           <a href="{% url 'election:election_summary' from_election.id %}">cancel</a>
           <input type="hidden" name="change_now" value="1" />
           <input type="submit" value="Migrate all now" />
+        </p>
+      {% endif %}
+    {% else %}
+      <br />
+      <p>This will analyze *what* data will be migrated, but does not actually move the data.</p>
+      <p>
+        {% if from_election_id %}
+          <a href="{% url 'election:election_summary' from_election.id %}">cancel</a>
+        {% else %}
+          <a href="{% url 'election:election_list' %}">cancel</a>
+        {% endif %}
+        <input type="submit" value="Prepare to Migrate" />
       </p>
     {% endif %}
-{% else %}
+
+  </form>
+
+
+
+
   <br />
-    <p>This will analyze *what* data will be migrated, but does not actually move the data.</p>
-    <p>
-    {% if from_election_id %}
-        <a href="{% url 'election:election_summary' from_election.id %}">cancel</a>
-    {% else %}
-        <a href="{% url 'election:election_list' %}">cancel</a>
-    {% endif %}
-        <input type="submit" value="Prepare to Migrate" />
-    </p>
-{% endif %}
-
-</form>
-
-
-
-
-<br />
-{% if from_election_id %}
+  {% if from_election_id %}
     {% if from_election_office_count %}
-    <h5>We Vote Election: Offices</h5>
-    <table>
-    {% for from_election_office in from_election_office_list %}
-        <tr>
+      <h5>We Vote Election: Offices</h5>
+      <table>
+        {% for from_election_office in from_election_office_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td colspan="3">
-                <strong><a href="{% url 'office:office_summary' from_election_office.id %}">{{ from_election_office.office_name }} - {{ from_election_office.we_vote_id }}</a></strong>
+              <strong><a href="{% url 'office:office_summary' from_election_office.id %}">{{ from_election_office.office_name }} - {{ from_election_office.we_vote_id }}</a></strong>
             </td>
             <td>&nbsp;</td>
-        </tr>
+          </tr>
 
-    {% endfor %}
+        {% endfor %}
       </table>
     {% else %}
-    no offices found
+      no offices found
     {% endif %}
 
 
     {% if from_election_candidate_count %}
-    <h5>We Vote Election: Candidates</h5>
-    <table>
+      <h5>We Vote Election: Candidates</h5>
+      <table>
         {% for candidate in from_election_candidate_list %}
-        <tr>
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if candidate.candidate_photo_url %}
+              {% if candidate.candidate_photo_url %}
                 <img src='{{ candidate.candidate_photo_url }}' height="25px" />
-                {% else %}
-                    &nbsp;
-                {% endif %}
+              {% else %}
+                &nbsp;
+              {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ to_election_id }}">{{ candidate.candidate_name }} - {{ candidate.we_vote_id }}</a></td>
-            <td>{{ candidate.position_count }}</td>
             <td>
-
+              <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ to_election_id }}">{{ candidate.candidate_name }} - {{ candidate.we_vote_id }}</a>
             </td>
-        </tr>
+            <td>{{ candidate.position_count }}</td>
+            <td></td>
+          </tr>
         {% endfor %}
-    </table>
+      </table>
     {% endif %}
-{% endif %}
+  {% endif %}
 
 {% endblock %}

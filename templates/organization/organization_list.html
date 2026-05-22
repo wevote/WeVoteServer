@@ -3,334 +3,406 @@
 
 {% block title %}Endorsers{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Endorsers</h1>
+  <h1>Endorsers</h1>
 
-    <ul>
-        <li><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-              target="_blank">
-                Import New Endorsers ></a> (open in new window)
+  <ul>
+    <li>
+      <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+         target="_blank">Import New Endorsers ></a> (open in new window)
+      </li>
+
+      <li>
+        <a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
+          Add New Endorser / Voter Guide</a>.
+          Vote Smart special interest groups
+          <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.
+
+          <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Endorser List Analysis</a>.
+
+          <a href="{% url 'organization:reserved_domain_list' %}">Reserved Website Domains</a>.
         </li>
 
-        <li><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
-            Add New Endorser / Voter Guide</a>.
-            Vote Smart special interest groups
-            <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.
-        
-            <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Endorser List Analysis</a>.
-        
-            <a href="{% url 'organization:reserved_domain_list' %}">Reserved Website Domains</a>.
+        <li>
+          <a href="{% url 'organization:duplicates_list' %}?state_code={{ state_code }}"
+             target="_blank">
+          Possible Duplicate Endorsers <span class="glyphicon glyphicon-new-window"></span></a>
         </li>
+      </ul>
+      <p>
+        <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+          Scrape endorser website for social media handles (only when data missing)</a>,
 
-       <li>
-            <a href="{% url 'organization:duplicates_list' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Possible Duplicate Endorsers <span class="glyphicon glyphicon-new-window"></span></a>
-        </li>
-</ul>
-<p>
-    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
-        Scrape endorser website for social media handles (only when data missing)</a>,
+          {% if TWITTER_API_ON %}
+            <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1&google_civic_election_id={{ google_civic_election_id }}">
+              Retrieve all Twitter data (only when data missing)</a>,
+            {% endif %}
+            <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+              Retrieve photos from Wikipedia</a>,
 
-    {% if TWITTER_API_ON %}
-    <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1&google_civic_election_id={{ google_civic_election_id }}">
-        Retrieve all Twitter data (only when data missing)</a>,
-    {% endif %}
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
-        Retrieve photos from Wikipedia</a>,
+              <a href="{% url 'follow:repair_follow_organization' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+              Repair FollowOrganization data</a>
+            </p>
 
-    <a href="{% url 'follow:repair_follow_organization' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
-        Repair FollowOrganization data</a>
-</p>
+            <form name="state_code_form"
+                  method="get"
+                  action="{% url 'organization:organization_list' %}">
+              {% csrf_token %}
+              <input type="hidden" name="sort_by" value="{{ sort_by }}">
 
-<form name="state_code_form" method="get" action="{% url 'organization:organization_list' %}">
-    {% csrf_token %}
-    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+              {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
 
-    {% if state_code != "" %}
-    <a href="#" onclick="showAllStates(); return false;">
-        show all states</a>
-    {% endif %}
-    
-{% if state_list %}
-    <select id="state_code_id" name="state_code">
-        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-        {% if '' == state_code %}
-            -- State Served --
-        {% else %}
-            -- All States Served --
-        {% endif %}
-        </option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-{% endif %}{# End of if state_list #}
-
-
-{% if organization_types %}
-    <select id="organization_type_filter_id" name="organization_type_filter">
-        <option value="" {% if '' ==  organization_type_filter %} selected="selected" {% endif %}>
-        {% if '' ==  organization_type_filter %}
-            -- Endorser Type --
-        {% else %}
-            -- All Endorser Types --
-        {% endif %}
-        </option>
-    {% for key, organization_type in organization_types %}
-        <option value="{{ key }}"
-                {% if key|lower == organization_type_filter|lower %} selected="selected"{% endif %}>
-        {{ organization_type }}</option>
-    {% endfor %}
-    </select>
-{% endif %} {# End of if organization_types #}
-
-    &nbsp;&nbsp;&nbsp;
-
-    {#  #}
-    <label for="show_organizations_to_augment_id">
-      <input type="checkbox" name="show_organizations_to_augment" id="show_organizations_to_augment_id" value="1"
-             {% if show_organizations_to_augment %}checked{% endif %} /> To Augment
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    {#  #}
-    <label for="show_organizations_to_analyze_id">
-      <input type="checkbox" name="show_organizations_to_analyze" id="show_organizations_to_analyze_id" value="1"
-             {% if show_organizations_to_analyze %}checked{% endif %} /> To Analyze Values
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    {#  #}
-    <label for="show_organizations_to_qa_id">
-      <input type="checkbox" name="show_organizations_to_qa" id="show_organizations_to_qa_id" value="1"
-             {% if show_organizations_to_qa %}checked{% endif %} /> QA Needed
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    {#  #}
-    <label for="show_help_needed_id">
-      <input type="checkbox" name="show_help_needed" id="show_help_needed_id" value="1"
-             {% if show_help_needed %}checked{% endif %} /> Help Needed
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <br />
-    {% if election_years_available %}
-    <select id="limit_to_opinions_in_this_year_id" name="limit_to_opinions_in_this_year">
-        <option value="0" {% if 0 == limit_to_opinions_in_this_year|convert_to_int %} selected="selected"{% endif %}>
-        {% if 0 == limit_to_opinions_in_this_year %}
-            -- Opinions in Year --
-        {% else %}
-            -- Do Not Limit by Year --
-        {% endif %}
-        </option>
-        {% for year in election_years_available %}
-        <option value="{{ year }}"
-                {% if limit_to_opinions_in_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
-            {% if limit_to_opinions_in_this_year|slugify == year|slugify %}Limited To {% endif %}
-            {{ year }}</option>
-        {% endfor %}
-    </select>
-    {% endif %}{# End of if election_list #}
-
-    {% if state_list %}
-    <select id="limit_to_opinions_in_state_code_id" name="limit_to_opinions_in_state_code">
-        <option value="" {% if '' == limit_to_opinions_in_state_code %} selected="selected"{% endif %}>
-        {% if '' == limit_to_opinions_in_state_code %}
-            -- Opinions in State --
-        {% else %}
-            -- Do Not Limit by State --
-        {% endif %}
-        </option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == limit_to_opinions_in_state_code|lower %} selected="selected"{% endif %}>
-            {% if key|lower == limit_to_opinions_in_state_code|lower %}Limited to Opinions About Candidates in {% endif %}
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-    {% endif %}{# End of if state_list #}
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    {#  #}
-    <label for="show_organizations_without_email_id">
-      <input type="checkbox" name="show_organizations_without_email" id="show_organizations_without_email_id" value="1"
-             {% if show_organizations_without_email %}checked{% endif %} /> Emails Missing
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    {#  #}
-    <label for="show_defunct_id">
-      <input type="checkbox" name="show_defunct" id="show_defunct_id" value="1"
-             {% if show_defunct %}checked{% endif %} /> Defunct
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    {#  #}
-    <label for="show_twitter_updates_failing_id">
-      <input type="checkbox" name="show_twitter_updates_failing" id="show_twitter_updates_failing_id" value="1"
-             {% if show_twitter_updates_failing %}checked{% endif %} /> Twitter Failing
-    </label>
-
-
-    <br />
-
-<div id="jump_to_name_by_letter_id">
-    Jump to name starting with: 
-    {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-        <a href="#" onclick="selectLetter('{{ letter }}'); return false;" 
-           {% if letter_selected == letter %}style="font-weight: bold;"{% endif %}>
-            {{ letter }}
-        </a>
-        {% if not forloop.last %} | {% endif %}
-    {% endfor %}
-    | <a href="#" onclick="selectLetter('#'); return false;"
-         {% if letter_selected == '#' %}style="font-weight: bold;"{% endif %}>
-        Number
-      </a>
-    {% if letter_selected %}
-        | <a href="#" onclick="clearLetterSelection(); return false;">Clear</a>
-    {% endif %}
-    <input type="hidden" name="letter_selected" id="letter_selected_id" value="{{ letter_selected }}">
-</div>
-
-{% if issue_list %}
-    <p>Values/Issues to filter [OR] :
-    {% for issue in issue_list %}
-        <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
-        {% if issue.selected %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
-    {% endfor %}
-    </p>
-{% endif %}
-    <br />
-
-{% if organization_search %}
-    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
-{% endif %}
-
-    <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
-    <input type="submit" value="Search for Endorser" />
-    &nbsp;&nbsp;
-    <label for="show_up_to_1000_id">
-      <input type="checkbox" name="show_up_to_1000" id="show_up_to_1000_id" value="1"
-             {% if show_up_to_1000 %}checked{% endif %} /> Show up to 1,000
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_up_to_2000_id">
-      <input type="checkbox" name="show_up_to_2000" id="show_up_to_2000_id" value="1"
-             {% if show_up_to_2000 %}checked{% endif %} /> Show up to 2,000
-    </label>
-    &nbsp;&nbsp;
-    <label for="show_all_id">
-      <input type="checkbox" name="show_all" id="show_all_id" value="1"
-             {% if show_all %}checked{% endif %} /> Show all
-    </label>
-
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <label id="show_more_loading_id"></label>
-</form>
-
-{% if organization_list %}
-    <table class="table">
-    {% for organization in organization_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
-    {# Show the header every ~15 lines #}
-     <thead>
-        <tr>
-            <th></th>
-            <th></th>
-            <th>
-              <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
-              {% if sort_by == "organization" %}<strong>Endorser</strong>{% else %}Endorser{% endif %}
-              </a>
-            </th>
-            <th>
-              {% if sort_by == "twitter" %}
-                  <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
-                  Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
-                  </a>
-              {% else %}
-              <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
-                  Twitter (click to sort)
-                  </a>
+              {% if state_list %}
+                <select id="state_code_id" name="state_code">
+                  <option value="" {% if '' == state_code %}selected="selected"{% endif %}>
+                    {% if '' == state_code %}
+                      -- State Served --
+                    {% else %}
+                      -- All States Served --
+                    {% endif %}
+                  </option>
+                  {% for key, state in state_list %}
+                    <option value="{{ key }}"
+                            {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+                  {% endfor %}
+                </select>
               {% endif %}
-            </th>
-            <th>Type</th>
-            <th>Values/Issues {% if show_issues %}
-              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
-              (hide)</a>
-            {% else %}
-              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_issues=1&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
-              (show)</a>
-            {% endif %}</th>
-{#            <th>Vote Smart</th>#}
-            <th>State</th>
-            <th>Email</th>
-        </tr>
-      </thead>
-    {% endif %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{% if organization.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
-                    <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" /></a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
-                   target="_blank">
-                {{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a><br />
-                &nbsp;&nbsp;&nbsp;({{ organization.we_vote_id }} <a href="{% url 'organization:organization_edit' organization.id %}"
-                                      target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
-              {% if organization.linked_issues_count %}
-                {{ organization.linked_issues_count }} Values/Issues Linked
+              {# End of if state_list #}
+
+
+              {% if organization_types %}
+                <select id="organization_type_filter_id" name="organization_type_filter">
+                  <option value=""
+                          {% if '' ==  organization_type_filter %}selected="selected"{% endif %}>
+                    {% if '' ==  organization_type_filter %}
+                      -- Endorser Type --
+                    {% else %}
+                      -- All Endorser Types --
+                    {% endif %}
+                  </option>
+                  {% for key, organization_type in organization_types %}
+                    <option value="{{ key }}"
+                            {% if key|lower == organization_type_filter|lower %}selected="selected"{% endif %}>
+                      {{ organization_type }}
+                    </option>
+                  {% endfor %}
+                </select>
               {% endif %}
-            </td>
-            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
-                ({{ organization.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td>{{ organization.organization_type_display }}</td>
-            <td>
-              {% if organization.issue_analysis_done %}
-                <strong>analyzed</strong>&nbsp;
-              {% else %}
-                <span class="u-no-break" style="color: darkgray;">not analyzed</span>
+              {# End of if organization_types #}
+
+              &nbsp;&nbsp;&nbsp;
+
+              {#  #}
+              <label for="show_organizations_to_augment_id">
+                <input type="checkbox"
+                       name="show_organizations_to_augment"
+                       id="show_organizations_to_augment_id"
+                       value="1"
+                       {% if show_organizations_to_augment %}checked{% endif %} />
+                To Augment
+              </label>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;
+
+              {#  #}
+              <label for="show_organizations_to_analyze_id">
+                <input type="checkbox"
+                       name="show_organizations_to_analyze"
+                       id="show_organizations_to_analyze_id"
+                       value="1"
+                       {% if show_organizations_to_analyze %}checked{% endif %} />
+                To Analyze Values
+              </label>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;
+
+              {#  #}
+              <label for="show_organizations_to_qa_id">
+                <input type="checkbox"
+                       name="show_organizations_to_qa"
+                       id="show_organizations_to_qa_id"
+                       value="1"
+                       {% if show_organizations_to_qa %}checked{% endif %} />
+                QA Needed
+              </label>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;
+
+              {#  #}
+              <label for="show_help_needed_id">
+                <input type="checkbox"
+                       name="show_help_needed"
+                       id="show_help_needed_id"
+                       value="1"
+                       {% if show_help_needed %}checked{% endif %} />
+                Help Needed
+              </label>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <br />
+              {% if election_years_available %}
+                <select id="limit_to_opinions_in_this_year_id"
+                        name="limit_to_opinions_in_this_year">
+                  <option value="0"
+                          {% if 0 == limit_to_opinions_in_this_year|convert_to_int %}selected="selected"{% endif %}>
+                    {% if 0 == limit_to_opinions_in_this_year %}
+                      -- Opinions in Year --
+                    {% else %}
+                      -- Do Not Limit by Year --
+                    {% endif %}
+                  </option>
+                  {% for year in election_years_available %}
+                    <option value="{{ year }}"
+                            {% if limit_to_opinions_in_this_year|slugify == year|slugify %}selected="selected"{% endif %}>
+                      {% if limit_to_opinions_in_this_year|slugify == year|slugify %}Limited To{% endif %}
+                      {{ year }}
+                    </option>
+                  {% endfor %}
+                </select>
               {% endif %}
-              {% if organization.display_we_vote_issues %}
-                  {{ organization.display_we_vote_issues }}
-              {% endif %}</td>
-{#            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}#}
-{#            {% if organization.display_vote_smart_issues %}#}
-{#              <br />#}
-{#              {{ organization.display_vote_smart_issues }}#}
-{#            {% endif %}#}
-{#            </td>#}
-            <td>{{ organization.state_served_code|default_if_none:"" }}</td>
-            <td>{{ organization.organization_email|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}
-    </table>
+              {# End of if election_list #}
 
-    <p></p>
-    <p>
-        <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Endorsers</a>
-    </p>
-{% else %}
-    <p>(no endorsers found)</p>
-{% endif %}
+              {% if state_list %}
+                <select id="limit_to_opinions_in_state_code_id"
+                        name="limit_to_opinions_in_state_code">
+                  <option value=""
+                          {% if '' == limit_to_opinions_in_state_code %}selected="selected"{% endif %}>
+                    {% if '' == limit_to_opinions_in_state_code %}
+                      -- Opinions in State --
+                    {% else %}
+                      -- Do Not Limit by State --
+                    {% endif %}
+                  </option>
+                  {% for key, state in state_list %}
+                    <option value="{{ key }}"
+                            {% if key|lower == limit_to_opinions_in_state_code|lower %}selected="selected"{% endif %}>
+                      {% if key|lower == limit_to_opinions_in_state_code|lower %}Limited to Opinions About Candidates in{% endif %}
+                      {{ state }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+              {# End of if state_list #}
 
-    <p></p>
-{#    <p>#}
-{#        <a href="{% url 'organization:organizations_import' %}" >Import Endorsers From Master Server</a>#}
-{#    </p>#}
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              {#  #}
+              <label for="show_organizations_without_email_id">
+                <input type="checkbox"
+                       name="show_organizations_without_email"
+                       id="show_organizations_without_email_id"
+                       value="1"
+                       {% if show_organizations_without_email %}checked{% endif %} />
+                Emails Missing
+              </label>
 
-<script>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              {#  #}
+              <label for="show_defunct_id">
+                <input type="checkbox"
+                       name="show_defunct"
+                       id="show_defunct_id"
+                       value="1"
+                       {% if show_defunct %}checked{% endif %} />
+                Defunct
+              </label>
+
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              {#  #}
+              <label for="show_twitter_updates_failing_id">
+                <input type="checkbox"
+                       name="show_twitter_updates_failing"
+                       id="show_twitter_updates_failing_id"
+                       value="1"
+                       {% if show_twitter_updates_failing %}checked{% endif %} />
+                Twitter Failing
+              </label>
+
+
+              <br />
+
+              <div id="jump_to_name_by_letter_id">
+                Jump to name starting with:
+                {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                  <a href="#"
+                     onclick="selectLetter('{{ letter }}'); return false;"
+                     {% if letter_selected == letter %}style="font-weight: bold;"{% endif %}>{{ letter }}</a>
+                  {% if not forloop.last %}|{% endif %}
+                {% endfor %}
+                | <a href="#"
+    onclick="selectLetter('#'); return false;"
+    {% if letter_selected == '#' %}style="font-weight: bold;"{% endif %}>Number</a>
+              {% if letter_selected %}| <a href="#" onclick="clearLetterSelection(); return false;">Clear</a>{% endif %}
+              <input type="hidden"
+                     name="letter_selected"
+                     id="letter_selected_id"
+                     value="{{ letter_selected }}">
+            </div>
+
+            {% if issue_list %}
+              <p>
+                Values/Issues to filter [OR] :
+                {% for issue in issue_list %}
+                  <input type="checkbox"
+                         name="selected_issues"
+                         id="selected_issues"
+                         value="{{ issue.we_vote_id }}"
+                         {% if issue.selected %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
+                {% endfor %}
+              </p>
+            {% endif %}
+            <br />
+
+            {% if organization_search %}<a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;{% endif %}
+
+            <input type="text"
+                   name="organization_search"
+                   id="organization_search_id"
+                   value="{{ organization_search }}" />
+            <input type="submit" value="Search for Endorser" />
+            &nbsp;&nbsp;
+            <label for="show_up_to_1000_id">
+              <input type="checkbox"
+                     name="show_up_to_1000"
+                     id="show_up_to_1000_id"
+                     value="1"
+                     {% if show_up_to_1000 %}checked{% endif %} />
+              Show up to 1,000
+            </label>
+            &nbsp;&nbsp;
+            <label for="show_up_to_2000_id">
+              <input type="checkbox"
+                     name="show_up_to_2000"
+                     id="show_up_to_2000_id"
+                     value="1"
+                     {% if show_up_to_2000 %}checked{% endif %} />
+              Show up to 2,000
+            </label>
+            &nbsp;&nbsp;
+            <label for="show_all_id">
+              <input type="checkbox"
+                     name="show_all"
+                     id="show_all_id"
+                     value="1"
+                     {% if show_all %}checked{% endif %} />
+              Show all
+            </label>
+
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <label id="show_more_loading_id"></label>
+          </form>
+
+          {% if organization_list %}
+            <table class="table">
+              {% for organization in organization_list %}
+                {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+                  {# Show the header every ~15 lines #}
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>
+                        <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+                          {% if sort_by == "organization" %}
+                            <strong>Endorser</strong>
+                          {% else %}
+                            Endorser
+                          {% endif %}
+                        </a>
+                      </th>
+                      <th>
+                        {% if sort_by == "twitter" %}
+                          <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
+                            Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
+                          </a>
+                        {% else %}
+                          <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
+                            Twitter (click to sort)
+                          </a>
+                        {% endif %}
+                      </th>
+                      <th>Type</th>
+                      <th>
+                        Values/Issues
+                        {% if show_issues %}
+                          <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
+                          (hide)</a>
+                        {% else %}
+                          <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_defunct={{ show_defunct }}&show_issues=1&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}}&show_organizations_to_analyze={{ show_organizations_to_analyze }}&show_organizations_to_augment={{ show_organizations_to_augment }}&show_organizations_to_qa={{ show_organizations_to_qa }}&show_help_needed={{ show_help_needed }}">
+                          (show)</a>
+                        {% endif %}
+                      </th>
+                      {#            <th>Vote Smart</th>#}
+                      <th>State</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                {% endif %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    {% if organization.we_vote_hosted_profile_image_url_medium %}
+                      <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                        <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}"
+                             width="48px" />
+                      </a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
+                       target="_blank">
+                    {{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    <br />
+                    &nbsp;&nbsp;&nbsp;({{ organization.we_vote_id }} <a href="{% url 'organization:organization_edit' organization.id %}"
+    target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>)
+                    {% if organization.linked_issues_count %}{{ organization.linked_issues_count }} Values/Issues Linked{% endif %}
+                  </td>
+                  <td>
+                    {% if organization.organization_twitter_handle %}
+                      {{ organization.organization_twitter_handle }}
+                      <br />
+                      ({{ organization.twitter_followers_count|intcomma }} followers)
+                    {% endif %}
+                  </td>
+                  <td>{{ organization.organization_type_display }}</td>
+                  <td>
+                    {% if organization.issue_analysis_done %}
+                      <strong>analyzed</strong>&nbsp;
+                    {% else %}
+                      <span class="u-no-break" style="color: darkgray;">not analyzed</span>
+                    {% endif %}
+                    {% if organization.display_we_vote_issues %}{{ organization.display_we_vote_issues }}{% endif %}
+                  </td>
+                  {#            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}#}
+                  {#            {% if organization.display_vote_smart_issues %}#}
+                  {#              <br />#}
+                  {#              {{ organization.display_vote_smart_issues }}#}
+                  {#            {% endif %}#}
+                  {#            </td>#}
+                  <td>{{ organization.state_served_code|default_if_none:"" }}</td>
+                  <td>{{ organization.organization_email|default_if_none:"" }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+
+            <p></p>
+            <p>
+              <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json"
+                 target="_blank">Export Endorsers</a>
+            </p>
+          {% else %}
+            <p>(no endorsers found)</p>
+          {% endif %}
+
+          <p></p>
+          {#    <p>#}
+          {#        <a href="{% url 'organization:organizations_import' %}">Import Endorsers From Master Server</a>#}
+          {#    </p>#}
+
+          <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -442,6 +514,6 @@
             displayLoadingBanner();
         });
     });
-</script>
+          </script>
 
-{% endblock %}
+        {% endblock %}

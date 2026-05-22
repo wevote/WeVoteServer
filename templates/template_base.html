@@ -1,42 +1,64 @@
 {# templates/template_base.html #}
 {% block doctype %}<!DOCTYPE html>{% endblock %}
 <html lang="en-us">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}{% endblock %}{#% trans "My Website" %#}</title>
-    <link rel="shortcut icon" type="image/x-icon" href="https://wevote.us/img/global/icons/favicon-32x32.png" />
+    <title>
+      {% block title %}{% endblock %}
+      {#% trans "My Website" %#}</title>
+      <link rel="shortcut icon"
+            type="image/x-icon"
+            href="https://wevote.us/img/global/icons/favicon-32x32.png" />
 
-    {% block meta_tags %}{% endblock %}
+      {% block meta_tags %}{% endblock %}
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
+      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+            crossorigin="anonymous">
+      <link rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+      <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"
+            rel="stylesheet">
 
-    <!-- load google fonts -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Alfa+Slab+One&effect=fire-animation' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Rock+Salt' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css' rel='stylesheet' type='text/css'>
+      <!-- load google fonts -->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet">
+      <link href='https://fonts.googleapis.com/css?family=Alfa+Slab+One&effect=fire-animation'
+            rel='stylesheet'
+            type='text/css'>
+      <link href='https://fonts.googleapis.com/css?family=Rock+Salt'
+            rel='stylesheet'
+            type='text/css'>
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans'
+            rel='stylesheet'
+            type='text/css'>
+      <link href='https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css'
+            rel='stylesheet'
+            type='text/css'>
 
-    {% block stylesheet %}{% endblock %}
+      {% block stylesheet %}{% endblock %}
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone-with-data.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/4.0.2/autosize.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+              integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+              crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+              integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+              crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone-with-data.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/4.0.2/autosize.min.js"></script>
 
-    {#  Load CSS and JavaScript #}
-    {% load bootstrap3 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
+      {#  Load CSS and JavaScript #}
+      {% load bootstrap3 %}
+      {% bootstrap_css %}
+      {% bootstrap_javascript %}
 
-    <style>
+      <style>
         .u-gray-border-bottom {
           border-bottom: 1px solid #ddd;
         }
@@ -129,53 +151,48 @@
         .main {
             flex: 1
         }
-    </style>
+      </style>
 
-    {% block js %}{% endblock %}
-    {% block extrahead %}{% endblock %}
-</head>
-<body class="{% block bodyclass %}{% endblock %}">
-    {% block page %}
+      {% block js %}{% endblock %}
+      {% block extrahead %}{% endblock %}
+    </head>
+    <body class="{% block bodyclass %}{% endblock %}">
+      {% block page %}
         <div class="navbar-wrapper">
-            <div id="header" class="container-fluid">
-                {% block header_navigation %}
-                    {% include "header_navigation.html" %}
-                {% endblock %}
-                {% block language_chooser %}
-                    {% include "language_chooser.html" %}
-                {% endblock %}
-            </div>
+          <div id="header" class="container-fluid">
+            {% block header_navigation %}
+              {% include "header_navigation.html" %}
+            {% endblock %}
+            {% block language_chooser %}
+              {% include "language_chooser.html" %}
+            {% endblock %}
+          </div>
         </div>
-       <div class="flex-container">
-            {% include "sidebar_navigation.html" %}
-            <div class="main">
-                 <div class="wrapper">
-                    <div id="content" class="container-fluid" style="padding-top: 10px">
-                        {# Display django.contrib.messages #}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div
-                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}class="alert alert-danger" role="alert"
-                                {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}class="alert alert-primary" role="alert"
-                                {% endif %}
-                                >
-                                {{ message|linebreaksbr }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
+        <div class="flex-container">
+          {% include "sidebar_navigation.html" %}
+          <div class="main">
+            <div class="wrapper">
+              <div id="content" class="container-fluid" style="padding-top: 10px">
+                {# Display django.contrib.messages #}
+                {% if messages %}
+                  {% for message in messages %}
+                    <div {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}class="alert alert-danger" role="alert" {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}class="alert alert-primary" role="alert" {% endif %}>
+                      {{ message|linebreaksbr }}
+                    </div>
+                  {% endfor %}
+                {% endif %}
 
-                        {% block content %}
-                        {% endblock %}
-                    </div>
-                    <div id="footer" class="clearfix container-fluid">
-                        {% block footer_navigation %}
-                            {% include "footer_navigation.html" %}
-                        {% endblock %}
-                    </div>
-                </div>
+                {% block content %}{% endblock %}
+              </div>
+              <div id="footer" class="clearfix container-fluid">
+                {% block footer_navigation %}
+                  {% include "footer_navigation.html" %}
+                {% endblock %}
+              </div>
             </div>
+          </div>
         </div>
-    {% endblock %}
-    {% block extrabody %}{% endblock %}
-</body>
-</html>
+      {% endblock %}
+      {% block extrabody %}{% endblock %}
+    </body>
+  </html>

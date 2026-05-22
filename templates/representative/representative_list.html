@@ -3,201 +3,267 @@
 
 {% block title %}Representatives{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
-<h1>Elected Representatives</h1>
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
+  <h1>Elected Representatives</h1>
 
-<br/>
+  <br />
 
-<a href="{% url 'representative:representative_new' %}?state_code={{ state_code }}">Add New Representative</a>{% if state_code %},
-<a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
-    Find and Merge Duplicate Representatives for this State <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute){% endif %}
-{% if show_this_year %}
-    <ul>
-{#        <li>Prepare: <a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"#}
-{#                        target="_blank" >#}
-{#        Find and Merge Duplicate Candidates for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
-{##}
-        <li>Prepare: <a href="{% url 'representative:representative_politician_match_this_year' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
-        target="_blank">
-        Match Representatives to Politicians (and Create Politicians) for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li>Prepare: <a href="{% url 'representative:update_representatives_from_politicians' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
-        target="_blank">
-        Update Representatives from Politicians for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li>Prepare: <a href="{% url 'representative:update_ocd_id_state_mismatch' %}" target="_blank">
-            Update Representatives with OCD ID/State mismatch <span class="glyphicon glyphicon-new-window"></span></a>
-            &nbsp;&nbsp;
-             <a href="{% url 'representative:update_ocd_id_state_mismatch_related_tables' %}" target="_blank">
-            Update Related tables <span class="glyphicon glyphicon-new-window"></span></a>
-            &nbsp;&nbsp;
-            <a href="{% url 'representative:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
-                Repair OCD ID Mismatches (after Politicians)</a>
+  <a href="{% url 'representative:representative_new' %}?state_code={{ state_code }}">Add New Representative</a>
+  {% if state_code %}
+    ,
+    <a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+       target="_blank">
+      Find and Merge Duplicate Representatives for this State <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
+    {% endif %}
+    {% if show_this_year %}
+      <ul>
+        {#        <li>Prepare: <a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"#}
+        {#                        target="_blank" >#}
+        {#        Find and Merge Duplicate Candidates for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
+        {##}
+        <li>
+          Prepare: <a href="{% url 'representative:representative_politician_match_this_year' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
+    target="_blank">
+          Match Representatives to Politicians (and Create Politicians) for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
         </li>
+        <li>
+          Prepare: <a href="{% url 'representative:update_representatives_from_politicians' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
+    target="_blank">
+          Update Representatives from Politicians for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
+        </li>
+        <li>
+          Prepare: <a href="{% url 'representative:update_ocd_id_state_mismatch' %}"
+    target="_blank">
+        Update Representatives with OCD ID/State mismatch <span class="glyphicon glyphicon-new-window"></span></a>
+        &nbsp;&nbsp;
+        <a href="{% url 'representative:update_ocd_id_state_mismatch_related_tables' %}"
+           target="_blank">
+        Update Related tables <span class="glyphicon glyphicon-new-window"></span></a>
+        &nbsp;&nbsp;
+        <a href="{% url 'representative:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+        Repair OCD ID Mismatches (after Politicians)</a>
+      </li>
     </ul>
-{% endif %}
+  {% endif %}
 
-<br/><br/>
+  <br />
+  <br />
 
-<form name="state_code_form" method="get" action="{% url 'representative:representative_list' %}">
+  <form name="state_code_form"
+        method="get"
+        action="{% url 'representative:representative_list' %}">
     {% csrf_token %}
 
-    {% if state_code != "" %}
-    <a href="#" onclick="showAllStates(); return false;">
-        show all states</a>
-    {% endif %}
+    {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
 
     {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
+      <select id="state_code_id" name="state_code">
+        <option value="">-- Filter by State Served --</option>
         {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
+          <option value="{{ key }}"
+                  {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
         {% endfor %}
-        </select>
-    {% endif %}{# End of if state_list #}
+      </select>
+    {% endif %}
+    {# End of if state_list #}
 
     {% if years_available %}
-    <select id="show_this_year_id" name="show_this_year">
-        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
-            -- Choose Year --</option>
+      <select id="show_this_year_id" name="show_this_year">
+        <option value="0"
+                {% if 0 == show_this_year|convert_to_int %}selected="selected"{% endif %}>-- Choose Year --</option>
         {% for year in years_available %}
-        <option value="{{ year }}"
-                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
-            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
-            {{ year }}</option>
+          <option value="{{ year }}"
+                  {% if show_this_year|slugify == year|slugify %}selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To{% endif %}
+            {{ year }}
+          </option>
         {% endfor %}
-    </select>
-    {% endif %}{# End of if years_available #}
+      </select>
+    {% endif %}
+    {# End of if years_available #}
     &nbsp;&nbsp;
     {% if representative_search %}
-    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+      <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
-    <!-- <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
+      <!-- <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
          clear search</a>&nbsp; -->
     {% endif %}
-    <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
-    <input  id="representative_search_submit_id" type="submit" value="Search for Representative" />
+    <input type="text"
+           name="representative_search"
+           id="representative_search_id"
+           value="{{ representative_search }}" />
+    <input id="representative_search_submit_id"
+           type="submit"
+           value="Search for Representative" />
     &nbsp;&nbsp;
     <label for="show_representatives_with_email_id">
-      <input type="checkbox" name="show_representatives_with_email" id="show_representatives_with_email_id" value="1"
-             {% if show_representatives_with_email %}checked{% endif %} /> Has email
+      <input type="checkbox"
+             name="show_representatives_with_email"
+             id="show_representatives_with_email_id"
+             value="1"
+             {% if show_representatives_with_email %}checked{% endif %} />
+      Has email
     </label>
     &nbsp;&nbsp;
     <label for="missing_politician_id">
-      <input type="checkbox" name="missing_politician" id="missing_politician_id" value="1"
-             {% if missing_politician %}checked{% endif %} /> Missing politician
+      <input type="checkbox"
+             name="missing_politician"
+             id="missing_politician_id"
+             value="1"
+             {% if missing_politician %}checked{% endif %} />
+      Missing politician
     </label>
     &nbsp;&nbsp;
     <label for="show_battleground_id">
-      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
-             {% if show_battleground %}checked{% endif %} /> Show battleground races
+      <input type="checkbox"
+             name="show_battleground"
+             id="show_battleground_id"
+             value="1"
+             {% if show_battleground %}checked{% endif %} />
+      Show battleground races
     </label>
-   &nbsp;&nbsp;
+    &nbsp;&nbsp;
     <label for="show_ocd_id_state_mismatch_id">
-      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
-             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
+      <input type="checkbox"
+             name="show_ocd_id_state_mismatch"
+             id="show_ocd_id_state_mismatch_id"
+             value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} />
+      Show OCD ID/State mismatch
     </label>
     &nbsp;&nbsp;
     <label for="show_all_id">
-      <input type="checkbox" name="show_all" id="show_all_id" value="1"
-             {% if show_all %}checked{% endif %} /> Show up to 1,000 representatives
+      <input type="checkbox"
+             name="show_all"
+             id="show_all_id"
+             value="1"
+             {% if show_all %}checked{% endif %} />
+      Show up to 1,000 representatives
     </label>
     &nbsp;&nbsp;
     <label for="show_representatives_with_claimed_profile_id">
-      <input type="checkbox" name="show_representatives_with_claimed_profile" id="show_representatives_with_claimed_profile_id" value="1"
-             {% if show_representatives_with_claimed_profile %}checked{% endif %} /> Is Claimed Profile
+      <input type="checkbox"
+             name="show_representatives_with_claimed_profile"
+             id="show_representatives_with_claimed_profile_id"
+             value="1"
+             {% if show_representatives_with_claimed_profile %}checked{% endif %} />
+      Is Claimed Profile
     </label>
-</form>
-<br/>
+  </form>
+  <br />
 
-{% if representative_list %}
+  {% if representative_list %}
     <table class="table">
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>Representative Name</td>
+        <td>Office Held Name</td>
+        <td>State</td>
+        <td>Twitter Handle</td>
+        <td>Email(s)</td>
+        <td>ID(s)</td>
+        <td>Website(s)</td>
+      </tr>
+      {% for representative in representative_list %}
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Representative Name</td>
-            <td>Office Held Name</td>
-            <td>State</td>
-            <td>Twitter Handle</td>
-            <td>Email(s)</td>
-            <td>ID(s)</td>
-            <td>Website(s)</td>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            {% if representative.we_vote_hosted_profile_image_url_medium %}
+              <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}">
+                <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}'
+                     height="48px" />
+              </a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}"
+               class="u-no-break">
+              {% if representative.representative_name %}
+                {{ representative.representative_name }}
+              {% else %}
+                no name
+              {% endif %}
+            </a>
+            <br />
+            <span class="u-no-break">In office:
+              {% if representative.year_in_office_2023 %}2023{% endif %}
+              {% if representative.year_in_office_2024 %}2024{% endif %}
+              {% if representative.year_in_office_2025 %}2025{% endif %}
+              {% if representative.year_in_office_2026 %}2026{% endif %}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}"
+               style="display: block;
+                      width: 200px;
+                      word-wrap: break-word"
+               target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% if representative.office_held_we_vote_id %}{{ representative.office_held_we_vote_id }}{% endif %}
+            {% if representative.ocd_division_id %}{{ representative.ocd_division_id }}{% endif %}
+          </td>
+          <td>{{ representative.state_code }}</td>
+          <td>
+            {% if representative.representative_twitter_handle %}
+              <a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+                 target="_blank">{{ representative.representative_twitter_handle }}</a>
+              <br />
+              ({{ representative.twitter_followers_count|intcomma }} followers)
+            {% endif %}
+          </td>
+          <td>
+            {% if representative.representative_email %}
+              <span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email }}</span>&nbsp;
+            {% endif %}
+            {% if representative.representative_email2 %}
+              <span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email2 }}</span>&nbsp;
+            {% endif %}
+            {% if representative.representative_email3 %}
+              <span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email3 }}</span>&nbsp;
+            {% endif %}
+          </td>
+          <td>
+            {{ representative.we_vote_id }}
+            {% if representative.politician_we_vote_id %}
+              -
+              <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?"
+                 class="u-no-break"
+                 target="_blank">
+                {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            {% endif %}
+          </td>
+          <td>
+            {% if representative.wikipedia_url %}
+              <span style="display: block; width: 200px; word-wrap: break-word;"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;
+            {% endif %}
+            {% if representative.representative_url %}
+              <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;
+            {% endif %}
+            {% if representative.representative_url2 %}
+              <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}</a></span>&nbsp;
+            {% endif %}
+            {% if representative.representative_url3 %}
+              <span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}</a></span>&nbsp;
+            {% endif %}
+          </td>
         </tr>
-    {% for representative in representative_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if representative.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}">
-                    <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}' height="48px" />
-                </a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">
-                    {% if representative.representative_name %}{{ representative.representative_name }}{% else %}no name{% endif %}</a>
-                <br />
-                <span class="u-no-break">In office:
-        {% if representative.year_in_office_2023 %}2023 {% endif %}
-        {% if representative.year_in_office_2024 %}2024 {% endif %}
-        {% if representative.year_in_office_2025 %}2025 {% endif %}
-        {% if representative.year_in_office_2026 %}2026 {% endif %}
-                </span>
-            </td>
-            <td>
-                <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}"
-                   style="display: block; width: 200px; word-wrap: break-word;"
-                   target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                {% if representative.office_held_we_vote_id %}
-                    {{ representative.office_held_we_vote_id }}
-                {% endif %}
-                {% if representative.ocd_division_id %}
-                    {{ representative.ocd_division_id }}
-                {% endif %}
-            </td>
-            <td>{{ representative.state_code }}</td>
-            <td>
-                {% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
-                    target="_blank">{{ representative.representative_twitter_handle }}</a><br />
-                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}
-            </td>
-            <td>
-                {% if representative.representative_email %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email }}</span>&nbsp;{% endif %}
-                {% if representative.representative_email2 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email2 }}</span>&nbsp;{% endif %}
-                {% if representative.representative_email3 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email3 }}</span>&nbsp;{% endif %}
-            </td>
-            <td>
-                {{ representative.we_vote_id }}
-                {% if representative.politician_we_vote_id %}
-                    -
-                    <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?" class="u-no-break" target="_blank">
-                    {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
-                    </a>
-                {% endif %}
-            </td>
-            <td>
-                {% if representative.wikipedia_url %}<span style="display: block; width: 200px; word-wrap: break-word;"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url2 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url3 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}</a></span>&nbsp;{% endif %}
-            </td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
 
     <p></p>
-{% else %}
+  {% else %}
     <p>(no representatives found)</p>
     <p>
-        <a href="{% url 'representative:representative_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Representative</a><br />
+      <a href="{% url 'representative:representative_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Representative</a>
+      <br />
     </p>
-{% endif %}
+  {% endif %}
 
-<script>
+  <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -261,6 +327,6 @@
         });
     });
 
-</script>
+  </script>
 
 {% endblock %}

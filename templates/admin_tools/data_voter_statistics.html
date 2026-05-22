@@ -3,138 +3,151 @@
 
 {% block title %}Voter Statistics{% endblock %}
 
-{%  block content %}
-<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
+{% block content %}
+  <a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
+  <br />
 
-<div class="container">
-  <table class="table table-bordered table-condensed" style="width: auto;">
-    <thead>
-      <tr>
-        <th><h2>Voter Statistics</h2></th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Signed in Voters</td>
-        <td>{{ voter_list_with_sign_in_data_count }}</td>
-      </tr>
-      <tr>
-        <td>Friendships</td>
-        <td>{{ current_friend_count }}</td>
-      </tr>
-      <tr>
-        <td>Suggested Friendships</td>
-        <td>{{ suggested_friend_count }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <div class="container">
+    <table class="table table-bordered table-condensed" style="width: auto;">
+      <thead>
+        <tr>
+          <th>
+            <h2>Voter Statistics</h2>
+          </th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Signed in Voters</td>
+          <td>{{ voter_list_with_sign_in_data_count }}</td>
+        </tr>
+        <tr>
+          <td>Friendships</td>
+          <td>{{ current_friend_count }}</td>
+        </tr>
+        <tr>
+          <td>Suggested Friendships</td>
+          <td>{{ suggested_friend_count }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
 
-<div class="container">
-  <table class="table table-bordered table-condensed" style="width: auto;">
-    <thead>
-      <tr>
-        <th><h2>Election Statistics</h2></th>
-        {% for one_election in election_statistics %}
-        <th>{{ one_election.election_name }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Voters</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voter_address_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Saved Ballots</strong>. This is a ballot saved for a voter's device, whether copied from a
-            map point, or retrieved from a full address.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voter_ballot_saved_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Ballots from Full Address</strong>. A ballot retrieved for a voter's full address.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voter_ballot_returned_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Voters with Public Positions</strong>. The number of individual voters who chose to share at least
-        one position publicly.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voters_with_public_positions_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Total Voter Positions - Public</strong>. The aggregate number of publicly visible positions
-        that were entered by all voters.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voter_position_entered_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Voters with Friends Only Positions</strong>. The number of voters who shared one or more positions
-        with friends. (i.e., positions that were not public.)</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voters_with_positions_for_friends_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Total Voter Positions - Friends Only</strong>. The aggregate number of "friends only" positions
-        that were entered by all voters.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.voter_position_for_friends_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <th>&nbsp;</th>
-        <th colspan="{{ election_statistics|length }}">Not Voter Specific</th>
-      </tr>
-      <tr>
-        <td><strong>Map Points with Ballot Data</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.polling_location_ballot_returned_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Endorsers with Public Positions</strong>. The number of individual organizations that shared at least
-        one position publicly.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.organizations_with_public_positions_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Total Organizational Positions - Public</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.organization_position_entered_count }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Offices Count</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.number_of_offices }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Candidates Count</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.number_of_candidates }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td><strong>Measures Count</strong>.</td>
-        {% for one_election in election_statistics %}
-        <td>{{ one_election.number_of_measures }}</td>
-        {% endfor %}
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <div class="container">
+    <table class="table table-bordered table-condensed" style="width: auto;">
+      <thead>
+        <tr>
+          <th>
+            <h2>Election Statistics</h2>
+          </th>
+          {% for one_election in election_statistics %}<th>{{ one_election.election_name }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>Voters</strong>.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.voter_address_count }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Saved Ballots</strong>. This is a ballot saved for a voter's device, whether copied from a
+            map point, or retrieved from a full address.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.voter_ballot_saved_count }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Ballots from Full Address</strong>. A ballot retrieved for a voter's full address.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.voter_ballot_returned_count }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Voters with Public Positions</strong>. The number of individual voters who chose to share at least
+            one position publicly.
+          </td>
+          {% for one_election in election_statistics %}
+            <td>{{ one_election.voters_with_public_positions_count }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Total Voter Positions - Public</strong>. The aggregate number of publicly visible positions
+            that were entered by all voters.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.voter_position_entered_count }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Voters with Friends Only Positions</strong>. The number of voters who shared one or more positions
+            with friends. (i.e., positions that were not public.)
+          </td>
+          {% for one_election in election_statistics %}
+            <td>{{ one_election.voters_with_positions_for_friends_count }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Total Voter Positions - Friends Only</strong>. The aggregate number of "friends only" positions
+            that were entered by all voters.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.voter_position_for_friends_count }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <th colspan="{{ election_statistics|length }}">Not Voter Specific</th>
+        </tr>
+        <tr>
+          <td>
+            <strong>Map Points with Ballot Data</strong>.
+          </td>
+          {% for one_election in election_statistics %}
+            <td>{{ one_election.polling_location_ballot_returned_count }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Endorsers with Public Positions</strong>. The number of individual organizations that shared at least
+            one position publicly.
+          </td>
+          {% for one_election in election_statistics %}
+            <td>{{ one_election.organizations_with_public_positions_count }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Total Organizational Positions - Public</strong>.
+          </td>
+          {% for one_election in election_statistics %}
+            <td>{{ one_election.organization_position_entered_count }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Offices Count</strong>.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.number_of_offices }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Candidates Count</strong>.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.number_of_candidates }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td>
+            <strong>Measures Count</strong>.
+          </td>
+          {% for one_election in election_statistics %}<td>{{ one_election.number_of_measures }}</td>{% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<br />
+  <br />
 
 {% endblock %}

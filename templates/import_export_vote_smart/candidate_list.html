@@ -3,65 +3,71 @@
 
 {% block title %}Vote Smart Candidates{% endblock %}
 
-{%  block content %}
-<p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a></p>
+{% block content %}
+  <p>
+    <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a>
+  </p>
 
-<h1>Vote Smart Candidates</h1>
+  <h1>Vote Smart Candidates</h1>
 
-    {% if election_list %}
-    <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
-        {% csrf_token %}
+  {% if election_list %}
+    <form name="candidate_choose_election"
+          method="get"
+          action="{% url 'candidate:candidate_list' %}">
+      {% csrf_token %}
 
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
-    {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
-    {% endfor %}
-    </select>
+      <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0"
+                {% if 0 == google_civic_election_id %}selected="selected"{% endif %}>-- Filter by Election --</option>
+        {% for one_election in election_list %}
+          <option value="{{ one_election.google_civic_election_id }}"
+                  {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+          </option>
+        {% endfor %}
+      </select>
     </form>
-    {% endif %}{# End of if election_list #}
+  {% endif %}
+  {# End of if election_list #}
 
 
 
-{% if candidate_list %}
+  {% if candidate_list %}
     <table border="1" cellpadding="5" cellspacing="5">
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>First Name</td>
+        <td>Last Name</td>
+        <td>Election Year</td>
+        <td>State Id</td>
+      </tr>
+      {% for candidate in candidate_list %}
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>First Name</td>
-            <td>Last Name</td>
-            <td>Election Year</td>
-            <td>State Id</td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ candidate.candidateId }}</td>
+          <td>{{ candidate.firstName }}</td>
+          <td>{{ candidate.lastName }}</td>
+          <td>{{ candidate.electionYear }}</td>
+          <td>{{ candidate.officeStateId }}</td>
         </tr>
-    {% for candidate in candidate_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ candidate.candidateId }}</td>
-            <td>{{ candidate.firstName }}</td>
-            <td>{{ candidate.lastName }}</td>
-            <td>{{ candidate.electionYear }}</td>
-            <td>{{ candidate.officeStateId }}</td>
-        </tr>
-    {% endfor %}
+      {% endfor %}
     </table>
 
     <p></p>
 
-{% else %}
+  {% else %}
     <p>(no candidates found)</p>
-{% endif %}
+  {% endif %}
 
 
-    <script>
+  <script>
         $(function() {
             $('#google_civic_election_id').change(function() {
                 this.form.submit();
             });
         });
-    </script>
+  </script>
 
 {% endblock %}

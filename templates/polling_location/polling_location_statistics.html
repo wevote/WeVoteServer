@@ -3,35 +3,34 @@
 
 {% block title %}Map Points Statistics{% endblock %}
 
-{%  block content %}
-{% load humanize %}
+{% block content %}
+  {% load humanize %}
 
-<h1>Map Points Statistics</h1>
+  <h1>Map Points Statistics</h1>
 
-    <p>
-        <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
-        Go to "Import Map Points From Master Server" Page
-        </a>
-    </p>
+  <p>
+    <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}"
+       target="_blank">Go to "Import Map Points From Master Server" Page</a>
+  </p>
 
-    <p>
-      <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         Create map point,
-      </a>
+  <p>
+    <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">Create map point,</a>
 
-      <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
-         See Electoral Districts
-      </a>
-    </p>
+    <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
+      See Electoral Districts
+    </a>
+  </p>
 
-<form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_statistics' %}">
+  <form name="polling_location_search_form"
+        method="get"
+        action="{% url 'polling_location:polling_location_statistics' %}">
     {% csrf_token %}
 
 
-{% if state_details_list %}
-    <table class="table table-condensed">
-    <thead>
-        <tr>
+    {% if state_details_list %}
+      <table class="table table-condensed">
+        <thead>
+          <tr>
             <th></th>
             <th>State</th>
             <th></th>
@@ -39,42 +38,30 @@
             <th>State Population</th>
             <th>Avg People Per Map Point</th>
             <th>Missing Lat/Long</th>
-        </tr>
-    </thead>
+          </tr>
+        </thead>
 
-    {% for one_state in state_details_list %}
-        <tr>
+        {% for one_state in state_details_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
+            <td>{{ one_state.state_code }} - {{ one_state.state_name }}</td>
             <td>
-              {{ one_state.state_code }} - {{ one_state.state_name }}
-            </td>
-            <td>
-              <a
-                href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ one_state.state_code }}"
-                target="_blank"
-              >
+              <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ one_state.state_code }}"
+                 target="_blank">
                 (go) <span class="glyphicon glyphicon-new-window"></span>
               </a>
             </td>
-            <td>
-              {{ one_state.polling_location_count|intcomma }}
-            </td>
-            <td>
-              {{ one_state.state_population|intcomma }}
-            </td>
-            <td>
-              {{ one_state.average_people_per_map_point|intcomma }}
-            </td>
-            <td>
-              {{ one_state.polling_location_without_latitude_count }}
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
-{% else %}
-    <p>(no states found)</p>
-{% endif %}
-<br />
+            <td>{{ one_state.polling_location_count|intcomma }}</td>
+            <td>{{ one_state.state_population|intcomma }}</td>
+            <td>{{ one_state.average_people_per_map_point|intcomma }}</td>
+            <td>{{ one_state.polling_location_without_latitude_count }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>(no states found)</p>
+    {% endif %}
+    <br />
     <script>
         $(function() {
             $('#state_code').change(function() {
@@ -83,4 +70,4 @@
         });
     </script>
 
-{% endblock %}
+  {% endblock %}

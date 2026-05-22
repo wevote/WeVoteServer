@@ -1,58 +1,69 @@
 {# templates/analytics/organization_election_metrics.html #}
 {% extends "template_base.html" %}
 
-{% block title %}
-    Endorser Election Metrics
-{% endblock %}
+{% block title %}Endorser Election Metrics{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+{% block content %}
+  {% load template_filters %}
+  <p>
+    <a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a>
+  </p>
 
-<h2>Endorser Election Metrics</h2>
+  <h2>Endorser Election Metrics</h2>
 
-<p>
-    Show activity relating to one organization, for one election.
-</p>
+  <p>Show activity relating to one organization, for one election.</p>
 
-<form name="choose_election" method="get" action="{% url 'analytics:organization_election_metrics' %}">
+  <form name="choose_election"
+        method="get"
+        action="{% url 'analytics:organization_election_metrics' %}">
     {% csrf_token %}
     <input type="hidden" name="state_code" value="{{ state_code }}" />
     {% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
+      <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0"
+                {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
+          -- Filter by Election --
+        </option>
         {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
+          <option value="{{ one_election.google_civic_election_id }}"
+                  {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+          </option>
         {% endfor %}
-    </select>
-    {% endif %}{# End of if election_list #}
-</form>
+      </select>
+    {% endif %}
+    {# End of if election_list #}
+  </form>
 
-<form name="organization_election_metrics" method="get" action="{% url 'analytics:organization_election_metrics_process' %}">
+  <form name="organization_election_metrics"
+        method="get"
+        action="{% url 'analytics:organization_election_metrics_process' %}">
     {% csrf_token %}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}" />
     <input type="hidden" name="state_code" value="{{ state_code }}" />
 
     <div class="form-group">
-        <label for="organization_election_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-8">
-            <button type="submit" class="btn btn-default" name="organization_election_metrics_button">Update Election Metrics</button>
-        </div>
+      <label for="organization_election_metrics_button"
+             class="col-sm-3 control-label">&nbsp;</label>
+      <div class="col-sm-8">
+        <button type="submit"
+                class="btn btn-default"
+                name="organization_election_metrics_button">Update Election Metrics</button>
+      </div>
     </div>
-</form>
+  </form>
 
-{% include "analytics/organization_election_metrics_table.html" with organization_election_metrics_list=organization_election_metrics_list %}
+  {% include "analytics/organization_election_metrics_table.html" with organization_election_metrics_list=organization_election_metrics_list %}
 
-<script>
+  <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
     });
-</script>
+  </script>
 
 {% endblock %}

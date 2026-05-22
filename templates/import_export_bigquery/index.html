@@ -3,15 +3,15 @@
 
 {% block title %}Import/Export Data from BigQuery{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-<h1>Import/Export Data from BigQuery</h1>
+  <h1>Import/Export Data from BigQuery</h1>
 
-<p>
+  <p>
     In order to help manage the WeVote data lake, these tools help us migrate and look at data coming from WeVote's
     BigQuery system.
-</p>
-    
-<a href="{% url 'import_export_bigquery:bigquery_event_list' %}">BigQuery Event List</a>
+  </p>
+
+  <a href="{% url 'import_export_bigquery:bigquery_event_list' %}">BigQuery Event List</a>
 
 {% endblock %}

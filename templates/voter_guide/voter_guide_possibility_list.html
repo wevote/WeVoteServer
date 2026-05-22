@@ -4,280 +4,369 @@
 {% block title %}Endorsement Websites{% endblock %}
 
 {% block content %}
-{% include "admin_tools/loading_banner.html" %}
-{% load template_filters %}
+  {% include "admin_tools/loading_banner.html" %}
+  {% load template_filters %}
 
-<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <link rel="stylesheet"
+        href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-<h1 style="font-size: 32px;">
+  <h1 style="font-size: 32px;">
     Endorsement Websites (Python Scraper)
-{% if filtered_by_title %}
-  - {{ filtered_by_title }}
-{% endif %}
-</h1>
+    {% if filtered_by_title %}- {{ filtered_by_title }}{% endif %}
+  </h1>
 
-<ul>
-    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>
-        Quick public tools that feeds into import_export_batch system.</li>
-    <li><strong><a href="{% url 'volunteer_task:scoreboard_list' %}"
-                   target="_blank">Scoreboard <span class="glyphicon glyphicon-new-window"></span></a></strong>
-        Tasks completed by the political data team, person-by-person.</li>
-    <li><strong><a href="{% url 'voter_guide:create_possible_voter_guides_from_prior_elections' %}?google_civic_election_id={{ google_civic_election_id }}">
+  <ul>
+    <li>
+      <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
+   target="_blank">Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>
+      Quick public tools that feeds into import_export_batch system.
+    </li>
+    <li>
+      <strong><a href="{% url 'volunteer_task:scoreboard_list' %}" target="_blank">Scoreboard <span class="glyphicon glyphicon-new-window"></span></a></strong>
+      Tasks completed by the political data team, person-by-person.
+    </li>
+    <li>
+      <strong><a href="{% url 'voter_guide:create_possible_voter_guides_from_prior_elections' %}?google_civic_election_id={{ google_civic_election_id }}">
         Suggest Possible Voter Guides, from Prior Elections</a></strong>. (3 at a time)
-        Look back at voter guides in the last 5 years from endorsers that might have endorsements in upcoming elections.</li>
-</ul>
+        Look back at voter guides in the last 5 years from endorsers that might have endorsements in upcoming elections.
+      </li>
+    </ul>
 
 
-<form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
-    {% csrf_token %}
-    {% if election_list %}
+    <form name="voter_guide_choose_election"
+          method="get"
+          action="{% url 'voter_guide:voter_guide_possibility_list' %}">
+      {% csrf_token %}
+      {% if election_list %}
         <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0">-- Filter by Election --</option>
-        {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
-        {% endfor %}
+          <option value="0">-- Filter by Election --</option>
+          {% for one_election in election_list %}
+            <option value="{{ one_election.google_civic_election_id }}"
+                    {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+              {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+              {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+            </option>
+          {% endfor %}
         </select>
-    {% else %}
+      {% else %}
         (no elections found)
-    {% endif %}
+      {% endif %}
 
-    {# Default to showing only upcoming elections #}
-    <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
-    </label>
+      {# Default to showing only upcoming elections #}
+      <label for="show_all_elections_id">
+        <input type="checkbox"
+               name="show_all_elections"
+               id="show_all_elections_id"
+               value="1"
+               {% if show_all_elections %}checked{% endif %} />
+        Include Past Elections
+      </label>
 
-    &nbsp;&nbsp;&nbsp;
-    <label for="show_number_of_ballot_items_id">
-      <input type="checkbox" name="show_number_of_ballot_items" id="show_number_of_ballot_items_id" value="1"
-             {% if show_number_of_ballot_items %}checked{% endif %} /> Show Ballot Items Count
-    </label>
-    &nbsp;&nbsp;&nbsp;
-    {% if voter_guide_possibility_search %}
+      &nbsp;&nbsp;&nbsp;
+      <label for="show_number_of_ballot_items_id">
+        <input type="checkbox"
+               name="show_number_of_ballot_items"
+               id="show_number_of_ballot_items_id"
+               value="1"
+               {% if show_number_of_ballot_items %}checked{% endif %} />
+        Show Ballot Items Count
+      </label>
+      &nbsp;&nbsp;&nbsp;
+      {% if voter_guide_possibility_search %}
         <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
         <!-- <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
              clear search</a>&nbsp; -->
-    {% endif %}
+      {% endif %}
 
-    <input type="text" name="voter_guide_possibility_search" id="voter_guide_possibility_search_id" value="{{ voter_guide_possibility_search }}" />
-    <input type="submit" value="Search" />
+      <input type="text"
+             name="voter_guide_possibility_search"
+             id="voter_guide_possibility_search_id"
+             value="{{ voter_guide_possibility_search }}" />
+      <input type="submit" value="Search" />
 
-    {# Pass along the url_variables this page is using, so we can return to the same page state #}
-    <input type="hidden" name="assigned_to_voter_we_vote_id" value="{{ assigned_to_voter_we_vote_id }}">
-    <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
-    <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
-    <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
-    <input type="hidden" name="filter_selected_done_needs_verification" value="{{ filter_selected_done_needs_verification }}">
-    <input type="hidden" name="filter_selected_done_verified" value="{{ filter_selected_done_verified }}">
-    <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
-    <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
-    <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">
-    <input type="hidden" name="show_ignore_this_source" value="{{ show_ignore_this_source }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-</form>
+      {# Pass along the url_variables this page is using, so we can return to the same page state #}
+      <input type="hidden"
+             name="assigned_to_voter_we_vote_id"
+             value="{{ assigned_to_voter_we_vote_id }}">
+      <input type="hidden"
+             name="filter_selected_archive"
+             value="{{ filter_selected_archive }}">
+      <input type="hidden"
+             name="filter_selected_candidates_missing"
+             value="{{ filter_selected_candidates_missing }}">
+      <input type="hidden"
+             name="filter_selected_capture_detailed_comments"
+             value="{{ filter_selected_capture_detailed_comments }}">
+      <input type="hidden"
+             name="filter_selected_done_needs_verification"
+             value="{{ filter_selected_done_needs_verification }}">
+      <input type="hidden"
+             name="filter_selected_done_verified"
+             value="{{ filter_selected_done_verified }}">
+      <input type="hidden"
+             name="filter_selected_from_prior_election"
+             value="{{ filter_selected_from_prior_election }}">
+      <input type="hidden"
+             name="filter_selected_ignore"
+             value="{{ filter_selected_ignore }}">
+      <input type="hidden"
+             name="filter_selected_not_available_yet"
+             value="{{ filter_selected_not_available_yet }}">
+      <input type="hidden"
+             name="show_ignore_this_source"
+             value="{{ show_ignore_this_source }}">
+      <input type="hidden" name="state_code" value="{{ state_code }}">
+    </form>
 
-<p></p>
-<div style="padding-bottom: 15px">
-    Filters:&nbsp;
+    <p></p>
+    <div style="padding-bottom: 15px">
+      Filters:&nbsp;
 
-    {# Return to see voter guides to review #}
-    <span class="mdl-chip{% if filter_selected_to_review %} mdl-color--grey{% endif %}" {% if filter_selected_to_review %} style="font-weight: bold;"{% endif %}>
+      {# Return to see voter guides to review #}
+      <span class="mdl-chip{% if filter_selected_to_review %} mdl-color--grey{% endif %}"
+            {% if filter_selected_to_review %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_to_review %}color: #fff;{% endif %}">
-                To Review
-                  ({{ to_review_count }})
-              </span>
-            </a>
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_to_review %}color: #fff;{% endif %}">
+              To Review
+              ({{ to_review_count }})
+            </span>
+          </a>
         </span>
-    </span>
+      </span>
 
-    {# Show voter guides suggested from prior elections #}
-    <span class="mdl-chip{% if filter_selected_from_prior_election %} mdl-color--grey{% endif %}" {% if filter_selected_from_prior_election %} style="font-weight: bold;"{% endif %}>
+      {# Show voter guides suggested from prior elections #}
+      <span class="mdl-chip{% if filter_selected_from_prior_election %} mdl-color--grey{% endif %}"
+            {% if filter_selected_from_prior_election %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_from_prior_election=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_from_prior_election %}color: #fff;{% endif %}">
-                  Past Year
-                  ({{ from_prior_election_count }})
-              </span>
-            </a>
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_from_prior_election=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_from_prior_election %}color: #fff;
+                         {% endif %}">
+              Past Year
+              ({{ from_prior_election_count }})
+            </span>
+          </a>
         </span>
-    </span>
+      </span>
 
-    {# Show voter guides where we previously couldn't find endorsements #}
-    <span class="mdl-chip{% if filter_selected_not_available_yet %} mdl-color--grey{% endif %}" {% if filter_selected_not_available_yet %} style="font-weight: bold;"{% endif %}>
+      {# Show voter guides where we previously couldn't find endorsements #}
+      <span class="mdl-chip{% if filter_selected_not_available_yet %} mdl-color--grey{% endif %}"
+            {% if filter_selected_not_available_yet %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_not_available_yet=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_not_available_yet %}color: #fff;{% endif %}">
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_not_available_yet=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_not_available_yet %}color: #fff;
+                         {% endif %}">
               Not Available Yet
               ({{ not_available_yet_count }})
-              </span>
-            </a>
+            </span>
+          </a>
         </span>
-    </span>
+      </span>
 
-    {# Show voter guides where we don't have the matching candidates or measures in our database #}
-    <span class="mdl-chip{% if filter_selected_candidates_missing %} mdl-color--grey{% endif %}" {% if filter_selected_candidates_missing %} style="font-weight: bold;"{% endif %}>
+      {# Show voter guides where we don't have the matching candidates or measures in our database #}
+      <span class="mdl-chip{% if filter_selected_candidates_missing %} mdl-color--grey{% endif %}"
+            {% if filter_selected_candidates_missing %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_candidates_missing=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_candidates_missing %}color: #fff;{% endif %}">
-                  Candidates Missing
-                  ({{ candidates_missing_count }})
-              </span>
-            </a>
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_candidates_missing=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_candidates_missing %}color: #fff;
+                         {% endif %}">
+              Candidates Missing
+              ({{ candidates_missing_count }})
+            </span>
+          </a>
         </span>
-    </span>
+      </span>
 
-    {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
-    <span class="mdl-chip{% if filter_selected_capture_detailed_comments %} mdl-color--grey{% endif %}" {% if filter_selected_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
+      {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
+      <span class="mdl-chip{% if filter_selected_capture_detailed_comments %} mdl-color--grey{% endif %}"
+            {% if filter_selected_capture_detailed_comments %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_capture_detailed_comments=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_capture_detailed_comments %}color: #fff;{% endif %}">
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_capture_detailed_comments=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_capture_detailed_comments %}color: #fff;
+                         {% endif %}">
               Capture Comments
               ({{ capture_detailed_comments_count }})
-              </span>
-            </a>
+            </span>
+          </a>
         </span>
-    </span>
+      </span>
 
-    &nbsp;&nbsp;&nbsp;
-    {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
-    <span class="mdl-chip{% if filter_selected_done_needs_verification %} mdl-color--grey{% endif %}" {% if filter_selected_done_needs_verification %} style="font-weight: bold;"{% endif %}>
+      &nbsp;&nbsp;&nbsp;
+      {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
+      <span class="mdl-chip{% if filter_selected_done_needs_verification %} mdl-color--grey{% endif %}"
+            {% if filter_selected_done_needs_verification %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_needs_verification=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_done_needs_verification %}color: #fff;{% endif %}">
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_needs_verification=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_done_needs_verification %}color: #fff;
+                         {% endif %}">
               Done-To Verify
               ({{ done_needs_verification_count }})
-              </span>
-            </a>
+            </span>
+          </a>
         </span>
-    </span>
-    {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
-    <span class="mdl-chip{% if filter_selected_done_verified %} mdl-color--grey{% endif %}" {% if filter_selected_done_verified %} style="font-weight: bold;"{% endif %}>
+      </span>
+      {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
+      <span class="mdl-chip{% if filter_selected_done_verified %} mdl-color--grey{% endif %}"
+            {% if filter_selected_done_verified %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_verified=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_done_verified %}color: #fff;{% endif %}">
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_verified=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_done_verified %}color: #fff;{% endif %}">
               Done-Verified
               ({{ done_verified_count }})
-              </span>
-            </a>
+            </span>
+          </a>
         </span>
-    </span>
-    {# Return to see voter guides to review #}
-    <span class="mdl-chip{% if filter_selected_archive %} mdl-color--grey{% endif %}" {% if filter_selected_archive %} style="font-weight: bold;"{% endif %}>
-       <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_archive=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_archive %}color: #fff;{% endif %}">
-              Archived
-              </span>
-            </a>
-        </span>
-    </span>
-
-    {# Show voter guides where we ignore the source #}
-    <span class="mdl-chip{% if filter_selected_ignore %} mdl-color--grey{% endif %}" {% if filter_selected_ignore %} style="font-weight: bold;"{% endif %}>
+      </span>
+      {# Return to see voter guides to review #}
+      <span class="mdl-chip{% if filter_selected_archive %} mdl-color--grey{% endif %}"
+            {% if filter_selected_archive %}style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_ignore=1" onclick="displayLoadingBanner()">
-              <span style="{% if filter_selected_ignore %}color: #fff;{% endif %}">
-                Ignored
-              </span>
-            </a>
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_archive=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_archive %}color: #fff;{% endif %}">Archived</span>
+          </a>
         </span>
-    </span>
+      </span>
 
-</div>
-<form name="voter_guide_possibility_markings" method="post" action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
-  {% csrf_token %}
-  {# Filter the voter guides possibilities: Only show the ones owned by a particular person #}
-  <div class="form-group pull-left">
-      <label for="assigned_to_voter_we_vote_id_id" class="control-label">
-        <span class="u-no-break">Show your list:</span>
-      </label>
-      <select id="assigned_to_voter_we_vote_id_id" name="assigned_to_voter_we_vote_id">
-          <option value="">-- choose name --</option>
-        {% for voter in political_data_managers_list %}
-          <option value="{{ voter.we_vote_id }}" {% if assigned_to_voter_we_vote_id|slugify == voter.we_vote_id|slugify %}selected="selected"{% endif %}>{{ voter.get_full_name }}</option>
-        {% endfor %}
-          <option value="ASSIGNED_TO_NO_ONE" {% if assigned_to_voter_we_vote_id|slugify == "ASSIGNED_TO_NO_ONE"|slugify %}selected="selected"{% endif %}>* Not Assigned *</option>
-      </select>
-    &nbsp;&nbsp;&nbsp;
-  </div>
-{% if voter_guide_possibility_list %}
-    {# Reassign voter guides possibilities to one political data manager  #}
-    <div class="form-group pull-left">
-        <label for="reassign_to_voter_we_vote_id_id" class="control-label">
-          <span class="u-no-break">Reassign to:</span>
-        </label>
-        <select id="reassign_to_voter_we_vote_id_id" name="reassign_to_voter_we_vote_id">
-            <option value="">-- choose name --</option>
-          {% for voter in political_data_managers_list %}
-            <option value="{{ voter.we_vote_id }}">{{ voter.get_full_name }}</option>
-          {% endfor %}
-        </select>
-        <input type="submit" value="Assign" />
+      {# Show voter guides where we ignore the source #}
+      <span class="mdl-chip{% if filter_selected_ignore %} mdl-color--grey{% endif %}"
+            {% if filter_selected_ignore %}style="font-weight: bold;"{% endif %}>
+        <span class="mdl-chip__text">
+          <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_ignore=1"
+             onclick="displayLoadingBanner()">
+            <span style="{% if filter_selected_ignore %}color: #fff;{% endif %}">Ignored</span>
+          </a>
+        </span>
+      </span>
+
     </div>
-    {% if not hide_pagination %}
-    <span class="float-right">
-      {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
-      Page {{ current_page_number|add:1 }}
-      | <a href="{{ next_page_url }}">Next page</a></span>
-    {% endif %}
-    <div class="form-group pull-right">
-        <div class="col-xs-4">
+    <form name="voter_guide_possibility_markings"
+          method="post"
+          action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
+      {% csrf_token %}
+      {# Filter the voter guides possibilities: Only show the ones owned by a particular person #}
+      <div class="form-group pull-left">
+        <label for="assigned_to_voter_we_vote_id_id" class="control-label">
+          <span class="u-no-break">Show your list:</span>
+        </label>
+        <select id="assigned_to_voter_we_vote_id_id"
+                name="assigned_to_voter_we_vote_id">
+          <option value="">-- choose name --</option>
+          {% for voter in political_data_managers_list %}
+            <option value="{{ voter.we_vote_id }}"
+                    {% if assigned_to_voter_we_vote_id|slugify == voter.we_vote_id|slugify %}selected="selected"{% endif %}>
+              {{ voter.get_full_name }}
+            </option>
+          {% endfor %}
+          <option value="ASSIGNED_TO_NO_ONE"
+                  {% if assigned_to_voter_we_vote_id|slugify == "ASSIGNED_TO_NO_ONE"|slugify %}selected="selected"{% endif %}>
+            * Not Assigned *
+          </option>
+        </select>
+        &nbsp;&nbsp;&nbsp;
+      </div>
+      {% if voter_guide_possibility_list %}
+        {# Reassign voter guides possibilities to one political data manager  #}
+        <div class="form-group pull-left">
+          <label for="reassign_to_voter_we_vote_id_id" class="control-label">
+            <span class="u-no-break">Reassign to:</span>
+          </label>
+          <select id="reassign_to_voter_we_vote_id_id"
+                  name="reassign_to_voter_we_vote_id">
+            <option value="">-- choose name --</option>
+            {% for voter in political_data_managers_list %}
+              <option value="{{ voter.we_vote_id }}">{{ voter.get_full_name }}</option>
+            {% endfor %}
+          </select>
+          <input type="submit" value="Assign" />
+        </div>
+        {% if not hide_pagination %}
+          <span class="float-right">
+            {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+            Page {{ current_page_number|add:1 }}
+          | <a href="{{ next_page_url }}">Next page</a></span>
+        {% endif %}
+        <div class="form-group pull-right">
+          <div class="col-xs-4">
             <label for="which_marking_id" class="control-label">
               <span class="u-no-break">Mark selected rows as:</span>
             </label>
-        </div>
-        <div class="col-xs-6">
+          </div>
+          <div class="col-xs-6">
             <select id="which_marking_id" name="which_marking">
-                {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-                <option value="add_to_active_review">To Review</option>
-                <option value="from_prior_election">Past Year</option>
-                <option value="cannot_find_endorsements">Not Available Yet</option>
-                <option value="candidates_missing_from_we_vote">Candidates Missing</option>
-                <option value="capture_detailed_comments">Capture Comments</option>
-                <option value="done_needs_verification">Done-To Verify</option>
-                <option value="done_verified">Done-Verified</option>
-                <option value="hide_from_active_review">Archive</option>
-                <option value="ignore_this_source">Ignore Website in Future</option>
-                <option value="delete_this_source">Hard Delete this Entry</option>
+              {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+              <option value="add_to_active_review">To Review</option>
+              <option value="from_prior_election">Past Year</option>
+              <option value="cannot_find_endorsements">Not Available Yet</option>
+              <option value="candidates_missing_from_we_vote">Candidates Missing</option>
+              <option value="capture_detailed_comments">Capture Comments</option>
+              <option value="done_needs_verification">Done-To Verify</option>
+              <option value="done_verified">Done-Verified</option>
+              <option value="hide_from_active_review">Archive</option>
+              <option value="ignore_this_source">Ignore Website in Future</option>
+              <option value="delete_this_source">Hard Delete this Entry</option>
             </select>
+          </div>
+          <div class="col-xs-1">
+            <input type="submit" value="Save" class="btn btn-primary" />
+          </div>
         </div>
-        <div class="col-xs-1">
-            <input type="submit" value="Save" class="btn btn-primary"/>
-        </div>
-    </div>
 
         {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id starting_counter_number=starting_counter_number %}
-{% else %}
-    <p>(no voter guide possibilities found)</p>
-{% endif %}
-    {# Pass along the url_variables this page is using, so we can return to the same page state #}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
-    <input type="hidden" name="page" value="{{ page }}">
-    <input type="hidden" name="filter_selected_archive" value="{{ filter_selected_archive }}">
-    <input type="hidden" name="filter_selected_candidates_missing" value="{{ filter_selected_candidates_missing }}">
-    <input type="hidden" name="filter_selected_capture_detailed_comments" value="{{ filter_selected_capture_detailed_comments }}">
-    <input type="hidden" name="filter_selected_done_needs_verification" value="{{ filter_selected_done_needs_verification }}">
-    <input type="hidden" name="filter_selected_done_verified" value="{{ filter_selected_done_verified }}">
-    <input type="hidden" name="filter_selected_from_prior_election" value="{{ filter_selected_from_prior_election }}">
-    <input type="hidden" name="filter_selected_ignore" value="{{ filter_selected_ignore }}">
-    <input type="hidden" name="filter_selected_not_available_yet" value="{{ filter_selected_not_available_yet }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="voter_guide_possibility_search" value="{{ voter_guide_possibility_search }}">
-</form>
+      {% else %}
+        <p>(no voter guide possibilities found)</p>
+      {% endif %}
+      {# Pass along the url_variables this page is using, so we can return to the same page state #}
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id }}">
+      <input type="hidden"
+             name="show_all_elections"
+             value="{{ show_all_elections }}">
+      <input type="hidden" name="page" value="{{ page }}">
+      <input type="hidden"
+             name="filter_selected_archive"
+             value="{{ filter_selected_archive }}">
+      <input type="hidden"
+             name="filter_selected_candidates_missing"
+             value="{{ filter_selected_candidates_missing }}">
+      <input type="hidden"
+             name="filter_selected_capture_detailed_comments"
+             value="{{ filter_selected_capture_detailed_comments }}">
+      <input type="hidden"
+             name="filter_selected_done_needs_verification"
+             value="{{ filter_selected_done_needs_verification }}">
+      <input type="hidden"
+             name="filter_selected_done_verified"
+             value="{{ filter_selected_done_verified }}">
+      <input type="hidden"
+             name="filter_selected_from_prior_election"
+             value="{{ filter_selected_from_prior_election }}">
+      <input type="hidden"
+             name="filter_selected_ignore"
+             value="{{ filter_selected_ignore }}">
+      <input type="hidden"
+             name="filter_selected_not_available_yet"
+             value="{{ filter_selected_not_available_yet }}">
+      <input type="hidden" name="state_code" value="{{ state_code }}">
+      <input type="hidden"
+             name="voter_guide_possibility_search"
+             value="{{ voter_guide_possibility_search }}">
+    </form>
 
     {% if not hide_pagination %}
-    <span class="float-right">
-      {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
-      Page {{ current_page_number|add:1 }}
+      <span class="float-right">
+        {% if current_page_number > 0 %}<a href="{{ previous_page_url }}">Previous page</a> |{% endif %}
+        Page {{ current_page_number|add:1 }}
       | <a href="{{ next_page_url }}">Next page</a></span>
     {% endif %}
 
@@ -291,7 +380,7 @@
     <br />
     <br />
     <br />
-<script>
+    <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -327,5 +416,5 @@
             displayLoadingBanner();
         });
     });
-</script>
-{% endblock %}
+    </script>
+  {% endblock %}

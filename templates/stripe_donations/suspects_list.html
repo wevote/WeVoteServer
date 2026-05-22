@@ -3,152 +3,182 @@
 
 {% block title %}Stripe Fraudulent and Suspect Charges{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
 
-<style>
+  <style>
 h2, h3 {
     margin: 18px 0;
 }
 tr, th, td {
     font-size: 14px;
 }
-</style>
+  </style>
 
-<h3 >Stripe Fraudulent and Suspect Charges</h3>
-<div style="min-height: 90px">
+  <h3>Stripe Fraudulent and Suspect Charges</h3>
+  <div style="min-height: 90px">
     <div id="suspect1">
-        There are {{ number_of_suspects }} suspect charges in our database, {{ number_of_suspects_month }} from the last month.
-        <br />
-        These transactions (charge.succeeded) are cached at the moment they are received, and are not updated with current status.
+      There are {{ number_of_suspects }} suspect charges in our database, {{ number_of_suspects_month }} from the last month.
+      <br />
+      These transactions (charge.succeeded) are cached at the moment they are received, and are not updated with current status.
     </div>
     <div id="disputed1">
-        There are {{ number_of_disputes }} disputes in our database, {{ number_of_disputes_month }} from the last month.
-        <br />
-        We have two working weeks, to provide evidence that the charge is fraudulent.  Evidence due dates that are in the past are <span style="color: red">shown in red.</span>
-        <br />
-        These transactions (charge.dispute.funds_withdrawn) are cached at the moment they are received, and are not updated with current status.
+      There are {{ number_of_disputes }} disputes in our database, {{ number_of_disputes_month }} from the last month.
+      <br />
+      We have two working weeks, to provide evidence that the charge is fraudulent.  Evidence due dates that are in the past are <span style="color: red">shown in red.</span>
+      <br />
+      These transactions (charge.dispute.funds_withdrawn) are cached at the moment they are received, and are not updated with current status.
     </div>
     <div style="padding-top: 10px">
-        Click the link on the <b>Charge ID</b> field in any row, to go to the associated Stripe charge details page (you must have Stripe.com authentication for WeVote to see the page).
+      Click the link on the <b>Charge ID</b> field in any row, to go to the associated Stripe charge details page (you must have Stripe.com authentication for WeVote to see the page).
     </div>
-</div>
+  </div>
 
-<br />
-<div style="border: 1px solid #333; padding: 8px;margin: 20px;{% if not stripe_processing_enabled %}background-color: #ffc0c0;{% endif %}">
+  <br />
+  <div style="border: 1px solid #333;
+              padding: 8px;
+              margin: 20px;
+              {% if not stripe_processing_enabled %}background-color: #ffc0c0;{% endif %}">
     {% if stripe_processing_enabled %}
-        <span style="color: green;">Processing of Stripe Transactions is ENABLED</span>
+      <span style="color: green;">Processing of Stripe Transactions is ENABLED</span>
     {% else %}
-        <span style="color: black;">Processing of Stripe Transactions is DISABLED</span>
+      <span style="color: black;">Processing of Stripe Transactions is DISABLED</span>
     {% endif %}
     <span style="padding: 16px">
-        <input type="checkbox" name="toggle_confirm_one" id="toggle_confirm_one" value="0" style="margin: 0 6px 0 32px"/>
-        <button id="toggle_stripe_state" style="">{% if stripe_processing_enabled %}Disable{% else %}Enable{% endif %} Stripe (both checkboxes need to be checked)</button>
-        <input type="checkbox" name="toggle_confirm_two" id="toggle_confirm_two" value="0" style="margin: 0 0 0 6px"/>
+      <input type="checkbox"
+             name="toggle_confirm_one"
+             id="toggle_confirm_one"
+             value="0"
+             style="margin: 0 6px 0 32px" />
+      <button id="toggle_stripe_state" style="">
+        {% if stripe_processing_enabled %}
+          Disable
+        {% else %}
+          Enable
+        {% endif %}
+        Stripe (both checkboxes need to be checked)
+      </button>
+      <input type="checkbox"
+             name="toggle_confirm_two"
+             id="toggle_confirm_two"
+             value="0"
+             style="margin: 0 0 0 6px" />
     </span>
-</div>
-<br />
+  </div>
+  <br />
 
-<div id="tabs">
+  <div id="tabs">
     <ul>
-        <li><a href="#tabs-1">Disputed as Fraudulent</a></li>
-        <li><a href="#tabs-2">Suspect Charges (with no we_vote_voter_ids)</a></li>
+      <li>
+        <a href="#tabs-1">Disputed as Fraudulent</a>
+      </li>
+      <li>
+        <a href="#tabs-2">Suspect Charges (with no we_vote_voter_ids)</a>
+      </li>
     </ul>
     <div id="tabs-1">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Created</th>
-                    <th>Amount</th>
-                    <th>Fee</th>
-                    <th>Total</th>
-                    <th>Evidence Due By</th>
-                    <th>Zip Code</th>
-                    <th>Reason</th>
-                    <th>Charge ID</th>
-                    <th>Live Data</th>
-                </tr>
-            </thead>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Created</th>
+            <th>Amount</th>
+            <th>Fee</th>
+            <th>Total</th>
+            <th>Evidence Due By</th>
+            <th>Zip Code</th>
+            <th>Reason</th>
+            <th>Charge ID</th>
+            <th>Live Data</th>
+          </tr>
+        </thead>
         {% for dispute in disputes_list %}
-            <tr>
-                <td id="line_dispute_{{ forloop.counter }}">{{ forloop.counter }}</td>
-                <td>{{ dispute.created }}</td>
-                <td>{{ dispute.amount|pennies_to_money }}</td>
-                <td>{{ dispute.fee|pennies_to_money }}</td>
-                <td>{{ dispute.total_cost|pennies_to_money }}</td>
-                <td id="evidence_{{ forloop.counter }}">{{ dispute.evidence_due_by }}</td>
-                <td>{{ dispute.billing_address }}</td>
-                <td>{{ dispute.reason }}</td>
-                <td><a href="https://dashboard.stripe.com/payments/{{ dispute.charge_id}}" style="color: #007bff;" target="_blank">{{ dispute.charge_id}}</a>
-                <td>{{ dispute.livemode}}</td>
+          <tr>
+            <td id="line_dispute_{{ forloop.counter }}">{{ forloop.counter }}</td>
+            <td>{{ dispute.created }}</td>
+            <td>{{ dispute.amount|pennies_to_money }}</td>
+            <td>{{ dispute.fee|pennies_to_money }}</td>
+            <td>{{ dispute.total_cost|pennies_to_money }}</td>
+            <td id="evidence_{{ forloop.counter }}">{{ dispute.evidence_due_by }}</td>
+            <td>{{ dispute.billing_address }}</td>
+            <td>{{ dispute.reason }}</td>
+            <td>
+              <a href="https://dashboard.stripe.com/payments/{{ dispute.charge_id }}"
+                 style="color: #007bff"
+                 target="_blank">{{ dispute.charge_id }}</a>
+              <td>{{ dispute.livemode }}</td>
             </tr>
-        {% endfor %}
+          {% endfor %}
         </table>
         <div style="margin: 10px 0">
-            <span style="margin: 10px">
-                <a {% if prev_page_url_disputes %} style="color: #007bff;" href="{{ prev_page_url_disputes }}" {% endif %}>Previous page</a>
-            </span>
-            <span style="margin: 10px">
-                <a {% if next_page_url_disputes %} style="color: #007bff;" href="{{ next_page_url_disputes }}"{%  endif %}>Next page</a>
-            </span>
+          <span style="margin: 10px">
+            <a {% if prev_page_url_disputes %}style="color: #007bff;" href="{{ prev_page_url_disputes }}"{% endif %}>Previous page</a>
+          </span>
+          <span style="margin: 10px">
+            <a {% if next_page_url_disputes %}style="color: #007bff;" href="{{ next_page_url_disputes }}"{% endif %}>Next page</a>
+          </span>
         </div>
-    </div>
+      </div>
 
-    <div id="tabs-2">
+      <div id="tabs-2">
         <table class="table">
-            <thead>
-                <tr>
-                  <th></th>
-                  <th>Created</th>
-                  <th>Amount</th>
-                  <th>Paid</th>
-                  <th>Refunded</th>
-                  <th>Email</th>
-                  <th>Zipcode</th>
-                  <th>Brand</th>
-                  <th>Country</th>
-                  <th>Last 4</th>
-                  <th>Charge ID</th>
-                  <th>Live Data</th>
-                </tr>
-            </thead>
-        {% for suspect in suspects_list %}
+          <thead>
             <tr>
-                <td id="line_suspect_{{ forloop.counter }}">{{ forloop.counter }}</td>
-                <td>{{ suspect.created }}</td>
-                <td>{{ suspect.amount|pennies_to_money }}</td>
-                <td>{{ suspect.is_paid }}</td>
-                <td>{{ suspect.is_refunded }}</td>
-                <td>{{ suspect.email }}</td>
-                <td>{{ suspect.address_zip }}</td>
-                <td>{{ suspect.brand }}</td>
-                <td>{{ suspect.country }}</td>
-                <td>{{ suspect.last4 }}</td>
-                <td><a href="https://dashboard.stripe.com/payments/{{ suspect.stripe_charge_id }}" style="color: #007bff;" target="_blank">{{ suspect.stripe_charge_id }}</a>
-                <td>{{ suspect.livemode}}</td>
+              <th></th>
+              <th>Created</th>
+              <th>Amount</th>
+              <th>Paid</th>
+              <th>Refunded</th>
+              <th>Email</th>
+              <th>Zipcode</th>
+              <th>Brand</th>
+              <th>Country</th>
+              <th>Last 4</th>
+              <th>Charge ID</th>
+              <th>Live Data</th>
             </tr>
-        {% endfor %}
-        </table>
-        <div style="margin: 10px 0">
+          </thead>
+          {% for suspect in suspects_list %}
+            <tr>
+              <td id="line_suspect_{{ forloop.counter }}">{{ forloop.counter }}</td>
+              <td>{{ suspect.created }}</td>
+              <td>{{ suspect.amount|pennies_to_money }}</td>
+              <td>{{ suspect.is_paid }}</td>
+              <td>{{ suspect.is_refunded }}</td>
+              <td>{{ suspect.email }}</td>
+              <td>{{ suspect.address_zip }}</td>
+              <td>{{ suspect.brand }}</td>
+              <td>{{ suspect.country }}</td>
+              <td>{{ suspect.last4 }}</td>
+              <td>
+                <a href="https://dashboard.stripe.com/payments/{{ suspect.stripe_charge_id }}"
+                   style="color: #007bff"
+                   target="_blank">{{ suspect.stripe_charge_id }}</a>
+                <td>{{ suspect.livemode }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <div style="margin: 10px 0">
             <span style="margin: 10px">
-                <a {% if prev_page_url_suspects %} style="color: #007bff;" href="{{ prev_page_url_suspects }}" {% endif %}>Previous page</a>
+              <a {% if prev_page_url_suspects %}style="color: #007bff;" href="{{ prev_page_url_suspects }}"{% endif %}>Previous page</a>
             </span>
             <span style="margin: 10px">
-                <a {% if next_page_url_suspects %} style="color: #007bff;" href="{{ next_page_url_suspects }}"{%  endif %}>Next page</a>
+              <a {% if next_page_url_suspects %}style="color: #007bff;" href="{{ next_page_url_suspects }}"{% endif %}>Next page</a>
             </span>
+          </div>
         </div>
-    </div>
-</div>
-<div style="padding-top: 30px">
-    For testing ip history blocking:
-    <input type="text" name="ip_address" id="ip_address_id" style="width: 140px" />
-    <input type="submit" id="ip_address_button" value="Clear History Records For This IP" />
-</div>
+      </div>
+      <div style="padding-top: 30px">
+        For testing ip history blocking:
+        <input type="text" name="ip_address" id="ip_address_id" style="width: 140px" />
+        <input type="submit"
+               id="ip_address_button"
+               value="Clear History Records For This IP" />
+      </div>
 
 
-<script>
+      <script>
   const isInPast = (strDate) => {
     const parts = strDate.split(',')  ;
     const newStr = parts[0] +', ' + parts[1];
@@ -213,6 +243,6 @@ tr, th, td {
   if (window.location.href.includes('set_stripe_enabled=')) {
     window.location.href = window.location.href.replace(/[?&]set_stripe_enabled=(false|true)/gm, '');
   }
-</script>
+      </script>
 
-{% endblock %}
+    {% endblock %}

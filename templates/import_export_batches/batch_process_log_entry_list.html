@@ -4,208 +4,258 @@
 
 {% block title %}Batch Process Log{% endblock %}
 
-{%  block content %}
-<p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
->< Back to Batch Processes</a></p>
+{% block content %}
+  <p>
+    <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Batch Processes</a>
+  </p>
 
-<h1>Batch Process Log{% if batch_process_log_entry_list %} ({{ batch_process_log_entry_list_count }}){% endif %}</h1>
+  <h1>
+    Batch Process Log
+    {% if batch_process_log_entry_list %}({{ batch_process_log_entry_list_count }}){% endif %}
+  </h1>
 
-<form name="organization_position_choose_election" method="get" action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
+  <form name="organization_position_choose_election"
+        method="get"
+        action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
     {% csrf_token %}
     {% if election_list %}
-        <select id="google_civic_election_id" name="google_civic_election_id">
-            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-                -- Filter by Election --</option>
+      <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0"
+                {% if 0 == google_civic_election_id %}selected="selected"{% endif %}>-- Filter by Election --</option>
         {% for one_election in election_list %}
-            <option value="{{ one_election.google_civic_election_id }}"
-                    {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-                {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-                {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
+          <option value="{{ one_election.google_civic_election_id }}"
+                  {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+          </option>
         {% endfor %}
-        </select>
-        {% if google_civic_election_id %}
+      </select>
+      {% if google_civic_election_id %}
         <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?state_code={{ state_code }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}&batch_process_id={{ batch_process_id }}&batch_process_chunk_id={{ batch_process_chunk_id }}">
-            clear</a>
-          &nbsp;&nbsp;&nbsp;
-        {% endif %}
-    {% endif %}{# End of if election_list #}
+        clear</a>
+        &nbsp;&nbsp;&nbsp;
+      {% endif %}
+    {% endif %}
+    {# End of if election_list #}
 
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+      <input type="checkbox"
+             name="show_all_elections"
+             id="show_all_elections_id"
+             value="1"
+             {% if show_all_elections %}checked{% endif %} />
+      Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;
 
     {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
+      <select id="state_code_id" name="state_code">
+        <option value="">-- Filter by State Served --</option>
         {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
+          <option value="{{ key }}"
+                  {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
         {% endfor %}
-        </select>
-        {% if state_code != "" %}
+      </select>
+      {% if state_code != "" %}
         <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}&batch_process_id={{ batch_process_id }}&batch_process_chunk_id={{ batch_process_chunk_id }}">
-            show all states</a>
-        {% endif %}
+        show all states</a>
+      {% endif %}
     {% endif %}
     {# End of if state_list #}
-        <br />
-        {% if batch_process_log_entry_search %}
-            <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                 clear search</a>&nbsp;
-        {% endif %}
-        <input type="text" name="batch_process_log_entry_search" id="batch_process_log_entry_search_id" value="{{ batch_process_log_entry_search }}" style="width: 450px" />
-        <input type="submit" value="Search Batch Log" />
-        &nbsp;&nbsp;&nbsp;
-        {# Limit to on Batch Process ID #}
-        <input type="text" name="batch_process_id" id="batch_process_id" value="{{ batch_process_id }}" style="width: 80px" />
-        <input type="submit" value="Batch Process Id" />
-        &nbsp;&nbsp;&nbsp;
-        {# Limit to on Batch Process Chunk ID #}
-        <input type="text" name="batch_process_chunk_id" id="batch_process_chunk_id" value="{{ batch_process_chunk_id }}" style="width: 80px" />
-        <input type="submit" value="Batch Process Chunk Id" />      
-        <br />
-        <br />
-        <select id="kind_of_processes_to_show_id" name="kind_of_processes_to_show" onchange="this.form.submit()">
-            <option value="">-- Show All --</option>
-            <option value="ACTIVITY_NOTICE_PROCESS"
-            {% if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS" %} selected="selected"{% endif %}>
-                Activity Notice Processing</option>
-            <option value="ANALYTICS_ACTION"
-            {% if kind_of_processes_to_show == "ANALYTICS_ACTION" %} selected="selected"{% endif %}>
-                Analytics Processing</option>
-            <option value="API_REFRESH_REQUEST"
-            {% if kind_of_processes_to_show == "API_REFRESH_REQUEST" %} selected="selected"{% endif %}>
-                API Cache Refresh</option>
-            <option value="BALLOT_ITEMS"
-            {% if kind_of_processes_to_show == "BALLOT_ITEMS" %} selected="selected"{% endif %}>
-                Ballot Items</option>
-            <option value="DEDUPLICATION_SCRIPTS"
-            {% if kind_of_processes_to_show == "DEDUPLICATION_SCRIPTS" %} selected="selected"{% endif %}>
-                Deduplication Scripts</option>
-            <option value="MAINTENANCE_SCRIPTS"
-            {% if kind_of_processes_to_show == "MAINTENANCE_SCRIPTS" %} selected="selected"{% endif %}>
-                Maintenance Scripts</option>
-            <option value="MATCH_POLITICIANS_TO_ORGANIZATIONS"
-            {% if kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS" %} selected="selected"{% endif %}>
-                Match Politicians to Endorsers</option>
-            <option value="REPRESENTATIVES"
-            {% if kind_of_processes_to_show == "REPRESENTATIVES" %} selected="selected"{% endif %}>
-                Representatives</option>
-            <option value="RETRIEVE_FROM_BALLOTPEDIA"
-            {% if kind_of_processes_to_show == "RETRIEVE_FROM_BALLOTPEDIA" %} selected="selected"{% endif %}>
-                Retrieve from Ballotpedia</option>
-            <option value="SEARCH_TWITTER"
-            {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
-                Search Twitter</option>
-            <option value="GENERATE_VOTER_GUIDES"
-            {% if kind_of_processes_to_show == "GENERATE_VOTER_GUIDES" %} selected="selected"{% endif %}>
-                Generate Voter Guides</option>
-            <option value="UPDATE_TWITTER_DATA"
-            {% if kind_of_processes_to_show == "UPDATE_TWITTER_DATA" %} selected="selected"{% endif %}>
-                Update Twitter Data</option>
-        </select>
-        &nbsp;&nbsp;&nbsp;
-        <label for="after_datetime">After:</label>
-        <input type="datetime-local" id="after_datetime" name="after_datetime" value="{{ request.GET.after_datetime }}">
-     
-        <label for="before_datetime">Before:</label>
-        <input type="datetime-local" id="before_datetime" name="before_datetime" value="{{ request.GET.before_datetime }}">   
-        <input type="hidden" id="timezone_offset" name="timezone_offset">
-        <script>
+    <br />
+    {% if batch_process_log_entry_search %}
+      <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        clear search</a>&nbsp;
+      {% endif %}
+      <input type="text"
+             name="batch_process_log_entry_search"
+             id="batch_process_log_entry_search_id"
+             value="{{ batch_process_log_entry_search }}"
+             style="width: 450px" />
+      <input type="submit" value="Search Batch Log" />
+      &nbsp;&nbsp;&nbsp;
+      {# Limit to on Batch Process ID #}
+      <input type="text"
+             name="batch_process_id"
+             id="batch_process_id"
+             value="{{ batch_process_id }}"
+             style="width: 80px" />
+      <input type="submit" value="Batch Process Id" />
+      &nbsp;&nbsp;&nbsp;
+      {# Limit to on Batch Process Chunk ID #}
+      <input type="text"
+             name="batch_process_chunk_id"
+             id="batch_process_chunk_id"
+             value="{{ batch_process_chunk_id }}"
+             style="width: 80px" />
+      <input type="submit" value="Batch Process Chunk Id" />
+      <br />
+      <br />
+      <select id="kind_of_processes_to_show_id"
+              name="kind_of_processes_to_show"
+              onchange="this.form.submit()">
+        <option value="">-- Show All --</option>
+        <option value="ACTIVITY_NOTICE_PROCESS"
+                {% if kind_of_processes_to_show == "ACTIVITY_NOTICE_PROCESS" %}selected="selected"{% endif %}>
+          Activity Notice Processing
+        </option>
+        <option value="ANALYTICS_ACTION"
+                {% if kind_of_processes_to_show == "ANALYTICS_ACTION" %}selected="selected"{% endif %}>
+          Analytics Processing
+        </option>
+        <option value="API_REFRESH_REQUEST"
+                {% if kind_of_processes_to_show == "API_REFRESH_REQUEST" %}selected="selected"{% endif %}>
+          API Cache Refresh
+        </option>
+        <option value="BALLOT_ITEMS"
+                {% if kind_of_processes_to_show == "BALLOT_ITEMS" %}selected="selected"{% endif %}>
+          Ballot Items
+        </option>
+        <option value="DEDUPLICATION_SCRIPTS"
+                {% if kind_of_processes_to_show == "DEDUPLICATION_SCRIPTS" %}selected="selected"{% endif %}>
+          Deduplication Scripts
+        </option>
+        <option value="MAINTENANCE_SCRIPTS"
+                {% if kind_of_processes_to_show == "MAINTENANCE_SCRIPTS" %}selected="selected"{% endif %}>
+          Maintenance Scripts
+        </option>
+        <option value="MATCH_POLITICIANS_TO_ORGANIZATIONS"
+                {% if kind_of_processes_to_show == "MATCH_POLITICIANS_TO_ORGANIZATIONS" %}selected="selected"{% endif %}>
+          Match Politicians to Endorsers
+        </option>
+        <option value="REPRESENTATIVES"
+                {% if kind_of_processes_to_show == "REPRESENTATIVES" %}selected="selected"{% endif %}>
+          Representatives
+        </option>
+        <option value="RETRIEVE_FROM_BALLOTPEDIA"
+                {% if kind_of_processes_to_show == "RETRIEVE_FROM_BALLOTPEDIA" %}selected="selected"{% endif %}>
+          Retrieve from Ballotpedia
+        </option>
+        <option value="SEARCH_TWITTER"
+                {% if kind_of_processes_to_show == "SEARCH_TWITTER" %}selected="selected"{% endif %}>
+          Search Twitter
+        </option>
+        <option value="GENERATE_VOTER_GUIDES"
+                {% if kind_of_processes_to_show == "GENERATE_VOTER_GUIDES" %}selected="selected"{% endif %}>
+          Generate Voter Guides
+        </option>
+        <option value="UPDATE_TWITTER_DATA"
+                {% if kind_of_processes_to_show == "UPDATE_TWITTER_DATA" %}selected="selected"{% endif %}>
+          Update Twitter Data
+        </option>
+      </select>
+      &nbsp;&nbsp;&nbsp;
+      <label for="after_datetime">After:</label>
+      <input type="datetime-local"
+             id="after_datetime"
+             name="after_datetime"
+             value="{{ request.GET.after_datetime }}">
+
+      <label for="before_datetime">Before:</label>
+      <input type="datetime-local"
+             id="before_datetime"
+             name="before_datetime"
+             value="{{ request.GET.before_datetime }}">
+      <input type="hidden" id="timezone_offset" name="timezone_offset">
+      <script>
         document.getElementById("timezone_offset").value =
             new Date().getTimezoneOffset(); 
-        </script>
-        &nbsp;&nbsp;&nbsp;
-        {% if batch_process_log_entry_search or batch_process_id or batch_process_chunk_id or request.GET.after_datetime or request.GET.before_datetime %}
+      </script>
+      &nbsp;&nbsp;&nbsp;
+      {% if batch_process_log_entry_search or batch_process_id or batch_process_chunk_id or request.GET.after_datetime or request.GET.before_datetime %}
         <a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}{% if after_datetime %}&after_datetime={{ after_datetime }}{% endif %}{% if before_datetime %}&before_datetime={{ before_datetime }}{% endif %} ">
-            clear</a>
-        {% endif %}         
+        clear</a>
+      {% endif %}
 
-</form>{#  End of organization_position_choose_election form #}
 
-{% if batch_process_log_entry_list %}
-<form name="batch_process_log_entry_list_markings" method="post" action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
-    {% csrf_token %}
-{#    <div class="form-group pull-right">#}
-{#        <div class="col-xs-4">#}
-{#            <label for="which_marking_id" class="control-label">#}
-{#              <span class="u-no-break">Mark selected rows as:</span>#}
-{#            </label>#}
-{#        </div>#}
-{#        <div class="col-xs-6">#}
-{#            <select id="which_marking_id" name="which_marking">#}
-                {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-{#                <option value="is_battleground_race">Battleground Race</option>#}
-{#            </select>#}
-{#        </div>#}
-{#        <div class="col-xs-1">#}
-{#            <input type="submit" value="Save" />#}
-{#        </div>#}
-{#    </div>#}
-    {# Pass along the url_variables this page is using, so we can return to the same page state #}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
-    <input type="hidden" name="batch_process_log_entry_search" value="{{ batch_process_log_entry_search }}">
+    </form>
+    {#  End of organization_position_choose_election form #}
 
-    <!-- Pagination Section -->
-    {% if not hide_pagination %}
-    <span class="float-right">
-        {% if has_previous_page %}
-            <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
+    {% if batch_process_log_entry_list %}
+      <form name="batch_process_log_entry_list_markings"
+            method="post"
+            action="{% url 'import_export_batches:batch_process_log_entry_list' %}">
+        {% csrf_token %}
+        {#    <div class="form-group pull-right">#}
+        {#        <div class="col-xs-4">#}
+        {#            <label for="which_marking_id" class="control-label">#}
+        {#              <span class="u-no-break">Mark selected rows as:</span>#}
+        {#            </label>#}
+        {#        </div>#}
+        {#        <div class="col-xs-6">#}
+        {#            <select id="which_marking_id" name="which_marking">#}
+        {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+        {#                <option value="is_battleground_race">Battleground Race</option>#}
+        {#            </select>#}
+        {#        </div>#}
+        {#        <div class="col-xs-1">#}
+        {#            <input type="submit" value="Save" />#}
+        {#        </div>#}
+        {#    </div>#}
+        {# Pass along the url_variables this page is using, so we can return to the same page state #}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden"
+               name="show_all_elections"
+               value="{{ show_all_elections }}">
+        <input type="hidden"
+               name="batch_process_log_entry_search"
+               value="{{ batch_process_log_entry_search }}">
+
+        <!-- Pagination Section -->
+        {% if not hide_pagination %}
+          <span class="float-right">
+            {% if has_previous_page %}
+              <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
+            {% endif %}
+            Page {{ current_page_number|add:1 }}
+            {% if has_next_page %}| <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>{% endif %}
+          </span>
         {% endif %}
-        Page {{ current_page_number|add:1 }}
-        {% if has_next_page %}
-            | <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>
-        {% endif %}
-    </span>
-    {% endif %}
 
-    <table class="table">
-    {% for batch_process_log_entry in batch_process_log_entry_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:26 %}
-    {# Show the header every ~15 lines #}
-      <thead>
-        <tr>
-            <th>Date</th>
-            <th>Process ID</th>
-            <th>Chunk ID</th>
-            <th>Set ID</th>
-            <th>Kind of Process</th>
-            <th>Election</th>
-            <th>State</th>
-            <th>Status</th>
-        </tr>
-      </thead>
-    {% endif %}
-        <tr>
-            <td style="white-space: nowrap">{{ batch_process_log_entry.date_added|localtime|default_if_none:"" }}</td>
-            <td>{{ batch_process_log_entry.batch_process_id|default_if_none:"" }}</td>
-            <td>
+        <table class="table">
+          {% for batch_process_log_entry in batch_process_log_entry_list %}
+            {% if forloop.counter == 1 or forloop.counter|divisibleby:26 %}
+              {# Show the header every ~15 lines #}
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Process ID</th>
+                  <th>Chunk ID</th>
+                  <th>Set ID</th>
+                  <th>Kind of Process</th>
+                  <th>Election</th>
+                  <th>State</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+            {% endif %}
+            <tr>
+              <td style="white-space: nowrap">{{ batch_process_log_entry.date_added|localtime|default_if_none:"" }}</td>
+              <td>{{ batch_process_log_entry.batch_process_id|default_if_none:"" }}</td>
+              <td>
                 {% if batch_process_log_entry.batch_process_ballot_item_chunk_id %}
-                    {{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}
+                  {{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}
                 {% elif batch_process_log_entry.batch_process_representatives_chunk_id %}
-                    {{ batch_process_log_entry.batch_process_representatives_chunk_id|default_if_none:"" }}
+                  {{ batch_process_log_entry.batch_process_representatives_chunk_id|default_if_none:"" }}
                 {% endif %}
-            </td>
-            <td>{{ batch_process_log_entry.batch_set_id|default_if_none:"" }}</td>
-            <td>{{ batch_process_log_entry.kind_of_process }}</td>
-            <td>{{ batch_process_log_entry.google_civic_election_id|default_if_none:"" }}</td>
-            <td>{{ batch_process_log_entry.state_code|default_if_none:"" }}</td>
-            <td>{{ batch_process_log_entry.status|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-</form>
-    <p></p>
-{% else %}
-    <p>(no log entries found)</p>
-{% endif %}
+              </td>
+              <td>{{ batch_process_log_entry.batch_set_id|default_if_none:"" }}</td>
+              <td>{{ batch_process_log_entry.kind_of_process }}</td>
+              <td>{{ batch_process_log_entry.google_civic_election_id|default_if_none:"" }}</td>
+              <td>{{ batch_process_log_entry.state_code|default_if_none:"" }}</td>
+              <td>{{ batch_process_log_entry.status|default_if_none:"" }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </form>
+      <p></p>
+    {% else %}
+      <p>(no log entries found)</p>
+    {% endif %}
 
     <script>
     $(function() {
@@ -225,4 +275,4 @@
     });
     </script>
 
-{% endblock %}
+  {% endblock %}

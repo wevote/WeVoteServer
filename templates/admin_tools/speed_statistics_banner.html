@@ -2,90 +2,97 @@
 {% load performance_tags %}
 
 <body>
-<div class="alert alert-info" role="alert" id="SpeedStatisticsPopup"
-     style="display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; text-align: center; padding: 15px;">
-    <span class="close" id="SpeedStatisticsClose" style="position: absolute;
-                                top: 2px;
-                                right: 2px;">&times;
-    </span>
+  <div class="alert alert-info"
+       role="alert"
+       id="SpeedStatisticsPopup"
+       style="display: none;
+              justify-content: space-between;
+              align-items: center;
+              position: relative;
+              width: 100%;
+              text-align: center;
+              padding: 15px">
+    <span class="close"
+          id="SpeedStatisticsClose"
+          style="position: absolute;
+                 top: 2px;
+                 right: 2px">&times;</span>
 
     <table class="table table-bordered">
-        <thead>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Time Difference (seconds)</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for view, stats in performance_dict.items %}
+          <tr>
+            <td colspan="3" style="font-weight: bold; text-align: left">{{ view }}</td>
+          </tr>
+          {% for stat in stats %}
             <tr>
-                <th>Name</th>
-                <th>Time Difference (seconds)</th>
-                <th>Description</th>
+              {% if stat.name %}
+                {% if "subsnapshot" in stat.name|lower %}
+                  {% with stat.name|cut:"Subsnapshot_" as short_name %}
+                    <td style="color:#777; font-size:0.8em; line-height:1;">Nested Snapshot: {{ short_name }}</td>
+                    <td style="color:#777; font-size:0.8em; line-height:1;">{{ stat.time_difference|floatformat:4 }}</td>
+                    <td style="font-weight:100;
+                               color:#888;
+                               text-align:left;
+                               font-size:0.8em;
+                               line-height:1">{{ stat.description }}</td>
+                  {% endwith %}
+                {% else %}
+                  <td>{{ stat.name }}</td>
+                  <td>{{ stat.time_difference|floatformat:4 }}</td>
+                  <td style="font-weight:300; color:#666; text-align:left;">{{ stat.description }}</td>
+                {% endif %}
+              {% else %}
+                <td colspan="3">{{ stat }}</td>
+              {% endif %}
             </tr>
-        </thead>
-        <tbody>
-            {% for view, stats in performance_dict.items %}
-                <tr>
-                    <td colspan="3" style="font-weight: bold; text-align: left">{{ view }}</td>
-                </tr>
-                {% for stat in stats %}
-                    <tr>
-                        {% if stat.name %}
-                            {% if "subsnapshot" in stat.name|lower %}
-                                {% with stat.name|cut:"Subsnapshot_" as short_name %}
-                                    <td style="color:#777; font-size:0.8em; line-height:1;">
-                                        Nested Snapshot: {{ short_name }}
-                                    </td>
-                                    <td style="color:#777; font-size:0.8em; line-height:1;">
-                                        {{ stat.time_difference|floatformat:4 }}
-                                    </td>
-                                    <td style="font-weight:100; color:#888; text-align:left; font-size:0.8em; line-height:1;">
-                                        {{ stat.description }}
-                                    </td>
-                                {% endwith %}
-                            {% else %}
-                                <td>{{ stat.name }}</td>
-                                <td>{{ stat.time_difference|floatformat:4 }}</td>
-                                <td style="font-weight:300; color:#666; text-align:left;">
-                                    {{ stat.description }}
-                                </td>
-                            {% endif %}
-                        {% else %}
-                            <td colspan="3">{{ stat }}</td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                <tr style="font-weight: bold; background-color: #C0DDED;">
-                    <td>Total for {{ view }}</td>
-                    <td>{{ stats|performance_total|floatformat:4 }}</td>
-                    <td style="font-weight: bold; color: #666; text-align: left;">
-                        Sum of performance snapshots for {{ view }}</td>
-                </tr>
-            {% endfor %}
-            {# mjacquot1 Changes START #}
-            {% comment %} comment out the load time display {% endcomment %}
-            <tr>
-                <td colspan="3" style="font-weight: bold; text-align: left">rendering</td>
-            </tr>
-            <tr>
-                <td>Render Time</td>
-                <td id="renderLoadTimeDisplay"> Render time not available</td>
-                <td style="font-weight: 300; color: #666; text-align: left;">
-                    The amount of time it took to render the page in Django.
-                </td>
-            </tr>
-            <tr>
-                <td>Browser Load Time</td>
-                <td id="browserLoadTimeDisplay"></td>
-                <td style="font-weight: 300; color: #666; text-align: left;">
-                    The amount of time it took the browserto load static and dynamic elements of this page.
-                </td>
-            </tr>
-          {# mjacquot1 Changes END #}
-        </tbody>
+          {% endfor %}
+          <tr style="font-weight: bold; background-color: #C0DDED;">
+            <td>Total for {{ view }}</td>
+            <td>{{ stats|performance_total|floatformat:4 }}</td>
+            <td style="font-weight: bold; color: #666; text-align: left;">Sum of performance snapshots for {{ view }}</td>
+          </tr>
+        {% endfor %}
+        {# mjacquot1 Changes START #}
+        {% comment %} comment out the load time display {% endcomment %}
+        <tr>
+          <td colspan="3" style="font-weight: bold; text-align: left">rendering</td>
+        </tr>
+        <tr>
+          <td>Render Time</td>
+          <td id="renderLoadTimeDisplay">Render time not available</td>
+          <td style="font-weight: 300; color: #666; text-align: left;">
+            The amount of time it took to render the page in Django.
+          </td>
+        </tr>
+        <tr>
+          <td>Browser Load Time</td>
+          <td id="browserLoadTimeDisplay"></td>
+          <td style="font-weight: 300; color: #666; text-align: left;">
+            The amount of time it took the browserto load static and dynamic elements of this page.
+          </td>
+        </tr>
+        {# mjacquot1 Changes END #}
+      </tbody>
     </table>
-</div>
+  </div>
 
-<div style="display: flex; justify-content: flex-end;">
-    <button id="SpeedStatisticsButton" class="toggle_button" style="padding: 10px 20px; border: 1px solid black; background-color: white; cursor: pointer;">
-        Speed Statistics
-    </button>
-</div>
-<script>
+  <div style="display: flex; justify-content: flex-end;">
+    <button id="SpeedStatisticsButton"
+            class="toggle_button"
+            style="padding: 10px 20px;
+                   border: 1px solid black;
+                   background-color: white;
+                   cursor: pointer">Speed Statistics</button>
+  </div>
+  <script>
     // Handle showing the Speed Statistics table on button click
     document.querySelector('.toggle_button').addEventListener('click', function() {
         document.getElementById('SpeedStatisticsPopup').style.display = 'flex';
@@ -112,5 +119,5 @@
             elementToRemove.remove();
         }
     });
-</script>
+  </script>
 </body>

@@ -1,14 +1,17 @@
 <!-- Header navigation -->
 <div class="navbar navbar-inverse" style="height: 52px;">
 
-    <div class="we-vote-logo">
-      <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        <img src="https://quality.wevote.us/img/api-server/we-vote-logo-horizontal-color.svg" height="48px" />
-      </a>
+  <div class="we-vote-logo">
+    <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      <img src="https://quality.wevote.us/img/api-server/we-vote-logo-horizontal-color.svg"
+           height="48px" />
+    </a>
 
-      <div class="navbar-right">
+    <div class="navbar-right">
       {% if user and not user.is_anonymous %}
-        {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}" alt="" class="navimg"> #}
+        {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}"
+      alt=""
+      class="navimg"> #}
         <div class="navbar-text hidden-sm hidden-xs">
           {% if user.first_name %}
             <a href="/login_we_vote">{{ user.first_name }}</a> is a Voter
@@ -21,7 +24,7 @@
           <a href="/login_we_vote?next={{ request.path }}">Login</a>
         </div>
       {% endif %}
-      </div>
     </div>
+  </div>
 
 </div>

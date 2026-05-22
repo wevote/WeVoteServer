@@ -2,124 +2,157 @@
 {# This template is used to add (or edit) a OrganizationReservedDomain #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if reserved_domain_id %}Edit Reserved Domain{% else %}Add Reserved Domain{% endif %}{% endblock %}
+{% block title %}
+  {% if reserved_domain_id %}
+    Edit Reserved Domain
+  {% else %}
+    Add Reserved Domain
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-<!-- START organization/templates/organization/reserved_domain_edit.html //-->
+{% block content %}
+  <!-- START organization/templates/organization/reserved_domain_edit.html //-->
 
-<style>
+  <style>
   .form-group {
     clear: both;
     padding-top: 20px;
   }
-</style>
+  </style>
 
-<p><a href="{% url 'organization:reserved_domain_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    < Back to Reserved Domains</a></p>
+  <p>
+    <a href="{% url 'organization:reserved_domain_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    < Back to Reserved Domains</a>
+  </p>
 
-<h1>{% if reserved_domain_id %}Edit Reserved Domain{% else %}Add Reserved Domain{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  <h1>
+    {% if reserved_domain_id %}
+      Edit Reserved Domain
+    {% else %}
+      Add Reserved Domain
+    {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
-<form action="{% url "organization:reserved_domain_edit_process" %}" method="post">
-{% csrf_token %}
-    <input type="hidden" name="reserved_domain_id" value="{{ reserved_domain_id }}">
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+  <form action="{% url "organization:reserved_domain_edit_process" %}"
+        method="post">
+    {% csrf_token %}
+    <input type="hidden"
+           name="reserved_domain_id"
+           value="{{ reserved_domain_id }}">
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
 
 
-{# Subdomain of WeVote.US #}
-<div class="form-group">
-    <label for="subdomain_string_id" class="col-sm-2 control-label">
-      Sub Domain Name
-      {% if subdomain_string %}
-      <a href="https://{{ subdomain_string }}.wevote.us"
-         target="_blank"
-         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-      {% endif %}
-    </label>
-    <div class="col-sm-9">
-        <input type="text" name="subdomain_string" id="subdomain_string_id"
+    {# Subdomain of WeVote.US #}
+    <div class="form-group">
+      <label for="subdomain_string_id" class="col-sm-2 control-label">
+        Sub Domain Name
+        {% if subdomain_string %}
+          <a href="https://{{ subdomain_string }}.wevote.us"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+      </label>
+      <div class="col-sm-9">
+        <input type="text"
+               name="subdomain_string"
+               id="subdomain_string_id"
                value="{{ subdomain_string|default_if_none:"" }}"
                class="form-control" />
-      .WeVote.US
+        .WeVote.US
+      </div>
     </div>
-</div>
 
 
-{# Full Domain Name Website Address #}
-<div class="form-group">
-    <label for="full_domain_string_id" class="col-sm-2 control-label">
-      Full Domain Name
-      {% if full_domain_string %}
-      <a href="https://{{ full_domain_string }}"
-         target="_blank"
-         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-      {% endif %}
-    </label>
-    <div class="col-sm-9">
-        <input type="text" name="full_domain_string" id="full_domain_string_id"
+    {# Full Domain Name Website Address #}
+    <div class="form-group">
+      <label for="full_domain_string_id" class="col-sm-2 control-label">
+        Full Domain Name
+        {% if full_domain_string %}
+          <a href="https://{{ full_domain_string }}"
+             target="_blank"
+             class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+      </label>
+      <div class="col-sm-9">
+        <input type="text"
+               name="full_domain_string"
+               id="full_domain_string_id"
                value="{{ full_domain_string|default_if_none:"" }}"
                class="form-control" />
+      </div>
     </div>
-</div>
 
-<div class="form-group">
-    <div class="col-sm-9">
+    <div class="form-group">
+      <div class="col-sm-9">
         <button type="submit" class="btn btn-default">
-            {% if reserved_domain_id %}Update Reserved Domain{% else %}Save New{% endif %}
+          {% if reserved_domain_id %}
+            Update Reserved Domain
+          {% else %}
+            Save New
+          {% endif %}
         </button>
         or
         <a href="{% url 'organization:reserved_domain_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         cancel</a>
+      </div>
     </div>
-</div>
 
-</form>
+  </form>
 
-<br />
-<br />
-<br />
+  <br />
+  <br />
+  <br />
 
-{% if organization_domain_list or reserved_domain_list %}
+  {% if organization_domain_list or reserved_domain_list %}
     <div>
-        <h2>Duplicate Reserved Domain Found</h2>
+      <h2>Duplicate Reserved Domain Found</h2>
     </div>
-{% endif %}
+  {% endif %}
 
-{% for organization in organization_domain_list %}
+  {% for organization in organization_domain_list %}
     {% if organization.chosen_domain_string or organization.chosen_domain_string2 or organization.chosen_domain_string3 %}
-        {{ organization.chosen_domain_string }}{% if organization.chosen_domain_string2 %}, {{organization.chosen_domain_string2|default_if_none:""}}{% endif %}{% if organization.chosen_domain_string3 %}, {{organization.chosen_domain_string3|default_if_none:""}}{% endif %}
-        <a href="https://{{ organization.chosen_domain_string }}.wevote.us"
-           target="_blank"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        &nbsp;
-        <a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-           class="">edit</a>
-        <br />
+      {{ organization.chosen_domain_string }}
+      {% if organization.chosen_domain_string2 %}, {{ organization.chosen_domain_string2|default_if_none:"" }}{% endif %}
+      {% if organization.chosen_domain_string3 %}, {{ organization.chosen_domain_string3|default_if_none:"" }}{% endif %}
+      <a href="https://{{ organization.chosen_domain_string }}.wevote.us"
+         target="_blank"
+         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+      &nbsp;
+      <a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+         class="">edit</a>
+      <br />
     {% endif %}
     {% if organization.chosen_subdomain_string %}
-        {{ organization.chosen_subdomain_string }}.WeVote.US
-        <a href="https://{{ organization.chosen_subdomain_string }}.wevote.us"
-           target="_blank"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-        &nbsp;
-        <a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-           class="">edit</a>
-        <br />
+      {{ organization.chosen_subdomain_string }}.WeVote.US
+      <a href="https://{{ organization.chosen_subdomain_string }}.wevote.us"
+         target="_blank"
+         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+      &nbsp;
+      <a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+         class="">edit</a>
+      <br />
     {% endif %}
-{% endfor %}
+  {% endfor %}
 
-{% for reserved_domain in reserved_domain_list %}
+  {% for reserved_domain in reserved_domain_list %}
     {% if reserved_domain.full_domain_string %}
-        {{reserved_domain.full_domain_string}}
+      {{ reserved_domain.full_domain_string }}
     {% elif reserved_domain.subdomain_string %}
-        {{reserved_domain.subdomain_string}}.WeVote.US
-        <a href="https://{{ subdomain_string }}.wevote.us"
-           target="_blank"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+      {{ reserved_domain.subdomain_string }}.WeVote.US
+      <a href="https://{{ subdomain_string }}.wevote.us"
+         target="_blank"
+         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
     {% endif %}
     <a href="{% url 'organization:reserved_domain_edit' %}?reserved_domain_id={{ reserved_domain.id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">edit</a>
     <br />
-{% endfor %}
+  {% endfor %}
 
 {% endblock %}

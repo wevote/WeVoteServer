@@ -6,14 +6,13 @@
 {% block title %}Message Sent{% endblock %}
 
 {% block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
 
-<div class="container mt-5 p-4 bg-white rounded shadow-sm border" style="max-width: 800px;">
-    {{ email_body_assembled|safe }}
-</div>
+  <div class="container mt-5 p-4 bg-white rounded shadow-sm border"
+       style="max-width: 800px">{{ email_body_assembled|safe }}</div>
 
-{% load static %}
+  {% load static %}
 {% endblock %}

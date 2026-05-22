@@ -3,89 +3,94 @@
 
 {% block title %}Office Explanations{% endblock %}
 
-{%  block content %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>Office Explanations</h1>
+  <h1>Office Explanations</h1>
 
-{% if state_code != "" %}
-    <a href="#" onclick="showAllStates(); return false;">
-        show all states</a>
-{% endif %}
-{% if state_list %}
-    <form name="office_explanation_choose_state" method="get" action="{% url 'office:office_explanations_list' %}">
-    {% csrf_token %}
-    <select id="state_code_id" name="state_code">
-        <option value="">
-            -- Filter by State Served --</option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-    <input type="submit" value="Filter" />
+  {% if state_code != "" %}<a href="#" onclick="showAllStates(); return false;">show all states</a>{% endif %}
+  {% if state_list %}
+    <form name="office_explanation_choose_state"
+          method="get"
+          action="{% url 'office:office_explanations_list' %}">
+      {% csrf_token %}
+      <select id="state_code_id" name="state_code">
+        <option value="">-- Filter by State Served --</option>
+        {% for key, state in state_list %}
+          <option value="{{ key }}"
+                  {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+        {% endfor %}
+      </select>
+      <input type="submit" value="Filter" />
     </form>
-{% endif %}{# End of if state_list #}
+  {% endif %}
+  {# End of if state_list #}
 
-{% if office_search %}
+  {% if office_search %}
     <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
     <!-- <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
          clear search</a>&nbsp; -->
-{% endif %}
+  {% endif %}
 
-<form name="office_explanation_search_form" method="get" action="{% url 'office:office_explanations_list' %}">
+  <form name="office_explanation_search_form"
+        method="get"
+        action="{% url 'office:office_explanations_list' %}">
     {% csrf_token %}
-    <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" placeholder="Search for office explanations" />
+    <input type="text"
+           name="office_search"
+           id="office_search_id"
+           value="{{ office_search }}"
+           placeholder="Search for office explanations" />
     <input type="submit" value="Search" />
-</form>
+  </form>
 
-{% if office_list %}
+  {% if office_list %}
     <table class="table table-sm table-hover">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>Office Explanation Name</th>
-                <th>State</th>
-                <th>Office Explanation</th>
-                <th>Horizontal Video URL</th>
-                <th>Square Video URL</th>
-                <th>Vertical Video URL</th>
-                <th>ID</th>
-                <th>Edit</th>
+      <thead>
+        <tr>
+          <th>&nbsp;</th>
+          <th>Office Explanation Name</th>
+          <th>State</th>
+          <th>Office Explanation</th>
+          <th>Horizontal Video URL</th>
+          <th>Square Video URL</th>
+          <th>Vertical Video URL</th>
+          <th>ID</th>
+          <th>Edit</th>
 
-            </tr>
-        </thead>
-        <tbody>
+        </tr>
+      </thead>
+      <tbody>
         {% for office in office_list %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td><a href="{% url 'office:office_explanation_summary' office.we_vote_id %}">{{ office.office_explanation_name }}</a></td>
-                <td>{{ office.state_code }}</td>
-                <td>
-                    {{ office.office_explanation|default:"(no explanation)"|truncatechars:120 }}
-                </td>
-                <td>{{ office.video_url_horizontal|default:"(no url)" }}</td>
-                <td>{{ office.video_url_square|default:"(no url)" }}</td>
-                <td>{{ office.video_url_vertical|default:"(no url)" }}</td>
-                <td>{{ office.we_vote_id }}</td>
-                <td>
-                    <a href="{% url 'office:office_explanation_edit' office.we_vote_id %}">edit</a>
-                </td>
-            </tr>
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <a href="{% url 'office:office_explanation_summary' office.we_vote_id %}">{{ office.office_explanation_name }}</a>
+            </td>
+            <td>{{ office.state_code }}</td>
+            <td>{{ office.office_explanation|default:"(no explanation)"|truncatechars:120 }}</td>
+            <td>{{ office.video_url_horizontal|default:"(no url)" }}</td>
+            <td>{{ office.video_url_square|default:"(no url)" }}</td>
+            <td>{{ office.video_url_vertical|default:"(no url)" }}</td>
+            <td>{{ office.we_vote_id }}</td>
+            <td>
+              <a href="{% url 'office:office_explanation_edit' office.we_vote_id %}">edit</a>
+            </td>
+          </tr>
         {% endfor %}
-        </tbody>
+      </tbody>
     </table>
-{% else %}
+  {% else %}
     <p>(no office explanations found)</p>
-{% endif %}
+  {% endif %}
 
-<p><a href="{% url 'office:office_explanation_new' %}">
-    Add New Office Explanation
-</p>
+  <p>
+    <a href="{% url 'office:office_explanation_new' %}">
+      Add New Office Explanation
+    </p>
 
-<script>
+    <script>
     function displayLoadingBanner() {
         $('#FilterPopupMessage').show();
     }
@@ -101,6 +106,6 @@
         $('#office_search_id').val('');
         $('form[name="office_explanation_search_form"]').submit();
     }
-</script>
+    </script>
 
-{% endblock content %}
+  {% endblock content %}

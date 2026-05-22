@@ -4,14 +4,16 @@
 {{ json_from_google }}
 
 {% if legislator_list %}
-    <ul>
+  <ul>
     {% for legislatorcurrent in legislator_list %}
-        <li><a href="{% url 'import_export_theunitedstatesio:legislatorcurrent_detail' legislatorcurrent.id %}">{{ legislatorcurrent.first_name }} {{ legislatorcurrent.last_name }}</a></li>
+      <li>
+        <a href="{% url 'import_export_theunitedstatesio:legislatorcurrent_detail' legislatorcurrent.id %}">{{ legislatorcurrent.first_name }} {{ legislatorcurrent.last_name }}</a>
+      </li>
     {% endfor %}
-    </ul>
+  </ul>
 {% else %}
-    <p>No legislators are available.</p>
+  <p>No legislators are available.</p>
 {% endif %}
 
 <br />
-<a href="{% url 'import_export:import_export_index'%}">back to index</a>
+<a href="{% url 'import_export:import_export_index' %}">back to index</a>

@@ -3,23 +3,29 @@
 
 {% block js %}
   {# planDialog is in WeVoteServer/apis_v1/static/js/planDialog.js #}
-  <script src="https://quality.wevote.us/javascript/api-server/PlanDialog.js" type="text/javascript"></script>
+  <script src="https://quality.wevote.us/javascript/api-server/PlanDialog.js"
+          type="text/javascript"></script>
 {% endblock %}
 {% block title %}Coupons{% endblock %}
 
-{%  block content %}
+{% block content %}
 
-<h1>Coupons/Paid Subscription Plans for an Endorser</h1>
+  <h1>Coupons/Paid Subscription Plans for an Endorser</h1>
 
-<br>
-<span>
-  <input id="create-coupon" type="button" value="Create a Coupon" />
-</span>
-<br><br>
-&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rollupOlderVersions"> Display only the latest version of each Coupon<br>
-<br><br>
+  <br>
+  <span>
+    <input id="create-coupon" type="button" value="Create a Coupon" />
+  </span>
+  <br>
+  <br>
+  &nbsp;&nbsp;&nbsp;
+  <input type="checkbox" id="rollupOlderVersions">
+  Display only the latest version of each Coupon
+  <br>
+  <br>
+  <br>
 
-{% if plans %}
+  {% if plans %}
 
     <table id="pl" class="plan-table">
       <thead style="border-bottom: 2pt solid black;">
@@ -40,7 +46,12 @@
       </thead>
       {% for plan in plans %}
         <tr style="border-bottom: 1pt solid lightgrey">
-          <td style="width: 50px"><input id="edit-plan" type="button" value={{ plan.id }} onclick="activePlan = {{plan}}" /></td>
+          <td style="width: 50px">
+            <input id="edit-plan"
+                   type="button"
+                   value="{{ plan.id }}"
+                   onclick="activePlan = {{ plan }}" />
+          </td>
           <td style="width: 275px">{{ plan.coupon_code }}</td>
           <td style="width: 200px">{{ plan.premium_plan_type_enum }}</td>
           <td style="width: 200px">{{ plan.hidden_plan_comment }}</td>
@@ -51,7 +62,9 @@
           <td style="width: 65px; text-align: center">{{ plan.features_provided_bitmap }}</td>
           <td style="width: 120px">{{ plan.plan_created_at }}</td>
           <td style="width: 85px" class="base-expire">{{ plan.coupon_expires_date }}</td>
-          <td style="width: 65px">{% if plan.is_archived %}{{ plan.is_archived }}{% endif %}</td>
+          <td style="width: 65px">
+            {% if plan.is_archived %}{{ plan.is_archived }}{% endif %}
+          </td>
         </tr>
       {% endfor %}
     </table>
@@ -60,58 +73,132 @@
   {% endif %}
 
   <div id="dialog-form" title="Coupon Details">
-  <form>
-    <fieldset>
-      <label for="id">id</label><br>
-      <input type="text" name="id" id="id" value="000" disabled class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="coupon_code">Coupon Code</label><br>
-      <input type="text" name="coupon_code" id="coupon_code" value="" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="premium_plan_type_enum">Plan Type (Yearly and "paid without stripe" plans do not work yet)</label><br>
-      <select name="premium_plan_type_enum" id="premium_plan_type_enum" class="text ui-widget-content ui-corner-all"><br>
-        <option>FREE</option>
-        <option selected="selected">PROFESSIONAL_MONTHLY</option>
-        <option>ENTERPRISE_MONTHLY</option>
-        <option>PROFESSIONAL_YEARLY</option>
-        <option>ENTERPRISE_YEARLY</option>
-        <option>PROFESSIONAL_PAID_WITHOUT_STRIPE</option>
-        <option>ENTERPRISE_PAID_WITHOUT_STRIPE</option>
-      </select><br>
-      <div style="height: 7px;"></div>
-      <label for="hidden_plan_comment">Hidden Plan Comment</label><br>
-      <input type="text" name="hidden_plan_comment" id="hidden_plan_comment" value="" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="run_at">Coupon Applied Message</label><br>
-      <input type="text" name="coupon_applied_message" id="coupon_applied_message" value="" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="monthly_price_stripe">Monthly Price (annualized)</label><br>
-      <span id="monthly">
-        <input type="number" name="monthly_price_stripe" id="monthly_price_stripe" class="text ui-widget-content ui-corner-all">
-        <input type="number" name="annualized_monthly" id="annualized_monthly" value="" class="text ui-widget-content ui-corner-all" disabled><br>
-      </span>
-      <div style="height: 7px;"></div>
-      <label for="annual_price_stripe">Annual Price</label><br>
-      <input type="number" name="annual_price_stripe" id="annual_price_stripe" min="0.00" max="10000.00" step="1.00" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="redemptions">Redemptions</label><br>
-      <input type="text" name="redemptions" id="redemptions" value="" disabled class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="features_provided_bitmap">Features Provided Bitmap</label><br>
-      <input type="text" name="features_provided_bitmap" id="features_provided_bitmap" value="" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="plan_created_at">Plan Created Date</label><br>
-      <input type="text" name="plan_created_at" id="plan_created_at" value="" disabled class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
-      <label for="coupon_expires_date">Expiration Date of Coupon</label><br>
-      <input type="text" name="coupon_expires_date" id="coupon_expires_date" value="" class="text ui-widget-content ui-corner-all"><br>
-      <div style="height: 7px;"></div>
+    <form>
+      <fieldset>
+        <label for="id">id</label>
+        <br>
+        <input type="text"
+               name="id"
+               id="id"
+               value="000"
+               disabled
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="coupon_code">Coupon Code</label>
+        <br>
+        <input type="text"
+               name="coupon_code"
+               id="coupon_code"
+               value=""
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="premium_plan_type_enum">Plan Type (Yearly and "paid without stripe" plans do not work yet)</label>
+        <br>
+        <select name="premium_plan_type_enum"
+                id="premium_plan_type_enum"
+                class="text ui-widget-content ui-corner-all">
+          <br>
+          <option>FREE</option>
+          <option selected="selected">PROFESSIONAL_MONTHLY</option>
+          <option>ENTERPRISE_MONTHLY</option>
+          <option>PROFESSIONAL_YEARLY</option>
+          <option>ENTERPRISE_YEARLY</option>
+          <option>PROFESSIONAL_PAID_WITHOUT_STRIPE</option>
+          <option>ENTERPRISE_PAID_WITHOUT_STRIPE</option>
+        </select>
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="hidden_plan_comment">Hidden Plan Comment</label>
+        <br>
+        <input type="text"
+               name="hidden_plan_comment"
+               id="hidden_plan_comment"
+               value=""
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="run_at">Coupon Applied Message</label>
+        <br>
+        <input type="text"
+               name="coupon_applied_message"
+               id="coupon_applied_message"
+               value=""
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="monthly_price_stripe">Monthly Price (annualized)</label>
+        <br>
+        <span id="monthly">
+          <input type="number"
+                 name="monthly_price_stripe"
+                 id="monthly_price_stripe"
+                 class="text ui-widget-content ui-corner-all">
+          <input type="number"
+                 name="annualized_monthly"
+                 id="annualized_monthly"
+                 value=""
+                 class="text ui-widget-content ui-corner-all"
+                 disabled>
+          <br>
+        </span>
+        <div style="height: 7px;"></div>
+        <label for="annual_price_stripe">Annual Price</label>
+        <br>
+        <input type="number"
+               name="annual_price_stripe"
+               id="annual_price_stripe"
+               min="0.00"
+               max="10000.00"
+               step="1.00"
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="redemptions">Redemptions</label>
+        <br>
+        <input type="text"
+               name="redemptions"
+               id="redemptions"
+               value=""
+               disabled
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="features_provided_bitmap">Features Provided Bitmap</label>
+        <br>
+        <input type="text"
+               name="features_provided_bitmap"
+               id="features_provided_bitmap"
+               value=""
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="plan_created_at">Plan Created Date</label>
+        <br>
+        <input type="text"
+               name="plan_created_at"
+               id="plan_created_at"
+               value=""
+               disabled
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
+        <label for="coupon_expires_date">Expiration Date of Coupon</label>
+        <br>
+        <input type="text"
+               name="coupon_expires_date"
+               id="coupon_expires_date"
+               value=""
+               class="text ui-widget-content ui-corner-all">
+        <br>
+        <div style="height: 7px;"></div>
 
-      <!-- Allow form submission with keyboard without duplicating the dialog button -->
-      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-    </fieldset>
-  </form>
-</div>
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+      </fieldset>
+    </form>
+  </div>
 
 
 {% endblock %}

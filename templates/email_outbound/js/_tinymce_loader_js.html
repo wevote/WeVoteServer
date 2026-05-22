@@ -1,106 +1,107 @@
 document.addEventListener("DOMContentLoaded", function () {
-  if (!window.tinymce) {
-    console.log("TinyMCE not loaded.");
-    return;
-  }
+if (!window.tinymce) {
+console.log("TinyMCE not loaded.");
+return;
+}
 
-  console.log("TinyMCE loaded from WebApp.");
-  {# get uuid from api #}
-  const draftUuid = "{{ draft_uuid|default:'' }}" || crypto.randomUUID();
+console.log("TinyMCE loaded from WebApp.");
+{# get uuid from api #}
+const draftUuid = "{{ draft_uuid|default:'' }}" || crypto.randomUUID();
 
-  // Remove existing editors if re-rendered
-  tinymce.remove(".js-tinymce");
+// Remove existing editors if re-rendered
+tinymce.remove(".js-tinymce");
 
-  tinymce.init({
-    selector: ".js-tinymce",
-    license_key: "gpl",
-    menubar: true,
-    plugins:
-      "advlist autolink lists link image charmap preview anchor " +
-      "searchreplace visualblocks code fullscreen insertdatetime media " +
-      "table help wordcount",
-    toolbar:
-      "undo redo | blocks fontsize | " +
-      "bold italic underline strikethrough | forecolor backcolor | " +
-      "alignleft aligncenter alignright alignjustify | " +
-      "outdent indent | bullist numlist | " +
-      "link image media table | removeformat code fullscreen help",
-    toolbar_mode: "wrap",
-    height: 500,
-    branding: false,
-    promotion: false,
-    content_style:
-      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
-    link_default_target: "_blank",
-    link_assume_external_targets: true,
-    block_formats:
-      "Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre",
-    font_size_formats: "8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt",
-    extended_valid_elements: "*[*]",
-    valid_children: "+body[style]",
+tinymce.init({
+selector: ".js-tinymce",
+license_key: "gpl",
+menubar: true,
+plugins:
+"advlist autolink lists link image charmap preview anchor " +
+"searchreplace visualblocks code fullscreen insertdatetime media " +
+"table help wordcount",
+toolbar:
+"undo redo | blocks fontsize | " +
+"bold italic underline strikethrough | forecolor backcolor | " +
+"alignleft aligncenter alignright alignjustify | " +
+"outdent indent | bullist numlist | " +
+"link image media table | removeformat code fullscreen help",
+toolbar_mode: "wrap",
+height: 500,
+branding: false,
+promotion: false,
+content_style:
+'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
+link_default_target: "_blank",
+link_assume_external_targets: true,
+block_formats:
+"Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre",
+font_size_formats: "8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt",
+extended_valid_elements: "*[*]",
+valid_children: "+body[style]",
 
-    {#  process image, store it, and display it in TinyMCE #}
-    images_upload_handler: async (blobInfo, progress) => {
-      const formData = new FormData();
-      const file = blobInfo.blob()
+{#  process image, store it, and display it in TinyMCE #}
+images_upload_handler: async (blobInfo, progress) => {
+const formData = new FormData();
+const file = blobInfo.blob()
 
-      const timestamp = new Date().getTime();
+const timestamp = new Date().getTime();
 
-      // prepare file name so it is identifiable
-      const filename = (file.name && !file.name.includes('blobid'))
-                 ? file.name
-                 : `upload_${timestamp}.${extension}`;
+// prepare file name so it is identifiable
+const filename = (file.name && !file.name.includes('blobid'))
+? file.name
+: `upload_${timestamp}.${extension}`;
 
-      formData.append("file", file, filename);
-      if (draftUuid) formData.append("draft_uuid", draftUuid);
+formData.append("file", file, filename);
+if (draftUuid) formData.append("draft_uuid", draftUuid);
 
-      const res = await fetch("{% url 'email_outbound:email_attachment_image_upload' %}", {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": csrfToken,
-        },
-        body: formData,
-      });
+const res = await fetch("{% url 'email_outbound:email_attachment_image_upload' %}", {
+method: "POST",
+headers: {
+"X-CSRFToken": csrfToken,
+},
+body: formData,
+});
 
-      if (!res.ok) {
-        throw new Error(`Image upload failed (${res.status})`);
-      }
+if (!res.ok) {
+throw new Error(`Image upload failed (${res.status})`);
+}
 
-      const data = await res.json();
-      return data.location;   // TinyMCE inserts this into <img src="...">
-    },
+const data = await res.json();
+return data.location;   // TinyMCE inserts this into
+<img src="...">
+},
 
-    file_picker_types: "image",
-    file_picker_callback: function (callback, value, meta) {
-      if (meta.filetype === "image") {
-        var input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = function () {
-          var file = this.files[0];
-          var reader = new FileReader();
-          reader.onload = function () {
+file_picker_types: "image",
+file_picker_callback: function (callback, value, meta) {
+if (meta.filetype === "image") {
+var input = document.createElement("input");
+input.type = "file";
+input.accept = "image/*";
+input.onchange = function () {
+var file = this.files[0];
+var reader = new FileReader();
+reader.onload = function () {
 
-            // We convert the base64 back to a blob
-            // but manually attach the original name to it.
+// We convert the base64 back to a blob
+// but manually attach the original name to it.
 
-            const blobCache =  tinymce.activeEditor.editorUpload.blobCache;
-            const base64 = reader.result.split(',')[1];
-            const blobInfo = blobCache.create(file.name, file, base64);
-            blobCache.add(blobInfo);
+const blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+const base64 = reader.result.split(',')[1];
+const blobInfo = blobCache.create(file.name, file, base64);
+blobCache.add(blobInfo);
 
-            callback(blobInfo.blobUri(), { title: file.name });
-          };
-          reader.readAsDataURL(file);
-        };
-        input.click();
-      }
-    },
+callback(blobInfo.blobUri(), { title: file.name });
+};
+reader.readAsDataURL(file);
+};
+input.click();
+}
+},
 
-    setup: function (editor) {
-      editor.on("init", function () {
-        console.log("TinyMCE initialized successfully");
-      });
-    },
-  });
+setup: function (editor) {
+editor.on("init", function () {
+console.log("TinyMCE initialized successfully");
+});
+},
+});
 });

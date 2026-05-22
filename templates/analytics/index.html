@@ -1,123 +1,135 @@
 {# templates/analytics/index.html #}
 {% extends "template_base.html" %}
 
-{% block title %}
-    We Vote Analytics
-{% endblock %}
+{% block title %}We Vote Analytics{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
+{% block content %}
+  {% load template_filters %}
 
-<h1>We Vote Analytics</h1>
-<p>
+  <h1>We Vote Analytics</h1>
+  <p>
     <a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a>,
     <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    View Raw Log</a>,
-    <a href="https://datastudio.google.com/open/0B1Hg2s8Ne1lXb1pFRVJONFN2ZDQ"
-       target="_blank">Google Data Studio Dashboard <span class="glyphicon glyphicon-new-window"></span></a>,
-    <a href="https://analytics.google.com/analytics/web/#report/advertising-adwords-campaigns/a75328949w120491204p126067505/"
-       target="_blank">Google Analytics + AdWords <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
+      View Raw Log</a>,
+      <a href="https://datastudio.google.com/open/0B1Hg2s8Ne1lXb1pFRVJONFN2ZDQ"
+         target="_blank">Google Data Studio Dashboard <span class="glyphicon glyphicon-new-window"></span></a>,
+      <a href="https://analytics.google.com/analytics/web/#report/advertising-adwords-campaigns/a75328949w120491204p126067505/"
+         target="_blank">Google Analytics + AdWords <span class="glyphicon glyphicon-new-window"></span></a>
+    </p>
 
 
-<h2>Sitewide Voter Metrics</h2>
+    <h2>Sitewide Voter Metrics</h2>
     <p>
-        Show the most recent voters who have visited site and the major steps they've completed.
-        <a href="{% url 'analytics:sitewide_voter_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+      Show the most recent voters who have visited site and the major steps they've completed.
+      <a href="{% url 'analytics:sitewide_voter_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
     </p>
 
     {% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
 
 
 
-<h2>Sitewide Daily Metrics</h2>
+    <h2>Sitewide Daily Metrics</h2>
     <p>
-        Show activity day-to-day, across the entire site.
-        <a href="{% url 'analytics:sitewide_daily_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+      Show activity day-to-day, across the entire site.
+      <a href="{% url 'analytics:sitewide_daily_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
     </p>
 
     {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
 
 
 
-<h2>Sitewide Election Metrics</h2>
+    <h2>Sitewide Election Metrics</h2>
     <p>
-        Show activity related to each election.
-        <a href="{% url 'analytics:sitewide_election_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+      Show activity related to each election.
+      <a href="{% url 'analytics:sitewide_election_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
     </p>
 
     {% include "analytics/sitewide_election_metrics_table.html" %}
 
 
 
-{% if voter_allowed_to_see_organization_analytics %}
-<h2>Endorser Election Metrics</h2>
-    <p>
+    {% if voter_allowed_to_see_organization_analytics %}
+      <h2>Endorser Election Metrics</h2>
+      <p>
         Show activity related to how voters are viewing one organization, for one election.
         <a href="{% url 'analytics:organization_election_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
-    </p>
+      </p>
 
-    {% include "analytics/organization_election_metrics_table.html" %}
-{% endif %}
-
-
-<h2>Manually Update Metrics</h2>
-
-<form name="choose_election" method="get" action="{% url 'analytics:analytics_index' %}">
-    {% csrf_token %}
-    {% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
-        {% for one_election in election_list %}
-        <option value="{{ one_election.google_civic_election_id }}"
-                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
-        {% endfor %}
-    </select>
-    {% endif %}{# End of if election_list #}
-</form>
+      {% include "analytics/organization_election_metrics_table.html" %}
+    {% endif %}
 
 
+    <h2>Manually Update Metrics</h2>
 
-<h2>Latest Analytics Processing Date</h2>
+    <form name="choose_election"
+          method="get"
+          action="{% url 'analytics:analytics_index' %}">
+      {% csrf_token %}
+      {% if election_list %}
+        <select id="google_civic_election_id" name="google_civic_election_id">
+          <option value="0"
+                  {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
+            -- Filter by Election --
+          </option>
+          {% for one_election in election_list %}
+            <option value="{{ one_election.google_civic_election_id }}"
+                    {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+              {% if one_election.state_code %}{{ one_election.state_code }}{% endif %}
+              {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}
+            </option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      {# End of if election_list #}
+    </form>
 
-<form name="search_daily_metrics" method="get" action="{% url 'analytics:analytics_index_process' %}">
-  {% csrf_token %}
-  <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
-  <input type="hidden" name="state_code" value="{{ state_code }}" />
 
-  <div>
-    <div class="form-group">
-        <label for="analytics_date_as_integer_last_processed_id" class="col-sm-3 control-label">Last Date Processed YYYYMMDD</label>
-        <div class="col-sm-2">
-            <input type="text" name="analytics_date_as_integer_last_processed" id="analytics_date_as_integer_last_processed_id" class="form-control"
+
+    <h2>Latest Analytics Processing Date</h2>
+
+    <form name="search_daily_metrics"
+          method="get"
+          action="{% url 'analytics:analytics_index_process' %}">
+      {% csrf_token %}
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id }}" />
+      <input type="hidden" name="state_code" value="{{ state_code }}" />
+
+      <div>
+        <div class="form-group">
+          <label for="analytics_date_as_integer_last_processed_id"
+                 class="col-sm-3 control-label">Last Date Processed YYYYMMDD</label>
+          <div class="col-sm-2">
+            <input type="text"
+                   name="analytics_date_as_integer_last_processed"
+                   id="analytics_date_as_integer_last_processed_id"
+                   class="form-control"
                    value="{{ analytics_date_as_integer_last_processed }}" />
+          </div>
+          <div class="col-sm-2">{{ analytics_date_last_processed|default_if_none:"" }}</div>
         </div>
-        <div class="col-sm-2">
-            {{ analytics_date_last_processed|default_if_none:"" }}
+      </div>
+      <br />
+      <div>
+        <div class="form-group">
+          <label for="update_last_processed_date_id" class="col-sm-3 control-label">&nbsp;</label>
+          <div class="col-sm-2">
+            <button type="submit"
+                    class="btn btn-default"
+                    name="update_last_processed_date_button">Save Earlier Date</button>
+          </div>
         </div>
-    </div>
-  </div>
-  <br />
-  <div>
-    <div class="form-group">
-        <label for="update_last_processed_date_id" class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-2">
-            <button type="submit" class="btn btn-default" name="update_last_processed_date_button">Save Earlier Date</button>
-        </div>
-    </div>
-  </div>
-</form>
+      </div>
+    </form>
 
 
-<script>
+    <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
     });
-</script>
+    </script>
 
-{% endblock %}
+  {% endblock %}

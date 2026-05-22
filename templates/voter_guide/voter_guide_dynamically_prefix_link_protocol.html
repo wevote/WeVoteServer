@@ -2,14 +2,13 @@
 {# include parameters are: link, text, count (only) #}
 {# if count==1 include the <script> section #}
 
-<a onclick="prefix_protocol_link('{{ link }}')" style="word-break: break-all;">
-{% if text %}
-{{ text }}
-{% endif %}
-<span class="glyphicon glyphicon-new-window" style="color: #337ab7"></span></a>
+<a onclick="prefix_protocol_link('{{ link }}')"
+   style="word-break: break-all">
+  {% if text %}{{ text }}{% endif %}
+  <span class="glyphicon glyphicon-new-window" style="color: #337ab7"></span></a>
 
 {% if count == 1 %}
-<script>
+  <script>
     function prefix_protocol_link(url) {
         if (url.startsWith("http")) {
             window.open(url, '_blank');
@@ -29,5 +28,5 @@
             }
         });
     }
-</script>
+  </script>
 {% endif %}

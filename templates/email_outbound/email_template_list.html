@@ -3,11 +3,11 @@
 {% block title %}Email Templates{% endblock %}
 
 {% block content %}
-{% load template_filters %}
-{% load humanize %}
-{% include "admin_tools/loading_banner.html" %}
+  {% load template_filters %}
+  {% load humanize %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<style>
+  <style>
   .wv-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .wv-spacer { flex:1; }
   .wv-section { margin-top: 18px; }
@@ -40,45 +40,51 @@
   .wv-actions-right { display:flex; gap:8px; justify-content:flex-end; margin-top: 12px; }
   .wv-muted-section { background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:12px; }
 
-</style>
+  </style>
 
-<a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-  &lt; Back to Email Campaigns
-</a>
+  <a href="{% url 'email_outbound:email_campaign_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    &lt; Back to Email Campaigns
+  </a>
 
-<div class="wv-row" style="margin-top:10px;">
-  <h1 style="margin:0;">Email Templates</h1>
-  <div class="wv-spacer"></div>
+  <div class="wv-row" style="margin-top:10px;">
+    <h1 style="margin:0;">Email Templates</h1>
+    <div class="wv-spacer"></div>
 
-  {# Create Template (unfiled by default) #}
-  <form class="wv-inline-form" method="post" action="{{ process_url }}">
-    {% csrf_token %}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="hidden" name="action" value="create_template">
-    <button class="btn btn-primary" type="submit">Create email template</button>
-  </form>
+    {# Create Template (unfiled by default) #}
+    <form class="wv-inline-form" method="post" action="{{ process_url }}">
+      {% csrf_token %}
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id }}">
+      <input type="hidden" name="state_code" value="{{ state_code }}">
+      <input type="hidden" name="action" value="create_template">
+      <button class="btn btn-primary" type="submit">Create email template</button>
+    </form>
 
-  {# Create Folder button => modal #}
-  <button id="openCreateFolder" class="btn btn-primary">Create folder</button>
-</div>
-{# ---------------- ACTIVE FOLDERS ---------------- #}
-<div class="wv-section">
-  {% for f in folders_active %}
+    {# Create Folder button => modal #}
+    <button id="openCreateFolder" class="btn btn-primary">Create folder</button>
+  </div>
+  {# ---------------- ACTIVE FOLDERS ---------------- #}
+  <div class="wv-section">
+    {% for f in folders_active %}
       {% with list=templates_by_folder|get_value_from_dict:f.id %}
         <details class="wv-accordion" open>
           <summary class="wv-accordion-head">
-            <div class="wv-accordion-title" >
-                <svg class="chevron" width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 10l5 5 5-5"></path>
-                </svg>
-                <strong>{{ f.email_template_name }}</strong>
+            <div class="wv-accordion-title">
+              <svg class="chevron"
+                   width="25"
+                   height="25"
+                   viewBox="0 0 24 24"
+                   aria-hidden="true">
+                <path d="M7 10l5 5 5-5"></path>
+              </svg>
+              <strong>{{ f.email_template_name }}</strong>
             </div>
             <div class="wv-actions">
               {% if list %}
-                  <span class="wv-tag">{{ list|length }} templates</span>
+                <span class="wv-tag">{{ list|length }} templates</span>
               {% else %}
-                  <span class="wv-tag">0 templates</span>
+                <span class="wv-tag">0 templates</span>
               {% endif %}
               <div class="wv-dropdown">
                 <button type="button" class="wv-kebab js-dd">•••</button>
@@ -87,7 +93,9 @@
                   {# Create template in this folder #}
                   <form class="wv-inline-form" method="post" action="{{ process_url }}">
                     {% csrf_token %}
-                    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+                    <input type="hidden"
+                           name="google_civic_election_id"
+                           value="{{ google_civic_election_id }}">
                     <input type="hidden" name="state_code" value="{{ state_code }}">
                     <input type="hidden" name="action" value="create_template">
                     <input type="hidden" name="folder_id" value="{{ f.id }}">
@@ -95,145 +103,181 @@
                   </form>
 
                   {# Other folder options#}
-                  <button class="wv-menu-btn js-open-rename" data-folder-id="{{ f.id }}" data-folder-name="{{ f.email_template_name }}">Rename folder</button>
-                  <button class="wv-menu-btn js-open-archive-folder" data-folder-id="{{ f.id }}" data-folder-name="{{ f.email_template_name }}">Archive folder</button>
-                  <button class="wv-menu-btn js-open-delete-folder" data-folder-id="{{ f.id }}" data-folder-name="{{ f.email_template_name }}">Delete folder</button>
+                  <button class="wv-menu-btn js-open-rename"
+                          data-folder-id="{{ f.id }}"
+                          data-folder-name="{{ f.email_template_name }}">Rename folder</button>
+                  <button class="wv-menu-btn js-open-archive-folder"
+                          data-folder-id="{{ f.id }}"
+                          data-folder-name="{{ f.email_template_name }}">Archive folder</button>
+                  <button class="wv-menu-btn js-open-delete-folder"
+                          data-folder-id="{{ f.id }}"
+                          data-folder-name="{{ f.email_template_name }}">Delete folder</button>
                 </div>
               </div>
             </div>
           </summary>
 
           <div class="wv-list">
-              {% if list %}
-                {% for t in list %}
-                  <div class="wv-item" id="template_row_{{ t.id }}">
-                    <div>
-                      <a href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}"
-                         style="font-size: 1.2em;">
+            {% if list %}
+              {% for t in list %}
+                <div class="wv-item" id="template_row_{{ t.id }}">
+                  <div>
+                    <a href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}"
+                       style="font-size: 1.2em">
                       <strong>{{ t.email_template_name }}</strong>
-                      </a>
-                      {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
-                    </div>
-                    <div class="wv-actions">
-                      <a class="btn btn-secondary" href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">
-                          Edit</a>
+                    </a>
+                    {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
+                  </div>
+                  <div class="wv-actions">
+                    <a class="btn btn-secondary"
+                       href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">
+                    Edit</a>
 
-                      {# Other template Options#}
-                      <div class="wv-dropdown">
-                        <button type="button" class="wv-kebab js-dd">•••</button>
-                        <div class="wv-dropdown-menu">
-                          <button class="wv-menu-btn js-open-move" data-template-id="{{ t.id }}" data-current-folder-id="{{ f.id|default_if_none:'null' }}">Change folder</button>
-                          <button class="wv-menu-btn js-open-archive-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Archive</button>
-                          <button class="wv-menu-btn js-open-delete-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Delete</button>
-                        </div>
+                    {# Other template Options#}
+                    <div class="wv-dropdown">
+                      <button type="button" class="wv-kebab js-dd">•••</button>
+                      <div class="wv-dropdown-menu">
+                        <button class="wv-menu-btn js-open-move"
+                                data-template-id="{{ t.id }}"
+                                data-current-folder-id="{{ f.id|default_if_none:'null' }}">Change folder</button>
+                        <button class="wv-menu-btn js-open-archive-template"
+                                data-template-id="{{ t.id }}"
+                                data-template-name="{{ t.email_template_name }}">Archive</button>
+                        <button class="wv-menu-btn js-open-delete-template"
+                                data-template-id="{{ t.id }}"
+                                data-template-name="{{ t.email_template_name }}">Delete</button>
                       </div>
                     </div>
                   </div>
-                {% endfor %}
-              {% else %}
-                <div class="wv-muted">No templates in this folder yet.</div>
-              {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="wv-muted">No templates in this folder yet.</div>
+            {% endif %}
           </div>
         </details>
       {% endwith %}
-  {% empty %}
-    <div class="wv-muted-section">No folders yet</div>
-  {% endfor %}
+    {% empty %}
+      <div class="wv-muted-section">No folders yet</div>
+    {% endfor %}
 
-  {# ---------------- UNFILED FOLDER ---------------- #}
-  <details class="wv-accordion" style="margin-top:10px;" open>
-    <summary class="wv-accordion-head">
-      <div class="wv-accordion-title" >
-        <svg class="chevron" width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
+    {# ---------------- UNFILED FOLDER ---------------- #}
+    <details class="wv-accordion" style="margin-top:10px;" open>
+      <summary class="wv-accordion-head">
+        <div class="wv-accordion-title">
+          <svg class="chevron"
+               width="25"
+               height="25"
+               viewBox="0 0 24 24"
+               aria-hidden="true">
             <path d="M7 10l5 5 5-5"></path>
-        </svg>
-        <strong>Unfiled</strong>
-      </div>
-      <div class="wv-actions">
-        {% if unfiled_templates %}
+          </svg>
+          <strong>Unfiled</strong>
+        </div>
+        <div class="wv-actions">
+          {% if unfiled_templates %}
             <span class="wv-tag">{{ unfiled_templates|length }} templates</span>
-        {% else %}
+          {% else %}
             <span class="wv-tag">0 templates</span>
-        {% endif %}
-        <form class="wv-inline-form" method="post" action="{{ process_url }}">
-          {% csrf_token %}
-          <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-          <input type="hidden" name="state_code" value="{{ state_code }}">
-          <input type="hidden" name="action" value="create_template">
-          <input type="hidden" name="folder_id" value="null">
-          <button class="btn btn-secondary" type="submit">Create email template</button>
-        </form>
-      </div>
-    </summary>
+          {% endif %}
+          <form class="wv-inline-form" method="post" action="{{ process_url }}">
+            {% csrf_token %}
+            <input type="hidden"
+                   name="google_civic_election_id"
+                   value="{{ google_civic_election_id }}">
+            <input type="hidden" name="state_code" value="{{ state_code }}">
+            <input type="hidden" name="action" value="create_template">
+            <input type="hidden" name="folder_id" value="null">
+            <button class="btn btn-secondary" type="submit">Create email template</button>
+          </form>
+        </div>
+      </summary>
 
-    <div class="wv-list">
-      {% if unfiled_templates %}
-        {% for t in unfiled_templates %}
-          <div class="wv-item" id="template_row_unfiled_{{ t.id }}">
-            <div>
-              <a href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}"
-                 style="font-size: 1.2em;">
-                <strong>{{ t.email_template_name }}</strong>
-              </a>
-              {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
-            </div>
-            <div class="wv-actions">
-              <a class="btn btn-secondary" href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">
-                  Edit</a>
+      <div class="wv-list">
+        {% if unfiled_templates %}
+          {% for t in unfiled_templates %}
+            <div class="wv-item" id="template_row_unfiled_{{ t.id }}">
+              <div>
+                <a href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}"
+                   style="font-size: 1.2em">
+                  <strong>{{ t.email_template_name }}</strong>
+                </a>
+                {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
+              </div>
+              <div class="wv-actions">
+                <a class="btn btn-secondary"
+                   href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">
+                Edit</a>
 
-              <div class="wv-dropdown">
-                <button type="button" class="wv-kebab js-dd">•••</button>
-                <div class="wv-dropdown-menu">
-                  <button class="wv-menu-btn js-open-move" data-template-id="{{ t.id }}" data-current-folder-id="null">Change folder</button>
-                  <button class="wv-menu-btn js-open-archive-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Archive</button>
-                  <button class="wv-menu-btn js-open-delete-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Delete</button>
+                <div class="wv-dropdown">
+                  <button type="button" class="wv-kebab js-dd">•••</button>
+                  <div class="wv-dropdown-menu">
+                    <button class="wv-menu-btn js-open-move"
+                            data-template-id="{{ t.id }}"
+                            data-current-folder-id="null">Change folder</button>
+                    <button class="wv-menu-btn js-open-archive-template"
+                            data-template-id="{{ t.id }}"
+                            data-template-name="{{ t.email_template_name }}">Archive</button>
+                    <button class="wv-menu-btn js-open-delete-template"
+                            data-template-id="{{ t.id }}"
+                            data-template-name="{{ t.email_template_name }}">Delete</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <div class="wv-muted">No unfiled templates.</div>
-      {% endif %}
-    </div>
-  </details>
-</div>
+          {% endfor %}
+        {% else %}
+          <div class="wv-muted">No unfiled templates.</div>
+        {% endif %}
+      </div>
+    </details>
+  </div>
 
-{# ---------------- ARCHIVED FOLDERS ---------------- #}
-<div class="wv-section">
-  <details class="wv-accordion">
-    <summary class="wv-accordion-head">
-        <div class="wv-accordion-title" >
-            <svg class="chevron" width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 10l5 5 5-5"></path>
-            </svg>
+  {# ---------------- ARCHIVED FOLDERS ---------------- #}
+  <div class="wv-section">
+    <details class="wv-accordion">
+      <summary class="wv-accordion-head">
+        <div class="wv-accordion-title">
+          <svg class="chevron"
+               width="25"
+               height="25"
+               viewBox="0 0 24 24"
+               aria-hidden="true">
+            <path d="M7 10l5 5 5-5"></path>
+          </svg>
 
-            <h4 style="margin:0;">Archived Folders</h4>
+          <h4 style="margin:0;">Archived Folders</h4>
         </div>
-    </summary>
+      </summary>
 
-    {% if folders_archived %}
-      {% for f in folders_archived %}
-        {% with list=templates_by_folder|get_value_from_dict:f.id %}
+      {% if folders_archived %}
+        {% for f in folders_archived %}
+          {% with list=templates_by_folder|get_value_from_dict:f.id %}
             <details class="wv-accordion" style="margin-top:10px;">
               <summary class="wv-accordion-head">
-                <div class="wv-accordion-title" >
-                    <svg class="chevron" width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M7 10l5 5 5-5"></path>
-                    </svg>
-                    <strong>{{ f.email_template_name }}</strong>
-                    <span class="wv-tag" title="Archived folder">Archived</span>
+                <div class="wv-accordion-title">
+                  <svg class="chevron"
+                       width="25"
+                       height="25"
+                       viewBox="0 0 24 24"
+                       aria-hidden="true">
+                    <path d="M7 10l5 5 5-5"></path>
+                  </svg>
+                  <strong>{{ f.email_template_name }}</strong>
+                  <span class="wv-tag" title="Archived folder">Archived</span>
                 </div>
                 <div class="wv-actions">
                   {% if list %}
-                      <span class="wv-tag">{{ list|length }} templates</span>
+                    <span class="wv-tag">{{ list|length }} templates</span>
                   {% else %}
-                      <span class="wv-tag">0 templates</span>
+                    <span class="wv-tag">0 templates</span>
                   {% endif %}
                   <div class="wv-dropdown">
                     <button type="button" class="wv-kebab js-dd">•••</button>
                     <div class="wv-dropdown-menu">
-                      <button class="wv-menu-btn js-open-unarchive-folder" data-folder-id="{{ f.id }}" data-folder-name="{{ f.email_template_name }}">Unarchive folder</button>
+                      <button class="wv-menu-btn js-open-unarchive-folder"
+                              data-folder-id="{{ f.id }}"
+                              data-folder-name="{{ f.email_template_name }}">Unarchive folder</button>
                     </div>
                   </div>
                 </div>
@@ -242,301 +286,373 @@
               {# Templates in archived folder#}
               <div class="wv-list">
 
-                  {% if list %}
-                    {% for t in list %}
-                      <div class="wv-item">
-                        <div>
-                          <strong>{{ t.email_template_name }}</strong>
-                          {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
-                        </div>
-                        <div class="wv-actions">
-                          <a class="btn btn-secondary" href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">Edit</a>
-                          <div class="wv-dropdown">
-                            <button type="button" class="wv-kebab js-dd">•••</button>
-                            <div class="wv-dropdown-menu">
-                              <button class="wv-menu-btn js-open-move" data-template-id="{{ t.id }}" data-current-folder-id="{{ f.id }}">Change folder</button>
-                              <button class="wv-menu-btn js-open-archive-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Archive</button>
-                              <button class="wv-menu-btn js-open-delete-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Delete</button>
-                            </div>
+                {% if list %}
+                  {% for t in list %}
+                    <div class="wv-item">
+                      <div>
+                        <strong>{{ t.email_template_name }}</strong>
+                        {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
+                      </div>
+                      <div class="wv-actions">
+                        <a class="btn btn-secondary"
+                           href="{{ template_edit_url }}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&email_template_id={{ t.id }}">Edit</a>
+                        <div class="wv-dropdown">
+                          <button type="button" class="wv-kebab js-dd">•••</button>
+                          <div class="wv-dropdown-menu">
+                            <button class="wv-menu-btn js-open-move"
+                                    data-template-id="{{ t.id }}"
+                                    data-current-folder-id="{{ f.id }}">Change folder</button>
+                            <button class="wv-menu-btn js-open-archive-template"
+                                    data-template-id="{{ t.id }}"
+                                    data-template-name="{{ t.email_template_name }}">Archive</button>
+                            <button class="wv-menu-btn js-open-delete-template"
+                                    data-template-id="{{ t.id }}"
+                                    data-template-name="{{ t.email_template_name }}">Delete</button>
                           </div>
                         </div>
                       </div>
-                    {% endfor %}
-                  {% else %}
-                    <div class="wv-muted">No lists from templates in this archived folder.</div>
-                  {% endif %}
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="wv-muted">No lists from templates in this archived folder.</div>
+                {% endif %}
               </div>
             </details>
-        {% endwith %}
-      {% endfor %}
-    {% else %}
-      <div class="wv-muted-section">No archived folders.</div>
-    {% endif %}
-  </details>
-</div>
+          {% endwith %}
+        {% endfor %}
+      {% else %}
+        <div class="wv-muted-section">No archived folders.</div>
+      {% endif %}
+    </details>
+  </div>
 
-{# ---------------- ARCHIVED TEMPLATES LIST ---------------- #}
-<div class="wv-section">
-  <details class="wv-accordion">
-    <summary class="wv-accordion-head">
-        <div class="wv-accordion-title" >
-            <svg class="chevron" width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 10l5 5 5-5"></path>
-            </svg>
+  {# ---------------- ARCHIVED TEMPLATES LIST ---------------- #}
+  <div class="wv-section">
+    <details class="wv-accordion">
+      <summary class="wv-accordion-head">
+        <div class="wv-accordion-title">
+          <svg class="chevron"
+               width="25"
+               height="25"
+               viewBox="0 0 24 24"
+               aria-hidden="true">
+            <path d="M7 10l5 5 5-5"></path>
+          </svg>
 
-            <h4 style="margin:0;">Archived Templates</h4>
+          <h4 style="margin:0;">Archived Templates</h4>
         </div>
         <div class="wv-actions">
           {% if archived_templates %}
-              <span class="wv-tag">{{ archived_templates|length }} templates</span>
+            <span class="wv-tag">{{ archived_templates|length }} templates</span>
           {% else %}
-              <span class="wv-tag">0 templates</span>
+            <span class="wv-tag">0 templates</span>
           {% endif %}
         </div>
 
-    </summary>
+      </summary>
 
-    {% if archived_templates %}
-      <div class="wv-list">
-        {% for t in archived_templates %}
-          <div class="wv-item">
-            <div>
-              <strong>{{ t.email_template_name }}</strong>
-              {% if t.email_template_folder_id %}
+      {% if archived_templates %}
+        <div class="wv-list">
+          {% for t in archived_templates %}
+            <div class="wv-item">
+              <div>
+                <strong>{{ t.email_template_name }}</strong>
+                {% if t.email_template_folder_id %}
                   {% with folder_name=all_folders_by_id|get_value_from_dict:t.email_template_folder_id %}
                     <span class="wv-tag" title="Original folder">From: {{ folder_name }}</span>
                   {% endwith %}
-              {% else %}
-                <span class="wv-tag" title="Original folder">From: Unfiled</span>
-              {% endif %}
-              {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
-            </div>
-            <div class="wv-actions">
-              <div class="wv-dropdown">
-                <button type="button" class="wv-kebab js-dd">•••</button>
-                <div class="wv-dropdown-menu">
-                  <button class="wv-menu-btn js-open-unarchive-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Unarchive</button>
-                  <button class="wv-menu-btn js-open-delete-template" data-template-id="{{ t.id }}" data-template-name="{{ t.email_template_name }}">Delete</button>
+                {% else %}
+                  <span class="wv-tag" title="Original folder">From: Unfiled</span>
+                {% endif %}
+                {% if t.subject %}<span class="wv-muted">— {{ t.subject }}</span>{% endif %}
+              </div>
+              <div class="wv-actions">
+                <div class="wv-dropdown">
+                  <button type="button" class="wv-kebab js-dd">•••</button>
+                  <div class="wv-dropdown-menu">
+                    <button class="wv-menu-btn js-open-unarchive-template"
+                            data-template-id="{{ t.id }}"
+                            data-template-name="{{ t.email_template_name }}">Unarchive</button>
+                    <button class="wv-menu-btn js-open-delete-template"
+                            data-template-id="{{ t.id }}"
+                            data-template-name="{{ t.email_template_name }}">Delete</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="wv-muted-section">No archived templates.</div>
-    {% endif %}
-  </details>
-</div>
-
-{# ---------------- MODALS ---------------- #}
-
-{# Create Folder Modal #}
-<div id="createFolderModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="createFolderTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="createFolderTitle">Create Email Template Folder</h3>
-      <button type="button" class="btn" id="closeCreateFolder">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="create_folder">
-      <label for="email_template_name" style="display:block; font-weight:500; margin-bottom:6px;">Folder name</label>
-      <input class="wv-input" id="email_template_name" name="email_template_name" maxlength="255" required />
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelCreate">Cancel</button>
-        <button type="submit" class="btn btn-primary">Create</button>
-      </div>
-    </form>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="wv-muted-section">No archived templates.</div>
+      {% endif %}
+    </details>
   </div>
-</div>
 
-{# Rename Folder Modal #}
-<div id="renameFolderModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="renameFolderTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="renameFolderTitle">Rename Folder</h3>
-      <button type="button" class="btn" id="closeRenameFolder">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="rename_folder">
-      <input type="hidden" name="folder_id" id="rf_folder_id">
-      <label for="rf_name" style="display:block; font-weight:500; margin-bottom:6px;">New folder name</label>
-      <input class="wv-input" id="rf_name" name="edit_email_template_name" maxlength="255" required />
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelRenameFolder">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
+  {# ---------------- MODALS ---------------- #}
 
-{# Delete Folder Confirm #}
-<div id="deleteFolderModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="deleteFolderTitle">Delete Folder</h3>
-      <button type="button" class="btn" id="closeDeleteFolder">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="delete_folder">
-      <input type="hidden" name="folder_id" id="df_folder_id">
-      <p class="wv-muted">This moves all templates to <strong>Unfiled</strong> and removes the folder.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelDeleteFolder">Cancel</button>
-        <button type="submit" class="btn btn-danger">Delete</button>
+  {# Create Folder Modal #}
+  <div id="createFolderModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="createFolderTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="createFolderTitle">Create Email Template Folder</h3>
+        <button type="button" class="btn" id="closeCreateFolder">✕</button>
       </div>
-    </form>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="create_folder">
+        <label for="email_template_name"
+               style="display:block;
+                      font-weight:500;
+                      margin-bottom:6px">Folder name</label>
+        <input class="wv-input"
+               id="email_template_name"
+               name="email_template_name"
+               maxlength="255"
+               required />
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelCreate">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-{# Archive / Unarchive Folder Confirm #}
-<div id="archiveFolderModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="archiveFolderTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="archiveFolderTitle">Archive Folder</h3>
-      <button type="button" class="btn" id="closeArchiveFolder">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="archive_folder">
-      <input type="hidden" name="folder_id" id="af_folder_id">
-      <p class="wv-muted">Archive this folder. You can unarchive it later.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelArchiveFolder">Cancel</button>
-        <button type="submit" class="btn btn-primary">Archive</button>
+  {# Rename Folder Modal #}
+  <div id="renameFolderModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="renameFolderTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="renameFolderTitle">Rename Folder</h3>
+        <button type="button" class="btn" id="closeRenameFolder">✕</button>
       </div>
-    </form>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="rename_folder">
+        <input type="hidden" name="folder_id" id="rf_folder_id">
+        <label for="rf_name"
+               style="display:block;
+                      font-weight:500;
+                      margin-bottom:6px">New folder name</label>
+        <input class="wv-input"
+               id="rf_name"
+               name="edit_email_template_name"
+               maxlength="255"
+               required />
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelRenameFolder">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<div id="unarchiveFolderModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="unarchiveFolderTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="unarchiveFolderTitle">Unarchive Folder</h3>
-      <button type="button" class="btn" id="closeUnarchiveFolder">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="unarchive_folder">
-      <input type="hidden" name="folder_id" id="uaf_folder_id">
-      <p class="wv-muted">Return this folder to active folders.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelUnarchiveFolder">Cancel</button>
-        <button type="submit" class="btn btn-primary">Unarchive</button>
+  {# Delete Folder Confirm #}
+  <div id="deleteFolderModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="deleteFolderTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="deleteFolderTitle">Delete Folder</h3>
+        <button type="button" class="btn" id="closeDeleteFolder">✕</button>
       </div>
-    </form>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="delete_folder">
+        <input type="hidden" name="folder_id" id="df_folder_id">
+        <p class="wv-muted">
+          This moves all templates to <strong>Unfiled</strong> and removes the folder.
+        </p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelDeleteFolder">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-{# Move Template Modal #}
-<div id="moveTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog" aria-modal="true" aria-labelledby="moveTemplateTitle">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title" id="moveTemplateTitle">Move Template to Folder</h3>
-      <button type="button" class="btn" id="closeMoveTemplate">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="change_template_folder">
-      <input type="hidden" name="template_id" id="mt_template_id">
-      <label for="new_folder_id" style="display:block; font-weight:500; margin-bottom:6px;">Destination</label>
-      <select id="new_folder_id" name="new_folder_id" class="wv-select" required>
-        <option value="null">Unfiled</option>
-        {% for f in folders_active %}
-          <option value="{{ f.id }}">{{ f.email_template_name }}</option>
-        {% endfor %}
-        {% for f in folders_archived %}
-          <option value="{{ f.id }}">{{ f.email_template_name }} (Archived)</option>
-        {% endfor %}
-      </select>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelMoveTemplate">Cancel</button>
-        <button type="submit" class="btn btn-primary">Move</button>
+  {# Archive / Unarchive Folder Confirm #}
+  <div id="archiveFolderModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="archiveFolderTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="archiveFolderTitle">Archive Folder</h3>
+        <button type="button" class="btn" id="closeArchiveFolder">✕</button>
       </div>
-    </form>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="archive_folder">
+        <input type="hidden" name="folder_id" id="af_folder_id">
+        <p class="wv-muted">Archive this folder. You can unarchive it later.</p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelArchiveFolder">Cancel</button>
+          <button type="submit" class="btn btn-primary">Archive</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-{# Archive Template Confirm Modal #}
-<div id="archiveTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title">Archive Template</h3>
-      <button type="button" class="btn" id="closeArchiveTemplate">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="archive_template">
-      <input type="hidden" name="template_id" id="at_template_id">
-      <p class="wv-muted">Archive this template. You can unarchive it later.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelArchiveTemplate">Cancel</button>
-        <button type="submit" class="btn btn-primary">Archive</button>
+  <div id="unarchiveFolderModal"
+       class="wv-modal-backdrop"
+       aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="unarchiveFolderTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="unarchiveFolderTitle">Unarchive Folder</h3>
+        <button type="button" class="btn" id="closeUnarchiveFolder">✕</button>
       </div>
-    </form>
-  </div>
-</div>
-{# Unarchive Template Confirm Modal#}
-<div id="unarchiveTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title">Unarchive Template</h3>
-      <button type="button" class="btn" id="closeUnarchiveTemplate">✕</button>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="unarchive_folder">
+        <input type="hidden" name="folder_id" id="uaf_folder_id">
+        <p class="wv-muted">Return this folder to active folders.</p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelUnarchiveFolder">Cancel</button>
+          <button type="submit" class="btn btn-primary">Unarchive</button>
+        </div>
+      </form>
     </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="unarchive_template">
-      <input type="hidden" name="template_id" id="uat_template_id">
-      <p class="wv-muted">Return this template to the active list.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelUnarchiveTemplate">Cancel</button>
-        <button type="submit" class="btn btn-primary">Unarchive</button>
-      </div>
-    </form>
   </div>
-</div>
-{# Delete Template Confirm Modal#}
-<div id="deleteTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
-  <div class="wv-modal" role="dialog">
-    <div class="wv-modal-header">
-      <h3 class="wv-modal-title">Delete Template</h3>
-      <button type="button" class="btn" id="closeDeleteTemplate">✕</button>
-    </div>
-    <form method="post" action="{{ process_url }}">
-      {% csrf_token %}
-      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden" name="action" value="delete_template">
-      <input type="hidden" name="template_id" id="dt_template_id">
-      <p class="wv-muted">This marks the template as deleted and removes it from lists.</p>
-      <div class="wv-actions-right">
-        <button type="button" class="btn" id="cancelDeleteTemplate">Cancel</button>
-        <button type="submit" class="btn btn-danger">Delete</button>
-      </div>
-    </form>
-  </div>
-</div>
 
-<script>
+  {# Move Template Modal #}
+  <div id="moveTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="moveTemplateTitle">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title" id="moveTemplateTitle">Move Template to Folder</h3>
+        <button type="button" class="btn" id="closeMoveTemplate">✕</button>
+      </div>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="change_template_folder">
+        <input type="hidden" name="template_id" id="mt_template_id">
+        <label for="new_folder_id"
+               style="display:block;
+                      font-weight:500;
+                      margin-bottom:6px">Destination</label>
+        <select id="new_folder_id" name="new_folder_id" class="wv-select" required>
+          <option value="null">Unfiled</option>
+          {% for f in folders_active %}<option value="{{ f.id }}">{{ f.email_template_name }}</option>{% endfor %}
+          {% for f in folders_archived %}<option value="{{ f.id }}">{{ f.email_template_name }} (Archived)</option>{% endfor %}
+        </select>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelMoveTemplate">Cancel</button>
+          <button type="submit" class="btn btn-primary">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# Archive Template Confirm Modal #}
+  <div id="archiveTemplateModal"
+       class="wv-modal-backdrop"
+       aria-hidden="true">
+    <div class="wv-modal" role="dialog">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title">Archive Template</h3>
+        <button type="button" class="btn" id="closeArchiveTemplate">✕</button>
+      </div>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="archive_template">
+        <input type="hidden" name="template_id" id="at_template_id">
+        <p class="wv-muted">Archive this template. You can unarchive it later.</p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelArchiveTemplate">Cancel</button>
+          <button type="submit" class="btn btn-primary">Archive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {# Unarchive Template Confirm Modal#}
+  <div id="unarchiveTemplateModal"
+       class="wv-modal-backdrop"
+       aria-hidden="true">
+    <div class="wv-modal" role="dialog">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title">Unarchive Template</h3>
+        <button type="button" class="btn" id="closeUnarchiveTemplate">✕</button>
+      </div>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="unarchive_template">
+        <input type="hidden" name="template_id" id="uat_template_id">
+        <p class="wv-muted">Return this template to the active list.</p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelUnarchiveTemplate">Cancel</button>
+          <button type="submit" class="btn btn-primary">Unarchive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {# Delete Template Confirm Modal#}
+  <div id="deleteTemplateModal" class="wv-modal-backdrop" aria-hidden="true">
+    <div class="wv-modal" role="dialog">
+      <div class="wv-modal-header">
+        <h3 class="wv-modal-title">Delete Template</h3>
+        <button type="button" class="btn" id="closeDeleteTemplate">✕</button>
+      </div>
+      <form method="post" action="{{ process_url }}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="hidden" name="action" value="delete_template">
+        <input type="hidden" name="template_id" id="dt_template_id">
+        <p class="wv-muted">This marks the template as deleted and removes it from lists.</p>
+        <div class="wv-actions-right">
+          <button type="button" class="btn" id="cancelDeleteTemplate">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
   // --- helpers ---
   function byId(id){ return document.getElementById(id); }
   function openModal(el){ el.classList.add('open'); el.setAttribute('aria-hidden','false'); }
@@ -670,6 +786,6 @@
       document.querySelectorAll('.wv-modal-backdrop.open').forEach(m=>closeModal(m));
     }
   });
-</script>
+  </script>
 
 {% endblock %}

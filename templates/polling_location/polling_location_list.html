@@ -1,233 +1,280 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if state_name %}{{ state_name }} {% endif %}Map Points{% endblock %}
+{% block title %}
+  {% if state_name %}{{ state_name }}{% endif %}
+  Map Points
+{% endblock %}
 
 {% block js %}
-    <script>
+  <script>
         $.getScript("https://quality.wevote.us/javascript/api-server/PollingLocationVisualization.js", () => {
             $.getScript("https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&loading=async&callback=initMap&libraries=marker");
         });
-    </script>
+  </script>
 {% endblock %}
 
-{%  block content %}
-{% include "admin_tools/loading_banner.html" %}
+{% block content %}
+  {% include "admin_tools/loading_banner.html" %}
 
-<h1>{% if state_name %}{{ state_name }} {% endif %}Map Points</h1>
+  <h1>
+    {% if state_name %}{{ state_name }}{% endif %}
+    Map Points
+  </h1>
 
-    <p>
-        <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
-        Go to "Import Map Points From Master Server" Page
-        </a>
-    </p>
+  <p>
+    <a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}"
+       target="_blank">Go to "Import Map Points From Master Server" Page</a>
+  </p>
 
-    <p>
-      <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         Create map point,
-      </a>
+  <p>
+    <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">Create map point,</a>
 
-      <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
-         See Electoral Districts,
-      </a>
+    <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
+      See Electoral Districts,
+    </a>
 
     {% if state_code %}
-        <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
-            Add latitude/longitude to map points (up to 1000),
-        </a>
-        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}">
-            Delete duplicate map points
-        </a>
+      <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
+        Add latitude/longitude to map points (up to 1000),
+      </a>
+      <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}">
+        Delete duplicate map points
+      </a>
       [
-        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=2000">
-            Start at 2,000</a>,
-        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=4000">
-            4,000</a>,
-        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=6000">
-            6,000</a>,
-        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=8000">
-            8,000</a>
-      ]
-    {% else %}
-        (Choose state to add latitude/longitude to map points),
-    {% endif %}
-        <a href="{% url 'polling_location:polling_locations_add_address_from_latitude_and_longitude' %}?state_code={{ state_code }}">
+      <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=2000">
+        Start at 2,000</a>,
+        <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=4000">4,000</a>,
+          <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=6000">6,000</a>,
+            <a href="{% url 'polling_location:soft_delete_duplicates' %}?state_code={{ state_code }}&analyze_start=8000">8,000</a>
+            ]
+          {% else %}
+            (Choose state to add latitude/longitude to map points),
+          {% endif %}
+          <a href="{% url 'polling_location:polling_locations_add_address_from_latitude_and_longitude' %}?state_code={{ state_code }}">
             Add address to map points with only latitude/longitude (up to 1000),
-        </a>
+          </a>
 
-        <a href="{% url 'polling_location:polling_location_statistics' %}?state_code={{ state_code }}" target="_blank">
+          <a href="{% url 'polling_location:polling_location_statistics' %}?state_code={{ state_code }}"
+             target="_blank">
             See state-by-state statistics <span class="glyphicon glyphicon-new-window"></span>,
-        </a>
+          </a>
 
-        <a href="{% url 'polling_location:polling_location_visualize' 0 %}?state_code={{ state_code }}"
-           target="_blank">
-         Google Maps Map Points <span class="glyphicon glyphicon-new-window"></span>
-        </a>
-    </p>
+          <a href="{% url 'polling_location:polling_location_visualize' 0 %}?state_code={{ state_code }}"
+             target="_blank">
+            Google Maps Map Points <span class="glyphicon glyphicon-new-window"></span>
+          </a>
+        </p>
 
-<form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
-    {% csrf_token %}
+        <form name="polling_location_search_form"
+              method="get"
+              action="{% url 'polling_location:polling_location_list' %}">
+          {% csrf_token %}
 
-{% if state_list %}
-    <select id="state_code" name="state_code">
-        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-            -- Filter by State --</option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-{% endif %}{# End of if state_list #}
+          {% if state_list %}
+            <select id="state_code" name="state_code">
+              <option value="" {% if '' == state_code %}selected="selected"{% endif %}>-- Filter by State --</option>
+              {% for key, state in state_list %}
+                <option value="{{ key }}"
+                        {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
+          {# End of if state_list #}
 
 
-{% if polling_location_search or issues_selected %}
-    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+          {% if polling_location_search or issues_selected %}
+            <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
-    <!-- <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
+            <!-- <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp; -->
-{% endif %}
-    <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
-    <input type="submit" value="Search for Map Point" />&nbsp;&nbsp;&nbsp;
+          {% endif %}
+          <input type="text"
+                 name="polling_location_search"
+                 id="polling_location_id"
+                 value="{{ polling_location_search|default_if_none:"" }}" />
+          <input type="submit" value="Search for Map Point" />
+          &nbsp;&nbsp;&nbsp;
 
-    <label for="show_ctcl_errors_id">
-      <input type="checkbox" name="show_ctcl_errors" id="show_ctcl_errors_id" value="1" onChange="this.form.submit()"
-             {% if show_ctcl_errors %}checked{% endif %} /> show CTCL errors&nbsp;&nbsp;&nbsp;
-    </label>
+          <label for="show_ctcl_errors_id">
+            <input type="checkbox"
+                   name="show_ctcl_errors"
+                   id="show_ctcl_errors_id"
+                   value="1"
+                   onChange="this.form.submit()"
+                   {% if show_ctcl_errors %}checked{% endif %} />
+            show CTCL errors&nbsp;&nbsp;&nbsp;
+          </label>
 
-    <label for="show_vote_usa_errors_id">
-      <input type="checkbox" name="show_vote_usa_errors" id="show_vote_usa_errors_id" value="1" onChange="this.form.submit()"
-             {% if show_vote_usa_errors %}checked{% endif %} /> Vote USA errors&nbsp;&nbsp;&nbsp;
-    </label>
+          <label for="show_vote_usa_errors_id">
+            <input type="checkbox"
+                   name="show_vote_usa_errors"
+                   id="show_vote_usa_errors_id"
+                   value="1"
+                   onChange="this.form.submit()"
+                   {% if show_vote_usa_errors %}checked{% endif %} />
+            Vote USA errors&nbsp;&nbsp;&nbsp;
+          </label>
 
-    <label for="show_successful_retrieves_id">
-      <input type="checkbox" name="show_successful_retrieves" id="show_successful_retrieves_id" value="1" onChange="this.form.submit()"
-             {% if show_successful_retrieves %}checked{% endif %} /> successful retrieves&nbsp;&nbsp;&nbsp;
-    </label>
+          <label for="show_successful_retrieves_id">
+            <input type="checkbox"
+                   name="show_successful_retrieves"
+                   id="show_successful_retrieves_id"
+                   value="1"
+                   onChange="this.form.submit()"
+                   {% if show_successful_retrieves %}checked{% endif %} />
+            successful retrieves&nbsp;&nbsp;&nbsp;
+          </label>
 
-    <label for="show_no_contests_id">
-      <input type="checkbox" name="show_no_contests" id="show_no_contests_id" value="1" onChange="this.form.submit()"
-             {% if show_no_contests %}checked{% endif %} /> contest data missing&nbsp;&nbsp;&nbsp;
-    </label>
+          <label for="show_no_contests_id">
+            <input type="checkbox"
+                   name="show_no_contests"
+                   id="show_no_contests_id"
+                   value="1"
+                   onChange="this.form.submit()"
+                   {% if show_no_contests %}checked{% endif %} />
+            contest data missing&nbsp;&nbsp;&nbsp;
+          </label>
 
-    <label for="show_bulk_retrieve_id">
-      <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
-             {% if show_bulk_retrieve %}checked{% endif %} /> bulk retrieve locations
-    </label>
+          <label for="show_bulk_retrieve_id">
+            <input type="checkbox"
+                   name="show_bulk_retrieve"
+                   id="show_bulk_retrieve_id"
+                   value="1"
+                   onChange="this.form.submit()"
+                   {% if show_bulk_retrieve %}checked{% endif %} />
+            bulk retrieve locations
+          </label>
 
-    {% if source_code_list %}
-        {% for source_code in source_code_list %}
-            {% if source_code == "POST_OFFICE_LAT_LONG" %}
-                <label for="show_{{source_code}}_id">
-                    <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
-                        {% if source_code in selected_types %}checked{% endif %} /> post office
+          {% if source_code_list %}
+            {% for source_code in source_code_list %}
+              {% if source_code == "POST_OFFICE_LAT_LONG" %}
+                <label for="show_{{ source_code }}_id">
+                  <input type="checkbox"
+                         name="show_{{ source_code }}"
+                         id="show_{{ source_code }}_id"
+                         value="1"
+                         onChange="this.form.submit()"
+                         {% if source_code in selected_types %}checked{% endif %} />
+                  post office
                 </label>
                 &nbsp;&nbsp;&nbsp;
-            {% else %}
-                <label for="show_{{source_code}}_id">
-                    <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
-                        {% if source_code in selected_types %}checked{% endif %} /> public school
+              {% else %}
+                <label for="show_{{ source_code }}_id">
+                  <input type="checkbox"
+                         name="show_{{ source_code }}"
+                         id="show_{{ source_code }}_id"
+                         value="1"
+                         onChange="this.form.submit()"
+                         {% if source_code in selected_types %}checked{% endif %} />
+                  public school
                 </label>
                 &nbsp;&nbsp;&nbsp;
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-</form>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </form>
 
-{% if polling_location_list %}
-    <table class="table table-condensed">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>we_vote_id</th>
-        {% if not show_ctcl_errors and not show_no_contests and not show_vote_usa_errors and not show_successful_retrieves %}
-            <th>lat/long</th>
-            <th>Source Code</th>
-            <th>County</th>
-            <th>Precinct</th>
-            <th>Bulk retrieve?</th>
-        {% else %}
-            <th>Log Entries</th>
-        {% endif %}
-            <th></th>
-        </tr>
-    </thead>
+        {% if polling_location_list %}
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>we_vote_id</th>
+                {% if not show_ctcl_errors and not show_no_contests and not show_vote_usa_errors and not show_successful_retrieves %}
+                  <th>lat/long</th>
+                  <th>Source Code</th>
+                  <th>County</th>
+                  <th>Precinct</th>
+                  <th>Bulk retrieve?</th>
+                {% else %}
+                  <th>Log Entries</th>
+                {% endif %}
+                <th></th>
+              </tr>
+            </thead>
 
-    {% for polling_location in polling_location_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">
-            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(no location name)&nbsp;&nbsp;{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td>
-                {{ polling_location.get_text_for_map_search }}
-                (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
-                    target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
-                (<a href="{% url 'electoral_district:electoral_district_list' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state }}"
-                    target="_blank">show districts <span class="glyphicon glyphicon-new-window"></span></a>)
-            </td>
-            <td>
-                {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
-            </td>
-        {% if not show_ctcl_errors and not show_no_contests and not show_vote_usa_errors and not show_successful_retrieves %}
-            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;{{ polling_location.latitude }}/{{ polling_location.longitude }}{% endif %}</td>
-            <td>
-                {{ polling_location.source_code|default_if_none:"" }}
-            </td>
-            <td>
-                {{ polling_location.county_name|default_if_none:"" }}
-            </td>
-            <td>
-                {{ polling_location.precinct_name|default_if_none:"" }}
-            </td>
-            <td>
-              {% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}
-              {% if polling_location.polling_location_deleted %} <strong>DELETED</strong>{% endif %}
-            </td>
-        {% else %}
-            <td>
-                <table class="table table-bordered table-condensed">
-                    {% for log_entry in polling_location.polling_location_log_entry_list %}
-                        <tr>
-                            <td>{{ log_entry.date_time|date:"M d, Y H:i" }}</td>
-                            <td>
-                                {{ log_entry.kind_of_log_entry }}{% if log_entry.is_from_ctcl %}/CTCL{% endif %}{% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
-                            </td>
-                            <td>
-                                {{ log_entry.google_civic_election_id }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    {% if polling_location.polling_location_log_entry_list and polling_location.polling_location_log_entry_list_has_error %}
-                        <tr>
-                            <td colspan="3">
-                                <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&clear_errors_for_polling_location_we_vote_id={{ polling_location.we_vote_id }}" style="font-size: .65em"
-                                    >(mark as fixed now)</a>
-                            </td>
-                        </tr>
-
+            {% for polling_location in polling_location_list %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                     target="_blank">
+                    {% if polling_location.location_name %}
+                      {{ polling_location.location_name }}
+                    {% else %}
+                      (no location name)&nbsp;&nbsp;
                     {% endif %}
-                </table>
-            </td>
-        {% endif %}
-            <td><span class="u-no-break"><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em"
-                   target="_blank" >edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a></span></td>
-        </tr>
-    {% endfor %}
-    </table>
-{% else %}
-    <p>(no polling_locations found)</p>
-{% endif %}
-<br />
-<a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&recalculate_log_entry_counts=1"
-    >Recalculate Log Entry count statistics for this state ({{ state_code }})</a>
-<br />
-<input type="hidden" id="state_list" value="{{ state_list }}">
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+                </td>
+                <td>
+                  {{ polling_location.get_text_for_map_search }}
+                  (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
+   target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
+                  (<a href="{% url 'electoral_district:electoral_district_list' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state }}"
+   target="_blank">show districts <span class="glyphicon glyphicon-new-window"></span></a>)
+                </td>
+                <td>
+                  {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
+                </td>
+                {% if not show_ctcl_errors and not show_no_contests and not show_vote_usa_errors and not show_successful_retrieves %}
+                  <td>
+                    {% if polling_location.latitude %}
+                      &nbsp;&nbsp;Lat/Long:&nbsp;{{ polling_location.latitude }}/{{ polling_location.longitude }}
+                    {% endif %}
+                  </td>
+                  <td>{{ polling_location.source_code|default_if_none:"" }}</td>
+                  <td>{{ polling_location.county_name|default_if_none:"" }}</td>
+                  <td>{{ polling_location.precinct_name|default_if_none:"" }}</td>
+                  <td>
+                    {% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}
+                    {% if polling_location.polling_location_deleted %}<strong>DELETED</strong>{% endif %}
+                  </td>
+                {% else %}
+                  <td>
+                    <table class="table table-bordered table-condensed">
+                      {% for log_entry in polling_location.polling_location_log_entry_list %}
+                        <tr>
+                          <td>{{ log_entry.date_time|date:"M d, Y H:i" }}</td>
+                          <td>
+                            {{ log_entry.kind_of_log_entry }}
+                            {% if log_entry.is_from_ctcl %}/CTCL{% endif %}
+                            {% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
+                          </td>
+                          <td>{{ log_entry.google_civic_election_id }}</td>
+                        </tr>
+                      {% endfor %}
+                      {% if polling_location.polling_location_log_entry_list and polling_location.polling_location_log_entry_list_has_error %}
+                        <tr>
+                          <td colspan="3">
+                            <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&clear_errors_for_polling_location_we_vote_id={{ polling_location.we_vote_id }}"
+                               style="font-size: .65em">(mark as fixed now)</a>
+                          </td>
+                        </tr>
 
-<script>
+                      {% endif %}
+                    </table>
+                  </td>
+                {% endif %}
+                <td>
+                  <span class="u-no-break"><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+   style="font-size: .65em"
+   target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a></span>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% else %}
+          <p>(no polling_locations found)</p>
+        {% endif %}
+        <br />
+        <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&recalculate_log_entry_counts=1">Recalculate Log Entry count statistics for this state ({{ state_code }})</a>
+        <br />
+        <input type="hidden" id="state_list" value="{{ state_list }}">
+
+        <script>
     const sourceCodeList = {{ source_code_list|safe }};
     console.log("Source Code List:", sourceCodeList);
 
@@ -286,6 +333,6 @@
             displayLoadingBanner();
         });
     });
-</script>
+        </script>
 
-{% endblock %}
+      {% endblock %}

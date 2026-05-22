@@ -1,94 +1,112 @@
 {# templates/analytics/sitewide_daily_metrics.html #}
 {% extends "template_base.html" %}
 
-{% block title %}
-    Sitewide Daily Metrics
-{% endblock %}
+{% block title %}Sitewide Daily Metrics{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
-<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
+  <p>
+    <a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a>
+  </p>
 
-<h2>Sitewide Daily Metrics</h2>
-    <p>
-        Show activity day-to-day, across the entire site.
-    </p>
+  <h2>Sitewide Daily Metrics</h2>
+  <p>Show activity day-to-day, across the entire site.</p>
 
-<form name="search_daily_metrics" method="get" action="{% url 'analytics:sitewide_daily_metrics' %}">
-  {% csrf_token %}
-  <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
-  <input type="hidden" name="state_code" value="{{ state_code }}" />
+  <form name="search_daily_metrics"
+        method="get"
+        action="{% url 'analytics:sitewide_daily_metrics' %}">
+    {% csrf_token %}
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}" />
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
 
-  <div>
-    <div class="form-group">
+    <div>
+      <div class="form-group">
         <label for="date_to_process" class="col-sm-3 control-label">Search Start Date YYYYMMDD</label>
         <div class="col-sm-2">
-            <input type="text" name="date_as_integer" id="date_to_process_id" class="form-control"
-                   value="{{ date_as_integer }}" />
+          <input type="text"
+                 name="date_as_integer"
+                 id="date_to_process_id"
+                 class="form-control"
+                 value="{{ date_as_integer }}" />
         </div>
-        <div class="col-sm-2">
-            {{ start_date|default_if_none:"" }}
-        </div>
+        <div class="col-sm-2">{{ start_date|default_if_none:"" }}</div>
+      </div>
     </div>
-  </div>
-  <br />
-  <div>
-    <div class="form-group">
+    <br />
+    <div>
+      <div class="form-group">
         <label for="through_date_as_integer_id" class="col-sm-3 control-label">Search Through Date YYYYMMDD</label>
         <div class="col-sm-2">
-            <input type="text" name="through_date_as_integer" id="through_date_as_integer_id" class="form-control"
-                   value="{{ through_date_as_integer }}" />
+          <input type="text"
+                 name="through_date_as_integer"
+                 id="through_date_as_integer_id"
+                 class="form-control"
+                 value="{{ through_date_as_integer }}" />
         </div>
-        <div class="col-sm-2">
-            {{ through_date|default_if_none:"" }}
-        </div>
+        <div class="col-sm-2">{{ through_date|default_if_none:"" }}</div>
+      </div>
     </div>
-  </div>
-  <br />
-  <div>
-    <div class="form-group">
+    <br />
+    <div>
+      <div class="form-group">
         <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
         <div class="col-sm-2">
-            <button type="submit" class="btn btn-default" name="search_daily_metrics_button">Search</button>
+          <button type="submit"
+                  class="btn btn-default"
+                  name="search_daily_metrics_button">Search</button>
         </div>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
 
 
-    {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
+  {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
 
 
-<h4>Manually Update Daily Metrics</h4>
+  <h4>Manually Update Daily Metrics</h4>
 
-<form name="update_daily_metrics" method="get" action="{% url 'analytics:sitewide_daily_metrics_process' %}">
+  <form name="update_daily_metrics"
+        method="get"
+        action="{% url 'analytics:sitewide_daily_metrics_process' %}">
     {% csrf_token %}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}" />
     <input type="hidden" name="state_code" value="{{ state_code }}" />
 
     <div class="form-group">
-        <label for="date_to_process_id" class="col-sm-3 control-label">Start Date YYYYMMDD</label>
-        <div class="col-sm-8">
-            <input type="text" name="date_as_integer" id="date_to_process_id" class="form-control"
-                   value="{{ date_as_integer }}" />
-        </div>
+      <label for="date_to_process_id" class="col-sm-3 control-label">Start Date YYYYMMDD</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="date_as_integer"
+               id="date_to_process_id"
+               class="form-control"
+               value="{{ date_as_integer }}" />
+      </div>
     </div>
 
     <div class="form-group">
-        <label for="through_date_to_process_id" class="col-sm-3 control-label">Through Date YYYYMMDD</label>
-        <div class="col-sm-8">
-            <input type="text" name="through_date_as_integer" id="through_date_to_process_id" class="form-control"
-                   value="{{ through_date_as_integer }}" />
-        </div>
+      <label for="through_date_to_process_id" class="col-sm-3 control-label">Through Date YYYYMMDD</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="through_date_as_integer"
+               id="through_date_to_process_id"
+               class="form-control"
+               value="{{ through_date_as_integer }}" />
+      </div>
     </div>
 
     <div class="form-group">
-        <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-8">
-            <button type="submit" class="btn btn-default" name="update_daily_metrics_button">Update Sitewide Daily Metrics</button>
-        </div>
+      <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
+      <div class="col-sm-8">
+        <button type="submit"
+                class="btn btn-default"
+                name="update_daily_metrics_button">Update Sitewide Daily Metrics</button>
+      </div>
     </div>
-</form>
+  </form>
 
 {% endblock %}

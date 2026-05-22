@@ -3,119 +3,127 @@
 
 {% block title %}Duplicate Measures{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
 
-<h1>Duplicate Measures</h1>
+  <h1>Duplicate Measures</h1>
 
-    {% if state_code %}
+  {% if state_code %}
     <ul>
-        <li>
-            <a href="{% url 'measure:delete_all_duplicates' %}?state_code={{ state_code }}">
-            Delete all duplicate measure data for this state</a>
+      <li>
+        <a href="{% url 'measure:delete_all_duplicates' %}?state_code={{ state_code }}">
+        Delete all duplicate measure data for this state</a>
+      </li>
+      <li>
+        <a href="{% url 'measure:find_and_merge_duplicate_measures' %}?state_code={{ state_code }}">
+          Find and merge duplicate measures</a> (about 3 minutes)
         </li>
-        <li>
-            <a href="{% url 'measure:find_and_merge_duplicate_measures' %}?state_code={{ state_code }}">
-            Find and merge duplicate measures</a> (about 3 minutes)
-        </li>
-    </ul>
+      </ul>
     {% endif %}
 
-<br />
+    <br />
 
-<div>
-    <form name="state_code_form" method="get" action="{% url 'measure:duplicates_list' %}">
+    <div>
+      <form name="state_code_form"
+            method="get"
+            action="{% url 'measure:duplicates_list' %}">
         {% csrf_token %}
 
         {% if state_list %}
-            <select id="state_code_id" name="state_code">
-                <option value="">
-                    -- Filter by State Served --</option>
+          <select id="state_code_id" name="state_code">
+            <option value="">-- Filter by State Served --</option>
             {% for key, state in state_list %}
-                <option value="{{ key }}"
-                        {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                    {{ state }}</option>
+              <option value="{{ key }}"
+                      {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
             {% endfor %}
-            </select>
-            {% if state_code != "" %}
-            <a href="{% url 'measure:duplicates_list' %}?show_all={{ show_all }}">
-                show all states</a>&nbsp;&nbsp;&nbsp;
+          </select>
+          {% if state_code != "" %}
+            <a href="{% url 'measure:duplicates_list' %}?show_all={{ show_all }}">show all states</a>&nbsp;&nbsp;&nbsp;
             {% endif %}
-        {% endif %}{# End of if state_list #}
+          {% endif %}
+          {# End of if state_list #}
 
 
-    </form>
-    </br>
-    <form name="measure_search_form" method="get" action="{% url 'measure:duplicates_list' %}">
+        </form>
+      </br>
+      <form name="measure_search_form"
+            method="get"
+            action="{% url 'measure:duplicates_list' %}">
         {% csrf_token %}
-        <input type="text" name="measure_search" id="measure_search_id" value="{{ measure_search|default_if_none:"" }}" placeholder="Search for Measure" />
+        <input type="text"
+               name="measure_search"
+               id="measure_search_id"
+               value="{{ measure_search|default_if_none:"" }}"
+               placeholder="Search for Measure" />
         <input type="submit" value="Search for Measure" />
         {% if measure_search %}
-            <a href="{% url 'measure:duplicates_list' %}">clear search</a>
+          <a href="{% url 'measure:duplicates_list' %}">clear search</a>
         {% endif %}
-    </form>
-</div>
-{% if duplicates_list %}
-    <table class="table">
-      <thead>
-        <tr>
+      </form>
+    </div>
+    {% if duplicates_list %}
+      <table class="table">
+        <thead>
+          <tr>
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th>Measure 1 Name</th>
             <th>Measure 2 Name</th>
-        </tr>
-      </thead>
-    {% for possible_duplicate in duplicates_list %}
-        <tr>
+          </tr>
+        </thead>
+        {% for possible_duplicate in duplicates_list %}
+          <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                <a href="{% url 'measure:compare_two_measures_for_merge' %}?contest_measure1_we_vote_id={{ possible_duplicate.measure1.we_vote_id }}&contest_measure2_we_vote_id={{ possible_duplicate.measure2.we_vote_id }}"
-                   class="u-no-break btn btn-primary"
-                   target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
-                <br />
-                <br />
-                <a href="{% url 'measure:not_duplicates' %}?contest_measure1_we_vote_id={{ possible_duplicate.measure1.we_vote_id }}&contest_measure2_we_vote_id={{ possible_duplicate.measure2.we_vote_id }}&state_code={{ state_code }}"
-                   class="u-no-break btn btn-light">mark as not duplicates</a>
+              <a href="{% url 'measure:compare_two_measures_for_merge' %}?contest_measure1_we_vote_id={{ possible_duplicate.measure1.we_vote_id }}&contest_measure2_we_vote_id={{ possible_duplicate.measure2.we_vote_id }}"
+                 class="u-no-break btn btn-primary"
+                 target="_blank">compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
+              <br />
+              <br />
+              <a href="{% url 'measure:not_duplicates' %}?contest_measure1_we_vote_id={{ possible_duplicate.measure1.we_vote_id }}&contest_measure2_we_vote_id={{ possible_duplicate.measure2.we_vote_id }}&state_code={{ state_code }}"
+                 class="u-no-break btn btn-light">mark as not duplicates</a>
             </td>
-        {% if possible_duplicate.measure1 %}
-            <td>
+            {% if possible_duplicate.measure1 %}
+              <td>
                 <a href="{% url 'measure:measure_edit' possible_duplicate.measure1.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{% if possible_duplicate.measure1.measure_title %}<span style="font-size: 1.2em; font-weight: 600;">{{ possible_duplicate.measure1.measure_title }}</span>{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
-                {% if possible_duplicate.measure1.state_code %}<br /><span style="color: #999;">{{ possible_duplicate.measure1.state_code|upper }}</span>{% endif %}
-            <br />
-            <span style="color: #999;">
-                {{ possible_duplicate.measure1.id }} - {{ possible_duplicate.measure1.we_vote_id }}
-            </span>
-            <br />
-            <span style="color: #999;">
-                {{ possible_duplicate.measure1.google_civic_election_id }}
-            </span>
-            </td>
-        {% endif %}
-        {% if possible_duplicate.measure2 %}
-            <td>
+                   target="_blank">
+                  {% if possible_duplicate.measure1.measure_title %}
+                    <span style="font-size: 1.2em; font-weight: 600;">{{ possible_duplicate.measure1.measure_title }}</span>
+                  {% endif %}
+                  <span class="glyphicon glyphicon-new-window"></span></a>
+                {% if possible_duplicate.measure1.state_code %}
+                  <br />
+                  <span style="color: #999;">{{ possible_duplicate.measure1.state_code|upper }}</span>
+                {% endif %}
+                <br />
+                <span style="color: #999;">{{ possible_duplicate.measure1.id }} - {{ possible_duplicate.measure1.we_vote_id }}</span>
+                <br />
+                <span style="color: #999;">{{ possible_duplicate.measure1.google_civic_election_id }}</span>
+              </td>
+            {% endif %}
+            {% if possible_duplicate.measure2 %}
+              <td>
                 <a href="{% url 'measure:measure_edit' possible_duplicate.measure2.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank"><span style="font-size: 1.2em; font-weight: 600;">{{ possible_duplicate.measure2.measure_title }}</span> <span class="glyphicon glyphicon-new-window"></span></a>
-                {% if possible_duplicate.measure2.state_code %}<br /><span style="color: #999;">{{ possible_duplicate.measure2.state_code|upper }}</span>{% endif %}
-            <br />
-            <span style="color: #999;">
-                {{ possible_duplicate.measure2.id }} - {{ possible_duplicate.measure2.we_vote_id }}
-            </span>
-            <br />
-            <span style="color: #999;">
-                {{ possible_duplicate.measure2.google_civic_election_id }}
-            </span>
-            </td>
-        {% endif %}
-        </tr>
-    {% endfor %}
-    </table>
+                {% if possible_duplicate.measure2.state_code %}
+                  <br />
+                  <span style="color: #999;">{{ possible_duplicate.measure2.state_code|upper }}</span>
+                {% endif %}
+                <br />
+                <span style="color: #999;">{{ possible_duplicate.measure2.id }} - {{ possible_duplicate.measure2.we_vote_id }}</span>
+                <br />
+                <span style="color: #999;">{{ possible_duplicate.measure2.google_civic_election_id }}</span>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </table>
 
-    <p></p>
-{% else %}
-    <p>(no duplicates found)</p>
-{% endif %}
+      <p></p>
+    {% else %}
+      <p>(no duplicates found)</p>
+    {% endif %}
 
     <script>
         $(function() {
@@ -125,4 +133,4 @@
         });
     </script>
 
-{% endblock %}
+  {% endblock %}

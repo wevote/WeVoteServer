@@ -2,37 +2,48 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="dist/themes/default/style.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+  <link rel="stylesheet" href="dist/themes/default/style.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
-<div class="mb-3">
+  <div class="mb-3">
 
-  <label for="jstree_container" class="form-label">{{ selection_type }}</label>
-  <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle="collapse" data-target="#jstreeCollapse" aria-expanded="false" aria-controls="jstreeCollapse">
-    <span>📁 Select {{ selection_type }}</span>
-    <span class="ml-2">▼</span>
-  </button>
-  <div class="collapse mt-2 border rounded p-3 bg-white" id="jstreeCollapse" style="max-height: 500px; overflow-y: auto;">
-    <div id="jstree_container">
-      <ul>
-        {% for node in selection_tree_data %}
-          <li data-node-type="node">
-            {{ node.node_name }}
-            <ul>
-              {% for leaf_node in node.children %}
-                <li data-node-type="leaf" data-jstree='{"icon":"jstree-file"}' value="{{ leaf_node.node_value }}">{{ leaf_node.node_name }}</li>
-              {% endfor %}
-            </ul>
-          </li>
-        {% endfor %}
-      </ul>
+    <label for="jstree_container" class="form-label">{{ selection_type }}</label>
+    <button class="btn btn-outline-secondary btn-sm"
+            type="button"
+            data-toggle="collapse"
+            data-target="#jstreeCollapse"
+            aria-expanded="false"
+            aria-controls="jstreeCollapse">
+      <span>📁 Select {{ selection_type }}</span>
+      <span class="ml-2">▼</span>
+    </button>
+    <div class="collapse mt-2 border rounded p-3 bg-white"
+         id="jstreeCollapse"
+         style="max-height: 500px;
+                overflow-y: auto">
+      <div id="jstree_container">
+        <ul>
+          {% for node in selection_tree_data %}
+            <li data-node-type="node">
+              {{ node.node_name }}
+              <ul>
+                {% for leaf_node in node.children %}
+                  <li data-node-type="leaf"
+                      data-jstree='{"icon":"jstree-file"}'
+                      value="{{ leaf_node.node_value }}">{{ leaf_node.node_name }}</li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
-</div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
-<script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+  <script>
     function sendTreeSelection(treeSelectionData) {
       const event = new CustomEvent("treeSelectionChanged", {
         detail: treeSelectionData
@@ -60,6 +71,6 @@
       $('[data-target="#jstreeCollapse"]').attr('aria-expanded', 'false');
     }
   });
-</script>
+  </script>
 
 {% endblock %}

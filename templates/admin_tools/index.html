@@ -1,127 +1,135 @@
 {# templates/admin_tools/index.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Admin Menu{% if WE_VOTE_SERVER_ROOT_URL %} :: {{ WE_VOTE_SERVER_ROOT_URL }}{% endif %}{% endblock %}
+{% block title %}
+  Admin Menu
+  {% if WE_VOTE_SERVER_ROOT_URL %}:: {{ WE_VOTE_SERVER_ROOT_URL }}{% endif %}
+{% endblock %}
 
 {% block content %}
-{% load humanize %}
-<style>
+  {% load humanize %}
+  <style>
     td {
         padding-left: 20px;
     }
-</style>
-<h1>We Vote Admin Menu</h1>
-    {% if user and not user.is_anonymous %}
+  </style>
+  <h1>We Vote Admin Menu</h1>
+  {% if user and not user.is_anonymous %}
     <p>
-            <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
-            <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
+      <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
+      <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
     </p>
-    {% endif %}
+  {% endif %}
 
-    {# ################## #}
-<h2>Analytics</h2>
+  {# ################## #}
+  <h2>Analytics</h2>
 
-<p>
+  <p>
     <a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a>&nbsp;&nbsp;&nbsp;
     <a href="{% url 'import_export_bigquery:import_export_bigquery_index' %}">BigQuery Tools</a>&nbsp;&nbsp;&nbsp;
     <a href="{% url 'import_export_apple_app_store:import_export_apple_app_store_index' %}">Apple App Store Tools</a>&nbsp;&nbsp;&nbsp;
     <a href="{% url 'import_export_google_play_store:import_export_google_play_store_index' %}">Google Play Store Tools</a>&nbsp;&nbsp;&nbsp;
     <a href="{% url 'import_export_openreplay:import_export_openreplay_index' %}">OpenReplay Tools</a>
-</p>
+  </p>
 
-<p>
+  <p>
     <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
+       target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
+  </p>
 
-{# ################## #}
-<h2>Statistics</h2>
-<p><a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
+  {# ################## #}
+  <h2>Statistics</h2>
+  <p>
+    <a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+       target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
     (aggregate voter usage)
-</p>
-<p><a href="{% url 'volunteer_task:scoreboard_list' %}"
-        target="_blank">Scoreboard: Volunteer Tasks Completed <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
-<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
-<p><a href="{% url 'admin_tools:statistics_summary' %}">API Usage Statistics</a></p>
+  </p>
+  <p>
+    <a href="{% url 'volunteer_task:scoreboard_list' %}" target="_blank">Scoreboard: Volunteer Tasks Completed <span class="glyphicon glyphicon-new-window"></span></a>
+  </p>
+  <p>
+    <a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a>
+  </p>
+  <p>
+    <a href="{% url 'admin_tools:statistics_summary' %}">API Usage Statistics</a>
+  </p>
 
-<p>Opinions and Links Statistics:</p>
-    <table style="margin-left: 20px; width: 80%">
-        <tr style="border-bottom: 1px solid black" >
-            <th style="width: fit-content; padding: 4px 10px 4px 0px !important">Statistics</th>
-            <th style="width: fit-content; padding: 4px 25px !important"></th>
-            <th style="width: fit-content; padding: 4px 10px !important"></th>
-            <th style="width: fit-content; padding: 4px 25px !important"></th>
-            <th style="width: fit-content; padding: 4px 10px !important"></th>
-            <th style="width: fit-content; padding: 4px 25px !important"></th>
-            <th style="width: fit-content; padding: 4px 10px !important"></th>
-            <th style="width: fit-content; padding: 4px 25px !important"></th>
-            <th style="width: fit-content; padding: 4px 10px !important"></th>
-            <th style="width: fit-content; padding: 4px 25px !important"></th>
-        </tr>
-        <tr>
-            <td>Public Opinions:</td>
-            <td>{{ total_public_endorsements_count|intcomma }}</td>
-            <td>w/commentary:</td>
-            <td>{{ total_public_endorsements_with_commentary_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Friends-Only Opinions:</td>
-            <td>{{ total_friends_only_endorsements_count|intcomma }}</td>
-            <td>w/commentary:</td>
-            <td>{{ total_friends_only_endorsements_with_commentary_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Total Ballot Requests:</td>
-            <td>{{ voter_address_basic_count|intcomma }}</td>
-            <td>Full Address:</td>
-            <td>{{ voter_address_full_address_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Total Voter Accounts:</td>
-            <td>{{ voter_accounts_count|intcomma }}</td>
-            <td>Twitter:</td>
-            <td>{{ voter_twitter_accounts_count|intcomma }}</td>
-            <td>Facebook:</td>
-            <td>{{ voter_facebook_accounts_count|intcomma }}</td>
-            <td>Email:</td>
-            <td>{{ voter_email_accounts_count|intcomma }}</td>
-            <td>SMS:</td>
-            <td>{{ voter_sms_accounts_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Total Friend Links:</td>
-            <td>{{ voter_friendships_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>&nbsp;&nbsp;&nbsp;Voters With 1 Friend:</td>
-            <td>{{ voters_with_1_friend_count|intcomma }}</td>
-            <td>2 Friends:</td>
-            <td>{{ voters_with_2_friends_count|intcomma }}</td>
-            <td>3 Friends:</td>
-            <td>{{ voters_with_3_friends_count|intcomma }}</td>
-            <td>10-19 Friends:</td>
-            <td>{{ voters_with_10_to_20_friends_count|intcomma }}</td>
-            <td>20+ Friends:</td>
-            <td>{{ voters_with_20_plus_friends_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Total Vote Plans Made:</td>
-            <td>{{ voters_with_plan_count|intcomma }}</td>
-        </tr>
-        <tr>
-            <td>Shared Links, Unique Sharers:</td>
-            <td>{{ shared_link_clicked_unique_sharer_count|intcomma }}</td>
-            <td>Unique Viewers:</td>
-            <td>{{ shared_link_clicked_unique_viewer_count|intcomma }}</td>
-            <td>Shared Links:</td>
-            <td>{{ shared_links_count|intcomma }}</td>
-            <td>Link Clicks w/o Reclicks:</td>
-            <td>{{ shared_links_click_without_reclick_count|intcomma }}</td>
-            {#        Link Clicks With Reclicks: {{ shared_links_click_count|intcomma }})#}
-        </tr>
-    </table>
+  <p>Opinions and Links Statistics:</p>
+  <table style="margin-left: 20px; width: 80%">
+    <tr style="border-bottom: 1px solid black">
+      <th style="width: fit-content; padding: 4px 10px 4px 0px !important">Statistics</th>
+      <th style="width: fit-content; padding: 4px 25px !important"></th>
+      <th style="width: fit-content; padding: 4px 10px !important"></th>
+      <th style="width: fit-content; padding: 4px 25px !important"></th>
+      <th style="width: fit-content; padding: 4px 10px !important"></th>
+      <th style="width: fit-content; padding: 4px 25px !important"></th>
+      <th style="width: fit-content; padding: 4px 10px !important"></th>
+      <th style="width: fit-content; padding: 4px 25px !important"></th>
+      <th style="width: fit-content; padding: 4px 10px !important"></th>
+      <th style="width: fit-content; padding: 4px 25px !important"></th>
+    </tr>
+    <tr>
+      <td>Public Opinions:</td>
+      <td>{{ total_public_endorsements_count|intcomma }}</td>
+      <td>w/commentary:</td>
+      <td>{{ total_public_endorsements_with_commentary_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Friends-Only Opinions:</td>
+      <td>{{ total_friends_only_endorsements_count|intcomma }}</td>
+      <td>w/commentary:</td>
+      <td>{{ total_friends_only_endorsements_with_commentary_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Total Ballot Requests:</td>
+      <td>{{ voter_address_basic_count|intcomma }}</td>
+      <td>Full Address:</td>
+      <td>{{ voter_address_full_address_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Total Voter Accounts:</td>
+      <td>{{ voter_accounts_count|intcomma }}</td>
+      <td>Twitter:</td>
+      <td>{{ voter_twitter_accounts_count|intcomma }}</td>
+      <td>Facebook:</td>
+      <td>{{ voter_facebook_accounts_count|intcomma }}</td>
+      <td>Email:</td>
+      <td>{{ voter_email_accounts_count|intcomma }}</td>
+      <td>SMS:</td>
+      <td>{{ voter_sms_accounts_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Total Friend Links:</td>
+      <td>{{ voter_friendships_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;&nbsp;Voters With 1 Friend:</td>
+      <td>{{ voters_with_1_friend_count|intcomma }}</td>
+      <td>2 Friends:</td>
+      <td>{{ voters_with_2_friends_count|intcomma }}</td>
+      <td>3 Friends:</td>
+      <td>{{ voters_with_3_friends_count|intcomma }}</td>
+      <td>10-19 Friends:</td>
+      <td>{{ voters_with_10_to_20_friends_count|intcomma }}</td>
+      <td>20+ Friends:</td>
+      <td>{{ voters_with_20_plus_friends_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Total Vote Plans Made:</td>
+      <td>{{ voters_with_plan_count|intcomma }}</td>
+    </tr>
+    <tr>
+      <td>Shared Links, Unique Sharers:</td>
+      <td>{{ shared_link_clicked_unique_sharer_count|intcomma }}</td>
+      <td>Unique Viewers:</td>
+      <td>{{ shared_link_clicked_unique_viewer_count|intcomma }}</td>
+      <td>Shared Links:</td>
+      <td>{{ shared_links_count|intcomma }}</td>
+      <td>Link Clicks w/o Reclicks:</td>
+      <td>{{ shared_links_click_without_reclick_count|intcomma }}</td>
+      {#        Link Clicks With Reclicks: {{ shared_links_click_count|intcomma }})#}
+    </tr>
+  </table>
 
   <!-- https://simpleisbetterthancomplex.com/tutorial/2020/01/19/how-to-use-chart-js-with-django.html -->
   <button id="showChart" style="margin: 16px 0 10px 20px">Show Friends Frequency Chart</button>
@@ -161,64 +169,84 @@
 
 
 
-{# ################## #}
-<h2>Security</h2>
-    <p><a href="{% url 'stripe_donations:suspects_list' %}">Disputed, Fraudulent, and Suspect, Stripe Transactions</a></p>
+  {# ################## #}
+  <h2>Security</h2>
+  <p>
+    <a href="{% url 'stripe_donations:suspects_list' %}">Disputed, Fraudulent, and Suspect, Stripe Transactions</a>
+  </p>
 
-{# ################## #}
-<h2>Maintenance</h2>
-    <p><a href="{% url 'apis_v1:apisIndex' %}">API Documentation</a></p>
-    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Fast Load (or Sync) Data with Master We Vote Servers</a></p>
-    <p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        >Batch Process Status List</a></p>
-    <p><a href="{% url 'voter:voter_list' %}">Voters</a>&nbsp;&nbsp; |&nbsp;&nbsp;
+  {# ################## #}
+  <h2>Maintenance</h2>
+  <p>
+    <a href="{% url 'apis_v1:apisIndex' %}">API Documentation</a>
+  </p>
+  <p>
+    <a href="{% url 'admin_tools:sync_dashboard' %}">Fast Load (or Sync) Data with Master We Vote Servers</a>
+  </p>
+  <p>
+    <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Batch Process Status List</a>
+  </p>
+  <p>
+    <a href="{% url 'voter:voter_list' %}">Voters</a>&nbsp;&nbsp; |&nbsp;&nbsp;
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_VOTER&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Export Voters</a></p>
-    <p><a href="{% url 'admin_tools:data_cleanup' %}">Data Cleanup Routines</a></p>
-    <p><a href="{% url 'import_export_jira:jira_import_elections' %}">JIRA Import Tool</a></p>
-    <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        >Import Data in Batches</a></p>
-    <p><a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a></p>
-    <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Endorsers</a></p>
-{#    <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>#}
-    <p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a></p>
+    Export Voters</a>
+  </p>
+  <p>
+    <a href="{% url 'admin_tools:data_cleanup' %}">Data Cleanup Routines</a>
+  </p>
+  <p>
+    <a href="{% url 'import_export_jira:jira_import_elections' %}">JIRA Import Tool</a>
+  </p>
+  <p>
+    <a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Import Data in Batches</a>
+  </p>
+  <p>
+    <a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a>
+  </p>
+  <p>
+    <a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Endorsers</a>
+  </p>
+  {#    <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>#}
+  <p>
+    <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a>
+  </p>
 
-<br>
-<br>
-<br>
-{# ################## #}
-{# This information does not have to be on the front page, as long as it can be found somewhere #}
-<h4>Technical Information</h4>
-<p>
+  <br>
+  <br>
+  <br>
+  {# ################## #}
+  {# This information does not have to be on the front page, as long as it can be found somewhere #}
+  <h4>Technical Information</h4>
+  <p>
     <table>
-        <tr>
-            <td>Python:</td>
-            <td>{{ python_version }}</td>
-        </tr>
-        <tr>
-            <td>Node:</td>
-            <td>{{ node_version }}</td>
-        </tr>
-        <tr>
-            <td>Postgres:&nbsp;&nbsp;</td>
-            <td>{{ postgres_version }}</td>
-        </tr>
-        <tr>
-            <td>pg_dump:&nbsp;&nbsp;</td>
-            <td>{{ pg_dump_version }}</td>
-        </tr>
-        <tr>
-            <td>Git commit hash:</td>
-            <td>
-                <a id="gitLink" href={{git_commit_hash_url}} target="_blank">{{git_commit_hash}}</a>
-                <span style="padding-left: 40px;">({{git_commit_date}})</span>
-            </td>
-        </tr>
-        <tr>
-            <td>SERVER_IS_SOURCE_OF_TRUTH:&nbsp;&nbsp;</td>
-            <td>{{ SERVER_IS_SOURCE_OF_TRUTH }}</td>
-        </tr>
-     </table>
-</p>
+      <tr>
+        <td>Python:</td>
+        <td>{{ python_version }}</td>
+      </tr>
+      <tr>
+        <td>Node:</td>
+        <td>{{ node_version }}</td>
+      </tr>
+      <tr>
+        <td>Postgres:&nbsp;&nbsp;</td>
+        <td>{{ postgres_version }}</td>
+      </tr>
+      <tr>
+        <td>pg_dump:&nbsp;&nbsp;</td>
+        <td>{{ pg_dump_version }}</td>
+      </tr>
+      <tr>
+        <td>Git commit hash:</td>
+        <td>
+          <a id="gitLink" href={{ git_commit_hash_url }} target="_blank">{{ git_commit_hash }}</a>
+          <span style="padding-left: 40px;">({{ git_commit_date }})</span>
+        </td>
+      </tr>
+      <tr>
+        <td>SERVER_IS_SOURCE_OF_TRUTH:&nbsp;&nbsp;</td>
+        <td>{{ SERVER_IS_SOURCE_OF_TRUTH }}</td>
+      </tr>
+    </table>
+  </p>
 
-{%  endblock %}
+{% endblock %}

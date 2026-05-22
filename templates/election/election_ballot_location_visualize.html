@@ -41,22 +41,35 @@
     </a>
     <h3 style="margin-top: 10px;">{{ election_name }}</h3>
     <div>
-      <input type="checkbox" id="showRedPinsId" name="vehicle1" value="showRedPins" />
-      <label for="showRedPinsId" style="margin: 2px; font-weight: 450; font-size: 12px;">
-          Show &quot;Map Points without Ballots&quot; (red pins) for this election
-      </label><br>
-      <input type="checkbox" id="showGreenPinsId" name="vehicle2" value="showGreenPins" />
-      <label for="showGreenPinsId" style="margin: 2px; font-weight: 450; font-size: 12px;">
-          Show Map Points that have "Ballot Returned" (green pins) for this election
-      </label>
+      <input type="checkbox"
+             id="showRedPinsId"
+             name="vehicle1"
+             value="showRedPins" />
+      <label for="showRedPinsId"
+             style="margin: 2px;
+                    font-weight: 450;
+                    font-size: 12px">Show &quot;Map Points without Ballots&quot; (red pins) for this election</label>
+      <br>
+      <input type="checkbox"
+             id="showGreenPinsId"
+             name="vehicle2"
+             value="showGreenPins" />
+      <label for="showGreenPinsId"
+             style="margin: 2px;
+                    font-weight: 450;
+                    font-size: 12px">Show Map Points that have "Ballot Returned" (green pins) for this election</label>
     </div>
     <div id='map'></div>
 
-    <input type="hidden" id="source_html" value="election_ballot_location_visualize.html">
+    <input type="hidden"
+           id="source_html"
+           value="election_ballot_location_visualize.html">
     <input type="hidden" id="geo_center_lat" value="{{ geo_center_lat }}">
     <input type="hidden" id="geo_center_lng" value="{{ geo_center_lng }}">
     <input type="hidden" id="geo_center_zoom" value="{{ geo_center_zoom }}">
-    <input type="hidden" id="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden"
+           id="google_civic_election_id"
+           value="{{ google_civic_election_id }}">
     <input type="hidden" id="icon_url_base" value="{{ icon_url_base }}">
     <input type="hidden" id="icon_scale_base" value="{{ icon_scale_base }}">
     <input type="hidden" id="icon_url_no" value="{{ icon_url_no }}">
@@ -64,9 +77,10 @@
     <input type="hidden" id="show_base_pins" value="{{ show_base_pins }}">
     <input type="hidden" id="show_no_pins" value="{{ show_no_pins }}">
     <input type="hidden" id="state_code" value="{{ state_code }}">
-    <input type="hidden" id="is_national_election" value="{{ is_national_election }}">
+    <input type="hidden"
+           id="is_national_election"
+           value="{{ is_national_election }}">
     <input type="hidden" id="election_name" value="{{ election_name }}">
     <input type="hidden" id="state_list" value="{{ state_list }}">
   </div>
 {% endblock %}
-

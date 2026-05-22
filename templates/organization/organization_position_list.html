@@ -1,621 +1,732 @@
 {# templates/organization/organization_position_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}Error: Name Missing{% endif %}{% endblock %}
+{% block title %}
+  {% if organization %}
+    {{ organization.organization_name }}
+  {% else %}
+    Error: Name Missing
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-{% load template_filters %}
-{% load humanize %}
+{% block content %}
+  {% load template_filters %}
+  {% load humanize %}
 
-<a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
-    Analyze Endorser Data ></a></p>
+  <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
+  Analyze Endorser Data ></a>
+</p>
 
 {% if organization %}
-<h1>
+  <h1>
     {{ organization.organization_name }}
     {% if organization.we_vote_hosted_profile_image_url_large %}
-        <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
+      <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
     {% endif %}
-</h1>
+  </h1>
 
-<table>{# Two column master table #}
+  <table>
+    {# Two column master table #}
     <tr>
-        <td style="vertical-align:top; width: 50%;">
-            <table>
-                <tr>
-                    <th>We Vote ID:</th>
-                    <td> {{ organization.we_vote_id }}
-                        (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See org images <span class="glyphicon glyphicon-new-window"></span></a>)</td>
-                </tr>
-{#                <tr>#}
-{#                    <th>Vote Smart ID:</th>#}
-{#                    <td>{% if organization.vote_smart_id %}#}
-{#                        <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a>#}
-{#                        {% endif %}#}
-{#                    </td>#}
-{#                </tr>#}
-                <tr>
-                    <th>Website:</th>
-                    <td>
-                        {{ organization.organization_website }}
-                        {% if organization.organization_website %}
-                        <a href="{{ organization.organization_website }}"
-                           target="_blank"
-                           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% if organization.organization_contact_form_url %}
-                <tr>
-                    <th>Contact Form Website:</th>
-                    <td>
-                        {{ organization.organization_contact_form_url }}
-                        {% if organization.organization_contact_form_url %}
-                        <a href="{{ organization.organization_contact_form_url }}"
-                           target="_blank"
-                           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endif %}
-            {% if organization.organization_email %}
-                <tr>
-                    <th>Contact Email: </th>
-                    <td>
-                        {{ organization.organization_email|default_if_none:"" }}
-                    </td>
-                </tr>
-            {% endif %}
-                {% if organization_voter %}
-                <tr>
-                    <th>Voter:</th>
-                    <td>
-                        <a href="{% url 'voter:voter_summary' organization_voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                           target="_blank">{% if organization_voter.get_full_name %}{{ organization_voter.get_full_name }}{% else %}{{ organization_voter.we_vote_id }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
-                        (<a href="{% url 'image:images_for_one_voter' organization_voter.id %}" target="_blank">See voter images <span class="glyphicon glyphicon-new-window"></span></a>)
-                    </td>
-                </tr>
+      <td style="vertical-align:top; width: 50%;">
+        <table>
+          <tr>
+            <th>We Vote ID:</th>
+            <td>
+              {{ organization.we_vote_id }}
+              (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}"
+   target="_blank">See org images <span class="glyphicon glyphicon-new-window"></span></a>)
+            </td>
+          </tr>
+          {#                <tr>#}
+          {#                    <th>Vote Smart ID:</th>#}
+          {#                    <td>{% if organization.vote_smart_id %}#}
+          {#                        <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a>#}
+          {#                        {% endif %}#}
+          {#                    </td>#}
+          {#                </tr>#}
+          <tr>
+            <th>Website:</th>
+            <td>
+              {{ organization.organization_website }}
+              {% if organization.organization_website %}
+                <a href="{{ organization.organization_website }}"
+                   target="_blank"
+                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+            </td>
+          </tr>
+          {% if organization.organization_contact_form_url %}
+            <tr>
+              <th>Contact Form Website:</th>
+              <td>
+                {{ organization.organization_contact_form_url }}
+                {% if organization.organization_contact_form_url %}
+                  <a href="{{ organization.organization_contact_form_url }}"
+                     target="_blank"
+                     class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
-                <tr>
-                    <th>Twitter&nbsp;Link&nbsp;To&nbsp;Endorser:&nbsp;</th>
-                    <td>{% if twitter_link_to_organization and twitter_link_to_organization.twitter_id %}{{ twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely|default_if_none:"" }}{% else %}no link{% endif %}</td>
-                </tr>
-                <tr>
-                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Handle{% if twitter_handle_mismatch %} (MISMATCH WITH TWITTER LINK){% endif %}:</span></th>
-                    <td>
-                    {{ organization.organization_twitter_handle|default_if_none:"" }}
-                    {% if organization.generate_twitter_link %}
-                        {% if organization.organization_twitter_handle %}
-                            <a href="{{ organization.generate_twitter_link }}"
-                               target="_blank"
-                               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-                        {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if organization.organization_email %}
+            <tr>
+              <th>Contact Email:</th>
+              <td>{{ organization.organization_email|default_if_none:"" }}</td>
+            </tr>
+          {% endif %}
+          {% if organization_voter %}
+            <tr>
+              <th>Voter:</th>
+              <td>
+                <a href="{% url 'voter:voter_summary' organization_voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                  {% if organization_voter.get_full_name %}
+                    {{ organization_voter.get_full_name }}
+                  {% else %}
+                    {{ organization_voter.we_vote_id }}
+                  {% endif %}
+                  <span class="glyphicon glyphicon-new-window"></span></a>
+                (<a href="{% url 'image:images_for_one_voter' organization_voter.id %}"
+   target="_blank">See voter images <span class="glyphicon glyphicon-new-window"></span></a>)
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <th>Twitter&nbsp;Link&nbsp;To&nbsp;Endorser:&nbsp;</th>
+            <td>
+              {% if twitter_link_to_organization and twitter_link_to_organization.twitter_id %}
+                {{ twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely|default_if_none:"" }}
+              {% else %}
+                no link
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Handle
+                {% if twitter_handle_mismatch %}(MISMATCH WITH TWITTER LINK){% endif %}
+              :</span>
+            </th>
+            <td>
+              {{ organization.organization_twitter_handle|default_if_none:"" }}
+              {% if organization.generate_twitter_link %}
+                {% if organization.organization_twitter_handle %}
+                  <a href="{{ organization.generate_twitter_link }}"
+                     target="_blank"
+                     class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
 
-                        ({{ organization.twitter_followers_count|intcomma }} Followers)
-                    {% endif %}
-                    {% if twitter_handle_mismatch %}
-                        (cannot Refresh Twitter Details with mismatch)
+                ({{ organization.twitter_followers_count|intcomma }} Followers)
+              {% endif %}
+              {% if twitter_handle_mismatch %}
+                (cannot Refresh Twitter Details with mismatch)
+              {% else %}
+                {% if TWITTER_API_ON %}
+                  (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                  {% if organization.organization_twitter_handle %}
+                    Refresh
+                  {% else %}
+                    Clear
+                  {% endif %}
+                  Twitter Details</a>)
+                {% endif %}
+              {% endif %}
+              (<a href="{% url 'import_export_twitter:delete_images_view' %}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Descriptive Name:</span>
+            </th>
+            <td>{{ organization.twitter_name|default_if_none:"" }}</td>
+          </tr>
+          <tr>
+            <th>
+              <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Description:</span>
+            </th>
+            <td>{{ organization.twitter_description|default_if_none:"" }}</td>
+          </tr>
+          <tr>
+            <th>
+              <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Location:</span>
+            </th>
+            <td>{{ organization.twitter_location|default_if_none:"" }}</td>
+          </tr>
+          <tr>
+            <th>
+              <span>Instagram Handle</span>
+            </th>
+            <td>
+              {{ organization.organization_instagram_handle|default_if_none:"" }}
+              {% if organization.generate_instagram_link %}
+                {% if organization.organization_instagram_handle %}
+                  <a href="{{ organization.generate_instagram_link }}"
+                     target="_blank"
+                     class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% if organization.generate_facebook_link %}
+            <tr>
+              <th>Facebook:</th>
+              <td>
+                {% if organization.generate_facebook_link %}
+                  <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% else %}
+                  {{ organization.organization_facebook|default_if_none:"" }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {#                <tr>#}
+          {#                    <th>Wikipedia Page:</th>#}
+          {#                    <td>{% if organization.wikipedia_page_title %}#}
+          {#                            <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>#}
+          {#                        {% endif %}#}
+          {#                    </td>#}
+          {#                </tr>#}
+          {% if organization.organization_endorsements_api_url %}
+            <tr>
+              <th>Endorsements Importer URL:</th>
+              <td>
+                <a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}"><strong>Import Endorsements</strong></a>
+                <a href="{{ organization.organization_endorsements_api_url }}"
+                   target="_blank">{{ organization.organization_endorsements_api_url }}</a>
+                (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit"
+   target="_blank">see specification</a>)
+              </td>
+            </tr>
+          {% endif %}
+          {% if organization_issues_list %}
+            <tr>
+              <th>Values/Issues Linked:</th>
+              <td>
+                <ul class="list-inline">
+                  {% for issue in organization_issues_list %}
+                    <li class="list-inline-item">
+                      {% if issue.hide_issue %}
+                        <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
+                      {% else %}
+                        {{ issue.issue_name }}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endif %}
+          {% if organization_blocked_issues_list %}
+            <tr>
+              <th>Values/Issues Blocked:</th>
+              <td>
+                <ul class="list-inline">
+                  {% for issue in organization_blocked_issues_list %}
+                    {% if issue.hide_issue %}
+                      <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
                     {% else %}
-                        {% if TWITTER_API_ON %}
-                        (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                            >{% if organization.organization_twitter_handle %}Refresh{% else %}Clear{% endif %} Twitter Details</a>)
-                        {% endif %}
+                      {{ issue.issue_name }}
                     {% endif %}
-                    (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)
-                    </td>
-                </tr>
-                <tr>
-                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Descriptive Name:</span></th>
-                    <td>{{ organization.twitter_name|default_if_none:"" }}</td>
-                </tr>
-                <tr>
-                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Description:</span></th>
-                    <td>{{ organization.twitter_description|default_if_none:"" }}</td>
-                </tr>
-                <tr>
-                    <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Location:</span></th>
-                    <td>{{ organization.twitter_location|default_if_none:"" }}</td>
-                </tr>
-                <tr>
-                    <th><span>Instagram Handle</span></th>
-                    <td>
-                        {{ organization.organization_instagram_handle|default_if_none:"" }}
-                    {% if organization.generate_instagram_link %}
-                        {% if organization.organization_instagram_handle %}
-                            <a href="{{ organization.generate_instagram_link }}"
-                               target="_blank"
-                               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-                        {% endif %}
-                    {% endif %}
-                    </td>
-                </tr>
-            {% if organization.generate_facebook_link %}
-                <tr>
-                    <th>Facebook: </th>
-                    <td>
-                        {% if organization.generate_facebook_link %}
-                            <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
-                        {% else %}
-                            {{ organization.organization_facebook|default_if_none:"" }}
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endif %}
-{#                <tr>#}
-{#                    <th>Wikipedia Page:</th>#}
-{#                    <td>{% if organization.wikipedia_page_title %}#}
-{#                            <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>#}
-{#                        {% endif %}#}
-{#                    </td>#}
-{#                </tr>#}
-                {% if organization.organization_endorsements_api_url %}
-                <tr>
-                    <th>Endorsements Importer URL:</th>
-                    <td>
-                        <a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}"><strong>Import Endorsements</strong></a>
-                        <a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a>
-                        (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see specification</a>)
-                    </td>
-                </tr>
-                {% endif %}
-                {% if organization_issues_list %}
-                <tr>
-                    <th>Values/Issues Linked:</th>
-                    <td>
-                        <ul class="list-inline">
-                        {% for issue in organization_issues_list %}
-                          <li class="list-inline-item">
-                            {% if issue.hide_issue %}
-                            <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
-                            {% else %}
-                            {{ issue.issue_name }}
-                            {% endif %}
-                          </li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-                {% endif %}
-                {% if organization_blocked_issues_list %}
-                <tr>
-                    <th>Values/Issues Blocked:</th>
-                    <td>
-                        <ul class="list-inline">
-                        {% for issue in organization_blocked_issues_list %}
-                            {% if issue.hide_issue %}
-                            <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
-                            {% else %}
-                            {{ issue.issue_name }}
-                            {% endif %}
-                        {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-                {% endif %}
-                {% if organization_type_display_text %}
-                <tr>
-                    <th> Endorser Type:</th>
-                    <td>{{ organization_type_display_text }}</td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <th>Issue&nbsp;Analysis&nbsp;Status:</th>
-                    <td>
-                        <input type="checkbox" name="issue_analysis_done" id="issue_analysis_done_id" value="1" disabled
-                            {% if organization.issue_analysis_done %}checked{% endif %} />
-                        Values Analysis Done.
-                        <span style="color: darkgray">This endorser has been tagged with the correct issues.</span>
-                        {% if organization.issue_analysis_admin_notes %}
-                        <br />
-                        {{ organization.issue_analysis_admin_notes|default_if_none:"" }}
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th></th>
-                    <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                           class="btn btn-primary">Edit {{ organization.organization_name }}</a></td>
-                </tr>
-            </table>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endif %}
+          {% if organization_type_display_text %}
+            <tr>
+              <th>Endorser Type:</th>
+              <td>{{ organization_type_display_text }}</td>
+            </tr>
+          {% endif %}
+          <tr>
+            <th>Issue&nbsp;Analysis&nbsp;Status:</th>
+            <td>
+              <input type="checkbox"
+                     name="issue_analysis_done"
+                     id="issue_analysis_done_id"
+                     value="1"
+                     disabled
+                     {% if organization.issue_analysis_done %}checked{% endif %} />
+              Values Analysis Done.
+              <span style="color: darkgray">This endorser has been tagged with the correct issues.</span>
+              {% if organization.issue_analysis_admin_notes %}
+                <br />
+                {{ organization.issue_analysis_admin_notes|default_if_none:"" }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th></th>
+            <td>
+              <a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                 class="btn btn-primary">Edit {{ organization.organization_name }}</a>
+            </td>
+          </tr>
+        </table>
 
-            <br />
-            <br />
-            <br />
-            <ul>
-                <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}" target="_blank">
-                    Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.</li>
-                <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
-                       target="_blank">Add New Position Form <span class="glyphicon glyphicon-new-window"></span></a></li>
-                <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
-                    Refresh Voter Guides</a></li>
-                <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">Find Voter Guides for this Endorser <span class="glyphicon glyphicon-new-window"></span></a></li>
-                <li>Assorted tools:
-                    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}" style="padding-left: 10px">Retrieve photos from Wikipedia</a>,
-                    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}" style="padding-left: 10px">Scrape endorser website for Twitter Accounts</a>,
-                    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}" style="padding-left: 10px">Retrieve tweets for endorser</a>,
-                    <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}" style="padding-left: 10px">Link issues from twitter feed</a>,
-                    {% if organization.organization_facebook %}
-                        <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?reverse_path=organization:organization_position_list&organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&reverse_path='organization:organization_edit'&page={{ page }}"
-                           style="padding-left: 10px" id="steve">
-                            Refresh Facebook Photo
-                        </a>
-                    {% endif %}
-                </li>
-            </ul>
+        <br />
+        <br />
+        <br />
+        <ul>
+          <li>
+            <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}&state_code={{ organization.state_served_code }}"
+   target="_blank">
+              Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>. Quick public tools that feeds into import_export_batch system.
+            </li>
+            <li>
+              <a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
+                 target="_blank">Add New Position Form <span class="glyphicon glyphicon-new-window"></span></a>
+            </li>
+            <li>
+              <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
+              Refresh Voter Guides</a>
+            </li>
+            <li>
+              <a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
+                 target="_blank">Find Voter Guides for this Endorser <span class="glyphicon glyphicon-new-window"></span></a>
+            </li>
+            <li>
+              Assorted tools:
+              <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}"
+                 style="padding-left: 10px">Retrieve photos from Wikipedia</a>,
+              <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}"
+                 style="padding-left: 10px">Scrape endorser website for Twitter Accounts</a>,
+              <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}"
+                 style="padding-left: 10px">Retrieve tweets for endorser</a>,
+              <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}"
+                 style="padding-left: 10px">Link issues from twitter feed</a>,
+              {% if organization.organization_facebook %}
+                <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?reverse_path=organization:organization_position_list&organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&reverse_path='organization:organization_edit'&page={{ page }}"
+                   style="padding-left: 10px"
+                   id="steve">Refresh Facebook Photo</a>
+              {% endif %}
+            </li>
+          </ul>
 
         </td>
         <td>&nbsp;&nbsp;&nbsp;</td>
         <td style="vertical-align:top; width: 50%;">
-            <table>
-                <tr>
-                    <th>Hide We Vote Logo:</th>
-                    <td>{{organization.chosen_hide_we_vote_logo|default_if_none:""}}</td>
-                </tr>
+          <table>
+            <tr>
+              <th>Hide We Vote Logo:</th>
+              <td>{{ organization.chosen_hide_we_vote_logo|default_if_none:"" }}</td>
+            </tr>
             {% if organization.chosen_subdomain_string %}
-                <tr>
-                    <th>Sub domain string:</th>
-                    <td>{{organization.chosen_subdomain_string|default_if_none:""}}{% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}</td>
-                </tr>
+              <tr>
+                <th>Sub domain string:</th>
+                <td>
+                  {{ organization.chosen_subdomain_string|default_if_none:"" }}
+                  {% if organization.chosen_subdomain_string %}.WeVote.US{% endif %}
+                </td>
+              </tr>
             {% endif %}
             {% if organization.chosen_subdomain_string or organization.chosen_domain_string %}
-                <tr>
-                    <th>Which Kind of Site:</th>
-                    <td>{% if organization.chosen_domain_type_is_campaign %}Campaigns Site{% else %}Ballot Site{% endif %}</td>
-                </tr>
+              <tr>
+                <th>Which Kind of Site:</th>
+                <td>
+                  {% if organization.chosen_domain_type_is_campaign %}
+                    Campaigns Site
+                  {% else %}
+                    Ballot Site
+                  {% endif %}
+                </td>
+              </tr>
             {% endif %}
             {% if organization.chosen_domain_string or organization.chosen_domain_string2 or organization.chosen_domain_string3 %}
-                <tr>
-                    <th>Domain string(s):</th>
-                    <td>
-                        {{organization.chosen_domain_string|default_if_none:""}}{% if organization.chosen_domain_string2 %}, {{organization.chosen_domain_string2|default_if_none:""}}{% endif %}{% if organization.chosen_domain_string3 %}, {{organization.chosen_domain_string3|default_if_none:""}}{% endif %}
-                    </td>
-                </tr>
+              <tr>
+                <th>Domain string(s):</th>
+                <td>
+                  {{ organization.chosen_domain_string|default_if_none:"" }}
+                  {% if organization.chosen_domain_string2 %}, {{ organization.chosen_domain_string2|default_if_none:"" }}{% endif %}
+                  {% if organization.chosen_domain_string3 %}, {{ organization.chosen_domain_string3|default_if_none:"" }}{% endif %}
+                </td>
+              </tr>
             {% endif %}
             {% if organization.chosen_organization_api_pass_code %}
-                <tr>
-                    <th>API Pass Code:</th>
-                    <td>{{organization.chosen_organization_api_pass_code|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>API Pass Code:</th>
+                <td>{{ organization.chosen_organization_api_pass_code|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
             {% if organization.chosen_favicon_url_https %}
-                <tr>
-                    <th>Favicon URL:</th>
-                    <td>{{organization.chosen_favicon_url_https|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>Favicon URL:</th>
+                <td>{{ organization.chosen_favicon_url_https|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
-                <tr>
-                    <th>Prevent&nbsp;Sharing&nbsp;Opinions:</th>
-                    <td>{{organization.chosen_prevent_sharing_opinions|default_if_none:""}}</td>
-                </tr>
+            <tr>
+              <th>Prevent&nbsp;Sharing&nbsp;Opinions:</th>
+              <td>{{ organization.chosen_prevent_sharing_opinions|default_if_none:"" }}</td>
+            </tr>
             {% if organization.chosen_google_analytics_tracking_id %}
-                <tr>
-                    <th>Google Analytics account number:</th>
-                    <td>{{organization.chosen_google_analytics_tracking_id|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>Google Analytics account number:</th>
+                <td>{{ organization.chosen_google_analytics_tracking_id|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
             {% if organization.chosen_html_verification_string %}
-                <tr>
-                    <th>HTML verification string:</th>
-                    <td>{{organization.chosen_html_verification_string|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>HTML verification string:</th>
+                <td>{{ organization.chosen_html_verification_string|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
             {% if organization.chosen_logo_url_https %}
-                <tr>
-                    <th>Logo:</th>
-                    <td><img src="{{organization.chosen_logo_url_https|default_if_none:""}}" width="250px" /></td>
-                </tr>
+              <tr>
+                <th>Logo:</th>
+                <td>
+                  <img src="{{ organization.chosen_logo_url_https|default_if_none:"" }}"
+                       width="250px" />
+                </td>
+              </tr>
             {% endif %}
             {% if organization.chosen_social_share_description %}
-                <tr>
-                    <th>Social share description:</th>
-                    <td>{{organization.chosen_social_share_description|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>Social share description:</th>
+                <td>{{ organization.chosen_social_share_description|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
             {% if organization.chosen_social_share_image_256x256_url_https %}
-                <tr>
-                    <th>Social share image:</th>
-                    <td>{{organization.chosen_social_share_image_256x256_url_https|default_if_none:""}}</td>
-                </tr>
+              <tr>
+                <th>Social share image:</th>
+                <td>{{ organization.chosen_social_share_image_256x256_url_https|default_if_none:"" }}</td>
+              </tr>
             {% endif %}
-                <tr>
-                    <th>Subscription plan:</th>
-                    <td>{{organization.chosen_subscription_plan|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <th>Feature Package:</th>
-                    <td>{{organization.chosen_feature_package|default_if_none:""}}</td>
-                </tr>
-                <tr>
-                    <td colspan="2"><a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                                       class="btn btn-primary">Edit Client-Configured Values</a></td>
-                </tr>
-            </table>
+            <tr>
+              <th>Subscription plan:</th>
+              <td>{{ organization.chosen_subscription_plan|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+              <th>Feature Package:</th>
+              <td>{{ organization.chosen_feature_package|default_if_none:"" }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <a href="{% url 'organization:organization_edit_account' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   class="btn btn-primary">Edit Client-Configured Values</a>
+              </td>
+            </tr>
+          </table>
 
-            <br />
-            <br />
-            <br />
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Team Members</th>
-                        <th>Manage Team</th>
-                        <th>Edit Campaigns</th>
-                        <th>Send Campaign Updates</th>
-                    </tr>
-                </thead>
+          <br />
+          <br />
+          <br />
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Team Members</th>
+                <th>Manage Team</th>
+                <th>Edit Campaigns</th>
+                <th>Send Campaign Updates</th>
+              </tr>
+            </thead>
             {% for team_member in organization_team_member_list %}
-                <tr>
-                    <td>
-                        {% if team_member.we_vote_hosted_profile_image_url_tiny %}
-                        <img src="{{ team_member.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
-                        {% endif %}
-                        {{ team_member.team_member_name }}&nbsp;&nbsp;
-                    </td>
-                    <td>
-                        {% if team_member.can_manage_team_members %}
-                            <span class="glyphicon glyphicon-ok"></span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if team_member.can_edit_campaignx_owned_by_organization %}
-                            <span class="glyphicon glyphicon-ok"></span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if team_member.can_send_updates_for_campaignx_owned_by_organization %}
-                            <span class="glyphicon glyphicon-ok"></span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="4"><a href="{% url 'organization:edit_team_members' organization.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                                       class="btn btn-primary">Add or Edit Team Members</a></td>
-                </tr>
-            </table>
+              <tr>
+                <td>
+                  {% if team_member.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ team_member.we_vote_hosted_profile_image_url_tiny }}"
+                         width="32px" />
+                  {% endif %}
+                  {{ team_member.team_member_name }}&nbsp;&nbsp;
+                </td>
+                <td>
+                  {% if team_member.can_manage_team_members %}<span class="glyphicon glyphicon-ok"></span>{% endif %}
+                </td>
+                <td>
+                  {% if team_member.can_edit_campaignx_owned_by_organization %}<span class="glyphicon glyphicon-ok"></span>{% endif %}
+                </td>
+                <td>
+                  {% if team_member.can_send_updates_for_campaignx_owned_by_organization %}
+                    <span class="glyphicon glyphicon-ok"></span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="4">
+                <a href="{% url 'organization:edit_team_members' organization.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   class="btn btn-primary">Add or Edit Team Members</a>
+              </td>
+            </tr>
+          </table>
 
 
-            <br />
-            <br />
-            <br />
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>...is Owner of these Campaign(s)</th>
-                        <th>Visible to Public</th>
-                    </tr>
-                </thead>
+          <br />
+          <br />
+          <br />
+          <table class="table">
+            <thead>
+              <tr>
+                <th>...is Owner of these Campaign(s)</th>
+                <th>Visible to Public</th>
+              </tr>
+            </thead>
             {% for campaignx_owner in campaignx_owner_list %}
-                <tr>
-                    <td>
-                        {{ campaignx_owner.campaign_title }}&nbsp;&nbsp;
-                        <a href="{% url 'campaign:campaignx_summary' campaignx_owner.campaignx_we_vote_id %}"
-                           target="_blank">
-                            view
-                            <span class="glyphicon glyphicon-new-window"></span></a>
-                    </td>
-                    <td>
-                        {% if campaignx_owner.visible_to_public %}
-                            visible
-                        {% else %}
-                            NOT visible
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+              <tr>
+                <td>
+                  {{ campaignx_owner.campaign_title }}&nbsp;&nbsp;
+                  <a href="{% url 'campaign:campaignx_summary' campaignx_owner.campaignx_we_vote_id %}"
+                     target="_blank">
+                    view
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+                </td>
+                <td>
+                  {% if campaignx_owner.visible_to_public %}
+                    visible
+                  {% else %}
+                    NOT visible
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
 
-            <br />
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Campaign(s) to List on Site</th>
-                        <th>Visible to Public</th>
-                    </tr>
-                </thead>
+          <br />
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Campaign(s) to List on Site</th>
+                <th>Visible to Public</th>
+              </tr>
+            </thead>
             {% for campaignx_listed_by_organization in campaignx_listed_by_organization_list %}
-                <tr>
-                    <td>
-                        {{ campaignx_listed_by_organization.campaign_title }}&nbsp;&nbsp;
-                        <a href="{% url 'campaign:campaignx_summary' campaignx_listed_by_organization.campaignx_we_vote_id %}"
-                           target="_blank">
-                            view
-                            <span class="glyphicon glyphicon-new-window"></span></a>
-                    </td>
-                    <td>
-                        {% if campaignx_listed_by_organization.visible_to_public %}
-                            visible
-                        {% else %}
-                            NOT visible
-                        {% endif %}
-                        {% if campaignx_listed_by_organization.listing_requested_by_voter_name %}
-                            (Requested by: {{ campaignx_listed_by_organization.listing_requested_by_voter_name }})
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="3"><a href="{% url 'organization:organization_edit_listed_campaigns' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                                       class="btn btn-primary">Add or Edit Listed Campaigns</a></td>
-                </tr>
-            </table>
-        {% if voter.is_admin and change_log_list %}
+              <tr>
+                <td>
+                  {{ campaignx_listed_by_organization.campaign_title }}&nbsp;&nbsp;
+                  <a href="{% url 'campaign:campaignx_summary' campaignx_listed_by_organization.campaignx_we_vote_id %}"
+                     target="_blank">
+                    view
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+                </td>
+                <td>
+                  {% if campaignx_listed_by_organization.visible_to_public %}
+                    visible
+                  {% else %}
+                    NOT visible
+                  {% endif %}
+                  {% if campaignx_listed_by_organization.listing_requested_by_voter_name %}
+                    (Requested by: {{ campaignx_listed_by_organization.listing_requested_by_voter_name }})
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="3">
+                <a href="{% url 'organization:organization_edit_listed_campaigns' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   class="btn btn-primary">Add or Edit Listed Campaigns</a>
+              </td>
+            </tr>
+          </table>
+          {% if voter.is_admin and change_log_list %}
             <br />
-{% include "organization/change_log_list.html" with change_log_list=change_log_list %}
-        {% endif %}
+            {% include "organization/change_log_list.html" with change_log_list=change_log_list %}
+          {% endif %}
 
         </td>
-    </tr>
-</table>{# End of two column master table #}
+      </tr>
+    </table>
+    {# End of two column master table #}
 
-<form name="organization_position_list_markings" method="post" action="{% url 'organization:organization_position_list' organization_id=organization.id %}">
-    {% csrf_token %}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <div class="pull-right">
+    <form name="organization_position_list_markings"
+          method="post"
+          action="{% url 'organization:organization_position_list' organization_id=organization.id %}">
+      {% csrf_token %}
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{{ google_civic_election_id }}">
+      <input type="hidden" name="state_code" value="{{ state_code }}">
+      <div class="pull-right">
         <label for="which_marking_id" class="control-label">
           <span class="u-no-break">Process selected row:</span>
         </label>
         <select id="which_marking_id" name="which_marking">
-            {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-            <option value="delete_position">Delete</option>
+          {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+          <option value="delete_position">Delete</option>
         </select>
         <input type="submit" value="Go" />
-    </div>
-    <h3>{{ organization_num_positions }} Position{{ organization_num_positions|pluralize }}
+      </div>
+      <h3>
+        {{ organization_num_positions }} Position{{ organization_num_positions|pluralize }}
         {% for key, state in state_list %}
-            {% if key == state_code %}
-                in {{ state }}
-            {% endif %}
-        {% endfor %} 
-        {% if show_all_elections %} in All Elections{% else %} in Upcoming Elections{% endif %}</h3>
-    {# Default to showing only upcoming elections #}
-    {% if state_list %}
-    <select id="state_code_id" name="state_code">
-        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-        {% if '' == state_code %}
-            -- Filter by State Served --
+          {% if key == state_code %}in {{ state }}{% endif %}
+        {% endfor %}
+
+        {% if show_all_elections %}
+          in All Elections
         {% else %}
-            -- Show All States Served --
+          in Upcoming Elections
         {% endif %}
-        </option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-{% endif %}{# End of if state_list #}
-    <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
-    </label>
-{% if organization_position_list %}
-
-    <table class="table">
-    <thead>
-    <tr>
-        <th></th>
-        <th>Candidate/Measure</th>
-        <th>State</th>
-        <th>Visibility?</th>
-        <th>Stance</th>
-        <th>Election</th>
-        <th>
-            Select<br />
-            (all
-            <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>)
-        </th>
-    </tr>
-    </thead>
-
-    {% for organization_position in organization_position_list %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <td width="50%"><a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
-            {% if organization_position.ballot_item_display_name %}
-                {{ organization_position.ballot_item_display_name }}
+      </h3>
+      {# Default to showing only upcoming elections #}
+      {% if state_list %}
+        <select id="state_code_id" name="state_code">
+          <option value="" {% if '' == state_code %}selected="selected"{% endif %}>
+            {% if '' == state_code %}
+              -- Filter by State Served --
             {% else %}
-                (missing ballot_item_display_name)
+              -- Show All States Served --
             {% endif %}
-            </a>
-{#            {% if organization_position.state_code %}#}
-{#            <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>#}
-{#            {% endif %}#}
-        <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
-        </td>
-        <td>
-            {{ organization_position.state_code|default_if_none:"" }}
-        </td>
-        <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
-        <td>
-            {{ organization_position.get_stance_display }}
-{#            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}#}
-            <br />
-            <a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
-                delete</a>
-        </td>
-        <td>
-        <div width="100%">
-            <div>{{ organization_position.election.election_day_text }}&nbsp;({{ organization_position.election.google_civic_election_id }})</div>
-            <span style="color: slategray; font-weight: 400;">
-                {% if organization_position.position_ultimate_election_date or organization_position.position_year %}
+          </option>
+          {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      {# End of if state_list #}
+      <label for="show_all_elections_id">
+        <input type="checkbox"
+               name="show_all_elections"
+               id="show_all_elections_id"
+               value="1"
+               {% if show_all_elections %}checked{% endif %} />
+        Include Past Elections
+      </label>
+      {% if organization_position_list %}
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Candidate/Measure</th>
+              <th>State</th>
+              <th>Visibility?</th>
+              <th>Stance</th>
+              <th>Election</th>
+              <th>
+                Select
+                <br />
+                (all
+                <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1" />
+                )
+              </th>
+            </tr>
+          </thead>
+
+          {% for organization_position in organization_position_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td width="50%">
+                <a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
+                  {% if organization_position.ballot_item_display_name %}
+                    {{ organization_position.ballot_item_display_name }}
+                  {% else %}
+                    (missing ballot_item_display_name)
+                  {% endif %}
+                </a>
+                {#            {% if organization_position.state_code %}#}
+                {#            <span style="color: slategray; font-weight: 400;">({{ organization_position.state_code|upper }}) </span>#}
+                {#            {% endif %}#}
+                <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
+              </td>
+              <td>{{ organization_position.state_code|default_if_none:"" }}</td>
+              <td>
+                {% if organization_position.is_public_position %}
+                  <strong>Public</strong>
+                {% else %}
+                  Friends&nbsp;Only
                 {% endif %}
-                {% if organization_position.position_year %}{{ organization_position.position_year }}&nbsp;&nbsp;&nbsp;{% endif %}{% if organization_position.position_ultimate_election_date %}{{ organization_position.position_ultimate_election_date }}{% endif %}
-            </span>
-        </div>
-        </td>
-        <td>
-            <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ organization_position.we_vote_id }}"/>
-        </td>
-    </tr>
-    {% endfor %}
+              </td>
+              <td>
+                {{ organization_position.get_stance_display }}
+                {#            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}#}
+                <br />
+                <a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
+                delete</a>
+              </td>
+              <td>
+                <div width="100%">
+                  <div>
+                    {{ organization_position.election.election_day_text }}&nbsp;({{ organization_position.election.google_civic_election_id }})
+                  </div>
+                  <span style="color: slategray; font-weight: 400;">
+                    {% if organization_position.position_ultimate_election_date or organization_position.position_year %}{% endif %}
+                    {% if organization_position.position_year %}{{ organization_position.position_year }}&nbsp;&nbsp;&nbsp;{% endif %}
+                    {% if organization_position.position_ultimate_election_date %}
+                      {{ organization_position.position_ultimate_election_date }}
+                    {% endif %}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <input type="checkbox"
+                       name="select_for_marking_checks[]"
+                       id="select_for_marking_id"
+                       value="{{ organization_position.we_vote_id }}" />
+              </td>
+            </tr>
+          {% endfor %}
 
-    </table>
-{% endif %}
+        </table>
+      {% endif %}
 
 
-{% if not organization_position_list %}
-    {# The following is shown if there is no candidate list #}
-    <p>(no candidates found)</p>
-{% endif %}
-</form>
+      {% if not organization_position_list %}
+        {# The following is shown if there is no candidate list #}
+        <p>(no candidates found)</p>
+      {% endif %}
+    </form>
 
 
-<h3>Merge with Another Endorser</h3>
-<form name="find_another_to_merge" method="get" action="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}">
-    {% csrf_token %}
-    {% if organization_search_for_merge %}
+    <h3>Merge with Another Endorser</h3>
+    <form name="find_another_to_merge"
+          method="get"
+          action="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}">
+      {% csrf_token %}
+      {% if organization_search_for_merge %}
         <a href="{% url 'organization:organization_we_vote_id_position_list' organization.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
-    {% endif %}
-    <input type="text" name="organization_search_for_merge" id="organization_search_for_merge_id" value="{{ organization_search_for_merge }}" style="width: 450px" />
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="state_code" value="{{ state_code }}">
-    <input type="submit" value="Search for Duplicate Endorser" />
-</form>
+          clear search</a>&nbsp;
+        {% endif %}
+        <input type="text"
+               name="organization_search_for_merge"
+               id="organization_search_for_merge_id"
+               value="{{ organization_search_for_merge }}"
+               style="width: 450px" />
+        <input type="hidden"
+               name="google_civic_election_id"
+               value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+        <input type="submit" value="Search for Duplicate Endorser" />
+      </form>
 
-{% if organization_search_results_list %}
-    <table class="table-condensed">
-        <tr>
+      {% if organization_search_results_list %}
+        <table class="table-condensed">
+          <tr>
             <td>&nbsp;</td>
             <td>Twitter</td>
             <td>Endorser Name</td>
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Description</td>
-        </tr>
-    {% for found_organization in organization_search_results_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
+          </tr>
+          {% for found_organization in organization_search_results_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
                 {{ found_organization.organization_twitter_handle|default_if_none:"" }}
                 <span class="u-no-break" style="color: darkgray;">({{ found_organization.twitter_followers_count|intcomma }}&nbsp;Followers)</span>
-            </td>
-            <td>
+              </td>
+              <td>
                 {{ found_organization.organization_name }}
                 <br />
                 <a href="{% url 'organization:organization_position_list' found_organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_elections=1"
                    target="_blank"
-                   class="u-no-break"
-                >view&nbsp;organization <span class="glyphicon glyphicon-new-window"></span></a>,
+                   class="u-no-break">view&nbsp;organization <span class="glyphicon glyphicon-new-window"></span></a>,
                 <a href="{% url 'organization:compare_two_organizations_for_merge' %}?organization1_we_vote_id={{ organization.we_vote_id }}&organization2_we_vote_id={{ found_organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                    target="_blank"
-                   class="u-no-break"
-                >compare&nbsp;for&nbsp;merge <span class="glyphicon glyphicon-new-window"></span></a>
-            </td>
-            <td>{{ found_organization.id }}</td>
-            <td>{{ found_organization.we_vote_id }}</td>
-            <td>{{ found_organization.twitter_description|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-<br/>
+                   class="u-no-break">compare&nbsp;for&nbsp;merge <span class="glyphicon glyphicon-new-window"></span></a>
+              </td>
+              <td>{{ found_organization.id }}</td>
+              <td>{{ found_organization.we_vote_id }}</td>
+              <td>{{ found_organization.twitter_description|default_if_none:"" }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+      <br />
 
 
-    <script>
+      <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
@@ -644,59 +755,83 @@
             }
         });
     });
-    </script>
+      </script>
 
-{% endif %}
-
-
-{% if organization %}
-    {% if organization.we_vote_hosted_profile_image_url_tiny %}
-        we_vote_hosted_profile_image_url_tiny: {{ organization.we_vote_hosted_profile_image_url_tiny }}<br />
-        <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}"><br />
-        <br />
     {% endif %}
 
-    {% if organization.we_vote_hosted_profile_image_url_medium %}
-        we_vote_hosted_profile_image_url_medium: {{ organization.we_vote_hosted_profile_image_url_medium }}<br />
-        <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}"><br />
+
+    {% if organization %}
+      {% if organization.we_vote_hosted_profile_image_url_tiny %}
+        we_vote_hosted_profile_image_url_tiny: {{ organization.we_vote_hosted_profile_image_url_tiny }}
         <br />
+        <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.we_vote_hosted_profile_image_url_medium %}
+        we_vote_hosted_profile_image_url_medium: {{ organization.we_vote_hosted_profile_image_url_medium }}
+        <br />
+        <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.twitter_profile_image_url_https %}
+        twitter_profile_image_url_https: {{ organization.twitter_profile_image_url_https }}
+        <br />
+        <img src="{{ organization.twitter_profile_image_url_https }}">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.we_vote_hosted_profile_image_url_large %}
+        we_vote_hosted_profile_image_url_large: <a href="{{ organization.we_vote_hosted_profile_image_url_large }}"
+    target="_blank">{{ organization.we_vote_hosted_profile_image_url_large }}</a>
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.twitter_profile_banner_url_https %}
+        twitter_profile_banner_url_https: {{ organization.twitter_profile_banner_url_https }}
+        <br />
+        <img src="{{ organization.twitter_profile_banner_url_https }}"
+             style="max-width:800px;
+                    width:100%">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.twitter_profile_background_image_url_https %}
+        twitter_profile_background_image_url_https: {{ organization.twitter_profile_background_image_url_https }}
+        <br />
+        <img src="{{ organization.twitter_profile_background_image_url_https }}"
+             style="max-width:800px;
+                    width:100%">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.wikipedia_thumbnail_url %}
+        Wikipedia Thumbnail
+        <br />
+        <img src="{{ organization.wikipedia_thumbnail_url }}"
+             style="max-width:800px;
+                    width:100%">
+        <br />
+        <br />
+      {% endif %}
+
+      {% if organization.wikipedia_photo_url %}
+        Wikipedia Full size
+        <br />
+        <img src="{{ organization.wikipedia_photo_url }}"
+             style="max-width:800px;
+                    width:100%">
+        <br />
+        <br />
+      {% endif %}
+
     {% endif %}
 
-    {% if organization.twitter_profile_image_url_https %}
-        twitter_profile_image_url_https: {{ organization.twitter_profile_image_url_https }}<br />
-        <img src="{{ organization.twitter_profile_image_url_https }}"><br />
-        <br />
-    {% endif %}
-
-    {% if organization.we_vote_hosted_profile_image_url_large %}
-        we_vote_hosted_profile_image_url_large: <a href="{{ organization.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ organization.we_vote_hosted_profile_image_url_large }}</a><br />
-        <br />
-    {% endif %}
-
-    {% if organization.twitter_profile_banner_url_https %}
-        twitter_profile_banner_url_https: {{ organization.twitter_profile_banner_url_https }}<br />
-        <img src="{{ organization.twitter_profile_banner_url_https }}" style="max-width:800px;width:100%"><br />
-        <br />
-    {% endif %}
-
-    {% if organization.twitter_profile_background_image_url_https %}
-        twitter_profile_background_image_url_https: {{ organization.twitter_profile_background_image_url_https }}<br />
-        <img src="{{ organization.twitter_profile_background_image_url_https }}" style="max-width:800px;width:100%"><br />
-        <br />
-    {% endif %}
-
-    {% if organization.wikipedia_thumbnail_url %}
-        Wikipedia Thumbnail<br />
-        <img src="{{ organization.wikipedia_thumbnail_url }}" style="max-width:800px;width:100%"><br />
-        <br />
-    {% endif %}
-
-    {% if organization.wikipedia_photo_url %}
-        Wikipedia Full size<br />
-        <img src="{{ organization.wikipedia_photo_url }}" style="max-width:800px;width:100%"><br />
-        <br />
-    {% endif %}
-
-{% endif %}
-
-{% endblock %}
+  {% endblock %}
