@@ -51,6 +51,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "wevote_server_cache",
+    }
+}
+
 ALLOWED_HOSTS = ['*']
 
 # ########## Logging configurations ###########
