@@ -215,5 +215,40 @@
             </form>
         </p>
     </div>
+    {% if api_slug == 'positionsSyncOut' %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const electionIdField = document.querySelector('input[name="google_civic_election_id"]');
+            const upcomingElectionRadios = document.querySelectorAll('input[name="all_upcoming_elections"]');
+
+            if (!electionIdField || !upcomingElectionRadios.length) {
+                return;
+            }
+
+            function toggleElectionIdField() {
+                let upcomingSelected = false;
+
+                upcomingElectionRadios.forEach((radio) => {
+                    if (radio.checked && radio.value === 'true') {
+                        upcomingSelected = true;
+                    }
+                });
+
+                if (upcomingSelected) {
+                    electionIdField.value = '';
+                    electionIdField.disabled = true;
+                } else {
+                    electionIdField.disabled = false;
+                }
+            }
+
+            upcomingElectionRadios.forEach((radio) => {
+                radio.addEventListener('change', toggleElectionIdField);
+            });
+
+            toggleElectionIdField();
+        });
+        </script>
+    {% endif %}
 </body>
 </html>

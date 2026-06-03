@@ -35,6 +35,7 @@ from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from django.http import HttpResponse
 import json
 from time import time
+from datetime import date
 
 UNKNOWN = 'U'
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
@@ -46,11 +47,16 @@ logger = wevote_functions.admin.get_logger(__name__)
 # This page does not need to be protected.
 def positions_sync_out_view(request):  # positionsSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    year = convert_to_int(request.GET.get('year', 0))
+    all_upcoming_elections = positive_value_exists(request.GET.get('all_upcoming_elections', False))
+    state_code = request.GET.get('state_code', '')
 
-    if not positive_value_exists(google_civic_election_id):
+    if not positive_value_exists(google_civic_election_id)\
+            and not positive_value_exists(year) \
+            and not positive_value_exists(all_upcoming_elections) and not positive_value_exists(state_code):
         json_data = {
             'success': False,
-            'status': 'POSITION_LIST_CANNOT_BE_RETURNED-ELECTION_ID_REQUIRED'
+            'status': 'POSITION_LIST_CANNOT_BE_RETURNED-ELECTION_ID/YEAR/STATE_CODE REQUIRED'
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -62,7 +68,20 @@ def positions_sync_out_view(request):  # positionsSyncOut
         # As of Aug 2018 we are no longer using PERCENT_RATING
         # position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
 
-        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(all_upcoming_elections):
+            today_as_integer = convert_to_int(date.today().strftime('%Y%m%d'))
+            position_list_query = position_list_query.filter(
+                position_ultimate_election_date__gte=today_as_integer
+            )
+        elif positive_value_exists(google_civic_election_id):
+            position_list_query = position_list_query.filter(
+                google_civic_election_id=google_civic_election_id
+            )
+
+        if positive_value_exists(year):
+            position_list_query = position_list_query.filter(position_year=year)
+        if positive_value_exists(state_code):
+            position_list_query = position_list_query.filter(state_code=state_code)
         # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
         if stance_we_are_looking_for != ANY_STANCE:
             # If we passed in the stance "ANY" it means we want to not filter down the list

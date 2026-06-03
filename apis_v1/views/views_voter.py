@@ -207,6 +207,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
 
     if voter_address_retrieve_results['address_found']:
         status += voter_address_retrieve_results['status']
+        text_for_map_search = voter_address_retrieve_results['text_for_map_search']
         if positive_value_exists(voter_address_retrieve_results['google_civic_election_id']):
             google_civic_election_id = voter_address_retrieve_results['google_civic_election_id']
         else:
@@ -226,11 +227,13 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
         status += results['status']
         if results['voter_ballot_saved_found']:
             google_civic_election_id = results['google_civic_election_id']
+        if not positive_value_exists(text_for_map_search):
+            text_for_map_search = results['text_for_map_search']
 
         json_data = {
             'voter_device_id': voter_address_retrieve_results['voter_device_id'],
             'address_type': voter_address_retrieve_results['address_type'],
-            'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+            'text_for_map_search': text_for_map_search,
             'google_civic_election_id': google_civic_election_id,
             'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
             'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
@@ -347,24 +350,29 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
             if voter_address_results['voter_address_found']:
                 voter_address = voter_address_results['voter_address']
+                if not positive_value_exists(text_for_map_search):
+                    text_for_map_search = voter_address.text_for_map_search
             else:
                 voter_address = None
 
             results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
                                                               voter_address)
             status += results['status']
-
             if results['voter_ballot_saved_found']:
                 google_civic_election_id = results['google_civic_election_id']
+            if not positive_value_exists(text_for_map_search):
+                text_for_map_search = results['text_for_map_search']
 
             voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
             status += voter_address_retrieve_results['status']
             if voter_address_retrieve_results['address_found']:
+                if not positive_value_exists(text_for_map_search):
+                    text_for_map_search = voter_address_retrieve_results['text_for_map_search']
                 json_data = {
                     'voter_device_id': voter_device_id,
                     'address_type': voter_address_retrieve_results['address_type'],
-                    'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+                    'text_for_map_search': text_for_map_search,
                     'google_civic_election_id': google_civic_election_id,
                     'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
                     'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],

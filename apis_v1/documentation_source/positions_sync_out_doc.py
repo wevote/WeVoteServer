@@ -14,7 +14,18 @@ def positions_sync_out_doc_template_values(url_root):
             'description':  'The election for which we want positions.',
         },
         {
-            'name':         'state_code',
+            'name': 'all_upcoming_elections',
+            'value': 'boolean',
+            'default': 'true',
+            'description': 'Return positions for all upcoming elections. Overrides limitation to a specific google_civic_election_id.',
+        },
+        {
+            'name':         'year',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Limit the positions entries retrieved to those in a particular year.',
+        },
+        {
+             'name':        'state_code',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Limit the positions entries retrieved to those in a particular state.',
         },
@@ -27,7 +38,7 @@ def positions_sync_out_doc_template_values(url_root):
 
     try_now_link_variables_dict = {
         'format': 'json',
-        'google_civic_election_id': '1000000',
+        'all_upcoming_elections': 'true',
     }
 
     api_response = '[{\n' \

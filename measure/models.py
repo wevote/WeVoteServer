@@ -60,6 +60,7 @@ CONTEST_MEASURE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'vote_smart_id',
 ]
 
+
 # The measure that is on the ballot (equivalent to ContestOffice)
 class ContestMeasure(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other

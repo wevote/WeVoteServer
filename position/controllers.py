@@ -1972,7 +1972,7 @@ def position_save_for_api(  # positionSave
     if not unique_identifier_found:
         results = {
             'date_entered':             '',
-            'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
+            'status':                   "POSITION_SAVE_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING ",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      position_we_vote_id,
@@ -4211,6 +4211,11 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         statement_html='',
         visibility_setting=False,
         ):
+    # print("voter_position_comment_save_for_api called candidate_we_vote_id: ", candidate_we_vote_id,
+    #       ', politician_we_vote_id: ', politician_we_vote_id,
+    #       ', measure_we_vote_id: ', measure_we_vote_id,
+    #       ', stance: ', stance,
+    #       ', visibility_setting: ', visibility_setting)
     status = ""
     final_results_dict = {
         'status': status,

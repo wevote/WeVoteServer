@@ -3120,6 +3120,10 @@ def process_contest_referendum_from_structured_json(
         'referendumUrl' in one_contest_referendum_structured_json else ''
     referendum_text = one_contest_referendum_structured_json['referendumText'] if \
         'referendumText' in one_contest_referendum_structured_json else ''
+    no_vote_description = one_contest_referendum_structured_json['noVoteDescription'] if \
+        'noVoteDescription' in one_contest_referendum_structured_json else ''
+    yes_vote_description = one_contest_referendum_structured_json['yesVoteDescription'] if \
+        'yesVoteDescription' in one_contest_referendum_structured_json else ''
 
     # These following fields exist for both candidates and referendum
     results = process_contest_common_fields_from_structured_json(one_contest_referendum_structured_json)
@@ -3169,6 +3173,10 @@ def process_contest_referendum_from_structured_json(
             updated_contest_measure_values['primary_party'] = primary_party
         if positive_value_exists(district_scope):
             updated_contest_measure_values['district_scope'] = district_scope
+        if positive_value_exists(no_vote_description):
+            updated_contest_measure_values['ballotpedia_no_vote_description'] = no_vote_description
+        if positive_value_exists(yes_vote_description):
+            updated_contest_measure_values['ballotpedia_yes_vote_description'] = yes_vote_description
 
         measure_manager = ContestMeasureManager()
         update_or_create_contest_measure_results = measure_manager.update_or_create_contest_measure(
@@ -3274,6 +3282,10 @@ def groom_and_store_google_civic_measure_json_2021(
         'referendumUrl' in one_contest_json else ''
     referendum_text = one_contest_json['referendumText'] if \
         'referendumText' in one_contest_json else ''
+    no_vote_description = one_contest_json['noVoteDescription'] if \
+        'noVoteDescription' in one_contest_json else ''
+    yes_vote_description = one_contest_json['yesVoteDescription'] if \
+        'yesVoteDescription' in one_contest_json else ''
 
     # These following fields exist for both candidates and referendum
     results = process_contest_common_fields_from_structured_json(one_contest_json, is_ctcl=use_ctcl)
@@ -3469,12 +3481,10 @@ def groom_and_store_google_civic_measure_json_2021(
                 updated_contest_measure_values['primary_party'] = primary_party
             if positive_value_exists(district_scope):
                 updated_contest_measure_values['district_scope'] = district_scope
-            if 'yes_vote_description' in one_contest_json and \
-                    positive_value_exists(one_contest_json['yes_vote_description']):
+            if yes_vote_description:
                 updated_contest_measure_values['ballotpedia_yes_vote_description'] = \
                     one_contest_json['yes_vote_description']
-            if 'no_vote_description' in one_contest_json and \
-                    positive_value_exists(one_contest_json['no_vote_description']):
+            if no_vote_description:
                 updated_contest_measure_values['ballotpedia_no_vote_description'] = \
                     one_contest_json['no_vote_description']
 
