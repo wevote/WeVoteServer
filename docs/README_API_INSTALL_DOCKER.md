@@ -86,6 +86,40 @@ _If necessary, run `ALTER USER  postgres  WITH PASSWORD '<your-password-here>';`
 
 6. Click Save
 
+### Debugging docker image with VS Code 
+**Prerequisites**
+* debugpy must be installed in the Docker container.
+* Port 5678 must be exposed and accessible so that VS Code can attach to the debugger.
+* Add the following configuration to your .vscode/launch.json file:
+```
+    {
+      "name": "Attach to Docker",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/wevote/code"
+        }
+      ],
+      "justMyCode": false,
+      "django": true
+    }
+```
+<img width="787" height="80" alt="image" src="https://github.com/user-attachments/assets/15c7301d-4451-434a-ad34-c43711dfd968" />
+
+**Attaching the Debugger**
+- Open the project in VS Code.
+- Navigate to Run and Debug from the left-hand sidebar.
+- From the debug configuration dropdown, select Attach to Docker.
+- Click Start Debugging (or press F5) to attach VS Code to the Docker container.
+- Set breakpoints in the desired source files.
+- Trigger the application flow or API request you want to debug. Execution will pause at the configured breakpoints, allowing you to inspect variables, evaluate expressions, and step through the code.
+<img width="1635" height="383" alt="image" src="https://github.com/user-attachments/assets/966e4bbb-9603-4f87-ac6f-faac50956a49" />
 
 ## Resources
 
