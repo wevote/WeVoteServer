@@ -115,6 +115,7 @@ _If necessary, run `ALTER USER  postgres  WITH PASSWORD '<your-password-here>';`
 }
 ```
 **Note:** If the .vscode/launch.json file does not exist, create the .vscode directory and the launch.json file, then add the configuration shown above.
+
 <img width="787" height="80" alt="image" src="https://github.com/user-attachments/assets/15c7301d-4451-434a-ad34-c43711dfd968" />
 
 **Attaching the Debugger**
