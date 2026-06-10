@@ -16,6 +16,7 @@ phases:
     on-failure: ABORT
     commands:
       - echo Build started at $(date)
+      - aws s3 cp s3://wevote-packages/GeoIP2-City.mmdb geoip/GeoIP2-City.mmdb
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION > git_commit_hash
       - docker build -f docker/Dockerfile.prod -t $IMAGE_NAME .
   post_build:
