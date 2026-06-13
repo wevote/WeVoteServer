@@ -13,8 +13,12 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 # from dj_static import Cling  # For Heroku
+from opentelemetry.instrumentation.django import DjangoInstrumentor
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+# Call the instrumentation hook
+DjangoInstrumentor().instrument()
 
 application = get_wsgi_application()  # Without Heroku
 # application = Cling(get_wsgi_application())  # For Heroku
