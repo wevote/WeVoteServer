@@ -43,8 +43,6 @@ oauthlib==3.2.2
 pandas~=2.2.3           # recommend engine - comment out if initial installation is failing
 jira>=3.5               # JIRA API client for JiraUtil integration
 openpyxl>=3.1           # required by pandas for .xlsx support
-opentelemetry-sdk>=1.42.1
-opentelemetry-instrumentation-django>=0.63b1
 phonenumbers==8.13.26
 pillow==12.1.1
 pip-tools==7.4.1
