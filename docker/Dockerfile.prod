@@ -10,7 +10,13 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # install python dependencies
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
-RUN pip install newrelic
+
+# install New Relic Python agent for application performance monitoring
+#RUN pip install newrelic
+
+# install OpenTelemetry instrumentation for Python and Django
+RUN pip install opentelemetry-distro opentelemetry-instrumentation-django opentelemetry-exporter-otlp
+RUN opentelemetry-bootstrap -a install
 
 # copy entrypoint script
 COPY docker/prod/entrypoint /usr/local/bin/docker-entrypoint
@@ -35,5 +41,5 @@ USER wevote
 EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["newrelic-admin", "run-program", "gunicorn", "--workers", "3", "--worker-class", "gthread", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
+CMD ["opentelemetry-instrument", "gunicorn", "--workers", "3", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
 
