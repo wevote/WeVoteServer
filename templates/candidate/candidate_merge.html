@@ -1,380 +1,431 @@
 {# templates/candidate/candidate_merge.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+{% block title %}
+  {% if candidate_option1 %}
+    Merge {{ candidate_option1.candidate_name }}
+  {% else %}
+    CANNOT MERGE
+  {% endif %}
+{% endblock %}
 
-{%  block content %}
-<a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
-  <br /></r />
-<a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?candidate_year={{ candidate_year }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
-   target="_blank" >Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
+{% block content %}
+  <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+  <br />
+  </r />
+  <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?candidate_year={{ candidate_year }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
+     target="_blank">Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
 
-<h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  <h1>
+    {% if candidate_option1 %}
+      Merge {{ candidate_option1.candidate_name }}
+    {% else %}
+      CANNOT MERGE
+    {% endif %}
+  </h1>
+  {% if error_message %}
+    <p>
+      <strong>{{ error_message }}</strong>
+    </p>
+  {% endif %}
 
-<form action="{% url 'candidate:candidate_merge_process' %}" method="post">
-{% csrf_token %}
-{% if candidate_option1 and candidate_option2 %}
-<table>
-    <tr>
-        <td>
-          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
-        </td>
-        <td></td>
-        <td><input type="submit" value="Merge Candidates" name="merge" class="btn btn-primary" /></td>
-    </tr>
-    <tr>
-        <th>&nbsp;</th>
-        <th>Candidate Option 1</th>
-        <th>Candidate Option 2</th>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td>
+  <form action="{% url 'candidate:candidate_merge_process' %}" method="post">
+    {% csrf_token %}
+    {% if candidate_option1 and candidate_option2 %}
+      <table>
+        <tr>
+          <td>
+            <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp;
+            <input type="submit" value="Skip - Not Duplicates" name="skip" />
+            &nbsp;
+          </td>
+          <td></td>
+          <td>
+            <input type="submit"
+                   value="Merge Candidates"
+                   name="merge"
+                   class="btn btn-primary" />
+          </td>
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <th>Candidate Option 1</th>
+          <th>Candidate Option 2</th>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>
             <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option1.we_vote_id %}"
                target="_blank">view candidate 1 <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
             <a href="https://www.google.com/search?q={{ candidate_option1.candidate_name|urlencode }}%20politician"
                target="_blank"
                class="u-no-break">
-                google search <span class="glyphicon glyphicon-new-window"></span>
+              google search <span class="glyphicon glyphicon-new-window"></span>
             </a>
-        </td>
-        <td>
+          </td>
+          <td>
             <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option2.we_vote_id %}"
                target="_blank">view candidate 2 <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;
             <a href="https://www.google.com/search?q={{ candidate_option2.candidate_name|urlencode }}%20politician"
                target="_blank"
                class="u-no-break">
-                google search <span class="glyphicon glyphicon-new-window"></span>
+              google search <span class="glyphicon glyphicon-new-window"></span>
             </a>
-        </td>
-    </tr>
-    <tr>
-        <td>
+          </td>
+        </tr>
+        <tr>
+          <td>
             {% if candidate_option1.politician_we_vote_id and candidate_option2.politician_we_vote_id and candidate_option1.politician_we_vote_id != candidate_option2.politician_we_vote_id %}
-            <strong><span style="color: red">Politician ***CONFLICT***</span></strong>&nbsp;
+              <strong><span style="color: red">Politician ***CONFLICT***</span></strong>&nbsp;
             {% endif %}
-        </td>
-        <td>
+          </td>
+          <td>
             {% if candidate_option1.politician_we_vote_id %}
-            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option1.politician_we_vote_id %}"
-               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+              <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option1.politician_we_vote_id %}"
+                 target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
-        </td>
-        <td>
+          </td>
+          <td>
             {% if candidate_option2.politician_we_vote_id %}
-            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option2.politician_we_vote_id %}"
-               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+              <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option2.politician_we_vote_id %}"
+                 target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
-        </td>
-    </tr>
+          </td>
+        </tr>
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="politician_we_vote_id" field_label="Politician We Vote ID" conflict_status=conflict_values.politician_we_vote_id candidate1_field_value=candidate_option1.politician_we_vote_id candidate2_field_value=candidate_option2.politician_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="politician_we_vote_id" field_label="Politician We Vote ID" conflict_status=conflict_values.politician_we_vote_id candidate1_field_value=candidate_option1.politician_we_vote_id candidate2_field_value=candidate_option2.politician_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="politician_id" field_label="Politician ID" conflict_status=conflict_values.politician_id candidate1_field_value=candidate_option1.politician_id candidate2_field_value=candidate_option2.politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="politician_id" field_label="Politician ID" conflict_status=conflict_values.politician_id candidate1_field_value=candidate_option1.politician_id candidate2_field_value=candidate_option2.politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_name" field_label="Candidate Name" conflict_status=conflict_values.candidate_name candidate1_field_value=candidate_option1.candidate_name candidate2_field_value=candidate_option2.candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_name" field_label="Candidate Name" conflict_status=conflict_values.candidate_name candidate1_field_value=candidate_option1.candidate_name candidate2_field_value=candidate_option2.candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;1</td>
-        <td>{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}</td>
-    </tr>
-{% if candidate_option1.google_civic_candidate_name2 or candidate_option2.google_civic_candidate_name2 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;2</td>
-        <td>{{ candidate_option1.google_civic_candidate_name2|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.google_civic_candidate_name2|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
-{% if candidate_option1.google_civic_candidate_name3 or candidate_option2.google_civic_candidate_name3 %}
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;3</td>
-        <td>{{ candidate_option1.google_civic_candidate_name3|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.google_civic_candidate_name3|default_if_none:"" }}</td>
-    </tr>
-{% endif %}
+        <tr>
+          <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;1</td>
+          <td>{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}</td>
+          <td>{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}</td>
+        </tr>
+        {% if candidate_option1.google_civic_candidate_name2 or candidate_option2.google_civic_candidate_name2 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;2</td>
+            <td>{{ candidate_option1.google_civic_candidate_name2|default_if_none:"" }}</td>
+            <td>{{ candidate_option2.google_civic_candidate_name2|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+        {% if candidate_option1.google_civic_candidate_name3 or candidate_option2.google_civic_candidate_name3 %}
+          <tr>
+            <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;3</td>
+            <td>{{ candidate_option1.google_civic_candidate_name3|default_if_none:"" }}</td>
+            <td>{{ candidate_option2.google_civic_candidate_name3|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_name" field_label="Candidate Name (from Ballotpedia)" conflict_status=conflict_values.ballotpedia_candidate_name candidate1_field_value=candidate_option1.ballotpedia_candidate_name candidate2_field_value=candidate_option2.ballotpedia_candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_name" field_label="Candidate Name (from Ballotpedia)" conflict_status=conflict_values.ballotpedia_candidate_name candidate1_field_value=candidate_option1.ballotpedia_candidate_name candidate2_field_value=candidate_option2.ballotpedia_candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% if contest_office_mismatch %}
-    <tr>
-        <td><strong><span style="color: red">Office ***MISMATCH***</span></strong></td>
-        <td><strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong></td>
-        <td><strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong></td>
-    </tr>
-{% endif %}
+        {% if contest_office_mismatch %}
+          <tr>
+            <td>
+              <strong><span style="color: red">Office ***MISMATCH***</span></strong>
+            </td>
+            <td>
+              <strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong>
+            </td>
+            <td>
+              <strong><span style="color: red">********* NO OFFICES SHARED - MERGE OFFICES? *********</span></strong>
+            </td>
+          </tr>
+        {% endif %}
 
-    <tr>
-        <td>Office Links</td>
-        <td>
+        <tr>
+          <td>Office Links</td>
+          <td>
             {% for candidate_to_office_link in candidate_option1_candidate_to_office_link_list %}
-                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
-                ({{ candidate_to_office_link.google_civic_election_id }}) --
-                {% if candidate_to_office_link.contest_office_we_vote_id %}
+              {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+              ({{ candidate_to_office_link.google_civic_election_id }}) --
+              {% if candidate_to_office_link.contest_office_we_vote_id %}
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
                    target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})
                   <span class="glyphicon glyphicon-new-window"></span></a>
-                {% else %}
-                    Missing contest_office_we_vote_id
-                {% endif %}
-                <br />
+              {% else %}
+                Missing contest_office_we_vote_id
+              {% endif %}
+              <br />
             {% endfor %}
-        </td>
-        <td>
+          </td>
+          <td>
             {% for candidate_to_office_link in candidate_option2_candidate_to_office_link_list %}
-                {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
-                ({{ candidate_to_office_link.google_civic_election_id }}) --
-                {% if candidate_to_office_link.contest_office_we_vote_id %}
+              {{ candidate_to_office_link.election.election_name }}, {{ candidate_to_office_link.election.election_day_text }}
+              ({{ candidate_to_office_link.google_civic_election_id }}) --
+              {% if candidate_to_office_link.contest_office_we_vote_id %}
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
                    target="_blank">{{ candidate_to_office_link.office.office_name }} ({{ candidate_to_office_link.contest_office_we_vote_id }})
                   <span class="glyphicon glyphicon-new-window"></span></a>
-                {% else %}
-                    Missing contest_office_we_vote_id
-                {% endif %}
-                <br />
+              {% else %}
+                Missing contest_office_we_vote_id
+              {% endif %}
+              <br />
             {% endfor %}
-        </td>
-    </tr>
+          </td>
+        </tr>
 
 
-{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
+        {#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="party" field_label="Party" conflict_status=conflict_values.party candidate1_field_value=candidate_option1.party candidate2_field_value=candidate_option2.party candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="party" field_label="Party" conflict_status=conflict_values.party candidate1_field_value=candidate_option1.party candidate2_field_value=candidate_option2.party candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-    <tr>
-        <td>Candidate Year</td>
-        <td>{{ candidate_option1.candidate_year|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.candidate_year|default_if_none:"" }}</td>
-    </tr>
+        <tr>
+          <td>Candidate Year</td>
+          <td>{{ candidate_option1.candidate_year|default_if_none:"" }}</td>
+          <td>{{ candidate_option2.candidate_year|default_if_none:"" }}</td>
+        </tr>
 
-    {% if candidate_option1.id != None or candidate_option2.id != None %}
-    <tr>
-        <td>ID</td>
-        <td>{{ candidate_option1.id|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.id|default_if_none:"" }}</td>
-    </tr>
-    {% endif %}
-    {% if candidate_option1.we_vote_id != None or candidate_option2.we_vote_id != None %}
-    <tr>
-        <td>We Vote ID</td>
-        <td>{{ candidate_option1.we_vote_id|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.we_vote_id|default_if_none:"" }}</td>
-    </tr>
-    {% endif %}
+        {% if candidate_option1.id != None or candidate_option2.id != None %}
+          <tr>
+            <td>ID</td>
+            <td>{{ candidate_option1.id|default_if_none:"" }}</td>
+            <td>{{ candidate_option2.id|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
+        {% if candidate_option1.we_vote_id != None or candidate_option2.we_vote_id != None %}
+          <tr>
+            <td>We Vote ID</td>
+            <td>{{ candidate_option1.we_vote_id|default_if_none:"" }}</td>
+            <td>{{ candidate_option2.we_vote_id|default_if_none:"" }}</td>
+          </tr>
+        {% endif %}
 
-{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election ID" conflict_status=conflict_values.google_civic_election_id candidate1_field_value=candidate_option1.google_civic_election_id candidate2_field_value=candidate_option2.google_civic_election_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
+        {#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election ID" conflict_status=conflict_values.google_civic_election_id candidate1_field_value=candidate_option1.google_civic_election_id candidate2_field_value=candidate_option2.google_civic_election_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_candidate_id candidate1_field_value=candidate_option1.ballotpedia_candidate_id candidate2_field_value=candidate_option2.ballotpedia_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_candidate_id candidate1_field_value=candidate_option1.ballotpedia_candidate_id candidate2_field_value=candidate_option2.ballotpedia_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_summary" field_label="Ballotpedia Candidate Summary" conflict_status=conflict_values.ballotpedia_candidate_summary candidate1_field_value=candidate_option1.ballotpedia_candidate_summary candidate2_field_value=candidate_option2.ballotpedia_candidate_summary candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_summary" field_label="Ballotpedia Candidate Summary" conflict_status=conflict_values.ballotpedia_candidate_summary candidate1_field_value=candidate_option1.ballotpedia_candidate_summary candidate2_field_value=candidate_option2.ballotpedia_candidate_summary candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballot_guide_official_statement" field_label="Official Candidate Statement" conflict_status=conflict_values.ballot_guide_official_statement candidate1_field_value=candidate_option1.ballot_guide_official_statement candidate2_field_value=candidate_option2.ballot_guide_official_statement candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballot_guide_official_statement" field_label="Official Candidate Statement" conflict_status=conflict_values.ballot_guide_official_statement candidate1_field_value=candidate_option1.ballot_guide_official_statement candidate2_field_value=candidate_option2.ballot_guide_official_statement candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_url" field_label="Ballotpedia URL" conflict_status=conflict_values.ballotpedia_candidate_url candidate1_field_value=candidate_option1.ballotpedia_candidate_url candidate2_field_value=candidate_option2.ballotpedia_candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_url" field_label="Ballotpedia URL" conflict_status=conflict_values.ballotpedia_candidate_url candidate1_field_value=candidate_option1.ballotpedia_candidate_url candidate2_field_value=candidate_option2.ballotpedia_candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Office Held ID" conflict_status=conflict_values.ballotpedia_office_id candidate1_field_value=candidate_option1.ballotpedia_office_id candidate2_field_value=candidate_option2.ballotpedia_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Office Held ID" conflict_status=conflict_values.ballotpedia_office_id candidate1_field_value=candidate_option1.ballotpedia_office_id candidate2_field_value=candidate_option2.ballotpedia_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_page_title" field_label="Ballotpedia Page Title" conflict_status=conflict_values.ballotpedia_page_title candidate1_field_value=candidate_option1.ballotpedia_page_title candidate2_field_value=candidate_option2.ballotpedia_page_title candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_page_title" field_label="Ballotpedia Page Title" conflict_status=conflict_values.ballotpedia_page_title candidate1_field_value=candidate_option1.ballotpedia_page_title candidate2_field_value=candidate_option2.ballotpedia_page_title candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_person_id" field_label="Ballotpedia Person ID" conflict_status=conflict_values.ballotpedia_person_id candidate1_field_value=candidate_option1.ballotpedia_person_id candidate2_field_value=candidate_option2.ballotpedia_person_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_person_id" field_label="Ballotpedia Person ID" conflict_status=conflict_values.ballotpedia_person_id candidate1_field_value=candidate_option1.ballotpedia_person_id candidate2_field_value=candidate_option2.ballotpedia_person_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_photo_url" field_label="Ballotpedia Photo" conflict_status=conflict_values.ballotpedia_photo_url candidate1_field_value=candidate_option1.ballotpedia_photo_url candidate2_field_value=candidate_option2.ballotpedia_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_photo_url" field_label="Ballotpedia Photo" conflict_status=conflict_values.ballotpedia_photo_url candidate1_field_value=candidate_option1.ballotpedia_photo_url candidate2_field_value=candidate_option2.ballotpedia_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_race_id" field_label="Ballotpedia Race ID" conflict_status=conflict_values.ballotpedia_race_id candidate1_field_value=candidate_option1.ballotpedia_race_id candidate2_field_value=candidate_option2.ballotpedia_race_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_race_id" field_label="Ballotpedia Race ID" conflict_status=conflict_values.ballotpedia_race_id candidate1_field_value=candidate_option1.ballotpedia_race_id candidate2_field_value=candidate_option2.ballotpedia_race_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="birth_day_text" field_label="Birth Day Text: YYYY-MM-DD" conflict_status=conflict_values.birth_day_text candidate1_field_value=candidate_option1.birth_day_text candidate2_field_value=candidate_option2.birth_day_text candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="birth_day_text" field_label="Birth Day Text: YYYY-MM-DD" conflict_status=conflict_values.birth_day_text candidate1_field_value=candidate_option1.birth_day_text candidate2_field_value=candidate_option2.birth_day_text candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_email" field_label="Candidate Email" conflict_status=conflict_values.candidate_email candidate1_field_value=candidate_option1.candidate_email candidate2_field_value=candidate_option2.candidate_email candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_email" field_label="Candidate Email" conflict_status=conflict_values.candidate_email candidate1_field_value=candidate_option1.candidate_email candidate2_field_value=candidate_option2.candidate_email candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_gender" field_label="Candidate Gender" conflict_status=conflict_values.candidate_gender candidate1_field_value=candidate_option1.candidate_gender candidate2_field_value=candidate_option2.candidate_gender candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_gender" field_label="Candidate Gender" conflict_status=conflict_values.candidate_gender candidate1_field_value=candidate_option1.candidate_gender candidate2_field_value=candidate_option2.candidate_gender candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_phone" field_label="Phone Number" conflict_status=conflict_values.candidate_phone candidate1_field_value=candidate_option1.candidate_phone candidate2_field_value=candidate_option2.candidate_phone candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_phone" field_label="Phone Number" conflict_status=conflict_values.candidate_phone candidate1_field_value=candidate_option1.candidate_phone candidate2_field_value=candidate_option2.candidate_phone candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="is_battleground_race" field_label="Battleground Race" conflict_status=conflict_values.is_battleground_race candidate1_field_value=candidate_option1.is_battleground_race candidate2_field_value=candidate_option2.is_battleground_race candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="is_battleground_race" field_label="Battleground Race" conflict_status=conflict_values.is_battleground_race candidate1_field_value=candidate_option1.is_battleground_race candidate2_field_value=candidate_option2.is_battleground_race candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_incumbent" field_label="Is Incumbent" conflict_status=conflict_values.candidate_is_incumbent candidate1_field_value=candidate_option1.candidate_is_incumbent candidate2_field_value=candidate_option2.candidate_is_incumbent candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_incumbent" field_label="Is Incumbent" conflict_status=conflict_values.candidate_is_incumbent candidate1_field_value=candidate_option1.candidate_is_incumbent candidate2_field_value=candidate_option2.candidate_is_incumbent candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_top_ticket" field_label="Is Top of Ticket" conflict_status=conflict_values.candidate_is_top_ticket candidate1_field_value=candidate_option1.candidate_is_top_ticket candidate2_field_value=candidate_option2.candidate_is_top_ticket candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_top_ticket" field_label="Is Top of Ticket" conflict_status=conflict_values.candidate_is_top_ticket candidate1_field_value=candidate_option1.candidate_is_top_ticket candidate2_field_value=candidate_option2.candidate_is_top_ticket candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_ultimate_election_date" field_label="Ultimate Election Date" conflict_status=conflict_values.candidate_ultimate_election_date candidate1_field_value=candidate_option1.candidate_ultimate_election_date candidate2_field_value=candidate_option2.candidate_ultimate_election_date candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_ultimate_election_date" field_label="Ultimate Election Date" conflict_status=conflict_values.candidate_ultimate_election_date candidate1_field_value=candidate_option1.candidate_ultimate_election_date candidate2_field_value=candidate_option2.candidate_ultimate_election_date candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="do_not_display_on_ballot" field_label="Don't Display On Ballot" conflict_status=conflict_values.do_not_display_on_ballot candidate1_field_value=candidate_option1.do_not_display_on_ballot candidate2_field_value=candidate_option2.do_not_display_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="do_not_display_on_ballot" field_label="Don't Display On Ballot" conflict_status=conflict_values.do_not_display_on_ballot candidate1_field_value=candidate_option1.do_not_display_on_ballot candidate2_field_value=candidate_option2.do_not_display_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_participation_status" field_label="Participation Status" conflict_status=conflict_values.candidate_participation_status candidate1_field_value=candidate_option1.candidate_participation_status candidate2_field_value=candidate_option2.candidate_participation_status candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_participation_status" field_label="Participation Status" conflict_status=conflict_values.candidate_participation_status candidate1_field_value=candidate_option1.candidate_participation_status candidate2_field_value=candidate_option2.candidate_participation_status candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawn_from_election" field_label="Withdrawn" conflict_status=conflict_values.withdrawn_from_election candidate1_field_value=candidate_option1.withdrawn_from_election candidate2_field_value=candidate_option2.withdrawn_from_election candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawn_from_election" field_label="Withdrawn" conflict_status=conflict_values.withdrawn_from_election candidate1_field_value=candidate_option1.withdrawn_from_election candidate2_field_value=candidate_option2.withdrawn_from_election candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawal_date" field_label="Withdrawal Date" conflict_status=conflict_values.withdrawal_date candidate1_field_value=candidate_option1.withdrawal_date candidate2_field_value=candidate_option2.withdrawal_date candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawal_date" field_label="Withdrawal Date" conflict_status=conflict_values.withdrawal_date candidate1_field_value=candidate_option1.withdrawal_date candidate2_field_value=candidate_option2.withdrawal_date candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_url" field_label="Candidate URL" conflict_status=conflict_values.candidate_url candidate1_field_value=candidate_option1.candidate_url candidate2_field_value=candidate_option2.candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_url" field_label="Candidate URL" conflict_status=conflict_values.candidate_url candidate1_field_value=candidate_option1.candidate_url candidate2_field_value=candidate_option2.candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_contact_form_url" field_label="Candidate Contact URL" conflict_status=conflict_values.candidate_contact_form_url candidate1_field_value=candidate_option1.candidate_contact_form_url candidate2_field_value=candidate_option2.candidate_contact_form_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_contact_form_url" field_label="Candidate Contact URL" conflict_status=conflict_values.candidate_contact_form_url candidate1_field_value=candidate_option1.candidate_contact_form_url candidate2_field_value=candidate_option2.candidate_contact_form_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-    <tr>
-        <td>Twitter Handles</td>
-        <td>
+        <tr>
+          <td>Twitter Handles</td>
+          <td>
             {{ candidate_option1.candidate_twitter_handle|default_if_none:"" }}
             {% if candidate_option1.candidate_twitter_handle2 %}
-                <br />{{ candidate_option1.candidate_twitter_handle2|default_if_none:"" }}
+              <br />
+              {{ candidate_option1.candidate_twitter_handle2|default_if_none:"" }}
             {% endif %}
             {% if candidate_option1.candidate_twitter_handle3 %}
-                <br />{{ candidate_option1.candidate_twitter_handle3|default_if_none:"" }}
+              <br />
+              {{ candidate_option1.candidate_twitter_handle3|default_if_none:"" }}
             {% endif %}
-        </td>
-        <td>
+          </td>
+          <td>
             {{ candidate_option2.candidate_twitter_handle|default_if_none:"" }}
             {% if candidate_option2.candidate_twitter_handle2 %}
-                <br />{{ candidate_option2.candidate_twitter_handle2|default_if_none:"" }}
+              <br />
+              {{ candidate_option2.candidate_twitter_handle2|default_if_none:"" }}
             {% endif %}
             {% if candidate_option2.candidate_twitter_handle3 %}
-                <br />{{ candidate_option2.candidate_twitter_handle3|default_if_none:"" }}
+              <br />
+              {{ candidate_option2.candidate_twitter_handle3|default_if_none:"" }}
             {% endif %}
-        </td>
-    </tr>
+          </td>
+        </tr>
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_handle_updates_failing" field_label="Twitter Handle Updates Failing" conflict_status=conflict_values.twitter_handle_updates_failing candidate1_field_value=candidate_option1.twitter_handle_updates_failing candidate2_field_value=candidate_option2.twitter_handle_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_handle_updates_failing" field_label="Twitter Handle Updates Failing" conflict_status=conflict_values.twitter_handle_updates_failing candidate1_field_value=candidate_option1.twitter_handle_updates_failing candidate2_field_value=candidate_option2.twitter_handle_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_handle2_updates_failing" field_label="Twitter Handle 2 Updates Failing" conflict_status=conflict_values.twitter_handle2_updates_failing candidate1_field_value=candidate_option1.twitter_handle2_updates_failing candidate2_field_value=candidate_option2.twitter_handle2_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_handle2_updates_failing" field_label="Twitter Handle 2 Updates Failing" conflict_status=conflict_values.twitter_handle2_updates_failing candidate1_field_value=candidate_option1.twitter_handle2_updates_failing candidate2_field_value=candidate_option2.twitter_handle2_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="crowdpac_candidate_id" field_label="Crowdpac Candidate Id" conflict_status=conflict_values.crowdpac_candidate_id candidate1_field_value=candidate_option1.crowdpac_candidate_id candidate2_field_value=candidate_option2.crowdpac_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="crowdpac_candidate_id" field_label="Crowdpac Candidate Id" conflict_status=conflict_values.crowdpac_candidate_id candidate1_field_value=candidate_option1.crowdpac_candidate_id candidate2_field_value=candidate_option2.crowdpac_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="CTCL UUID" conflict_status=conflict_values.ctcl_uuid candidate1_field_value=candidate_option1.ctcl_uuid candidate2_field_value=candidate_option2.ctcl_uuid candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="CTCL UUID" conflict_status=conflict_values.ctcl_uuid candidate1_field_value=candidate_option1.ctcl_uuid candidate2_field_value=candidate_option2.ctcl_uuid candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="maplight_id" field_label="MapLight ID" conflict_status=conflict_values.maplight_id candidate1_field_value=candidate_option1.maplight_id candidate2_field_value=candidate_option2.maplight_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="maplight_id" field_label="MapLight ID" conflict_status=conflict_values.maplight_id candidate1_field_value=candidate_option1.maplight_id candidate2_field_value=candidate_option2.maplight_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division ID" conflict_status=conflict_values.ocd_division_id candidate1_field_value=candidate_option1.ocd_division_id candidate2_field_value=candidate_option2.ocd_division_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division ID" conflict_status=conflict_values.ocd_division_id candidate1_field_value=candidate_option1.ocd_division_id candidate2_field_value=candidate_option2.ocd_division_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code candidate1_field_value=candidate_option1.state_code candidate2_field_value=candidate_option2.state_code candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code candidate1_field_value=candidate_option1.state_code candidate2_field_value=candidate_option2.state_code candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_url" field_label="Twitter URL (from Google)" conflict_status=conflict_values.twitter_url candidate1_field_value=candidate_option1.twitter_url candidate2_field_value=candidate_option2.twitter_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_url" field_label="Twitter URL (from Google)" conflict_status=conflict_values.twitter_url candidate1_field_value=candidate_option1.twitter_url candidate2_field_value=candidate_option2.twitter_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_name" field_label="Twitter Name" conflict_status=conflict_values.twitter_name candidate1_field_value=candidate_option1.twitter_name candidate2_field_value=candidate_option2.twitter_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_name" field_label="Twitter Name" conflict_status=conflict_values.twitter_name candidate1_field_value=candidate_option1.twitter_name candidate2_field_value=candidate_option2.twitter_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_location" field_label="Twitter Location" conflict_status=conflict_values.twitter_location candidate1_field_value=candidate_option1.twitter_location candidate2_field_value=candidate_option2.twitter_location candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_location" field_label="Twitter Location" conflict_status=conflict_values.twitter_location candidate1_field_value=candidate_option1.twitter_location candidate2_field_value=candidate_option2.twitter_location candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="instagram_handle" field_label="Instagram Handle" conflict_status=conflict_values.instagram_handle candidate1_field_value=candidate_option1.instagram_handle candidate2_field_value=candidate_option2.instagram_handle candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="instagram_handle" field_label="Instagram Handle" conflict_status=conflict_values.instagram_handle candidate1_field_value=candidate_option1.instagram_handle candidate2_field_value=candidate_option2.instagram_handle candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="order_on_ballot" field_label="Order on Ballot" conflict_status=conflict_values.order_on_ballot candidate1_field_value=candidate_option1.order_on_ballot candidate2_field_value=candidate_option2.order_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="order_on_ballot" field_label="Order on Ballot" conflict_status=conflict_values.order_on_ballot candidate1_field_value=candidate_option1.order_on_ballot candidate2_field_value=candidate_option2.order_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook URL" conflict_status=conflict_values.facebook_url candidate1_field_value=candidate_option1.facebook_url candidate2_field_value=candidate_option2.facebook_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook URL" conflict_status=conflict_values.facebook_url candidate1_field_value=candidate_option1.facebook_url candidate2_field_value=candidate_option2.facebook_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken candidate1_field_value=candidate_option1.facebook_url_is_broken candidate2_field_value=candidate_option2.facebook_url_is_broken candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken candidate1_field_value=candidate_option1.facebook_url_is_broken candidate2_field_value=candidate_option2.facebook_url_is_broken candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="youtube_url" field_label="YouTube URL" conflict_status=conflict_values.youtube_url candidate1_field_value=candidate_option1.youtube_url candidate2_field_value=candidate_option2.youtube_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="youtube_url" field_label="YouTube URL" conflict_status=conflict_values.youtube_url candidate1_field_value=candidate_option1.youtube_url candidate2_field_value=candidate_option2.youtube_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_plus_url" field_label="Google+ URL" conflict_status=conflict_values.google_plus_url candidate1_field_value=candidate_option1.google_plus_url candidate2_field_value=candidate_option2.google_plus_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_plus_url" field_label="Google+ URL" conflict_status=conflict_values.google_plus_url candidate1_field_value=candidate_option1.google_plus_url candidate2_field_value=candidate_option2.google_plus_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="linkedin_url" field_label="LinkedIn URL" conflict_status=conflict_values.linkedin_url candidate1_field_value=candidate_option1.linkedin_url candidate2_field_value=candidate_option2.linkedin_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="linkedin_url" field_label="LinkedIn URL" conflict_status=conflict_values.linkedin_url candidate1_field_value=candidate_option1.linkedin_url candidate2_field_value=candidate_option2.linkedin_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="linkedin_photo_url" field_label="LinkedIn Photo" conflict_status=conflict_values.linkedin_photo_url candidate1_field_value=candidate_option1.linkedin_photo_url candidate2_field_value=candidate_option2.linkedin_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="linkedin_photo_url" field_label="LinkedIn Photo" conflict_status=conflict_values.linkedin_photo_url candidate1_field_value=candidate_option1.linkedin_photo_url candidate2_field_value=candidate_option2.linkedin_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="other_source_url" field_label="Other Source URL" conflict_status=conflict_values.other_source_url candidate1_field_value=candidate_option1.other_source_url candidate2_field_value=candidate_option2.other_source_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="other_source_url" field_label="Other Source URL" conflict_status=conflict_values.other_source_url candidate1_field_value=candidate_option1.other_source_url candidate2_field_value=candidate_option2.other_source_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="other_source_photo_url" field_label="Other Source Photo" conflict_status=conflict_values.other_source_photo_url candidate1_field_value=candidate_option1.other_source_photo_url candidate2_field_value=candidate_option2.other_source_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="other_source_photo_url" field_label="Other Source Photo" conflict_status=conflict_values.other_source_photo_url candidate1_field_value=candidate_option1.other_source_photo_url candidate2_field_value=candidate_option2.other_source_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url" field_label="Other Photo" conflict_status=conflict_values.photo_url candidate1_field_value=candidate_option1.photo_url candidate2_field_value=candidate_option2.photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url" field_label="Other Photo" conflict_status=conflict_values.photo_url candidate1_field_value=candidate_option1.photo_url candidate2_field_value=candidate_option2.photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_ctcl" field_label="Photo (from CTCL)" conflict_status=conflict_values.photo_url_from_ctcl candidate1_field_value=candidate_option1.photo_url_from_ctcl candidate2_field_value=candidate_option2.photo_url_from_ctcl candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_ctcl" field_label="Photo (from CTCL)" conflict_status=conflict_values.photo_url_from_ctcl candidate1_field_value=candidate_option1.photo_url_from_ctcl candidate2_field_value=candidate_option2.photo_url_from_ctcl candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_maplight" field_label="Photo (from MapLight)" conflict_status=conflict_values.photo_url_from_maplight candidate1_field_value=candidate_option1.photo_url_from_maplight candidate2_field_value=candidate_option2.photo_url_from_maplight candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_maplight" field_label="Photo (from MapLight)" conflict_status=conflict_values.photo_url_from_maplight candidate1_field_value=candidate_option1.photo_url_from_maplight candidate2_field_value=candidate_option2.photo_url_from_maplight candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_smart" field_label="Photo (from Vote Smart)" conflict_status=conflict_values.photo_url_from_vote_smart candidate1_field_value=candidate_option1.photo_url_from_vote_smart candidate2_field_value=candidate_option2.photo_url_from_vote_smart candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_smart" field_label="Photo (from Vote Smart)" conflict_status=conflict_values.photo_url_from_vote_smart candidate1_field_value=candidate_option1.photo_url_from_vote_smart candidate2_field_value=candidate_option2.photo_url_from_vote_smart candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart ID" conflict_status=conflict_values.vote_smart_id candidate1_field_value=candidate_option1.vote_smart_id candidate2_field_value=candidate_option2.vote_smart_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart ID" conflict_status=conflict_values.vote_smart_id candidate1_field_value=candidate_option1.vote_smart_id candidate2_field_value=candidate_option2.vote_smart_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office" conflict_status=conflict_values.vote_usa_office_id candidate1_field_value=candidate_option1.vote_usa_office_id candidate2_field_value=candidate_option2.vote_usa_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office" conflict_status=conflict_values.vote_usa_office_id candidate1_field_value=candidate_option1.vote_usa_office_id candidate2_field_value=candidate_option2.vote_usa_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id candidate1_field_value=candidate_option1.vote_usa_politician_id candidate2_field_value=candidate_option2.vote_usa_politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id candidate1_field_value=candidate_option1.vote_usa_politician_id candidate2_field_value=candidate_option2.vote_usa_politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_usa" field_label="Vote USA Photo (url on their servers)" conflict_status=conflict_values.photo_url_from_vote_usa candidate1_field_value=candidate_option1.photo_url_from_vote_usa candidate2_field_value=candidate_option2.photo_url_from_vote_usa candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_usa" field_label="Vote USA Photo (url on their servers)" conflict_status=conflict_values.photo_url_from_vote_usa candidate1_field_value=candidate_option1.photo_url_from_vote_usa candidate2_field_value=candidate_option2.photo_url_from_vote_usa candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_profile_image_url_https" field_label="Vote USA Image (Local Cache)" conflict_status=conflict_values.vote_usa_profile_image_url_https candidate1_field_value=candidate_option1.vote_usa_profile_image_url_https candidate2_field_value=candidate_option2.vote_usa_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_profile_image_url_https" field_label="Vote USA Image (Local Cache)" conflict_status=conflict_values.vote_usa_profile_image_url_https candidate1_field_value=candidate_option1.vote_usa_profile_image_url_https candidate2_field_value=candidate_option2.vote_usa_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="profile_image_type_currently_active" field_label="Image Currently Active" conflict_status=conflict_values.profile_image_type_currently_active candidate1_field_value=candidate_option1.profile_image_type_currently_active candidate2_field_value=candidate_option2.profile_image_type_currently_active candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="profile_image_type_currently_active" field_label="Image Currently Active" conflict_status=conflict_values.profile_image_type_currently_active candidate1_field_value=candidate_option1.profile_image_type_currently_active candidate2_field_value=candidate_option2.profile_image_type_currently_active candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Displayed photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Displayed photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Ballotpedia photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_profile_image_url_https" field_label="Ballotpedia Image" conflict_status=conflict_values.ballotpedia_profile_image_url_https candidate1_field_value=candidate_option1.ballotpedia_profile_image_url_https candidate2_field_value=candidate_option2.ballotpedia_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Ballotpedia photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_profile_image_url_https" field_label="Ballotpedia Image" conflict_status=conflict_values.ballotpedia_profile_image_url_https candidate1_field_value=candidate_option1.ballotpedia_profile_image_url_https candidate2_field_value=candidate_option2.ballotpedia_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Facebook photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_tiny" field_label="Facebook Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Facebook photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_tiny" field_label="Facebook Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_medium" field_label="Facebook Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_medium" field_label="Facebook Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_large" field_label="Facebook Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_large" field_label="Facebook Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Twitter photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_tiny" field_label="Twitter Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Twitter photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_tiny" field_label="Twitter Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_medium" field_label="Twitter Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_medium" field_label="Twitter Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_large" field_label="Twitter Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_twitter_image_url_large" field_label="Twitter Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_twitter_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_twitter_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_twitter_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Uploaded photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_tiny" field_label="Uploaded Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Uploaded photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_tiny" field_label="Uploaded Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_medium" field_label="Uploaded Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_medium" field_label="Uploaded Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_large" field_label="Uploaded Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_large" field_label="Uploaded Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{# Vote USA photo #}
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_tiny" field_label="Vote USA Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {# Vote USA photo #}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_tiny" field_label="Vote USA Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_medium" field_label="Vote USA Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_medium" field_label="Vote USA Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_large" field_label="Vote USA Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_large" field_label="Vote USA Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="wikipedia_page_title" field_label="Wikipedia Page Title" conflict_status=conflict_values.wikipedia_page_title candidate1_field_value=candidate_option1.wikipedia_page_title candidate2_field_value=candidate_option2.wikipedia_page_title candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="wikipedia_page_title" field_label="Wikipedia Page Title" conflict_status=conflict_values.wikipedia_page_title candidate1_field_value=candidate_option1.wikipedia_page_title candidate2_field_value=candidate_option2.wikipedia_page_title candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="wikipedia_photo_url" field_label="Wikipedia Photo" conflict_status=conflict_values.wikipedia_photo_url candidate1_field_value=candidate_option1.wikipedia_photo_url candidate2_field_value=candidate_option2.wikipedia_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
-    <tr>
-        <td>Public Positions Count</td>
-        <td>{{ candidate_option1.public_positions_count }}</td>
-        <td>{{ candidate_option2.public_positions_count }}</td>
-    </tr>
-    <tr>
-        <td>Friends Positions Count</td>
-        <td>{{ candidate_option1.friends_positions_count }}</td>
-        <td>{{ candidate_option2.friends_positions_count }}</td>
-    </tr>
-    <tr>
-        <td>Bookmarks Count</td>
-        <td>{{ candidate_option1.bookmarks_count }}</td>
-        <td>{{ candidate_option2.bookmarks_count }}</td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td>
-          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
-        </td>
-        <td></td>
-        <td><input type="submit" value="Merge Candidates" name="merge" class="btn btn-primary" /></td>
-    </tr>
-</table>
-<input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
-<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
-<input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ candidate_option2.state_code }}{% endif %}" />
-<input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate_option1.google_civic_election_id }}{% endif %}" />
-<input type="hidden" name="candidate1_we_vote_id" value="{{ candidate_option1.we_vote_id }}" />
-<input type="hidden" name="candidate2_we_vote_id" value="{{ candidate_option2.we_vote_id }}" />
-{% else %}
-<input type="submit" value="CANNOT MERGE" />
-{% endif %}
-</form>
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="wikipedia_photo_url" field_label="Wikipedia Photo" conflict_status=conflict_values.wikipedia_photo_url candidate1_field_value=candidate_option1.wikipedia_photo_url candidate2_field_value=candidate_option2.wikipedia_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+        <tr>
+          <td>Public Positions Count</td>
+          <td>{{ candidate_option1.public_positions_count }}</td>
+          <td>{{ candidate_option2.public_positions_count }}</td>
+        </tr>
+        <tr>
+          <td>Friends Positions Count</td>
+          <td>{{ candidate_option1.friends_positions_count }}</td>
+          <td>{{ candidate_option2.friends_positions_count }}</td>
+        </tr>
+        <tr>
+          <td>Bookmarks Count</td>
+          <td>{{ candidate_option1.bookmarks_count }}</td>
+          <td>{{ candidate_option2.bookmarks_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp;
+            <input type="submit" value="Skip - Not Duplicates" name="skip" />
+            &nbsp;
+          </td>
+          <td></td>
+          <td>
+            <input type="submit"
+                   value="Merge Candidates"
+                   name="merge"
+                   class="btn btn-primary" />
+          </td>
+        </tr>
+      </table>
+      <input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
+      <input type="hidden"
+             name="remove_duplicate_process"
+             value="{{ remove_duplicate_process }}" />
+      <input type="hidden"
+             name="state_code"
+             value="{% if state_code %}{{ state_code }}{% else %}{{ candidate_option2.state_code }}{% endif %}" />
+      <input type="hidden"
+             name="google_civic_election_id"
+             value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate_option1.google_civic_election_id }}{% endif %}" />
+      <input type="hidden"
+             name="candidate1_we_vote_id"
+             value="{{ candidate_option1.we_vote_id }}" />
+      <input type="hidden"
+             name="candidate2_we_vote_id"
+             value="{{ candidate_option2.we_vote_id }}" />
+    {% else %}
+      <input type="submit" value="CANNOT MERGE" />
+    {% endif %}
+  </form>
 
-<br />
+  <br />
 
 {% endblock %}
