@@ -63,32 +63,30 @@
         <div class="resize-handle-bar">• • •</div>
       </div>
 
-        <div class="preview-header">
-            <h2 class="preview-title">
-                Preview
-            </h2>
-            <div class="preview-header-actions">
-                <button type="button" class="btn btn-default btn-sm preview-expand-btn"
-                        onclick="slidePreviewToTop()"
-                        id="previewExpandBtn"
-                        aria-label="Slide preview to top">
-                    ↑ Slide to top
-                </button>
-                <button type="button" class="btn btn-default btn-sm preview-collapse-btn"
-                        onclick="collapsePreviewToBottom()"
-                        id="previewCollapseBtn"
-                        aria-label="Collapse preview to bottom">
-                    ↓ Collapse
-                </button>
-            </div>
+      <div class="preview-header">
+        <h2 class="preview-title">Preview</h2>
+        <div class="preview-header-actions">
+          <button type="button"
+                  class="btn btn-default btn-sm preview-expand-btn"
+                  onclick="slidePreviewToTop()"
+                  id="previewExpandBtn"
+                  aria-label="Slide preview to top">↑ Slide to top</button>
+          <button type="button"
+                  class="btn btn-default btn-sm preview-collapse-btn"
+                  onclick="collapsePreviewToBottom()"
+                  id="previewCollapseBtn"
+                  aria-label="Collapse preview to bottom">↓ Collapse</button>
         </div>
-        <div class="preview-content">
-            <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerPreviewHTML -->
-            <div id="audienceBuilderDrawerPreviewHTML">
-                <p class="preview-content-placeholder"><em>Preview content will be added here...</em></p>
-            </div>
+      </div>
+      <div class="preview-content">
+        <!-- This will be filled with logic builder content via javascript: Search for audienceBuilderDrawerPreviewHTML -->
+        <div id="audienceBuilderDrawerPreviewHTML">
+          <p class="preview-content-placeholder">
+            <em>Preview content will be added here...</em>
+          </p>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</form>
 </div>
