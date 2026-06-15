@@ -202,13 +202,16 @@
                   </tr>
                 {% elif query_parameter.value == 'checkboxlist' %}
                   <tr>
-                    <td>{{ query_parameter.name }}: </td>
+                    <td>{{ query_parameter.name }}:</td>
                     <td colspan="2">
                       {% for choice in query_parameter.choices %}
-                      <label>
-                        <input type="checkbox" name="{{ query_parameter.name }}" value="{{ choice }}">
+                        <label>
+                          <input type="checkbox"
+                                 name="{{ query_parameter.name }}"
+                                 value="{{ choice }}">
                           {{ choice }}
-                      </label><br />
+                        </label>
+                        <br />
                       {% endfor %}
                     </td>
                   </tr>
@@ -266,19 +269,22 @@
                       False
                     </td>
                   </tr>
-                        {% elif query_parameter.value == 'checkboxlist' %}
-                            <tr>
-                                <td>{{ query_parameter.name }}: </td>
-                                <td colspan="2">
-                                    {% for choice in query_parameter.choices %}
-                                        <label>
-                                            <input type="checkbox" name="{{ query_parameter.name }}" value="{{ choice }}">
-                                            {{ choice }}
-                                        </label><br />
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                  {% elif query_parameter.value == 'text' %}
+                {% elif query_parameter.value == 'checkboxlist' %}
+                  <tr>
+                    <td>{{ query_parameter.name }}:</td>
+                    <td colspan="2">
+                      {% for choice in query_parameter.choices %}
+                        <label>
+                          <input type="checkbox"
+                                 name="{{ query_parameter.name }}"
+                                 value="{{ choice }}">
+                          {{ choice }}
+                        </label>
+                        <br />
+                      {% endfor %}
+                    </td>
+                  </tr>
+                {% elif query_parameter.value == 'text' %}
                   <tr>
                     <td>{{ query_parameter.name }}:</td>
                     <td colspan="2">
