@@ -51,107 +51,107 @@
 
     {% if campaignx_search %}
       <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?state_code={{ state_code }}">clear search</a>&nbsp;
-      {% endif %}
-      <input type="text"
-             name="campaignx_search"
-             id="campaignx_search_id"
-             value="{{ campaignx_search }}" />
-      <input type="submit" value="Search for Supporter" />
+    {% endif %}
+    <input type="text"
+           name="campaignx_search"
+           id="campaignx_search_id"
+           value="{{ campaignx_search }}" />
+    <input type="submit" value="Search for Supporter" />
 
-    </form>
+  </form>
 
-    <form action="{% url "campaign:supporters_list_process" %}"
-          method="post"
-          class="form-horizontal">
-      {% csrf_token %}
-      <input type="hidden"
-             name="campaignx_we_vote_id"
-             value="{{ campaignx_we_vote_id }}">
-      <input type="hidden"
-             name="campaignx_owner_organization_we_vote_id"
-             value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
-      <input type="hidden"
-             name="campaignx_search"
-             value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
-      <input type="hidden"
-             name="google_civic_election_id"
-             value="{{ google_civic_election_id }}">
-      <input type="hidden" name="state_code" value="{{ state_code }}">
-      <input type="hidden"
-             name="only_show_supporters_with_endorsements"
-             value="{{ only_show_supporters_with_endorsements }}">
-      <input type="hidden"
-             name="show_supporters_not_visible_to_public"
-             value="{{ show_supporters_not_visible_to_public }}">
+  <form action="{% url "campaign:supporters_list_process" %}"
+        method="post"
+        class="form-horizontal">
+    {% csrf_token %}
+    <input type="hidden"
+           name="campaignx_we_vote_id"
+           value="{{ campaignx_we_vote_id }}">
+    <input type="hidden"
+           name="campaignx_owner_organization_we_vote_id"
+           value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden"
+           name="campaignx_search"
+           value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
+    <input type="hidden"
+           name="google_civic_election_id"
+           value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="hidden"
+           name="only_show_supporters_with_endorsements"
+           value="{{ only_show_supporters_with_endorsements }}">
+    <input type="hidden"
+           name="show_supporters_not_visible_to_public"
+           value="{{ show_supporters_not_visible_to_public }}">
 
-      <hr />
-      <div class="form-group">
-        <div class="col-sm-12">
-          <strong>Add New Supporter:</strong>
-          <br />
-          <table id="campaignx_supporter_add">
-            <thead>
-              <tr>
-                <th style="color: darkgray">Voter or Organization We Vote Id</th>
-                <th style="color: darkgray">Endorsement</th>
-                <th style="color: darkgray">Supporter Wants Visibility &nbsp;&nbsp;</th>
-                <th style="color: darkgray">Visibility Blocked by We Vote &nbsp;&nbsp;</th>
-              </tr>
-            </thead>
+    <hr />
+    <div class="form-group">
+      <div class="col-sm-12">
+        <strong>Add New Supporter:</strong>
+        <br />
+        <table id="campaignx_supporter_add">
+          <thead>
             <tr>
-              <td style="width: 250px;">
-                <input type="text"
-                       name="incoming_campaignx_supporter_we_vote_id"
-                       style="width: 230px;
-                              border: 1px solid lightgray" />
-              </td>
-              <td style="width: 320px;">
-                <textarea name="incoming_campaignx_supporter_endorsement"
-                          rows="1"
-                          style="width: 300px;
-                                 border: 1px solid lightgray"></textarea>
-              </td>
-              <td>
-                <input type="checkbox"
-                       name="incoming_campaignx_supporter_wants_visibility"
-                       id="incoming_campaignx_supporter_wants_visibility_id"
-                       value="1"
-                       checked />
-              </td>
-              <td>
-                <input type="checkbox"
-                       name="incoming_visibility_blocked_by_we_vote"
-                       id="incoming_visibility_blocked_by_we_vote_id"
-                       value="1" />
-              </td>
+              <th style="color: darkgray">Voter or Organization We Vote Id</th>
+              <th style="color: darkgray">Endorsement</th>
+              <th style="color: darkgray">Supporter Wants Visibility &nbsp;&nbsp;</th>
+              <th style="color: darkgray">Visibility Blocked by We Vote &nbsp;&nbsp;</th>
             </tr>
-          </table>
+          </thead>
+          <tr>
+            <td style="width: 250px;">
+              <input type="text"
+                     name="incoming_campaignx_supporter_we_vote_id"
+                     style="width: 230px;
+                            border: 1px solid lightgray" />
+            </td>
+            <td style="width: 320px;">
+              <textarea name="incoming_campaignx_supporter_endorsement"
+                        rows="1"
+                        style="width: 300px;
+                               border: 1px solid lightgray"></textarea>
+            </td>
+            <td>
+              <input type="checkbox"
+                     name="incoming_campaignx_supporter_wants_visibility"
+                     id="incoming_campaignx_supporter_wants_visibility_id"
+                     value="1"
+                     checked />
+            </td>
+            <td>
+              <input type="checkbox"
+                     name="incoming_visibility_blocked_by_we_vote"
+                     id="incoming_visibility_blocked_by_we_vote_id"
+                     value="1" />
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    {% if supporters_list %}
+      {% include "campaign/campaignx_supporters_list_table.html" with supporters_list=supporters_list %}
+
+      <p></p>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">
+          <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+        </label>
+        <div class="col-sm-8">
+          <button type="submit" class="btn btn-default">Update Campaign Supporters</button>
         </div>
       </div>
 
-      {% if supporters_list %}
-        {% include "campaign/campaignx_supporters_list_table.html" with supporters_list=supporters_list %}
+    </form>
 
-        <p></p>
+  {% else %}
+    <p>(no supporters found with current filters)</p>
+  {% endif %}
 
-        <div class="form-group">
-          <label class="col-sm-3 control-label">
-            <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
-          </label>
-          <div class="col-sm-8">
-            <button type="submit" class="btn btn-default">Update Campaign Supporters</button>
-          </div>
-        </div>
+  <p></p>
 
-      </form>
-
-    {% else %}
-      <p>(no supporters found with current filters)</p>
-    {% endif %}
-
-    <p></p>
-
-    <script>
+  <script>
         $(function() {
             $('#limit_to_opinions_in_this_year_id').change(function() {
                 this.form.submit();
@@ -169,6 +169,6 @@
                 this.form.submit();
             });
         });
-    </script>
+  </script>
 
-  {% endblock %}
+{% endblock %}
