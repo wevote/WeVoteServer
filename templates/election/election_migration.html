@@ -52,8 +52,7 @@
           <td>State to Migrate:&nbsp;</td>
           <td>
             <select id="from_state_code_id" name="from_state_code">
-              <option value=""
-                      {% if '' == from_state_code %}selected="selected"{% endif %}>-- Migrate All States --</option>
+              <option value="" {% if '' == from_state_code %}selected="selected"{% endif %}>-- Migrate All States --</option>
               {% for key, state in state_list %}
                 <option value="{{ key|lower }}"
                         {% if key|lower == from_state_code|lower %}selected="selected"{% endif %}>{{ state }}</option>
