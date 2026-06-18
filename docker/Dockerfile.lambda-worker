@@ -4,7 +4,12 @@
 #
 # The AWS Lambda Python 3.12 base uses Amazon Linux 2023.
 # System packages use dnf instead of apt.
+FROM public.ecr.aws/newrelic-lambda-layers-for-docker/newrelic-lambda-layers-python:312 AS newRelic
+
 FROM public.ecr.aws/lambda/python:3.12
+
+# Copy New Relic layer code
+COPY --from=newRelic /opt/ /opt/
 
 # libmagic is required by the python-magic package used in WeVoteServer
 RUN dnf install -y file-libs && dnf clean all
@@ -16,4 +21,7 @@ RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt --no-cache-dir
 # Copy the full WeVoteServer codebase — all Django apps must be importable
 COPY . ${LAMBDA_TASK_ROOT}/
 
-CMD ["aws.lambda_sqs_worker.handler"]
+ENV NEW_RELIC_LAMBDA_HANDLER=aws.lambda_sqs_worker.handler
+ENV NEW_RELIC_APM_LAMBDA_MODE=true
+
+CMD ["newrelic_lambda_wrapper.handler"]
