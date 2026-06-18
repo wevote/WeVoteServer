@@ -2,7 +2,9 @@ import json
 import logging
 import os
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+log_level = os.environ.get("LAMBDA_LOG_LEVEL", "INFO")
+logger.setLevel(logging.getLevelName(log_level))
 
 import boto3
 from botocore.exceptions import ClientError
@@ -15,6 +17,7 @@ if _secret_arn and _region:
     try:
         _client = boto3.session.Session().client('secretsmanager', region_name=_region)
         _secret = json.loads(_client.get_secret_value(SecretId=_secret_arn)['SecretString'])
+        logger.info("Loaded config from secret with %d entries", len(_secret))
         for _key, _val in _secret.items():
             if _key not in os.environ:
                 os.environ[_key] = _val
@@ -60,4 +63,5 @@ def handler(event, context):
         raise ValueError(f"Unknown batch function: {function_name!r}")
 
     logger.info("Batch processor complete: function=%s success=%s", function_name, result.get('success'))
+    logger.info("Batch processor result: %s", result)
     return result
