@@ -8,7 +8,7 @@ cloudscraper==1.2.68
 cryptography==46.0.7
 debugpy==1.8.20
 dj-database-url==2.1.0
-django==5.1.15
+django==5.2.16
 django-bootstrap3==15.0.0
 django-cors-headers==4.3.1
 django-crispy-forms==1.12.0
