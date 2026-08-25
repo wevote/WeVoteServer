@@ -416,7 +416,7 @@ class Politician(models.Model):
     politician_email = models.CharField(max_length=255, null=True, unique=False)
     politician_email2 = models.CharField(max_length=255, null=True, unique=False)
     politician_email3 = models.CharField(max_length=255, null=True, unique=False)
-    politician_email_subscription_secret_key = models.CharField(default='', max_length=255, blank=True, unique=True)
+    politician_email_subscription_secret_key = models.CharField(max_length=255, null=True, blank=True, unique=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     politician_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     bluesky_handle = models.TextField(blank=True, null=True)
