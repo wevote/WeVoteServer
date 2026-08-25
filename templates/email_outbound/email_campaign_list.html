@@ -7,6 +7,8 @@
 {% block content %}
 {% include "admin_tools/loading_banner.html" %}
 
+<script src="{% static 'js/email_outbound_campaign.js' %}"></script>
+
 <style>
   .wv-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .wv-spacer { flex:1; }
@@ -232,7 +234,7 @@
   <div class="search-container">
     <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     <input type="text"
-           id="search-campaigns"
+           id="search"
            class="search-input"
            placeholder="Search campaigns">
   </div>
@@ -400,64 +402,5 @@
     </table>
   </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tabButtons = document.querySelectorAll('.tab-button');
-  const tabContents = document.querySelectorAll('.tab-content');
-  const searchInput = document.getElementById('search-campaigns');
-
-  // Tab switching — search text persists, filter re-applied to new tab
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetTab = button.dataset.tab;
-
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      tabContents.forEach(content => {
-        if (content.dataset.content === targetTab) {
-          content.classList.add('active');
-        } else {
-          content.classList.remove('active');
-        }
-      });
-
-      // Re-apply current search to the newly visible tab
-      filterCampaigns(searchInput.value.toLowerCase());
-    });
-  });
-
-  // Search — scoped to active tab only
-  searchInput.addEventListener('input', function(e) {
-    filterCampaigns(e.target.value.toLowerCase());
-  });
-
-  function filterCampaigns(searchTerm) {
-    const activeTab = document.querySelector('.tab-content.active');
-    if (!activeTab) return;
-    activeTab.querySelectorAll('.campaign-row').forEach(row => {
-      const name = row.dataset.name || '';
-      row.style.display = name.includes(searchTerm) ? '' : 'none';
-    });
-  }
-
-  // Dropdown (kebab menu on each row)
-  document.querySelectorAll('.js-dd').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const wrap = btn.closest('.wv-dropdown');
-      document.querySelectorAll('.wv-dropdown').forEach(d => {
-        if (d !== wrap) d.classList.remove('open');
-      });
-      wrap.classList.toggle('open');
-    });
-  });
-
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.wv-dropdown').forEach(d => d.classList.remove('open'));
-  });
-});
-</script>
 
 {% endblock %}
