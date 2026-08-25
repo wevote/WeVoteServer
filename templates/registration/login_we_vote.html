@@ -21,26 +21,26 @@
     <h1>Sign-In</h1>
     <br>
     <br>
-    <p>
-      <a href="{% url 'social:begin' 'facebook' %}?next={{ next }}"
-         style="border-radius: 4px;
-                color: white;
-                font-size: 14px;
-                background: rgb(10, 104, 234);
-                padding: 10px">Sign in with Facebook</a>
-    </p>
-    <br>
-    <br>
-    <p>
-      <a href="{% url 'social:begin' 'twitter' %}?next={{ next }}"
-         style="border-radius: 4px;
-                color: white;
-                font-size: 14px;
-                background: rgb(39, 145, 234);
-                padding: 10px">Sign in with Twitter</a>
-    </p>
-    <br>
-    <br>
+<!--    <p>-->
+<!--      <a href="{% url 'social:begin' 'facebook' %}?next={{ next }}"-->
+<!--         style="border-radius: 4px;-->
+<!--                color: white;-->
+<!--                font-size: 14px;-->
+<!--                background: rgb(10, 104, 234);-->
+<!--                padding: 10px">Sign in with Facebook</a>-->
+<!--    </p>-->
+<!--    <br>-->
+<!--    <br>-->
+<!--    <p>-->
+<!--      <a href="{% url 'social:begin' 'twitter' %}?next={{ next }}"-->
+<!--         style="border-radius: 4px;-->
+<!--                color: white;-->
+<!--                font-size: 14px;-->
+<!--                background: rgb(39, 145, 234);-->
+<!--                padding: 10px">Sign in with Twitter</a>-->
+<!--    </p>-->
+<!--    <br>-->
+<!--    <br>-->
 
     <form method="post" action="{% url 'login_we_vote' %}">
       {% csrf_token %}

@@ -7,6 +7,7 @@ import re
 
 from config.environment_variable_functions import get_environment_variable, get_environment_variable_default, \
     get_we_vote_server_root_url, convert_logging_level
+from wevote_functions.functions import positive_value_exists
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Override in local.py for development
@@ -110,7 +111,7 @@ INSTALLED_APPS = (
     'representative',
     'rest_framework',    # Jan 2019, looks abandoned
     'retrieve_tables',
-    # 'scheduled_tasks',  # April 2024, Disabled for Python 11, could be revived
+    # 'scheduled_tasks', # April 2024, Disabled for Python 11, could be revived
     'search',
     'share',
     'sms',
@@ -357,7 +358,7 @@ def convert_to_https_dev_url_if_configured(env_var_value):
                     return env_var_value
     except Exception as e:
         print('Error in convert_to_https_dev_url_if_configured: ' + str(e))
-    # print('HTTP Passing  on  ' + env_var_value)
+    # print('HTTP Passing on  ' + env_var_value)
     return env_var_value
 
 
@@ -410,6 +411,11 @@ SOCIAL_AUTH_FACEBOOK_EXTRA_DATA = [
 
 EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
+SENDGRID_SANDBOX_MODE = \
+    positive_value_exists(get_environment_variable("SENDGRID_SANDBOX_MODE", no_exception=True))
+SENDGRID_SANDBOX_MODE_IN_DEBUG = \
+    positive_value_exists(get_environment_variable("SENDGRID_SANDBOX_MODE_IN_DEBUG", no_exception=True))
+SYSTEM_SENDER_EMAIL_ADDRESS = get_environment_variable("SYSTEM_SENDER_EMAIL_ADDRESS", no_exception=True)
 # ADMIN_EMAIL_ADDRESSES = get_environment_variable("ADMIN_EMAIL_ADDRESSES")
 # # Expecting a space delimited string of emails like "jane@wevote.us" or "jane@wevote.us bill@wevote.us"
 # ADMIN_EMAIL_ADDRESSES_ARRAY = []

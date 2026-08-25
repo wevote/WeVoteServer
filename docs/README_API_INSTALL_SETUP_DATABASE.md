@@ -96,8 +96,6 @@ Find admin tools here:
 
     http://localhost:8000/admin
 
-Now you will need to authenticate as an admin. You can log in with Email or Twitter account or Facebook account.
-
 Login with Email:
 If you created superuser with this command "python manage.py createsuperuser" during Setup - Database Creation step,
 login with same email id and password, otherwise create superuser with the following command and use that email to

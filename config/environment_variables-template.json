@@ -83,11 +83,14 @@
   "EMAIL_USE_TLS":                  "True",
 
   "_comment":                       "sendgrid-django API settings",
-  "EMAIL_BACKEND":                  "sgbackend.SendGridBackend",
+  "EMAIL_BACKEND":                  "sendgrid_backend.SendgridBackend",
   "SENDGRID_API_KEY_ID":            "API Key ID: reference id provided by SendGrid",
   "SENDGRID_API_KEY":               "SENDGRID_API_KEY Private API Key",
   "SENDGRID_EMAIL_VALIDATION_API_KEY_ID": "API Key ID: reference id provided by SendGrid",
   "SENDGRID_EMAIL_VALIDATION_API_KEY": "SENDGRID_EMAIL_VALIDATION_API_KEY Private API Key",
+  "SENDGRID_SANDBOX_MODE":          false,
+  "SENDGRID_SANDBOX_MODE_IN_DEBUG": false,
+  "SYSTEM_SENDER_EMAIL_ADDRESS":    "info@wevote.us",
 
   "_comment":                       "emails separated by spaces for error alerts",
   "ADMIN_EMAIL_ADDRESSES":          "",

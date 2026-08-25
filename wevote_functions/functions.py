@@ -2170,7 +2170,7 @@ def strip_html_tags(value):
 def server_is_source_of_truth():
     # If 'SERVER_IS_SOURCE_OF_TRUTH' is not False
     # then the default value has been modified in the environment_variables.json file.
-    return get_environment_variable('SERVER_IS_SOURCE_OF_TRUTH') is not False
+    return positive_value_exists(get_environment_variable('SERVER_IS_SOURCE_OF_TRUTH'))
 
 def normalize_sms_phone_number_for_voter_update(phone_number):
     status = ""

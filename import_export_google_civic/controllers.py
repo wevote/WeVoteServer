@@ -3121,10 +3121,18 @@ def process_contest_referendum_from_structured_json(
     if not positive_value_exists(referendum_text):
         referendum_text = one_contest_referendum_structured_json['referendumBrief'] if \
             'referendumBrief' in one_contest_referendum_structured_json else ''
-    no_vote_description = one_contest_referendum_structured_json['noVoteDescription'] if \
-        'noVoteDescription' in one_contest_referendum_structured_json else ''
-    yes_vote_description = one_contest_referendum_structured_json['yesVoteDescription'] if \
-        'yesVoteDescription' in one_contest_referendum_structured_json else ''
+    if 'noVoteDescription' in one_contest_referendum_structured_json:
+        no_vote_description = one_contest_referendum_structured_json['noVoteDescription']
+    elif 'referendumDetailForNo' in one_contest_referendum_structured_json:
+        no_vote_description = one_contest_referendum_structured_json['referendumDetailForNo']
+    if 'yesVoteDescription' in one_contest_referendum_structured_json:
+        yes_vote_description = one_contest_referendum_structured_json['yesVoteDescription']
+    elif 'referendumDetailForYes' in one_contest_referendum_structured_json:
+        yes_vote_description = one_contest_referendum_structured_json['referendumDetailForYes']
+    referendum_con = one_contest_referendum_structured_json['referendumDetailCon'] if \
+        'referendumDetailCon' in one_contest_referendum_structured_json else ''
+    referendum_pro = one_contest_referendum_structured_json['referendumDetailPro'] if \
+        'referendumDetailPro' in one_contest_referendum_structured_json else ''
 
     # These following fields exist for both candidates and referendum
     results = process_contest_common_fields_from_structured_json(one_contest_referendum_structured_json)
@@ -3303,10 +3311,18 @@ def groom_and_store_google_civic_measure_json_2021(
     if not positive_value_exists(referendum_text):
         referendum_text = one_contest_json['referendumBrief'] if \
             'referendumBrief' in one_contest_json else ''
-    no_vote_description = one_contest_json['noVoteDescription'] if \
-        'noVoteDescription' in one_contest_json else ''
-    yes_vote_description = one_contest_json['yesVoteDescription'] if \
-        'yesVoteDescription' in one_contest_json else ''
+    if 'noVoteDescription' in one_contest_json:
+        no_vote_description = one_contest_json['noVoteDescription']
+    elif 'referendumDetailForNo' in one_contest_json:
+        no_vote_description = one_contest_json['referendumDetailForNo']
+    if 'yesVoteDescription' in one_contest_json:
+        yes_vote_description = one_contest_json['yesVoteDescription']
+    elif 'referendumDetailForYes' in one_contest_json:
+        yes_vote_description = one_contest_json['referendumDetailForYes']
+    referendum_con = one_contest_json['referendumDetailCon'] if \
+        'referendumDetailCon' in one_contest_json else ''
+    referendum_pro = one_contest_json['referendumDetailPro'] if \
+        'referendumDetailPro' in one_contest_json else ''
 
     # These following fields exist for both candidates and referendum
     results = process_contest_common_fields_from_structured_json(one_contest_json, is_ctcl=use_ctcl)

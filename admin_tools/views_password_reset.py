@@ -218,7 +218,9 @@ class WeVotePasswordResetForm(PasswordResetForm):
                 deleted=False,
             )
             voter_we_vote_id_list = list(queryset.values_list('voter_we_vote_id', flat=True))
-        except Exception:
+            print('password_reset get_users: Email found in EmailAddress table')
+        except Exception as e:
+            print('password_reset get_users: Email not found in EmailAddress table {}'.format(e))
             voter_we_vote_id_list = []
 
         if voter_we_vote_id_list:
@@ -279,6 +281,7 @@ class WeVotePasswordResetView(auth_views.PasswordResetView):
         # Reject a banned source cheaply, before any timing budget, database, or email work, so a
         # flood cannot tie up workers. Same "check your email" page, so it reveals nothing.
         if is_banned('request', ip_address):
+            print('password_reset: request from banned IP {}'.format(ip_address))
             return HttpResponseRedirect(self.get_success_url())
 
         # Everything past here runs to a fixed total time so an account that exists (which triggers
@@ -290,8 +293,10 @@ class WeVotePasswordResetView(auth_views.PasswordResetView):
         ip_key = 'password_reset_ip_{}'.format(_hashed(ip_address))
         if counter_at_limit(ip_key, RESET_REQUESTS_PER_IP, RESET_RATE_LIMIT_WINDOW_SECONDS):
             register_offense('request', ip_address)
+            print('password_reset post: request from IP {} over limit'.format(ip_address))
             response = HttpResponseRedirect(self.get_success_url())
         else:
+            print('password_reset post: request from IP posted {}'.format(ip_address))
             response = super().post(request, *args, **kwargs)
 
         sleep_until_deadline(started_at)
@@ -304,7 +309,9 @@ class WeVotePasswordResetView(auth_views.PasswordResetView):
         # so a real and a nonexistent address behave identically.
         email_address_text = form.cleaned_data.get('email', '')
         if email_address_text and email_recently_sent(email_address_text):
+            print('password_reset form_valid: request from IP {} over limit'.format(email_address_text))
             return HttpResponseRedirect(self.get_success_url())
+        print('password_reset: form_valid')
         return super().form_valid(form)
 
 
@@ -324,6 +331,7 @@ class WeVotePasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
         # Turn away a banned source cheaply, before the delay.
         if is_banned('confirm', ip_address):
+            print('password_reset_confirm: request from banned IP {}'.format(ip_address))
             return render(request, 'registration/password_reset_throttled.html', status=429)
 
         deliberate_delay()
@@ -333,6 +341,7 @@ class WeVotePasswordResetConfirmView(auth_views.PasswordResetConfirmView):
             register_offense('confirm', ip_address)
             return render(request, 'registration/password_reset_throttled.html', status=429)
 
+        print('password_reset_confirm: starting dispatch')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
