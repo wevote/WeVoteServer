@@ -358,6 +358,7 @@ class JiraExcelLoader:
                 f"Consider splitting into smaller batches to avoid timeout or memory issues."
             )
 
+        manual_subtasks = self.subtask_names is not None
         if self.subtask_names is None:
             self.subtask_names = []
             for i in range(MAX_SUBTASK_COLUMNS):
@@ -454,15 +455,29 @@ class JiraExcelLoader:
             for i, name in enumerate(self.subtask_names[:MAX_SUBTASK_COLUMNS]):
                 if not name:
                     continue
-                col = COL_SUBTASK_URL_START + i
-                if col < self.df.shape[1] and pd.notna(row.iloc[col]):
+                if manual_subtasks:
+                    # Manually entered subtask descriptions replace file-driven
+                    # subtasks entirely — create one per story regardless of
+                    # the file's columns.
                     story.add_sub_task(
                         JiraSubTask(
                             task_type=name,
-                            task_url=row.iloc[col],
+                            task_url=None,
                             **common_subtask_fields,
                         )
                     )
+                else:
+                    # File-driven: only create this subtask when the story
+                    # actually has a value in the matching column.
+                    col = COL_SUBTASK_URL_START + i
+                    if col < self.df.shape[1] and pd.notna(row.iloc[col]):
+                        story.add_sub_task(
+                            JiraSubTask(
+                                task_type=name,
+                                task_url=row.iloc[col],
+                                **common_subtask_fields,
+                            )
+                        )
 
             epic.add_story(story)
 
@@ -779,7 +794,7 @@ class JiraApiControl:
         return {
             "project": {"key": self.project_key},
             "summary": f"{subtask.task_type.title()} - {candidate_name}",
-            "description": f"URL: {subtask.task_url}",
+            "description": f"URL: {subtask.task_url}" if subtask.task_url else "",
             "issuetype": {"name": "Sub-task"},
             "parent": {"key": parent_key},
             "labels": labels,

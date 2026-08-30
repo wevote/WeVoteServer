@@ -299,7 +299,8 @@ class JiraExcelLoaderTests(TestCase):
 
     @patch("pandas.read_excel")
     def test_dynamic_subtasks_custom_names(self, mock_read_excel):
-        """Test dynamic subtask names are applied."""
+        """Test manually entered subtask names are applied to every story,
+        independent of any file columns (manual mode doesn't read file data)."""
         data = [
             [
                 "2024-11-05",
@@ -316,13 +317,9 @@ class JiraExcelLoaderTests(TestCase):
                 "John Doe",
                 "JD-001",
                 "Story Title",
-                "http://research.com",
-                "http://verify.com",
-                "http://review.com",
-                None,
             ]
         ]
-        rows = [[""] * 18, [""] * 18] + data
+        rows = [[""] * 14, [""] * 14] + data
         mock_read_excel.return_value = pd.DataFrame(rows)
         loader = JiraExcelLoader(
             "/tmp/test.xlsx", subtask_names=["Research", "Verify", "Final Review"]
@@ -331,7 +328,7 @@ class JiraExcelLoaderTests(TestCase):
         stories = epics[0].stories
         self.assertEqual(len(stories[0].sub_tasks), 3)
         self.assertEqual(stories[0].sub_tasks[0].task_type, "Research")
-        self.assertEqual(stories[0].sub_tasks[0].task_url, "http://research.com")
+        self.assertIsNone(stories[0].sub_tasks[0].task_url)
         self.assertEqual(stories[0].sub_tasks[1].task_type, "Verify")
         self.assertEqual(stories[0].sub_tasks[2].task_type, "Final Review")
 
@@ -402,7 +399,16 @@ class JiraExcelLoaderTests(TestCase):
 
     @patch("pandas.read_excel")
     def test_dynamic_subtasks_skips_empty_cols(self, mock_read_excel):
-        """Test subtasks only created for non-empty URL columns."""
+        """Test file-driven subtasks are only created for non-empty URL
+        columns (per-story blank cells are legitimately skipped). This only
+        applies in file-driven mode (subtask_names=None, auto-detected from
+        headers) — manual mode ignores file columns entirely."""
+        header_row = ["Election Date"] + [""] * 13 + [
+            "Research",
+            "Verify",
+            "Review",
+            None,
+        ]
         data = [
             [
                 "2024-11-05",
@@ -425,15 +431,15 @@ class JiraExcelLoaderTests(TestCase):
                 None,
             ]
         ]
-        rows = [[""] * 18, [""] * 18] + data
+        rows = [["dummy"] * 18, header_row] + data
         mock_read_excel.return_value = pd.DataFrame(rows)
-        loader = JiraExcelLoader(
-            "/tmp/test.xlsx", subtask_names=["Research", "Verify", "Review"]
-        )
+        loader = JiraExcelLoader("/tmp/test.xlsx")
         epics = loader.load()
         self.assertEqual(len(epics[0].stories[0].sub_tasks), 2)
         self.assertEqual(epics[0].stories[0].sub_tasks[0].task_type, "Research")
+        self.assertEqual(epics[0].stories[0].sub_tasks[0].task_url, "http://u1.com")
         self.assertEqual(epics[0].stories[0].sub_tasks[1].task_type, "Review")
+        self.assertEqual(epics[0].stories[0].sub_tasks[1].task_url, "http://u3.com")
 
     def test_load_empty_file_path(self):
         """Test that empty file_path raises ValueError."""
@@ -479,7 +485,9 @@ class JiraExcelLoaderTests(TestCase):
 
     @patch("pandas.read_excel")
     def test_dynamic_subtasks_beyond_file_columns(self, mock_read_excel):
-        """Test that subtask config beyond available file columns is safe."""
+        """Test that manually-named subtasks are still created even when the
+        file has no matching column for them — manual names aren't tied to
+        file columns, so the subtask is created with no task_url."""
         data = [
             [
                 "2024-11-05",
@@ -502,7 +510,12 @@ class JiraExcelLoaderTests(TestCase):
         mock_read_excel.return_value = pd.DataFrame(rows)
         loader = JiraExcelLoader("/tmp/test.xlsx", subtask_names=["Research", "Verify"])
         epics = loader.load()
-        self.assertEqual(len(epics[0].stories[0].sub_tasks), 0)
+        sub_tasks = epics[0].stories[0].sub_tasks
+        self.assertEqual(len(sub_tasks), 2)
+        self.assertEqual(sub_tasks[0].task_type, "Research")
+        self.assertIsNone(sub_tasks[0].task_url)
+        self.assertEqual(sub_tasks[1].task_type, "Verify")
+        self.assertIsNone(sub_tasks[1].task_url)
 
     @patch("pandas.read_excel")
     def test_get_summary_returns_header_suggestions(self, mock_read_excel):
