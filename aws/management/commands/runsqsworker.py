@@ -48,7 +48,8 @@ MAX_JOB_PROCESSING_TIME = 60
 MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
-    logger.info('(Ok) SQS job execute process_request ' + function + '  ' + str(body))
+    # Disabled due to logging possible sensitive information
+    # logger.info('(Ok) SQS job execute process_request ' + function + '  ' + str(body))
 
     if function == 'caching_facebook_images_for_retrieve_process':
         from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
