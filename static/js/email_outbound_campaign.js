@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
   const searchInput = document.getElementById('search');
+  const searchClear = document.getElementById('search-clear');
 
   // Tab switching — search text persists, filter re-applied to new tab
   tabButtons.forEach(button => {
@@ -29,16 +30,38 @@ document.addEventListener('DOMContentLoaded', function() {
     filter(e.target.value.toLowerCase());
   });
 
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    filter('');
+    searchInput.focus();
+  });
+
   function filter(searchTerm) {
     const activeTab = document.querySelector('.tab-content.active');
     if (!activeTab) return;
     const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
     activeTab.querySelectorAll('.campaign-row').forEach(row => {
       const name = row.dataset.name || '';
-      const isMatch = searchTerms.length === 0 || searchTerms.some(term => name.includes(term));
+      const isMatch = searchTerms.every(term => name.includes(term));
       row.style.display = isMatch ? '' : 'none';
     });
+    updateTabCounts();
   }
+
+  // Show each tab's row count in its label, e.g. "Sent (12)", and keep it
+  // in sync with the currently visible (i.e. search-filtered) rows.
+  function updateTabCounts() {
+    tabButtons.forEach(button => {
+      const content = document.querySelector('.tab-content[data-content="' + button.dataset.tab + '"]');
+      const countEl = button.querySelector('.tab-count');
+      if (!content || !countEl) return;
+      const rows = content.querySelectorAll('.campaign-row');
+      const visibleCount = Array.from(rows).filter(row => row.style.display !== 'none').length;
+      countEl.textContent = '(' + visibleCount + ')';
+    });
+  }
+
+  updateTabCounts();
 
   // Dropdown (kebab menu on each row)
   document.querySelectorAll('.js-dd').forEach(btn => {
