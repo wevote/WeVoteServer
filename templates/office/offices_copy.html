@@ -13,7 +13,7 @@
     {% csrf_token %}
     {% if election_list %}
       Copy From:
-      {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=from_google_civic_election_id select_id="from_google_civic_election_id" select_name="from_google_civic_election_id" %}
+      {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=from_google_civic_election_id select_id="from_google_civic_election_id" select_name="from_google_civic_election_id" reverse_date_order=show_all_elections %}
     {% endif %}
     {# End of if election_list #}
 
@@ -114,7 +114,7 @@
 
       {% if election_list %}
         Copy To:
-        {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=to_google_civic_election_id select_id="to_google_civic_election_id" select_name="to_google_civic_election_id" %}
+        {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=to_google_civic_election_id select_id="to_google_civic_election_id" select_name="to_google_civic_election_id" reverse_date_order=show_all_elections %}
       {% endif %}
       {# End of if election_list #}
       {% if to_google_civic_election_id and from_google_civic_election_id != to_google_civic_election_id %}

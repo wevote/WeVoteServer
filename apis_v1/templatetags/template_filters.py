@@ -6,8 +6,10 @@
 
 from django import template
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.template.defaultfilters import _property_resolver
 
 from wevote_functions import functions, functions_date
+from wevote_functions.functions import positive_value_exists
 
 register = template.Library()
 
@@ -55,3 +57,36 @@ def pennies_to_money(number):
     result += intcomma(rest[1:]) if is_neg else intcomma(rest)
     result += '.' + number_string[-2:]
     return result
+
+
+@register.filter(name="dictsort_none_safe")
+def dictsort_none_safe(value, arg, reverse_date_order):
+    """
+    Like Django's built-in dictsort, but treats a null (None) sort field as an
+    empty string instead of returning "" for the whole list. Works on both dict
+    keys and object attributes. On any other failure, returns the list unsorted.
+    """
+    resolver = _property_resolver(arg)
+    reverse_sort = positive_value_exists(reverse_date_order)
+
+    def sort_key(item):
+        resolved = resolver(item)
+        # None sorts before any real value, and never gets compared to a str.
+        return (resolved is None, resolved if resolved is not None else "")
+
+    try:
+        return sorted(value, key=sort_key, reverse=reverse_sort)
+    except (AttributeError, TypeError):
+        return value
+
+
+@register.filter(name="sort_election_list_for_dropdown")
+def sort_election_list_for_dropdown(election_list, reverse_date_order=False):
+    """
+    When show_all_elections is True, sort by election_day_text descending (newest
+    first). Otherwise use the default state_code, then election_day_text ordering.
+    Both paths are null-safe.
+    """
+    return dictsort_none_safe(
+        dictsort_none_safe(election_list, "state_code", False),
+        "election_day_text", reverse_date_order)

@@ -279,7 +279,11 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         # env_in_container = subprocess.run(['ls', '-la', script_path], env=env, capture_output=True, text=True)
         # print(f"ls -la {script_path}:  {env_in_container.stdout}")
 
-        table_restore_result = subprocess.run(command_list, shell=True, env=env)
+        # The Docker branch builds a shell string (uses "< file" redirection) so it needs shell=True.
+        # The non-Docker branch builds an argument list, which must run with shell=False, otherwise
+        # only "pg_restore" is executed and its arguments are dropped.
+        table_restore_result = subprocess.run(command_list, shell=in_docker, env=env,
+                                              capture_output=True, text=True)
 
         # Any return code other than 0 is an error
         if table_restore_result.returncode != 0:

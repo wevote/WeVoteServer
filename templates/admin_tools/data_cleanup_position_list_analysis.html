@@ -21,7 +21,7 @@
               method="get"
               action="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">
           {% csrf_token %}
-          {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=google_civic_election_id %}
+          {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=google_civic_election_id reverse_date_order=True %}
         </form>
       {% endif %}
       {# End of if election_list #}

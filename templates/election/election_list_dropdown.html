@@ -8,12 +8,14 @@
             {% if 0 == selected_election_id|convert_to_int %}selected="selected"{% endif %}>
       {{ default_option_text|default:"-- Filter by Election --" }}
     </option>
-    {% for one_election in election_list|dictsort:"state_code"|dictsort:"election_day_text" %}
+    {% with reverse_date_order=reverse_date_order|default:False %}
+    {% for one_election in election_list|sort_election_list_for_dropdown:reverse_date_order %}
       <option value="{{ one_election.google_civic_election_id }}"
               {% if one_election.google_civic_election_id|slugify == selected_election_id|slugify %} selected="selected"{% endif %}>
         {% if one_election.state_code %}{{ one_election.election_day_text}} {% endif %}
         {{ one_election.state_code }}: {{ one_election.election_name }} &ndash; {{ one_election.google_civic_election_id }}
       </option>
     {% endfor %}
+    {% endwith %}
   </select>
 {% endif %}
