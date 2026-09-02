@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('search');
   const searchClear = document.getElementById('search-clear');
 
-  // Tab switching — search text persists, filter re-applied to new tab
+  // Tab switching — search text persists; all tabs are already filtered
+  // (see filter() below) so switching just changes which one is visible.
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
       const targetTab = button.dataset.tab;
@@ -19,13 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
           content.classList.remove('active');
         }
       });
-
-      // Re-apply current search to the newly visible tab
-      filter(searchInput.value.toLowerCase());
     });
   });
 
-  // Search — scoped to opened tab only
+  // Search — applied to every tab so each tab's count reflects the filter,
+  // not just the one currently visible.
   searchInput.addEventListener('input', function(e) {
     filter(e.target.value.toLowerCase());
   });
@@ -37,13 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function filter(searchTerm) {
-    const activeTab = document.querySelector('.tab-content.active');
-    if (!activeTab) return;
     const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
-    activeTab.querySelectorAll('.campaign-row').forEach(row => {
-      const name = row.dataset.name || '';
-      const isMatch = searchTerms.every(term => name.includes(term));
-      row.style.display = isMatch ? '' : 'none';
+    tabContents.forEach(content => {
+      content.querySelectorAll('.campaign-row').forEach(row => {
+        const name = row.dataset.name || '';
+        const isMatch = searchTerms.every(term => name.includes(term));
+        row.style.display = isMatch ? '' : 'none';
+      });
     });
     updateTabCounts();
   }
