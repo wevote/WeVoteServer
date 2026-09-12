@@ -236,6 +236,26 @@ class WeVotePasswordResetForm(PasswordResetForm):
                     already_found_voter_ids.add(voter.pk)
 
         return users
+    
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+        # Address they typed (may be a secondary EmailAddress)
+        requested_email = self.cleaned_data.get('email') or to_email
+        return super().send_mail(
+            subject_template_name,
+            email_template_name,
+            context,
+            from_email,
+            requested_email,
+            html_email_template_name,
+        )
 
 
 def canonical_link_email_context():
