@@ -48,7 +48,6 @@ def store_vote_usa_json_response_to_import_batch_system(
             google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id, state_code=state_code)
         return results
     elif kind_of_batch is MEASURE:
-        # TODO: Not updated from Ballotpedia yet
         filename = "Measures from Vote USA API"
         if state_code != "":
             filename += " for " + state_code.upper()

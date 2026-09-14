@@ -76,6 +76,8 @@ def measure_retrieve_doc_template_values(url_root):
                    '  "measure_url": string,\n' \
                    '  "no_vote_description": string,\n' \
                    '  "ocd_division_id": string,\n' \
+                   '  "referendum_con": string,\n' \
+                   '  "referendum_pro": string,\n' \
                    '  "regional_display_name": string,\n' \
                    '  "state_code": string,\n' \
                    '  "state_display_name": string,\n' \

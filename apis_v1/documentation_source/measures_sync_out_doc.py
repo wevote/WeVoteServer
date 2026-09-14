@@ -45,6 +45,8 @@ def measures_sync_out_doc_template_values(url_root):
                    '  "measure_url": string,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "primary_party": string,\n' \
+                   '  "referendum_con": string,\n' \
+                   '  "referendum_pro": string,\n' \
                    '  "state_code": string,\n' \
                    '  "wikipedia_page_id": string,\n' \
                    '  "wikipedia_page_title": string,\n' \

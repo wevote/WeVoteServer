@@ -2371,7 +2371,7 @@ def office_explanations_list_view(request):
 
 
     try:
-        office_explanations = OfficeExplanation.objects.order_by('we_vote_id')
+        office_explanations = OfficeExplanation.objects.order_by('office_explanation_name')
         if positive_value_exists(state_code):
             office_explanations = office_explanations.filter(state_code__iexact=state_code)
         if positive_value_exists(office_search):
@@ -2394,10 +2394,10 @@ def office_explanations_list_view(request):
     state_list = sorted(state_codes_modified.items())
 
     template_values = {
-        'office_list': office_explanation_list,
-        'state_list':         state_list,
-        'state_code':         state_code,
-        'office_search':      office_search,
+        'office_list':      office_explanation_list,
+        'state_list':       state_list,
+        'state_code':       state_code,
+        'office_search':    office_search,
     }
 
     return render(request, 'office/office_explanations_list.html', template_values)

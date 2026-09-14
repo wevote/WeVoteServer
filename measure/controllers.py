@@ -253,6 +253,8 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             if contest_measure.measure_url else contest_measure.ballotpedia_measure_url,
             'no_vote_description':      strip_html_tags(contest_measure.ballotpedia_no_vote_description),
             'ocd_division_id':          contest_measure.ocd_division_id,
+            'referendum_con':           contest_measure.referendum_con,
+            'referendum_pro':           contest_measure.referendum_pro,
             'regional_display_name':    "",
             'state_code':               contest_measure.state_code,
             'state_display_name':       convert_state_code_to_state_text(contest_measure.state_code),
@@ -312,6 +314,7 @@ def measures_import_from_structured_json(structured_json):  # Consumes measuresS
     measures_updated = 0
     measures_not_processed = 0
     for one_measure in structured_json:
+        vote_usa_measure_id = one_measure['vote_usa_measure_id'] if 'vote_usa_measure_id' in one_measure else ''
         we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
         google_civic_election_id = \
             one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else 0
@@ -380,7 +383,11 @@ def measures_import_from_structured_json(structured_json):  # Consumes measuresS
                 'measure_year': one_measure['measure_year'] if 'measure_year' in one_measure else '',
                 'ocd_division_id': one_measure['ocd_division_id'] if 'ocd_division_id' in one_measure else '',
                 'primary_party': one_measure['primary_party'] if 'primary_party' in one_measure else '',
+                'referendum_con': one_measure['referendum_con'] if 'referendum_con' in one_measure else '',
+                'referendum_pro': one_measure['referendum_pro'] if 'referendum_pro' in one_measure else '',
                 'state_code': state_code,
+                'vote_usa_measure_id':
+                    one_measure['vote_usa_measure_id'] if 'vote_usa_measure_id' in one_measure else '',
                 'we_vote_id': we_vote_id,
                 'wikipedia_page_id': one_measure['wikipedia_page_id'] if 'wikipedia_page_id' in one_measure else '',
                 'wikipedia_page_title': one_measure['wikipedia_page_title'] if 'wikipedia_page_title' in

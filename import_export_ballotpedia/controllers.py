@@ -2814,6 +2814,8 @@ def groom_and_store_sample_ballot_results_api_v4(
                                 'measure_url': contest_measure.measure_url,
                                 'no_vote_description': contest_measure.ballotpedia_no_vote_description,
                                 'polling_location_we_vote_id': polling_location_we_vote_id,
+                                'referendum_con': contest_measure.referendum_con,
+                                'referendum_pro': contest_measure.referendum_pro,
                                 'state_code': state_code,
                                 'voter_id': voter_id,
                                 'yes_vote_description': contest_measure.ballotpedia_yes_vote_description,
@@ -2853,6 +2855,10 @@ def groom_and_store_sample_ballot_results_api_v4(
                                 update_values['ballotpedia_yes_vote_description'] = measure_dict['yes_vote']
                             if 'no_vote' in measure_dict and positive_value_exists(measure_dict['no_vote']):
                                 update_values['ballotpedia_no_vote_description'] = measure_dict['no_vote']
+                            if 'referendum_con' in measure_dict and positive_value_exists(measure_dict['referendum_con']):
+                                update_values['referendum_con'] = measure_dict['referendum_con']
+                            if 'referendum_pro' in measure_dict and positive_value_exists(measure_dict['referendum_pro']):
+                                update_values['referendum_pro'] = measure_dict['referendum_pro']
                             if 'status' in measure_dict and positive_value_exists(measure_dict['status']):
                                 update_values['ballotpedia_measure_status'] = measure_dict['status']
                             create_results = measure_manager.update_or_create_contest_measure(
@@ -2872,6 +2878,8 @@ def groom_and_store_sample_ballot_results_api_v4(
                                     'measure_text': contest_measure.measure_text,
                                     'measure_url': contest_measure.measure_url,
                                     'no_vote_description': contest_measure.ballotpedia_no_vote_description,
+                                    'referendum_con': contest_measure.referendum_con,
+                                    'referendum_pro': contest_measure.referendum_pro,
                                     'state_code': state_code,
                                     'polling_location_we_vote_id': polling_location_we_vote_id,
                                     'voter_id': voter_id,

@@ -43,6 +43,8 @@ def ballot_items_sync_out_doc_template_values(url_root):
                    '  "measure_url": string,\n' \
                    '  "no_vote_description": string,\n' \
                    '  "polling_location_we_vote_id": string,\n' \
+                   '  "referendum_con": string,\n' \
+                   '  "referendum_pro": string,\n' \
                    '  "yes_vote_description": string,\n' \
                    '}]'
 

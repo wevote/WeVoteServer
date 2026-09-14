@@ -2564,6 +2564,8 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                     'no_vote_description':          strip_html_tags(contest_measure.ballotpedia_no_vote_description),
                     # 'district_name':                "",  # TODO Add this
                     'election_display_name':        election_name,
+                    'referendum_con':               strip_html_tags(contest_measure.referendum_con),
+                    'referendum_pro':               strip_html_tags(contest_measure.referendum_pro),
                     # 'regional_display_name':        "",  # TODO Add this
                     # 'state_display_name':           "",  # TODO Add this
                     'we_vote_id':                   measure_we_vote_id,
@@ -3087,6 +3089,8 @@ def generate_ballot_item_list_from_object_list(
                     measure_text = measure_results_dict[measure_we_vote_id].measure_text
                     measure_url = measure_results_dict[measure_we_vote_id].measure_url
                     no_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_no_vote_description
+                    referendum_con = measure_results_dict[measure_we_vote_id].referendum_con
+                    referendum_pro = measure_results_dict[measure_we_vote_id].referendum_pro
                     state_code = measure_results_dict[measure_we_vote_id].state_code
                     yes_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_yes_vote_description
                 else:
@@ -3095,6 +3099,8 @@ def generate_ballot_item_list_from_object_list(
                     measure_text = ballot_item.measure_text
                     measure_url = ballot_item.measure_url
                     no_vote_description = ballot_item.no_vote_description
+                    referendum_con = ballot_item.referendum_con
+                    referendum_pro = ballot_item.referendum_pro
                     state_code = ballot_item.state_code
                     yes_vote_description = ballot_item.yes_vote_description
             except Exception as e:
@@ -3104,6 +3110,8 @@ def generate_ballot_item_list_from_object_list(
                 measure_text = ballot_item.measure_text
                 measure_url = ballot_item.measure_url
                 no_vote_description = ballot_item.no_vote_description
+                referendum_con = ''
+                referendum_pro = ''
                 state_code = ballot_item.state_code
                 yes_vote_description = ballot_item.yes_vote_description
             one_ballot_item = {
@@ -3120,6 +3128,8 @@ def generate_ballot_item_list_from_object_list(
                 'district_name':                "",  # TODO Add this
                 'election_display_name':        "",  # TODO Add this
                 'regional_display_name':        "",  # TODO Add this
+                'referendum_con':               strip_html_tags(referendum_con),
+                'referendum_pro':               strip_html_tags(referendum_pro),
                 'state_code':                   state_code,
                 'state_display_name':           "",  # TODO Add this
                 'we_vote_id':                   measure_we_vote_id,

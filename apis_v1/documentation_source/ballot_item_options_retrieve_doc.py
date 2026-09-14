@@ -106,6 +106,8 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
                    '      "measure_url": string,\n' \
                    '      "measure_we_vote_id": string,\n' \
                    '      "no_vote_description": string,\n' \
+                   '      "referendum_con": string,\n' \
+                   '      "referendum_pro": string,\n' \
                    '      "state_code": string,\n' \
                    '      "yes_vote_description": string,\n' \
                    '   ],\n' \

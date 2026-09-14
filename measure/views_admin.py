@@ -309,6 +309,7 @@ def find_and_merge_duplicate_measures(state_code=''):
 def measures_sync_out_view(request):  # measuresSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    status = ''
 
     try:
         contest_measure_query = ContestMeasure.objects.using('readonly').all()
@@ -335,17 +336,21 @@ def measures_sync_out_view(request):  # measuresSyncOut
             'ocd_division_id',
             'primary_party', 'state_code',
             'vote_smart_id',
+            'vote_usa_measure_id',
             'we_vote_id',
+            'referendum_con',
+            'referendum_pro',
             'wikipedia_page_id', 'wikipedia_page_title', 'wikipedia_photo_url')
         if contest_measure_list_dict:
             contest_measure_list_json = list(contest_measure_list_dict)
             return HttpResponse(json.dumps(contest_measure_list_json), content_type='application/json')
     except Exception as e:
-        pass
+        status += 'EXCEPTION processing measures_sync_out_view: ' + str(e) + ' '
 
+    status += 'CONTEST_MEASURE_LIST_MISSING '
     json_data = {
         'success': False,
-        'status': 'CONTEST_MEASURE_LIST_MISSING'
+        'status': status,
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -998,6 +1003,8 @@ def measure_edit_process_view(request):
     measure_url = request.POST.get('measure_url', False)
     measure_year = request.POST.get('measure_year', False)
     maplight_id = request.POST.get('maplight_id', False)
+    referendum_con = request.POST.get('referendum_con', False)
+    referendum_pro = request.POST.get('referendum_pro', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     vote_usa_measure_id = request.POST.get('vote_usa_measure_id', False)
     state_code = request.POST.get('state_code', False)
@@ -1062,6 +1069,10 @@ def measure_edit_process_view(request):
                     measure_on_stage.measure_year = measure_year
                 if maplight_id is not False:
                     measure_on_stage.maplight_id = maplight_id
+                if referendum_con is not False:
+                    measure_on_stage.referendum_con = referendum_con
+                if referendum_pro is not False:
+                    measure_on_stage.referendum_pro = referendum_pro
                 if vote_smart_id is not False:
                     measure_on_stage.vote_smart_id = vote_smart_id
                 if vote_usa_measure_id is not False:
@@ -1082,8 +1093,6 @@ def measure_edit_process_view(request):
                 measure_on_stage = ContestMeasure(
                     ballotpedia_measure_status=ballotpedia_measure_status,
                     ballotpedia_measure_url=ballotpedia_measure_url,
-                    ballotpedia_no_vote_description=ballotpedia_no_vote_description,
-                    ballotpedia_yes_vote_description=ballotpedia_yes_vote_description,
                     google_civic_election_id=google_civic_election_id,
                     google_civic_measure_title=google_civic_measure_title,
                     google_civic_measure_title2=google_civic_measure_title2,
@@ -1110,6 +1119,14 @@ def measure_edit_process_view(request):
                         measure_on_stage.ballotpedia_election_id = 0
                     else:
                         measure_on_stage.ballotpedia_election_id = ballotpedia_election_id
+                if ballotpedia_no_vote_description is not False:
+                    measure_on_stage.ballotpedia_no_vote_description = ballotpedia_no_vote_description
+                if ballotpedia_yes_vote_description is not False:
+                    measure_on_stage.ballotpedia_yes_vote_description = ballotpedia_yes_vote_description
+                if referendum_con is not False:
+                    measure_on_stage.referendum_con = referendum_con
+                if referendum_pro is not False:
+                    measure_on_stage.referendum_pro = referendum_pro
                 measure_on_stage.save()
                 messages.add_message(request, messages.INFO, 'New measure saved.')
         except Exception as e:

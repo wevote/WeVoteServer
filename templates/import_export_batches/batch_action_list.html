@@ -771,6 +771,8 @@
                                       <th>ballotpedia_measure_url</th>
                                       <th>ballotpedia_yes_vote_description</th>
                                       <th>ballotpedia_no_vote_description</th>
+                                      <th>referendum_pro</th>
+                                      <th>referendum_con</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -852,6 +854,8 @@
                                       <td>{{ one_batch_row.batch_row_action.ballotpedia_measure_url|default_if_none:"" }}</td>
                                       <td>{{ one_batch_row.batch_row_action.ballotpedia_yes_vote_description|default_if_none:"" }}</td>
                                       <td>{{ one_batch_row.batch_row_action.ballotpedia_no_vote_description|default_if_none:"" }}</td>
+                                      <td>{{ one_batch_row.batch_row_action.referendum_pro|default_if_none:"" }}</td>
+                                      <td>{{ one_batch_row.batch_row_action.referendum_con|default_if_none:"" }}</td>
                                     </tr>
                                     {% if one_batch_row.batch_row_action.status %}
                                       <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %} table-info {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %} table-success {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %} table-danger {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %} table-danger {% endif %}">
