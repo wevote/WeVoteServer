@@ -107,6 +107,8 @@ class BallotItem(models.Model):
     measure_url = models.TextField(verbose_name='url of measure', null=True)
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
+    referendum_con = models.TextField(blank=True, default="", null=True)
+    referendum_pro = models.TextField(blank=True, default="", null=True)
 
     class Meta:
         indexes = [
@@ -235,6 +237,8 @@ class BallotItemManager(models.Manager):
             ballot_item.measure_text = contest_measure.measure_text
             ballot_item.measure_url = contest_measure.measure_url
             ballot_item.no_vote_description = contest_measure.ballotpedia_no_vote_description
+            ballot_item.referendum_con = contest_measure.referendum_con
+            ballot_item.referendum_pro = contest_measure.referendum_pro
             ballot_item.yes_vote_description = contest_measure.ballotpedia_yes_vote_description
             values_changed = True
 
@@ -388,6 +392,10 @@ class BallotItemManager(models.Manager):
                     create_values['yes_vote_description'] = defaults['yes_vote_description']
                 if 'no_vote_description' in defaults:
                     create_values['no_vote_description'] = defaults['no_vote_description']
+                if 'referendum_con' in defaults:
+                    create_values['referendum_con'] = defaults['referendum_con']
+                if 'referendum_pro' in defaults:
+                    create_values['referendum_pro'] = defaults['referendum_pro']
 
                 # We search with contest_measure_id and contest_office_id because they are (will be) integers,
                 #  which will be a faster search
@@ -444,6 +452,12 @@ class BallotItemManager(models.Manager):
                         if 'no_vote_description' in defaults:
                             no_vote_description = defaults['no_vote_description']
                             ballot_item_on_stage.no_vote_description = no_vote_description
+                        if 'referendum_con' in defaults:
+                            referendum_con = defaults['referendum_con']
+                            ballot_item_on_stage.referendum_con = referendum_con
+                        if 'referendum_pro' in defaults:
+                            referendum_pro = defaults['referendum_pro']
+                            ballot_item_on_stage.referendum_pro = referendum_pro
                         ballot_item_on_stage.save()
 
                         success = True
@@ -683,6 +697,10 @@ class BallotItemManager(models.Manager):
                 if 'no_vote_description' in defaults:
                     no_vote_description = defaults['no_vote_description']
                     new_ballot_item.no_vote_description = no_vote_description
+                if 'referendum_con' in defaults:
+                    new_ballot_item.referendum_con = defaults['referendum_con']
+                if 'referendum_pro' in defaults:
+                    new_ballot_item.referendum_pro = defaults['referendum_pro']
                 if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
                     state_code_from_defaults = defaults['state_code']
                     state_code_from_defaults = state_code_from_defaults.lower()
@@ -695,7 +713,7 @@ class BallotItemManager(models.Manager):
         except Exception as e:
             success = False
             new_ballot_item_created = False
-            status += "BALLOT_ITEM_RETRIEVE_ERROR " + str(e) + " "
+            status += "CREATE-BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -758,6 +776,8 @@ class BallotItemManager(models.Manager):
                 measure_text=contest_measure.measure_text,
                 measure_url=contest_measure.measure_url,
                 no_vote_description=contest_measure.ballotpedia_no_vote_description,
+                referendum_con=contest_measure.referendum_con,
+                referendum_pro=contest_measure.referendum_pro,
                 # state_code=contest_measure.state_code,
                 yes_vote_description=contest_measure.ballotpedia_yes_vote_description,
             )
@@ -956,7 +976,7 @@ class BallotItemManager(models.Manager):
         except Exception as e:
             success = False
             ballot_item_updated = False
-            status += "BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
+            status += "UPDATE-BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -1633,6 +1653,8 @@ class BallotItemListManager(models.Manager):
                     defaults['measure_url'] = measure.get_measure_url()
                     defaults['yes_vote_description'] = measure.ballotpedia_yes_vote_description
                     defaults['no_vote_description'] = measure.ballotpedia_no_vote_description
+                    defaults['referendum_con'] = measure.referendum_con
+                    defaults['referendum_pro'] = measure.referendum_pro
                     google_ballot_placement = measure.google_ballot_placement
                     ballot_item_display_name = measure.measure_title
                     measure_subtitle = measure.measure_subtitle

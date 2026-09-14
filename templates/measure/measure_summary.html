@@ -17,6 +17,10 @@
 
     <h1>{{ measure.measure_title }}</h1>
     <div>
+      <strong>State Code:</strong>
+      {% if measure.state_code %}{{ measure.state_code|upper }}{% endif %}
+    </div>
+    <div>
       <strong>Measure Title Alternate 1:</strong>
       {% if measure.google_civic_measure_title %}{{ measure.google_civic_measure_title }}{% endif %}
     </div>
@@ -46,8 +50,10 @@
     {% endif %}
     <p>{{ measure.measure_subtitle|default_if_none:"" }}</p>
     <p>{{ measure.measure_text|default_if_none:"" }}</p>
-    <p>A yes vote means...: {{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}</p>
-    <p>A no vote means...: {{ measure.ballotpedia_no_vote_description|default_if_none:"" }}</p>
+    <p>A yes vote means: {{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}</p>
+    <p>A no vote means: {{ measure.ballotpedia_no_vote_description|default_if_none:"" }}</p>
+    <p>Pro: {{ measure.referendum_pro|default_if_none:"" }}</p>
+    <p>Con: {{ measure.referendum_con|default_if_none:"" }}</p>
     <div>
       <strong>Measure Ultimate Election Date:</strong>
       {% if measure.measure_year %}
@@ -58,7 +64,11 @@
     </div>
 
     <p>
-      Measure Website: {{ measure.measure_url|default_if_none:"" }}
+      Measure Website:
+      {% if measure.measure_url %}
+        <a href="{{ measure.measure_url }}" target="_blank" rel="noopener">
+          {{ measure.measure_url }} <span class="glyphicon glyphicon-new-window"></span></a>
+      {% endif %}
       <br />
       <a href="{% url 'position:refresh_positions_with_contest_measure_details_for_election' %}?measure_id={{ measure.id }}&measure_we_vote_id={{ measure.we_vote_id }}">
       Refresh Position Data with Details from Measure</a>

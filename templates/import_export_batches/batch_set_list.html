@@ -25,20 +25,8 @@
       <div class="form-group">
         <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
         <div class="col-sm-8">
-          <select id="google_civic_election_id"
-                  name="google_civic_election_id"
-                  class="form-control">
-            <option value="0"
-                    {% if 0 == google_civic_election_id|convert_to_int %}selected="selected"{% endif %}>
-              -- Election --
-            </option>
-            {% for election in election_list %}
-              <option value="{{ election.google_civic_election_id }}"
-                      {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %}selected="selected"{% endif %}>
-                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
-              </option>
-            {% endfor %}
-          </select>
+{% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=google_civic_election_id reverse_date_order=True %}
+          <br />
           {# Limit to on Batch Set ID #}
           <input type="text"
                  name="batch_set_id"

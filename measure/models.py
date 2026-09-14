@@ -46,6 +46,8 @@ CONTEST_MEASURE_UNIQUE_IDENTIFIERS = [
     'measure_url',
     'ocd_division_id',
     'primary_party',
+    'referendum_con',
+    'referendum_pro',
     'state_code',
     # 'vote_usa_measure_id',
     'vote_smart_id',
@@ -63,6 +65,11 @@ CONTEST_MEASURE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
 
 # The measure that is on the ballot (equivalent to ContestOffice)
 class ContestMeasure(models.Model):
+    def __str__(self):
+        return f"ContestMeasure(id={self.id}, we_vote_id={self.we_vote_id}, " \
+               f"measure_title={self.measure_title}, state_code={self.state_code}, " \
+               f"measure_year={self.measure_year})"
+
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
@@ -156,6 +163,8 @@ class ContestMeasure(models.Model):
         verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
     position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
+    referendum_con = models.TextField(blank=True, default="", null=True)
+    referendum_pro = models.TextField(blank=True, default="", null=True)
     vote_usa_measure_id = models.CharField(db_index=True, max_length=255, default=None, null=True)
 
     def get_measure_state(self):
@@ -952,6 +961,10 @@ class ContestMeasureManager(models.Manager):
                     contest_measure.ballotpedia_yes_vote_description = defaults['ballotpedia_yes_vote_description']
                 if 'ballotpedia_no_vote_description' in defaults:
                     contest_measure.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
+                if 'referendum_con' in defaults:
+                    contest_measure.referendum_con = defaults['referendum_con']
+                if 'referendum_pro' in defaults:
+                    contest_measure.referendum_pro = defaults['referendum_pro']
                 if 'election_day_text' in defaults:
                     contest_measure.election_day_text = defaults['election_day_text']
                 if 'measure_url' in defaults:
@@ -1045,6 +1058,10 @@ class ContestMeasureManager(models.Manager):
                     existing_measure_entry.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
                 if 'measure_url' in defaults:
                     existing_measure_entry.measure_url = defaults['measure_url']
+                if 'referendum_con' in defaults:
+                    existing_measure_entry.referendum_con = defaults['referendum_con']
+                if 'referendum_pro' in defaults:
+                    existing_measure_entry.referendum_pro = defaults['referendum_pro']
                 if 'state_code' in defaults:
                     existing_measure_entry.state_code = defaults['state_code']
                 measure_updated = False
@@ -1899,6 +1916,8 @@ class ContestMeasureListManager(models.Manager):
                     'measure_url':              measure.measure_url,
                     'measure_we_vote_id':       measure.we_vote_id,
                     'no_vote_description':      measure.ballotpedia_no_vote_description,
+                    'referendum_con':           measure.referendum_con,
+                    'referendum_pro':           measure.referendum_pro,
                     'state_code':               measure.state_code,
                     'yes_vote_description':     measure.ballotpedia_yes_vote_description,
                 }

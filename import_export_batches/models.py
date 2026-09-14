@@ -359,10 +359,12 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
     'measure_name': 'measure_name',
     'measure_text': 'measure_text',
     'measure_subtitle': 'measure_subtitle',
+    'referendum_con': 'referendum_con',
+    'referendum_pro': 'referendum_pro',
     'state_code': 'state_code',
 }
 
-# We Vote contest office key on the left, and Ballotpedia field name on right
+# We Vote contest office key on the left, and remote system field name on right
 # This gives us the option of putting the same field from a remote source into two We Vote fields
 BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
@@ -406,6 +408,8 @@ BATCH_HEADER_MAP_MEASURES_TO_VOTE_USA_MEASURES = {
     'no_vote_description': 'no_vote_description',
     'yes_vote_description': 'yes_vote_description',
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'referendum_con': 'referendum_con',
+    'referendum_pro': 'referendum_pro',
     'state_code': 'state_code',
     'voter_id': 'voter_id',
 }
@@ -5872,6 +5876,8 @@ class BatchRowActionMeasure(models.Model):
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    referendum_con = models.TextField(null=True, blank=True, default="")
+    referendum_pro = models.TextField(null=True, blank=True, default="")
 
     status = models.TextField(verbose_name="batch row action measure status", null=True, blank=True, default="")
 
@@ -6649,6 +6655,8 @@ class BatchRowActionBallotItem(models.Model):
     measure_url = models.TextField(verbose_name='url of measure', null=True)
     yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
+    referendum_con = models.TextField(null=True, blank=True, default=None)
+    referendum_pro = models.TextField(null=True, blank=True, default=None)
 
     status = models.TextField(verbose_name="batch row action ballot item status", null=True, blank=True, default="")
 

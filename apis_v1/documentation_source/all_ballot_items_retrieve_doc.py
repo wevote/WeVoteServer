@@ -87,6 +87,8 @@ def all_ballot_items_retrieve_doc_template_values(url_root):
                    '     "measure_text": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "measure_url": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "no_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "referendum_con": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "referendum_pro": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "state_code": string,\n' \
                    '     "yes_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
                    '   ],\n' \

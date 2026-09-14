@@ -820,6 +820,10 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         "ballotpedia_no_vote_description", batch_header_map, one_batch_row)
     election_day_text = batch_manager.retrieve_value_from_batch_row(
         "election_day_text", batch_header_map, one_batch_row)
+    referendum_con = batch_manager.retrieve_value_from_batch_row(
+        "referendum_con", batch_header_map, one_batch_row)
+    referendum_pro = batch_manager.retrieve_value_from_batch_row(
+        "referendum_pro", batch_header_map, one_batch_row)
     state_code = batch_manager.retrieve_value_from_batch_row(
         "state_code", batch_header_map, one_batch_row)
 
@@ -927,6 +931,8 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         batch_row_action_measure.measure_url = measure_url
         batch_row_action_measure.measure_we_vote_id = measure_we_vote_id
         batch_row_action_measure.measure_subtitle = measure_subtitle
+        batch_row_action_measure.referendum_con = referendum_con
+        batch_row_action_measure.referendum_pro = referendum_pro
         batch_row_action_measure.state_code = state_code
         batch_row_action_measure.status = status
         batch_row_action_measure.kind_of_action = kind_of_action
@@ -3016,6 +3022,8 @@ def create_batch_row_action_ballot_item(batch_description,
     contest_measure_url = ""
     yes_vote_description = ""
     no_vote_description = ""
+    referendum_con = ""
+    referendum_pro = ""
 
     if positive_value_exists(one_batch_row.google_civic_election_id):
         google_civic_election_id = str(one_batch_row.google_civic_election_id)
@@ -3209,6 +3217,8 @@ def create_batch_row_action_ballot_item(batch_description,
             contest_measure_url = contest_measure.get_measure_url()
             yes_vote_description = contest_measure.ballotpedia_yes_vote_description
             no_vote_description = contest_measure.ballotpedia_no_vote_description
+            referendum_con = contest_measure.referendum_con
+            referendum_pro = contest_measure.referendum_pro
 
     # check for duplicate entries in the live ballot_item data
     existing_ballot_item_query_completed = False
@@ -3296,6 +3306,8 @@ def create_batch_row_action_ballot_item(batch_description,
                 measure_url=contest_measure_url,
                 no_vote_description=no_vote_description,
                 polling_location_we_vote_id=polling_location_we_vote_id,
+                referendum_con=referendum_con,
+                referendum_pro=referendum_pro,
                 state_code=state_code,
                 status=status,
                 voter_id=voter_id,
@@ -4202,6 +4214,8 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
             'ballotpedia_measure_url':      one_batch_row_action.ballotpedia_measure_url,
             'ballotpedia_yes_vote_description': one_batch_row_action.ballotpedia_yes_vote_description,
             'ballotpedia_no_vote_description':  one_batch_row_action.ballotpedia_no_vote_description,
+            'referendum_con':               one_batch_row_action.referendum_con,
+            'referendum_pro':               one_batch_row_action.referendum_pro,
             'state_code':                   one_batch_row_action.state_code,
         }
 
@@ -5652,7 +5666,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                         one_batch_row_action.save()
                     except Exception as e:
                         success = False
-                        status += "BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
+                        status += "IMPORT-BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
                 else:
                     status += results['status']
