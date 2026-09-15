@@ -31,6 +31,30 @@ def positions_sync_out_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
+        {
+            'name': 'include_positions_with_voter_placeholder_name',
+            'value': 'boolean',
+            'default': 'false',
+            'description': 'Include positions with a placeholder speaker_display_name beginning with Voter-.',
+        },
+        {
+            'name': 'include_positions_without_stance_and_statement',
+            'value': 'boolean',
+            'default': 'false',
+            'description': 'Include positions whose stance is NO_STANCE and whose statement_text is empty.',
+        },
+        {
+            'name': 'include_positions_without_matchable_endorser_details',
+            'value': 'boolean',
+            'default': 'false',
+            'description': 'Include positions without a usable speaker Twitter handle, display name, or more-info URL.',
+        },
+        {
+            'name': 'include_positions_with_vote_usa_politician_id',
+            'value': 'boolean',
+            'default': 'false',
+            'description': 'Only return positions linked to a politician or candidate with a Vote USA politician ID.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -70,6 +94,7 @@ def positions_sync_out_doc_template_values(url_root):
                    '  "tweet_source_id": string,\n' \
                    '  "twitter_user_entered_position": string,\n' \
                    '  "volunteer_certified": string,\n' \
+                   '  "vote_usa_politician_id": string,\n' \
                    '  "vote_smart_rating": string,\n' \
                    '  "vote_smart_rating_id": string,\n' \
                    '  "vote_smart_rating_name": string,\n' \
