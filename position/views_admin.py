@@ -6,7 +6,7 @@ from .controllers import generate_position_sorting_dates_for_election, positions
     refresh_positions_with_candidate_details_for_election, \
     refresh_positions_with_contest_office_details_for_election, \
     refresh_positions_with_contest_measure_details_for_election
-from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager
+from .models import ANY_STANCE, NO_STANCE, PositionEntered, PositionForFriends, PositionListManager
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.environment_variable_functions import get_environment_variable
@@ -48,6 +48,14 @@ def positions_sync_out_view(request):  # positionsSyncOut
     year = convert_to_int(request.GET.get('year', 0))
     all_upcoming_elections = positive_value_exists(request.GET.get('all_upcoming_elections', False))
     state_code = request.GET.get('state_code', '')
+    include_positions_with_voter_placeholder_name = positive_value_exists(
+        request.GET.get('include_positions_with_voter_placeholder_name', False))
+    include_positions_without_stance_and_statement = positive_value_exists(
+        request.GET.get('include_positions_without_stance_and_statement', False))
+    include_positions_without_matchable_endorser_details = positive_value_exists(
+        request.GET.get('include_positions_without_matchable_endorser_details', False))
+    include_positions_with_vote_usa_politician_id = positive_value_exists(
+        request.GET.get('include_positions_with_vote_usa_politician_id', False))
 
     if not positive_value_exists(google_civic_election_id)\
             and not positive_value_exists(year) \
@@ -80,6 +88,21 @@ def positions_sync_out_view(request):  # positionsSyncOut
             position_list_query = position_list_query.filter(position_year=year)
         if positive_value_exists(state_code):
             position_list_query = position_list_query.filter(state_code=state_code)
+        if not include_positions_with_voter_placeholder_name:
+            position_list_query = position_list_query.exclude(
+                Q(speaker_display_name__istartswith='Voter-')
+            )
+        if not include_positions_without_stance_and_statement:
+            position_list_query = position_list_query.exclude(
+                (Q(stance__iexact=NO_STANCE) | Q(stance='')) &
+                (Q(statement_text__isnull=True) | Q(statement_text=''))
+            )
+        if not include_positions_without_matchable_endorser_details:
+            position_list_query = position_list_query.filter(
+                (Q(speaker_twitter_handle__isnull=False) & ~Q(speaker_twitter_handle='')) |
+                (Q(speaker_display_name__isnull=False) & ~Q(speaker_display_name='')) |
+                (Q(more_info_url__isnull=False) & ~Q(more_info_url=''))
+            )
         # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
         if stance_we_are_looking_for != ANY_STANCE:
             # If we passed in the stance "ANY" it means we want to not filter down the list
@@ -106,8 +129,9 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'organization_certified', 'volunteer_certified', 'voter_entering_position',
             'tweet_source_id', 'twitter_user_entered_position', 'is_private_citizen')
 
-        if position_list_dict:
-            position_list_json = list(position_list_dict)
+        position_list_json = list(position_list_dict)
+
+        if position_list_json:
 
             politician_we_vote_id_set = set()
             candidate_we_vote_id_set = set()
@@ -159,7 +183,13 @@ def positions_sync_out_view(request):  # positionsSyncOut
                 one_position['vote_usa_politician_id'] = \
                     vote_usa_politician_id if positive_value_exists(vote_usa_politician_id) else ''
 
-            return HttpResponse(json.dumps(position_list_json), content_type='application/json')
+            if include_positions_with_vote_usa_politician_id:
+                position_list_json = [
+                    one_position for one_position in position_list_json
+                    if positive_value_exists(one_position.get('vote_usa_politician_id', ''))
+                ]
+
+        return HttpResponse(json.dumps(position_list_json), content_type='application/json')
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
 
