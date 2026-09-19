@@ -30,7 +30,7 @@ from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, convert_to_political_party_constant, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, extract_website_from_url, \
-    is_url_valid, MIDDLE_INITIAL_SUBSTRINGS, \
+    is_url_valid, MIDDLE_INITIAL_WITH_PERIOD_SUBSTRINGS, MIDDLE_INITIAL_WITHOUT_PERIOD_SUBSTRINGS, \
     normalize_sms_phone_number_for_voter_update, positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
@@ -393,9 +393,9 @@ def choose_best_candidate_url(
             best_url_string = 'CANDIDATE1'
 
     results = {
-        'best_url': best_url_string,
-        'status': status,
-        'success': success,
+        'best_url_string':  best_url_string,
+        'status':           status,
+        'success':          success,
     }
     return results
 
@@ -631,16 +631,31 @@ def preferred_name_identifier(candidate1_name, candidate2_name):
     # For example, Kristi C. Morris <=> Kristi Morris: Should choose "Kristi Morris"
     candidate1_has_middle_initial = False
     candidate2_has_middle_initial = False
+
+    # Did we find an exact match in the name for a middle initial WITH a period at the end?
     modified_candidate1_name = candidate1_name
     modified_candidate2_name = candidate2_name
-    for middle_initial_substring in MIDDLE_INITIAL_SUBSTRINGS:
+    for middle_initial_substring in MIDDLE_INITIAL_WITH_PERIOD_SUBSTRINGS:
         # Remove middle_initial_substring
         modified_candidate1_name = modified_candidate1_name.replace(middle_initial_substring, " ")
         modified_candidate2_name = modified_candidate2_name.replace(middle_initial_substring, " ")
-
-    if len(candidate1_name) != len(modified_candidate1_name):
+    # Check if the difference between these two lengths is 4 characters, independent of whichever one is longer
+    if abs(len(candidate1_name) - len(modified_candidate1_name)) == 4:
         candidate1_has_middle_initial = True
-    if len(candidate2_name) != len(modified_candidate2_name):
+    if abs(len(candidate2_name) - len(modified_candidate2_name)) == 4:
+        candidate2_has_middle_initial = True
+
+    # Did we find an exact match in the name for a middle initial WITHOUT a period at the end?
+    modified_candidate1_name = candidate1_name
+    modified_candidate2_name = candidate2_name
+    for middle_initial_substring in MIDDLE_INITIAL_WITHOUT_PERIOD_SUBSTRINGS:
+        # Remove middle_initial_substring
+        modified_candidate1_name = modified_candidate1_name.replace(middle_initial_substring, " ")
+        modified_candidate2_name = modified_candidate2_name.replace(middle_initial_substring, " ")
+    # Check if the difference between these two lengths is 3 characters, independent of whichever one is longer
+    if abs(len(candidate1_name) - len(modified_candidate1_name)) == 3:
+        candidate1_has_middle_initial = True
+    if abs(len(candidate2_name) - len(modified_candidate2_name)) == 3:
         candidate2_has_middle_initial = True
 
     if candidate1_has_middle_initial and candidate2_has_middle_initial:
@@ -661,6 +676,10 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     candidate1_we_vote_id = candidate1_on_stage.we_vote_id
     candidate2_we_vote_id = candidate2_on_stage.we_vote_id
 
+    # look_at_list = ['wv2mcand9540', 'wv2mcand26630']
+    # if candidate1_we_vote_id in look_at_list or candidate2_we_vote_id in look_at_list:
+    #     status += "CANDIDATE_WE_WANT_TO_LOOK_AT "
+
     # conflict_values mostly comes from figure_out_candidate_conflict_values
 
     # Are there any comparisons that require admin intervention?
@@ -669,6 +688,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
         # Don't let conflict stop us with any of these fields
         if attribute == "ballotpedia_candidate_id" \
                 or attribute == "ballotpedia_office_id" \
+                or attribute == "ballotpedia_photo_url" \
                 or attribute == "ballotpedia_race_id" \
                 or attribute == "candidate_url" \
                 or attribute == "facebook_url" \
