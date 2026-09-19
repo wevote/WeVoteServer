@@ -30,12 +30,14 @@ from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, convert_to_political_party_constant, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, extract_website_from_url, \
-    positive_value_exists, process_request_from_master, \
+    is_url_valid, MIDDLE_INITIAL_SUBSTRINGS, \
+    normalize_sms_phone_number_for_voter_update, positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
     convert_we_vote_date_string_to_date_as_integer, get_current_date_as_integer, get_current_year_as_integer, \
     DATE_FORMAT_YMD_HMS, DATE_FORMAT_YMD
 from wevote_functions.utils import staticUserAgent
+from wevote_functions.validate_email import validate_email
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \
@@ -359,6 +361,62 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_o
     return results
 
 
+def choose_best_candidate_url(
+        url_option1,
+        url_option2,
+):
+    status = ''
+    success = True
+
+    # Normalize both url_options
+    url_option1 = normalize_candidate_url_for_comparison(url_option1)
+    url_option2 = normalize_candidate_url_for_comparison(url_option2)
+
+    if url_option1 == url_option2:
+        status += "NORMALIZED_URLS_EQUAL "
+        if is_url_valid(url_option1) and is_url_valid(url_option2):
+            best_url_string = 'MATCHING'
+        elif is_url_valid(url_option1):
+            best_url_string = 'CANDIDATE1'
+        elif is_url_valid(url_option2):
+            best_url_string = 'CANDIDATE2'
+        else:
+            # Just default to first one
+            best_url_string = 'CANDIDATE1'
+    else:
+        status += "URLS_NOT_EQUAL "
+        if is_url_valid(url_option1):
+            best_url_string = 'CANDIDATE1'
+        elif is_url_valid(url_option2):
+            best_url_string = 'CANDIDATE2'
+        else:
+            best_url_string = 'CANDIDATE1'
+
+    results = {
+        'best_url': best_url_string,
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def normalize_candidate_url_for_comparison(incoming_url):
+    # Step by step, Standardize this incoming_url to have "https", no "www", and never have a trailing slash. Return the modified/normalized url
+    if not incoming_url:
+        return incoming_url
+    # Make incoming_url all lower case
+    incoming_url = incoming_url.lower()
+    if incoming_url.startswith('http://'):
+        incoming_url = 'https://' + incoming_url[7:]
+    # If url doesn't have http or https, add it
+    if not incoming_url.startswith('https://'):
+        incoming_url = 'https://' + incoming_url
+    if incoming_url.startswith('https://www.'):
+        incoming_url = 'https://' + incoming_url[11:]
+    if incoming_url.endswith('/'):
+        incoming_url = incoming_url[:-1]
+    return incoming_url
+
 def figure_out_candidate_conflict_values(candidate1, candidate2):
     candidate_merge_conflict_values = {}
 
@@ -387,6 +445,50 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute in [
+                    "ballotpedia_candidate_links_retrieved",
+                    "ballotpedia_photo_url_is_broken",
+                    "ballotpedia_photo_url_is_placeholder",
+                ]:
+                    # Choose the value that is false (unless both are true) -- prevent marking as 'CONFLICT'
+                    #  for any of these attributes
+                    if not positive_value_exists(candidate1_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    elif not positive_value_exists(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                elif attribute == "candidate_email":
+                    # We don't want a CONFLICT around candidate_email at this time
+                    if positive_value_exists(candidate1_attribute_value) and \
+                            positive_value_exists(candidate2_attribute_value) and \
+                            candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    elif positive_value_exists(candidate1_attribute_value) and \
+                            validate_email(candidate1_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    elif positive_value_exists(candidate2_attribute_value) and \
+                            validate_email(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                elif attribute == "candidate_phone":
+                    # We don't want a CONFLICT around candidate_phone at this time
+                    # normalize_results1 = normalize_sms_phone_number_for_voter_update(candidate1_attribute_value)
+                    # normalized_phone_number1 = normalize_results1['normalized_sms_phone_number']
+                    # normalize_results2 = normalize_sms_phone_number_for_voter_update(candidate2_attribute_value)
+                    # normalized_phone_number2 = normalize_results2['normalized_sms_phone_number']
+                    # Note: We could validate phone numbers in the future
+                    if positive_value_exists(candidate1_attribute_value) and \
+                            positive_value_exists(candidate2_attribute_value) and \
+                            candidate1_attribute_value == candidate2_attribute_value:
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    elif positive_value_exists(candidate1_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    elif positive_value_exists(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
                 elif attribute == "candidate_ultimate_election_date":
                     candidate1_attribute_value_integer = convert_to_int(candidate1_attribute_value) \
                         if positive_value_exists(candidate1_attribute_value) else 0
@@ -408,15 +510,28 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                     else:
                         candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
                 elif attribute == "candidate_url":
-                    candidate1_attribute_value_trimmed = candidate1_attribute_value.rstrip('/')
-                    candidate2_attribute_value_trimmed = candidate2_attribute_value.rstrip('/')
-                    if candidate1_attribute_value_trimmed.lower() == candidate2_attribute_value_trimmed.lower():
+                    # Normalize URLs so equivalent URLs match despite cosmetic differences.
+                    results = \
+                        choose_best_candidate_url(candidate1_attribute_value, candidate2_attribute_value)
+                    candidate_merge_conflict_values[attribute] = results['best_url_string']
+                    # if positive_value_exists(results['status']):
+                    #     print(results['status'])
+                    # For now, we just want to accept a valid URL -- we don't ever show conflict
+                    # else:
+                    #     candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "candidate_name":
+                    if candidate1_attribute_value.lower().trim() == candidate2_attribute_value.lower().trim():
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
-                    elif 'http' in candidate2_attribute_value and 'http' not in candidate1_attribute_value:
-                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
                     else:
-                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
-                elif attribute == "candidate_name" or attribute == "state_code":
+                        # We want to make more automatic matches for names when enough other significant fields match
+                        # Examples include:
+                        #   Kristi C. Morris <=> Kristi Morris: Should choose "Kristi Morris"
+                        if candidate_match_is_high_confidence_level(candidate1, candidate2):
+                            # Now figure out which is the preferred name format, if we can auto-choose
+                            candidate_merge_conflict_values[attribute] = preferred_name_identifier(candidate1, candidate2)
+                        else:
+                            candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "state_code":
                     if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
@@ -457,6 +572,87 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
     return candidate_merge_conflict_values
 
 
+def candidate_match_is_high_confidence_level(candidate1, candidate2):
+    # Confidence level greater than YY means the names can be slightly different and we still merge
+    confidence_level = 0
+    confidence_threshold = 90
+    status = "MATCHING: "
+    # We don't need to deal with conflicts here -- only positive matches. Conflicts are handled in figure_out_conflict_values
+    for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
+        both_exist = False
+        neither_exist = False
+        try:
+            candidate1_attribute_value = getattr(candidate1, attribute)
+            candidate2_attribute_value = getattr(candidate2, attribute)
+            if positive_value_exists(candidate1_attribute_value) and positive_value_exists(candidate2_attribute_value):
+                both_exist = True
+            elif not positive_value_exists(candidate1_attribute_value) and not positive_value_exists(candidate2_attribute_value):
+                neither_exist = True
+            if neither_exist:
+                pass
+            elif attribute == "ballotpedia_candidate_url" \
+                    or attribute == "candidate_contact_form_url" \
+                    or attribute == "candidate_instagram_form_url" \
+                    or attribute == "candidate_url" \
+                    or attribute == "facebook_url" \
+                    or attribute == "linkedin_url" \
+                    or attribute == "youtube_url":
+                if both_exist and candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                    confidence_level += 20
+                    status += f"{attribute} "
+            elif attribute == "candidate_email":
+                if both_exist and candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                    confidence_level += 50
+                    status += f"{attribute} "
+            elif attribute == "candidate_phone":
+                # We don't want a CONFLICT around candidate_phone at this time
+                normalize_results1 = normalize_sms_phone_number_for_voter_update(candidate1_attribute_value)
+                normalized_phone_number1 = normalize_results1['normalized_sms_phone_number']
+                normalize_results2 = normalize_sms_phone_number_for_voter_update(candidate2_attribute_value)
+                normalized_phone_number2 = normalize_results2['normalized_sms_phone_number']
+                # Note: We could validate phone numbers in the future
+                if both_exist and normalized_phone_number1 == normalized_phone_number2:
+                    confidence_level += 50
+                    status += f"{attribute} "
+            elif attribute == "vote_usa_politician_id":
+                if both_exist and candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                    confidence_level += 95
+                    status += f"{attribute} "
+        except AttributeError:
+            pass
+    if confidence_level >= confidence_threshold:
+        return True
+    return False
+
+
+def preferred_name_identifier(candidate1_name, candidate2_name):
+    # If candidate1_name_lower_case has a value from MIDDLE_INITIAL_SUBSTRINGS in it, return "CANDIDATE2".
+    # If candidate2_name_lower_case has a value from MIDDLE_INITIAL_SUBSTRINGS in it, return "CANDIDATE1".
+    # For example, Kristi C. Morris <=> Kristi Morris: Should choose "Kristi Morris"
+    candidate1_has_middle_initial = False
+    candidate2_has_middle_initial = False
+    modified_candidate1_name = candidate1_name
+    modified_candidate2_name = candidate2_name
+    for middle_initial_substring in MIDDLE_INITIAL_SUBSTRINGS:
+        # Remove middle_initial_substring
+        modified_candidate1_name = modified_candidate1_name.replace(middle_initial_substring, " ")
+        modified_candidate2_name = modified_candidate2_name.replace(middle_initial_substring, " ")
+
+    if len(candidate1_name) != len(modified_candidate1_name):
+        candidate1_has_middle_initial = True
+    if len(candidate2_name) != len(modified_candidate2_name):
+        candidate2_has_middle_initial = True
+
+    if candidate1_has_middle_initial and candidate2_has_middle_initial:
+        return "CONFLICT"
+    elif candidate1_has_middle_initial and not candidate2_has_middle_initial:
+        # Prefer the name WITHOUT the middle initial: "Kristi Morris" over "Kristi C. Morris"
+        return "CANDIDATE2"
+    elif candidate2_has_middle_initial and not candidate1_has_middle_initial:
+        return "CANDIDATE1"
+    return "CONFLICT"
+
+
 def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conflict_values):
     success = False
     status = "MERGE_IF_DUPLICATE_CANDIDATES "
@@ -464,6 +660,8 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     decisions_required = False
     candidate1_we_vote_id = candidate1_on_stage.we_vote_id
     candidate2_we_vote_id = candidate2_on_stage.we_vote_id
+
+    # conflict_values mostly comes from figure_out_candidate_conflict_values
 
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
