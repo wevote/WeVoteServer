@@ -14,6 +14,10 @@
           <a href="{{ candidate1_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>&nbsp;
+        {% elif 'www' in candidate1_field_value or '.com' in candidate1_field_value %}
+          <a href="https://{{ candidate1_field_value }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+          </a>&nbsp;
         {% endif %}
       </td>
       <td>
@@ -23,6 +27,10 @@
         <span class="bold-select">{{ candidate2_field_value|default_if_none:"" }}</span>
         {% if 'http' in candidate2_field_value %}
           <a href="{{ candidate2_field_value }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+          </a>
+        {% elif 'www' in candidate2_field_value or '.com' in candidate2_field_value %}
+          <a href="https://{{ candidate2_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>
         {% endif %}
