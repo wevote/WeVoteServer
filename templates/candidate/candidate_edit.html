@@ -1032,22 +1032,45 @@ th, td {
   <br />
 
 
+<form action="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
+      method="get"
+      class="form-horizontal"
+      enctype="multipart/form-data">
+
     <h3>Possible Duplicate Candidates for {{ candidate.candidate_name }}</h3>
-    <div style="margin-bottom: 15px;">
-      <label for="use_trigram_match_id">
-        <input type="checkbox"
-               name="use_trigram_match"
-               id="use_trigram_match_id"
-               value="1" />
-        <strong>Use Trigram-Based Fuzzy Matching</strong> (finds candidates with similar names even with spelling variations)
+<!--    <div style="margin-bottom: 15px;">-->
+<!--      <label for="use_trigram_match_id">-->
+<!--        <input type="checkbox"-->
+<!--               name="use_trigram_match"-->
+<!--               id="use_trigram_match_id"-->
+<!--               value="1" />-->
+<!--        <strong>Use Trigram-Based Fuzzy Matching</strong> (finds candidates with similar names even with spelling variations)-->
+<!--      </label>-->
+<!--      {% if use_trigram_match %}-->
+<!--        <span style="color: #0066cc; margin-left: 20px;">✓ Currently viewing fuzzy matching results</span>-->
+<!--      {% else %}-->
+<!--        <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>-->
+<!--      {% endif %}-->
+<!--    </div>-->
+  <div class="col">
+    <div class="row form-group">
+      <label for="candidate_search_id" class="control-label">
+        Search words
       </label>
-      {% if use_trigram_match %}
-        <span style="color: #0066cc; margin-left: 20px;">✓ Currently viewing fuzzy matching results</span>
-      {% else %}
-        <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>
-      {% endif %}
+      <div class="col">
+        <input type="text"
+               name="candidate_search"
+               id="candidate_search_id"
+               class="form-control"
+               value="{% if candidate_search %}{{ candidate_search|default_if_none:'' }}{% endif %}" />
+      </div>
     </div>
-  {% if related_candidate_list %}
+  </div>
+  <input name="submit_text"
+         type="submit"
+         value="{% if candidate %}Find Candidates that Might Be Duplicates{% endif %}"
+         id="find_candidates_submit_btn" />
+  {% if duplicate_candidate_list %}
     <table class="table">
       <thead>
         <tr>
@@ -1109,7 +1132,7 @@ th, td {
           {% endif %}
         </td>
       </tr>
-      {% for found_candidate in related_candidate_list %}
+      {% for found_candidate in duplicate_candidate_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
           <td width="48px">
@@ -1189,7 +1212,16 @@ th, td {
         </tr>
       {% endfor %}
     </table>
-  {% endif %}
+{% else %}
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <p>No candidates found to merge with this candidate.</p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+{% endif %}
+
+<!--End of search form-->
+</form>
   <br />
 
   {% if candidate %}

@@ -2104,6 +2104,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     candidate_email = request.GET.get('candidate_email', False)
     candidate_phone = request.GET.get('candidate_phone', False)
+    candidate_search = request.GET.get('candidate_search', False)
     party = request.GET.get('party', False)
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
     ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)
@@ -2358,12 +2359,62 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
         # #########################################
         # Search for possible duplicates
-        from candidate.controllers import find_possible_duplicate_candidates_to_merge_with_this_candidate
         t0 = time()
-        related_candidate_list = \
-            find_possible_duplicate_candidates_to_merge_with_this_candidate(
-                candidate=candidate_on_stage,
-                use_trigram_match=use_trigram_match)
+
+        if candidate_search:
+            try:
+                duplicate_candidate_list = CandidateCampaign.objects.using('readonly').all()
+                duplicate_candidate_list = duplicate_candidate_list.exclude(we_vote_id__iexact=candidate_on_stage.we_vote_id)
+                if positive_value_exists(candidate_on_stage.candidate_year):
+                    duplicate_candidate_list = duplicate_candidate_list.filter(candidate_year=candidate_on_stage.candidate_year)
+                if positive_value_exists(candidate_on_stage.state_code):
+                    duplicate_candidate_list = duplicate_candidate_list.filter(state_code__iexact=candidate_on_stage.state_code)
+                search_words = candidate_search.split()
+                for one_word in search_words:
+                    # "OR" filters below
+                    filters = []
+
+                    new_filter = (
+                            Q(candidate_name__icontains=one_word) |
+                            Q(ballotpedia_candidate_name__icontains=one_word) |
+                            Q(google_civic_candidate_name__icontains=one_word) |
+                            Q(google_civic_candidate_name2__icontains=one_word) |
+                            Q(google_civic_candidate_name3__icontains=one_word)
+                    )
+                    filters.append(new_filter)
+
+                    new_filter = (
+                            Q(candidate_twitter_handle__icontains=one_word) |
+                            Q(candidate_twitter_handle2__icontains=one_word) |
+                            Q(candidate_twitter_handle3__icontains=one_word)
+                    )
+                    filters.append(new_filter)
+
+                    new_filter = Q(vote_usa_politician_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        duplicate_candidate_list = duplicate_candidate_list.filter(final_filters)
+
+                duplicate_candidate_list = duplicate_candidate_list.order_by('candidate_name')
+                duplicate_candidate_list = duplicate_candidate_list[:20]
+                duplicate_candidate_list = list(duplicate_candidate_list)
+            except Exception as e:
+                duplicate_candidate_list = []
+        else:
+            from candidate.controllers import find_possible_duplicate_candidates_to_merge_with_this_candidate
+            duplicate_candidate_list = \
+                find_possible_duplicate_candidates_to_merge_with_this_candidate(
+                    candidate=candidate_on_stage,
+                    use_trigram_match=use_trigram_match)
+
         t1 = time()
 
         performance_snapshot = {
@@ -2455,6 +2506,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             },
             'candidate_name':                   candidate_name,
             'candidate_position_list':          candidate_position_list,
+            'candidate_search':                 candidate_search,
             'candidate_to_office_link_list':    candidate_to_office_link_list,
             'candidate_twitter_handle':         candidate_twitter_handle,
             'candidate_twitter_handle2':        candidate_twitter_handle2,
@@ -2528,7 +2580,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'performance_dict':                 performance_dict,
             'performance_process_dict':         performance_process_dict,
             'rating_list':                      rating_list,
-            'related_candidate_list':           related_candidate_list,
+            'duplicate_candidate_list':           duplicate_candidate_list,
             'use_trigram_match':                use_trigram_match,
             'state_code':                       state_code,
             'state_code_dict':
