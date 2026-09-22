@@ -2181,6 +2181,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 if politician_phone_number3 else politician_on_stage.politician_phone_number3
             },
             'politician_position_list':     politician_position_list,
+            'politician_search':            politician_search,
             'politician_twitter_handle':    politician_twitter_handle,
             'politician_twitter_handle2':   politician_twitter_handle2,
             'politician_twitter_handle3':   politician_twitter_handle3,

@@ -44,10 +44,22 @@
           <td>
             <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=politician_option1.we_vote_id %}"
                target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+            <a href="https://www.google.com/search?q={{ politician_option1.politician_name|urlencode }}%20politician"
+               target="_blank"
+               class="u-no-break">
+              google search <span class="glyphicon glyphicon-new-window"></span>
+            </a>
           </td>
           <td>
             <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=politician_option2.we_vote_id %}"
                target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+            <a href="https://www.google.com/search?q={{ politician_option2.politician_name|urlencode }}%20politician"
+               target="_blank"
+               class="u-no-break">
+              google search <span class="glyphicon glyphicon-new-window"></span>
+            </a>
           </td>
         </tr>
 
