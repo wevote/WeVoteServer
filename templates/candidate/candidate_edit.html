@@ -1032,7 +1032,6 @@ th, td {
   <br />
 
 
-  {% if related_candidate_list %}
     <h3>Possible Duplicate Candidates for {{ candidate.candidate_name }}</h3>
     <div style="margin-bottom: 15px;">
       <label for="use_trigram_match_id">
@@ -1048,6 +1047,7 @@ th, td {
         <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>
       {% endif %}
     </div>
+  {% if related_candidate_list %}
     <table class="table">
       <thead>
         <tr>

@@ -1477,22 +1477,31 @@
   <p>(no recommended politicians found)</p>
 {% endif %}
 
-{% if duplicate_politician_list %}
+<form action="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+      method="get"
+      class="form-horizontal"
+      enctype="multipart/form-data">
+
   <h4>Possible Duplicate Politicians</h4>
-  <div style="margin-bottom: 15px;">
-    <label for="use_trigram_match_duplicates_id">
-      <input type="checkbox"
-             name="use_trigram_match_duplicates"
-             id="use_trigram_match_duplicates_id"
-             value="1" />
-      <strong>Use Trigram-Based Fuzzy Matching</strong> (finds duplicate politicians with similar names even with spelling variations)
-    </label>
-    {% if use_trigram_match %}
-      <span style="color: #0066cc; margin-left: 20px;">✓ Currently viewing fuzzy matching results</span>
-    {% else %}
-      <span style="color: #6c757d; margin-left: 20px;">Currently viewing exact matching results</span>
-    {% endif %}
+  <div class="col">
+    <div class="row form-group">
+      <label for="politician_search_id" class="control-label">
+        Search words
+      </label>
+      <div class="col">
+        <input type="text"
+               name="politician_search"
+               id="politician_search_id"
+               class="form-control"
+               value="{% if politician_search %}{{ politician_search|default_if_none:'' }}{% endif %}" />
+      </div>
+    </div>
   </div>
+  <input name="submit_text"
+         type="submit"
+         value="{% if politician %}Find Politicians that Might Be Duplicates{% endif %}"
+         id="find_candidates_submit_btn" />
+{% if duplicate_politician_list %}
   <table class="table">
     <tr>
       <td>&nbsp;</td>
@@ -1581,8 +1590,16 @@
       </tr>
     {% endfor %}
   </table>
+{% else %}
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <p>No politicians found to merge with this politician.</p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
 {% endif %}
 
+<!--End of search form-->
+</form>
 
 
 
