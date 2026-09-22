@@ -1447,6 +1447,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     ballotpedia_politician_url = request.GET.get('ballotpedia_politician_url', False)
     birth_date = request.GET.get('birth_date', False)
     ballotpedia_politician_name = request.GET.get('ballotpedia_politician_name', False)
+    politician_search = request.GET.get('politician_search', False)
     facebook_url = request.GET.get('facebook_url', False)
     facebook_url2 = request.GET.get('facebook_url2', False)
     facebook_url3 = request.GET.get('facebook_url3', False)
@@ -1728,7 +1729,79 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             description="Retrieve Politician objects for this politician")
 
         duplicate_politician_list = []
-        if positive_value_exists(politician_on_stage.politician_name) or \
+        if positive_value_exists(politician_search):
+            try:
+                duplicate_politician_list = Politician.objects.using('readonly').all()
+                duplicate_politician_list = duplicate_politician_list.exclude(
+                    we_vote_id=politician_on_stage.we_vote_id)
+                duplicate_politician_list = duplicate_politician_list.filter(
+                    state_code__iexact=politician_on_stage.state_code)
+
+                search_words = politician_search.split()
+                for one_word in search_words:
+                    filters = []
+
+                    new_filter = Q(first_name__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = (
+                        Q(google_civic_candidate_name__icontains=one_word) |
+                        Q(google_civic_candidate_name2__icontains=one_word) |
+                        Q(google_civic_candidate_name3__icontains=one_word)
+                    )
+                    filters.append(new_filter)
+
+                    new_filter = Q(last_name__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(linked_campaignx_we_vote_id=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = (
+                        Q(politician_email__icontains=one_word) |
+                        Q(politician_email2__icontains=one_word) |
+                        Q(politician_email3__icontains=one_word)
+                    )
+                    filters.append(new_filter)
+
+                    new_filter = Q(politician_name__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = (
+                        Q(politician_twitter_handle__icontains=one_word) |
+                        Q(politician_twitter_handle2__icontains=one_word) |
+                        Q(politician_twitter_handle3__icontains=one_word) |
+                        Q(politician_twitter_handle4__icontains=one_word) |
+                        Q(politician_twitter_handle5__icontains=one_word)
+                    )
+                    filters.append(new_filter)
+
+                    new_filter = Q(political_party__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(seo_friendly_path__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(vote_usa_politician_id__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(we_vote_id=one_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        duplicate_politician_list = duplicate_politician_list.filter(final_filters)
+                duplicate_politician_list = duplicate_politician_list.order_by('politician_name')[:20]
+            except ObjectDoesNotExist:
+                # This is fine, create new
+                pass
+        elif positive_value_exists(politician_on_stage.politician_name) or \
                 positive_value_exists(politician_on_stage.first_name) or \
                 positive_value_exists(politician_on_stage.last_name) or \
                 positive_value_exists(politician_on_stage.politician_twitter_handle) or \
@@ -1826,7 +1899,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             except ObjectDoesNotExist:
                 # This is fine, create new
                 pass
-            speed_statistics.end(context="Find possible duplicate politicians")
+
+        speed_statistics.end(context="Find possible duplicate politicians")
 
         # ##################################
         # Find Representatives Linked to this Politician
