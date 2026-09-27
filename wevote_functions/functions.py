@@ -1885,6 +1885,42 @@ def generate_bluesky_url(input_value):
         # If it doesn't match expected patterns, return an empty string
         return ''
 
+def normalize_generic_url_for_comparison(input_value):
+    if not input_value:
+        return ''
+
+    # Remove leading/trailing whitespace and convert to lowercase
+    input_value = input_value.strip().lower()
+
+    # strip http:// or https://
+    input_value = input_value.replace('http://', '').replace('https://', '')
+
+    # strip www.
+    input_value = input_value.replace('www.', '')
+
+    # Remove question mark and everything after question mark, IFF there is a question mark
+    if '?' in input_value:
+        input_value = input_value.split('?')[0]
+
+    # Remove trailing slash
+    input_value = input_value.rstrip('/')
+
+    return input_value
+
+def normalize_facebook_for_comparison(input_value):
+    if not input_value:
+        return ''
+
+    input_value = normalize_generic_url_for_comparison(input_value)
+
+    return input_value
+
+def normalize_instagram_for_comparison(input_value):
+    if not input_value:
+        return ''
+
+    return extract_instagram_handle_from_text_string(input_value)
+
 def normalize_threads_handle(input_value):
     if not input_value:
         return ''

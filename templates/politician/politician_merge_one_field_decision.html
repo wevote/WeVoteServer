@@ -25,6 +25,14 @@
       </td>
     {% else %}
       <td>
+        {% if politician1_field_value and politician2_field_value %}
+          {% if conflict_status == "POLITICIAN1" or conflict_status == "POLITICIAN2" %}
+          <input type="radio"
+                 name="{{ field_name }}_choice"
+                 value="{{ politician1.we_vote_id }}"
+                 {% if conflict_status == "POLITICIAN1" %}checked{% endif %} />
+          {% endif %}
+        {% endif %}
         {% if 'http' in politician1_field_value %}
           <a href="{{ politician1_field_value }}" target="_blank">
             {% if conflict_status == "POLITICIAN1" %}
@@ -45,6 +53,14 @@
         &nbsp;&nbsp;
       </td>
       <td>
+        {% if politician1_field_value and politician2_field_value %}
+          {% if conflict_status == "POLITICIAN1" or conflict_status == "POLITICIAN2" %}
+          <input type="radio"
+                 name="{{ field_name }}_choice"
+                 value="{{ politician2.we_vote_id }}"
+                 {% if conflict_status == "POLITICIAN2" %}checked{% endif %} />
+          {% endif %}
+        {% endif %}
         {% if 'http' in politician2_field_value %}
           <a href="{{ politician2_field_value }}" target="_blank">
             {% if conflict_status == "POLITICIAN2" %}
