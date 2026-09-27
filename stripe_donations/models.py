@@ -2049,7 +2049,8 @@ class StripeManager(models.Manager):
             return 'none'
 
         except Exception as e:
-            logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
+            # Disabled due to logging possible sensitive information
+            # logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
             return 'none'
 
     @staticmethod
@@ -2080,7 +2081,8 @@ class StripeManager(models.Manager):
             return 'none'
 
         except Exception as e:
-            logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
+            # Disabled due to logging possible sensitive information
+            # logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
             return 'none'
 
 

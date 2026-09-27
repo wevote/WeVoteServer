@@ -1676,8 +1676,10 @@ class DonationManager(models.Manager):
             how_many_days= 10
             queryset = DonationInvoice.objects.filter(invoice_date__lte=datetime.fromtimestamp(
                 int(time.time()), timezone.utc) - timedelta(days=how_many_days))
-            logger.info("update_subscription_with_latest_charge_date: DELETED " + str(queryset.count()) +
-                        " invoice rows that were older than " + str(how_many_days) + " days old.")
+            
+            # Disabled due to logging possible sensitive information
+            # logger.info("update_subscription_with_latest_charge_date: DELETED " + str(queryset.count()) +
+            #             " invoice rows that were older than " + str(how_many_days) + " days old.")
             queryset.delete()
 
         except Exception as e:

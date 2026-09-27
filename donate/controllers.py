@@ -692,7 +692,8 @@ def donation_process_charge(event):           # 'charge.succeeded'
             voter_we_vote_id = charge['metadata']['voter_we_vote_id']
             if voter_we_vote_id:
                 # Has our metadata?  Then we have already made a journal entry at the time of the donation
-                logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
+                 # Disabled due to logging possible sensitive information
+                # logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
                 return
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(customer)
