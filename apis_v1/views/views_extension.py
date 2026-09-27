@@ -80,7 +80,7 @@ def process_pdf_to_html(pdf_url, return_version):
     output_from_subprocess = 'exception occurred before output was captured'
     status = ''
     success = False
-    # logger.error('entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
+    logger.error('entry to process_pdf_to_html: ' + pdf_url + '   ' + str(return_version))
 
     # Version report, only used to debug connectivity to the Tika server
     if return_version:
@@ -101,7 +101,7 @@ def process_pdf_to_html(pdf_url, return_version):
         }
         return json_data
 
-    # logger.error('immediately after return_version: ' + str(return_version))
+    logger.error('immediately after return_version: ' + str(return_version))
     pdf_file_name = os.path.basename(pdf_url)
     absolute_html_file = build_absolute_path_for_tempfile(pdf_file_name).replace('.pdf', '.html')
     try:
@@ -119,26 +119,26 @@ def process_pdf_to_html(pdf_url, return_version):
     try:
         raw = scraper.get(pdf_url)
         pdf_text_text = raw.content  # in bytes, not using str(raw.content)
-        # logger.error('cloudscraper attempt with base PDF url : ' + pdf_url +
-        #              ' returned bytes: ' + str(len(pdf_text_text)))
+        logger.error('cloudscraper attempt with base PDF url : ' + pdf_url +
+                     ' returned bytes: ' + str(len(pdf_text_text)))
         success = True
 
     # Probably got a http 403 forbidden, due to cloudscraper unsuccessfully handling a Cloudflare challenge
     # Now try to use Google's (hopefully) cached version of the page
     except Exception as scraper_or_tempfile_error:
         status = "First pass with base url failed with a " + str(scraper_or_tempfile_error)
-        # logger.error('cloudscraper with base PDF url or tempfile write exception: ' +
-        #              str(scraper_or_tempfile_error))
+        logger.error('cloudscraper with base PDF url or tempfile write exception: ' +
+                      str(scraper_or_tempfile_error))
 
     if not success:
         logger.error('first pass === not success')
         is_pdf = False
         try:
-            # logger.error('first pass === not success, pdf_url:  ' + pdf_url)
+            logger.error('first pass === not success, pdf_url:  ' + pdf_url)
             encoded = quote(pdf_url, safe='')
-            # logger.error('encoded success: ' + encoded)
+            logger.error('encoded success: ' + encoded)
             google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + encoded
-            # logger.error('cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
+            logger.error('cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -149,14 +149,14 @@ def process_pdf_to_html(pdf_url, return_version):
                 'Accept-Language': 'en-US,en;q=0.8',
                 'Connection': 'keep-alive'}
             r = requests.get(google_cached_pdf_url, headers)
-            # logger.error('after requests.get: ' + google_cached_pdf_url)
+            logger.error('after requests.get: ' + google_cached_pdf_url)
             # skip saving the pdf file (since we don't have one), and write the final html file to the temp dir
             html_text_text = r.text
             out_file = open(absolute_html_file, 'w')
             out_file.write(html_text_text)
 
-            # logger.error('requests was successful with google cached PDF url : ' + google_cached_pdf_url +
-            #              ' returned bytes: ' + str(len(pdf_text_text)))
+            logger.error('requests was successful with google cached PDF url : ' + google_cached_pdf_url +
+                         ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
         except Exception as scraper_or_tempfile_error2:      # Out of luck
             status += ", Second pass with google cached PDF url failed with a: " + str(scraper_or_tempfile_error2)
@@ -175,7 +175,7 @@ def process_pdf_to_html(pdf_url, return_version):
             output_from_subprocess = 'Tika status: ' + str(tika_response.status_code)
             with open(absolute_html_file, 'w') as out_file:
                 out_file.write(tika_response.text)
-            # logger.error('Tika PUT output: ' + output_from_subprocess)
+            logger.error('Tika PUT output: ' + output_from_subprocess)
         except Exception as tika_error:
             status += ', ' + str(tika_error)
             logger.error('Tika PUT request exception: ' + str(tika_error))

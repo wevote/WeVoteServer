@@ -3409,7 +3409,9 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
 
     if site_url.lower().endswith(".pdf"):
         print("PDF Detected ", site_url)
-        response = process_pdf_to_html(site_url)
+
+        return_version = False
+        response = process_pdf_to_html(site_url, return_version)
         if positive_value_exists(response['s3_url_for_html']):
             # Overwrite the site_url parameter, with a url to an html representation of the PDF file
             site_url = response['s3_url_for_html']
