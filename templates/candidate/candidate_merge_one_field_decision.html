@@ -14,8 +14,12 @@
           <a href="{{ candidate1_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>&nbsp;
-        {% elif 'www' in candidate1_field_value or '.com' in candidate1_field_value %}
+        {% elif 'www.' in candidate1_field_value or '.com' in candidate1_field_value %}
           <a href="https://{{ candidate1_field_value }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+          </a>&nbsp;
+        {% elif field_name == 'instagram_handle' %}
+          <a href="https://instagram.com/{{ candidate1_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>&nbsp;
         {% endif %}
@@ -29,14 +33,26 @@
           <a href="{{ candidate2_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>
-        {% elif 'www' in candidate2_field_value or '.com' in candidate2_field_value %}
+        {% elif 'www.' in candidate2_field_value or '.com' in candidate2_field_value %}
           <a href="https://{{ candidate2_field_value }}" target="_blank">
             <span class="glyphicon glyphicon-new-window"></span>
           </a>
+        {% elif field_name == 'instagram_handle' %}
+          <a href="https://instagram.com/{{ candidate2_field_value }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+          </a>&nbsp;
         {% endif %}
       </td>
     {% else %}
       <td>
+        {% if candidate1_field_value and candidate2_field_value %}
+          {% if conflict_status == "CANDIDATE1" or conflict_status == "CANDIDATE2" %}
+        <input type="radio"
+               name="{{ field_name }}_choice"
+               value="{{ candidate1.we_vote_id }}"
+               {% if conflict_status == "CANDIDATE1" %}checked{% endif %} />
+          {% endif %}
+        {% endif %}
         {% if 'http' in candidate1_field_value %}
           <a href="{{ candidate1_field_value }}" target="_blank">
             {% if conflict_status == "CANDIDATE1" %}
@@ -52,10 +68,25 @@
           {% else %}
             {{ candidate1_field_value|default_if_none:"" }}
           {% endif %}
+          {% if candidate1_field_value %}
+            {% if field_name == 'instagram_handle' %}
+          <a href="https://instagram.com/{{ candidate1_field_value }}" target="_blank">
+            <span class="glyphicon glyphicon-new-window"></span>
+          </a>&nbsp;
+            {% endif %}
+          {% endif %}
         {% endif %}
         &nbsp;&nbsp;
       </td>
       <td>
+        {% if candidate1_field_value and candidate2_field_value %}
+          {% if conflict_status == "CANDIDATE1" or conflict_status == "CANDIDATE2" %}
+        <input type="radio"
+               name="{{ field_name }}_choice"
+               value="{{ candidate2.we_vote_id }}"
+               {% if conflict_status == "CANDIDATE2" %}checked{% endif %} />
+          {% endif %}
+        {% endif %}
         {% if 'http' in candidate2_field_value %}
           <a href="{{ candidate2_field_value }}" target="_blank">
             {% if conflict_status == "CANDIDATE2" %}
@@ -70,6 +101,13 @@
             <strong>{{ candidate2_field_value|default_if_none:"" }}</strong>
           {% else %}
             {{ candidate2_field_value|default_if_none:"" }}
+          {% endif %}
+        {% endif %}
+        {% if field_name == 'instagram_handle' %}
+          {% if candidate2_field_value %}
+        <a href="https://instagram.com/{{ candidate2_field_value }}" target="_blank">
+          <span class="glyphicon glyphicon-new-window"></span>
+        </a>&nbsp;
           {% endif %}
         {% endif %}
       </td>

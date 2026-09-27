@@ -110,6 +110,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'photo_url_from_vote_usa',
     'politician_id',
     'politician_we_vote_id',
+    'profile_image_currently_active',
     'profile_image_type_currently_active',
     'state_code',
     'twitter_description',

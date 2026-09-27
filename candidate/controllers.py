@@ -31,6 +31,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     convert_to_int, convert_to_political_party_constant, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, extract_website_from_url, \
     is_url_valid, MIDDLE_INITIAL_WITH_PERIOD_SUBSTRINGS, MIDDLE_INITIAL_WITHOUT_PERIOD_SUBSTRINGS, \
+    normalize_facebook_for_comparison, \
     normalize_sms_phone_number_for_voter_update, positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
@@ -412,7 +413,7 @@ def normalize_candidate_url_for_comparison(incoming_url):
     if not incoming_url.startswith('https://'):
         incoming_url = 'https://' + incoming_url
     if incoming_url.startswith('https://www.'):
-        incoming_url = 'https://' + incoming_url[11:]
+        incoming_url = incoming_url.replace('https://www.', 'https://', 1)
     if incoming_url.endswith('/'):
         incoming_url = incoming_url[:-1]
     return incoming_url
@@ -434,7 +435,6 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                 if attribute == "ballotpedia_candidate_url" \
                         or attribute == "candidate_contact_form_url" \
                         or attribute == "candidate_instagram_form_url" \
-                        or attribute == "facebook_url" \
                         or attribute == "linkedin_url" \
                         or attribute == "youtube_url":
                     # If there is a link with 'http' in candidate 2, and candidate 1 doesn't have 'http',
@@ -496,7 +496,9 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         if positive_value_exists(candidate2_attribute_value) else 0
                     if positive_value_exists(candidate1_attribute_value_integer) \
                             and positive_value_exists(candidate2_attribute_value_integer):
-                        if candidate1_attribute_value_integer >= candidate2_attribute_value_integer:
+                        if candidate1_attribute_value_integer == candidate2_attribute_value_integer:
+                            candidate_merge_conflict_values[attribute] = 'MATCHING'
+                        elif candidate1_attribute_value_integer > candidate2_attribute_value_integer:
                             candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
                         elif candidate2_attribute_value_integer > candidate1_attribute_value_integer:
                             candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
@@ -531,8 +533,25 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                             candidate_merge_conflict_values[attribute] = preferred_name_identifier(candidate1, candidate2)
                         else:
                             candidate_merge_conflict_values[attribute] = 'CONFLICT'
-                elif attribute == "state_code":
-                    if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                elif attribute == "facebook_url":
+                    # Take both urls and normalize them
+                    candidate1_attribute_value_modified = normalize_facebook_for_comparison(candidate1_attribute_value)
+                    candidate2_attribute_value_modified = normalize_facebook_for_comparison(candidate2_attribute_value)
+                    if candidate1_attribute_value_modified.lower() == candidate2_attribute_value_modified.lower():
+                        if 'http' in candidate2_attribute_value and 'http' not in candidate1_attribute_value:
+                            candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                        elif 'http' in candidate1_attribute_value and 'http' not in candidate2_attribute_value:
+                            candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                        else:
+                            candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "instagram_handle":
+                    candidate1_attribute_value_modified = \
+                        extract_instagram_handle_from_text_string(candidate1_attribute_value)
+                    candidate2_attribute_value_modified = \
+                        extract_instagram_handle_from_text_string(candidate2_attribute_value)
+                    if candidate1_attribute_value_modified == candidate2_attribute_value_modified:
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
@@ -549,6 +568,11 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     elif candidate2_attribute_value == 'UNKNOWN':
                         candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "state_code":
+                    if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "withdrawn_from_election":
@@ -693,6 +717,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
                 or attribute == "candidate_url" \
                 or attribute == "facebook_url" \
                 or attribute == "facebook_profile_image_url_https" \
+                or attribute == "linkedin_url" \
                 or attribute == "maplight_id" \
                 or attribute == "other_source_photo_url" \
                 or attribute == "profile_image_type_currently_active" \
