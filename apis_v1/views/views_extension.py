@@ -80,7 +80,7 @@ def process_pdf_to_html(pdf_url, return_version):
     output_from_subprocess = 'exception occurred before output was captured'
     status = ''
     success = False
-    logger.error('entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
+    logger.error('entry to process_pdf_to_html: ' + pdf_url + '   ' + str(return_version))
 
     # Version report, only used to debug connectivity to the Tika server
     if return_version:
