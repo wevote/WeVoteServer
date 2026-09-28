@@ -2332,7 +2332,8 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
         update_values = {
             'politician_id': politician_id,
         }
-        results = candidate_manager.update_candidate_row_entry(candidate.we_vote_id, update_values)
+        results = candidate_manager.update_candidate_row_entry(
+            candidate.we_vote_id, update_values, candidate_object=candidate)
         candidate = results['updated_candidate']
 
     results = {
