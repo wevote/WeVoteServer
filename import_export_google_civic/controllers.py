@@ -246,6 +246,7 @@ def groom_and_store_google_civic_ballot_json_2021(
         polling_location_we_vote_id='',
         election_day_text='',
         voter_id=0,
+        changed_candidate_we_vote_id_list=[],
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
         existing_candidate_to_office_links_dict={},
@@ -288,6 +289,7 @@ def groom_and_store_google_civic_ballot_json_2021(
             'status':                                   status,
             'google_civic_election_id':                 google_civic_election_id,
             'ballot_item_dict_list':                    ballot_item_dict_list,
+            'changed_candidate_we_vote_id_list':        changed_candidate_we_vote_id_list,
             'existing_offices_by_election_dict':        existing_offices_by_election_dict,
             'existing_candidate_objects_dict':          existing_candidate_objects_dict,
             'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
@@ -423,6 +425,7 @@ def groom_and_store_google_civic_ballot_json_2021(
                         voter_id=voter_id,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         ballot_item_dict_list=ballot_item_dict_list,
+                        changed_candidate_we_vote_id_list=changed_candidate_we_vote_id_list,
                         existing_candidate_objects_dict=existing_candidate_objects_dict,
                         existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                         existing_offices_by_election_dict=existing_offices_by_election_dict,
@@ -432,6 +435,7 @@ def groom_and_store_google_civic_ballot_json_2021(
                         use_vote_usa=use_vote_usa,
                         update_or_create_rules=update_or_create_rules,
                     )
+                    changed_candidate_we_vote_id_list = process_contest_results['changed_candidate_we_vote_id_list']
                     existing_candidate_objects_dict = process_contest_results['existing_candidate_objects_dict']
                     existing_candidate_to_office_links_dict = \
                         process_contest_results['existing_candidate_to_office_links_dict']
@@ -441,6 +445,11 @@ def groom_and_store_google_civic_ballot_json_2021(
                     ballot_item_dict_list = process_contest_results['ballot_item_dict_list']
                 except Exception as e:
                     status += "OFFICE_FAIL: " + str(e) + ' '
+        # Now that we have brought in all the candidates, we want to refresh the politician records
+        if len(changed_candidate_we_vote_id_list) > 0:
+            # TODO Deal with updating politicians
+            # existing_candidate_objects_dict
+            pass
     else:
         status += "NO_CONTESTS_IN_JSON "
     results = {
@@ -468,6 +477,7 @@ def groom_and_store_google_civic_candidates_json_2021(
         contest_office_we_vote_id='',
         contest_office_name='',
         election_year_integer=0,
+        changed_candidate_we_vote_id_list=[],
         existing_candidate_objects_dict={},
         existing_candidate_to_office_links_dict={},
         new_candidate_we_vote_ids_list=[],
@@ -500,7 +510,10 @@ def groom_and_store_google_civic_candidates_json_2021(
     candidate_manager = CandidateManager()
     for one_candidate in candidates_structured_json:
         # Reset
+        candidate = None
+        candidate_found = False
         candidate_we_vote_id = ''
+        new_candidate_created = False
 
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
@@ -644,11 +657,12 @@ def groom_and_store_google_civic_candidates_json_2021(
                 candidate_results = candidate_manager.retrieve_candidate(
                     candidate_ctcl_uuid=candidate_ctcl_uuid,
                     candidate_year=election_year_integer,
-                    read_only=True
+                    read_only=False
                 )
                 if candidate_results['candidate_found']:
                     continue_searching_for_candidate = False
                     candidate = candidate_results['candidate']
+                    candidate_found = True
                     candidate_we_vote_id = candidate.we_vote_id
                     if candidate_ctcl_uuid not in existing_candidate_objects_dict:
                         existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
@@ -706,14 +720,15 @@ def groom_and_store_google_civic_candidates_json_2021(
                 elif candidate_results['candidate_found']:
                     continue_searching_for_candidate = False
                     candidate = candidate_results['candidate']
+                    candidate_found = True
                     candidate_we_vote_id = candidate.we_vote_id
-                    if positive_value_exists(candidate.photo_url_from_vote_usa) \
-                            and not positive_value_exists(candidate.vote_usa_profile_image_url_https):
-                        from import_export_vote_usa.controllers import \
-                            retrieve_and_store_vote_usa_candidate_photo
-                        results = retrieve_and_store_vote_usa_candidate_photo(candidate)
-                        if results['success']:
-                            candidate = results['candidate']
+                    # if positive_value_exists(candidate.photo_url_from_vote_usa) \
+                    #         and not positive_value_exists(candidate.vote_usa_profile_image_url_https):
+                    #     from import_export_vote_usa.controllers import \
+                    #         retrieve_and_store_vote_usa_candidate_photo
+                    #     results = retrieve_and_store_vote_usa_candidate_photo(candidate)
+                    #     if results['success']:
+                    #         candidate = results['candidate']
                     existing_candidate_objects_dict[vote_usa_politician_id] = candidate
                     # In the future, we will want to look for updated data to save
                 elif candidate_results['MultipleObjectsReturned']:
@@ -751,6 +766,7 @@ def groom_and_store_google_civic_candidates_json_2021(
             elif results['candidate_found']:
                 continue_searching_for_candidate = False
                 candidate = results['candidate']
+                candidate_found = True
                 candidate_we_vote_id = candidate.we_vote_id
                 if use_ctcl:
                     if positive_value_exists(candidate_ctcl_uuid):
@@ -825,8 +841,10 @@ def groom_and_store_google_civic_candidates_json_2021(
         proceed_to_create_candidate = positive_value_exists(create_candidate) and allowed_to_create_candidates
         allowed_to_update_candidates = 'update_candidates' in update_or_create_rules and positive_value_exists(
             update_or_create_rules['update_candidates'])
-        proceed_to_update_candidates = allowed_to_update_candidates
-        if proceed_to_create_candidate or proceed_to_update_candidates:
+        allowed_to_reset_photos = 'reset_photos_on_update' in update_or_create_rules and positive_value_exists(
+            update_or_create_rules['reset_photos_on_update'])
+        proceed_to_update_candidate = allowed_to_update_candidates
+        if proceed_to_create_candidate or proceed_to_update_candidate:
             if google_civic_election_id and contest_office_id and candidate_name:
                 # NOT using " and office_ocd_division_id"
 
@@ -848,13 +866,13 @@ def groom_and_store_google_civic_candidates_json_2021(
                     # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                     #  updating candidate_name via subsequent Google Civic imports
                     updated_candidate_values['candidate_name'] = candidate_name
-                    # We store the literal spelling here, so we can match in future, even if we change candidate_name
-                    updated_candidate_values['google_civic_candidate_name'] = candidate_name
+                    # TODO: We store the literal spelling here, so we can match in future, even if we change candidate_name
+                    # updated_candidate_values['google_civic_candidate_name'] = candidate_name
                 if positive_value_exists(election_year_integer):
                     updated_candidate_values['candidate_year'] = election_year_integer
                 if positive_value_exists(candidate_contact_form_url):
                     updated_candidate_values['candidate_contact_form_url'] = candidate_contact_form_url
-                if positive_value_exists(instagram_handle):
+                if positive_value_exists(instagram_handle):  # TODO filter this?
                     updated_candidate_values['instagram_handle'] = instagram_handle
                 if positive_value_exists(candidate_email):
                     updated_candidate_values['candidate_email'] = candidate_email
@@ -914,18 +932,19 @@ def groom_and_store_google_civic_candidates_json_2021(
                 if positive_value_exists(youtube_url):
                     updated_candidate_values['youtube_url'] = youtube_url
 
-                candidate = None
-                candidate_we_vote_id = ''
-
                 if positive_value_exists(proceed_to_create_candidate):
                     # If here we only want to create new candidates -- not update existing candidates
                     # These parameters are required to create a CandidateCampaign
                     if positive_value_exists(google_civic_election_id) and positive_value_exists(candidate_name):
+                        # 2026-09-27 Note that this create_candidate_row_entry doesn't create alternate names like the
+                        #  update_or_create_candidate function does.
                         candidate_results = candidate_manager.create_candidate_row_entry(updated_candidate_values)
                         new_candidate_created = candidate_results['new_candidate_created']
                         if positive_value_exists(new_candidate_created):
                             candidate = candidate_results['new_candidate']
                             candidate_we_vote_id = candidate.we_vote_id
+                            if candidate_we_vote_id not in changed_candidate_we_vote_id_list:
+                                changed_candidate_we_vote_id_list.append(candidate_we_vote_id)
                             if candidate_we_vote_id not in new_candidate_we_vote_ids_list:
                                 new_candidate_we_vote_ids_list.append(candidate_we_vote_id)
                             if positive_value_exists(use_ctcl):
@@ -947,22 +966,22 @@ def groom_and_store_google_civic_candidates_json_2021(
                                     if candidate_results['success']:
                                         candidate = candidate_results['candidate']
                                 existing_candidate_objects_dict[candidate_we_vote_id] = candidate
-                else:
-                    candidate_results = candidate_manager.update_or_create_candidate(
-                        google_civic_election_id=google_civic_election_id,
-                        ocd_division_id=office_ocd_division_id,
-                        contest_office_id=contest_office_id,
-                        contest_office_we_vote_id=contest_office_we_vote_id,
-                        google_civic_candidate_name=google_civic_candidate_name,
-                        updated_candidate_values=updated_candidate_values)
-                    candidate_found = candidate_results['candidate_found']
-                    if positive_value_exists(candidate_found):
-                        candidate = candidate_results['candidate']
-                        candidate_we_vote_id = candidate.we_vote_id
-                    if positive_value_exists(use_ctcl):
-                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
-                    elif positive_value_exists(use_vote_usa):
-                        existing_candidate_objects_dict[vote_usa_politician_id] = candidate
+                elif positive_value_exists(proceed_to_update_candidate):
+                    if positive_value_exists(candidate_we_vote_id):
+                        candidate_results = candidate_manager.update_candidate_row_entry(
+                            candidate_we_vote_id, updated_candidate_values, candidate_object=candidate)
+                        candidate_found = candidate_results['candidate_found']
+                        candidate_updated = candidate_results['candidate_updated']
+                        if positive_value_exists(candidate_found):
+                            candidate = candidate_results['candidate']
+                            candidate_we_vote_id = candidate.we_vote_id
+                        if positive_value_exists(use_ctcl):
+                            existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
+                        elif positive_value_exists(use_vote_usa):
+                            existing_candidate_objects_dict[vote_usa_politician_id] = candidate
+                        if candidate_updated:
+                            if candidate_we_vote_id not in changed_candidate_we_vote_id_list:
+                                changed_candidate_we_vote_id_list.append(candidate_we_vote_id)
 
         if positive_value_exists(candidate_we_vote_id):
             # Now make sure we have a CandidateToOfficeLink
@@ -986,9 +1005,33 @@ def groom_and_store_google_civic_candidates_json_2021(
                     )
                     existing_candidate_to_office_links_dict = results['existing_candidate_to_office_links_dict']
 
+            # Now update the photo
+            refresh_photo_if_in_create_mode = (proceed_to_create_candidate and new_candidate_created
+                and not positive_value_exists(candidate.vote_usa_profile_image_url_https))
+            refresh_photo_if_in_update_mode = \
+                proceed_to_update_candidate and candidate_found and allowed_to_reset_photos
+            if refresh_photo_if_in_create_mode or refresh_photo_if_in_update_mode:
+                if positive_value_exists(use_ctcl) and positive_value_exists(photo_url_from_ctcl):
+                    pass
+                elif positive_value_exists(use_vote_usa) and positive_value_exists(candidate.photo_url_from_vote_usa):
+                    from import_export_vote_usa.controllers import retrieve_and_store_vote_usa_candidate_photo
+                    results = retrieve_and_store_vote_usa_candidate_photo(candidate)
+                    if results['success']:
+                        candidate = results['candidate']
+                        if positive_value_exists(candidate.vote_usa_politician_id):
+                            existing_candidate_objects_dict[candidate.vote_usa_politician_id] = candidate
+                        if positive_value_exists(candidate.we_vote_id):
+                            if candidate.we_vote_id not in changed_candidate_we_vote_id_list:
+                                changed_candidate_we_vote_id_list.append(candidate.we_vote_id)
+                    else:
+                        status += results['status']
+                else:
+                    pass
+
     results = {
         'status':                           status,
         'success':                          success,
+        'changed_candidate_we_vote_id_list': changed_candidate_we_vote_id_list,
         'existing_candidate_objects_dict':  existing_candidate_objects_dict,
         'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
         'new_candidate_we_vote_ids_list':   new_candidate_we_vote_ids_list,
@@ -1284,6 +1327,7 @@ def groom_and_store_google_civic_office_json_2021(
         voter_id=0,
         polling_location_we_vote_id='',
         ballot_item_dict_list=[],
+        changed_candidate_we_vote_id_list=[],
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
         existing_candidate_to_office_links_dict={},
@@ -1312,6 +1356,7 @@ def groom_and_store_google_civic_office_json_2021(
             'updated': 0,
             'not_processed': 1,
             'ballot_item_dict_list': ballot_item_dict_list,
+            'changed_candidate_we_vote_id_list': changed_candidate_we_vote_id_list,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
             'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -1437,6 +1482,10 @@ def groom_and_store_google_civic_office_json_2021(
         'create_offices' in update_or_create_rules and positive_value_exists(update_or_create_rules['create_offices'])
     allowed_to_update_offices = \
         'update_offices' in update_or_create_rules and positive_value_exists(update_or_create_rules['update_offices'])
+    # Not currently used here:
+    # allowed_to_reset_photos = \
+    #     'reset_photos_on_update' in update_or_create_rules and \
+    #     positive_value_exists(update_or_create_rules['reset_photos_on_update'])
 
     candidates_structured_json = one_contest_json['candidates'] if 'candidates' in one_contest_json else ''
 
@@ -1536,6 +1585,7 @@ def groom_and_store_google_civic_office_json_2021(
                     'updated': 0,
                     'not_processed': 1,
                     'ballot_item_dict_list': ballot_item_dict_list,
+                    'changed_candidate_we_vote_id_list': changed_candidate_we_vote_id_list,
                     'existing_offices_by_election_dict': existing_offices_by_election_dict,
                     'existing_candidate_objects_dict': existing_candidate_objects_dict,
                     'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -1702,6 +1752,7 @@ def groom_and_store_google_civic_office_json_2021(
                 'updated': 0,
                 'not_processed': 1,
                 'ballot_item_dict_list': ballot_item_dict_list,
+                'changed_candidate_we_vote_id_list': changed_candidate_we_vote_id_list,
                 'existing_offices_by_election_dict': existing_offices_by_election_dict,
                 'existing_candidate_objects_dict': existing_candidate_objects_dict,
                 'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
@@ -1741,6 +1792,7 @@ def groom_and_store_google_civic_office_json_2021(
                 contest_office_we_vote_id=contest_office_we_vote_id,
                 contest_office_name=office_name,
                 election_year_integer=election_year_integer,
+                changed_candidate_we_vote_id_list=changed_candidate_we_vote_id_list,
                 existing_candidate_objects_dict=existing_candidate_objects_dict,
                 existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
                 new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
@@ -1748,6 +1800,7 @@ def groom_and_store_google_civic_office_json_2021(
                 use_ctcl=use_ctcl,
                 use_vote_usa=use_vote_usa,
                 vote_usa_office_id=vote_usa_office_id)
+            changed_candidate_we_vote_id_list = candidates_results['changed_candidate_we_vote_id_list']
             existing_candidate_objects_dict = candidates_results['existing_candidate_objects_dict']
             existing_candidate_to_office_links_dict = candidates_results['existing_candidate_to_office_links_dict']
             new_candidate_we_vote_ids_list = candidates_results['new_candidate_we_vote_ids_list']
@@ -1758,6 +1811,7 @@ def groom_and_store_google_civic_office_json_2021(
         'success':                          success,
         'status':                           status,
         'ballot_item_dict_list':            ballot_item_dict_list,
+        'changed_candidate_we_vote_id_list': changed_candidate_we_vote_id_list,
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_candidate_objects_dict':  existing_candidate_objects_dict,
         'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,

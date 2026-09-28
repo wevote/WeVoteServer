@@ -46,6 +46,7 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
         candidate_we_vote_id=candidate.we_vote_id,
         photo_url_from_vote_usa=candidate.photo_url_from_vote_usa,
         image_source=IMAGE_SOURCE_VOTE_USA)
+    status += cache_results['status']
     vote_usa_profile_image_url_https = cache_results['cached_vote_usa_profile_image_url_https']
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
@@ -65,10 +66,10 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
 
     try:
         candidate.save()
-        status += "CANDIDATE_SAVED "
+        status += "STORE_PHOTO_CANDIDATE_SAVED "
     except Exception as e:
         success = False
-        status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+        status += "STORE_PHOTO_CANDIDATE_NOT_SAVED: " + str(e) + " "
 
     results = {
         'success': success,
@@ -218,6 +219,7 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
                 'create_candidates': True,
                 'create_offices': True,
                 'create_measures': True,
+                'reset_photos_on_update': False,
                 'update_candidates': False,
                 'update_offices': False,
                 'update_measures': False,
@@ -377,6 +379,8 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
     if 'create_measures' not in update_or_create_rules:
         update_or_create_rules['create_measures'] = True
     # Update rules
+    if 'reset_photos_on_update' not in update_or_create_rules:
+        update_or_create_rules['reset_photos_on_update'] = False
     if 'update_offices' not in update_or_create_rules:
         update_or_create_rules['update_offices'] = False
     if 'update_candidates' not in update_or_create_rules:

@@ -3688,7 +3688,8 @@ class CandidateManager(models.Manager):
             contest_office_id=0,
             contest_office_we_vote_id='',
             google_civic_candidate_name='',
-            updated_candidate_values={}):
+            updated_candidate_values={},
+    ):
         """
         Either update or create a candidate entry.
         """
@@ -4942,7 +4943,7 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_candidate_row_entry(self, candidate_we_vote_id, update_values):
+    def update_candidate_row_entry(self, candidate_we_vote_id, update_values, candidate_object=None):
         """
         Update CandidateCampaign table entry with matching we_vote_id
         :param candidate_we_vote_id:
@@ -4952,134 +4953,204 @@ class CandidateManager(models.Manager):
 
         success = False
         status = ""
+        candidate_found = False
         candidate_updated = False
-        existing_candidate_entry = ''
+        existing_candidate_entry = None
 
         try:
-            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
+            if candidate_object and hasattr(candidate_object, 'we_vote_id'):
+                existing_candidate_entry = candidate_object
+            else:
+                existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
             values_changed = False
 
             if existing_candidate_entry:
-                # found the existing entry, update the values
+                candidate_found = True
+                # found the existing entry, update the values (only when the new value is different)
                 if 'ballotpedia_candidate_id' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_id = \
-                        convert_to_int(update_values['ballotpedia_candidate_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_candidate_id'])
+                    if existing_candidate_entry.ballotpedia_candidate_id != new_value:
+                        existing_candidate_entry.ballotpedia_candidate_id = new_value
+                        values_changed = True
                 if 'ballotpedia_candidate_name' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_name = update_values['ballotpedia_candidate_name']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_candidate_name']
+                    if existing_candidate_entry.ballotpedia_candidate_name != new_value:
+                        existing_candidate_entry.ballotpedia_candidate_name = new_value
+                        values_changed = True
                 if 'ballotpedia_candidate_links_retrieved' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_links_retrieved = update_values['ballotpedia_candidate_links_retrieved']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_candidate_links_retrieved']
+                    if existing_candidate_entry.ballotpedia_candidate_links_retrieved != new_value:
+                        existing_candidate_entry.ballotpedia_candidate_links_retrieved = new_value
+                        values_changed = True
                 if 'ballotpedia_candidate_summary' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_summary = \
-                        update_values['ballotpedia_candidate_summary']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_candidate_summary']
+                    if existing_candidate_entry.ballotpedia_candidate_summary != new_value:
+                        existing_candidate_entry.ballotpedia_candidate_summary = new_value
+                        values_changed = True
                 if 'ballotpedia_candidate_url' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
+                    new_value = update_values['ballotpedia_candidate_url'] \
                         if positive_value_exists(update_values['ballotpedia_candidate_url']) else None
-                    values_changed = True
+                    if existing_candidate_entry.ballotpedia_candidate_url != new_value:
+                        existing_candidate_entry.ballotpedia_candidate_url = new_value
+                        values_changed = True
                 if 'ballotpedia_election_id' in update_values:
-                    existing_candidate_entry.ballotpedia_election_id = \
-                        convert_to_int(update_values['ballotpedia_election_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_election_id'])
+                    if existing_candidate_entry.ballotpedia_election_id != new_value:
+                        existing_candidate_entry.ballotpedia_election_id = new_value
+                        values_changed = True
                 if 'ballotpedia_image_id' in update_values:
-                    existing_candidate_entry.ballotpedia_image_id = \
-                        convert_to_int(update_values['ballotpedia_image_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_image_id'])
+                    if existing_candidate_entry.ballotpedia_image_id != new_value:
+                        existing_candidate_entry.ballotpedia_image_id = new_value
+                        values_changed = True
                 if 'ballotpedia_office_id' in update_values:
-                    existing_candidate_entry.ballotpedia_office_id = \
-                        convert_to_int(update_values['ballotpedia_office_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_office_id'])
+                    if existing_candidate_entry.ballotpedia_office_id != new_value:
+                        existing_candidate_entry.ballotpedia_office_id = new_value
+                        values_changed = True
                 if 'ballotpedia_person_id' in update_values:
-                    existing_candidate_entry.ballotpedia_person_id = \
-                        convert_to_int(update_values['ballotpedia_person_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_person_id'])
+                    if existing_candidate_entry.ballotpedia_person_id != new_value:
+                        existing_candidate_entry.ballotpedia_person_id = new_value
+                        values_changed = True
                 if 'ballotpedia_photo_url' in update_values:
-                    existing_candidate_entry.ballotpedia_photo_url = update_values['ballotpedia_photo_url']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_photo_url']
+                    if existing_candidate_entry.ballotpedia_photo_url != new_value:
+                        existing_candidate_entry.ballotpedia_photo_url = new_value
+                        values_changed = True
                 if 'ballotpedia_photo_url_is_broken' in update_values:
-                    existing_candidate_entry.ballotpedia_photo_url_is_broken = \
-                        update_values['ballotpedia_photo_url_is_broken']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_photo_url_is_broken']
+                    if existing_candidate_entry.ballotpedia_photo_url_is_broken != new_value:
+                        existing_candidate_entry.ballotpedia_photo_url_is_broken = new_value
+                        values_changed = True
                 if 'ballotpedia_photo_url_is_placeholder' in update_values:
-                    existing_candidate_entry.ballotpedia_photo_url_is_placeholder = \
-                        update_values['ballotpedia_photo_url_is_placeholder']
-                    values_changed = True
+                    new_value = update_values['ballotpedia_photo_url_is_placeholder']
+                    if existing_candidate_entry.ballotpedia_photo_url_is_placeholder != new_value:
+                        existing_candidate_entry.ballotpedia_photo_url_is_placeholder = new_value
+                        values_changed = True
                 if 'ballotpedia_race_id' in update_values:
-                    existing_candidate_entry.ballotpedia_race_id = \
-                        convert_to_int(update_values['ballotpedia_race_id'])
-                    values_changed = True
+                    new_value = convert_to_int(update_values['ballotpedia_race_id'])
+                    if existing_candidate_entry.ballotpedia_race_id != new_value:
+                        existing_candidate_entry.ballotpedia_race_id = new_value
+                        values_changed = True
                 if 'birth_day_text' in update_values:
-                    existing_candidate_entry.birth_day_text = update_values['birth_day_text']
-                    values_changed = True
+                    new_value = update_values['birth_day_text']
+                    if existing_candidate_entry.birth_day_text != new_value:
+                        existing_candidate_entry.birth_day_text = new_value
+                        values_changed = True
                 if 'candidate_contact_form_url' in update_values:
-                    existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
-                    values_changed = True
+                    new_value = update_values['candidate_contact_form_url']
+                    if existing_candidate_entry.candidate_contact_form_url != new_value:
+                        existing_candidate_entry.candidate_contact_form_url = new_value
+                        values_changed = True
                 if 'candidate_email' in update_values:
-                    existing_candidate_entry.candidate_email = update_values['candidate_email']
-                    values_changed = True
+                    new_value = update_values['candidate_email']
+                    if existing_candidate_entry.candidate_email != new_value:
+                        existing_candidate_entry.candidate_email = new_value
+                        values_changed = True
                 if 'candidate_gender' in update_values:
-                    existing_candidate_entry.candidate_gender = update_values['candidate_gender']
-                    values_changed = True
+                    new_value = update_values['candidate_gender']
+                    if existing_candidate_entry.candidate_gender != new_value:
+                        existing_candidate_entry.candidate_gender = new_value
+                        values_changed = True
                 if 'candidate_is_incumbent' in update_values:
-                    existing_candidate_entry.candidate_is_incumbent = \
-                        positive_value_exists(update_values['candidate_is_incumbent'])
-                    values_changed = True
+                    new_value = positive_value_exists(update_values['candidate_is_incumbent'])
+                    if existing_candidate_entry.candidate_is_incumbent != new_value:
+                        existing_candidate_entry.candidate_is_incumbent = new_value
+                        values_changed = True
                 if 'candidate_is_top_ticket' in update_values:
-                    existing_candidate_entry.is_top_ticket = \
-                        positive_value_exists(update_values['candidate_is_top_ticket'])
-                    values_changed = True
+                    new_value = positive_value_exists(update_values['candidate_is_top_ticket'])
+                    if existing_candidate_entry.is_top_ticket != new_value:
+                        existing_candidate_entry.is_top_ticket = new_value
+                        values_changed = True
                 if 'candidate_name' in update_values:
-                    existing_candidate_entry.candidate_name = update_values['candidate_name']
-                    values_changed = True
+                    new_value = update_values['candidate_name']
+                    if existing_candidate_entry.candidate_name != new_value:
+                        existing_candidate_entry.candidate_name = new_value
+                        values_changed = True
                 if 'candidate_participation_status' in update_values:
-                    existing_candidate_entry.candidate_participation_status = \
-                        update_values['candidate_participation_status']
-                    values_changed = True
+                    new_value = update_values['candidate_participation_status']
+                    if existing_candidate_entry.candidate_participation_status != new_value:
+                        existing_candidate_entry.candidate_participation_status = new_value
+                        values_changed = True
                 if 'candidate_phone' in update_values:
-                    existing_candidate_entry.candidate_phone = update_values['candidate_phone']
-                    values_changed = True
+                    new_value = update_values['candidate_phone']
+                    if existing_candidate_entry.candidate_phone != new_value:
+                        existing_candidate_entry.candidate_phone = new_value
+                        values_changed = True
                 if 'candidate_twitter_handle' in update_values:
-                    existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
-                    values_changed = True
+                    new_value = update_values['candidate_twitter_handle']
+                    if existing_candidate_entry.candidate_twitter_handle != new_value:
+                        existing_candidate_entry.candidate_twitter_handle = new_value
+                        values_changed = True
                 if 'candidate_url' in update_values:
-                    existing_candidate_entry.candidate_url = update_values['candidate_url']
-                    values_changed = True
+                    new_value = update_values['candidate_url']
+                    if existing_candidate_entry.candidate_url != new_value:
+                        existing_candidate_entry.candidate_url = new_value
+                        values_changed = True
                 if 'contest_office_we_vote_id' in update_values:
-                    existing_candidate_entry.contest_office_we_vote_id = update_values['contest_office_we_vote_id']
-                    values_changed = True
+                    new_value = update_values['contest_office_we_vote_id']
+                    if existing_candidate_entry.contest_office_we_vote_id != new_value:
+                        existing_candidate_entry.contest_office_we_vote_id = new_value
+                        values_changed = True
                 if 'contest_office_id' in update_values:
-                    existing_candidate_entry.contest_office_id = update_values['contest_office_id']
-                    values_changed = True
+                    new_value = update_values['contest_office_id']
+                    existing_value = existing_candidate_entry.contest_office_id
+                    if (None if existing_value is None else str(existing_value)) != \
+                            (None if new_value is None else str(new_value)):
+                        existing_candidate_entry.contest_office_id = new_value
+                        values_changed = True
                 if 'contest_office_name' in update_values:
-                    existing_candidate_entry.contest_office_name = update_values['contest_office_name']
-                    values_changed = True
+                    new_value = update_values['contest_office_name']
+                    if existing_candidate_entry.contest_office_name != new_value:
+                        existing_candidate_entry.contest_office_name = new_value
+                        values_changed = True
                 if 'crowdpac_candidate_id' in update_values:
-                    existing_candidate_entry.crowdpac_candidate_id = update_values['crowdpac_candidate_id']
-                    values_changed = True
+                    new_value = update_values['crowdpac_candidate_id']
+                    if existing_candidate_entry.crowdpac_candidate_id != new_value:
+                        existing_candidate_entry.crowdpac_candidate_id = new_value
+                        values_changed = True
                 if 'ctcl_uuid' in update_values:
-                    existing_candidate_entry.ctcl_uuid = update_values['ctcl_uuid']
-                    values_changed = True
+                    new_value = update_values['ctcl_uuid']
+                    if existing_candidate_entry.ctcl_uuid != new_value:
+                        existing_candidate_entry.ctcl_uuid = new_value
+                        values_changed = True
                 if 'facebook_url' in update_values:
-                    existing_candidate_entry.facebook_url = update_values['facebook_url']
-                    values_changed = True
+                    new_value = update_values['facebook_url']
+                    if existing_candidate_entry.facebook_url != new_value:
+                        existing_candidate_entry.facebook_url = new_value
+                        values_changed = True
                 if 'google_civic_election_id' in update_values:
-                    existing_candidate_entry.google_civic_election_id = update_values['google_civic_election_id']
-                    values_changed = True
+                    new_value = update_values['google_civic_election_id']
+                    existing_value = existing_candidate_entry.google_civic_election_id
+                    if (None if existing_value is None else str(existing_value)) != \
+                            (None if new_value is None else str(new_value)):
+                        existing_candidate_entry.google_civic_election_id = new_value
+                        values_changed = True
                 if 'instagram_followers_count' in update_values:
-                    existing_candidate_entry.instagram_followers_count = update_values['instagram_followers_count']
-                    values_changed = True
+                    new_value = update_values['instagram_followers_count']
+                    if existing_candidate_entry.instagram_followers_count != new_value:
+                        existing_candidate_entry.instagram_followers_count = new_value
+                        values_changed = True
                 if 'instagram_handle' in update_values:
-                    existing_candidate_entry.instagram_handle = update_values['instagram_handle']
-                    values_changed = True
+                    new_value = update_values['instagram_handle']
+                    if existing_candidate_entry.instagram_handle != new_value:
+                        existing_candidate_entry.instagram_handle = new_value
+                        values_changed = True
                 if 'party' in update_values:
-                    existing_candidate_entry.party = update_values['party']
-                    values_changed = True
+                    new_value = update_values['party']
+                    if existing_candidate_entry.party != new_value:
+                        existing_candidate_entry.party = new_value
+                        values_changed = True
                 if 'politician_id' in update_values:
-                    existing_candidate_entry.politician_id = update_values['politician_id']
-                    values_changed = True
-                if 'photo_url' in update_values:
+                    new_value = update_values['politician_id']
+                    existing_value = existing_candidate_entry.politician_id
+                    if (None if existing_value is None else str(existing_value)) != \
+                            (None if new_value is None else str(new_value)):
+                        existing_candidate_entry.politician_id = new_value
+                        values_changed = True
+                if 'photo_url' in update_values and \
+                        update_values['photo_url'] != existing_candidate_entry.other_source_url:
                     # check if candidate has an existing photo in the CandidateCampaign table
                     if positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_large) and \
                             positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_medium) \
@@ -5088,10 +5159,16 @@ class CandidateManager(models.Manager):
                     else:
                         save_to_candidate_object = True
 
+                    image_values_before = (
+                        existing_candidate_entry.other_source_url,
+                        existing_candidate_entry.other_source_photo_url,
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_large,
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_medium,
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_tiny,
+                    )
                     candidate_results = self.modify_candidate_with_organization_endorsements_image(
                         existing_candidate_entry, update_values['photo_url'], save_to_candidate_object)
                     if candidate_results['success']:
-                        values_changed = True
                         candidate = candidate_results['candidate']
                         existing_candidate_entry.we_vote_hosted_profile_image_url_large = \
                             candidate.we_vote_hosted_profile_image_url_large
@@ -5099,41 +5176,60 @@ class CandidateManager(models.Manager):
                             candidate.we_vote_hosted_profile_image_url_medium
                         existing_candidate_entry.we_vote_hosted_profile_image_url_tiny = \
                             candidate.we_vote_hosted_profile_image_url_tiny
+                        image_values_after = (
+                            existing_candidate_entry.other_source_url,
+                            existing_candidate_entry.other_source_photo_url,
+                            existing_candidate_entry.we_vote_hosted_profile_image_url_large,
+                            existing_candidate_entry.we_vote_hosted_profile_image_url_medium,
+                            existing_candidate_entry.we_vote_hosted_profile_image_url_tiny,
+                        )
+                        if image_values_after != image_values_before:
+                            values_changed = True
                 if 'photo_url_from_ctcl' in update_values:
-                    existing_candidate_entry.photo_url_from_ctcl = update_values['photo_url_from_ctcl']
-                    values_changed = True
+                    new_value = update_values['photo_url_from_ctcl']
+                    if existing_candidate_entry.photo_url_from_ctcl != new_value:
+                        existing_candidate_entry.photo_url_from_ctcl = new_value
+                        values_changed = True
                 if 'photo_url_from_vote_usa' in update_values:
-                    existing_candidate_entry.photo_url_from_vote_usa = update_values['photo_url_from_vote_usa']
-                    values_changed = True
+                    new_value = update_values['photo_url_from_vote_usa']
+                    if existing_candidate_entry.photo_url_from_vote_usa != new_value:
+                        existing_candidate_entry.photo_url_from_vote_usa = new_value
+                        values_changed = True
                 if 'state_code' in update_values:
-                    state_code = update_values['state_code']
-                    if positive_value_exists(state_code):
-                        state_code = state_code.lower()
-                    existing_candidate_entry.state_code = state_code
-                    values_changed = True
+                    new_value = update_values['state_code'].lower() \
+                        if positive_value_exists(update_values['state_code']) else update_values['state_code']
+                    if existing_candidate_entry.state_code != new_value:
+                        existing_candidate_entry.state_code = new_value
+                        values_changed = True
                 if 'vote_usa_office_id' in update_values:
-                    existing_candidate_entry.vote_usa_office_id = update_values['vote_usa_office_id']
-                    values_changed = True
+                    new_value = update_values['vote_usa_office_id']
+                    if existing_candidate_entry.vote_usa_office_id != new_value:
+                        existing_candidate_entry.vote_usa_office_id = new_value
+                        values_changed = True
                 if 'vote_usa_politician_id' in update_values:
-                    existing_candidate_entry.vote_usa_politician_id = update_values['vote_usa_politician_id']
-                    values_changed = True
+                    new_value = update_values['vote_usa_politician_id']
+                    if existing_candidate_entry.vote_usa_politician_id != new_value:
+                        existing_candidate_entry.vote_usa_politician_id = new_value
+                        values_changed = True
                 if 'vote_usa_profile_image_url_https' in update_values:
-                    existing_candidate_entry.vote_usa_profile_image_url_https = (
-                        update_values['vote_usa_profile_image_url_https']
-                    )
-                    values_changed = True
+                    new_value = update_values['vote_usa_profile_image_url_https']
+                    if existing_candidate_entry.vote_usa_profile_image_url_https != new_value:
+                        existing_candidate_entry.vote_usa_profile_image_url_https = new_value
+                        values_changed = True
                 if 'wikipedia_photo_url' in update_values:
-                    existing_candidate_entry.wikipedia_photo_url = update_values['wikipedia_photo_url']
-                    values_changed = True
+                    new_value = update_values['wikipedia_photo_url']
+                    if existing_candidate_entry.wikipedia_photo_url != new_value:
+                        existing_candidate_entry.wikipedia_photo_url = new_value
+                        values_changed = True
                 # if 'wikipedia_photo_url_is_broken' in update_values:
                 #     existing_candidate_entry.wikipedia_photo_url_is_broken = \
                 #         update_values['wikipedia_photo_url_is_broken']
                 #     values_changed = True
                 if 'wikipedia_photo_does_not_exist' in update_values:
-                    existing_candidate_entry.wikipedia_photo_does_not_exist = \
-                        update_values['wikipedia_photo_does_not_exist']
-                    values_changed = True
-
+                    new_value = update_values['wikipedia_photo_does_not_exist']
+                    if existing_candidate_entry.wikipedia_photo_does_not_exist != new_value:
+                        existing_candidate_entry.wikipedia_photo_does_not_exist = new_value
+                        values_changed = True
 
                 # now go ahead and save this entry (update)
                 if values_changed:
@@ -5152,11 +5248,13 @@ class CandidateManager(models.Manager):
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':              success,
-                'status':               status,
-                'candidate_updated':    candidate_updated,
-                'updated_candidate':    existing_candidate_entry,
-            }
+            'success':              success,
+            'status':               status,
+            'candidate':            existing_candidate_entry,
+            'candidate_found':      candidate_found,
+            'candidate_updated':    candidate_updated,
+            'updated_candidate':    existing_candidate_entry,
+        }
         return results
 
     @staticmethod

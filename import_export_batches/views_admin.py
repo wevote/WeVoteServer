@@ -4125,3 +4125,47 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             'batch_process_ballot_item_chunk':  batch_process_ballot_item_chunk,
         }
         return results
+
+
+@login_required
+def retrieve_candidates_from_source_view(request):
+    """
+    :param request:
+    :return:
+    """
+    status = ""
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+    if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
+        update_candidates_results = update_existing_candidates_from_candidates_api(
+            google_civic_election_id=google_civic_election_id,
+            state_code=state_code)
+        if not update_candidates_results['success']:
+            status += 'UPDATE_EXISTING_CANDIDATES_FROM_CANDIDATES_API_FAILED: '
+            status += update_candidates_results.get('status', '')
+
+    messages.add_message(request, messages.INFO, 'status: {status}'.format(status=status))
+
+    return HttpResponseRedirect(
+        reverse('candidate:candidate_list', args=()) +
+        '?google_civic_election_id=' + str(google_civic_election_id) +
+        '&state_code=' + str(state_code)
+        )
