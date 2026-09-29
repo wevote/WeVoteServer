@@ -111,8 +111,8 @@ class SingleUseToken(models.Model):
             expiration_seconds = 300
         elif expiration_seconds < 0:
             raise ValueError("Expiration Seconds must be a positive value.")
-        elif expiration_seconds > 1800:  # 30 minutes
-            raise ValueError("Expiration Seconds must be <= 1800.")
+        # elif expiration_seconds > 3600:  # 30 minutes
+        #     raise ValueError("Expiration Seconds must be <= 3600.")
 
         if json_data is not None:
             json_data = json.dumps(json_data)
