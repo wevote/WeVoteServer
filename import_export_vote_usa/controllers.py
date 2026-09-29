@@ -219,7 +219,7 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
                 'create_candidates': True,
                 'create_offices': True,
                 'create_measures': True,
-                'reset_photos_on_update': False,
+                'reset_photos_on_update': True,
                 'update_candidates': False,
                 'update_offices': False,
                 'update_measures': False,
@@ -380,7 +380,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
         update_or_create_rules['create_measures'] = True
     # Update rules
     if 'reset_photos_on_update' not in update_or_create_rules:
-        update_or_create_rules['reset_photos_on_update'] = False
+        update_or_create_rules['reset_photos_on_update'] = True
     if 'update_offices' not in update_or_create_rules:
         update_or_create_rules['update_offices'] = False
     if 'update_candidates' not in update_or_create_rules:
