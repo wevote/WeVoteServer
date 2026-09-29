@@ -3430,9 +3430,14 @@ class CandidateManager(models.Manager):
                     candidate_to_office_link = candidate_to_office_link_list[0]
                     if positive_value_exists(candidate_to_office_link.candidate_we_vote_id):
                         candidate_manager = CandidateManager()
-                        return candidate_manager.retrieve_candidate_from_we_vote_id(
+                        results = candidate_manager.retrieve_candidate_from_we_vote_id(
                             candidate_to_office_link.candidate_we_vote_id,
                             read_only=read_only)
+                        results['candidate_we_vote_id_to_link'] = candidate_to_office_link.candidate_we_vote_id
+                        results['candidate_to_office_link_missing'] = False
+                        status += results['status']
+                        results['status'] = status
+                        return results
                 else:
                     candidate_found = False
                     candidate_to_office_link_missing = True

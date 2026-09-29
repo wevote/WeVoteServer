@@ -4135,7 +4135,7 @@ def retrieve_candidates_from_source_view(request):
     :param request:
     :return:
     """
-    status = ""
+    status = "STARTING_RETRIEVE_CANDIDATES_FROM_SOURCE "
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
@@ -4162,7 +4162,7 @@ def retrieve_candidates_from_source_view(request):
             state_code=state_code)
         if not update_candidates_results['success']:
             status += 'UPDATE_EXISTING_CANDIDATES_FROM_CANDIDATES_API_FAILED: '
-            status += update_candidates_results.get('status', '')
+        status += update_candidates_results.get('status', '')
 
     messages.add_message(request, messages.INFO, 'status: {status}'.format(status=status))
 

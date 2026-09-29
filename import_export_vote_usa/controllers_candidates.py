@@ -65,18 +65,21 @@ def update_existing_candidates_from_candidates_api(google_civic_election_id=0, s
         
         try:
             structured_json = json.loads(response.text)
+            status += "RESPONSE_FROM_VOTE_USA_RECEIVED "
         except json.JSONDecodeError:
             success = False
             if 'maxJsonLength' in response.text:
                 status += 'VOTE_USA_CANDIDATES_API_RESPONSE_TOO_LARGE_FOR_VOTE_USA_SERVER '
             else:
-                status += 'VOTE_USA_CANDIDATES_API_INVALID_RESPONSE: ' + response.text
+                status += f"VOTE_USA_CANDIDATES_API_INVALID_RESPONSE: {response.text} "
             logger.error(f"VoteUSA API unparsable response: {response.text}")
             results = {'success': success, 'status': status}
             return results
 
         candidates_structured_json = structured_json.get('candidates', [])
-        if not positive_value_exists(candidates_structured_json):
+        if positive_value_exists(candidates_structured_json):
+            status += "CANDIDATES_FOUND_IN_API_RESPONSE-" + str(len(candidates_structured_json)) + " "
+        else:
             status += 'NO_CANDIDATES_FOUND_IN_API_RESPONSE '
             results = {'success': success, 'status': status}
             return results
@@ -135,7 +138,6 @@ def update_existing_candidates_from_candidates_api(google_civic_election_id=0, s
                 status += 'CONTEST_OFFICE_NOT_FOUND_FOR_VOTE_USA_OFFICE_ID: ' + str(raw_vote_usa_office_id) + \
                     ' (' + str(len(office_candidates)) + ' candidates skipped) '
                 continue
-            # Create a different office for each political party primary race
             groom_results = groom_and_store_google_civic_candidates_json_2021(
                 candidates_structured_json=office_candidates,
                 google_civic_election_id=google_civic_election_id,
@@ -154,13 +156,15 @@ def update_existing_candidates_from_candidates_api(google_civic_election_id=0, s
                 use_vote_usa=True,
                 vote_usa_office_id=vote_usa_office_id,
             )
-            if not groom_results['success']:
-                success = False
-                status += 'GROOM_CANDIDATES_FAILED_FOR_OFFICE: ' + str(vote_usa_office_id) + ' '
+            if groom_results['success']:
+                status += '::RESULTS_FOR-' + str(vote_usa_office_id) + ' '
                 status += groom_results['status']
-            else:
                 changed_candidate_we_vote_id_list = groom_results['changed_candidate_we_vote_id_list']
                 existing_candidate_objects_dict = groom_results['existing_candidate_objects_dict']
+            else:
+                success = False
+                status += '||GROOM_CANDIDATES_FAILED_FOR_OFFICE: ' + str(vote_usa_office_id) + ' '
+                status += groom_results['status']
         if len(changed_candidate_we_vote_id_list) > 0:
             results = update_politicians_from_candidate_list(existing_candidate_objects_dict, changed_candidate_we_vote_id_list)
             status += results['status']
