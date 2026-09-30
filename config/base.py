@@ -409,6 +409,7 @@ SOCIAL_AUTH_FACEBOOK_EXTRA_DATA = [
     ('link', 'profile_url'),
 ]
 
+DEFAULT_FROM_EMAIL = get_environment_variable_default("SYSTEM_SENDER_EMAIL_ADDRESS", "info@wevote.us")
 EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
 SENDGRID_SANDBOX_MODE = \
