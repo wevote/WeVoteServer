@@ -1725,17 +1725,24 @@ def candidates_query_for_api(  # candidatesQuery
             success = False
     elif len(search_text) > 0:
         try:
-            results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
+            # Finder needs enough upcoming name matches that a low-Twitter 2026 candidate is not
+            # dropped by numberRequested=100. YEAR path still honors number_requested as given.
+            search_limit = 1000
+            results = candidate_list_manager.retrieve_candidates_for_search_text(
                 search_string=search_text,
+                candidates_limit=search_limit,
+                limit_to_this_state_code=limit_to_this_state_code,
                 return_list_of_objects=True,
                 read_only=True
             )
             success = results['success']
             status = results['status']
             candidate_list = results['candidate_list_objects']
+            candidates_returned_count = results['candidates_returned_count']
+            candidates_total_count = results['candidates_total_count']
 
         except Exception as e:
-            status = 'FAILED retrieve_all_candidates_for_upcoming_election. ' \
+            status = 'FAILED retrieve_candidates_for_search_text. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             handle_exception(e, logger=logger, exception_message=status)
             success = False
