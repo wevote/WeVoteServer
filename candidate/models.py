@@ -53,6 +53,27 @@ def candidate_party_search_aliases(search_word):
     return CANDIDATE_PARTY_SEARCH_ALIASES.get(search_word.lower(), [search_word])
 
 
+def apply_candidate_search_word_filters(candidate_query, search_words):
+    """AND across words; OR across name, twitter, office, and party fields for each word."""
+    for search_word in search_words:
+        filters = [
+            Q(ballotpedia_candidate_name__icontains=search_word),
+            Q(google_civic_candidate_name__icontains=search_word),
+            Q(candidate_name__icontains=search_word),
+            Q(candidate_twitter_handle__icontains=search_word),
+            Q(candidate_twitter_handle2__icontains=search_word),
+            Q(candidate_twitter_handle3__icontains=search_word),
+            Q(contest_office_name__icontains=search_word),
+            Q(twitter_name__icontains=search_word),
+        ]
+        for party_search_alias in candidate_party_search_aliases(search_word):
+            filters.append(Q(party__icontains=party_search_alias))
+        final_filters = filters.pop()
+        for item in filters:
+            final_filters |= item
+        candidate_query = candidate_query.filter(final_filters)
+    return candidate_query
+
 # When merging candidates, these are the fields we check for figure_out_candidate_conflict_values
 CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
@@ -593,6 +614,117 @@ class CandidateListManager(models.Manager):
             'candidate_list_found':             candidate_list_found,
             'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
             'candidate_list_light':             candidate_list_light,
+        }
+        return results
+
+    def retrieve_candidates_for_search_text(
+            self,
+            search_string='',
+            candidates_limit=300,
+            limit_to_this_state_code='',
+            return_list_of_objects=True,
+            read_only=True):
+        """
+        Election Finder search: upcoming CandidateToOfficeLink matches first, then fill with past name matches.
+        """
+        candidate_list_objects = []
+        candidate_list_found = False
+        candidates_returned_count = 0
+        candidates_total_count = 0
+        status = ""
+        success = True
+        search_words = normalize_candidate_search_words(search_string) if positive_value_exists(search_string) else []
+        if not search_words:
+            status += "CANDIDATE_SEARCH_TEXT_MISSING "
+            return {
+                'success': True,
+                'status': status,
+                'candidate_list_found': False,
+                'candidate_list_objects': [],
+                'candidates_returned_count': 0,
+                'candidates_total_count': 0,
+            }
+
+        search_limit = convert_to_int(candidates_limit)
+        if search_limit <= 0:
+            search_limit = 1000
+
+        election_manager = ElectionManager()
+        upcoming_results = election_manager.retrieve_upcoming_google_civic_election_id_list(
+            limit_to_this_state_code=limit_to_this_state_code)
+        upcoming_google_civic_election_id_list = upcoming_results['upcoming_google_civic_election_id_list']
+        if not positive_value_exists(upcoming_results['success']):
+            status += upcoming_results['status']
+
+        upcoming_candidate_we_vote_id_list = []
+        if len(upcoming_google_civic_election_id_list):
+            try:
+                upcoming_id_integers = [
+                    convert_to_int(election_id) for election_id in upcoming_google_civic_election_id_list
+                ]
+                if positive_value_exists(read_only):
+                    link_query = CandidateToOfficeLink.objects.using('readonly').all()
+                else:
+                    link_query = CandidateToOfficeLink.objects.all()
+                link_query = link_query.filter(google_civic_election_id__in=upcoming_id_integers)
+                if positive_value_exists(limit_to_this_state_code):
+                    link_query = link_query.filter(
+                        Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
+                upcoming_candidate_we_vote_id_list = list(
+                    link_query.exclude(candidate_we_vote_id__isnull=True)
+                    .exclude(candidate_we_vote_id='')
+                    .values_list('candidate_we_vote_id', flat=True)
+                    .distinct()
+                )
+            except Exception as e:
+                status += "FAILED_RETRIEVING_UPCOMING_CANDIDATE_LINKS: " + str(e) + " "
+
+        try:
+            if positive_value_exists(read_only):
+                base_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                base_query = CandidateCampaign.objects.all()
+            search_query = apply_candidate_search_word_filters(base_query, search_words)
+            search_query = search_query.order_by('-is_battleground_race', '-twitter_followers_count')
+
+            upcoming_query = search_query
+            if len(upcoming_candidate_we_vote_id_list):
+                upcoming_query = upcoming_query.filter(we_vote_id__in=upcoming_candidate_we_vote_id_list)
+            else:
+                upcoming_query = upcoming_query.none()
+            upcoming_total_count = upcoming_query.count()
+            upcoming_list = list(upcoming_query[:search_limit])
+
+            past_query = search_query
+            if len(upcoming_candidate_we_vote_id_list):
+                past_query = past_query.exclude(we_vote_id__in=upcoming_candidate_we_vote_id_list)
+            if positive_value_exists(limit_to_this_state_code):
+                past_query = past_query.filter(
+                    Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
+            past_total_count = past_query.count()
+
+            remainder = search_limit - len(upcoming_list)
+            past_list = list(past_query[:remainder]) if remainder > 0 else []
+
+            candidate_list_objects = upcoming_list + past_list
+            candidates_returned_count = len(candidate_list_objects)
+            candidates_total_count = upcoming_total_count + past_total_count
+            candidate_list_found = candidates_returned_count > 0
+            status += 'CANDIDATES_RETRIEVED_SEARCH_UPCOMING_THEN_PAST '
+            if candidates_returned_count < candidates_total_count:
+                status += 'SEARCH_RESULTS_CAPPED '
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED retrieve_candidates_for_search_text ' + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'candidate_list_found':         candidate_list_found,
+            'candidate_list_objects':       candidate_list_objects if return_list_of_objects else [],
+            'candidates_returned_count':    candidates_returned_count,
+            'candidates_total_count':       candidates_total_count,
         }
         return results
 
