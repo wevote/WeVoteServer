@@ -20,6 +20,18 @@
       <strong>State Code:</strong>
       {% if measure.state_code %}{{ measure.state_code|upper }}{% endif %}
     </div>
+{% if measure.ballotpedia_measure_id %}
+    <div>
+      <strong>Ballotpedia ID:</strong>
+      {{ measure.ballotpedia_measure_id }}
+    </div>
+{% endif %}
+{% if measure.vote_usa_measure_id %}
+    <div>
+      <strong>Vote USA ID:</strong>
+      {{ measure.vote_usa_measure_id }}
+    </div>
+{% endif %}
     <div>
       <strong>Measure Title Alternate 1:</strong>
       {% if measure.google_civic_measure_title %}{{ measure.google_civic_measure_title }}{% endif %}
@@ -65,10 +77,19 @@
 
     <p>
       Measure Website:
-      {% if measure.measure_url %}
+    {% if measure.measure_url %}
+      {% if 'http' in candidate2_field_value %}
         <a href="{{ measure.measure_url }}" target="_blank" rel="noopener">
           {{ measure.measure_url }} <span class="glyphicon glyphicon-new-window"></span></a>
+      {% elif 'www.' in measure.measure_url or '.com' in measure.measure_url or '.gov' in measure.measure_url %}
+        <a href="https://{{ measure.measure_url }}" target="_blank">
+          https://{{ measure.measure_url }}
+          <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+      {% else %}
+        {{ measure.measure_url }}
       {% endif %}
+    {% endif %}
       <br />
       <a href="{% url 'position:refresh_positions_with_contest_measure_details_for_election' %}?measure_id={{ measure.id }}&measure_we_vote_id={{ measure.we_vote_id }}">
       Refresh Position Data with Details from Measure</a>
@@ -104,25 +125,34 @@
         <input type="hidden"
                name="google_civic_election_id"
                value="{{ google_civic_election_id }}">
-        <input type="hidden" name="state_code" value="{{ state_code }}">
-        <input type="submit" value="Search for Duplicate Offices" />
+        <input type="hidden" name="state_code" value="{{ measure.state_code }}">
+        <input type="submit" value="Search for Duplicates" />
       </form>
 
       {% if measure_search_results_list %}
-        <table border="1" cellpadding="5" cellspacing="5">
+        <style>
+          .measure-summary-table td, .measure-summary-table th { padding: 5px; }
+        </style>
+        <table border="1" class="measure-summary-table" style="border-spacing: 5px;">
           <tr>
             <td>&nbsp;</td>
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Measure Title</td>
             <td>State</td>
-            <td>Ballotpedia Measure ID</td>
+            <td>Ballotpedia ID</td>
           </tr>
           {% for found_measure in measure_search_results_list %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ found_measure.id }}</td>
-              <td>{{ found_measure.we_vote_id }}</td>
+              <td>
+                {{ found_measure.we_vote_id }}
+                {% if found_measure.measure_year %}
+                <br />
+                  {{ found_measure.measure_year }}
+                {% endif %}
+              </td>
               <td>
                 {{ found_measure.measure_title }}
                 <br />
@@ -136,7 +166,14 @@
             </tr>
           {% endfor %}
         </table>
+      {% elif measure_search %}
+        <div>
+          No measures found with the search term "{{ measure_search }}".
+        </div>
       {% endif %}
+<br />
+<br />
+
 
 
       <h4>We Vote Positions Related to {{ measure.measure_title }}</h4>
