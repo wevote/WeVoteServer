@@ -1168,9 +1168,11 @@ def measure_summary_view(request, measure_id):
 
     measure_search_results_list = []
     if positive_value_exists(measure_search) and positive_value_exists(measure_we_vote_id):
+        this_year = get_current_year_as_integer()
         measure_queryset = ContestMeasure.objects.all()
-        measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+        # measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
         measure_queryset = measure_queryset.exclude(we_vote_id=measure_we_vote_id)
+        measure_queryset = measure_queryset.filter(measure_year=this_year)
 
         if positive_value_exists(state_code):
             measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
@@ -1178,6 +1180,12 @@ def measure_summary_view(request, measure_id):
         search_words = measure_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
+            new_filter = Q(measure_subtitle__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(measure_text__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(measure_title__icontains=one_word)
             filters.append(new_filter)
 
@@ -1202,6 +1210,9 @@ def measure_summary_view(request, measure_id):
             new_filter = Q(google_civic_measure_title5__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(vote_usa_measure_id__icontains=one_word)
+            filters.append(new_filter)
+
             # Add the first query
             if len(filters):
                 final_filters = filters.pop()
@@ -1210,7 +1221,7 @@ def measure_summary_view(request, measure_id):
                 for item in filters:
                     final_filters |= item
 
-                measure_queryset = measure_queryset.filter(final_filters)
+        measure_queryset = measure_queryset.filter(final_filters)
 
         measure_search_results_list = list(measure_queryset)
     elif measure_on_stage_found:
@@ -1240,6 +1251,7 @@ def measure_summary_view(request, measure_id):
             'google_civic_election_id': google_civic_election_id,
             'measure': measure_on_stage,
             'measure_position_list': measure_position_list,
+            'measure_search': measure_search,
             'measure_search_results_list': measure_search_results_list,
             'messages_on_stage': messages_on_stage,
         }
