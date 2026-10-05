@@ -58,7 +58,7 @@ pyasn1==0.6.4
 pyasn1-modules>=0.3.0
 pygeoip==0.3.2
 pyjwkest==1.4.2
-pyjwt==2.13.0
+pyjwt==2.15.0
 pyparsing==3.3.2
 python-dateutil~=2.8.2
 python-magic==0.4.24     # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
