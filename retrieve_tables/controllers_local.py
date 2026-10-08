@@ -289,6 +289,9 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         if table_restore_result.returncode != 0:
             logger.error(f"pg_restore failed: {table_restore_result.stderr}")
 
+        # --- Post-Restore: Fix/re-attach sequence and set max(id) ---
+        reset_table_id_sequence_psycopg2(table_name)
+
         diff_t0 = int((time.time() - global_stats['global_t0']))
         print(f"Restore completed at {diff_t0} seconds", flush=True)
         results['success'] = True
@@ -407,3 +410,42 @@ def fetch_data_from_api(url, params, token_headers, max_retries=1000, timeout=8)
         time.sleep(2 ** attempt)  # Exponential backoff
 
     raise Exception("API request failed after maximum retries")
+
+def reset_table_id_sequence_psycopg2(table_name):
+    """
+    Ensure the restored table's 'id' column has an auto-increment sequence attached
+    and the sequence value is set to max(id).
+    """
+    try:
+        conn = psycopg2.connect(
+            database=get_environment_variable('DATABASE_NAME'),
+            user=get_environment_variable('DATABASE_USER'),
+            password=get_environment_variable('DATABASE_PASSWORD'),
+            host=get_environment_variable('DATABASE_HOST'),
+            port=get_environment_variable('DATABASE_PORT')
+        )
+        conn.autocommit = True
+        cur = conn.cursor()
+
+        # Check if the table has an 'id' column
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = %s AND column_name = 'id';
+        """, (table_name,))
+
+        if cur.fetchone():
+            seq_name = f"{table_name}_id_seq"
+            # 1. Create sequence if missing and attach ownership
+            # 2. Attach default nextval() to the id column
+            # 3. Advance sequence past current max(id)
+            sql = f"""
+                CREATE SEQUENCE IF NOT EXISTS "{seq_name}" OWNED BY "{table_name}".id;
+                ALTER TABLE "{table_name}" ALTER COLUMN id SET DEFAULT nextval('"{seq_name}"');
+                SELECT setval('"{seq_name}"', COALESCE((SELECT MAX(id) FROM "{table_name}"), 0) + 1, false);
+            """
+            cur.execute(sql)
+            print(f"FastLoad: successfully reset id sequence for {table_name}", flush=True)
+    except Exception as e:
+        logger.error(f"Failed to reset id sequence for {table_name}: {str(e)}")
+
