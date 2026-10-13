@@ -33,7 +33,7 @@
   {% endif %}
 
   {% if election_list %}
-    <form action="{% url "ballot:ballot_item_list_edit" ballot_returned_id %}"
+    <form action="{% url 'ballot:ballot_item_list_edit' ballot_returned_id %}"
           method="get"
           class="form-horizontal">
       {% csrf_token %}
@@ -51,7 +51,7 @@
   {% endif %}
   {# End of if election_list #}
 
-  <form action="{% url "ballot:ballot_item_list_edit_process" %}"
+  <form action="{% url 'ballot:ballot_item_list_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

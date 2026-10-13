@@ -16,7 +16,7 @@ from import_export_google_civic.controllers import \
     refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved, \
     voter_ballot_items_retrieve_from_google_civic_for_api
 from measure.models import ContestMeasureListManager
-from office.models import ContestOfficeManager, ContestOfficeListManager
+from office.models import ContestOffice, ContestOfficeManager, ContestOfficeListManager, OfficeExplanation
 from polling_location.models import PollingLocationManager
 from politician.models import Politician
 import pytz
@@ -2962,6 +2962,38 @@ def generate_ballot_item_list_from_object_list(
     contest_office_manager = ContestOfficeManager()
     candidate_list_object = CandidateListManager()
 
+    # Loop through ballot items to get the office_we_vote_id so we can retrieve all offices at once with a single database call
+    office_we_vote_id_to_retrieve_list = []
+    office_explanation_we_vote_id_list = []
+    for ballot_item in ballot_item_object_list:
+        if ballot_item.contest_office_we_vote_id and \
+                ballot_item.contest_office_we_vote_id not in office_we_vote_id_to_retrieve_list:
+            office_we_vote_id_to_retrieve_list.append(ballot_item.contest_office_we_vote_id)
+    office_dict = {}
+    office_explanation_dict = {}
+    if len(office_we_vote_id_to_retrieve_list) > 0:
+        try:
+            queryset = ContestOffice.objects.using('readonly').\
+                filter(we_vote_id__in=office_we_vote_id_to_retrieve_list)
+            office_list = list(queryset)
+            for office in office_list:
+                office_dict[office.we_vote_id] = office
+                if positive_value_exists(office.office_explanation_we_vote_id) and \
+                        office.office_explanation_we_vote_id not in office_explanation_we_vote_id_list:
+                    office_explanation_we_vote_id_list.append(office.office_explanation_we_vote_id)
+        except Exception as e:
+            status += "EXCEPTION_RETRIEVING_OFFICES: " + str(e) + " "
+
+    if len(office_explanation_we_vote_id_list) > 0:
+        try:
+            queryset = OfficeExplanation.objects.using('readonly').\
+                filter(we_vote_id__in=office_explanation_we_vote_id_list)
+            office_explanation_list = list(queryset)
+            for office_explanation in office_explanation_list:
+                office_explanation_dict[office_explanation.we_vote_id] = office_explanation
+        except Exception as e:
+            status += "EXCEPTION_RETRIEVING_OFFICE_EXPLANATIONS: " + str(e) + " "
+
     # Loop through measures to make sure we have full measure data needed
     contest_measure_we_vote_id_list = []
     for ballot_item in ballot_item_object_list:
@@ -3010,24 +3042,47 @@ def generate_ballot_item_list_from_object_list(
     from candidate.controllers import generate_candidate_dict_from_candidate_object
     for ballot_item in ballot_item_object_list:
         if ballot_item.contest_office_we_vote_id:
+            contest_office = None
+            office_found = False
             office_name = ""
             kind_of_ballot_item = OFFICE
+            office_explanation_text = ''
+            office_explanation_we_vote_id = ''
             office_id = ballot_item.contest_office_id
             office_we_vote_id = ballot_item.contest_office_we_vote_id
             primary_party = ""
             race_office_level = ""
             state_code = ballot_item.state_code
+            video_url_horizontal = ''
+            video_url_vertical = ''
             if positive_value_exists(office_we_vote_id):
-                office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
-                    office_we_vote_id, read_only=True)
-                if office_results['contest_office_found']:
-                    contest_office = office_results['contest_office']
-                    office_id = contest_office.id
-                    office_name = contest_office.office_name
-                    primary_party = contest_office.primary_party
-                    race_office_level = contest_office.ballotpedia_race_office_level
-                    state_code = contest_office.state_code \
-                        if positive_value_exists(contest_office.state_code) else state_code
+                if office_we_vote_id in office_dict:
+                    contest_office = office_dict[office_we_vote_id]
+                    office_found = True
+                else:
+                    office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                        office_we_vote_id, read_only=True)
+                    if office_results['contest_office_found']:
+                        contest_office = office_results['contest_office']
+                        office_found = True
+
+            if office_found:
+                office_explanation_we_vote_id = contest_office.office_explanation_we_vote_id
+                office_id = contest_office.id
+                office_name = contest_office.office_name
+                primary_party = contest_office.primary_party
+                race_office_level = contest_office.ballotpedia_race_office_level
+                state_code = contest_office.state_code \
+                    if positive_value_exists(contest_office.state_code) else state_code
+                if positive_value_exists(office_explanation_we_vote_id):
+                    if office_explanation_we_vote_id in office_explanation_dict:
+                        try:
+                            office_explanation = office_explanation_dict[office_explanation_we_vote_id]
+                            office_explanation_text = office_explanation.office_explanation
+                            video_url_horizontal = office_explanation.video_url_horizontal
+                            video_url_vertical = office_explanation.video_url_vertical
+                        except Exception:
+                            pass
             try:
                 results = candidate_list_object.retrieve_all_candidates_for_office(
                     office_we_vote_id=office_we_vote_id, read_only=True)
@@ -3068,9 +3123,12 @@ def generate_ballot_item_list_from_object_list(
                     'id':                           office_id,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'kind_of_ballot_item':          kind_of_ballot_item,
+                    'office_explanation_text':      office_explanation_text,
                     'primary_party':                primary_party,
                     'race_office_level':            race_office_level,
                     'state_code':                   state_code,
+                    'video_url_horizontal':         video_url_horizontal,
+                    'video_url_vertical':           video_url_vertical,
                     'we_vote_id':                   office_we_vote_id,
                     'candidate_list':               candidates_to_display,
                 }

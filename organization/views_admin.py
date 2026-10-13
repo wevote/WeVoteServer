@@ -2644,7 +2644,6 @@ def organization_position_new_view(request, organization_id):
     measure_search = request.GET.get('measure_search', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
     state_code = request.GET.get('state_code', '')
-    print("State Code Retrieved:", state_code)
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # Take in some incoming values
@@ -2751,10 +2750,10 @@ def organization_position_new_view(request, organization_id):
     if all_is_well:
         election_manager = ElectionManager()
         if positive_value_exists(show_all_elections):
-            results = election_manager.retrieve_elections()
+            results = election_manager.retrieve_elections(state_code=state_code)
             election_list = results['election_list']
         else:
-            results = election_manager.retrieve_upcoming_elections()
+            results = election_manager.retrieve_upcoming_elections(state_code=state_code)
             election_list = results['election_list']
             # Make sure we always include the current election in the election_list, even if it is older
             if positive_value_exists(google_civic_election_id):
@@ -3019,7 +3018,7 @@ def organization_position_edit_process_view(request):
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
-    state_code = request.GET.get('state_code', '')
+    state_code = request.POST.get('state_code', '')
     go_back_to_add_new = False
     candidate_we_vote_id = ""
     google_civic_candidate_name = ""
@@ -3308,7 +3307,8 @@ def organization_position_edit_process_view(request):
                             measure_title=contest_measure_on_stage.measure_title))
                 go_back_to_add_new = True
         except Exception as e:
-            pass
+            success = False
+            messages.add_message(request, messages.ERROR, "ERROR saving: {error}".format(error=e))
         # If the position was saved, then update the voter_guide entry
         if success:
             voter_guide_manager = VoterGuideManager()

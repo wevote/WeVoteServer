@@ -14,7 +14,7 @@
     Only select a state if we are moving one state's election from a day where other states are also running an election.
     When a state code is selected, some data cannot be moved.
   </p>
-  <form action="{% url "election:election_migration" %}" method="post">
+  <form action="{% url 'election:election_migration' %}" method="post">
     {% csrf_token %}
 
     <table>

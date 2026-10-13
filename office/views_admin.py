@@ -34,7 +34,8 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     extract_first_name_from_full_name, extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     is_candidate_we_vote_id, is_politician_we_vote_id, positive_value_exists, \
     STATE_CODE_MAP
-from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_we_vote_date_string, \
+    convert_we_vote_date_string_to_date_as_integer
 from django.http import HttpResponse
 import json
 
@@ -2411,20 +2412,21 @@ def office_explanation_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
     
     office_explanation_name = request.POST.get('office_explanation_name', '')
-    office_explanation = request.POST.get('office_explanation', '')
+    office_explanation_description = request.POST.get('office_explanation_description', '')
     office_video_url_horizontal = request.POST.get('video_url_horizontal', '')
     office_video_url_square = request.POST.get('video_url_square', '')
     office_video_url_vertical = request.POST.get('video_url_vertical', '')
+    contest_office_search = request.POST.get('contest_office_search', '')
     we_vote_id = request.POST.get('we_vote_id', '')
 
     office_explanation_found = False
-    office_on_stage = OfficeExplanation()
+    office_explanation = OfficeExplanation()
     error = False
     try:
         if positive_value_exists(we_vote_id):
             office_query = OfficeExplanation.objects.filter(we_vote_id=we_vote_id)
             if len(office_query):
-                office_on_stage = office_query[0]
+                office_explanation = office_query[0]
                 office_explanation_found = True
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'There was an error trying to find this office explanation')
@@ -2433,35 +2435,51 @@ def office_explanation_process_view(request):
     state_code = request.POST.get('state_code', '')
     if request.POST.get('link_contest_offices_submit') == '1':
         selected_ids = request.POST.getlist('selected_contest_office_we_vote_ids')
+
+        if contest_office_search:
+            # Find the contest offices that were being looked at, minus the ones checked.
+            queryset = ContestOffice.objects.filter(
+                Q(office_name__icontains=contest_office_search) |
+                Q(state_code__icontains=contest_office_search) |
+                Q(we_vote_id__icontains=contest_office_search)
+            )
+            queryset = queryset.exclude(we_vote_id__in=selected_ids)
+            queryset = queryset.order_by('office_name', 'state_code')
+            # limit results to same number on office_explanation_edit_view
+            ids_to_clear = list(queryset.values_list('id', flat=True)[:1000])
+            if len(ids_to_clear) > 0:
+                ContestOffice.objects.filter(id__in=ids_to_clear).update(office_explanation_we_vote_id=None)
+
         ContestOffice.objects.filter(we_vote_id__in=selected_ids).update(
             office_explanation_we_vote_id=we_vote_id
         )
-        return HttpResponseRedirect(reverse('office:office_explanation_edit', args=[we_vote_id]))
+        return HttpResponseRedirect(reverse('office:office_explanation_edit', args=[we_vote_id]) + "?contest_office_search=" +
+                                str(contest_office_search))
 
     if not error:
         try:
             if not office_explanation_found:
                 # Create new office explanation
-                office_on_stage = OfficeExplanation(
+                office_explanation = OfficeExplanation(
                     office_explanation_name=office_explanation_name,
-                    office_explanation=office_explanation,
+                    office_explanation=office_explanation_description,
                     video_url_horizontal=office_video_url_horizontal,
                     video_url_square=office_video_url_square,
                     video_url_vertical=office_video_url_vertical,
                     state_code=state_code,
                     we_vote_id=None,
                 )
-                office_on_stage.save()
+                office_explanation.save()
                 messages.add_message(request, messages.INFO, 'Office explanation created.')
             else:
                 # Update existing office explanation
-                office_on_stage.office_explanation_name = office_explanation_name
-                office_on_stage.office_explanation = office_explanation
-                office_on_stage.video_url_horizontal = office_video_url_horizontal
-                office_on_stage.video_url_square = office_video_url_square
-                office_on_stage.video_url_vertical = office_video_url_vertical
-                office_on_stage.state_code = state_code
-                office_on_stage.save()
+                office_explanation.office_explanation_name = office_explanation_name
+                office_explanation.office_explanation = office_explanation_description
+                office_explanation.video_url_horizontal = office_video_url_horizontal
+                office_explanation.video_url_square = office_video_url_square
+                office_explanation.video_url_vertical = office_video_url_vertical
+                office_explanation.state_code = state_code
+                office_explanation.save()
                 messages.add_message(request, messages.INFO, 'Office explanation updated.')
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not save office explanation -- exception: ' + str(e))
@@ -2511,15 +2529,53 @@ def office_explanation_edit_view(request, we_vote_id):
     state_codes = STATE_CODE_MAP.keys()
     state_codes = sorted(state_codes)
 
-    search_term = request.GET.get("contest_office_search", "").strip()
+    contest_office_search = request.GET.get("contest_office_search", "").strip()
     contest_office_list = []
 
-    if search_term:
-        contest_office_list = ContestOffice.objects.filter(
-            Q(office_name__icontains=search_term) |
-            Q(state_code__icontains=search_term) |
-            Q(we_vote_id__icontains=search_term)
-        )[:50]  # limit results
+    if contest_office_search:
+        queryset = ContestOffice.objects.filter(
+            Q(office_name__icontains=contest_office_search) |
+            Q(state_code__icontains=contest_office_search) |
+            Q(we_vote_id__icontains=contest_office_search)
+        )
+        queryset = queryset.order_by('office_name', 'state_code')
+        queryset = queryset[:1000]  # limit results
+        contest_office_list = list(queryset)
+
+        # Cycle through contest_office_list and make date easier to read
+        contest_office_list_modified = []
+        for contest_office in contest_office_list:
+            if positive_value_exists(contest_office.election_date_as_integer):
+                try:
+                    as_date = convert_date_as_integer_to_date(contest_office.election_date_as_integer)
+                    contest_office.election_date = convert_date_to_we_vote_date_string(as_date)
+                except Exception:
+                    contest_office.election_date = contest_office.election_date_as_integer
+            else:
+                contest_office.election_date = contest_office.election_date_as_integer
+            contest_office_list_modified.append(contest_office)
+        contest_office_list = contest_office_list_modified
+    else:
+        queryset = ContestOffice.objects.filter(
+            office_explanation_we_vote_id__iexact=we_vote_id
+        )
+        queryset = queryset.order_by('office_name', 'state_code')
+        queryset = queryset[:1000]  # limit results
+        contest_office_list = list(queryset)
+
+        # Cycle through contest_office_list and make date easier to read
+        contest_office_list_modified = []
+        for contest_office in contest_office_list:
+            if positive_value_exists(contest_office.election_date_as_integer):
+                try:
+                    as_date = convert_date_as_integer_to_date(contest_office.election_date_as_integer)
+                    contest_office.election_date = convert_date_to_we_vote_date_string(as_date)
+                except Exception:
+                    contest_office.election_date = contest_office.election_date_as_integer
+            else:
+                contest_office.election_date = contest_office.election_date_as_integer
+            contest_office_list_modified.append(contest_office)
+        contest_office_list = contest_office_list_modified
 
     if request.POST.get('link_contest_offices_submit') == '1':
         selected_contest_office_ids = request.POST.getlist('selected_contest_office_we_vote_ids')
@@ -2543,11 +2599,11 @@ def office_explanation_edit_view(request, we_vote_id):
         return redirect('office:office_explanation_edit', we_vote_id)
 
     template_values = {
-        'office_explanation': office_explanation,
-        'title':              'Edit Office Explanation',
-        'state_codes':      state_codes,
-        'contest_office_search': search_term,
-        'contest_office_list': contest_office_list,
+        'office_explanation':       office_explanation,
+        'title':                    'Edit Office Explanation',
+        'state_codes':              state_codes,
+        'contest_office_search':    contest_office_search,
+        'contest_office_list':      contest_office_list,
     }
 
     return render(request, 'office/office_explanation_edit.html', template_values)

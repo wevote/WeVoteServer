@@ -29,7 +29,7 @@
   {% endif %}
 
 
-  <form action="{% url "representative:representative_edit_process" %}"
+  <form action="{% url 'representative:representative_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

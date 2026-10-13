@@ -996,7 +996,7 @@ th, td {
   </form>
 
   {% if candidate %}
-    <form action="{% url "candidate:candidate_delete_process" %}"
+    <form action="{% url 'candidate:candidate_delete_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

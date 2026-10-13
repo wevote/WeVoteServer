@@ -14,7 +14,7 @@
   {% load humanize %}
 
   <form id="the_form"
-        action="{% url "voter_guide:voter_guide_create_process" %}"
+        action="{% url 'voter_guide:voter_guide_create_process' %}"
         method="post"
         class="form-horizontal"
         onsubmit="dontSendUnnecessaryFormValues(this)">
@@ -74,7 +74,7 @@
           {% endif %}
           {% if has_suggested_voter_guide_rights and organization.we_vote_id %}
             &nbsp;
-            <a href="{% url "organization:organization_position_list" organization.id %}"
+            <a href="{% url 'organization:organization_position_list' organization.id %}"
                target="_blank"
                class="u-no-break">
               {% if organization.organization_name %}
@@ -152,7 +152,7 @@
             {% endif %}
             <span class="h3">{{ candidate.display_candidate_name }}</span>
             {% if has_suggested_voter_guide_rights and candidate.display_candidate_name and candidate.we_vote_id %}
-              <a href="{% url "candidate:candidate_summary" candidate.id %}"
+              <a href="{% url 'candidate:candidate_summary' candidate.id %}"
                  target="_blank"
                  class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}

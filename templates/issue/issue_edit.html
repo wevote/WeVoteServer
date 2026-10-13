@@ -30,7 +30,7 @@
   {% endif %}
 
 
-  <form action="{% url "issue:issue_edit_process" %}"
+  <form action="{% url 'issue:issue_edit_process' %}"
         method="post"
         class="form-horizontal"
         enctype="multipart/form-data">
@@ -255,7 +255,7 @@
   {% if issue %}
     <br />
     <br />
-    <form action="{% url "issue:issue_delete_process" %}"
+    <form action="{% url 'issue:issue_delete_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

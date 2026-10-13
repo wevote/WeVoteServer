@@ -32,7 +32,7 @@
 
 
 
-    <form action="{% url "organization:organization_edit_listed_campaigns_process" %}"
+    <form action="{% url 'organization:organization_edit_listed_campaigns_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

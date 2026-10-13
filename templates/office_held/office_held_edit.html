@@ -24,7 +24,7 @@
     {% endif %}
   </h1>
 
-  <form action="{% url "office_held:office_held_edit_process" %}"
+  <form action="{% url 'office_held:office_held_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

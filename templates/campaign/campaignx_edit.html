@@ -39,7 +39,7 @@
     <p>This form only allows editing an existing CampaignX.</p>
   {% endif %}
 
-  <form action="{% url "campaign:campaignx_edit_process" %}"
+  <form action="{% url 'campaign:campaignx_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}
@@ -413,7 +413,7 @@
   <p>&nbsp;</p>
 {% endif %}
 
-<form action="{% url "campaign:compare_two_campaigns_for_merge" %}"
+<form action="{% url 'campaign:compare_two_campaigns_for_merge' %}"
       method="get"
       class="form-horizontal"
       target="_blank">
@@ -432,7 +432,7 @@
 {% if campaignx %}
   <br />
   <br />
-  <form action="{% url "campaign:campaignx_delete_process" %}"
+  <form action="{% url 'campaign:campaignx_delete_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

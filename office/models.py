@@ -969,6 +969,56 @@ class ContestOfficeManager(models.Manager):
         return results
 
     @staticmethod
+    def retrieve_office_explanation(
+            contest_office_we_vote_id='',
+            office_explanation_we_vote_id='',
+            read_only=True):
+        office_explanation_found = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        office_explanation = OfficeExplanation()
+        status = ""
+        success = True
+
+        try:
+            # TODO Allow retrieve from contest_office_we_vote_id
+            if positive_value_exists(office_explanation_we_vote_id):
+                if positive_value_exists(read_only):
+                    office_explanation = OfficeExplanation.objects.using('readonly').get(
+                        we_vote_id=office_explanation_we_vote_id)  # Removed __iexact
+                else:
+                    office_explanation = OfficeExplanation.objects.get(
+                        we_vote_id=office_explanation_we_vote_id)  # Removed __iexact
+                office_explanation_we_vote_id = office_explanation.we_vote_id
+                office_explanation_found = True
+                status += "RETRIEVE_OFFICE_EXPLANATION_FOUND_BY_WE_VOTE_ID "
+            else:
+                status += "RETRIEVE_OFFICE_EXPLANATION_SEARCH_INDEX_MISSING "
+                success = False
+        except OfficeExplanation.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            exception_multiple_object_returned = True
+            status += "RETRIEVE_OFFICE_EXPLANATION_MULTIPLE_OBJECTS_RETURNED: " + str(e) + " "
+            success = False
+        except OfficeExplanation.DoesNotExist:
+            exception_does_not_exist = True
+            status += "RETRIEVE_OFFICE_EXPLANATION_NOT_FOUND "
+        except Exception as e:
+            status += "FAILURE_RETRIEVING_OFFICE_EXPLANATION: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'office_explanation_found':         office_explanation_found,
+            'office_explanation_we_vote_id':    office_explanation_we_vote_id,
+            'office_explanation':               office_explanation,
+        }
+        return results
+
+    @staticmethod
     def fetch_contest_office_id_from_we_vote_id(contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return internal/local-to-this-database contest_office_id

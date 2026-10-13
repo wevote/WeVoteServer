@@ -1,5 +1,5 @@
 
-{# templates/office/office_explanation_new.html #}
+{# templates/office/office_explanation_edit.html #}
 {% extends "template_base.html" %}
 {% load static %}
 {% load i18n %}
@@ -37,12 +37,12 @@
     </div>
 
     <div class="form-group">
-      <label for="office_explanation_id" class="col-sm-3 control-label">Office Explanation</label>
+      <label for="office_explanation_description_id" class="col-sm-3 control-label">Office Explanation</label>
       <div class="col-sm-8">
-        <textarea name="office_explanation"
-                  id="office_explanation_id"
+        <textarea name="office_explanation_description"
+                  id="office_explanation_description_id"
                   class="form-control animated"
-                  placeholder="Enter office explanation">{% if office_explanation %}{{ office_explanation.office_explanation|default_if_none:"" }}{% else %}{{ office_explanation_text|default_if_none:"" }}{% endif %}</textarea>
+                  placeholder="Enter office explanation">{% if office_explanation %}{{ office_explanation.office_explanation|default_if_none:"" }}{% else %}{{ office_explanation_description|default_if_none:"" }}{% endif %}</textarea>
       </div>
     </div>
 
@@ -116,7 +116,7 @@
   </form>
 
   {% if office_explanation %}
-    <form action="{% url "office:office_explanation_delete_process" office_explanation.we_vote_id %}"
+    <form action="{% url 'office:office_explanation_delete_process' office_explanation.we_vote_id %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}
@@ -265,63 +265,71 @@
     <div class="form-group">
       <label class="col-sm-3 control-label">&nbsp;</label>
       <div class="col-sm-8">
-
-        {% if contest_office_search %}
-          {% if contest_office_list %}
-            <table class="table table-sm table-hover" style="margin-top: 10px;">
-              <thead>
+        {% if contest_office_list %}
+          <table class="table table-sm table-hover" style="margin-top: 10px;">
+            <thead>
+              <tr>
+                <th style="width: 36px;">
+                  <input type="checkbox"
+                         id="select_all_contest_offices"
+                         aria-label="Select all contest offices"
+                         onclick="document.querySelectorAll('input[name=selected_contest_office_we_vote_ids]').forEach(function(cb){ cb.checked = this.checked; }, this);" />
+                </th>
+                <th colspan="2">Contest Office Name — Election Date</th>
+                <th>State</th>
+                <th>We Vote ID</th>
+                <th>Current Linked OfficeExplanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for contest_office in contest_office_list %}
                 <tr>
-                  <th style="width: 36px;">Select</th>
-                  <th>Contest Office Name</th>
-                  <th>State</th>
-                  <th>We Vote ID</th>
-                  <th>Current Linked OfficeExplanation</th>
+                  <td>
+                    <input
+                      type="checkbox"
+                      name="selected_contest_office_we_vote_ids"
+                      value="{{ contest_office.we_vote_id }}"
+                      aria-label="Select {{ contest_office.office_name }}"
+                      {% if office_explanation.we_vote_id and contest_office.office_explanation_we_vote_id == office_explanation.we_vote_id %}checked{% endif %}
+                    />
+                  </td>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    {{ contest_office.office_name|default:"(no name)" }}
+                    {% if contest_office.election_date %}
+                    <span style="color:darkgray;">
+                    — {{ contest_office.election_date|default:"" }}
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td>{{ contest_office.state_code|default:"" }}</td>
+                  <td>{{ contest_office.we_vote_id|default:"" }}</td>
+                  <td>{{ contest_office.office_explanation_we_vote_id|default:"(none)" }}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {% for contest_office in contest_office_list %}
-                  <tr>
-                    <td>
-                      <input type="checkbox"
-                             name="selected_contest_office_we_vote_ids"
-                             value="{{ contest_office.we_vote_id }}"
-                             aria-label="Select {{ contest_office.office_name }}" />
-                    </td>
-                    <td>{{ contest_office.office_name|default:"(no name)" }}</td>
-                    <td>{{ contest_office.state_code|default:"" }}</td>
-                    <td>{{ contest_office.we_vote_id|default:"" }}</td>
-                    <td>{{ contest_office.office_explanation_we_vote_id|default:"(none)" }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+              {% endfor %}
+            </tbody>
+          </table>
 
-            <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
-              <div>
-                <strong>Link to Office Explanation</strong>
-                <div style="font-size: .9em; opacity: .85;">
-                  Selected contest offices will be updated so their
-                  <code>office_explanation_we_vote_id</code> equals this OfficeExplanation’s <code>we_vote_id</code>.
-                </div>
-              </div>
-
-              <div style="margin-left:auto;">
-                <button type="submit"
-                        class="btn btn-primary"
-                        name="link_contest_offices_submit"
-                        value="1">Save</button>
+          <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
+            <div>
+              <strong>Link to Office Explanation</strong>
+              <div style="font-size: .9em; opacity: .85;">
+                Selected contest offices will be updated so their
+                <code>office_explanation_we_vote_id</code> equals this OfficeExplanation’s <code>we_vote_id</code>.
               </div>
             </div>
 
-          {% else %}
-            <div class="alert alert-warning" style="margin-top: 8px;">No results found. Try a different search term.</div>
-          {% endif %}
-        {% else %}
-          <div style="margin-top: 8px; font-size: .95em;">
-            <em>(Search to find contest offices to link)</em>
+            <div style="margin-left:auto;">
+              <button type="submit"
+                      class="btn btn-primary"
+                      name="link_contest_offices_submit"
+                      value="1">Save</button>
+            </div>
           </div>
-        {% endif %}
 
+        {% else %}
+          <div class="alert alert-warning" style="margin-top: 8px;">No results found. Try a different search term.</div>
+        {% endif %}
       </div>
     </div>
   </form>

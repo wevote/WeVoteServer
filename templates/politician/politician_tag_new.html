@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <a href="{% url "politician:politician_detail" politician_on_stage.id %}">< {{ politician_on_stage.display_full_name }}</a>
+  <a href="{% url 'politician:politician_detail' politician_on_stage.id %}">< {{ politician_on_stage.display_full_name }}</a>
 
   <h1>Add Tags</h1>
   {% if messages_on_stage %}
@@ -21,7 +21,7 @@
   <br />
   Ex/ @FictionalCandidate or #FictionalForMayor or "Fictional Candidate".
 
-  <form action="{% url "politician:politician_tag_new_process" politician_on_stage.id %}"
+  <form action="{% url 'politician:politician_tag_new_process' politician_on_stage.id %}"
         method="post">
     {% csrf_token %}
     <label for="new_tag_id">{{ choice.choice_text }}</label>

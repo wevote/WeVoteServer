@@ -38,7 +38,7 @@
     </p>
   {% endif %}
 
-  <form action="{% url "organization:reserved_domain_edit_process" %}"
+  <form action="{% url 'organization:reserved_domain_edit_process' %}"
         method="post">
     {% csrf_token %}
     <input type="hidden"

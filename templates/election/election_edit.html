@@ -21,7 +21,7 @@
       Create New Election
     {% endif %}
   </h1>
-  <form action="{% url "election:election_edit_process" %}"
+  <form action="{% url 'election:election_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}
@@ -298,7 +298,7 @@
               <td>{{ ballotpedia_election.election_type|default_if_none:"" }}</td>
               <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
               <td>
-                <form action="{% url "election:ballotpedia_election_delete_process" %}"
+                <form action="{% url 'election:ballotpedia_election_delete_process' %}"
                       method="post"
                       class="form-horizontal">
                   {% csrf_token %}
@@ -333,7 +333,7 @@
     <br clear="all" />
     <br />
     <div>
-      <form action="{% url "election:election_delete_process" %}"
+      <form action="{% url 'election:election_delete_process' %}"
             method="post"
             class="form-horizontal">
         {% csrf_token %}
