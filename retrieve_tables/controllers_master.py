@@ -361,6 +361,7 @@ def make_filename_and_command(table_name):
     command_args = ["pg_dump",
                     f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}',
                     f"--table={table_name}",
+                    f"--table={table_name}_id_seq",
                     "--format=c",
                     f"--file={tmp_file_name}",
                     "--disable-triggers"]
