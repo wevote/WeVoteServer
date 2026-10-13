@@ -81,7 +81,7 @@
     <br />
 
     {% if election_list %}
-      <form action="{% url "polling_location:polling_location_summary_by_we_vote_id" polling_location.we_vote_id %}"
+      <form action="{% url 'polling_location:polling_location_summary_by_we_vote_id' polling_location.we_vote_id %}"
             method="get"
             class="form-horizontal">
         {% csrf_token %}

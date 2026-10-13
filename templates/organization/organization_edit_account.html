@@ -22,7 +22,7 @@
 
 
 
-    <form action="{% url "organization:organization_edit_account_process" %}"
+    <form action="{% url 'organization:organization_edit_account_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

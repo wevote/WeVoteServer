@@ -60,7 +60,7 @@
 
   </form>
 
-  <form action="{% url "campaign:supporters_list_process" %}"
+  <form action="{% url 'campaign:supporters_list_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

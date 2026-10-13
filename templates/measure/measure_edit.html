@@ -25,7 +25,7 @@
   {% endif %}
 
 
-  <form action="{% url "measure:measure_edit_process" %}"
+  <form action="{% url 'measure:measure_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}
@@ -337,7 +337,7 @@
   </form>
 
   {% if measure %}
-    <form action="{% url "measure:measure_delete_process" %}"
+    <form action="{% url 'measure:measure_delete_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

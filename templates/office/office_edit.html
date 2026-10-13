@@ -27,7 +27,7 @@
   </h1>
 
   <form id="office_edit_post_form"
-        action="{% url "office:office_edit_process" %}"
+        action="{% url 'office:office_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

@@ -558,7 +558,10 @@ def measure_list_view(request):
         results = election_manager.retrieve_elections()
         election_list = results['election_list']
     else:
-        results = election_manager.retrieve_upcoming_elections()
+        if positive_value_exists(state_code):
+            results = election_manager.retrieve_upcoming_elections(state_code=state_code)
+        else:
+            results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
         # Make sure we always include the current election in the election_list, even if it is older
         if positive_value_exists(google_civic_election_id):
@@ -663,13 +666,11 @@ def measure_list_view(request):
         state_name_modified = one_state_name
         if positive_value_exists(count_result['measure_count']):
             state_name_modified += " - " + str(count_result['measure_count'])
-            state_list_modified[one_state_code] = state_name_modified
         elif str(one_state_code.lower()) == str(state_code.lower()):
             state_name_modified += " - 0"
-            state_list_modified[one_state_code] = state_name_modified
         else:
-            # Do not include state in drop-down if there aren't any candidates in that state
             pass
+        state_list_modified[one_state_code] = state_name_modified
     sorted_state_list = sorted(state_list_modified.items())
 
     measure_list_count_str = f'{measure_list_count:,}'

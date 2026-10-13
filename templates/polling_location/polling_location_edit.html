@@ -25,7 +25,7 @@
     {% endif %}
   </h1>
 
-  <form action="{% url "polling_location:polling_location_edit_process" %}"
+  <form action="{% url 'polling_location:polling_location_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

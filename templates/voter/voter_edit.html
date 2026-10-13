@@ -23,7 +23,7 @@
       Create New Voter Account
     {% endif %}
   </h1>
-  <form action="{% url "voter:voter_edit_process" %}"
+  <form action="{% url 'voter:voter_edit_process' %}"
         method="post"
         class="form-horizontal"
         enctype="multipart/form-data">
@@ -1099,7 +1099,7 @@
   <br />
   <h4>Deletion</h4>
   <div style="padding-left: 20px;">
-    <form action="{% url "voter:voter_delete_process" %}"
+    <form action="{% url 'voter:voter_delete_process' %}"
           method="post"
           class="form-horizontal">
       {% csrf_token %}

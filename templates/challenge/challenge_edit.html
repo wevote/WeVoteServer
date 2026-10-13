@@ -39,7 +39,7 @@
     <p>Create a new Challenge. You will be able to add more information on the next "Edit" page.</p>
   {% endif %}
 
-  <form action="{% url "challenge:challenge_edit_process" %}"
+  <form action="{% url 'challenge:challenge_edit_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}
@@ -413,7 +413,7 @@
 {% endif %}
 
 {% if challenge %}
-  <form action="{% url "challenge:compare_two_challenges_for_merge" %}"
+  <form action="{% url 'challenge:compare_two_challenges_for_merge' %}"
         method="get"
         class="form-horizontal"
         target="_blank">
@@ -433,7 +433,7 @@
 {% if challenge %}
   <br />
   <br />
-  <form action="{% url "challenge:challenge_delete_process" %}"
+  <form action="{% url 'challenge:challenge_delete_process' %}"
         method="post"
         class="form-horizontal">
     {% csrf_token %}

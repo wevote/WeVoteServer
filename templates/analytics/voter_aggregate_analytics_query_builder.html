@@ -36,8 +36,7 @@
   </p>
 
   <form
-    action="{% url "apis_v1:voterAggregateAnalyticsView" %}"
-    {#  action="https://cdn.wevoteusa.org/apis/v1/voterAggregateAnalytics"#}
+    action="{% url 'apis_v1:voterAggregateAnalyticsView' %}"
     class="form-horizontal"
     method="get"
     target="_blank"
@@ -216,7 +215,7 @@
   <script>
     $(function() {
         $('#show_this_year_of_analytics_id').change(function() {
-            this.form.action = "{% url "analytics:query_builder" %}"
+            this.form.action = "{% url 'analytics:query_builder' %}"
             this.form.target = ""
             this.form.submit();
         });

@@ -29,7 +29,7 @@
 
   <form name="submit_edit_form"
         id="submit_edit_form_id"
-        action="{% url "quick_info:quick_info_edit_process" %}"
+        action="{% url 'quick_info:quick_info_edit_process' %}"
         method="post">
     {% csrf_token %}
     <input type="hidden"

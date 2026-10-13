@@ -24,7 +24,7 @@
   {% endif %}
 
 
-  <form action="{% url "position:position_edit_process" %}" method="post">
+  <form action="{% url 'position:position_edit_process' %}" method="post">
     {% csrf_token %}
     <input type="hidden"
            name="position_we_vote_id"

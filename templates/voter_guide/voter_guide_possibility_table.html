@@ -60,7 +60,7 @@
                   {% if voter_guide_possibility.candidate %}
                     {{ voter_guide_possibility.candidate.display_candidate_name }}
                     {% if voter_guide_possibility.candidate.id %}
-                      <a href="{% url "candidate:candidate_summary" voter_guide_possibility.candidate.id %}"
+                      <a href="{% url 'candidate:candidate_summary' voter_guide_possibility.candidate.id %}"
                          target="_blank" class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
                     {% endif %}
                   {% else %}
