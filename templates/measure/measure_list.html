@@ -97,10 +97,8 @@
               <th>We Vote ID</th>
               <th>Other IDs</th>
               <th>Status</th>
-              {% if google_civic_election_id %}
-                <th>Support</th>
-                <th>Oppose</th>
-              {% endif %}
+              <th>Support</th>
+              <th>Oppose</th>
               <th>&nbsp;</th>
             </tr>
           </thead>
@@ -119,22 +117,20 @@
                 {% if measure.vote_usa_measure_id %}{{ measure.vote_usa_measure_id }}{% endif %}
               </td>
               <td>{{ measure.ballotpedia_measure_status|default_if_none:"" }}</td>
-              {% if google_civic_election_id %}
-                <td>
-                  {% if measure.support_count %}
-                    {{ measure.support_count }}
-                    <br />
-                    {{ measure.percentage_of_support }}%
-                  {% endif %}
-                </td>
-                <td>
-                  {% if measure.oppose_count %}
-                    {{ measure.oppose_count }}
-                    <br />
-                    {{ measure.percentage_of_oppose }}%
-                  {% endif %}
-                </td>
-              {% endif %}
+              <td>
+                {% if measure.support_count %}
+                  {{ measure.support_count }}
+                  <br />
+                  {{ measure.percentage_of_support }}%
+                {% endif %}
+              </td>
+              <td>
+                {% if measure.oppose_count %}
+                  {{ measure.oppose_count }}
+                  <br />
+                  {{ measure.percentage_of_oppose }}%
+                {% endif %}
+              </td>
               <td>
                 <a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                    style="font-size: .65em">edit</a>
