@@ -619,26 +619,23 @@ def measure_list_view(request):
 
         measure_list_count = measure_list.count()
 
-        if positive_value_exists(google_civic_election_id):
-            for one_measure in measure_list:
-                support_and_oppose_total = 0
-                # Find the count of Voters that support this candidate (Endorsers are not included in this)
-                one_measure.support_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
-                    one_measure.id, "", SUPPORT)
-                one_measure.oppose_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
-                    one_measure.id, "", OPPOSE)
-                support_and_oppose_total += one_measure.support_count
-                support_and_oppose_total += one_measure.oppose_count
+        for one_measure in measure_list:
+            support_and_oppose_total = 0
+            # Find the count of Voters that support this candidate (Endorsers are not included in this)
+            one_measure.support_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
+                one_measure.id, "", SUPPORT)
+            one_measure.oppose_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
+                one_measure.id, "", OPPOSE)
+            support_and_oppose_total += one_measure.support_count
+            support_and_oppose_total += one_measure.oppose_count
 
-                if positive_value_exists(support_and_oppose_total):
-                    percentage_of_oppose_number = one_measure.oppose_count / support_and_oppose_total * 100
-                    one_measure.percentage_of_oppose = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_oppose_number # "%d"
-                    percentage_of_support_number = one_measure.support_count / support_and_oppose_total * 100
-                    one_measure.percentage_of_support = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_support_number # "%d"
+            if positive_value_exists(support_and_oppose_total):
+                percentage_of_oppose_number = one_measure.oppose_count / support_and_oppose_total * 100
+                one_measure.percentage_of_oppose = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_oppose_number # "%d"
+                percentage_of_support_number = one_measure.support_count / support_and_oppose_total * 100
+                one_measure.percentage_of_support = DATE_FORMAT_DAY_TWO_DIGIT % percentage_of_support_number # "%d"
 
-                measure_list_modified.append(one_measure)
-        else:
-            measure_list_modified = measure_list
+            measure_list_modified.append(one_measure)
 
     except ContestMeasure.DoesNotExist:
         # This is fine
