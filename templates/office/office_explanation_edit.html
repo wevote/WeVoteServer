@@ -7,6 +7,7 @@
 {% block title %}{{ title }} - We Vote{% endblock %}
 
 {% block content %}
+  <a href="{% url 'office:office_explanations_list' %}">&lt; Back to List</a>
 
   <h1>Edit Office Explanation</h1>
   <hr />
@@ -18,7 +19,7 @@
 
     <input type="hidden"
            name="we_vote_id"
-           value="{% if office_explanation %}{{ office_explanation.we_vote_id }}{% else %}{{ we_vote_id|default_if_none:"" }}{% endif %}">
+           value="{% if office_explanation %}{{ office_explanation.we_vote_id }}{% else %}{{ we_vote_id|default_if_none:'' }}{% endif %}">
 
     <div class="form-group">
       <label for="office_explanation_name_id" class="col-sm-3 control-label">Office Explanation Name</label>
@@ -27,7 +28,7 @@
                name="office_explanation_name"
                id="office_explanation_name_id"
                class="form-control"
-               value="{% if office_explanation %}{{ office_explanation.office_explanation_name|default_if_none:"" }}{% else %}{{ office_explanation_name|default_if_none:"" }}{% endif %}" />
+               value="{% if office_explanation %}{{ office_explanation.office_explanation_name|default_if_none:'' }}{% else %}{{ office_explanation_name|default_if_none:'' }}{% endif %}" />
         {% if office_explanation %}
           {{ office_explanation.office_explanation_name }}
         {% else %}
@@ -73,7 +74,7 @@
                name="video_url_horizontal"
                id="video_url_horizontal_id"
                class="form-control"
-               value="{% if office_explanation %}{{ office_explanation.video_url_horizontal|default_if_none:"" }}{% else %}{{ video_url_horizontal|default_if_none:"" }}{% endif %}" />
+               value="{% if office_explanation %}{{ office_explanation.video_url_horizontal|default_if_none:'' }}{% else %}{{ video_url_horizontal|default_if_none:'' }}{% endif %}" />
       </div>
     </div>
 
@@ -84,7 +85,7 @@
                name="video_url_square"
                id="video_url_square_id"
                class="form-control"
-               value="{% if office_explanation %}{{ office_explanation.video_url_square|default_if_none:"" }}{% else %}{{ video_url_square|default_if_none:"" }}{% endif %}" />
+               value="{% if office_explanation %}{{ office_explanation.video_url_square|default_if_none:'' }}{% else %}{{ video_url_square|default_if_none:'' }}{% endif %}" />
       </div>
     </div>
 
@@ -95,7 +96,7 @@
                name="video_url_vertical"
                id="video_url_vertical_id"
                class="form-control"
-               value="{% if office_explanation %}{{ office_explanation.video_url_vertical|default_if_none:"" }}{% else %}{{ video_url_vertical|default_if_none:"" }}{% endif %}" />
+               value="{% if office_explanation %}{{ office_explanation.video_url_vertical|default_if_none:'' }}{% else %}{{ video_url_vertical|default_if_none:'' }}{% endif %}" />
       </div>
     </div>
 
@@ -241,8 +242,21 @@
                href="{% url 'office:office_explanation_edit' office_explanation.we_vote_id %}">clear</a>
           {% endif %}
         </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+      {# Do not show offices that already have an office explanation linked to them #}
+      <label for="hide_linked_offices_id">
+        <input type="checkbox"
+               name="hide_linked_offices"
+               id="hide_linked_offices_id"
+               value="1"
+               {% if hide_linked_offices %}checked{% endif %} />
+        hide offices already linked
+      </label>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
       </div>
     </div>
+
   </form>
 
   <form name="contest_office_link_form"
@@ -256,6 +270,12 @@
     <input type="hidden"
            name="we_vote_id"
            value="{{ office_explanation.we_vote_id }}">
+
+    {# Pass along the url_variables this page is using, so we can return to the same page state #}
+    <input type="hidden"
+           id="hide_linked_offices_hidden_id"
+           name="hide_linked_offices"
+           value="{{ hide_linked_offices }}">
 
     {# Optional: preserve the search term so after POST you can redirect back with it #}
     <input type="hidden"
@@ -277,6 +297,7 @@
                 </th>
                 <th colspan="2">Contest Office Name — Election Date</th>
                 <th>State</th>
+                <th>Office Level</th>
                 <th>We Vote ID</th>
                 <th>Current Linked OfficeExplanation</th>
               </tr>
@@ -303,6 +324,7 @@
                     {% endif %}
                   </td>
                   <td>{{ contest_office.state_code|default:"" }}</td>
+                  <td>{{ contest_office.ballotpedia_race_office_level|default:"" }}</td>
                   <td>{{ contest_office.we_vote_id|default:"" }}</td>
                   <td>{{ contest_office.office_explanation_we_vote_id|default:"(none)" }}</td>
                 </tr>
@@ -446,6 +468,16 @@
     // Initial render: default to horizontal
     renderPreview();
   })();
+  function syncHideLinkedOffices() {
+    const value = $('#hide_linked_offices_id').is(':checked') ? 'True' : '';
+    $('#hide_linked_offices_hidden_id').val(value);
+  }
+  $('#hide_linked_offices_id').change(syncHideLinkedOffices);
+  syncHideLinkedOffices();
+
+  $('#hide_linked_offices_id').change(function() {
+    syncHideLinkedOffices();
+  });
   </script>
 
 
