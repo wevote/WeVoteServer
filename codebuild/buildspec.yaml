@@ -23,6 +23,9 @@ phases:
     commands:
       - echo Pushing docker image to ECR
       - docker push $REPO_URI:$IMAGE_TAG
+      - echo Updating latest image tag
+      - docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest
+      - docker push $REPO_URI:latest
       - echo Writing image definitions
       - printf "[{\"name\":\"$ECS_CONTAINER_NAME\",\"imageUri\":\"$REPO_URI:$IMAGE_TAG\"}]" > imagedefinitions.json
 artifacts:
