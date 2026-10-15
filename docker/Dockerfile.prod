@@ -18,8 +18,8 @@ RUN pip install -r /tmp/requirements.txt --no-cache-dir
 #RUN pip install newrelic
 
 # install OpenTelemetry instrumentation for Python and Django
-RUN pip install opentelemetry-distro opentelemetry-instrumentation-django opentelemetry-exporter-otlp
-RUN opentelemetry-bootstrap -a install
+# RUN pip install opentelemetry-distro opentelemetry-instrumentation-django opentelemetry-exporter-otlp
+# RUN opentelemetry-bootstrap -a install
 
 # copy entrypoint script
 COPY docker/prod/entrypoint /usr/local/bin/docker-entrypoint
@@ -53,6 +53,8 @@ ENV OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SANITIZE_FIELDS=x-token-new-key,x-
     OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE=.*
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["opentelemetry-instrument", "gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
+# CMD ["opentelemetry-instrument", "gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
+CMD ["gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
+
 #CMD ["newrelic-admin", "run-program", "gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--timeout", "1800", "--bind", "0.0.0.0:8000", "config.wsgi"]
 

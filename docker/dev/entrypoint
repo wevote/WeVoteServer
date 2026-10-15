@@ -43,14 +43,14 @@ initial_dev_user = os.environ.get('DEV_VOTER_INITIAL_USER', "Samuel Adams samuel
 log(f"Running 'manage.py create_dev_user {initial_dev_user}'")
 os.system("python manage.py create_dev_user " + initial_dev_user)
 
-# Start debugpy listener
-try:
-    log("Starting debugpy on 0.0.0.0:5678")
-    debugpy.listen(("0.0.0.0", 5678))
+# # Start debugpy listener
+# try:
+#     log("Starting debugpy on 0.0.0.0:5678")
+#     debugpy.listen(("0.0.0.0", 5678))
 
-    log("Debugger is ready and waiting for VS Code or PyCharm to attach...")
-except Exception as e:
-    log(f"Error starting debugpy: {e}")
+#     log("Debugger is ready and waiting for VS Code or PyCharm to attach...")
+# except Exception as e:
+#     log(f"Error starting debugpy: {e}")
 
 # log(f"os.environ.get('WE_VOTE_SERVER_PROTOCOL', ''): {os.environ.get('WE_VOTE_SERVER_PORT', '')}")
 if os.environ.get('WE_VOTE_SERVER_PROTOCOL', '') == 'https':
