@@ -753,16 +753,23 @@ class ContestMeasureManager(models.Manager):
         status = ""
         success = True
 
-        if positive_value_exists(contest_measure.measure_year):
-            position_object.position_year = contest_measure.measure_year
-            position_object_updated = True
+        if hasattr(contest_measure, 'measure_year'):
+            if positive_value_exists(contest_measure.measure_year):
+                position_object.position_year = contest_measure.measure_year
+                position_object_updated = True
+            else:
+                generate_sorting_dates = True
         else:
-            generate_sorting_dates = True
-        if positive_value_exists(contest_measure.measure_ultimate_election_date):
-            position_object.position_ultimate_election_date = contest_measure.measure_ultimate_election_date
-            position_object_updated = True
+            status += "MISSING_CONTEST_MEASURE-measure_year "
+
+        if hasattr(contest_measure, 'measure_ultimate_election_date'):
+            if positive_value_exists(contest_measure.measure_ultimate_election_date):
+                position_object.position_ultimate_election_date = contest_measure.measure_ultimate_election_date
+                position_object_updated = True
+            else:
+                generate_sorting_dates = True
         else:
-            generate_sorting_dates = True
+            status += "MISSING_CONTEST_MEASURE-measure_ultimate_election_date "
 
         if generate_sorting_dates:
             largest_year_integer = None

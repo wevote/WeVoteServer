@@ -2411,6 +2411,7 @@ def office_explanation_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
     
+    hide_linked_offices = positive_value_exists(request.POST.get('hide_linked_offices', False))
     office_explanation_name = request.POST.get('office_explanation_name', '')
     office_explanation_description = request.POST.get('office_explanation_description', '')
     office_video_url_horizontal = request.POST.get('video_url_horizontal', '')
@@ -2443,6 +2444,8 @@ def office_explanation_process_view(request):
                 Q(state_code__icontains=contest_office_search) |
                 Q(we_vote_id__icontains=contest_office_search)
             )
+            if positive_value_exists(hide_linked_offices):
+                queryset = queryset.exclude(office_explanation_we_vote_id__isnull=False)
             queryset = queryset.exclude(we_vote_id__in=selected_ids)
             queryset = queryset.order_by('office_name', 'state_code')
             # limit results to same number on office_explanation_edit_view
@@ -2453,8 +2456,9 @@ def office_explanation_process_view(request):
         ContestOffice.objects.filter(we_vote_id__in=selected_ids).update(
             office_explanation_we_vote_id=we_vote_id
         )
-        return HttpResponseRedirect(reverse('office:office_explanation_edit', args=[we_vote_id]) + "?contest_office_search=" +
-                                str(contest_office_search))
+        return HttpResponseRedirect(reverse('office:office_explanation_edit', args=[we_vote_id]) +
+                                    "?contest_office_search=" + str(contest_office_search) +
+                                    "&hide_linked_offices=" + str(hide_linked_offices))
 
     if not error:
         try:
@@ -2484,7 +2488,9 @@ def office_explanation_process_view(request):
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not save office explanation -- exception: ' + str(e))
 
-    return HttpResponseRedirect(reverse('office:office_explanations_list', args=()) + '?state_code=' + str(state_code))
+    return HttpResponseRedirect(reverse('office:office_explanations_list', args=()) +
+                                '?state_code=' + str(state_code) +
+                                "&hide_linked_offices=" + str(hide_linked_offices))
 
 
 @login_required
@@ -2530,6 +2536,7 @@ def office_explanation_edit_view(request, we_vote_id):
     state_codes = sorted(state_codes)
 
     contest_office_search = request.GET.get("contest_office_search", "").strip()
+    hide_linked_offices = positive_value_exists(request.GET.get('hide_linked_offices', False))
     contest_office_list = []
 
     if contest_office_search:
@@ -2538,6 +2545,8 @@ def office_explanation_edit_view(request, we_vote_id):
             Q(state_code__icontains=contest_office_search) |
             Q(we_vote_id__icontains=contest_office_search)
         )
+        if positive_value_exists(hide_linked_offices):
+            queryset = queryset.exclude(office_explanation_we_vote_id__isnull=False)
         queryset = queryset.order_by('office_name', 'state_code')
         queryset = queryset[:1000]  # limit results
         contest_office_list = list(queryset)
@@ -2599,11 +2608,12 @@ def office_explanation_edit_view(request, we_vote_id):
         return redirect('office:office_explanation_edit', we_vote_id)
 
     template_values = {
-        'office_explanation':       office_explanation,
-        'title':                    'Edit Office Explanation',
-        'state_codes':              state_codes,
         'contest_office_search':    contest_office_search,
         'contest_office_list':      contest_office_list,
+        'hide_linked_offices':      hide_linked_offices,
+        'office_explanation':       office_explanation,
+        'state_codes':              state_codes,
+        'title':                    'Edit Office Explanation',
     }
 
     return render(request, 'office/office_explanation_edit.html', template_values)
