@@ -1,6 +1,7 @@
 
 {# templates/office/office_explanation_edit.html #}
 {% extends "template_base.html" %}
+{% load humanize %}
 {% load static %}
 {% load i18n %}
 
@@ -243,21 +244,72 @@
           {% endif %}
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
-      {# Do not show offices that already have an office explanation linked to them #}
-      <label for="hide_linked_offices_id">
-        <input type="checkbox"
-               name="hide_linked_offices"
-               id="hide_linked_offices_id"
-               value="1"
-               {% if hide_linked_offices %}checked{% endif %} />
-        hide offices already linked
-      </label>
-      &nbsp;&nbsp;&nbsp;&nbsp;
+          {# Do not show offices that already have an office explanation linked to them #}
+          <label for="hide_linked_offices_id">
+            <input type="checkbox"
+                   name="hide_linked_offices"
+                   id="hide_linked_offices_id"
+                   value="1"
+                   {% if hide_linked_offices %}checked{% endif %} />
+            hide offices already linked
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          {# Restrict to one office level #}
+          <label for="office_level_all_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_all_id"
+                   value=""
+                   {% if not office_level %}checked{% endif %} />
+            All
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_federal_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_federal_id"
+                   value="Federal"
+                   {% if office_level == 'Federal' %}checked{% endif %} />
+            Federal
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_state_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_state_id"
+                   value="State"
+                   {% if office_level == 'State' %}checked{% endif %} />
+            State
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_local_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_local_id"
+                   value="Local"
+                   {% if office_level == 'Local' %}checked{% endif %} />
+            Local
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_missing_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_missing_id"
+                   value="Missing"
+                   {% if office_level == 'Missing' %}checked{% endif %} />
+            Missing
+          </label>
         </div>
       </div>
     </div>
 
   </form>
+
+{% if offices_found_count > 0 %}
+  <div class="alert alert-success" style="margin-top: 10px;">
+    {{ offices_found_count|intcomma }} offices found.
+  </div>
+{% endif %}
 
   <form name="contest_office_link_form"
         method="post"
@@ -276,6 +328,10 @@
            id="hide_linked_offices_hidden_id"
            name="hide_linked_offices"
            value="{{ hide_linked_offices }}">
+    <input type="hidden"
+           id="office_level_hidden_id"
+           name="office_level"
+           value="{{ office_level }}">
 
     {# Optional: preserve the search term so after POST you can redirect back with it #}
     <input type="hidden"
@@ -473,11 +529,15 @@
     $('#hide_linked_offices_hidden_id').val(value);
   }
   $('#hide_linked_offices_id').change(syncHideLinkedOffices);
-  syncHideLinkedOffices();
+  syncHideLinkedOffices(); // Called on initial load
 
-  $('#hide_linked_offices_id').change(function() {
-    syncHideLinkedOffices();
-  });
+  function syncOfficeLevel() {
+    const value = $('input[name="office_level"]').value();
+    $('#office_level_hidden_id').val(value);
+    alert('office_level:' + value);
+  }
+  $('input[name="office_level"]').change(syncOfficeLevel);
+  syncOfficeLevel(); // Called on initial load
   </script>
 
 
