@@ -2414,6 +2414,13 @@ def office_explanation_process_view(request):
     hide_linked_offices = positive_value_exists(request.POST.get('hide_linked_offices', False))
     office_explanation_name = request.POST.get('office_explanation_name', '')
     office_explanation_description = request.POST.get('office_explanation_description', '')
+    office_level = request.POST.get('office_level', '')
+    if office_level == 'Missing':
+        office_level_missing = True
+    else:
+        office_level_missing = False
+    if office_level not in ('Federal', 'State', 'Local', 'Missing'):
+        office_level = ''
     office_video_url_horizontal = request.POST.get('video_url_horizontal', '')
     office_video_url_square = request.POST.get('video_url_square', '')
     office_video_url_vertical = request.POST.get('video_url_vertical', '')
@@ -2446,6 +2453,12 @@ def office_explanation_process_view(request):
             )
             if positive_value_exists(hide_linked_offices):
                 queryset = queryset.exclude(office_explanation_we_vote_id__isnull=False)
+            if office_level_missing:
+                queryset = queryset.filter(
+                    Q(ballotpedia_race_office_level__isnull=True) |
+                    Q(ballotpedia_race_office_level=''))
+            elif positive_value_exists(office_level):
+                queryset = queryset.filter(ballotpedia_race_office_level=office_level)
             queryset = queryset.exclude(we_vote_id__in=selected_ids)
             queryset = queryset.order_by('office_name', 'state_code')
             # limit results to same number on office_explanation_edit_view
@@ -2458,7 +2471,8 @@ def office_explanation_process_view(request):
         )
         return HttpResponseRedirect(reverse('office:office_explanation_edit', args=[we_vote_id]) +
                                     "?contest_office_search=" + str(contest_office_search) +
-                                    "&hide_linked_offices=" + str(hide_linked_offices))
+                                    "&hide_linked_offices=" + str(hide_linked_offices) +
+                                    "&office_level=" + str(office_level))
 
     if not error:
         try:
@@ -2490,7 +2504,8 @@ def office_explanation_process_view(request):
 
     return HttpResponseRedirect(reverse('office:office_explanations_list', args=()) +
                                 '?state_code=' + str(state_code) +
-                                "&hide_linked_offices=" + str(hide_linked_offices))
+                                "&hide_linked_offices=" + str(hide_linked_offices) +
+                                "&office_level=" + str(office_level))
 
 
 @login_required
@@ -2537,6 +2552,13 @@ def office_explanation_edit_view(request, we_vote_id):
 
     contest_office_search = request.GET.get("contest_office_search", "").strip()
     hide_linked_offices = positive_value_exists(request.GET.get('hide_linked_offices', False))
+    office_level = request.GET.get('office_level', '')
+    if office_level == 'Missing':
+        office_level_missing = True
+    else:
+        office_level_missing = False
+    if office_level not in ('Federal', 'State', 'Local', 'Missing'):
+        office_level = ''
     contest_office_list = []
 
     if contest_office_search:
@@ -2547,6 +2569,13 @@ def office_explanation_edit_view(request, we_vote_id):
         )
         if positive_value_exists(hide_linked_offices):
             queryset = queryset.exclude(office_explanation_we_vote_id__isnull=False)
+        if office_level_missing:
+            queryset = queryset.filter(
+                Q(ballotpedia_race_office_level__isnull=True) |
+                Q(ballotpedia_race_office_level=''))
+        elif positive_value_exists(office_level):
+            queryset = queryset.filter(ballotpedia_race_office_level=office_level)
+        offices_found_count = queryset.count()
         queryset = queryset.order_by('office_name', 'state_code')
         queryset = queryset[:1000]  # limit results
         contest_office_list = list(queryset)
@@ -2568,6 +2597,13 @@ def office_explanation_edit_view(request, we_vote_id):
         queryset = ContestOffice.objects.filter(
             office_explanation_we_vote_id__iexact=we_vote_id
         )
+        if office_level_missing:
+            queryset = queryset.filter(
+                Q(ballotpedia_race_office_level__isnull=True) |
+                Q(ballotpedia_race_office_level=''))
+        elif positive_value_exists(office_level):
+            queryset = queryset.filter(ballotpedia_race_office_level=office_level)
+        offices_found_count = queryset.count()
         queryset = queryset.order_by('office_name', 'state_code')
         queryset = queryset[:1000]  # limit results
         contest_office_list = list(queryset)
@@ -2612,6 +2648,8 @@ def office_explanation_edit_view(request, we_vote_id):
         'contest_office_list':      contest_office_list,
         'hide_linked_offices':      hide_linked_offices,
         'office_explanation':       office_explanation,
+        'office_level':             office_level,
+        'offices_found_count':      offices_found_count,
         'state_codes':              state_codes,
         'title':                    'Edit Office Explanation',
     }
