@@ -1424,19 +1424,64 @@ def sitewide_election_metrics_process_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    if not positive_value_exists(google_civic_election_id):
-        messages.add_message(request, messages.ERROR, 'google_civic_election_id required.')
-        return HttpResponseRedirect(reverse('analytics:sitewide_election_metrics', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
+    update_year_text = request.GET.get('update_year', '')
+    update_year = convert_to_int(update_year_text)
+    redirect_url = reverse('analytics:sitewide_election_metrics', args=()) + \
+        "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" + str(state_code)
 
-    results = save_sitewide_election_metrics(google_civic_election_id)  # DEBUG=1
-    messages.add_message(request, messages.INFO,
-                         ' NEED TO UPGRADE TO INCLUDE NATIONAL ELECTION TO INCLUDE STATE')
+    if update_year_text:
+        if not (len(update_year_text) == 4 and update_year_text.isdigit() and 1000 <= update_year <= 9999):
+            messages.error(request, 'Please select a valid year.')
+            return HttpResponseRedirect(redirect_url)
+        redirect_url += "&update_year=" + str(update_year)
+        election_results = ElectionManager().retrieve_elections_between_dates(
+            starting_date_as_integer=update_year * 10000 + 101,
+            ending_date_as_integer=update_year * 10000 + 1231)
+        if not election_results['success']:
+            messages.error(request, 'Unable to retrieve elections for ' + str(update_year) + '.')
+            return HttpResponseRedirect(redirect_url)
+        election_id_list = list(dict.fromkeys(
+            election.google_civic_election_id for election in election_results['election_list']))
+        if not election_id_list:
+            messages.info(request, 'No eligible elections found for ' + str(update_year) + '.')
+            return HttpResponseRedirect(redirect_url)
+    elif positive_value_exists(google_civic_election_id):
+        election_id_list = [google_civic_election_id]
+    else:
+        messages.error(request, 'Please select an election or a year before updating election metrics.')
+        return HttpResponseRedirect(redirect_url)
 
-    return HttpResponseRedirect(reverse('analytics:sitewide_election_metrics', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code))
+    updated_count = 0
+    failed_election_ids = []
+    for election_id in election_id_list:
+        try:
+            results = save_sitewide_election_metrics(election_id)
+            if results['success']:
+                updated_count += 1
+            else:
+                failed_election_ids.append(election_id)
+                logger.error('Election metrics update failed for %s: %s', election_id, results['status'])
+        except Exception:
+            failed_election_ids.append(election_id)
+            logger.exception('Election metrics update failed for %s', election_id)
+
+    summary = 'Election metrics updated: ' + str(updated_count) + '.'
+    if update_year_text:
+        summary += ' Update year: ' + str(update_year) + '.'
+    if failed_election_ids:
+        summary += ' Failed election IDs: ' + ', '.join(str(value) for value in failed_election_ids) + '.'
+        messages.error(request, summary)
+    else:
+        messages.info(request, summary)
+    if update_year_text and positive_value_exists(google_civic_election_id) and \
+            google_civic_election_id not in election_id_list:
+        messages.error(
+            request,
+            'Selected election ' + str(google_civic_election_id) + ' was not updated because it is not eligible '
+            'for the selected update year (' + str(update_year) + '). '
+            'To update only this election, clear the year selection by choosing "Selected election year" '
+            'in the "Update year" dropdown.')
+    return HttpResponseRedirect(redirect_url)
 
 
 @login_required
@@ -1467,12 +1512,22 @@ def sitewide_election_metrics_view(request):
 
     messages_on_stage = get_messages(request)
 
+    update_year = convert_to_int(request.GET.get('update_year', 0))
+    update_year_list = sorted({
+        convert_to_int(election.election_day_text[:4]) for election in election_list
+        if election.election_day_text and len(election.election_day_text) >= 4
+        and election.election_day_text[:4].isdigit()
+        and 1000 <= convert_to_int(election.election_day_text[:4]) <= 9999
+    }, reverse=True)
+
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'sitewide_election_metrics_list':   sitewide_election_metrics_list,
         'google_civic_election_id':         google_civic_election_id,
         'state_code':                       state_code,
         'election_list':                    election_list,
+        'update_year':                      update_year,
+        'update_year_list':                 update_year_list,
     }
     return render(request, 'analytics/sitewide_election_metrics.html', template_values)
 
