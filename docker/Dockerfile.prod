@@ -21,7 +21,8 @@ RUN pip install -r /tmp/requirements.txt --no-cache-dir
 RUN pip install \
     opentelemetry-distro==0.65b0 \
     opentelemetry-instrumentation-django==0.65b0 \
-    opentelemetry-exporter-otlp==1.44.0
+    opentelemetry-exporter-otlp==1.44.0\
+    opentelemetry-sdk-extension-aws==2.1.0
 RUN opentelemetry-bootstrap -a install
 
 # copy entrypoint script
