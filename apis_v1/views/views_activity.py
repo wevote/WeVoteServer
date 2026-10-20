@@ -632,8 +632,9 @@ def firebase_notification_send_to_cordova_apps(we_vote_id, speaker_name, stateme
                 for device in device_list:
                     send_single_message(device.platform_type, device.firebase_fcm_token, "We Vote", body,
                                         badge_number)
-                    logger.info('firebase_notification_send_to_cordova_apps sent : ' + device.platform_type +
-                                device.firebase_fcm_token + "We Vote" + body + str(badge_number))
+                    # Disabled due to logging possible sensitive data
+                    # logger.info('firebase_notification_send_to_cordova_apps sent : ' + device.platform_type +
+                    #             device.firebase_fcm_token + "We Vote" + body + str(badge_number))
             except Exception as e:
                 logger.error('firebase_notification_send_to_cordova_apps threw: ', e)
     end = str(time.time() - start)

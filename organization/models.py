@@ -2340,7 +2340,8 @@ class OrganizationManager(models.Manager):
         results = organization_manager.retrieve_organization(twitter_user_id=twitter_user_id)
 
         if not results['organization_found']:
-            logger.info("update_organization_single_voter_data was not able to find " + str(twitter_user_id))
+            # Disabled due to logging possible sensitive information
+            # logger.info("update_organization_single_voter_data was not able to find " + str(twitter_user_id))
             return False
         try:
             organization = results['organization']
