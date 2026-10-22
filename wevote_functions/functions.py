@@ -1715,6 +1715,30 @@ def set_voter_api_device_id(request, response, voter_api_device_id):
 def delete_voter_api_device_id_cookie(response):
     delete_cookie(response, 'voter_api_device_id')
 
+def set_redirect_url(response, redirect_url):
+    """
+    Set the redirect URL cookie.
+    :param response: HttpResponse object
+    :param redirect_url: URL to redirect to
+    """
+    set_cookie(response, 'redirect_url', redirect_url, days_expire=1)
+
+def get_redirect_url(request):
+    """
+    Get the redirect URL cookie.
+    :param request: HttpRequest object
+    :return: URL to redirect to
+    """
+    if hasattr(request, 'COOKIES'):
+        return request.COOKIES.get('redirect_url', '')
+    return ''
+
+def delete_redirect_url(response):
+    """
+    Delete the redirect URL cookie.
+    :param response: HttpResponse object
+    """
+    delete_cookie(response, 'redirect_url')
 
 def generate_random_string(
         string_length=88,

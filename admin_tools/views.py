@@ -44,7 +44,7 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
     VoterManager, VoterMetricsManager, \
     voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
-    get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
+    get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, set_redirect_url, get_redirect_url, delete_redirect_url, STATE_CODE_MAP
 from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, \
     get_pg_dump_version, get_git_params
 
@@ -1863,22 +1863,6 @@ def login_we_vote(request):
     if positive_value_exists(info_message):
         messages.add_message(request, messages.INFO, info_message)
 
-    messages_on_stage = get_messages(request)
-    template_values = {
-        'request':              request,
-        'username':             username,
-        'next':                 '.',
-        'voter_signed_in':      voter_signed_in,
-        'messages_on_stage':    messages_on_stage,
-    }
-    response = render(request, 'registration/login_we_vote.html', template_values)
-
-    # TODO: Add logging and remove error handling
-    try:
-        response = TokensManager.add_response_token_info_headers(response, token_response)
-    except Exception as e:
-        pass
-
     # If login with facebook then save facebook details in facebookAuthResponse and facebookLinkToVoter
     if facebook_data:
         facebook_user_data = getattr(facebook_data, 'user', None)
@@ -1898,6 +1882,34 @@ def login_we_vote(request):
         if positive_value_exists(facebook_user_id) and positive_value_exists(facebook_user_we_vote_id):
             facebook_link_results = facebook_user_manager.create_facebook_link_to_voter(facebook_user_id,
                                                                                         facebook_user_we_vote_id)
+
+    redirect_url = get_redirect_url(request)
+    if not positive_value_exists(redirect_url) or redirect_url == '.' or '/login' in redirect_url:
+        redirect_url = request.POST.get('next', '') or request.GET.get('next', '')
+        if not positive_value_exists(redirect_url) or redirect_url == '.' or '/login' in redirect_url:
+            redirect_url = ''
+
+    if voter_signed_in and positive_value_exists(redirect_url):
+        response = HttpResponseRedirect(redirect_url)
+        delete_redirect_url(response)
+    else:
+        messages_on_stage = get_messages(request)
+        template_values = {
+            'request':              request,
+            'username':             username,
+            'next':                 redirect_url if positive_value_exists(redirect_url) else '.',
+            'voter_signed_in':      voter_signed_in,
+            'messages_on_stage':    messages_on_stage,
+        }
+        response = render(request, 'registration/login_we_vote.html', template_values)
+        if not voter_signed_in and positive_value_exists(redirect_url) and not get_redirect_url(request):
+            set_redirect_url(response, redirect_url)
+
+    # TODO: Add logging and remove error handling
+    try:
+        response = TokensManager.add_response_token_info_headers(response, token_response)
+    except Exception as e:
+        pass
 
     # We want to store the voter_api_device_id cookie if it is new
     if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
@@ -1919,6 +1931,8 @@ def logout_we_vote(request):
         'messages_on_stage':    messages_on_stage,
     }
     response = render(request, 'registration/login_we_vote.html', template_values)
+
+    delete_redirect_url(response)
 
     # Find current voter_api_device_id
     voter_api_device_id = get_voter_api_device_id(request)
