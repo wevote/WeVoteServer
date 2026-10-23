@@ -3760,7 +3760,7 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
             # We do not want impersonal automatic replies from ZenDesk for negative comments
             # And we don't want a zendesk record if not negative
             from_email = Email(json_data['email'])
-            to_email = To('outgoing_email_address')
+            to_email = To(outgoing_email_address)
             subject = "Negative App Review bypassed in Cordova"
             content = Content("text/plain", content_string)
             mail = Mail(from_email, to_email, subject, content)
