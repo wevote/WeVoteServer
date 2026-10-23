@@ -21,7 +21,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import redirect, render
-from django.db.models import Q
+from django.db.models import Count, Q
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -737,11 +737,36 @@ def office_list_view(request):
 
     if office_list_found:
         position_list_manager = PositionListManager()
+        office_explanation_we_vote_ids = [
+            office.office_explanation_we_vote_id
+            for office in office_list
+            if positive_value_exists(office.office_explanation_we_vote_id)
+        ]
+        office_explanation_dict = {}
+        if office_explanation_we_vote_ids:
+            try:
+                office_explanation_list = OfficeExplanation.objects.using('readonly').filter(
+                    we_vote_id__in=office_explanation_we_vote_ids
+                )
+                office_explanation_dict = {
+                    item.we_vote_id.lower(): item for item in office_explanation_list if item.we_vote_id
+                }
+            except Exception as e:
+                pass
+
         for office in office_list:
             if show_statistics:
                 office.candidate_count = fetch_candidate_count_for_office(office.id)
                 office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
                     office.id, office.we_vote_id)
+
+            if positive_value_exists(office.office_explanation_we_vote_id):
+                office_explanation = office_explanation_dict.get(office.office_explanation_we_vote_id.lower())
+                if office_explanation:
+                    office.office_explanation = office_explanation
+                    office.office_explanation_we_vote_id = office_explanation.we_vote_id
+                else:
+                    office.office_explanation_we_vote_id = None
 
             updated_office_list.append(office)
 
@@ -2386,8 +2411,24 @@ def office_explanations_list_view(request):
         office_explanation_list = []
 
     state_codes = STATE_CODE_MAP
+    office_explanation_we_vote_ids = [
+        one_office.we_vote_id for one_office in office_explanation_list if one_office.we_vote_id
+    ]
+    office_links_count_dict = {}
+    if office_explanation_we_vote_ids:
+        contest_office_counts = ContestOffice.objects.filter(
+            office_explanation_we_vote_id__in=office_explanation_we_vote_ids
+        ).values('office_explanation_we_vote_id').annotate(office_count=Count('id'))
+        office_links_count_dict = {
+            item['office_explanation_we_vote_id'].lower(): item['office_count']
+            for item in contest_office_counts
+            if item['office_explanation_we_vote_id']
+        }
+
     state_codes_modified = {}
     for one_office_explanation in office_explanation_list:
+        we_vote_id_key = (one_office_explanation.we_vote_id or '').lower()
+        one_office_explanation.office_links = office_links_count_dict.get(we_vote_id_key, 0)
         if one_office_explanation.state_code not in state_codes_modified:
             state_name = state_codes.get(one_office_explanation.state_code, one_office_explanation.state_code)
             state_codes_modified[one_office_explanation.state_code] = state_name

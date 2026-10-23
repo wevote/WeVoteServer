@@ -31,7 +31,7 @@
   </p>
 
   <p>
-    <a href="{% url 'office:office_explanations_list' %}? google_civic_election_id={{ google_civic_election_id }}& state_code={{ state_code }}">
+    <a href="{% url 'office:office_explanations_list' %}? google_civic_election_id={{ google_civic_election_id }}& state_code={{ state_code }}" target="_blank">
       Office Explanations
     </a>
   </p>
@@ -256,8 +256,18 @@
                 <span style="color: darkgray">{{ office.district_name|default_if_none:"" }}</span>
               {% endif %}
               {% if office.ballotpedia_race_office_level %}
+                {% if not office.district_name %}<br />{% endif %}
                 &nbsp;&nbsp;
                 <span style="color: darkgray">({{ office.ballotpedia_race_office_level }})</span>
+              {% endif %}
+              {% if office.office_explanation_we_vote_id %}
+                {% if not office.district_name and not office.ballotpedia_race_office_level %}<br />{% endif %}
+                &nbsp;&nbsp;
+                <a href="{% url 'office:office_explanation_edit' office.office_explanation_we_vote_id %}"
+                   target="_blank"
+                   class="u-no-break">
+                  Video&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                </a>
               {% endif %}
               {% if office.is_battleground_race %}
                 <br />
