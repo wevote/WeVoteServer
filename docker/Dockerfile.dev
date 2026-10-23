@@ -20,16 +20,6 @@ COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt --no-cache-dir && \
     pip install debugpy
 
-# ## ONLY FOR LOCAL METRIC TESTING
-# # install OpenTelemetry instrumentation for Python and Django
-# RUN pip install opentelemetry-distro opentelemetry-instrumentation-django opentelemetry-exporter-otlp
-
-# # install OpenTelemetry SDK extension for AWS
-# # Only needed for dev to test send traces to PROD
-# RUN pip install opentelemetry-sdk-extension-aws
-
-# RUN opentelemetry-bootstrap -a install
-
 # copy entrypoint script
 COPY docker/dev/entrypoint /usr/local/bin/docker-entrypoint
 
@@ -47,25 +37,6 @@ EXPOSE 5678
 
 ENV RUNNING_IN_DEVELOPER_MODE=True
 ENV RUNNING_IN_DOCKER=True
-ENV DJANGO_SETTINGS_MODULE=config.settings
-
-# # OpenTelemetry Tracing configuration
-# ENV OTEL_SDK_ENABLED=True \
-#     OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317 \
-#     OTEL_SERVICE_NAME=WevoteApi-DevAPI \
-#     OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST=.* \
-#     OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE=.* \
-#     OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST=.* \
-#     OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE=.* \
-#     OTEL_PYTHON_ID_GENERATOR=xray \
-#     OTEL_PROPAGATORS=tracecontext,baggage,xray
-
-# ENV  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SANITIZE_FIELDS=x-token-new-key,x-csrftoken,set-cookie,cookie,authorization \
-
 
 ENTRYPOINT ["docker-entrypoint"]
-# CMD ["python", "-u", "manage.py", "runserver", "0.0.0.0:8000"]
-
-## ONLY FOR LOCAL METRIC TESTING
-# CMD ["opentelemetry-instrument", "python", "-u", "manage.py", "runserver", "0.0.0.0:8000"]
 CMD ["python", "-u", "manage.py", "runserver", "0.0.0.0:8000"]
