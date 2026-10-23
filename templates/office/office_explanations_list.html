@@ -53,12 +53,8 @@
           <th>Office Explanation Name</th>
           <th>State</th>
           <th>Office Explanation</th>
-          <th>Horizontal Video URL</th>
-          <th>Square Video URL</th>
-          <th>Vertical Video URL</th>
-          <th>ID</th>
-          <th>Edit</th>
-
+          <th>Video URL</th>  
+          <th>Office Links</th>
         </tr>
       </thead>
       <tbody>
@@ -66,17 +62,17 @@
           <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-              <a href="{% url 'office:office_explanation_summary' office.we_vote_id %}">{{ office.office_explanation_name }}</a>
+              <a href="{% url 'office:office_explanation_edit' office.we_vote_id %}">{{ office.office_explanation_name }}</a> <br>
+              <span style="color: gray">{{ office.we_vote_id }}</span>
             </td>
             <td>{{ office.state_code }}</td>
             <td>{{ office.office_explanation|default:"(no explanation)"|truncatechars:120 }}</td>
-            <td>{{ office.video_url_horizontal|default:"(no url)" }}</td>
-            <td>{{ office.video_url_square|default:"(no url)" }}</td>
-            <td>{{ office.video_url_vertical|default:"(no url)" }}</td>
-            <td>{{ office.we_vote_id }}</td>
-            <td>
-              <a href="{% url 'office:office_explanation_edit' office.we_vote_id %}">edit</a>
+            <td class="u-wrap-links">
+              H: {% if office.video_url_horizontal %}<a href="{{ office.video_url_horizontal }}" target="_blank" class="u-wrap-links">{{ office.video_url_horizontal }}</a>{% else %}(no url){% endif %}<br>
+              S: {% if office.video_url_square %}<a href="{{ office.video_url_square }}" target="_blank" class="u-wrap-links">{{ office.video_url_square }}</a>{% else %}(no url){% endif %}<br>
+              V: {% if office.video_url_vertical %}<a href="{{ office.video_url_vertical }}" target="_blank" class="u-wrap-links">{{ office.video_url_vertical }}</a>{% else %}(no url){% endif %}
             </td>
+            <td>{{ office.office_links}}</td>
           </tr>
         {% endfor %}
       </tbody>
