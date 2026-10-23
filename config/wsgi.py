@@ -10,11 +10,15 @@ https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
 """
 
 import os
+from config.otel import setup_opentelemetry
 
 from django.core.wsgi import get_wsgi_application
 # from dj_static import Cling  # For Heroku
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+# Start up OpenTelemetry for Django in Production
+setup_opentelemetry()
 
 application = get_wsgi_application()  # Without Heroku
 # application = Cling(get_wsgi_application())  # For Heroku
