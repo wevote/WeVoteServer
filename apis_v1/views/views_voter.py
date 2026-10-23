@@ -2,18 +2,19 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import json
 import hmac
+import json
 from datetime import datetime, timezone
 from time import time
-from sendgrid import sendgrid
-from sendgrid.helpers.mail import Mail, Email, To, Content
+
 from django.contrib import messages
 from django.core.exceptions import RequestDataTooBig
 from django.db.models import F
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
+from sendgrid import sendgrid, To
+from sendgrid.helpers.mail import Mail, Email, Content
 
 import wevote_functions.admin
 from apis_v1.controllers import voter_count
@@ -60,10 +61,12 @@ from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_devic
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
     voter_has_authority, APP_REVIEW_NEGATIVE
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
-from wevote_functions.functions import convert_to_int, generate_random_string, get_maximum_number_to_retrieve_from_request, \
+from wevote_functions.functions import convert_to_int, generate_random_string, \
+    get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists, normalize_sms_phone_number_for_voter_update
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from wevote_functions.functions_date import DATE_FORMAT_YMD_HMS
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -3757,7 +3760,7 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
             # We do not want impersonal automatic replies from ZenDesk for negative comments
             # And we don't want a zendesk record if not negative
             from_email = Email(json_data['email'])
-            to_email = outgoing_email_address
+            to_email = To('outgoing_email_address')
             subject = "Negative App Review bypassed in Cordova"
             content = Content("text/plain", content_string)
             mail = Mail(from_email, to_email, subject, content)
