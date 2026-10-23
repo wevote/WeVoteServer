@@ -3696,11 +3696,17 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
     we_vote_id = voter.we_vote_id
 
     app_review_state = request.POST.get('app_review_state', 'NONE').upper()
+    address_state_code = request.POST.get('address_state_code', '')
     app_review_version  = request.POST.get('app_review_version', '')
     app_review_platform = request.POST.get('app_review_platform', '')
+    app_review_pathname = request.POST.get('app_review_pathname', '')
     app_review_body = request.POST.get('app_review_body_negative_bypass', '')  # Not stored in SQL
     app_review_email = request.POST.get('app_review_email', '')                # Not stored in SQL
     app_review_date = str(datetime.now(timezone.utc))                          # SQL datetime now, timezone aware
+    outgoing_email_address = request.POST.get('sendgrid_outgoing_email', 'support@wevote.us')
+
+    # print("app_review_body ", app_review_body)
+    # sys.stdout.flush()
 
     json_data = {
         'success': True,
@@ -3708,9 +3714,11 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
         'voter_device_id': voter_device_id,
         'we_vote_id': we_vote_id,
         'app_review_state': app_review_state,
+        'address_state_code': address_state_code,
         'app_review_date': app_review_date,
         'app_review_version': app_review_version,
         'app_review_platform': app_review_platform,
+        'app_review_pathname': app_review_pathname,
         'email_api_status_code': 'none',
         'negative_bypass_review_length': len(app_review_body)
     }
@@ -3727,13 +3735,17 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
         json_data["we_vote_id"] = we_vote_id
         json_data['first_name'] = voter.first_name
         json_data['last_name'] = voter.last_name
-        id_string = ''
+        # print("app_review_state.upper() ", app_review_state.upper())
+        # sys.stdout.flush()
 
         if app_review_state.upper() == APP_REVIEW_NEGATIVE:
             id_string = (
-                f"[voter: {we_vote_id}, email: {voter.email or ''}, first: {voter.first_name or ''}, last: {voter.last_name or ''}, "
+                f"[voter: {we_vote_id}, email: {voter.email or ''}, sms: {voter.normalized_sms_phone_number or ''}, "
+                f"first: {voter.first_name or ''}, last: {voter.last_name or ''}, "
+                f"address_state_code: {address_state_code}, pathname: {app_review_pathname}, "
                 f"platform: {voter.app_review_platform or ''}, version: {voter.app_review_version or ''}]")
-            # print(id_string)
+            logger.error("voter_has_reviewed_an_app -- id_string " + id_string)
+
             if positive_value_exists(app_review_email):
                 json_data['email'] = app_review_email
             else:
@@ -3745,13 +3757,15 @@ def voter_has_reviewed_an_app(request):    # voterReviewedApp
             # We do not want impersonal automatic replies from ZenDesk for negative comments
             # And we don't want a zendesk record if not negative
             from_email = Email(json_data['email'])
-            to_email = To('support@wevote.us')
+            to_email = outgoing_email_address
             subject = "Negative App Review bypassed in Cordova"
             content = Content("text/plain", content_string)
             mail = Mail(from_email, to_email, subject, content)
 
             # Get a JSON-ready representation of the Mail object
             mail_json = mail.get()
+            logger.error("voter_has_reviewed_an_app -- positive_value_exists(mail_json): " + str(positive_value_exists(mail_json)))
+            logger.error("voter_has_reviewed_an_app -- mail_json: " + json.dumps(mail_json))
 
             # Send an HTTP POST request to /mail/send
             response = sg.client.mail.send.post(request_body=mail_json)

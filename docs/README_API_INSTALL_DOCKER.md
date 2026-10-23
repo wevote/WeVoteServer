@@ -100,7 +100,7 @@ docker compose exec db sh
 
 ## PgAdmin
 ### 1. Access PgAdmin Container
-Go to `localhost:8080` in your local web browser to access the `PgAdmin` container UI.  If you used all the default environment_variables: on PgAdmin login screen, your "Email Address/Username" will be `fake_email@wevoteeducation.org` and your password will be `admin`.
+Go to `http://localhost:9000` in your local web browser to access the `PgAdmin` container UI.  If you used all the default environment_variables: on PgAdmin login screen, your "Email Address/Username" will be `fake_email@wevoteeducation.org` and your password will be `admin`.
 ### 2. Register New Server
 1. Right-click on 'Servers' in the left pane, and select Register/Server.
 
