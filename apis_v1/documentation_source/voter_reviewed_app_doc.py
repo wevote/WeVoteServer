@@ -14,6 +14,11 @@ def voter_reviewed_app_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server. ',
         },
         {
+            'name':         'address_state_code',
+            'value':        'string',  #    ('CA')
+            'description':  'The two letter state for the voter&apos;s ballot location',
+        },
+        {
             'name':         'app_review_state',
             'value':        'string',  #    ('Positive', 'Negative', None)
             'description':  'The new state of the app review stored in voter_voter, one of {"POSITIVE", '
@@ -30,6 +35,11 @@ def voter_reviewed_app_template_values(url_root):
             'description':  'The platform of the app being reviewed, one of {"iOS", "Android"}',
         },
         {
+            'name':         'app_review_pathname',
+            'value':        'string',  #
+            'description':  'The path (or page) being displayed, when the app review is initiated ... something like "/ballot"',
+        },
+        {
             'name':         'app_review_body_negative_bypass',
             'value':        'string',  #
             'description':  'Only when a Negative review is bypassed, this is the message body that is sent to Zendesk.'
@@ -42,6 +52,11 @@ def voter_reviewed_app_template_values(url_root):
                             'the email to Zendesk that creates a ticket. If no email is provided, the voter does '
                             'not want a reply from WeVote, and we supply donotreply@wevote.us as a "from". '
                             'This is not saved in the database.',
+        },
+        {
+            'name':         'sendgrid_outgoing_email',
+            'value':        'string',  #
+            'description':  'Normally leave this field blank.  Only used in testing, when one needs to send the email to themselves instead of to Zendesk.',
         },
     ]
 
