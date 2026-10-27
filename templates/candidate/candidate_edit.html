@@ -752,7 +752,11 @@ th, td {
           <label for="candidate_url_id" class="pl-4 control-label">
             Candidate Website
             {% if candidate.candidate_url %}
+              {% if 'http' in candidate.candidate_url %}
               <a href="{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% else %}
+              <a href="https://{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
             {% endif %}
           </label>
           <div class="col">
@@ -1031,7 +1035,7 @@ th, td {
   {% endif %}
   <br />
 
-
+{% if candidate %}
 <form action="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
       method="get"
       class="form-horizontal"
@@ -1222,6 +1226,7 @@ th, td {
 
 <!--End of search form-->
 </form>
+{% endif %}
   <br />
 
   {% if candidate %}
