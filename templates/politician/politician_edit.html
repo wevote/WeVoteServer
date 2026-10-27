@@ -522,7 +522,11 @@
           <label for="politician_url_id" class="pl-4 control-label">
             Politician Website
             {% if politician.politician_url %}
+              {% if 'http' in politician.politician_url %}
               <a href="{{ politician.politician_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% else %}
+              <a href="https://{{ politician.politician_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
             {% endif %}
           </label>
           <div class="col">
