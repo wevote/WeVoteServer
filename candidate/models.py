@@ -656,7 +656,8 @@ class CandidateListManager(models.Manager):
         if not positive_value_exists(upcoming_results['success']):
             status += upcoming_results['status']
 
-        upcoming_candidate_we_vote_id_list = []
+        # Stay a queryset so Postgres filters with a subquery instead of a Python list of every upcoming id.
+        upcoming_candidate_ids = None
         if len(upcoming_google_civic_election_id_list):
             try:
                 upcoming_id_integers = [
@@ -670,10 +671,10 @@ class CandidateListManager(models.Manager):
                 if positive_value_exists(limit_to_this_state_code):
                     link_query = link_query.filter(
                         Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
-                upcoming_candidate_we_vote_id_list = list(
+                upcoming_candidate_ids = (
                     link_query.exclude(candidate_we_vote_id__isnull=True)
                     .exclude(candidate_we_vote_id='')
-                    .values_list('candidate_we_vote_id', flat=True)
+                    .values('candidate_we_vote_id')
                     .distinct()
                 )
             except Exception as e:
@@ -688,31 +689,27 @@ class CandidateListManager(models.Manager):
             search_query = search_query.order_by('-is_battleground_race', '-twitter_followers_count')
 
             upcoming_query = search_query
-            if len(upcoming_candidate_we_vote_id_list):
-                upcoming_query = upcoming_query.filter(we_vote_id__in=upcoming_candidate_we_vote_id_list)
+            if upcoming_candidate_ids is not None:
+                upcoming_query = upcoming_query.filter(we_vote_id__in=upcoming_candidate_ids)
             else:
                 upcoming_query = upcoming_query.none()
-            upcoming_total_count = upcoming_query.count()
             upcoming_list = list(upcoming_query[:search_limit])
 
             past_query = search_query
-            if len(upcoming_candidate_we_vote_id_list):
-                past_query = past_query.exclude(we_vote_id__in=upcoming_candidate_we_vote_id_list)
+            if upcoming_candidate_ids is not None:
+                past_query = past_query.exclude(we_vote_id__in=upcoming_candidate_ids)
             if positive_value_exists(limit_to_this_state_code):
                 past_query = past_query.filter(
                     Q(state_code__iexact=limit_to_this_state_code) | Q(state_code__iexact='na'))
-            past_total_count = past_query.count()
 
             remainder = search_limit - len(upcoming_list)
             past_list = list(past_query[:remainder]) if remainder > 0 else []
 
             candidate_list_objects = upcoming_list + past_list
             candidates_returned_count = len(candidate_list_objects)
-            candidates_total_count = upcoming_total_count + past_total_count
+            candidates_total_count = candidates_returned_count
             candidate_list_found = candidates_returned_count > 0
             status += 'CANDIDATES_RETRIEVED_SEARCH_UPCOMING_THEN_PAST '
-            if candidates_returned_count < candidates_total_count:
-                status += 'SEARCH_RESULTS_CAPPED '
         except Exception as e:
             handle_exception(e, logger=logger)
             status += 'FAILED retrieve_candidates_for_search_text ' + str(e) + ' '
