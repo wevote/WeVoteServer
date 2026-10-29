@@ -119,8 +119,8 @@ class WeVoteAPIsV1TestsCandidatesQuery(TestCase):
         returned_names = [candidate.candidate_name for candidate in results['candidate_list_objects']]
         self.assertEqual(returned_names, ['Michael C. Walsh'])
         self.assertEqual(results['candidates_returned_count'], 1)
-        self.assertGreaterEqual(results['candidates_total_count'], 2)
-        self.assertIn('SEARCH_RESULTS_CAPPED', results['status'])
+        self.assertEqual(results['candidates_total_count'], 1)
+        self.assertNotIn('SEARCH_RESULTS_CAPPED', results['status'])
 
     def test_year_path_does_not_use_search_text(self):
         response = self.client.get(self.candidates_query_url, {
