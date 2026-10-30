@@ -157,3 +157,20 @@ extending anything... 'class ClassName:'
     ```
     python manage.py migrate
     ```
+
+#### November 2026 -- debugging with docker
+
+Dinara Tsydenova (JetBrains)
+
+@Steve Podell , thanks for the console output and the screenshots! The container part works. The Debugger warning: It seems that frozen modules are being used lines come from debugpy, so debugpy did start inside the container. You don't see the Starting development server line yet because of --wait-for-client: Django waits until a debugger connects, and only then starts. So that output is what we want to see at this point. You can also ignore the frozen modules warning, it doesn't affect breakpoints here.
+
+About the missing check mark for debugpy in requirements.txt , most likely it is not related because the status bar shows Docker Compose (web) [3.6.1], and PyCharm sees Django 3.2.25. The container you started runs Python 3.12 and Django 5.2.17. So the interpreter set in PyCharm comes from a different, older image, not from this project.
+
+As for the "Failed to launch Python DAP debug adapter" error , could you please try to change Remote address as follows:
+
+Start the containers with docker compose -f docker-compose.yml -f docker-compose.debug.yml up --build, as you did.
+In the Attach to DAP dialog, change Remote address to localhost:5678. Keep the path mapping to /app.
+Put a breakpoint inside the index function in config/urls.py.
+Start the configuration with Debug.
+Open http://localhost:8000 in the browser.
+When PyCharm connects, you'll see Django's Starting development server at http://0.0.0.0:8000/ line appear in the web-1 output. When you open the page, PyCharm should stop at the breakpoint.
