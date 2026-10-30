@@ -160,6 +160,8 @@ extending anything... 'class ClassName:'
 
 #### November 2026 -- debugging with docker
 
+https://youtrack.jetbrains.com/issue/PY-91381/Breakpoints-not-hit-with-Docker-Compose-interpreter-Accept-timed-out-and-containers-stop
+
 Dinara Tsydenova (JetBrains)
 
 @Steve Podell , thanks for the console output and the screenshots! The container part works. The Debugger warning: It seems that frozen modules are being used lines come from debugpy, so debugpy did start inside the container. You don't see the Starting development server line yet because of --wait-for-client: Django waits until a debugger connects, and only then starts. So that output is what we want to see at this point. You can also ignore the frozen modules warning, it doesn't affect breakpoints here.
