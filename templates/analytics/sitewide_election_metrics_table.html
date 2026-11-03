@@ -1,8 +1,20 @@
 {# templates/analytics/sitewide_election_metrics_table.html #}
+{% load humanize %}
 
-<table border="1" cellpadding="5" cellspacing="5" class="table">
+<style>
+  table.sitewide-election-metrics-table {
+    border-collapse: collapse;
+    border: 1px solid #999;
+  }
+  table.table.sitewide-election-metrics-table > tbody > tr > th,
+  table.table.sitewide-election-metrics-table > tbody > tr > td {
+    border: 1px solid #999;
+  }
+</style>
+
+<table class="table sitewide-election-metrics-table">
   {% for one_row in sitewide_election_metrics_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:26 %}
       <tr>
         <th>#</th>
         <th>Election Name (ID)</th>
@@ -18,35 +30,35 @@
       </tr>
     {% endif %}
     <tr>
-      <td>{{ forloop.counter }}</td>
-      <td>{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
+      <td>{% if metrics_row_offset %}{{ forloop.counter|add:metrics_row_offset }}{% else %}{{ forloop.counter }}{% endif %}</td>
+      <td>{% if one_row.election.election_day_text %}{{ one_row.election.election_day_text }} {% endif %}{% if one_row.election.state_code %}{{ one_row.election.state_code|upper }}: {% endif %}{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
       <td>
-        all: {{ one_row.visitors_total }}
+        all: {{ one_row.visitors_total|intcomma }}
         {% if one_row.authenticated_visitors_total %}
           <br />
-          signed_in: {{ one_row.authenticated_visitors_total }}
+          signed_in: {{ one_row.authenticated_visitors_total|intcomma }}
         {% endif %}
       </td>
       <td>
-        viewed: {{ one_row.voter_guides_viewed|default_if_none:"n/a" }}
+        viewed: {{ one_row.voter_guides_viewed|default_if_none:"n/a"|intcomma }}
         {#            <br />#}
         {#            views: {{ one_row.voter_guide_views|default_if_none:"n/a" }}<br />#}
         {#            first-views: {{ one_row.voter_guide_entries|default_if_none:"n/a" }}#}
       </td>
       <td>
-        public: {{ one_row.public_positions }}
+        public: {{ one_row.public_positions|intcomma }}
         <br />
-        with comments: {{ one_row.public_positions_with_comments }}
+        with comments: {{ one_row.public_positions_with_comments|intcomma }}
       </td>
       <td>
-        friends only: {{ one_row.friends_only_positions }}
+        friends only: {{ one_row.friends_only_positions|intcomma }}
         <br />
-        with comments: {{ one_row.friends_only_positions_with_comments }}
+        with comments: {{ one_row.friends_only_positions_with_comments|intcomma }}
       </td>
       <td>
-        followed: {{ one_row.unique_voters_that_followed_organizations|default_if_none:"n/a" }}
+        followed: {{ one_row.unique_voters_that_followed_organizations|default_if_none:"n/a"|intcomma }}
         <br />
-        auto-followed: {{ one_row.unique_voters_that_auto_followed_organizations|default_if_none:"n/a" }}
+        auto-followed: {{ one_row.unique_voters_that_auto_followed_organizations|default_if_none:"n/a"|intcomma }}
       </td>
       {#        <td>followed: {{ one_row.organizations_followed|default_if_none:"n/a" }}<br />#}
       {#            auto-followed: {{ one_row.organizations_auto_followed|default_if_none:"n/a" }}</td>#}
@@ -59,7 +71,7 @@
   {% endfor %}
   {% if not sitewide_election_metrics_list %}
     <tr>
-      <td colspan="13">No election-level metrics found for the entire site.</td>
+      <td colspan="7">No election-level metrics match the current filters.</td>
     </tr>
   {% endif %}
 </table>

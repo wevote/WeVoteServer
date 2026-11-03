@@ -18,8 +18,14 @@
     {% csrf_token %}
     <input type="hidden" name="state_code" value="{{ state_code }}" />
     <input type="hidden" name="update_year" value="{{ update_year|default:'' }}" />
+    {% if include_elections_with_no_data %}
+      <input type="hidden" name="include_elections_with_no_data" value="1" />
+    {% endif %}
     {% if election_list %}
-      {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=google_civic_election_id reverse_date_order=True %}
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="google_civic_election_id" style="margin: 0;">Election</label>
+        {% include "election/election_list_dropdown.html" with election_list=election_list selected_election_id=google_civic_election_id reverse_date_order=True default_option_text="-- Select an election --" %}
+      </div>
     {% endif %}
     {# End of if election_list #}
   </form>
@@ -28,15 +34,18 @@
         method="get"
         action="{% url 'analytics:sitewide_election_metrics_process' %}">
     {% csrf_token %}
+    {% if include_elections_with_no_data %}
+      <input type="hidden" name="include_elections_with_no_data" value="1" />
+    {% endif %}
     <input type="hidden"
            name="google_civic_election_id"
            value="{{ google_civic_election_id }}" />
     <input type="hidden" name="state_code" value="{{ state_code }}" />
 
     <div class="form-group" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 15px;">
-      <label for="update_year" style="margin-bottom: 0;">Update year</label>
+      <label for="update_year" style="margin-bottom: 0;">Year</label>
       <select id="update_year" name="update_year">
-        <option value="">Selected election year</option>
+        <option value="">Select a year</option>
         {% for year in update_year_list %}
           <option value="{{ year }}"{% if year == update_year %} selected="selected"{% endif %}>{{ year }}</option>
         {% endfor %}
@@ -45,10 +54,39 @@
               class="btn btn-default"
               name="organization_election_metrics_button">Update Election Metrics</button>
     </div>
-    <p>Select a year to update all eligible elections in that year, or choose Selected election to update one election.</p>
+    <p>Selecting a year updates all eligible elections in that year, regardless of the election selected above.</p>
   </form>
 
+  <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 20px; margin-bottom: 10px;">
+    <form name="filter_metrics" method="get" action="{% url 'analytics:sitewide_election_metrics' %}" style="margin: 0;">
+      <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+      <input type="hidden" name="state_code" value="{{ state_code }}" />
+      <input type="hidden" name="update_year" value="{{ update_year|default:'' }}" />
+      <label for="include_elections_with_no_data"
+             style="display: inline-flex; align-items: center; gap: 8px; margin: 0; font-weight: normal; cursor: pointer;">
+        <input type="checkbox" id="include_elections_with_no_data" name="include_elections_with_no_data" value="1"
+               style="position: static; margin: 0; flex-shrink: 0;"
+               {% if include_elections_with_no_data %}checked="checked"{% endif %}
+               onchange="this.form.elements['update_year'].value = document.getElementById('update_year').value; this.form.submit();" />
+        Include elections with no data
+      </label>
+    </form>
+    {% if metrics_page.paginator.num_pages > 1 %}
+      <nav aria-label="Election metrics pages" style="text-align: right; margin: 10px 0;">
+        {% if metrics_page.has_previous %}<a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ metrics_page.previous_page_number }}">Previous page</a> | {% endif %}
+        Page {{ metrics_page.number }}
+        {% if metrics_page.has_next %} | <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ metrics_page.next_page_number }}">Next page</a>{% endif %}
+      </nav>
+    {% endif %}
+  </div>
   {% include "analytics/sitewide_election_metrics_table.html" with sitewide_election_metrics_list=sitewide_election_metrics_list %}
+  {% if metrics_page.paginator.num_pages > 1 %}
+    <nav aria-label="Election metrics pages" style="text-align: right; margin: 10px 0;">
+      {% if metrics_page.has_previous %}<a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ metrics_page.previous_page_number }}">Previous page</a> | {% endif %}
+      Page {{ metrics_page.number }}
+      {% if metrics_page.has_next %} | <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ metrics_page.next_page_number }}">Next page</a>{% endif %}
+    </nav>
+  {% endif %}
 
   <script>
     $(function() {
