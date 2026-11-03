@@ -1520,8 +1520,6 @@ class AnalyticsManager(models.Manager):
             google_civic_election_id = sitewide_election_metrics_values['google_civic_election_id']
 
             try:
-                election = Election.objects.using('readonly').get(google_civic_election_id=google_civic_election_id)
-                sitewide_election_metrics_values['election_day_text'] = election.election_day_text
                 metrics_saved, created = SitewideElectionMetrics.objects.using('analytics').update_or_create(
                     google_civic_election_id=google_civic_election_id,
                     defaults=sitewide_election_metrics_values

@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils.timezone import now
@@ -35,6 +36,8 @@ from wevote_functions.functions_date import convert_date_as_integer_to_date, con
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+SITEWIDE_ELECTION_METRICS_PER_PAGE = 25
 
 ANALYTICS_ACTION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/analyticsActionSyncOut/"
 ORGANIZATION_ELECTION_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/organizationElectionMetricsSyncOut/"
@@ -1426,8 +1429,11 @@ def sitewide_election_metrics_process_view(request):
 
     update_year_text = request.GET.get('update_year', '')
     update_year = convert_to_int(update_year_text)
+    include_elections_with_no_data = request.GET.get('include_elections_with_no_data', '') == '1'
     redirect_url = reverse('analytics:sitewide_election_metrics', args=()) + \
         "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" + str(state_code)
+    if include_elections_with_no_data:
+        redirect_url += '&include_elections_with_no_data=1'
 
     if update_year_text:
         if not (len(update_year_text) == 4 and update_year_text.isdigit() and 1000 <= update_year <= 9999):
@@ -1440,12 +1446,20 @@ def sitewide_election_metrics_process_view(request):
         if not election_results['success']:
             messages.error(request, 'Unable to retrieve elections for ' + str(update_year) + '.')
             return HttpResponseRedirect(redirect_url)
-        election_id_list = list(dict.fromkeys(
-            election.google_civic_election_id for election in election_results['election_list']))
+        elections_by_id = {
+            convert_to_int(election.google_civic_election_id): election
+            for election in election_results['election_list']}
+        election_id_list = list(elections_by_id)
         if not election_id_list:
             messages.info(request, 'No eligible elections found for ' + str(update_year) + '.')
             return HttpResponseRedirect(redirect_url)
     elif positive_value_exists(google_civic_election_id):
+        election = Election.objects.using('readonly').filter(
+            google_civic_election_id=google_civic_election_id).first()
+        if election is None:
+            messages.error(request, 'Selected election was not found.')
+            return HttpResponseRedirect(redirect_url)
+        elections_by_id = {google_civic_election_id: election}
         election_id_list = [google_civic_election_id]
     else:
         messages.error(request, 'Please select an election or a year before updating election metrics.')
@@ -1455,7 +1469,8 @@ def sitewide_election_metrics_process_view(request):
     failed_election_ids = []
     for election_id in election_id_list:
         try:
-            results = save_sitewide_election_metrics(election_id)
+            results = save_sitewide_election_metrics(
+                election_id, election_day_text=elections_by_id[election_id].election_day_text)
             if results['success']:
                 updated_count += 1
             else:
@@ -1477,10 +1492,9 @@ def sitewide_election_metrics_process_view(request):
             google_civic_election_id not in election_id_list:
         messages.error(
             request,
-            'Selected election ' + str(google_civic_election_id) + ' was not updated because it is not eligible '
-            'for the selected update year (' + str(update_year) + '). '
-            'To update only this election, clear the year selection by choosing "Selected election year" '
-            'in the "Update year" dropdown.')
+            'Selected election ' + str(google_civic_election_id) + ' was not updated, '
+            'To update only this election, clear the selected year by choosing "Select a year" '
+            'in the "year" dropdown.')
     return HttpResponseRedirect(redirect_url)
 
 
@@ -1498,17 +1512,33 @@ def sitewide_election_metrics_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    sitewide_election_metrics_list = []
+    sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('analytics').order_by(
+        '-election_day_text', '-id')
+    include_elections_with_no_data = request.GET.get('include_elections_with_no_data', '') == '1'
+    displayed_metric_fields = (
+        'visitors_total', 'authenticated_visitors_total', 'voter_guides_viewed',
+        'public_positions', 'public_positions_with_comments',
+        'friends_only_positions', 'friends_only_positions_with_comments',
+        'unique_voters_that_followed_organizations', 'unique_voters_that_auto_followed_organizations',
+    )
+    if not include_elections_with_no_data:
+        has_data = Q()
+        for field in displayed_metric_fields:
+            has_data |= Q(**{field + '__gt': 0})
+        sitewide_election_metrics_query = sitewide_election_metrics_query.filter(has_data)
+    paginator = Paginator(sitewide_election_metrics_query, SITEWIDE_ELECTION_METRICS_PER_PAGE)
+    metrics_page = paginator.get_page(request.GET.get('page', 1))
+    sitewide_election_metrics_list = list(metrics_page.object_list)
+    page_parameters = request.GET.copy()
+    page_parameters.pop('page', None)
+    page_parameters.pop('csrfmiddlewaretoken', None)
+    pagination_query = page_parameters.urlencode()
 
-    try:
-        sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('analytics').\
-            order_by('-election_day_text')
-        sitewide_election_metrics_list = list(sitewide_election_metrics_query)
-    except SitewideElectionMetrics.DoesNotExist:
-        # This is fine
-        pass
-
-    election_list = Election.objects.order_by('-election_day_text')
+    election_list = list(Election.objects.using('readonly').order_by('-election_day_text'))
+    elections_by_id = {convert_to_int(election.google_civic_election_id): election for election in election_list}
+    for metrics in sitewide_election_metrics_list:
+        # Reuse the dropdown's election objects instead of querying once per table row.
+        metrics.election = elections_by_id.get(metrics.google_civic_election_id)
 
     messages_on_stage = get_messages(request)
 
@@ -1528,6 +1558,10 @@ def sitewide_election_metrics_view(request):
         'election_list':                    election_list,
         'update_year':                      update_year,
         'update_year_list':                 update_year_list,
+        'include_elections_with_no_data':   include_elections_with_no_data,
+        'metrics_page':                    metrics_page,
+        'pagination_query':                pagination_query,
+        'metrics_row_offset':              max(0, metrics_page.start_index() - 1),
     }
     return render(request, 'analytics/sitewide_election_metrics.html', template_values)
 

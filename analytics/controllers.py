@@ -1617,7 +1617,7 @@ def save_sitewide_daily_metrics(date_as_integer, through_date_as_integer=0):
     return results
 
 
-def save_sitewide_election_metrics(google_civic_election_id):
+def save_sitewide_election_metrics(google_civic_election_id, election_day_text=None):
     status = ""
     success = False
 
@@ -1625,6 +1625,8 @@ def save_sitewide_election_metrics(google_civic_election_id):
     status += results['status']
     if results['success']:
         sitewide_election_metrics_values = results['sitewide_election_metrics_values']
+        if election_day_text is not None:
+            sitewide_election_metrics_values['election_day_text'] = election_day_text
 
         analytics_manager = AnalyticsManager()
         update_results = \
