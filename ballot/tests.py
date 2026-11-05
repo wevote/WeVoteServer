@@ -1,7 +1,7 @@
 from unittest import mock
 from collections import namedtuple
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from ballot.models import BallotReturned, BallotReturnedManager
 
@@ -100,3 +100,60 @@ class BallotTestCase(TestCase):
             self.assertFalse(result['geocoder_quota_exceeded'])
             self.assertTrue(result['ballot_returned_found'])
             self.assertEqual(result['ballot_returned'], ballot_in_jackson)
+
+
+class AllBallotItemsNationalElectionTests(SimpleTestCase):
+    """State code NA means 'no state' for a single-state election, and 'every state' for a national election."""
+
+    def _retrieve(self, requested_state, election_state_code, election_found=True):
+        from ballot.controllers import all_ballot_items_retrieve_for_one_election_for_api
+
+        election = mock.Mock(state_code=election_state_code)
+        election_manager = mock.Mock()
+        election_manager.retrieve_election.return_value = {
+            'election_found': election_found,
+            'election': election,
+        }
+        office_manager = mock.Mock()
+        office_manager.retrieve_all_offices_for_upcoming_election.return_value = {
+            'success': True,
+            'status': '',
+            'office_list_found': False,
+        }
+        measure_manager = mock.Mock()
+        measure_manager.retrieve_all_measures_for_upcoming_election.return_value = {
+            'success': True,
+            'status': '',
+            'measure_list_found': False,
+        }
+        with mock.patch('ballot.controllers.ElectionManager', return_value=election_manager), \
+                mock.patch('ballot.controllers.ContestOfficeListManager', return_value=office_manager), \
+                mock.patch('ballot.controllers.CandidateListManager'), \
+                mock.patch('ballot.controllers.ContestMeasureListManager', return_value=measure_manager):
+            all_ballot_items_retrieve_for_one_election_for_api(1000403, requested_state)
+        return office_manager, measure_manager
+
+    def test_national_election_requested_as_na_returns_every_state(self):
+        office_manager, measure_manager = self._retrieve('NA', '')
+        office_manager.retrieve_all_offices_for_upcoming_election.assert_called_once_with(
+            1000403, '', True, True)
+        measure_manager.retrieve_all_measures_for_upcoming_election.assert_called_once_with(
+            google_civic_election_id_list=[1000403],
+            state_code='',
+            return_list_of_objects=True,
+            limit=0,
+            read_only=True)
+
+    def test_state_election_requested_as_na_keeps_national_office_filter(self):
+        office_manager, measure_manager = self._retrieve('NA', 'KS')
+        self.assertEqual(
+            office_manager.retrieve_all_offices_for_upcoming_election.call_args[0][1], 'NA')
+        self.assertEqual(
+            measure_manager.retrieve_all_measures_for_upcoming_election.call_args.kwargs['state_code'], 'NA')
+
+    def test_state_request_is_unchanged(self):
+        office_manager, measure_manager = self._retrieve('KS', 'KS')
+        self.assertEqual(
+            office_manager.retrieve_all_offices_for_upcoming_election.call_args[0][1], 'KS')
+        self.assertEqual(
+            measure_manager.retrieve_all_measures_for_upcoming_election.call_args.kwargs['state_code'], 'KS')
