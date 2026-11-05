@@ -2391,11 +2391,24 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     office_list = []
     results = {}
 
+    # Election Finder requests a multi-state election as "NA" because the election row has no
+    # state_code. That value otherwise matches only offices stored with no state. Return every
+    # office and measure on the election, and leave the caller's state_code in the API response.
+    state_code_for_query = state_code_to_find
+    if positive_value_exists(state_code_to_find) and state_code_to_find.lower() == 'na':
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_election(google_civic_election_id)
+        if election_results['election_found']:
+            election_state_code = election_results['election'].state_code
+            if not positive_value_exists(election_state_code) or election_state_code.lower() == 'na':
+                state_code_for_query = ''
+                status += "NATIONAL_ELECTION_RETURNING_ALL_STATE_OFFICES "
+
     # Retrieve all offices in this election
     read_only = True
     return_list_of_objects = True
     office_results = contest_office_list_manager.retrieve_all_offices_for_upcoming_election(
-        google_civic_election_id, state_code_to_find, return_list_of_objects, read_only)
+        google_civic_election_id, state_code_for_query, return_list_of_objects, read_only)
     office_success = office_results['success']
     status += office_results['status']
     if office_results['office_list_found']:
@@ -2521,7 +2534,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
     google_civic_election_id_list = [google_civic_election_id]
     measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
-        state_code=state_code_to_find,
+        state_code=state_code_for_query,
         return_list_of_objects=return_list_of_objects,
         limit=measure_limit,
         read_only=read_only)
