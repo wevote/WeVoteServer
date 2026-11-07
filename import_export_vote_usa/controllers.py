@@ -80,8 +80,8 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
 
 
 def retrieve_from_vote_usa_api_election_query():
-    logger.info("Loading json data from Vote USA servers, API call electionQuery")
-    print("Loading json data from Vote USA servers, API call electionQuery")
+    logger.info("Loading json data from Vote-USA servers, API call electionQuery")
+    print("Loading json data from Vote-USA servers, API call electionQuery")
 
     if not positive_value_exists(VOTE_USA_ELECTION_QUERY_URL):
         results = {
@@ -116,7 +116,7 @@ def retrieve_from_vote_usa_api_election_query():
         logger.error("VOTE_USA_ELECTION_QUERY_URL: " + str(VOTE_USA_ELECTION_QUERY_URL) +
                      ", VOTE_USA_API_KEY:" + str(VOTE_USA_API_KEY))
         results = {
-            'status': "Error from Vote USA: " + structured_json['status'] + ' ',
+            'status': "Error from Vote-USA: " + structured_json['status'] + ' ',
             'structured_json':  structured_json,
             'success': False,
         }
@@ -135,7 +135,7 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
         ballot_returned=None,
         state_code=""):
     """
-    We are telling the server to explicitly reach out to the Vote USA API and retrieve the ballot items
+    We are telling the server to explicitly reach out to the Vote-USA API and retrieve the ballot items
     for this voter.
     """
     status = ""
@@ -205,7 +205,7 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
 
     ballot_returned_found = False
     try:
-        # Use Vote USA API call counter to track the number of queries we are doing each day
+        # Use Vote-USA API call counter to track the number of queries we are doing each day
         api_counter_manager = VoteUSAApiCounterManager()
         api_counter_manager.create_counter_entry(
             VOTE_USA_VOTER_INFO_QUERY_TYPE,
@@ -502,7 +502,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
             return results
 
         try:
-            # Use Vote USA API call counter to track the number of queries we are doing each day
+            # Use Vote-USA API call counter to track the number of queries we are doing each day
             api_counter_manager = VoteUSAApiCounterManager()
             api_counter_manager.create_counter_entry(
                 VOTE_USA_VOTER_INFO_QUERY_TYPE,

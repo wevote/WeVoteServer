@@ -27,7 +27,7 @@ def store_google_civic_json_response_to_import_batch_system(
     number_of_batch_rows = 0
     if kind_of_batch is CONTEST_OFFICE:
         # TODO: Not updated from Ballotpedia yet
-        filename = "Races from Vote USA API"
+        filename = "Races from Vote-USA API"
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""
@@ -38,7 +38,7 @@ def store_google_civic_json_response_to_import_batch_system(
         return results
     elif kind_of_batch is CANDIDATE:
         # TODO: Not updated from Ballotpedia yet
-        filename = "Candidates from Vote USA API"
+        filename = "Candidates from Vote-USA API"
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""
@@ -49,7 +49,7 @@ def store_google_civic_json_response_to_import_batch_system(
         return results
     elif kind_of_batch is MEASURE:
         # TODO: Not updated from Ballotpedia yet
-        filename = "Measures from Vote USA API"
+        filename = "Measures from Vote-USA API"
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""
@@ -59,7 +59,7 @@ def store_google_civic_json_response_to_import_batch_system(
             google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id, state_code=state_code)
         return results
     elif kind_of_batch is IMPORT_BALLOT_ITEM:
-        filename = "Ballot Items for Address from Vote USA API"
+        filename = "Ballot Items for Address from Vote-USA API"
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""

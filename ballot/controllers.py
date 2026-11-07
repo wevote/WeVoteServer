@@ -1416,7 +1416,7 @@ def choose_election_and_prepare_ballot_data(
 
     # If here, then we need to either:
     # 1) Find ballot data from a specific location (using either ballot_returned_we_vote_id or ballot_location_shortcut)
-    # 2) Get ballot data from the current default ballot source: Vote USA, Ballotpedia or Google Civic for VoterAddress
+    # 2) Get ballot data from the current default ballot source: Vote-USA, Ballotpedia or Google Civic for VoterAddress
     # 3) Find ballot data from a nearby address, previously retrieved and cached within We Vote, or
     #    generated within We Vote (google_civic_election_id >= 1000000
     # 4) Get test ballot data from Google Civic
@@ -1861,7 +1861,7 @@ def generate_ballot_data(
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
 
-            # We don't want to call Vote USA when we just have "City, State ZIP".
+            # We don't want to call Vote-USA when we just have "City, State ZIP".
             # Since we don't always know whether we have a street address or not, then we use a
             # simple string length cut-off.
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:

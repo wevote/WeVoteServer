@@ -138,7 +138,7 @@
              id="has_vote_usa_data_id"
              value="1"
              {% if has_vote_usa_data %}checked{% endif %} />
-      has Vote USA data
+      has Vote-USA data
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -314,7 +314,7 @@
                 <br />
               {% endif %}
               {% if office.vote_usa_office_id %}
-                Vote USA: {{ office.vote_usa_office_id|default_if_none:"" }}
+                Vote-USA: {{ office.vote_usa_office_id|default_if_none:"" }}
                 <br />
               {% endif %}
             </td>

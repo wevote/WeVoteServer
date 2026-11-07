@@ -110,7 +110,7 @@ class WeVoteImage(models.Model):
         verbose_name='profile image from linkedin', blank=True, null=True)
     organization_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     photo_url_from_ctcl = models.TextField(blank=True, null=True)  # URL provided by CTCL stored on other server
-    photo_url_from_vote_usa = models.TextField(blank=True, null=True)  # URL from Vote USA: stored on other server
+    photo_url_from_vote_usa = models.TextField(blank=True, null=True)  # URL from Vote-USA: stored on other server
     politician_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     voter_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     wikipedia_profile_image_url = models.TextField(

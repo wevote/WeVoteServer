@@ -189,12 +189,7 @@
               {% endif %}
             </a>
             <br />
-            <span class="u-no-break">In office:
-              {% if representative.year_in_office_2023 %}2023{% endif %}
-              {% if representative.year_in_office_2024 %}2024{% endif %}
-              {% if representative.year_in_office_2025 %}2025{% endif %}
-              {% if representative.year_in_office_2026 %}2026{% endif %}
-            </span>
+{% include "../representative/year_in_office_display.html" with representative=representative %}
           </td>
           <td>
             <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}"
@@ -233,6 +228,15 @@
                  class="u-no-break"
                  target="_blank">
                 {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+              </a>
+            {% endif %}
+            <!-- VoteUSAPoliticianId -->
+            {% if representative.vote_usa_politician_id %}
+              <br />
+              <a href="{% url 'politician:politician_vote_usa_edit' representative.vote_usa_politician_id %}?"
+                 class="u-no-break"
+                 target="_blank">
+                {{ representative.vote_usa_politician_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
               </a>
             {% endif %}
           </td>

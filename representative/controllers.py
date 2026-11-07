@@ -429,6 +429,10 @@ def generate_representative_dict_from_representative_object(
         'is_battleground_race_2024':    positive_value_exists(representative.is_battleground_race_2024),
         'is_battleground_race_2025':    positive_value_exists(representative.is_battleground_race_2025),
         'is_battleground_race_2026':    positive_value_exists(representative.is_battleground_race_2026),
+        'is_battleground_race_2027':    positive_value_exists(representative.is_battleground_race_2027),
+        'is_battleground_race_2028':    positive_value_exists(representative.is_battleground_race_2028),
+        'is_battleground_race_2029':    positive_value_exists(representative.is_battleground_race_2029),
+        'is_battleground_race_2030':    positive_value_exists(representative.is_battleground_race_2030),
         'is_claimed_profile':           representative.is_claimed_profile
         if positive_value_exists(representative.is_claimed_profile) else False,  # TO BE IMPLEMENTED FROM POLITICIAN
         'last_updated':                 date_last_updated,
@@ -469,6 +473,10 @@ def generate_representative_dict_from_representative_object(
         'year_in_office_2024':          representative.year_in_office_2024,
         'year_in_office_2025':          representative.year_in_office_2025,
         'year_in_office_2026':          representative.year_in_office_2026,
+        'year_in_office_2027':          representative.year_in_office_2026,
+        'year_in_office_2028':          representative.year_in_office_2026,
+        'year_in_office_2029':          representative.year_in_office_2026,
+        'year_in_office_2030':          representative.year_in_office_2026,
         'youtube_url':                  representative.youtube_url,
     }
 
@@ -1007,6 +1015,10 @@ def representatives_import_from_structured_json(structured_json):  # representat
         'is_battleground_race_2024',
         'is_battleground_race_2025',
         'is_battleground_race_2026',
+        'is_battleground_race_2027',
+        'is_battleground_race_2028',
+        'is_battleground_race_2029',
+        'is_battleground_race_2030',
         'politician_deduplication_attempted',
         'politician_match_attempted',
         'twitter_handle_updates_failing',
@@ -1015,6 +1027,10 @@ def representatives_import_from_structured_json(structured_json):  # representat
         'year_in_office_2024',
         'year_in_office_2025',
         'year_in_office_2026',
+        'year_in_office_2027',
+        'year_in_office_2028',
+        'year_in_office_2029',
+        'year_in_office_2030',
     ]
     character_fields = [
         'ballotpedia_representative_url',

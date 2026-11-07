@@ -97,7 +97,7 @@ def update_existing_candidates_from_candidates_api(google_civic_election_id=0, s
         return results
     
     try:
-        # Use Vote USA API call counter to track the number of queries we are doing each day
+        # Use Vote-USA API call counter to track the number of queries we are doing each day
         api_counter_manager = VoteUSAApiCounterManager()
         api_counter_manager.create_counter_entry(
             VOTE_USA_CANDIDATE_QUERY_TYPE,

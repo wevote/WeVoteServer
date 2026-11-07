@@ -113,7 +113,7 @@
                    value="1"
                    onChange="this.form.submit()"
                    {% if show_vote_usa_errors %}checked{% endif %} />
-            Vote USA errors&nbsp;&nbsp;&nbsp;
+            Vote-USA errors&nbsp;&nbsp;&nbsp;
           </label>
 
           <label for="show_successful_retrieves_id">
@@ -241,7 +241,7 @@
                           <td>
                             {{ log_entry.kind_of_log_entry }}
                             {% if log_entry.is_from_ctcl %}/CTCL{% endif %}
-                            {% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
+                            {% if log_entry.is_from_vote_usa %}/Vote-USA{% endif %}
                           </td>
                           <td>{{ log_entry.google_civic_election_id }}</td>
                         </tr>

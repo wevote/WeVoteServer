@@ -127,7 +127,7 @@ class Election(models.Model):
     use_google_civic_as_data_source = models.BooleanField(default=False)
     use_vote_usa_as_data_source = models.BooleanField(default=False)
     vote_usa_election_id = models.CharField(max_length=255, null=True)
-    # Vote USA election ids like this -- we collapse into one election, and put PD, PR, SA into suffix_list:
+    # Vote-USA election ids like this -- we collapse into one election, and put PD, PR, SA into suffix_list:
     #  * GA20220524PD (Democratic Party Primary)
     #  * GA20220524PR (Republican Party Primary)
     #  * GA20220524SA (Special General)

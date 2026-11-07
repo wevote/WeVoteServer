@@ -1239,7 +1239,7 @@ def extract_vote_usa_office_id(raw_vote_usa_office_id):
             parts = raw_vote_usa_office_id.split("|")
             vote_usa_office_id = parts[1]
         elif '}' in raw_vote_usa_office_id:
-            # A typo has been found in incoming data from Vote USA
+            # A typo has been found in incoming data from Vote-USA
             parts = raw_vote_usa_office_id.split("}")
             vote_usa_office_id = parts[1]
         else:
@@ -1262,7 +1262,7 @@ def extract_vote_usa_office_id_with_suffix(raw_vote_usa_office_id):
             if suffix:
                 vote_usa_office_id += '|' + suffix
         elif '}' in raw_vote_usa_office_id:
-            # A typo has been found in incoming data from Vote USA
+            # A typo has been found in incoming data from Vote-USA
             parts = raw_vote_usa_office_id.split("}")
             vote_usa_office_id = parts[1]
             chunk_with_election_type = parts[0]

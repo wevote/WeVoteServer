@@ -272,7 +272,7 @@
                    disabled
                    value="True"
                    {% if election.use_vote_usa_as_data_source %}checked{% endif %} />
-          &nbsp;Use&nbsp;Vote&nbsp;USA</span>
+          &nbsp;Use&nbsp;Vote-USA</span>
         </div>
       </div>
 
@@ -523,7 +523,7 @@
                 <li>
                   <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                      target="_blank">
-                    Vote USA: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to
+                    Vote-USA: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to
                     {{ map_points_retrieved_each_batch_chunk }}
                     at a time
                     {% if state_code %}(for {{ state_code|upper }}){% endif %}
@@ -533,7 +533,7 @@
                   Clicking this link schedules a Batch Process that does the following:
                   <ul>
                     <li>
-                      For each map point in this state, reach out to Vote USA "voterInfoQuery" API and retrieve the offices/candidates/measures.
+                      For each map point in this state, reach out to Vote-USA "voterInfoQuery" API and retrieve the offices/candidates/measures.
                     </li>
                     <li>Store the offices, candidates and measures returned.</li>
                   </ul>
@@ -541,7 +541,7 @@
                 <li>
                   <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1"
                      target="_blank">
-                    Vote USA: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to
+                    Vote-USA: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to
                     {{ map_points_retrieved_each_batch_chunk }}
                     at a time
                     {% if state_code %}(for {{ state_code|upper }}){% endif %}
@@ -552,7 +552,7 @@
                 <li>
                   <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                      target="_blank">
-                    Vote USA: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to
+                    Vote-USA: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to
                     {{ map_points_retrieved_each_batch_chunk }}
                     at a time
                     {% if state_code %}(for {{ state_code|upper }}){% endif %}
@@ -562,7 +562,7 @@
                 </li>
               {% else %}
                 <li>
-                  Vote USA: To retrieve Ballot Data for this National Election, please specify a state.
+                  Vote-USA: To retrieve Ballot Data for this National Election, please specify a state.
                   <br />
                 </li>
               {% endif %}

@@ -39,6 +39,10 @@ REPRESENTATIVE_UNIQUE_IDENTIFIERS = [
     'is_battleground_race_2024',
     'is_battleground_race_2025',
     'is_battleground_race_2026',
+    'is_battleground_race_2027',
+    'is_battleground_race_2028',
+    'is_battleground_race_2029',
+    'is_battleground_race_2030',
     'linkedin_url',
     'ocd_division_id',
     'office_held_id',
@@ -82,6 +86,10 @@ REPRESENTATIVE_UNIQUE_IDENTIFIERS = [
     'year_in_office_2024',
     'year_in_office_2025',
     'year_in_office_2026',
+    'year_in_office_2027',
+    'year_in_office_2028',
+    'year_in_office_2029',
+    'year_in_office_2030',
     'youtube_url',
 ]
 
@@ -236,6 +244,10 @@ class Representative(models.Model):
     is_battleground_race_2024 = models.BooleanField(default=False, null=False)
     is_battleground_race_2025 = models.BooleanField(default=False, null=False)
     is_battleground_race_2026 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2027 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2028 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2029 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2030 = models.BooleanField(default=False, null=False)
     # Politician has claimed this profile - this is copy. is_claimed_profile in Politician table is master
     is_claimed_profile = models.BooleanField(default=False, null=False)
     # Every politician has one default CampaignX entry that follows them over time. Campaigns with
@@ -258,6 +270,8 @@ class Representative(models.Model):
         default=None, null=True, blank=True, unique=False)
     # Image URL on Google Civic's servers.
     # See google_civic_profile_image_url_https, the master image cached on We Vote servers.
+    # Since Google Civic no longer provides a representatives query,
+    #  we are going to use this field for Vote-USA
     photo_url_from_google_civic = models.TextField(null=True, blank=True)
     # The full name of the party the representative is a member of.
     political_party = models.CharField(verbose_name="political_party", max_length=255, null=True, blank=True)
@@ -305,6 +319,7 @@ class Representative(models.Model):
                                                         blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    vote_usa_office_id = models.TextField(null=True, unique=False)
     vote_usa_politician_id = models.CharField(max_length=255, null=True, unique=False)
 
     # Which representative image is currently active?
@@ -323,7 +338,7 @@ class Representative(models.Model):
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for representative from Vote USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
+    # Image for representative from Vote-USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
@@ -341,6 +356,10 @@ class Representative(models.Model):
     year_in_office_2024 = models.BooleanField(default=None, null=True)
     year_in_office_2025 = models.BooleanField(default=None, null=True)
     year_in_office_2026 = models.BooleanField(default=None, null=True)
+    year_in_office_2027 = models.BooleanField(default=None, null=True)
+    year_in_office_2028 = models.BooleanField(default=None, null=True)
+    year_in_office_2029 = models.BooleanField(default=None, null=True)
+    year_in_office_2030 = models.BooleanField(default=None, null=True)
     youtube_url = models.TextField(blank=True, null=True)
 
 
@@ -486,6 +505,7 @@ class RepresentativeManager(models.Manager):
     def retrieve_polling_location_we_vote_id_list_from_representatives_are_missing(
             batch_process_date_started=None,
             is_from_google_civic=False,
+            is_from_vote_usa=False,
             state_code=''):
         polling_location_we_vote_id_list = []
         status = ''
@@ -500,6 +520,8 @@ class RepresentativeManager(models.Manager):
                 query = query.filter(date_last_updated__gt=batch_process_date_started)
             if positive_value_exists(is_from_google_civic):
                 query = query.filter(is_from_google_civic=True)
+            if positive_value_exists(is_from_vote_usa):
+                query = query.filter(is_from_vote_usa=True)
             if positive_value_exists(state_code):
                 query = query.filter(state_code__iexact=state_code)
             query = query.values_list('polling_location_we_vote_id', flat=True).distinct()
@@ -595,7 +617,8 @@ class RepresentativeManager(models.Manager):
             read_only=False,
             representative_id=0,
             representative_we_vote_id=None,
-            representative_name=None):
+            representative_name=None,
+            vote_usa_politician_id=None):
         representative_found = False
         representative_list = []
         representative_list_found = False
@@ -623,6 +646,18 @@ class RepresentativeManager(models.Manager):
                 representative_we_vote_id = representative_on_stage.we_vote_id
                 representative_found = True
                 status += "RETRIEVE_REPRESENTATIVE_FOUND_BY_WE_VOTE_ID "
+            elif positive_value_exists(vote_usa_politician_id):
+                if read_only:
+                    representative_on_stage = \
+                        Representative.objects.using('readonly')\
+                            .get(vote_usa_politician_id__iexact=vote_usa_politician_id)
+                else:
+                    representative_on_stage = Representative.objects\
+                        .get(vote_usa_politician_id__iexact=vote_usa_politician_id)
+                representative_id = representative_on_stage.id
+                representative_we_vote_id = representative_on_stage.we_vote_id
+                representative_found = True
+                status += "RETRIEVE_REPRESENTATIVE_FOUND_BY_VOTE_USA_POLITICIAN_ID "
             elif positive_value_exists(office_held_we_vote_id) and (
                     positive_value_exists(google_civic_representative_name) or
                     positive_value_exists(representative_name)):
@@ -1584,6 +1619,7 @@ class RepresentativeManager(models.Manager):
     @staticmethod
     def create_representatives_missing(
             is_from_google_civic=False,
+            is_from_vote_usa=False,
             polling_location_we_vote_id='',
             state_code=None,
             defaults={}):
@@ -1596,6 +1632,7 @@ class RepresentativeManager(models.Manager):
         try:
             representatives_missing, entry_created = RepresentativesMissingFromPollingLocation.objects.update_or_create(
                 is_from_google_civic=is_from_google_civic,
+                is_from_vote_usa=is_from_vote_usa,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
                 defaults=defaults)
@@ -1950,6 +1987,7 @@ class RepresentativesMissingFromPollingLocation(models.Model):
         verbose_name='date representatives last requested', auto_now=True, db_index=True)
     error_message = models.TextField(default=None, null=True)
     is_from_google_civic = models.BooleanField(default=False)
+    is_from_vote_usa = models.BooleanField(default=False)
     issue_resolved = models.BooleanField(default=False)
     # The map point for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(

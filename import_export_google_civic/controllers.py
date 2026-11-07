@@ -378,10 +378,10 @@ def groom_and_store_google_civic_ballot_json_2021(
                 if contest_type.lower() == 'referendum' or 'referendumTitle' in one_contest_json:
                     contest_type_calculated = 'referendum'
             elif 'referendumTitle' in one_contest_json:
-                # Vote USA not supporting 'type', so we determine with this
+                # Vote-USA not supporting 'type', so we determine with this
                 contest_type_calculated = 'referendum'
             elif 'office' in one_contest_json:
-                # Vote USA not supporting 'type', so we determine with this
+                # Vote-USA not supporting 'type', so we determine with this
                 contest_type_calculated = 'office'
             elif 'ballot_measures' in one_contest_json:
                 # This might be a holdover from Ballotpedia, and may need to be removed
@@ -686,7 +686,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                 continue_searching_for_candidate = False
             else:
                 # Does candidate already exist?
-                # Vote USA uses permanent office and politician ids, so finding an existing candidate from a prior
+                # Vote-USA uses permanent office and politician ids, so finding an existing candidate from a prior
                 #  election in our database is not uncommon. If it isn't linked to the relevant
                 #  google_civic_election_id, then we still consider the candidate "not found" and we create a new
                 #
@@ -1593,7 +1593,7 @@ def groom_and_store_google_civic_office_json_2021(
                 }
                 return results
             else:
-                # If here, we have a Vote USA Office Id, but no office found.
+                # If here, we have a Vote-USA Office Id, but no office found.
                 create_office_entry = True
                 continue_searching_for_office = False
 
@@ -3487,7 +3487,7 @@ def groom_and_store_google_civic_measure_json_2021(
                 }
                 return results
             else:
-                # If here, we have a Vote USA Measure Id, but no measure found.
+                # If here, we have a Vote-USA Measure Id, but no measure found.
                 create_measure_entry = True
                 continue_searching_for_measure = False
 

@@ -53,7 +53,7 @@ def positions_sync_out_doc_template_values(url_root):
             'name': 'include_positions_with_vote_usa_politician_id',
             'value': 'boolean',
             'default': 'false',
-            'description': 'Only return positions linked to a politician or candidate with a Vote USA politician ID.',
+            'description': 'Only return positions linked to a politician or candidate with a Vote-USA politician ID.',
         },
     ]
 

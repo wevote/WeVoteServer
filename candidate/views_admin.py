@@ -2042,14 +2042,14 @@ def candidate_new_view(request):
             },
             'vote_usa_office_id_dict':
             {
-                'label':    'Vote USA Office Id',
+                'label':    'Vote-USA Office Id',
                 'id':       'vote_usa_office_id',
                 'name':     'vote_usa_office',
                 'value':     vote_usa_office_id
             },
             'vote_usa_politician_id_dict':
             {
-                'label':    'Vote USA Politician Id',
+                'label':    'Vote-USA Politician Id',
                 'id':       'vote_usa_politician_id',
                 'name':     'vote_usa_politician',
                 'value':     vote_usa_politician_id
@@ -2616,14 +2616,14 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'vote_smart_id':                    vote_smart_id,
             'vote_usa_office_id_dict':
             {
-                'label':    'Vote USA Office Id',
+                'label':    'Vote-USA Office Id',
                 'id':       'vote_usa_office_id_id',
                 'name':     'vote_usa_office_id',
                 'value':     vote_usa_office_id if vote_usa_office_id else candidate_on_stage.vote_usa_office_id
             },
             'vote_usa_politician_id_dict':
             {
-                'label':    'Vote USA Politician Id',
+                'label':    'Vote-USA Politician Id',
                 'id':       'vote_usa_politician_id_id',
                 'name':     'vote_usa_politician_id',
                 'value':     vote_usa_politician_id \

@@ -4,7 +4,8 @@
 
 from .models import BatchProcessManager, \
     BatchSet, \
-    BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
+    BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES, BATCH_SET_SOURCE_IMPORT_VOTE_USA_REPRESENTATIVES, \
+    REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
     RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
 from .controllers_batch_process import process_next_representatives
 from admin_tools.views import redirect_to_sign_in_page
@@ -69,6 +70,7 @@ def import_representatives_for_location_view(request):
         'update_office_helds':      False,
         'update_representatives':   False,
     }
+    retrieve_representatives = False
 
     # See pattern in 'import_ballot_items_for_location_view' if we want to support other data providers
     if not success:
@@ -79,6 +81,15 @@ def import_representatives_for_location_view(request):
         status += "CTCL_NOT_SUPPORTED_AS_DATA_SOURCE "
     elif positive_value_exists(use_google_civic):
         status += "USE_GOOGLE_CIVIC_IS_DATA_SOURCE "
+        retrieve_representatives = True
+    elif positive_value_exists(use_vote_usa):
+        status += "USE_VOTE_USA_AS_DATA_SOURCE "
+        retrieve_representatives = True
+    else:
+        # Should not be possible to get here
+        pass
+
+    if retrieve_representatives:
         from import_export_google_civic.controllers_representatives \
             import retrieve_google_civic_representatives_from_polling_location_api
         results = retrieve_google_civic_representatives_from_polling_location_api(
@@ -87,11 +98,6 @@ def import_representatives_for_location_view(request):
             update_or_create_rules=update_or_create_rules,
         )
         status += results['status']
-    elif positive_value_exists(use_vote_usa):
-        status += "VOTE_USA_NOT_SUPPORTED_AS_DATA_SOURCE "
-    else:
-        # Should not be possible to get here
-        pass
 
     messages.add_message(request, messages.INFO, status)
     if positive_value_exists(polling_location_we_vote_id):
@@ -261,7 +267,8 @@ def retrieve_representatives_for_polling_locations_internal_view(
         results = representative_manager.\
             retrieve_polling_location_we_vote_id_list_from_representatives_are_missing(
                 batch_process_date_started=batch_process_date_started,
-                is_from_google_civic=True,
+                # is_from_google_civic=True,
+                is_from_vote_usa=True,
                 state_code=state_code,
             )
         if results['polling_location_we_vote_id_list_found']:
@@ -416,6 +423,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
     failed_representatives_api_call = 0
 
     existing_offices_held_by_ocd_and_name_dict = {}
+    existing_offices_held_by_vote_usa_office_id_dict = {}
     existing_representative_objects_dict = {}
     existing_representative_to_office_held_links_dict = {}
     new_office_held_we_vote_ids_list = []
@@ -427,12 +435,12 @@ def retrieve_representatives_for_polling_locations_internal_view(
     # elif positive_value_exists(use_ctcl):
     #     batch_set_source = BATCH_SET_SOURCE_IMPORT_CTCL_REPRESENTATIVES
     #     source_uri = CTCL_VOTER_INFO_URL
-    # elif positive_value_exists(use_vote_usa):
-    #     batch_set_source = BATCH_SET_SOURCE_IMPORT_VOTE_USA_REPRESENTATIVES
-    #     source_uri = VOTE_USA_VOTER_INFO_URL
-    # else:
-    batch_set_source = BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES
-    source_uri = REPRESENTATIVES_BY_ADDRESS_URL
+    if positive_value_exists(use_vote_usa):
+        batch_set_source = BATCH_SET_SOURCE_IMPORT_VOTE_USA_REPRESENTATIVES
+        source_uri = REPRESENTATIVES_BY_ADDRESS_URL
+    else:
+        batch_set_source = BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES
+        source_uri = REPRESENTATIVES_BY_ADDRESS_URL
 
     batch_set_id = 0
     if len(polling_location_list) > 0:
@@ -517,6 +525,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
                 batch_process_id=batch_process_id,
                 batch_set_id=batch_set_id,
                 existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
+                existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
                 existing_representative_objects_dict=existing_representative_objects_dict,
                 existing_representative_to_office_held_links_dict=existing_representative_to_office_held_links_dict,
                 new_office_held_we_vote_ids_list=new_office_held_we_vote_ids_list,
@@ -529,6 +538,8 @@ def retrieve_representatives_for_polling_locations_internal_view(
 
             existing_offices_held_by_ocd_and_name_dict = \
                 one_location_results['existing_offices_held_by_ocd_and_name_dict']
+            existing_offices_held_by_vote_usa_office_id_dict = \
+                one_location_results['existing_offices_held_by_vote_usa_office_id_dict']
             existing_representative_objects_dict = one_location_results['existing_representative_objects_dict']
             existing_representative_to_office_held_links_dict = \
                 one_location_results['existing_representative_to_office_held_links_dict']

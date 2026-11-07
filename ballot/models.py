@@ -1915,7 +1915,10 @@ class BallotReturned(models.Model):
             # Consider using:  and isinstance(self.election_date, str)
             return self.election_date.strftime('%Y-%m-%d')
         else:
-            return ""
+            try:
+                return self.election_date
+            except:
+                return ""
 
 
 class BallotReturnedEmpty(models.Model):
@@ -1931,7 +1934,7 @@ class BallotReturnedEmpty(models.Model):
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, db_index=True)
     is_from_ctcl = models.BooleanField(default=False)  # The ballot was returned empty from CTCL
-    is_from_vote_usa = models.BooleanField(default=False)  # The ballot was returned empty from Vote USA
+    is_from_vote_usa = models.BooleanField(default=False)  # The ballot was returned empty from Vote-USA
 
     # latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     # longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')

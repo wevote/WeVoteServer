@@ -1,0 +1,16 @@
+{# templates/representative/year_in_office_edit.html #}
+{% load template_filters %}
+{% if representative != None %}
+  <span class="u-no-break">In office:&nbsp;
+    {% for year in years_available %}
+    <label for="year_in_office_{{ year }}_id">
+      <input type="checkbox"
+             name="year_in_office_{{ year }}"
+             id="year_in_office_{{ year }}_id"
+             value="1"
+             {% if representative|year_in_office:year %}checked{% endif %} />
+      {{ year }}&nbsp;&nbsp;&nbsp;
+    </label>
+    {% endfor %}
+  </span>
+{% endif %}
