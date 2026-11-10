@@ -331,7 +331,7 @@ Press the green run icon to run, or the green bug icon to debug:
 
 Create another PyCharm run configuration called "Debug -- Attach to DAP" (in the "Attach to DAP" section) to run the **Python Debug Adapter Protocol (DAP)**
 
-<img src="./docs/images/DebugAttachToDAP.png" alt="PyCharm run or debug configuration" width="900" style="padding-left: 10%">
+<img src="./images/DebugAttachToDAP.png" alt="PyCharm run or debug configuration" width="1200" style="padding-left: 10%">
 
 - The *Remote address* field should be set to "localhost:5678"
 - The *Local Root Path* should be set to **your** path, something like "/Users/stevepodell/PycharmProjects/WeVoteServer"
@@ -346,7 +346,7 @@ To debug your code, simply start the docker image running with your existing "We
 run for the "Debug -- Attach to DAP" (Click the green Bug icon to start it).   Then, when you execute your code, the debugger should stop at any
 breakpoints that you have set.
 
-<img src="./docs/images/DebuggingWithDockerAndDAP.png" alt="PyCharm run or debug configuration" width="1300" style="padding-left: 10%">
+<img src="./images/DebuggingWithDockerAndDAP.png" alt="PyCharm run or debug configuration" width="1300" style="padding-left: 10%">
 
 [//]: # (Explanation: debugpy is Microsoft's implementation of the Debug Adapter Protocol &#40;DAP&#41; for Python. It allows editors and )
 [//]: # (IDEs &#40;like Visual Studio Code and PyCharm&#41; to set breakpoints, step through code, inspect variables, and manage remote )
