@@ -4,7 +4,8 @@
 
 from .models import AnalyticsAction, AnalyticsCountManager, AnalyticsManager, \
     ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
-from candidate.models import CandidateManager
+from .candidate_metrics import calculate_candidate_metrics
+from candidate.models import CandidateListManager, CandidateManager
 from config.environment_variable_functions import get_environment_variable
 from datetime import date, datetime, timedelta
 from django.db.models import Q
@@ -1197,6 +1198,24 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
     voter_metrics_manager = VoterMetricsManager()
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    candidate_results = CandidateListManager().retrieve_candidate_count_for_election_and_state(
+        google_civic_election_id_list=[google_civic_election_id])
+    status += candidate_results['status']
+    if not candidate_results['success']:
+        return {
+            'status': status,
+            'success': False,
+            'sitewide_election_metrics_values': {},
+        }
+    candidate_count = candidate_results['candidate_count']
+    try:
+        candidate_metrics = calculate_candidate_metrics(google_civic_election_id)
+    except Exception as e:
+        return {
+            'status': status + 'CANDIDATE_METRICS_FAILED: ' + str(e) + ' ',
+            'success': False,
+            'sitewide_election_metrics_values': {},
+        }
     visitors_total = analytics_count_manager.fetch_visitors(google_civic_election_id)
     voter_guide_entries = None
     voter_guide_views = None
@@ -1225,6 +1244,8 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
     success = True
 
     sitewide_election_metrics_values = {
+        'candidate_count':                         candidate_count,
+        **candidate_metrics,
         'google_civic_election_id':                 google_civic_election_id,
         'visitors_total':                           visitors_total,
         'voter_guide_entries':                      voter_guide_entries,

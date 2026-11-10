@@ -513,6 +513,16 @@ def sitewide_election_metrics_sync_out_view(request):  # sitewideElectionMetrics
 
         metrics_list_dict = metrics_query.values(
             'id', 'authenticated_visitors_total',
+            'candidate_count',
+            'candidate_count_claimed',
+            'candidate_dislikes_count',
+            'candidate_dislikes_count_claimed',
+            'candidate_favorites_count',
+            'candidate_favorites_count_claimed',
+            'candidates_chosen_count',
+            'candidates_chosen_count_claimed',
+            'candidates_opposed_count',
+            'candidates_opposed_count_claimed',
             'election_day_text', 'entered_full_address',
             'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
             'individuals_with_friends_only_positions', 'individuals_with_positions',
@@ -540,6 +550,16 @@ def sitewide_election_metrics_sync_out_view(request):  # sitewideElectionMetrics
                 writer.writerow(
                     [
                         'id', 'authenticated_visitors_total',
+                        'candidate_count',
+                        'candidate_count_claimed',
+                        'candidate_dislikes_count',
+                        'candidate_dislikes_count_claimed',
+                        'candidate_favorites_count',
+                        'candidate_favorites_count_claimed',
+                        'candidates_chosen_count',
+                        'candidates_chosen_count_claimed',
+                        'candidates_opposed_count',
+                        'candidates_opposed_count_claimed',
                         'election_day_text', 'entered_full_address',
                         'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
                         'individuals_with_friends_only_positions', 'individuals_with_positions',
