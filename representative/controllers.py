@@ -468,15 +468,17 @@ def generate_representative_dict_from_representative_object(
         if positive_value_exists(representative.twitter_description) and
         len(representative.twitter_description) > 1 else '',
         'twitter_followers_count':      representative.twitter_followers_count,
+        'vote_usa_office_id':           representative.vote_usa_office_id,
+        'vote_usa_politician_id':       representative.vote_usa_politician_id,
         'wikipedia_url':                representative.wikipedia_url,
         'year_in_office_2023':          representative.year_in_office_2023,
         'year_in_office_2024':          representative.year_in_office_2024,
         'year_in_office_2025':          representative.year_in_office_2025,
         'year_in_office_2026':          representative.year_in_office_2026,
-        'year_in_office_2027':          representative.year_in_office_2026,
-        'year_in_office_2028':          representative.year_in_office_2026,
-        'year_in_office_2029':          representative.year_in_office_2026,
-        'year_in_office_2030':          representative.year_in_office_2026,
+        'year_in_office_2027':          representative.year_in_office_2027,
+        'year_in_office_2028':          representative.year_in_office_2028,
+        'year_in_office_2029':          representative.year_in_office_2029,
+        'year_in_office_2030':          representative.year_in_office_2030,
         'youtube_url':                  representative.youtube_url,
     }
 

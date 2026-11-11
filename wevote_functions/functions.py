@@ -1244,6 +1244,8 @@ def extract_vote_usa_office_id(raw_vote_usa_office_id):
             vote_usa_office_id = parts[1]
         else:
             vote_usa_office_id = raw_vote_usa_office_id
+        if len(vote_usa_office_id) >= 2 and vote_usa_office_id[0] == "'" and vote_usa_office_id[-1] == "'":
+            vote_usa_office_id = vote_usa_office_id[1:-1]
         return vote_usa_office_id
     else:
         return ''

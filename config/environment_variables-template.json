@@ -33,11 +33,6 @@
   "DATABASE_HOST_READONLY":         "",
   "DATABASE_PORT_READONLY":         "5678",
 
-  "_comment":                       "Docker Developer Settings",
-  "DEV_SERVER_SSL_CERT":            "cert/wevotedeveloper.com.crt",
-  "DEV_SERVER_SSL_KEY":             "cert/wevotedeveloper.com_key.txt",
-  "DEV_VOTER_INITIAL_USER":         "Samuel Adams samuel@adams.com ale",
-
   "_comment":                       "analytics database settings for local.py",
   "DATABASE_ENGINE_ANALYTICS":      "django.db.backends.postgresql_psycopg2",
   "DATABASE_NAME_ANALYTICS":        "wevoteserverdb",

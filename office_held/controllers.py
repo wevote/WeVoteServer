@@ -32,6 +32,7 @@ def generate_office_held_dict_list_from_office_held_object_list(office_held_list
             'office_held_we_vote_id':       office_held.we_vote_id,
             'race_office_level':            office_held.race_office_level,
             'state_code':                   office_held.state_code,
+            'vote_usa_office_id':           office_held.vote_usa_office_id,
         }
         office_held_dict_list.append(one_office_dict)
 

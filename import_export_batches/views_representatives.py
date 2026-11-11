@@ -424,7 +424,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
 
     existing_offices_held_by_ocd_and_name_dict = {}
     existing_offices_held_by_vote_usa_office_id_dict = {}
-    existing_representative_objects_dict = {}
+    existing_representatives_by_office_and_name_dict = {}
     existing_representative_to_office_held_links_dict = {}
     new_office_held_we_vote_ids_list = []
     new_representative_we_vote_ids_list = []
@@ -526,7 +526,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
                 batch_set_id=batch_set_id,
                 existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
                 existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
-                existing_representative_objects_dict=existing_representative_objects_dict,
+                existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,
                 existing_representative_to_office_held_links_dict=existing_representative_to_office_held_links_dict,
                 new_office_held_we_vote_ids_list=new_office_held_we_vote_ids_list,
                 new_representative_we_vote_ids_list=new_representative_we_vote_ids_list,
@@ -540,7 +540,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
                 one_location_results['existing_offices_held_by_ocd_and_name_dict']
             existing_offices_held_by_vote_usa_office_id_dict = \
                 one_location_results['existing_offices_held_by_vote_usa_office_id_dict']
-            existing_representative_objects_dict = one_location_results['existing_representative_objects_dict']
+            existing_representatives_by_office_and_name_dict = one_location_results['existing_representatives_by_office_and_name_dict']
             existing_representative_to_office_held_links_dict = \
                 one_location_results['existing_representative_to_office_held_links_dict']
             new_office_held_we_vote_ids_list = one_location_results['new_office_held_we_vote_ids_list']
@@ -574,7 +574,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
     existing_offices_found = 0
     # if google_civic_election_id in existing_offices_held_by_ocd_and_name_dict:
     #     existing_offices_found = len(existing_offices_held_by_ocd_and_name_dict[google_civic_election_id])
-    existing_representatives_found = len(existing_representative_objects_dict)
+    existing_representatives_found = len(existing_representatives_by_office_and_name_dict)
     new_office_helds_found = len(new_office_held_we_vote_ids_list)
     new_representatives_found = len(new_representative_we_vote_ids_list)
 

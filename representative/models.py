@@ -618,13 +618,38 @@ class RepresentativeManager(models.Manager):
             representative_id=0,
             representative_we_vote_id=None,
             representative_name=None,
-            vote_usa_politician_id=None):
+            vote_usa_politician_id=None,
+            years_list=None):
         representative_found = False
         representative_list = []
         representative_list_found = False
         representative_on_stage = None
         status = ''
         success = True
+
+        if years_list and len(years_list) > 0:
+            # One usage pattern for this method is to find any existing Representative,
+            #  without caring *which* year they were in office. We need this when we are capturing
+            #  that the same politician is in the same office from a previous year (e.g. the second
+            #  year they are in office for an office one holds for 2+ years)
+            pass
+        else:
+            # Only retrieve representatives from the year we care about
+            today = datetime.now().date()
+            year = today.year
+            years_list = [year]
+
+        year_filters = []
+        year_integer_list = []
+        for year in years_list:
+            year_integer = convert_to_int(year)
+            if year_integer in OFFICE_HELD_YEARS_AVAILABLE:
+                year_integer_list.append(year_integer)
+        for year_integer in year_integer_list:
+            if positive_value_exists(year_integer):
+                year_in_office_key = 'year_in_office_' + str(year_integer)
+                one_year_filter = Q(**{year_in_office_key: True})
+                year_filters.append(one_year_filter)
 
         try:
             if positive_value_exists(representative_id):
@@ -646,18 +671,41 @@ class RepresentativeManager(models.Manager):
                 representative_we_vote_id = representative_on_stage.we_vote_id
                 representative_found = True
                 status += "RETRIEVE_REPRESENTATIVE_FOUND_BY_WE_VOTE_ID "
-            elif positive_value_exists(vote_usa_politician_id):
+            elif positive_value_exists(vote_usa_politician_id) and positive_value_exists(office_held_we_vote_id):
                 if read_only:
-                    representative_on_stage = \
-                        Representative.objects.using('readonly')\
-                            .get(vote_usa_politician_id__iexact=vote_usa_politician_id)
+                    queryset = Representative.objects.using('readonly').all()
                 else:
-                    representative_on_stage = Representative.objects\
-                        .get(vote_usa_politician_id__iexact=vote_usa_politician_id)
-                representative_id = representative_on_stage.id
-                representative_we_vote_id = representative_on_stage.we_vote_id
-                representative_found = True
-                status += "RETRIEVE_REPRESENTATIVE_FOUND_BY_VOTE_USA_POLITICIAN_ID "
+                    queryset = Representative.objects.all()
+                queryset = queryset.filter(vote_usa_politician_id__iexact=vote_usa_politician_id)
+                # A representative object is the politician in one office. There can be multiple Representative
+                #  entries per politician when that politician is in multiple offices over the years.
+                queryset = queryset.filter(office_held_we_vote_id=office_held_we_vote_id)
+                if len(year_filters) > 0:
+                    # Add the first query
+                    final_filters = year_filters.pop()
+                    # ...and "OR" the remaining items in the list
+                    for item in year_filters:
+                        final_filters |= item
+                    queryset = queryset.filter(final_filters)
+                representative_list = list(queryset)
+                if len(representative_list) > 0:
+                    # At least one entry exists
+                    if len(representative_list) == 1:
+                        representative_on_stage = representative_list[0]
+                        representative_id = representative_on_stage.id
+                        representative_found = True
+                        representative_list_found = False
+                        representative_we_vote_id = representative_on_stage.we_vote_id
+                        status += "REPRESENTATIVE_FOUND_BY_VOTE_USA_ID "
+                    else:
+                        # more than one entry found
+                        representative_found = False
+                        representative_list_found = True
+                        status += "MULTIPLE_REPRESENTATIVE_MATCHES_BY_VOTE_USA_ID "
+                else:
+                    representative_found = False
+                    representative_list_found = False
+                    status += "REPRESENTATIVE_NOT_FOUND_BY_VOTE_USA_ID "
             elif positive_value_exists(office_held_we_vote_id) and (
                     positive_value_exists(google_civic_representative_name) or
                     positive_value_exists(representative_name)):
@@ -665,6 +713,8 @@ class RepresentativeManager(models.Manager):
                     queryset = Representative.objects.using('readonly').all()
                 else:
                     queryset = Representative.objects.all()
+                # A representative object is the politician in one office. There can be multiple Representative
+                #  entries per politician when that politician is in multiple different offices over the years.
                 queryset = queryset.filter(office_held_we_vote_id=office_held_we_vote_id)
                 if positive_value_exists(representative_name):
                     queryset = queryset.filter(
@@ -679,6 +729,13 @@ class RepresentativeManager(models.Manager):
                         Q(google_civic_representative_name2=google_civic_representative_name) |
                         Q(google_civic_representative_name3=google_civic_representative_name)
                     )
+                if len(year_filters) > 0:
+                    # Add the first query
+                    final_filters = year_filters.pop()
+                    # ...and "OR" the remaining items in the list
+                    for item in year_filters:
+                        final_filters |= item
+                    queryset = queryset.filter(final_filters)
                 representative_list = list(queryset)
                 if len(representative_list) > 0:
                     # At least one entry exists
@@ -704,20 +761,6 @@ class RepresentativeManager(models.Manager):
                 else:
                     queryset = Representative.objects.all()
                 queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
-                today = datetime.now().date()
-                year = today.year
-                year_filters = []
-                years_list = [year]
-                year_integer_list = []
-                for year in years_list:
-                    year_integer = convert_to_int(year)
-                    if year_integer in OFFICE_HELD_YEARS_AVAILABLE:
-                        year_integer_list.append(year_integer)
-                for year_integer in year_integer_list:
-                    if positive_value_exists(year_integer):
-                        year_in_office_key = 'year_in_office_' + str(year_integer)
-                        one_year_filter = Q(**{year_in_office_key: True})
-                        year_filters.append(one_year_filter)
                 if len(year_filters) > 0:
                     # Add the first query
                     final_filters = year_filters.pop()
@@ -725,6 +768,7 @@ class RepresentativeManager(models.Manager):
                     for item in year_filters:
                         final_filters |= item
                     queryset = queryset.filter(final_filters)
+                # We don't have to order this list because we are only looking at entries from this year
                 representative_list = list(queryset)
                 if len(representative_list) > 0:
                     representative_on_stage = representative_list[0]
@@ -732,7 +776,7 @@ class RepresentativeManager(models.Manager):
                     representative_found = True
                     representative_list_found = False
                     representative_we_vote_id = representative_on_stage.we_vote_id
-                    status += "REPRESENTATIVE_FOUND "
+                    status += "REPRESENTATIVE_FOUND_BY_POLITICIAN_WE_VOTE_ID "
             else:
                 representative_found = False
                 status += "RETRIEVE_REPRESENTATIVE_SEARCH_INDEX_MISSING "
@@ -910,11 +954,12 @@ class RepresentativeManager(models.Manager):
             index_start=0,
             is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
-            office_held_we_vote_id_list=[],
-            politician_we_vote_id_list=[],
+            office_held_we_vote_id_list=None,
+            politician_we_vote_id_list=None,
             read_only=False,
             representatives_limit=300,
             search_string='',
+            vote_usa_politician_we_vote_id_list=None,
             years_list=[]):
         """
 
@@ -926,9 +971,16 @@ class RepresentativeManager(models.Manager):
         :param read_only:
         :param representatives_limit:
         :param search_string:
+        :param vote_usa_politician_we_vote_id_list:
         :param years_list:
         :return:
         """
+        if office_held_we_vote_id_list is None:
+            office_held_we_vote_id_list = []
+        if politician_we_vote_id_list is None:
+            politician_we_vote_id_list = []
+        if vote_usa_politician_we_vote_id_list is None:
+            vote_usa_politician_we_vote_id_list = []
         index_start = convert_to_int(index_start)
         representative_list = []
         representative_list_found = False
@@ -984,6 +1036,8 @@ class RepresentativeManager(models.Manager):
                 queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
             if len(politician_we_vote_id_list) > 0:
                 queryset = queryset.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+            if len(vote_usa_politician_we_vote_id_list) > 0:
+                queryset = queryset.filter(vote_usa_politician_we_vote_id__in=vote_usa_politician_we_vote_id_list)
             if positive_value_exists(is_missing_politician_we_vote_id):
                 queryset = queryset.filter(
                     Q(politician_we_vote_id__isnull=True) |
@@ -1079,8 +1133,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_fresh_twitter_details_to_representative(
-            self,
             representative=None,
             representative_we_vote_id='',
             twitter_user=None):
