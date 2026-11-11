@@ -1,0 +1,9 @@
+{# templates/office_held/year_with_data_display.html #}
+{% load template_filters %}
+{% if office_held != None %}
+<span class="u-no-break">Years with data:
+  <strong>
+  {% for year in office_held|years_with_data_list %}{{ year }} {% endfor %}
+  </strong>
+</span>
+{% endif %}

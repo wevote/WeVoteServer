@@ -32,6 +32,7 @@ def generate_office_held_dict_list_from_office_held_object_list(office_held_list
             'office_held_we_vote_id':       office_held.we_vote_id,
             'race_office_level':            office_held.race_office_level,
             'state_code':                   office_held.state_code,
+            'vote_usa_office_id':           office_held.vote_usa_office_id,
         }
         office_held_dict_list.append(one_office_dict)
 
@@ -85,11 +86,19 @@ def office_held_import_from_structured_json(structured_json):
         'is_battleground_race_2024',
         'is_battleground_race_2025',
         'is_battleground_race_2026',
+        'is_battleground_race_2027',
+        'is_battleground_race_2028',
+        'is_battleground_race_2029',
+        'is_battleground_race_2030',
         'office_held_is_partisan',
         'year_with_data_2023',
         'year_with_data_2024',
         'year_with_data_2025',
         'year_with_data_2026',
+        'year_with_data_2027',
+        'year_with_data_2028',
+        'year_with_data_2029',
+        'year_with_data_2030',
     ]
     character_fields = [
         'district_id',
@@ -197,6 +206,10 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
         'year_with_data_2024',
         'year_with_data_2025',
         'year_with_data_2026',
+        'year_with_data_2027',
+        'year_with_data_2028',
+        'year_with_data_2029',
+        'year_with_data_2030',
     ]
     character_fields = [
         'office_held_name_01',

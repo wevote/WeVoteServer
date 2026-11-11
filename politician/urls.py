@@ -30,6 +30,8 @@ urlpatterns = [
     re_path(r'^merge/$', views_admin.politician_merge_process_view, name='politician_merge_process'),
     re_path(r'^new/$', views_admin.politician_new_view, name='politician_new'),
     re_path(r'^(?P<politician_id>[0-9]+)/edit/$', views_admin.politician_edit_view, name='politician_edit'),
+    re_path(r'^(?P<vote_usa_politician_id>[A-Za-z0-9_-]+)/vote_usa_edit/$',
+            views_admin.politician_edit_view, name='politician_vote_usa_edit'),
     re_path(r'^(?P<politician_we_vote_id>wv[\w]{2}pol[\w]+)/edit$',
             views_admin.politician_edit_view, name='politician_we_vote_id_edit'),
     re_path(r'^(?P<politician_id>[0-9]+)/retrieve_photos/$',

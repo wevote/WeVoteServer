@@ -93,6 +93,10 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'is_battleground_race_2024',
     'is_battleground_race_2025',
     'is_battleground_race_2026',
+    'is_battleground_race_2027',
+    'is_battleground_race_2028',
+    'is_battleground_race_2029',
+    'is_battleground_race_2030',
     'is_claimed_profile',
     'last_name',
     'linked_campaignx_we_vote_id',
@@ -330,9 +334,9 @@ class Politician(models.Model):
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this politician", max_length=64, default=None, null=True, blank=True)
-    # Image URL on Vote USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
+    # Image URL on Vote-USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
     photo_url_from_vote_usa = models.TextField(null=True, blank=True)
-    # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
+    # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote-USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
     # Which politician image is currently active?
@@ -359,7 +363,7 @@ class Politician(models.Model):
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for politician from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https
+    # Image for politician from Vote-USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
@@ -385,6 +389,10 @@ class Politician(models.Model):
     is_battleground_race_2024 = models.BooleanField(default=False, null=False)
     is_battleground_race_2025 = models.BooleanField(default=False, null=False)
     is_battleground_race_2026 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2027 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2028 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2029 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2030 = models.BooleanField(default=False, null=False)
     # Politician has claimed this profile - This is the master value, and is_claimed_profile in candidate table is copy
     is_claimed_profile = models.BooleanField(default=False, null=False)
     is_claimed_profile_analysis_complete = models.BooleanField(default=False)

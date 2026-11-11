@@ -213,6 +213,7 @@ def office_held_new_view(request):
     office_held_facebook_url = request.GET.get('office_held_facebook_url', "")
     office_held_twitter_handle = request.GET.get('office_held_twitter_handle', "")
     office_held_url = request.GET.get('office_held_url', "")
+    vote_usa_office_id = request.GET.get('vote_usa_office_id', "")
 
     office_held_manager = OfficeHeldManager()
     updated_office_held_list = []
@@ -264,12 +265,12 @@ def office_held_new_view(request):
             'name':     'google_civic_office_held_name3',
             'value':     google_civic_office_held_name3
         },
-            'ocd_division_id_dict':
+        'ocd_division_id_dict':
         {
             'label':    'Ocd Division Id',
             'id':       'ocd_division_id_id',
             'name':     'ocd_division_id',
-            'value':     ocd_division_id
+            'value':     ocd_division_id,
         },
         'office_held_facebook_url_dict':
         {
@@ -299,6 +300,13 @@ def office_held_new_view(request):
             'name':     'state_code',
             'value':     state_code
         },
+        'vote_usa_office_id_dict':
+        {
+            'label':    'Vote-USA Office Id',
+            'id':       'vote_usa_office_id_id',
+            'name':     'vote_usa_office_id',
+            'value':     vote_usa_office_id,
+        },
     }
     return render(request, 'office_held/office_held_edit.html', template_values)
 
@@ -323,6 +331,7 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
     office_held_url = request.GET.get('office_held_url', '')
     state_code = request.GET.get('state_code', 0)
     twitter_handle = request.GET.get('twitter_handle', '')
+    vote_usa_office_id = request.GET.get('vote_usa_office_id', '')
 
     office_held = None
     office_held_found = False
@@ -406,14 +415,21 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'label':    'Office Held Website',
                 'id':       'office_held_url_id',
                 'name':     'office_held_url',
-                'value':     office_held_url if office_held_url else office_held.office_held_url
+                'value':     office_held_url if office_held_url else office_held.office_held_url,
             },
             'state_code_dict':
             {
                 'label':    'State Code',
                 'id':       'state_code_id',
                 'name':     'state_code',
-                'value':     state_code if state_code else office_held.state_code
+                'value':     state_code if state_code else office_held.state_code,
+            },
+            'vote_usa_office_id_dict':
+            {
+                'label':    'Vote-USA Office Id',
+                'id':       'vote_usa_office_id_id',
+                'name':     'vote_usa_office_id',
+                'value':     vote_usa_office_id if vote_usa_office_id else office_held.vote_usa_office_id,
             },
         }
     else:
@@ -492,6 +508,7 @@ def office_held_edit_process_view(request):
     office_held_facebook_url = request.POST.get('office_held_facebook_url', False)
     office_held_twitter_handle = request.POST.get('office_held_twitter_handle', False)
     office_held_url = request.POST.get('office_held_url', False)
+    vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
     # is_battleground_race_ values taken in below
 
     office_held_found = False
@@ -552,6 +569,8 @@ def office_held_edit_process_view(request):
                 office_held.office_held_twitter_handle = office_held_twitter_handle
             if office_held_url is not False:
                 office_held.office_held_url = office_held_url
+            if vote_usa_office_id is not False:
+                office_held.vote_usa_office_id = vote_usa_office_id
             is_battleground_years_list = IS_BATTLEGROUND_YEARS_AVAILABLE
             for year in is_battleground_years_list:
                 is_battleground_race_key = 'is_battleground_race_' + str(year)
@@ -943,6 +962,10 @@ def office_held_sync_out_view(request):  # officeHeldSyncOut
             'is_battleground_race_2024',
             'is_battleground_race_2025',
             'is_battleground_race_2026',
+            'is_battleground_race_2027',
+            'is_battleground_race_2028',
+            'is_battleground_race_2029',
+            'is_battleground_race_2030',
             'number_elected',
             'ocd_division_id',
             'office_held_description',
@@ -967,6 +990,10 @@ def office_held_sync_out_view(request):  # officeHeldSyncOut
             'year_with_data_2024',
             'year_with_data_2025',
             'year_with_data_2026',
+            'year_with_data_2027',
+            'year_with_data_2028',
+            'year_with_data_2029',
+            'year_with_data_2030',
         )
         if office_held_list_dict:
             office_held_list_json = list(office_held_list_dict)
@@ -1059,6 +1086,10 @@ def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationS
             'year_with_data_2024',
             'year_with_data_2025',
             'year_with_data_2026',
+            'year_with_data_2027',
+            'year_with_data_2028',
+            'year_with_data_2029',
+            'year_with_data_2030',
         )
         if offices_held_for_location_list_dict:
             modified_list_dict = []

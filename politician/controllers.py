@@ -2612,6 +2612,10 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
         'is_battleground_race_2024',
         'is_battleground_race_2025',
         'is_battleground_race_2026',
+        'is_battleground_race_2027',
+        'is_battleground_race_2028',
+        'is_battleground_race_2029',
+        'is_battleground_race_2030',
         'twitter_handle_updates_failing',
         'twitter_handle2_updates_failing',
     ]

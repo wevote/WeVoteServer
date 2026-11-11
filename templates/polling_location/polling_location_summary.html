@@ -123,7 +123,7 @@
       <li>
         Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_vote_usa=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}"
     target="_blank">
-      Vote USA: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a>
+      Vote-USA: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a>
     </li>
   {% endif %}
   <li>
@@ -132,8 +132,8 @@
 </li>
 
 <li>
-  <a href="{% url 'import_export_batches:import_representatives_for_location' %}?use_google_civic=1&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}">
-  Google Civic: Retrieve Representatives for this Map Point</a>
+  <a href="{% url 'import_export_batches:import_representatives_for_location' %}?use_vote_usa=1&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}">
+  Vote-USA: Retrieve Representatives for this Map Point</a>
 </li>
 <li>
   <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ polling_location.state|default_if_none:"" }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
@@ -157,7 +157,7 @@
           {{ log_entry.kind_of_log_entry }}
           {% if log_entry.is_from_ctcl %}/CTCL{% endif %}
           {% if log_entry.is_from_google_civic %}/Google Civic{% endif %}
-          {% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
+          {% if log_entry.is_from_vote_usa %}/Vote-USA{% endif %}
         </td>
         {% if not google_civic_election_id %}
           <td>{{ log_entry.election_name }} - {{ log_entry.google_civic_election_id }} - {{ log_entry.election_day_text }}</td>
@@ -263,7 +263,7 @@
         <td>
           <a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}"
              target="_blank">{{ ballot_returned.we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
-          {% if ballot_returned.google_civic_election_id %}&nbsp;({{ ballot_returned.google_civic_election_id }}){% endif %}
+          {% if ballot_returned.google_civic_election_id %}&nbsp;(<a href="{% url 'election:election_summary_by_google_id' ballot_returned.google_civic_election_id %}" target="_blank">{{ ballot_returned.google_civic_election_id }}</a>{% if ballot_returned.election_day_text %} - {{ ballot_returned.election_day_text }}{% endif %}){% endif %}
         </td>
         <td align="middle">
           {% if ballot_returned.ballot_location_display_name %}{{ ballot_returned.ballot_location_display_name }}{% endif %}

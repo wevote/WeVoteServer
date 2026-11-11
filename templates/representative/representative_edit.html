@@ -102,7 +102,7 @@
                    value="VOTE_USA"
                    {% if representative.profile_image_type_currently_active == 'VOTE_USA' %}checked{% endif %} />
             <img src='{{ representative.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
-            Vote USA
+            Vote-USA
           {% endif %}
         </span>
       </div>
@@ -139,40 +139,7 @@
           {{ we_vote_id }}
         {% endif %}
         <br />
-        <span class="u-no-break">In office:&nbsp;
-          <label for="year_in_office_2023_id">
-            <input type="checkbox"
-                   name="year_in_office_2023"
-                   id="year_in_office_2023_id"
-                   value="1"
-                   {% if representative.year_in_office_2023 %}checked{% endif %} />
-            2023&nbsp;&nbsp;&nbsp;
-          </label>
-          <label for="year_in_office_2024_id">
-            <input type="checkbox"
-                   name="year_in_office_2024"
-                   id="year_in_office_2024_id"
-                   value="1"
-                   {% if representative.year_in_office_2024 %}checked{% endif %} />
-            2024&nbsp;&nbsp;&nbsp;
-          </label>
-          <label for="year_in_office_2025_id">
-            <input type="checkbox"
-                   name="year_in_office_2025"
-                   id="year_in_office_2025_id"
-                   value="1"
-                   {% if representative.year_in_office_2025 %}checked{% endif %} />
-            2025&nbsp;&nbsp;&nbsp;
-          </label>
-          <label for="year_in_office_2026_id">
-            <input type="checkbox"
-                   name="year_in_office_2026"
-                   id="year_in_office_2026_id"
-                   value="1"
-                   {% if representative.year_in_office_2026 %}checked{% endif %} />
-            2026&nbsp;&nbsp;&nbsp;
-          </label>
-        </span>
+{% include "../representative/year_in_office_edit.html" with representative=representative %}
       </div>
     </div>
 
@@ -192,6 +159,23 @@
           <a href="{% url 'representative:update_representative_from_politician' %}?politician_we_vote_id={{ representative.politician_we_vote_id }}&representative_we_vote_id={{ representative.we_vote_id }}">update representative from politician</a>
         {% else %}
           &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'representative:representative_politician_match' %}?representative_id={{ representative.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote-USA Politician Id</label>
+      <div class="col-sm-8">
+        <input type="text"
+               name="vote_usa_politician_id"
+               id="vote_usa_politician_id_id"
+               class="form-control"
+               value="{% if representative %}{{ representative.vote_usa_politician_id|default_if_none:'' }}{% else %}{{ vote_usa_politician_id|default_if_none:'' }}{% endif %}" />
+        {% if representative.vote_usa_politician_id %}
+          <a href="{% url 'politician:politician_vote_usa_edit' representative.vote_usa_politician_id %}?"
+             target="_blank">
+            view politician&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+          </a>&nbsp;&nbsp;
         {% endif %}
       </div>
     </div>
@@ -628,9 +612,55 @@
           <td>State</td>
           <td>Twitter Handle</td>
           <td>Website</td>
-          <td>Id</td>
-          <td>We Vote Id</td>
+          <td>Id(s)</td>
         </tr>
+          <tr>
+            <td></td>
+            <td>
+              {% if representative.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                  <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}'
+                       height="48px" />
+                </a>
+              {% endif %}
+            </td>
+            <td>
+              {{ representative.representative_name }}
+              <br />
+            </td>
+            <td>
+              {% if representative.office_held_we_vote_id %}
+                <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+              {% if representative %}
+              <br />
+{% include "../representative/year_in_office_display.html" with representative=representative %}
+              {% endif %}
+            </td>
+            <td>{{ representative.state_code }}</td>
+            <td>
+              {% if representative.representative_twitter_handle %}
+                <a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+                   target="_blank">{{ representative.representative_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                ({{ representative.twitter_followers_count|intcomma }} followers)
+              {% endif %}
+            </td>
+            <td>
+              {% if representative.representative_url %}
+                <a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+              {% endif %}
+            </td>
+            <td>
+              {{ representative.id }}
+              {{ representative.we_vote_id }}
+              {% if representative.vote_usa_politician_id %}
+              {{ representative.vote_usa_politician_id }}
+              {% endif %}
+            </td>
+          </tr>
         {% for found_representative in duplicate_representative_list %}
           <tr>
             <td>{{ forloop.counter }}</td>
@@ -655,6 +685,10 @@
                 <a href="{% url 'office_held:office_held_summary' found_representative.office_held_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">{{ found_representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
               {% endif %}
+              {% if found_representative %}
+              <br />
+{% include "../representative/year_in_office_display.html" with representative=found_representative %}
+              {% endif %}
             </td>
             <td>{{ found_representative.state_code }}</td>
             <td>
@@ -670,8 +704,13 @@
                 <a href="{{ found_representative.representative_url }}" target="_blank">{{ found_representative.representative_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
               {% endif %}
             </td>
-            <td>{{ found_representative.id }}</td>
-            <td>{{ found_representative.we_vote_id }}</td>
+            <td>
+              {{ found_representative.id }}
+              {{ found_representative.we_vote_id }}
+              {% if found_representative.vote_usa_politician_id %}
+              {{ found_representative.vote_usa_politician_id }}
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </table>

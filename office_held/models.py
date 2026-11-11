@@ -86,6 +86,8 @@ def attach_defaults_values_to_office_held_object(office_held, defaults):
         office_held.race_office_level = defaults['race_office_level']
     if 'state_code' in defaults:
         office_held.state_code = defaults['state_code']
+    if 'vote_usa_office_id' in defaults:
+        office_held.vote_usa_office_id = defaults['vote_usa_office_id']
     if 'wikipedia_id' in defaults:
         office_held.wikipedia_id = defaults['wikipedia_id']
     year_with_data_list = OFFICE_HELD_YEARS_AVAILABLE
@@ -179,6 +181,10 @@ class OfficeHeld(models.Model):
     is_battleground_race_2024 = models.BooleanField(default=False, null=False)
     is_battleground_race_2025 = models.BooleanField(default=False, null=False)
     is_battleground_race_2026 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2027 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2028 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2029 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2030 = models.BooleanField(default=False, null=False)
     is_us_national_house = models.BooleanField(null=True)
     is_us_national_senate = models.BooleanField(null=True)
     # The number of candidates elected to office
@@ -214,15 +220,19 @@ class OfficeHeld(models.Model):
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     race_office_level = models.CharField(max_length=255, null=True, blank=True)
     state_code = models.CharField(verbose_name="state this office_held serves", max_length=2, null=True, blank=True)
+    vote_usa_office_id = models.TextField(null=True, unique=False)
 
     # Which years do we have representative data? This is cached data built up from master
     #  data in the Representative.years_in_office_flags field
     # As we add more years here, update /wevote_settings/constants.py OFFICE_HELD_YEARS_AVAILABLE
-    # As we add more years here, update attach_defaults_values_to_office_held_object
     year_with_data_2023 = models.BooleanField(default=None, null=True)
     year_with_data_2024 = models.BooleanField(default=None, null=True)
     year_with_data_2025 = models.BooleanField(default=None, null=True)
     year_with_data_2026 = models.BooleanField(default=None, null=True)
+    year_with_data_2027 = models.BooleanField(default=None, null=True)
+    year_with_data_2028 = models.BooleanField(default=None, null=True)
+    year_with_data_2029 = models.BooleanField(default=None, null=True)
+    year_with_data_2030 = models.BooleanField(default=None, null=True)
 
     def get_office_held_state(self):
         if positive_value_exists(self.state_code):
@@ -557,6 +567,7 @@ class OfficeHeldManager(models.Manager):
             office_held_name='',
             office_held_we_vote_id='',
             read_only=False,
+            vote_usa_office_id='',
     ):
         office_held = None
         office_held_found = False
@@ -584,6 +595,16 @@ class OfficeHeldManager(models.Manager):
                 office_held_found = True
                 office_held_we_vote_id = office_held.we_vote_id
                 status += "RETRIEVE_OFFICE_HELD_FOUND_BY_WE_VOTE_ID "
+            elif positive_value_exists(vote_usa_office_id):
+                if read_only:
+                    office_held = OfficeHeld.objects.using('readonly')\
+                        .get(vote_usa_office_id__iexact=vote_usa_office_id)
+                else:
+                    office_held = OfficeHeld.objects.get(vote_usa_office_id__iexact=vote_usa_office_id)
+                office_held_id = office_held.id
+                office_held_found = True
+                office_held_we_vote_id = office_held.we_vote_id
+                status += "RETRIEVE_OFFICE_HELD_FOUND_BY_VOTE_USA_OFFICE_ID "
             elif positive_value_exists(maplight_id):
                 if read_only:
                     office_held = OfficeHeld.objects.using('readonly').get(maplight_id=maplight_id)
@@ -1197,8 +1218,11 @@ class OfficesHeldForLocation(models.Model):
     voter_we_vote_id = models.CharField(default=None, max_length=255, null=True)
     # Which years do we have OfficesHeldForLocation data?
     # As we add more years here, update /wevote_settings/constants.py OFFICE_HELD_YEARS_AVAILABLE
-    # As we add more years here, update attach_defaults_values_to_offices_held_object
     year_with_data_2023 = models.BooleanField(default=None, null=True)
     year_with_data_2024 = models.BooleanField(default=None, null=True)
     year_with_data_2025 = models.BooleanField(default=None, null=True)
     year_with_data_2026 = models.BooleanField(default=None, null=True)
+    year_with_data_2027 = models.BooleanField(default=None, null=True)
+    year_with_data_2028 = models.BooleanField(default=None, null=True)
+    year_with_data_2029 = models.BooleanField(default=None, null=True)
+    year_with_data_2030 = models.BooleanField(default=None, null=True)

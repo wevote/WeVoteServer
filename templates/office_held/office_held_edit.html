@@ -67,13 +67,7 @@
           <!--target="_blank">check for duplicate office helds</a> - in new window)-->
           <!--{% endif %}-->
           <br />
-          Years with data:
-          <strong>
-            {% if office_held.year_with_data_2023 %}2023{% endif %}
-            {% if office_held.year_with_data_2024 %}2024{% endif %}
-            {% if office_held.year_with_data_2025 %}2025{% endif %}
-            {% if office_held.year_with_data_2026 %}2026{% endif %}
-          </strong>
+{% include "../office_held/year_with_data_display.html" with office_held=office_held %}
           <br />
           {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=office_held %}
         </div>
@@ -81,7 +75,7 @@
 
       {% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
 
-      {% include "../form_inputs/two_form_groups.html" with field_dict_1=district_name_dict field_dict_2=ocd_division_id_dict %}
+      {% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=district_name_dict field_dict_2=vote_usa_office_id_dict field_dict_3=ocd_division_id_dict %}
 
       {% if office_held.primary_party %}
         <div class="row form-group">

@@ -108,7 +108,7 @@ def candidates_query_doc_template_values(url_root):
         'api_slug': 'candidatesQuery',
         'api_introduction':
             "Retrieve all the candidates in a particular election or state. This API maintains compatibility with "
-            "the Vote USA API of the same name. For We Vote usage, we offer an option to return variables with "
+            "the Vote-USA API of the same name. For We Vote usage, we offer an option to return variables with "
             "'snake case' formatting as opposed to 'camel case'.",
         'try_now_link': 'apis_v1:candidatesQueryView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

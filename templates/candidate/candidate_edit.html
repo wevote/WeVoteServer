@@ -272,7 +272,7 @@ th, td {
                    value="VOTE_USA"
                    {% if candidate.profile_image_type_currently_active == 'VOTE_USA' %}checked{% endif %} />
             <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
-            Vote USA
+            Vote-USA
           {% endif %}
         </span>
         {# WIKIPEDIA IMAGE #}
@@ -923,7 +923,7 @@ th, td {
         <div class="row form-group">
           <label for="photo_url_from_vote_usa_id" class="pl-4 control-label">
             {% if candidate.photo_url_from_vote_usa %}<img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />{% endif %}
-            Vote USA Image
+            Vote-USA Image
           </label>
           <div class="col">
             <input type="text"

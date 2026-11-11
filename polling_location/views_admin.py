@@ -1101,6 +1101,8 @@ def polling_location_summary_internal_view(
                 google_civic_election_id=google_civic_election_id)
         ballot_returned_queryset = ballot_returned_queryset.filter(
             polling_location_we_vote_id=polling_location_we_vote_id)
+        # Order by ballot_returned.election_date (DESC) and then id (DESC) for records without election_date
+        ballot_returned_queryset = ballot_returned_queryset.order_by('-election_date', '-id')
         ballot_returned_list = list(ballot_returned_queryset)
         if len(ballot_returned_list):
             ballot_returned_list_found = True

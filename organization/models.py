@@ -3458,7 +3458,7 @@ class Organization(models.Model):
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image from Vote USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
+    # Image from Vote-USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)

@@ -1292,7 +1292,7 @@ def politician_new_view(request):
         },
         'vote_usa_politician_id_dict':
         {
-            'label':    'Vote USA Politician Id',
+            'label':    'Vote-USA Politician Id',
             'id':       'vote_usa_politician_id_id',
             'name':     'vote_usa_politician_id',
             'value':     vote_usa_politician_id
@@ -1423,7 +1423,7 @@ def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
 
 @login_required
 @SpeedStatisticsViewWrapper()
-def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
+def politician_edit_view(request, politician_id=0, politician_we_vote_id='', vote_usa_politician_id=''):
     status = ''
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
@@ -1484,7 +1484,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     state_code = request.GET.get('state_code', False)
     use_trigram_match = positive_value_exists(request.GET.get('use_trigram_match', False))
     vote_smart_id = request.GET.get('vote_smart_id', False)
-    vote_usa_politician_id = request.GET.get('vote_usa_politician_id', False)
+    if not positive_value_exists(vote_usa_politician_id):
+        vote_usa_politician_id = request.GET.get('vote_usa_politician_id', False)
     youtube_url = request.GET.get('youtube_url', False)
     maplight_id = request.GET.get('maplight_id', False)
 
@@ -1498,6 +1499,10 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     try:
         if positive_value_exists(politician_id):
             politician_on_stage = Politician.objects.get(id=politician_id)
+            politician_we_vote_id = politician_on_stage.we_vote_id
+        elif positive_value_exists(vote_usa_politician_id):
+            politician_on_stage = Politician.objects.get(vote_usa_politician_id__iexact=vote_usa_politician_id)
+            politician_id = politician_on_stage.id
             politician_we_vote_id = politician_on_stage.we_vote_id
         else:
             politician_on_stage = Politician.objects.get(we_vote_id=politician_we_vote_id)
@@ -2240,7 +2245,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             },
             'vote_usa_politician_id_dict':
             {
-                'label':    'Vote USA Politician Id',
+                'label':    'Vote-USA Politician Id',
                 'id':       'vote_usa_politician_id_id',
                 'name':     'vote_usa_politician_id',
                 'value':     vote_usa_politician_id
@@ -4254,6 +4259,10 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'is_battleground_race_2024',
             'is_battleground_race_2025',
             'is_battleground_race_2026',
+            'is_battleground_race_2027',
+            'is_battleground_race_2028',
+            'is_battleground_race_2029',
+            'is_battleground_race_2030',
             'last_name',
             'linked_campaignx_we_vote_id',
             'linkedin_url',

@@ -166,7 +166,7 @@
                    value="VOTE_USA"
                    {% if politician.profile_image_type_currently_active == 'VOTE_USA' %}checked{% endif %} />
             <img src='{{ politician.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
-            Vote USA
+            Vote-USA
           {% endif %}
         </span>
         {# WIKIPEDIA IMAGE #}
@@ -976,7 +976,7 @@
               <td>Website</td>
               <td>Id</td>
               <td>We Vote Ids</td>
-              <td>Vote Smart Vote USA Id</td>
+              <td>Vote Smart Vote-USA Id</td>
             </tr>
             {% for candidate in related_candidate_list %}
               <tr>
@@ -1135,12 +1135,7 @@
                   {% if representative.ocd_division_id %}
                     <div style="color: darkgray">{{ representative.ocd_division_id }}</div>
                   {% endif %}
-                  <span class="u-no-break">In office:
-                    {% if representative.year_in_office_2023 %}2023{% endif %}
-                    {% if representative.year_in_office_2024 %}2024{% endif %}
-                    {% if representative.year_in_office_2025 %}2025{% endif %}
-                    {% if representative.year_in_office_2026 %}2026{% endif %}
-                  </span>
+{% include "../representative/year_in_office_display.html" with representative=representative %}
                   {% if representative.office_held_we_vote_id %}&nbsp;&nbsp;&nbsp;{{ representative.office_held_we_vote_id }}{% endif %}
                 </td>
                 <td class="padded">
@@ -1226,12 +1221,7 @@
               </td>
               <td>{{ representative.state_code }}</td>
               <td>
-                <span class="u-no-break">In office:
-                  {% if representative.year_in_office_2023 %}2023{% endif %}
-                  {% if representative.year_in_office_2024 %}2024{% endif %}
-                  {% if representative.year_in_office_2025 %}2025{% endif %}
-                  {% if representative.year_in_office_2026 %}2026{% endif %}
-                </span>
+{% include "../representative/year_in_office_display.html" with representative=representative %}
               </td>
               <td>
                 <div>

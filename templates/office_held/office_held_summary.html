@@ -34,6 +34,15 @@
         </td>
       </tr>
 
+      {% if office_held.vote_usa_office_id %}
+        <tr>
+          <td>Vote-USA Office Id:</td>
+          <td>
+            <strong>{{ office_held.vote_usa_office_id }}</strong>
+          </td>
+        </tr>
+      {% endif %}
+
       {% if office_held.district_name %}
         <tr>
           <td>District Name:</td>
@@ -85,29 +94,13 @@
         </tr>
       {% endif %}
       <tr>
-        <td>Years with Data:</td>
-        <td>
-          <strong>
-            {% if office_held.year_with_data_2023 %}2023{% endif %}
-            {% if office_held.year_with_data_2024 %}2024{% endif %}
-            {% if office_held.year_with_data_2025 %}2025{% endif %}
-            {% if office_held.year_with_data_2026 %}2026{% endif %}
-          </strong>
+        <td colspan="2">
+{% include "../office_held/year_with_data_display.html" with office_held=office_held %}
         </td>
       </tr>
       <tr>
-        <td>Is Battleground Race:</td>
         <td>
-          <strong>
-            {% if office_held.is_battleground_race_2019 %}2019{% endif %}
-            {% if office_held.is_battleground_race_2020 %}2020{% endif %}
-            {% if office_held.is_battleground_race_2021 %}2021{% endif %}
-            {% if office_held.is_battleground_race_2022 %}2022{% endif %}
-            {% if office_held.is_battleground_race_2023 %}2023{% endif %}
-            {% if office_held.is_battleground_race_2024 %}2024{% endif %}
-            {% if office_held.is_battleground_race_2025 %}2025{% endif %}
-            {% if office_held.is_battleground_race_2026 %}2026{% endif %}
-          </strong>
+{% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=office_held %}
         </td>
       </tr>
 
@@ -160,12 +153,7 @@
             <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                target="_blank">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             <br />
-            <span class="u-no-break">In office:
-              {% if representative.year_in_office_2023 %}2023{% endif %}
-              {% if representative.year_in_office_2024 %}2024{% endif %}
-              {% if representative.year_in_office_2025 %}2025{% endif %}
-              {% if representative.year_in_office_2026 %}2026{% endif %}
-            </span>
+{% include "../representative/year_in_office_display.html" with representative=representative %}
           </td>
           <td>{{ representative.political_party|default_if_none:"" }}</td>
           <td>{{ representative.state_code|default_if_none:"" }}</td>
@@ -182,12 +170,19 @@
               {{ representative.we_vote_id|default_if_none:"" }}
               <br />
             {% endif %}
-            {% if representative.office_held_we_vote_id %}
-              {{ representative.office_held_we_vote_id|default_if_none:"" }}
+            {% if representative.politician_we_vote_id %}
+              <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?"
+                 class="u-no-break"
+                 target="_blank">
+                {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+              </a>
               <br />
             {% endif %}
-            {% if representative.politician_we_vote_id %}
-              {{ representative.politician_we_vote_id|default_if_none:"" }}
+            {% if representative.vote_usa_politician_id %}
+              <a href="{% url 'politician:politician_vote_usa_edit' representative.vote_usa_politician_id %}?"
+                 target="_blank">
+                {{ representative.vote_usa_politician_id|default_if_none:"" }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+              </a>&nbsp;&nbsp;
               <br />
             {% endif %}
             {% if representative.ctcl_uuid %}

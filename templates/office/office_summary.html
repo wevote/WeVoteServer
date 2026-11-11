@@ -213,9 +213,18 @@
       {% endif %}
       {% if office.vote_usa_office_id %}
         <tr>
-          <td>Vote Office USA ID:</td>
+          <td>Vote-USA Office ID:</td>
           <td>
             <strong>{{ office.vote_usa_office_id|default_if_none:"" }}</strong>
+          </td>
+        </tr>
+      {% endif %}
+      {% if office.we_vote_id %}
+        <tr>
+          <td colspan="2">
+            <a href="https://quality.wevote.us/office/{{ office.we_vote_id }}" target="_blank">
+              View on quality.wevote.us&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+            </a>
           </td>
         </tr>
       {% endif %}
@@ -628,7 +637,7 @@
                         <br />
                       {% endif %}
                       {% if found_office.vote_usa_office_id %}
-                        Vote USA: {{ found_office.vote_usa_office_id|default_if_none:"" }}
+                        Vote-USA: {{ found_office.vote_usa_office_id|default_if_none:"" }}
                         <br />
                       {% endif %}
                       {% if found_office.ballotpedia_race_id %}

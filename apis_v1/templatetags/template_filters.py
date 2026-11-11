@@ -10,6 +10,7 @@ from django.template.defaultfilters import _property_resolver
 
 from wevote_functions import functions, functions_date
 from wevote_functions.functions import positive_value_exists
+from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 register = template.Library()
 
@@ -46,6 +47,39 @@ def get_list_from_dict(dict_variable, dict_key):
         return dict_variable[dict_key]
     except Exception as e:
         return []
+
+
+@register.filter(name="year_in_office")
+def year_in_office(obj, year):
+    return getattr(obj, 'year_in_office_' + str(year), False)
+
+
+@register.filter(name="years_with_data_list")
+def years_with_data_list(obj):
+    return [year for year in OFFICE_HELD_YEARS_AVAILABLE
+            if getattr(obj, 'year_with_data_' + str(year), False)]
+
+
+@register.filter(name="years_in_office_list")
+def years_in_office_list(obj):
+    return [year for year in OFFICE_HELD_YEARS_AVAILABLE
+            if getattr(obj, 'year_in_office_' + str(year), False)]
+
+
+@register.simple_tag(name="is_battleground_years_available")
+def is_battleground_years_available():
+    return IS_BATTLEGROUND_YEARS_AVAILABLE
+
+
+@register.filter(name="is_battleground_race")
+def is_battleground_race(obj, year):
+    return getattr(obj, 'is_battleground_race_' + str(year), False)
+
+
+@register.filter(name="battleground_years_list")
+def battleground_years_list(obj):
+    return [year for year in IS_BATTLEGROUND_YEARS_AVAILABLE
+            if getattr(obj, 'is_battleground_race_' + str(year), False)]
 
 
 @register.filter

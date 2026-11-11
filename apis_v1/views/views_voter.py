@@ -733,7 +733,7 @@ def voter_address_save_view(request):  # voterAddressSave
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
 
-            # We don't want to call Vote USA when we just have "City, State ZIP".
+            # We don't want to call Vote-USA when we just have "City, State ZIP".
             # Since we don't always know whether we have a street address or not, then we use a
             # simple string length cut-off.
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:

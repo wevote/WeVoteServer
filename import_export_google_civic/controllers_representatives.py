@@ -3,18 +3,22 @@
 
 # -*- coding: UTF-8 -*-
 
+import json
+from datetime import datetime
+import requests
+
+from django.utils.timezone import now
+
 from .models import GoogleCivicApiCounterManager
 from config.environment_variable_functions import get_environment_variable
-from datetime import datetime
-from django.utils.timezone import now
 from exception.models import handle_exception
-import json
 from office_held.models import OfficeHeldManager
 from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, \
     KIND_OF_LOG_ENTRY_NO_OFFICES_HELD, KIND_OF_LOG_ENTRY_RATE_LIMIT_ERROR, \
     KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED, PollingLocationManager
 from representative.models import RepresentativeManager
-import requests
+from import_export_vote_usa.models import VoteUSAApiCounterManager
+from wevote_settings.constants import OFFICE_HELD_YEARS_AVAILABLE
 from wevote_functions.functions import convert_level_to_race_office_level, convert_to_int, \
     extract_district_id_label_when_district_id_exists_from_ocd_id, extract_district_id_from_ocd_division_id, \
     extract_instagram_handle_from_text_string, \
@@ -27,6 +31,7 @@ GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
 VOTER_INFO_URL = get_environment_variable("VOTER_INFO_URL")
 VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
+VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY")
 REPRESENTATIVES_BY_ADDRESS_URL = get_environment_variable("REPRESENTATIVES_BY_ADDRESS_URL")
 
 
@@ -37,51 +42,7 @@ def augment_officials_list_with_office_data(incoming_officials_list=[]):
     # create_office_entry = False
     # office_manager = ContestOfficeManager()
     # ctcl_office_uuid = False
-    # if continue_searching_for_office and positive_value_exists(ctcl_office_uuid):
-    #     if ctcl_office_uuid in existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string]:
-    #         contest_office = \
-    #             existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string][ctcl_office_uuid]
-    #         office_held_name = contest_office.office_name
-    #         contest_office_we_vote_id = contest_office.we_vote_id
-    #         contest_office_id = contest_office.id
-    #         office_name = contest_office.office_name
-    #         continue_searching_for_office = False
-    #     else:
-    #         office_results = office_manager.retrieve_contest_office(
-    #             ctcl_uuid=ctcl_office_uuid,
-    #             google_civic_election_id=google_civic_election_id,
-    #             read_only=(not allowed_to_update_offices))
-    #         if office_results['contest_office_found']:
-    #             continue_searching_for_office = False
-    #             contest_office = office_results['contest_office']
-    #             office_held_name = contest_office.office_name
-    #             contest_office_we_vote_id = contest_office.we_vote_id
-    #             contest_office_id = contest_office.id
-    #             office_name = contest_office.office_name
-    #             existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string][ctcl_office_uuid] = contest_office
-    #             # In the future, we will want to look for updated data to save
-    #         elif office_results['MultipleObjectsReturned']:
-    #             status += "MORE_THAN_ONE_OFFICE_WITH_SAME_CTCL_UUID_ID: " + str(ctcl_office_uuid) + " "
-    #             continue_searching_for_office = False
-    #         elif not office_results['success']:
-    #             status += "RETRIEVE_BY_CTCL_UUID_FAILED: "
-    #             status += office_results['status']
-    #             results = {
-    #                 'success': False,
-    #                 'status': status,
-    #                 'saved': 0,
-    #                 'updated': 0,
-    #                 'not_processed': 1,
-    #                 'office_held_dict_list_for_location': office_held_dict_list_for_location,
-    #                 'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-    #                 'existing_representative_objects_dict': existing_representative_objects_dict,
-    #                 'new_representative_we_vote_ids_list': new_representative_we_vote_ids_list,
-    #                 'new_office_held_we_vote_ids_list': new_office_held_we_vote_ids_list,
-    #             }
-    #             return results
-    #         else:
-    #             continue_searching_for_office = True
-    # elif continue_searching_for_office and positive_value_exists(vote_usa_office_id):
+    # if continue_searching_for_office and positive_value_exists(vote_usa_office_id):
     #     if vote_usa_office_id in existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string]:
     #         contest_office = \
     #             existing_offices_held_by_ocd_and_name_dict[google_civic_election_id_string][vote_usa_office_id]
@@ -127,13 +88,13 @@ def augment_officials_list_with_office_data(incoming_officials_list=[]):
     #                 'not_processed': 1,
     #                 'office_held_dict_list_for_location': office_held_dict_list_for_location,
     #                 'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-    #                 'existing_representative_objects_dict': existing_representative_objects_dict,
+    #                 'existing_representatives_by_office_and_name_dict': existing_representatives_by_office_and_name_dict,
     #                 'new_representative_we_vote_ids_list': new_representative_we_vote_ids_list,
     #                 'new_office_held_we_vote_ids_list': new_office_held_we_vote_ids_list,
     #             }
     #             return results
     #         else:
-    #             # If here, we have a Vote USA Office Id, but no office found.
+    #             # If here, we have a Vote-USA Office Id, but no office found.
     #             create_office_entry = True
     #             continue_searching_for_office = False
     #
@@ -194,10 +155,31 @@ def augment_officials_list_with_office_data(incoming_officials_list=[]):
     return results
 
 
-def augment_officials_list_with_politician_data(incoming_officials_list=[]):
+def augment_officials_list_with_politician_data(
+        incoming_officials_list=None,
+        politicians_dict=None,
+        use_vote_usa=True):
+    if politicians_dict is None:
+        politicians_dict = {}
+    if incoming_officials_list is None:
+        incoming_officials_list = []
     status = ''
     success = True
-    officials_list = incoming_officials_list
+    officials_list = []
+
+    # Note that this relies on a unique identifier coming in from Vote-USA.
+    for official in incoming_officials_list:
+        if 'voteUSAPoliticianId' in official and official['voteUSAPoliticianId']:
+            if official['voteUSAPoliticianId'] in politicians_dict:
+                politician = politicians_dict[official['voteUSAPoliticianId']]
+                official['politician_id'] = politician.id
+                official['politician_we_vote_id'] = politician.we_vote_id
+                officials_list.append(official)
+            else:
+                officials_list.append(official)
+        else:
+            officials_list.append(official)
+
     results = {
         'success': success,
         'status': status,
@@ -251,7 +233,8 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
         polling_location_we_vote_id='',
         office_held_dict_list_for_location=[],
         existing_offices_held_by_ocd_and_name_dict={},
-        existing_representative_objects_dict={},
+        existing_offices_held_by_vote_usa_office_id_dict={},
+        existing_representatives_by_office_and_name_dict={},
         existing_representative_to_office_held_links_dict={},
         new_office_held_we_vote_ids_list=[],
         new_representative_we_vote_ids_list=[],
@@ -279,8 +262,9 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
             'not_processed': 1,
             'office_held_dict_list_for_location': office_held_dict_list_for_location,
             'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
+            'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
             'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
-            'existing_representative_objects_dict': existing_representative_objects_dict,
+            'existing_representatives_by_office_and_name_dict': existing_representatives_by_office_and_name_dict,
             'new_representative_we_vote_ids_list': new_representative_we_vote_ids_list,
             'new_office_held_we_vote_ids_list': new_office_held_we_vote_ids_list,
         }
@@ -291,7 +275,7 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
     if positive_value_exists(use_ctcl):
         ctcl_office_uuid = office_held_dict['id']
     elif positive_value_exists(use_vote_usa):
-        raw_vote_usa_office_id = office_held_dict['id']
+        raw_vote_usa_office_id = office_held_dict['voteUSAOfficeId']
         vote_usa_office_id = extract_vote_usa_office_id(raw_vote_usa_office_id)
 
     office_held_name = office_held_dict['name']
@@ -420,6 +404,12 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
             office_held_object_found = True
             office_held_id = office_held_object.id
             office_held_we_vote_id = office_held_object.we_vote_id
+    elif positive_value_exists(vote_usa_office_id) \
+            and vote_usa_office_id in existing_offices_held_by_vote_usa_office_id_dict:
+        office_held_object = existing_offices_held_by_vote_usa_office_id_dict[vote_usa_office_id]
+        office_held_object_found = True
+        office_held_id = office_held_object.id
+        office_held_we_vote_id = office_held_object.we_vote_id
 
     allowed_to_create_office_helds = \
         'create_office_helds' in update_or_create_rules and \
@@ -428,47 +418,61 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
         'update_office_helds' in update_or_create_rules and \
         positive_value_exists(update_or_create_rules['update_office_helds'])
 
+    office_held_object_results_found = False
     if not office_held_object_found:
         # Now see if this office_held_object is already in the database
-        if positive_value_exists(ocd_division_id) and positive_value_exists(office_held_name):
+        if positive_value_exists(vote_usa_office_id):
+            try:
+                results = office_held_manager.retrieve_office_held(
+                    vote_usa_office_id=vote_usa_office_id,
+                    read_only=(not allowed_to_update_office_helds))
+                if results['success']:
+                    office_held_object_results_found = True
+            except Exception as e:
+                status += "RETRIEVE_OFFICE_HELD_ERROR: " + str(e) + " "
+        elif positive_value_exists(ocd_division_id) and positive_value_exists(office_held_name):
             try:
                 results = office_held_manager.retrieve_office_held(
                     ocd_division_id=ocd_division_id,
                     google_civic_office_held_name=office_held_name,
                     read_only=(not allowed_to_update_office_helds))
+                if results['success']:
+                    office_held_object_results_found = True
             except Exception as e:
                 status += "RETRIEVE_OFFICE_HELD_ERROR: " + str(e) + " "
-            try:
-                if results['success']:
-                    if results['office_held_list_found']:
-                        # Use the first one found
-                        office_held_list = results['office_held_list']
-                        office_held_object = office_held_list[0]
-                        office_held_object_found = True
-                    elif results['office_held_found']:
-                        office_held_object = results['office_held']
-                        office_held_object_found = True
-                    if office_held_object_found:
-                        office_held_id = office_held_object.id
-                        office_held_we_vote_id = office_held_object.we_vote_id
-                        if type(existing_offices_held_by_ocd_and_name_dict) is not dict:
-                            existing_offices_held_by_ocd_and_name_dict = {}
-                        if office_held_object.ocd_division_id not in existing_offices_held_by_ocd_and_name_dict:
-                            existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id] = {}
-                        if type(existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id]) is not dict:
-                            existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id] = {}
-                        existing_offices_held_by_ocd_and_name_dict[
-                            office_held_object.ocd_division_id][office_held_object.office_held_name] = office_held_object
-                else:
-                    success = False
-            except Exception as e:
-                status += "PROBLEM_GETTING_OFFICE_HELD_OBJECT: " + str(e) + " "
+
+    if office_held_object_results_found:
+        try:
+            if results['office_held_list_found']:
+                # Use the first one found
+                office_held_list = results['office_held_list']
+                office_held_object = office_held_list[0]
+                office_held_object_found = True
+            elif results['office_held_found']:
+                office_held_object = results['office_held']
+                office_held_object_found = True
+        except Exception as e:
+            status += "PROBLEM_GETTING_OFFICE_HELD_OBJECT: " + str(e) + " "
+
+    # Store office_held_object so we don't have to retrieve it from the database
+    if office_held_object_found:
+        office_held_id = office_held_object.id
+        office_held_we_vote_id = office_held_object.we_vote_id
+        # By OCD ID and name
+        if type(existing_offices_held_by_ocd_and_name_dict) is not dict:
+            existing_offices_held_by_ocd_and_name_dict = {}
+        if office_held_object.ocd_division_id not in existing_offices_held_by_ocd_and_name_dict:
+            existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id] = {}
+        if type(existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id]) is not dict:
+            existing_offices_held_by_ocd_and_name_dict[office_held_object.ocd_division_id] = {}
+        existing_offices_held_by_ocd_and_name_dict[
+            office_held_object.ocd_division_id][office_held_object.office_held_name] = office_held_object
+        # By vote_usa_office_id
+        if type(existing_offices_held_by_vote_usa_office_id_dict) is not dict:
+            existing_offices_held_by_vote_usa_office_id_dict = {}
+        existing_offices_held_by_vote_usa_office_id_dict[office_held_object.vote_usa_office_id] = office_held_object
 
     officials_list_results = augment_officials_list_with_representative_data(officials_list)
-    if officials_list_results['success']:
-        officials_list = officials_list_results['officials_list']
-
-    officials_list_results = augment_officials_list_with_politician_data(officials_list)
     if officials_list_results['success']:
         officials_list = officials_list_results['officials_list']
 
@@ -563,8 +567,8 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
             #     updated_office_held_values['google_ballot_placement'] = google_ballot_placement
             if positive_value_exists(ctcl_office_uuid):
                 updated_office_held_values['ctcl_uuid'] = ctcl_office_uuid
-            # if positive_value_exists(vote_usa_office_id):
-            #     updated_office_held_values['vote_usa_office_id'] = vote_usa_office_id
+            if positive_value_exists(vote_usa_office_id):
+                updated_office_held_values['vote_usa_office_id'] = vote_usa_office_id
             if positive_value_exists(this_year):
                 year_with_data_key = 'year_with_data_' + str(this_year)
                 updated_office_held_values[year_with_data_key] = True
@@ -588,6 +592,7 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
                             office_held_we_vote_id = office_held_object.we_vote_id
                             if office_held_we_vote_id not in new_office_held_we_vote_ids_list:
                                 new_office_held_we_vote_ids_list.append(office_held_we_vote_id)
+                            # By OCD ID and name
                             if type(existing_offices_held_by_ocd_and_name_dict) is not dict:
                                 existing_offices_held_by_ocd_and_name_dict = {}
                             if ocd_division_id not in existing_offices_held_by_ocd_and_name_dict:
@@ -596,6 +601,10 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
                                 existing_offices_held_by_ocd_and_name_dict[ocd_division_id] = {}
                             existing_offices_held_by_ocd_and_name_dict[ocd_division_id][
                                 office_held_name] = office_held_object
+                            # By vote_usa_office_id
+                            if type(existing_offices_held_by_vote_usa_office_id_dict) is not dict:
+                                existing_offices_held_by_vote_usa_office_id_dict = {}
+                            existing_offices_held_by_vote_usa_office_id_dict[office_held_object.vote_usa_office_id] = office_held_object
                     except Exception as e:
                         status += "PROBLEM_CACHING_OFFICE_HELD: " + str(e) + " "
                 else:
@@ -615,7 +624,8 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
                 'not_processed': 1,
                 'office_held_dict_list_for_location': office_held_dict_list_for_location,
                 'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-                'existing_representative_objects_dict': existing_representative_objects_dict,
+                'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+                'existing_representatives_by_office_and_name_dict': existing_representatives_by_office_and_name_dict,
                 'new_representative_we_vote_ids_list': new_representative_we_vote_ids_list,
                 'new_office_held_we_vote_ids_list': new_office_held_we_vote_ids_list,
             }
@@ -648,13 +658,17 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
                 office_held_id=office_held_id,
                 office_held_we_vote_id=office_held_we_vote_id,
                 office_held_name=office_held_name,
-                existing_representative_objects_dict=existing_representative_objects_dict,
+                existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,
                 existing_representative_to_office_held_links_dict=existing_representative_to_office_held_links_dict,
                 new_representative_we_vote_ids_list=new_representative_we_vote_ids_list,
                 update_or_create_rules=update_or_create_rules,
                 use_ctcl=use_ctcl,
-                use_google_civic=use_google_civic)
-            existing_representative_objects_dict = results['existing_representative_objects_dict']
+                use_google_civic=use_google_civic,
+                use_vote_usa=use_vote_usa,
+                vote_usa_office_id=vote_usa_office_id,
+            )
+            existing_representatives_by_office_and_name_dict = \
+                results['existing_representatives_by_office_and_name_dict']
             existing_representative_to_office_held_links_dict = \
                 results['existing_representative_to_office_held_links_dict']
             new_representative_we_vote_ids_list = results['new_representative_we_vote_ids_list']
@@ -665,7 +679,8 @@ def groom_and_store_office_held_with_representatives_google_civic_json(
         'status':                                       status,
         'office_held_dict_list_for_location':           office_held_dict_list_for_location,
         'existing_offices_held_by_ocd_and_name_dict':   existing_offices_held_by_ocd_and_name_dict,
-        'existing_representative_objects_dict':         existing_representative_objects_dict,
+        'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+        'existing_representatives_by_office_and_name_dict': existing_representatives_by_office_and_name_dict,
         'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
         'new_representative_we_vote_ids_list':          new_representative_we_vote_ids_list,
         'new_office_held_we_vote_ids_list':             new_office_held_we_vote_ids_list,
@@ -679,15 +694,16 @@ def groom_and_store_officials_list_from_json(
         office_held_id=0,
         office_held_we_vote_id='',
         office_held_name='',
-        election_year_integer=0,
-        existing_representative_objects_dict={},
+        existing_representatives_by_office_and_name_dict={},
         existing_representative_to_office_held_links_dict={},
         new_representative_we_vote_ids_list=[],
         state_code='',
         update_or_create_rules={},
         use_ctcl=False,
         use_google_civic=False,
-        use_vote_usa=False):
+        use_vote_usa=False,
+        vote_usa_office_id='',
+):
     status = ''
     success = True
     results = {}
@@ -703,6 +719,8 @@ def groom_and_store_officials_list_from_json(
         representative_object = None
         representative_object_found = False
 
+        politician_id = one_official['politician_id'] if 'politician_id' in one_official else None
+        politician_we_vote_id = one_official['politician_we_vote_id'] if 'politician_we_vote_id' in one_official else None
         representative_name = one_official['name'] if 'name' in one_official else ''
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
         representative_name = representative_name.replace("/'", "'")
@@ -710,7 +728,7 @@ def groom_and_store_officials_list_from_json(
         if representative_name in ignore_representatives_with_any_of_these_names:
             # Do not proceed with this representative data
             continue
-        # We want to save the name exactly as it comes from the Google Civic API
+        # We want to save the name exactly as it comes from the source
         google_civic_representative_name = one_official['name'] if 'name' in one_official else ''
         google_civic_representative_name = google_civic_representative_name.strip()
         political_party = one_official['party'] if 'party' in one_official else ''
@@ -718,6 +736,7 @@ def groom_and_store_officials_list_from_json(
         representative_url = None
         representative_url2 = None
         representative_url3 = None
+        vote_usa_politician_id = one_official['voteUSAPoliticianId'] if 'voteUSAPoliticianId' in one_official else None
         wikipedia_url = None
         if 'urls' in one_official:
             representative_urls = one_official['urls']
@@ -871,12 +890,13 @@ def groom_and_store_officials_list_from_json(
                                             and positive_value_exists(update_or_create_rules['create_representatives'])
         allowed_to_update_representatives = 'update_representatives' in update_or_create_rules \
                                             and positive_value_exists(update_or_create_rules['update_representatives'])
-        if positive_value_exists(use_google_civic) and positive_value_exists(office_held_we_vote_id) and \
-                positive_value_exists(representative_name):
-            if office_held_we_vote_id in existing_representative_objects_dict:
-                if representative_name in existing_representative_objects_dict[office_held_we_vote_id]:
+        if positive_value_exists(office_held_we_vote_id) and (
+                positive_value_exists(representative_name) or
+                positive_value_exists(vote_usa_politician_id)):
+            if office_held_we_vote_id in existing_representatives_by_office_and_name_dict:
+                if representative_name in existing_representatives_by_office_and_name_dict[office_held_we_vote_id]:
                     representative_object = \
-                        existing_representative_objects_dict[office_held_we_vote_id][representative_name]
+                        existing_representatives_by_office_and_name_dict[office_held_we_vote_id][representative_name]
                     representative_we_vote_id = representative_object.we_vote_id
                     if positive_value_exists(representative_we_vote_id):
                         representative_object_found = True
@@ -886,6 +906,8 @@ def groom_and_store_officials_list_from_json(
                 results = representative_manager.retrieve_representative(
                     office_held_we_vote_id=office_held_we_vote_id,
                     google_civic_representative_name=google_civic_representative_name,
+                    vote_usa_politician_id=vote_usa_politician_id,
+                    years_list=OFFICE_HELD_YEARS_AVAILABLE,
                     read_only=(not allowed_to_update_representatives))
                 if results['success']:
                     if results['representative_list_found']:
@@ -900,13 +922,13 @@ def groom_and_store_officials_list_from_json(
                         representative_object_found = False
                     if representative_object_found:
                         try:
-                            if type(existing_representative_objects_dict) is not dict:
-                                existing_representative_objects_dict = {}
-                            if office_held_we_vote_id not in existing_representative_objects_dict:
-                                existing_representative_objects_dict[office_held_we_vote_id] = {}
-                            if type(existing_representative_objects_dict[office_held_we_vote_id]) is not dict:
-                                existing_representative_objects_dict[office_held_we_vote_id] = {}
-                            existing_representative_objects_dict[office_held_we_vote_id][
+                            if type(existing_representatives_by_office_and_name_dict) is not dict:
+                                existing_representatives_by_office_and_name_dict = {}
+                            if office_held_we_vote_id not in existing_representatives_by_office_and_name_dict:
+                                existing_representatives_by_office_and_name_dict[office_held_we_vote_id] = {}
+                            if type(existing_representatives_by_office_and_name_dict[office_held_we_vote_id]) is not dict:
+                                existing_representatives_by_office_and_name_dict[office_held_we_vote_id] = {}
+                            existing_representatives_by_office_and_name_dict[office_held_we_vote_id][
                                 representative_object.representative_name] = representative_object
                         except Exception as e:
                             status += "COULD_NOT_CACHE_REPRESENTATIVE: " + str(e) + " "
@@ -950,13 +972,15 @@ def groom_and_store_officials_list_from_json(
             if positive_value_exists(photo_url_from_google_civic):
                 updated_representative_values['photo_url_from_google_civic'] = photo_url_from_google_civic
             if positive_value_exists(photo_url_from_vote_usa):
-                updated_representative_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
+                # Since Google Civic no longer provides a representatives query,
+                #  we are going to use this field for Vote-USA
+                updated_representative_values['photo_url_from_google_civic'] = photo_url_from_vote_usa
             if positive_value_exists(political_party):
                 updated_representative_values['political_party'] = political_party
-            # if positive_value_exists(politician_id):
-            #     updated_representative_values['politician_id'] = politician_id
-            # if positive_value_exists(politician_we_vote_id):
-            #     updated_representative_values['politician_we_vote_id'] = politician_we_vote_id
+            if positive_value_exists(politician_id):
+                updated_representative_values['politician_id'] = politician_id
+            if positive_value_exists(politician_we_vote_id):
+                updated_representative_values['politician_we_vote_id'] = politician_we_vote_id
             if positive_value_exists(representative_email):
                 updated_representative_values['representative_email'] = representative_email
             if positive_value_exists(representative_email2):
@@ -983,6 +1007,10 @@ def groom_and_store_officials_list_from_json(
                 updated_representative_values['representative_url3'] = representative_url3
             if positive_value_exists(state_code):
                 updated_representative_values['state_code'] = state_code.lower()
+            if positive_value_exists(vote_usa_office_id):
+                updated_representative_values['vote_usa_office_id'] = vote_usa_office_id
+            if positive_value_exists(vote_usa_politician_id):
+                updated_representative_values['vote_usa_politician_id'] = vote_usa_politician_id
             if positive_value_exists(wikipedia_url):
                 updated_representative_values['wikipedia_url'] = wikipedia_url
             if positive_value_exists(this_year):
@@ -1006,13 +1034,12 @@ def groom_and_store_officials_list_from_json(
                             results = retrieve_and_store_google_civic_representative_photo(representative_object)
                             if results['success']:
                                 representative_object = results['representative']
-                        # elif positive_value_exists(use_vote_usa):
-                        #     if positive_value_exists(representative_object.photo_url_from_vote_usa):
-                        #         from import_export_vote_usa.controllers import \
-                        #             retrieve_and_store_vote_usa_representative_photo
-                        #         results = retrieve_and_store_vote_usa_representative_photo(representative_object)
-                        #         if results['success']:
-                        #             representative_object = results['representative']
+                        elif positive_value_exists(use_vote_usa):
+                            # We are reusing 'photo_url_from_google_civic' for Vote-USA
+                            if positive_value_exists(representative_object.photo_url_from_google_civic):
+                                results = retrieve_and_store_vote_usa_representative_photo(representative_object)
+                                if results['success']:
+                                    representative_object = results['representative']
                         # else:
                         #     if positive_value_exists(representative_object.photo_url):
                         #         representative_results = \
@@ -1021,13 +1048,13 @@ def groom_and_store_officials_list_from_json(
                         #         if representative_results['success']:
                         #             representative_object = representative_results['representative']
                         # Now put it into a local variable for later use
-                        if type(existing_representative_objects_dict) is not dict:
-                            existing_representative_objects_dict = {}
-                        if office_held_we_vote_id not in existing_representative_objects_dict:
-                            existing_representative_objects_dict[office_held_we_vote_id] = {}
-                        if type(existing_representative_objects_dict[office_held_we_vote_id]) is not dict:
-                            existing_representative_objects_dict[office_held_we_vote_id] = {}
-                        existing_representative_objects_dict[office_held_we_vote_id][
+                        if type(existing_representatives_by_office_and_name_dict) is not dict:
+                            existing_representatives_by_office_and_name_dict = {}
+                        if office_held_we_vote_id not in existing_representatives_by_office_and_name_dict:
+                            existing_representatives_by_office_and_name_dict[office_held_we_vote_id] = {}
+                        if type(existing_representatives_by_office_and_name_dict[office_held_we_vote_id]) is not dict:
+                            existing_representatives_by_office_and_name_dict[office_held_we_vote_id] = {}
+                        existing_representatives_by_office_and_name_dict[office_held_we_vote_id][
                             representative_object.representative_name] = representative_object
                     except Exception as e:
                         status += "PROBLEM_AFTER_REPRESENTATIVE_CREATED: " + str(e) + " "
@@ -1044,9 +1071,9 @@ def groom_and_store_officials_list_from_json(
             #         representative_object = representative_results['representative']
             #         representative_we_vote_id = representative_object.we_vote_id
             #     if positive_value_exists(use_ctcl):
-            #         existing_representative_objects_dict[representative_ctcl_uuid] = representative_object
+            #         existing_representatives_by_office_and_name_dict[representative_ctcl_uuid] = representative_object
             #     elif positive_value_exists(use_vote_usa):
-            #         existing_representative_objects_dict[vote_usa_politician_id] = representative_object
+            #         existing_representatives_by_office_and_name_dict[vote_usa_politician_id] = representative_object
 
         # DALE 2023-01-14 Not sure we are going to use a separate link object for Representatives and OfficeHeld
         # if positive_value_exists(representative_we_vote_id):
@@ -1075,7 +1102,7 @@ def groom_and_store_officials_list_from_json(
     results = {
         'status':                                       status,
         'success':                                      success,
-        'existing_representative_objects_dict':         existing_representative_objects_dict,
+        'existing_representatives_by_office_and_name_dict':  existing_representatives_by_office_and_name_dict,
         'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
         'new_representative_we_vote_ids_list':          new_representative_we_vote_ids_list,
     }
@@ -1124,6 +1151,48 @@ def retrieve_and_store_google_civic_representative_photo(representative):
     return results
 
 
+def retrieve_and_store_vote_usa_representative_photo(representative):
+    success = True
+    status = ''
+    status += "RETRIEVE_AND_STORE_VOTE_USA_REPRESENTATIVE_PHOTO_NOT_IMPLEMENTED_YET "
+    # TODO Update this with photo_url_from_google_civic
+    # cache_results = cache_master_and_resized_image(
+    #     representative_id=representative.id,
+    #     representative_we_vote_id=representative.we_vote_id,
+    #     photo_url_from_google_civic=representative.photo_url_from_google_civic,
+    #     image_source=IMAGE_SOURCE_GOOGLE_CIVIC)
+    # vote_usa_profile_image_url_https = cache_results['cached_other_source_image_url_https']
+    # we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    # we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    # we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+    #
+    # representative.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
+    # representative.we_vote_hosted_profile_vote_usa_image_url_large = we_vote_hosted_profile_image_url_large
+    # representative.we_vote_hosted_profile_vote_usa_image_url_medium = we_vote_hosted_profile_image_url_medium
+    # representative.we_vote_hosted_profile_vote_usa_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+    #
+    # if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+    #     representative.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
+    # if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
+    #     representative.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+    #     representative.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+    #     representative.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+    #
+    # try:
+    #     representative.save()
+    #     status += "CANDIDATE_SAVED "
+    # except Exception as e:
+    #     success = False
+    #     status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+
+    results = {
+        'success':          success,
+        'status':           status,
+        'representative':   representative,
+    }
+    return results
+
+
 def retrieve_google_civic_representatives_from_polling_location_api(
         polling_location_we_vote_id="",
         polling_location=None,
@@ -1131,7 +1200,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
         batch_process_id=0,
         batch_set_id=0,
         existing_offices_held_by_ocd_and_name_dict={},
-        existing_representative_objects_dict={},
+        existing_offices_held_by_vote_usa_office_id_dict={},
+        existing_representatives_by_office_and_name_dict={},
         existing_representative_to_office_held_links_dict={},
         new_office_held_we_vote_ids_list=[],
         new_representative_we_vote_ids_list=[],
@@ -1144,7 +1214,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
     :param batch_process_id:
     :param batch_set_id:
     :param existing_offices_held_by_ocd_and_name_dict:
-    :param existing_representative_objects_dict:
+    :param existing_offices_held_by_vote_usa_office_id_dict:
+    :param existing_representatives_by_office_and_name_dict:
     :param existing_representative_to_office_held_links_dict:
     :param new_office_held_we_vote_ids_list:
     :param new_representative_we_vote_ids_list:
@@ -1158,6 +1229,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
     batch_header_id = 0
     successful_representatives_api_call = False
     representative_manager = RepresentativeManager()
+    use_google_civic = False
+    use_vote_usa = True
 
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         status += "MISSING_POLLING_LOCATION_INFO_FOR_REPRESENTATIVES "
@@ -1167,7 +1240,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             'ballot_items_count':                       ballot_items_count,
             'successful_representatives_api_call':      successful_representatives_api_call,
             'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-            'existing_representative_objects_dict':     existing_representative_objects_dict,
+            'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+            'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
             'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
             'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
             'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
@@ -1215,7 +1289,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 'ballot_items_count':                       ballot_items_count,
                 'successful_representatives_api_call':      successful_representatives_api_call,
                 'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-                'existing_representative_objects_dict':     existing_representative_objects_dict,
+                'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+                'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
                 'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
                 'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
                 'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
@@ -1229,12 +1304,12 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 state_code = "na"
 
         try:
-            # Get representatives info for this address
+            # Get representatives' info for this address
             response = requests.get(
                 REPRESENTATIVES_BY_ADDRESS_URL,
                 params={
+                    "accessKey": VOTE_USA_API_KEY,
                     "address": text_for_map_search,
-                    "key": GOOGLE_CIVIC_API_KEY,
                 })
             representative_info_by_address_json = json.loads(response.text)
         except Exception as e:
@@ -1243,7 +1318,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             log_entry_message = status
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,
-                is_from_google_civic=True,
+                # is_from_google_civic=True,
+                is_from_vote_usa=True,
                 kind_of_log_entry=KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                 log_entry_message=log_entry_message,
                 polling_location_we_vote_id=polling_location_we_vote_id,
@@ -1252,7 +1328,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             )
             status += results['status']
             results = polling_location_manager.update_polling_location_with_log_counts(
-                is_from_google_civic=True,
+                # is_from_google_civic=True,
+                is_from_vote_usa=True,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 update_error_counts=True,
             )
@@ -1264,7 +1341,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 'ballot_items_count':                       ballot_items_count,
                 'successful_representatives_api_call':      successful_representatives_api_call,
                 'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-                'existing_representative_objects_dict':     existing_representative_objects_dict,
+                'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+                'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
                 'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
                 'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
                 'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
@@ -1273,8 +1351,38 @@ def retrieve_google_civic_representatives_from_polling_location_api(
 
         try:
             # Use API call counter to track the number of queries we are doing each day
-            api_counter_manager = GoogleCivicApiCounterManager()
-            api_counter_manager.create_counter_entry('representatives')
+            if use_google_civic:
+                api_counter_manager = GoogleCivicApiCounterManager()
+                api_counter_manager.create_counter_entry('representatives')
+            elif use_vote_usa:
+                api_counter_manager = VoteUSAApiCounterManager()
+                api_counter_manager.create_counter_entry('representatives')
+
+            officials_list = []
+            if 'officials' in representative_info_by_address_json:
+                # Assemble a list of all Vote-USA Politician Ids so we can retrieve them all at once,
+                #  and match them
+                politicians_dict = {}
+                officials_list = representative_info_by_address_json.get('officials', [])
+                vote_usa_politician_id_list = []
+                for official_dict in officials_list:
+                    if 'voteUSAPoliticianId' in official_dict:
+                        vote_usa_politician_id = official_dict['voteUSAPoliticianId']
+                        vote_usa_politician_id_list.append(vote_usa_politician_id)
+                if len(vote_usa_politician_id_list) > 0:
+                    try:
+                        # Retrieve from Politician table all entries that have vote_usa_politician_id matching
+                        from politician.models import Politician
+                        politician_query = Politician.objects.filter(vote_usa_politician_id__in=vote_usa_politician_id_list)
+                        politician_list = list(politician_query)
+                        politicians_dict = {politician.vote_usa_politician_id: politician for politician in politician_list}
+                    except Exception as e:
+                        pass
+                if len(politicians_dict) > 0:
+                    officials_list_results = augment_officials_list_with_politician_data(
+                        officials_list, politicians_dict=politicians_dict)
+                    if officials_list_results['success']:
+                        officials_list = officials_list_results['officials_list']
 
             if 'offices' in representative_info_by_address_json:
                 office_held_dict_list_for_location = []
@@ -1288,23 +1396,26 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                         office_held_dict=office_held_dict,
                         offices_held_display_order=offices_held_display_order,
                         office_held_array_index=office_held_array_index,
-                        officials_list=representative_info_by_address_json.get('officials', []),
+                        officials_list=officials_list,
                         state_code=state_code,  # TODO DALE: 2023-11-15 I think this is cause of Representatives bug
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
-                        existing_representative_objects_dict=existing_representative_objects_dict,
+                        existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
+                        existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,
                         existing_representative_to_office_held_links_dict=
                         existing_representative_to_office_held_links_dict,
                         new_office_held_we_vote_ids_list=new_office_held_we_vote_ids_list,
                         new_representative_we_vote_ids_list=new_representative_we_vote_ids_list,
                         update_or_create_rules=update_or_create_rules,
-                        use_google_civic=True,
+                        use_vote_usa=True,
                         )
                     status += groom_results['status']
                     office_held_dict_list_for_location = groom_results['office_held_dict_list_for_location']
                     existing_offices_held_by_ocd_and_name_dict = \
                         groom_results['existing_offices_held_by_ocd_and_name_dict']
-                    existing_representative_objects_dict = groom_results['existing_representative_objects_dict']
+                    existing_offices_held_by_vote_usa_office_id_dict = \
+                        groom_results['existing_offices_held_by_vote_usa_office_id_dict']
+                    existing_representatives_by_office_and_name_dict = groom_results['existing_representatives_by_office_and_name_dict']
                     existing_representative_to_office_held_links_dict = \
                         groom_results['existing_representative_to_office_held_links_dict']
                     new_office_held_we_vote_ids_list = groom_results['new_office_held_we_vote_ids_list']
@@ -1360,7 +1471,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     # Store that we have reviewed this polling_location, so we don't retrieve it again in the next chunk
                     results = polling_location_manager.create_polling_location_log_entry(
                         batch_process_id=batch_process_id,
-                        is_from_google_civic=True,
+                        # is_from_google_civic=True,
+                        is_from_vote_usa=True,
                         kind_of_log_entry=KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         state_code=state_code,
@@ -1369,7 +1481,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     if not results['success']:
                         status += results['status']
                     results = polling_location_manager.update_polling_location_with_log_counts(
-                        is_from_google_civic=True,
+                        # is_from_google_civic=True,
+                        is_from_vote_usa=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         update_data_counts=True,
                         is_successful_retrieve=True,
@@ -1378,7 +1491,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 else:
                     # We need to at least to mark the BallotReturned entry with a new date_last_updated date,
                     #  so we can move on to other ballot returned entries.
-                    status += "OFFICES_HELD_BUT_NO_INCOMING_REPRESENTATIVES_FOUND_GOOGLE_CIVIC "
+                    status += "OFFICES_HELD_BUT_NO_INCOMING_REPRESENTATIVES_FOUND_VOTE_USA "
             else:
                 # Create BallotReturnedEmpty entry, so we don't keep retrieving this map point
                 kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
@@ -1406,9 +1519,9 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                                         status += "ERROR_REPRESENTATIVES_REASON_NOT_RECOGNIZED: " \
                                                   "" + str(one_error['reason']) + ' '
                             except Exception as e:
-                                status += "PROBLEM_PARSING_REPRESENTATIVES_ERROR_GOOGLE_CIVIC: " + str(e) + ' '
+                                status += "PROBLEM_PARSING_REPRESENTATIVES_ERROR_VOTE_USA: " + str(e) + ' '
                 except Exception as e:
-                    status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_GOOGLE_CIVIC: " + str(e) + " "
+                    status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_VOTE_USA: " + str(e) + " "
                     log_entry_message += status
                 if kind_of_log_entry in [
                     KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_NO_OFFICES_HELD,
@@ -1418,7 +1531,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                         'issue_resolved':   False,
                     }
                     error_results = representative_manager.create_representatives_missing(
-                        is_from_google_civic=True,
+                        # is_from_google_civic=True,
+                        is_from_vote_usa=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         state_code=state_code,
                         defaults=defaults,
@@ -1426,7 +1540,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     status += error_results['status']
                 results = polling_location_manager.create_polling_location_log_entry(
                     batch_process_id=batch_process_id,
-                    is_from_google_civic=True,
+                    # is_from_google_civic=True,
+                    is_from_vote_usa=True,
                     kind_of_log_entry=kind_of_log_entry,
                     log_entry_message=log_entry_message,
                     polling_location_we_vote_id=polling_location_we_vote_id,
@@ -1435,24 +1550,26 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 )
                 status += results['status']
                 results = polling_location_manager.update_polling_location_with_log_counts(
-                    is_from_google_civic=True,
+                    # is_from_google_civic=True,
+                    is_from_vote_usa=True,
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     update_error_counts=True,
                 )
                 status += results['status']
         except Exception as e:
             success = False
-            status += 'RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS_GOOGLE_CIVIC-ERROR: ' + str(e) + ' '
+            status += 'RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS_VOTE_USA-ERROR: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
     else:
-        status += "POLLING_LOCATION_NOT_FOUND-GOOGLE_CIVIC-(" + str(polling_location_we_vote_id) + ") "
+        status += "POLLING_LOCATION_NOT_FOUND-VOTE_USA-(" + str(polling_location_we_vote_id) + ") "
     results = {
         'success':                                  success,
         'status':                                   status,
         'ballot_items_count':                       ballot_items_count,
         'successful_representatives_api_call':      successful_representatives_api_call,
         'existing_offices_held_by_ocd_and_name_dict':   existing_offices_held_by_ocd_and_name_dict,
-        'existing_representative_objects_dict':     existing_representative_objects_dict,
+        'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+        'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
         'existing_representative_to_office_held_links_dict':  existing_representative_to_office_held_links_dict,
         'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
         'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
@@ -1465,6 +1582,8 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
     success = True
     status = ""
+    use_google_civic = False
+    use_vote_usa = True
 
     # results = {
     #     'status':               'FUNCTION_TO_BE_BUILT ',
@@ -1476,7 +1595,8 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
 
     # print("retrieving one ballot for " + str(text_for_map_search))
     response = requests.get(REPRESENTATIVES_BY_ADDRESS_URL, params={
-        "key": GOOGLE_CIVIC_API_KEY,
+        "accessKey": VOTE_USA_API_KEY,
+        # "key": GOOGLE_CIVIC_API_KEY,
         "address": text_for_map_search,
     })
 
@@ -1534,8 +1654,12 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     # #  so we can then get contest data
 
     # Use Google Civic API call counter to track the number of queries we are doing each day
-    google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    google_civic_api_counter_manager.create_counter_entry('representatives')
+    if use_google_civic:
+        api_counter_manager = GoogleCivicApiCounterManager()
+        api_counter_manager.create_counter_entry('representatives')
+    elif use_vote_usa:
+        api_counter_manager = VoteUSAApiCounterManager()
+        api_counter_manager.create_counter_entry('representatives')
 
     # if 'pollingLocations' in structured_json:
     #     polling_location_retrieved = True

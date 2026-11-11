@@ -1088,6 +1088,7 @@ def representative_edit_view(request, representative_id):
         'show_this_year':                   show_this_year,
         'TWITTER_API_ON':                   TWITTER_API_ON,
         'web_app_root_url':                 web_app_root_url,
+        'years_available':                  OFFICE_HELD_YEARS_AVAILABLE,
     }
     return render(request, 'representative/representative_edit.html', template_values)
 
@@ -1217,6 +1218,9 @@ def representative_edit_process_view(request):
     if twitter_handle2_updates_failing is not None:
         defaults['twitter_handle2_updates_failing'] = positive_value_exists(twitter_handle2_updates_failing)
         twitter_handle2_updates_failing = positive_value_exists(twitter_handle2_updates_failing)
+    vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
+    if vote_usa_politician_id is not False:
+        defaults['vote_usa_politician_id'] = vote_usa_politician_id
     wikipedia_url = request.POST.get('wikipedia_url', False)
     if wikipedia_url is not False:
         defaults['wikipedia_url'] = wikipedia_url
@@ -1580,6 +1584,10 @@ def representatives_sync_out_view(request):  # representativesSyncOut
             'is_battleground_race_2024',
             'is_battleground_race_2025',
             'is_battleground_race_2026',
+            'is_battleground_race_2027',
+            'is_battleground_race_2028',
+            'is_battleground_race_2029',
+            'is_battleground_race_2030',
             'linkedin_url',
             'ocd_division_id',
             'office_held_district_name',
@@ -1642,6 +1650,10 @@ def representatives_sync_out_view(request):  # representativesSyncOut
             'year_in_office_2024',
             'year_in_office_2025',
             'year_in_office_2026',
+            'year_in_office_2027',
+            'year_in_office_2028',
+            'year_in_office_2029',
+            'year_in_office_2030',
             'youtube_url',
         )
         if representative_list_dict:

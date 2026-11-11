@@ -319,13 +319,13 @@
 
         {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart ID" conflict_status=conflict_values.vote_smart_id candidate1_field_value=candidate_option1.vote_smart_id candidate2_field_value=candidate_option2.vote_smart_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote USA Office" conflict_status=conflict_values.vote_usa_office_id candidate1_field_value=candidate_option1.vote_usa_office_id candidate2_field_value=candidate_option2.vote_usa_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_office_id" field_label="Vote-USA Office" conflict_status=conflict_values.vote_usa_office_id candidate1_field_value=candidate_option1.vote_usa_office_id candidate2_field_value=candidate_option2.vote_usa_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id candidate1_field_value=candidate_option1.vote_usa_politician_id candidate2_field_value=candidate_option2.vote_usa_politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote-USA Politician" conflict_status=conflict_values.vote_usa_politician_id candidate1_field_value=candidate_option1.vote_usa_politician_id candidate2_field_value=candidate_option2.vote_usa_politician_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_usa" field_label="Vote USA Photo (url on their servers)" conflict_status=conflict_values.photo_url_from_vote_usa candidate1_field_value=candidate_option1.photo_url_from_vote_usa candidate2_field_value=candidate_option2.photo_url_from_vote_usa candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_vote_usa" field_label="Vote-USA Photo (url on their servers)" conflict_status=conflict_values.photo_url_from_vote_usa candidate1_field_value=candidate_option1.photo_url_from_vote_usa candidate2_field_value=candidate_option2.photo_url_from_vote_usa candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_profile_image_url_https" field_label="Vote USA Image (Local Cache)" conflict_status=conflict_values.vote_usa_profile_image_url_https candidate1_field_value=candidate_option1.vote_usa_profile_image_url_https candidate2_field_value=candidate_option2.vote_usa_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="vote_usa_profile_image_url_https" field_label="Vote-USA Image (Local Cache)" conflict_status=conflict_values.vote_usa_profile_image_url_https candidate1_field_value=candidate_option1.vote_usa_profile_image_url_https candidate2_field_value=candidate_option2.vote_usa_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
 
         {% include "candidate/candidate_merge_one_field_decision.html" with field_name="profile_image_type_currently_active" field_label="Image Currently Active" conflict_status=conflict_values.profile_image_type_currently_active candidate1_field_value=candidate_option1.profile_image_type_currently_active candidate2_field_value=candidate_option2.profile_image_type_currently_active candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -418,10 +418,10 @@
 
         {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_uploaded_image_url_large" field_label="Uploaded Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_uploaded_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_uploaded_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_uploaded_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {# Vote USA photo #}
+        {# Vote-USA photo #}
     {% if candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large or candidate_option2.we_vote_hosted_profile_vote_usa_image_url_large %}
       <tr>
-        <td>Vote USA Image</td>
+        <td>Vote-USA Image</td>
         <td>
           {% if candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large %}
             <img src="{{ candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large }}"
@@ -438,11 +438,11 @@
         </td>
       </tr>
     {% endif %}
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_tiny" field_label="Vote USA Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_tiny" field_label="Vote-USA Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_medium" field_label="Vote USA Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_medium" field_label="Vote-USA Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_large" field_label="Vote USA Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+        {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_vote_usa_image_url_large" field_label="Vote-USA Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_vote_usa_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_vote_usa_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_vote_usa_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
 
         {% include "candidate/candidate_merge_one_field_decision.html" with field_name="wikipedia_page_title" field_label="Wikipedia Page Title" conflict_status=conflict_values.wikipedia_page_title candidate1_field_value=candidate_option1.wikipedia_page_title candidate2_field_value=candidate_option2.wikipedia_page_title candidate1=candidate_option1 candidate2=candidate_option2 %}
 

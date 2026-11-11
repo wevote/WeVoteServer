@@ -33,11 +33,6 @@
   "DATABASE_HOST_READONLY":         "",
   "DATABASE_PORT_READONLY":         "5678",
 
-  "_comment":                       "Docker Developer Settings",
-  "DEV_SERVER_SSL_CERT":            "cert/wevotedeveloper.com.crt",
-  "DEV_SERVER_SSL_KEY":             "cert/wevotedeveloper.com_key.txt",
-  "DEV_VOTER_INITIAL_USER":         "Samuel Adams samuel@adams.com ale",
-
   "_comment":                       "analytics database settings for local.py",
   "DATABASE_ENGINE_ANALYTICS":      "django.db.backends.postgresql_psycopg2",
   "DATABASE_NAME_ANALYTICS":        "wevoteserverdb",
@@ -149,7 +144,7 @@
   "ELECTION_QUERY_URL":             "https://www.googleapis.com/civicinfo/v2/elections",
   "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
   "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
-  "REPRESENTATIVES_BY_ADDRESS_URL": "https://www.googleapis.com/civicinfo/v2/representatives",
+  "REPRESENTATIVES_BY_ADDRESS_URL": "https://vote-usa.org/api/v1.asmx/representativeInfoByAddress",
 
   "_comment":                       "google_custom_search",
   "GOOGLE_SEARCH_API_KEY":          "",

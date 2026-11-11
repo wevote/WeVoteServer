@@ -1682,7 +1682,7 @@ class CandidateListManager(models.Manager):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 if positive_value_exists(vote_usa_politician_id):
-                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    # If we have an existing Vote-USA Politician ID, do not return candidates that have a value in
                     #  vote_usa_politician_id which doesn't match
                     # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
                     candidate_query = candidate_query.filter(
@@ -1739,7 +1739,7 @@ class CandidateListManager(models.Manager):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 if positive_value_exists(vote_usa_politician_id):
-                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    # If we have an existing Vote-USA Politician ID, do not return candidates that have a value in
                     #  vote_usa_politician_id which doesn't match
                     # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
                     candidate_query = candidate_query.filter(
@@ -1803,7 +1803,7 @@ class CandidateListManager(models.Manager):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 if positive_value_exists(vote_usa_politician_id):
-                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    # If we have an existing Vote-USA Politician ID, do not return candidates that have a value in
                     #  vote_usa_politician_id which doesn't match
                     # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
                     candidate_query = candidate_query.filter(
@@ -1882,7 +1882,7 @@ class CandidateListManager(models.Manager):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 if positive_value_exists(vote_usa_politician_id):
-                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    # If we have an existing Vote-USA Politician ID, do not return candidates that have a value in
                     #  vote_usa_politician_id which doesn't match
                     # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
                     candidate_query = candidate_query.filter(
@@ -2781,7 +2781,7 @@ class CandidateCampaign(models.Model):
         verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
     photo_url_from_vote_smart = models.TextField(
         verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
-    # Image URL on Vote USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
+    # Image URL on Vote-USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
     photo_url_from_vote_usa = models.TextField(null=True, blank=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
@@ -2852,12 +2852,9 @@ class CandidateCampaign(models.Model):
         verbose_name='profile banner image from twitter', blank=True, null=True)
     twitter_description = models.CharField(
         verbose_name="Text description of this organization from twitter.", max_length=255, null=True, blank=True)
-    vote_usa_office_id = models.CharField(
-        verbose_name="Vote USA permanent id for the office", max_length=64, default=None, null=True, blank=True)
-    vote_usa_politician_id = models.CharField(
-        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True,
-        db_index=True)
-    # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
+    vote_usa_office_id = models.CharField(max_length=64, default=None, null=True, blank=True)
+    vote_usa_politician_id = models.CharField(max_length=64, default=None, null=True, blank=True, db_index=True)
+    # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote-USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
     # Which candidate image is currently active?
@@ -2885,7 +2882,7 @@ class CandidateCampaign(models.Model):
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for candidate from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
+    # Image for candidate from Vote-USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)

@@ -1,0 +1,7 @@
+{# templates/representative/year_in_office_display.html #}
+{% load template_filters %}
+{% if representative != None %}
+<span class="u-no-break">In office:
+  {% for year in representative|years_in_office_list %}{{ year }} {% endfor %}
+</span>
+{% endif %}

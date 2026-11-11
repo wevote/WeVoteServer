@@ -409,7 +409,7 @@ def create_batch_row_actions(
                         if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                             ballot_item_deleting_turned_on = False
                     # Only schedule the deletion of the ballot_item when we are only using one data source
-                    #  (Like Vote USA, or CTCL exclusively)
+                    #  (Like Vote-USA, or CTCL exclusively)
                     if positive_value_exists(ballot_item_deleting_turned_on):
                         results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
                         batch_row_action_delete_exists = results['batch_row_action_delete_exists']
@@ -502,7 +502,7 @@ def create_batch_row_actions(
                         if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                             ballot_item_deleting_turned_on = False
                     # Only schedule the deletion of the ballot_item when we are only using one data source
-                    #  (Like Vote USA, or CTCL exclusively)
+                    #  (Like Vote-USA, or CTCL exclusively)
                     if positive_value_exists(ballot_item_deleting_turned_on):
                         results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
                         batch_row_action_delete_exists = results['batch_row_action_delete_exists']
