@@ -62,7 +62,7 @@ protobuf==5.29.6        # not directly required, pinned by Snyk to avoid a vulne
 psycopg2-binary==2.9.10
 py3dns==4.0.1
 pyarrow                 # recommend engine - comment out if initial installation is failing
-pyasn1==0.6.4
+pyasn1==0.6.5
 pyasn1-modules>=0.3.0
 pygeoip==0.3.2
 pyjwkest==1.4.2
