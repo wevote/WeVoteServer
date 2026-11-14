@@ -13,7 +13,8 @@ select = [
     "PLR6301"   # unused self parameters
 ]
 ignore = [
-    "F841"      # unused variables
+    "F841",      # unused variables
+    "DJ001",    # null=True on string-based fields (CharField/TextField)
 ]
 preview = true
 explicit-preview-rules = true

@@ -3,8 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 from django.db.models import Q
+from django.utils.timezone import localtime, now
 from config.environment_variable_functions import get_environment_variable
 
+from wevote_functions.functions_date import get_current_year_as_integer
 from office_held.models import OfficeHeld
 from politician.models import PoliticianManager
 import wevote_functions.admin
@@ -43,6 +45,12 @@ def batch_process_maintenance_scripts_representative():
     results = update_representatives_with_campaignx_we_vote_id(
         number_to_update=1000,
     )
+    if positive_value_exists(results['status']):
+        status += results['status'] + " :||: "
+
+    # ##################
+    # Update the representative record from the linked politician record
+    results = update_representative_from_politician_batch_process()
     if positive_value_exists(results['status']):
         status += results['status'] + " :||: "
 
@@ -132,6 +140,112 @@ def seo_friendly_path_updates(
         'success': success,
     }
     return results
+
+
+def update_representative_from_politician_batch_process():
+    representative_list = []
+    current_year = get_current_year_as_integer()
+    politician_dict_list = {}
+    status = ""
+    success = True
+
+    try:
+        queryset = Representative.objects.all()
+        if positive_value_exists(current_year):
+            year_in_office_key = 'year_in_office_' + str(current_year)
+            one_year_filter = Q(**{year_in_office_key: True})
+            queryset = queryset.filter(one_year_filter)
+        queryset = queryset.filter(updated_from_politician_completed=None)
+        queryset = queryset.exclude(
+            Q(politician_we_vote_id__isnull=True) |
+            Q(politician_we_vote_id='')
+        )
+        queryset = queryset[:500]  # Limit to 500 to throttle this process
+        representative_list = list(queryset)
+    except Exception as e:
+        status += "FAILED_RETRIEVING_REPRESENTATIVES_FOR_UPDATE_FROM_POLITICIAN: " + str(e) + " "
+
+    if representative_list and len(representative_list) > 0:
+        politician_we_vote_id_list = [
+            representative.politician_we_vote_id for representative in representative_list
+            if representative.politician_we_vote_id
+        ]
+        status += "UPDATE_REPRESENTATIVE_FROM_POLITICIAN "
+        status += "REPRESENTATIVES_FOUND-" + str(len(representative_list)) + " "
+        status += "POLITICIAN_WE_VOTE_IDS_FOUND-" + str(len(politician_we_vote_id_list)) + " "
+    else:
+        status += "UPDATE_REPRESENTATIVE_FROM_POLITICIAN_NONE_FOUND "
+        return {
+            'status':                   status,
+            'success':                  success,
+        }
+
+    try:
+        from politician.models import Politician
+        queryset = Politician.objects.using('readonly').filter(we_vote_id__in=politician_we_vote_id_list)
+        politician_list = list(queryset)
+        politician_dict_list = {}
+        for one_politician in politician_list:
+            politician_dict_list[one_politician.we_vote_id] = one_politician
+    except Exception as e:
+        status += "FAILED_RETRIEVING_POLITICIANS: " + str(e) + " "
+        success = False
+
+    all_representative_fields_updated = []
+    representative_bulk_update_list = []
+    representatives_updated_count = 0
+    representatives_not_updated_count = 0
+    representative_update_problem_count = 0
+    from representative.controllers import update_representative_details_from_politician
+    for one_representative in representative_list:
+        politician = politician_dict_list.get(one_representative.politician_we_vote_id)
+        if politician:
+            results = update_representative_details_from_politician(
+                politician=politician, representative=one_representative)
+            if results['success']:
+                save_changes = results['save_changes']
+                changed_representative = results['representative']
+                changed_representative.updated_from_politician_completed = localtime(now()).date()
+                if 'updated_from_politician_completed' not in all_representative_fields_updated:
+                    all_representative_fields_updated.append('updated_from_politician_completed')
+                if save_changes:
+                    changed_representative.date_last_updated = localtime(now()).date()
+                    if 'date_last_updated' not in all_representative_fields_updated:
+                        all_representative_fields_updated.append('date_last_updated')
+                    representatives_updated_count += 1
+                    fields_updated = results['fields_updated']
+                    for field in fields_updated:
+                        if field not in all_representative_fields_updated:
+                            all_representative_fields_updated.append(field)
+                else:
+                    representatives_not_updated_count += 1
+                representative_bulk_update_list.append(changed_representative)
+            else:
+                representative_update_problem_count += 1
+                representatives_not_updated_count += 1
+                if representative_update_problem_count <= 5:
+                    status += results['status']
+        else:
+            status += f"POLITICIAN_NOT_FOUND_IN_DB-{one_representative.politician_we_vote_id} "
+            representatives_not_updated_count += 1
+
+    if len(representative_bulk_update_list) > 0:
+        try:
+            Representative.objects.bulk_update(representative_bulk_update_list, all_representative_fields_updated)
+            status += \
+                "[[REPRESENTATIVES_UPDATED: {representatives_updated_count:,} " \
+                "NOT_UPDATED: {representatives_not_updated_count:,}]] \n" \
+                "".format(
+                    representatives_not_updated_count=representatives_not_updated_count,
+                    representatives_updated_count=representatives_updated_count,
+                )
+        except Exception as e:
+            status += "FAILED_BULK_UPDATE_OF_REPRESENTATIVES: " + str(e) + " "
+
+    return {
+        'status':                   status,
+        'success':                  success,
+    }
 
 
 def update_representatives_with_campaignx_we_vote_id(

@@ -1367,22 +1367,32 @@ class PoliticianManager(models.Manager):
             for facebook_url in facebook_url_list:
                 filter_set = True
                 if positive_value_exists(facebook_url):
-                    new_filter = (
-                        Q(facebook_url__iexact=facebook_url) |
-                        Q(facebook_url2__iexact=facebook_url) |
-                        Q(facebook_url3__iexact=facebook_url)
-                    )
-                    filters.append(new_filter)
+                    # Strip down to e.g. "facebook.com/RobynFrierHD40"
+                    stripped_facebook_url = facebook_url.strip().lower()
+                    stripped_facebook_url = re.sub(r'^https?://', '', stripped_facebook_url)
+                    stripped_facebook_url = re.sub(r'^(www\.|m\.)', '', stripped_facebook_url)
+                    stripped_facebook_url = stripped_facebook_url.rstrip('/')
+                    if positive_value_exists(stripped_facebook_url):
+                        # Matches "facebook.com/x", "www.facebook.com/x/", "https://www.facebook.com/x/", etc.
+                        facebook_url_regex = \
+                            r'^(https?://)?(www\.|m\.)?' + re.escape(stripped_facebook_url) + r'/?$'
+                        new_filter = (
+                            Q(facebook_url__iregex=facebook_url_regex) |
+                            Q(facebook_url2__iregex=facebook_url_regex) |
+                            Q(facebook_url3__iregex=facebook_url_regex)
+                        )
+                        filters.append(new_filter)
 
             if positive_value_exists(instagram_handle):
                 new_filter = Q(instagram_handle__iexact=instagram_handle)
                 filter_set = True
                 filters.append(new_filter)
 
-            if positive_value_exists(maplight_id):
-                new_filter = Q(maplight_id__iexact=maplight_id)
-                filter_set = True
-                filters.append(new_filter)
+            # No longer actively used
+            # if positive_value_exists(maplight_id):
+            #     new_filter = Q(maplight_id__iexact=maplight_id)
+            #     filter_set = True
+            #     filters.append(new_filter)
 
             for twitter_handle in twitter_handle_list:
                 if positive_value_exists(twitter_handle):
@@ -1411,10 +1421,11 @@ class PoliticianManager(models.Manager):
                         filters.append(final_search_filters)
                     # queryset = filter_results['queryset']
 
-            if positive_value_exists(vote_smart_id):
-                new_filter = Q(vote_smart_id__iexact=vote_smart_id)
-                filter_set = True
-                filters.append(new_filter)
+            # No longer actively used
+            # if positive_value_exists(vote_smart_id):
+            #     new_filter = Q(vote_smart_id__iexact=vote_smart_id)
+            #     filter_set = True
+            #     filters.append(new_filter)
 
             if positive_value_exists(vote_usa_politician_id):
                 new_filter = Q(vote_usa_politician_id__iexact=vote_usa_politician_id)
