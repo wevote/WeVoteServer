@@ -7,10 +7,46 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
 
 ## Installation
 
-### 1. Clone your WeVoteServer fork (replace wevote with your github username)
-There is need to do this step if you already have been working with the WeVoteServer.
+### 0. We recommend following the WebApp (front end React) installation instructions first
+We recommend installing [WebApp with Docker](https://github.com/wevote/WebApp/blob/develop/docs/installing/DOCKER.md) first, since those instructions have more detail about the initial steps of setting up Docker.
+
+### 1. Fork, and then Clone WeVoteServer
+You do not need to do this step if you have already been working with the WeVoteServer.
+
+#### Fork from https://github.com/wevote/WebVoteServer.git to your Github account
+
+In a moment you will configure 'upstream' and 'origin'. WeVote uses the 'upstream' label for the link to the project's main repository (i.e. https://github.com/wevote/WeVoteServer).
+[This diagram](https://docs.google.com/drawings/d/1ED4X3Gpy_UruGDSiO8FjjxQeGOmQqIApguodHDo6-ok/edit) provides more context.
+
+On GitHub, login to your account (create one if you don't have one) (For example https://github.com/SailingSteve)
+
+Then navigate to the WebApp repository at https://github.com/wevote/WeVoteServer
+
+Press the "Fork" button on the upper right, select yourself on the "Owner" pull down
+
+Leave 'Copy the develop branch only' checkbox checked
+
+Press the "Create Fork" button.
+
+#### Clone the WeVoteServer code to your local machine
+
+##### From the command line
+
+Replacing 'YOUR-GITHUB-NAME' with your Github username:
+
   ```
-  git clone https://github.com/wevote/WeVoteServer.git
+  git clone https://github.com/YOUR-GITHUB-NAME/WeVoteServer.git
+  cd WeVoteServer
+  ```
+
+##### In your IDE
+1) In WebStorm or PyCharm, on the File menu | New | Project from Version Control
+2) Enter the URL (replacing 'YOUR-GITHUB-NAME' with your Github username) https://github.com/YOUR-GITHUB-NAME/WebApp.git
+3) Press the Clone button
+
+On the command line, change into the WeVoteServer directory:
+
+  ```
   cd WeVoteServer
   ```
 
@@ -18,7 +54,7 @@ There is need to do this step if you already have been working with the WeVoteSe
 In the root directory (in the same directory as the requirements.txt file), create a new .env file with these values:
 
 ```
-WE_VOTE_SERVER_PROTOCOL=https
+WE_VOTE_SERVER_PROTOCOL=http
 DATABASE_USER=postgres
 DATABASE_PASSWORD=admin
 DATABASE_NAME=wevoteserverdb
@@ -53,7 +89,30 @@ docker compose down
 
 Once the containers are running, you can now access the API at [http://localhost:8000/](http://localhost:8000/)
 
-### 5. Extra step to make changes to Docker startup files take effect
+
+#### 5. Troubleshooting: ports are not available: exposing port TCP 127.0.0.1:5432 -> 127.0.0.1:0: listen tcp4 127.0.0.1:5432: bind: address already in use
+
+After typing `docker compose up` you might get this error:
+
+```text
+Error response from daemon: ports are not available: exposing port TCP 127.0.0.1:5432 -> 127.0.0.1:0: listen tcp4 127.0.0.1:5432: bind: address already in use
+```
+
+This is because your local Postgres is still running, and needs to be shut down.
+
+Please also make sure that in this file: config/environment_variables.json
+the following three lines use the port 5432:
+
+```commandline
+"DATABASE_PORT":                  "5432",
+
+"DATABASE_PORT_READONLY":         "5432",
+
+"DATABASE_PORT_ANALYTICS":        "5432",
+```
+
+
+### 6. Extra step to make changes to Docker startup files take effect
 
 The `StatReloader` will automatically auto-reload changes into the Django `runsslserver` as you save them, except for these startup files:
 ```
@@ -73,7 +132,7 @@ docker compose build --no-cache
 docker compose up
 ```
 
-### 6. Remove containers and data (rarely needed)
+### 7. Remove containers and data (rarely needed)
 
 **Do not run these commands as part of the installation steps, but if you need them they are documented here.**
 
