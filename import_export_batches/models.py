@@ -784,7 +784,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def create_batch_from_voter_object_list(self, objects_list):
+    @staticmethod
+    def create_batch_from_voter_object_list(objects_list):
         """
         Creates a batch from a list of voter objects
 
@@ -906,7 +907,8 @@ class BatchManager(models.Manager):
 
         return results
 
-    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id=0,
+    @staticmethod
+    def create_batch_from_csv_data(file_name, csv_data, kind_of_batch, google_civic_election_id=0,
                                    organization_we_vote_id="", polling_location_we_vote_id=""):
         first_line = True
         success = False
@@ -1146,7 +1148,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def create_batch_from_json(self, file_name, structured_json_list, mapping_dict, kind_of_batch,
+    @staticmethod
+    def create_batch_from_json(file_name, structured_json_list, mapping_dict, kind_of_batch,
                                google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
                                batch_set_id=0, state_code=""):
         success = False
@@ -1406,8 +1409,9 @@ class BatchManager(models.Manager):
         return results
 
     # I don't believe this is currently in use. There is also a function of this same name in controllers.py
+    @staticmethod
     def create_batch_header_translation_suggestion(
-            self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
+            kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
         """
 
         :param kind_of_batch:
@@ -1487,7 +1491,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def fetch_batch_row_count(self, batch_header_id):
+    @staticmethod
+    def fetch_batch_row_count(batch_header_id):
         """
         :param batch_header_id:
         :return:
@@ -1503,7 +1508,8 @@ class BatchManager(models.Manager):
 
         return batch_row_count
 
-    def fetch_batch_row_action_count(self, batch_header_id, kind_of_batch, kind_of_action=''):
+    @staticmethod
+    def fetch_batch_row_action_count(batch_header_id, kind_of_batch, kind_of_action=''):
         """
         :param batch_header_id:
         :param kind_of_batch:
@@ -1572,7 +1578,8 @@ class BatchManager(models.Manager):
 
         return batch_row_action_count
 
-    def fetch_batch_row_action_count_in_batch_set(self, batch_set_id, kind_of_batch, kind_of_action=''):
+    @staticmethod
+    def fetch_batch_row_action_count_in_batch_set(batch_set_id, kind_of_batch, kind_of_action=''):
         """
         :param batch_set_id:
         :param kind_of_batch:
@@ -1641,8 +1648,9 @@ class BatchManager(models.Manager):
 
         return batch_row_action_count
 
+    @staticmethod
     def retrieve_unprocessed_batch_set_info_by_election_and_set_source(
-            self, google_civic_election_id, batch_set_source, state_code=''):
+            google_civic_election_id, batch_set_source, state_code=''):
 
         batch_set_query = BatchSet.objects.using('readonly').all()
         batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
@@ -1680,8 +1688,8 @@ class BatchManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_batch_header_translation_suggestion(
-            self,
             kind_of_batch,
             incoming_alternate_header_value,
             read_only=True):
@@ -1734,8 +1742,9 @@ class BatchManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_batch_row_translation_map(  # TODO This hasn't been built
-            self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
+            kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
         success = False
         status = ""
 
@@ -1767,7 +1776,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_translation_map(self, kind_of_batch, incoming_alternate_header_value, read_only=True):
+    @staticmethod
+    def retrieve_batch_row_translation_map(kind_of_batch, incoming_alternate_header_value, read_only=True):
         # TODO This hasn't been built yet
         success = False
         status = ""
@@ -1810,7 +1820,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_organization(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_organization(batch_header_id, batch_row_id):
         status = ""
         try:
             batch_row_action_organization = BatchRowActionOrganization.objects.get(batch_header_id=batch_header_id,
@@ -1837,7 +1848,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_measure(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_measure(batch_header_id, batch_row_id):
         status = ""
         try:
             batch_row_action_measure = BatchRowActionMeasure.objects.get(batch_header_id=batch_header_id,
@@ -1864,7 +1876,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_office_held(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_office_held(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionOfficeHeld table
         :param batch_header_id:
@@ -1897,7 +1910,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_contest_office(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_contest_office(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionContestOffice table
         :param batch_header_id:
@@ -1930,7 +1944,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_politician(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_politician(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionPolitician table
         :param batch_header_id:
@@ -1963,7 +1978,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_polling_location(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_polling_location(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionPollingLocation table
         :param batch_header_id:
@@ -1996,7 +2012,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_position(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_position(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionPosition table
         :param batch_header_id:
@@ -2029,7 +2046,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_ballot_item(self, batch_header_id, batch_row_id=0, ballot_item_id=0):
+    @staticmethod
+    def retrieve_batch_row_action_ballot_item(batch_header_id, batch_row_id=0, ballot_item_id=0):
         """
         Retrieves data from BatchRowActionBallotItem table
         :param batch_header_id:
@@ -2076,7 +2094,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_ballot_item_list(self, batch_header_id, limit_to_kind_of_action_list=[]):
+    @staticmethod
+    def retrieve_batch_row_action_ballot_item_list(batch_header_id, limit_to_kind_of_action_list=[]):
         """
         Retrieves data from BatchRowActionBallotItem table
         :param batch_header_id:
@@ -2108,7 +2127,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_candidate(self, batch_header_id, batch_row_id):
+    @staticmethod
+    def retrieve_batch_row_action_candidate(batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionCandidate table
         :param batch_header_id:
@@ -2141,7 +2161,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_value_from_batch_row(self, batch_header_name_we_want, batch_header_map, one_batch_row):
+    @staticmethod
+    def retrieve_value_from_batch_row(batch_header_name_we_want, batch_header_map, one_batch_row):
         index_number = 0
         batch_header_name_we_want = batch_header_name_we_want.lower().strip()
         number_of_columns = 50
@@ -2168,7 +2189,8 @@ class BatchManager(models.Manager):
             index_number += 1
         return ""
 
-    def retrieve_column_name_from_batch_row(self, batch_header_name_we_want, batch_header_map):
+    @staticmethod
+    def retrieve_column_name_from_batch_row(batch_header_name_we_want, batch_header_map):
         """
         Given column name from batch_header_map, retrieve equivalent column name from batch row
         :param batch_header_name_we_want:
@@ -2194,7 +2216,8 @@ class BatchManager(models.Manager):
             index_number += 1
         return ""
 
-    def find_file_type(self, batch_uri):
+    @staticmethod
+    def find_file_type(batch_uri):
         """
         Determines the file type based on file extension. If no known extension, it gets the file type information from
         file magic.
@@ -2218,7 +2241,8 @@ class BatchManager(models.Manager):
 
         return filetype
 
-    def find_possible_matches(self, kind_of_batch, batch_row_name, incoming_batch_row_value,
+    @staticmethod
+    def find_possible_matches(kind_of_batch, batch_row_name, incoming_batch_row_value,
                               google_civic_election_id, state_code):
         if kind_of_batch == CONTEST_OFFICE:
             # TODO DALE
@@ -2276,7 +2300,8 @@ class BatchManager(models.Manager):
                 }
                 return results
 
-    def store_measure_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id=0):
+    @staticmethod
+    def store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id=0):
         """
         Retrieves Measure data from CTCL xml file
         :param batch_uri:
@@ -2421,7 +2446,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_office_held_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_office_held_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                  batch_set_id=0):
         """
         Retrieves Office data from CTCL xml file
@@ -2585,7 +2611,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_contest_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_contest_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                  batch_set_id=0):
         """
         Retrieves ContestOffice data from CTCL xml file
@@ -2794,7 +2821,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_politician_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_politician_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                              batch_set_id=0):
         """
         Retrieves Politician data from CTCL xml file
@@ -3024,7 +3052,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_candidate_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_candidate_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                             batch_set_id=0):
         """
         Retrieves Candidate data from CTCL xml file
@@ -3184,7 +3213,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_state_data_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_state_data_from_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                   batch_set_id=0):
         """
         Retrieves state data from CTCL xml file
@@ -3298,7 +3328,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_election_metadata_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_election_metadata_from_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                          batch_set_id=0):
         """
         Retrieves election metadata from CTCL xml file
@@ -3407,7 +3438,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_source_metadata_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    @staticmethod
+    def store_source_metadata_from_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                          batch_set_id=0):
         """
         Retrieves source metadata from CTCL xml file
@@ -3773,7 +3805,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def count_number_of_batch_action_rows(self, header_id, kind_of_batch):
+    @staticmethod
+    def count_number_of_batch_action_rows(header_id, kind_of_batch):
         """
             Return count of batch rows for a given header id
         :param header_id:
@@ -3800,7 +3833,8 @@ class BatchManager(models.Manager):
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
 
-    def count_number_of_batches_in_batch_set(self, batch_set_id=0, batch_row_analyzed=None, batch_row_created=None):
+    @staticmethod
+    def count_number_of_batches_in_batch_set(batch_set_id=0, batch_row_analyzed=None, batch_row_created=None):
         number_of_batches = 0
         batch_description_query = BatchDescription.objects.using('readonly').filter(batch_set_id=batch_set_id)
         batch_description_list = list(batch_description_query)
@@ -3841,7 +3875,8 @@ class BatchManager(models.Manager):
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
         return ""
 
-    def fetch_office_held_name_from_office_held_ctcl_id(self, office_held_ctcl_id, batch_set_id):
+    @staticmethod
+    def fetch_office_held_name_from_office_held_ctcl_id(office_held_ctcl_id, batch_set_id):
         """
         Take in office_held_ctcl_id and batch_set_id, look up BatchRow and return office_held_name
         :param office_held_ctcl_id:
@@ -3889,7 +3924,8 @@ class BatchManager(models.Manager):
 
         return office_held_name
 
-    def fetch_state_code_from_person_id_in_candidate(self, person_id, batch_set_id):
+    @staticmethod
+    def fetch_state_code_from_person_id_in_candidate(person_id, batch_set_id):
         """
         Take in person_id, batch_set_id, look up BatchRowActionCandidate and return state_code
         :param person_id:
@@ -3926,7 +3962,8 @@ class BatchManager(models.Manager):
 
         return state_code
 
-    def retrieve_election_details_from_election_day_or_state_code(self, election_day='', state_code='', read_only=True):
+    @staticmethod
+    def retrieve_election_details_from_election_day_or_state_code(election_day='', state_code='', read_only=True):
         """
         Retrieve election_name and google_civic_election_id from election_day and/or state_code
         :param election_day:
@@ -4111,7 +4148,8 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def import_offices_from_endorsement_json(self, batch_uri='', batch_set_id='', organization_we_vote_id='',
+    @staticmethod
+    def import_offices_from_endorsement_json(batch_uri='', batch_set_id='', organization_we_vote_id='',
                                              candidate_positions_list=''):
         """
         Import Offices from organization endorsements json file
@@ -4234,7 +4272,8 @@ class BatchManager(models.Manager):
 
         return results
 
-    def import_candidates_from_endorsement_json(self, batch_uri='', batch_set_id='', organization_we_vote_id='',
+    @staticmethod
+    def import_candidates_from_endorsement_json(batch_uri='', batch_set_id='', organization_we_vote_id='',
                                                 candidate_positions_list=''):
         """
         Import Candidates from organization endorsements json file
@@ -4376,7 +4415,8 @@ class BatchManager(models.Manager):
 
         return results
 
-    def import_candidate_positions_from_endorsement_json(self, batch_uri, batch_set_id, organization_we_vote_id,
+    @staticmethod
+    def import_candidate_positions_from_endorsement_json(batch_uri, batch_set_id, organization_we_vote_id,
                                                          organization_twitter_handle, candidate_positions_list):
         """
         Import candidate positions from organization endorsements json file
@@ -4529,7 +4569,8 @@ class BatchManager(models.Manager):
 
         return results
 
-    def import_measure_positions_from_endorsement_json(self, batch_uri, batch_set_id, measure_positions_list):
+    @staticmethod
+    def import_measure_positions_from_endorsement_json(batch_uri, batch_set_id, measure_positions_list):
         """
         Import measure positions from organization endorsements json file
         :param batch_uri:
@@ -5009,8 +5050,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_batch_process(
-            self,
             google_civic_election_id=0,
             kind_of_process=None,
             polling_location_we_vote_id=None,
@@ -5107,8 +5148,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_batch_process_log_entry(
-            self,
             batch_process_id=0,
             batch_process_ballot_item_chunk_id=0,
             batch_process_representatives_chunk_id=0,
@@ -5170,8 +5211,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_batch_process(
-            self,
             batch_process_id=0,
             google_civic_election_id=None,
             kind_of_process='',
@@ -5230,7 +5271,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
-    def count_active_batch_processes(self):
+    @staticmethod
+    def count_active_batch_processes():
         status = ""
         batch_process_count = 0
 
@@ -5254,7 +5296,8 @@ class BatchProcessManager(models.Manager):
             status += 'FAILED_COUNT_ACTIVE_BATCH_PROCESSES: ' + str(e) + ' '
         return batch_process_count
 
-    def count_checked_out_batch_processes(self):
+    @staticmethod
+    def count_checked_out_batch_processes():
         status = ""
         batch_process_count = 0
 
@@ -5343,8 +5386,9 @@ class BatchProcessManager(models.Manager):
             'batch_process_count':  batch_process_count,
         }
 
+    @staticmethod
     def is_batch_process_currently_scheduled(
-            self, google_civic_election_id=0, state_code="", kind_of_process=""):
+            google_civic_election_id=0, state_code="", kind_of_process=""):
         status = ""
         try:
             batch_process_queryset = BatchProcess.objects.using('readonly').all()
@@ -5360,7 +5404,8 @@ class BatchProcessManager(models.Manager):
             status += 'FAILED_COUNT_IS_BATCH_PROCESS_CURRENTLY_SCHEDULED: ' + str(e) + ' '
             return True
 
-    def is_activity_notice_process_currently_running(self):
+    @staticmethod
+    def is_activity_notice_process_currently_running():
         status = ""
         analytics_kind_of_process_list = [ACTIVITY_NOTICE_PROCESS]
         try:
@@ -5380,7 +5425,8 @@ class BatchProcessManager(models.Manager):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES-ACTIVITY_NOTICE: ' + str(e) + ' '
             return True
 
-    def is_analytics_process_currently_running(self):
+    @staticmethod
+    def is_analytics_process_currently_running():
         status = ""
         analytics_kind_of_process_list = [
                 AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
@@ -5400,8 +5446,8 @@ class BatchProcessManager(models.Manager):
             status += 'FAILED_COUNT_CHECKED_OUT_BATCH_PROCESSES: ' + str(e) + ' '
             return True
 
+    @staticmethod
     def retrieve_batch_process_list(
-            self,
             kind_of_process_list=[],
             process_active=False,
             process_needs_to_be_run=False,
@@ -5542,7 +5588,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
-    def retrieve_active_ballot_item_chunk_not_completed(self, batch_process_id):
+    @staticmethod
+    def retrieve_active_ballot_item_chunk_not_completed(batch_process_id):
         status = ""
         success = True
         batch_process_ballot_item_chunk = None
@@ -5591,7 +5638,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
-    def retrieve_analytics_action_chunk_not_completed(self, batch_process_id):
+    @staticmethod
+    def retrieve_analytics_action_chunk_not_completed(batch_process_id):
         status = ""
         success = True
         batch_process_analytics_chunk = None
@@ -5634,7 +5682,8 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
-    def system_turned_off(self):
+    @staticmethod
+    def system_turned_off():
         from wevote_settings.models import fetch_batch_process_system_on
         return not fetch_batch_process_system_on()
 

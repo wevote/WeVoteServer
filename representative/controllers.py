@@ -1532,6 +1532,13 @@ def update_representative_details_from_campaignx(representative=None, campaignx=
 
 
 def update_representative_details_from_politician(representative=None, politician=None):
+    """
+
+    :param representative:
+    :param politician:
+    :return:
+    """
+    fields_updated = []
     status = ''
     success = True
     save_changes = False
@@ -1547,11 +1554,14 @@ def update_representative_details_from_politician(representative=None, politicia
         only_change_object2_field_if_incoming_value=False,
         only_change_object2_field_if_no_existing_value=False)
     representative = results['object2'] if results['success'] and results['values_changed'] else representative
+    # Merge together the list from results['fields_updated'] into fields_updated
+    fields_updated.extend(results['fields_updated'])
     save_changes = save_changes or results['values_changed']
 
     if not positive_value_exists(representative.ballotpedia_representative_url) and \
             positive_value_exists(politician.ballotpedia_politician_url):
         representative.ballotpedia_representative_url = politician.ballotpedia_politician_url
+        fields_updated.append('ballotpedia_representative_url')
         save_changes = True
     representative_facebook_url_missing = \
         not positive_value_exists(representative.facebook_url) or representative.facebook_url_is_broken
@@ -1559,132 +1569,154 @@ def update_representative_details_from_politician(representative=None, politicia
         positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken
     if representative_facebook_url_missing and politician_facebook_url_exists:
         representative.facebook_url = politician.facebook_url
+        fields_updated.append('facebook_url')
         representative.facebook_url_is_broken = False
+        fields_updated.append('facebook_url_is_broken')
         save_changes = True
     if positive_value_exists(politician.politician_name) and positive_value_exists(representative.representative_name) \
             and politician.politician_name != representative.representative_name:
-        name_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='google_civic_representative_name',
             look_at_alternate_names=True,
             representative=representative,
             new_value_to_add=politician.politician_name)
-        if name_results['success']:
-            representative = name_results['representative']
-            save_changes = save_changes or name_results['values_changed']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
+            save_changes = save_changes or results['values_changed']
     if positive_value_exists(politician.google_civic_candidate_name):
-        name_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='google_civic_representative_name',
             look_at_alternate_names=True,
             representative=representative,
             new_value_to_add=politician.google_civic_candidate_name)
-        if name_results['success']:
-            representative = name_results['representative']
-            save_changes = save_changes or name_results['values_changed']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
+            save_changes = save_changes or results['values_changed']
     if positive_value_exists(politician.google_civic_candidate_name2):
-        name_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='google_civic_representative_name',
             look_at_alternate_names=True,
             representative=representative,
             new_value_to_add=politician.google_civic_candidate_name2)
-        if name_results['success']:
-            representative = name_results['representative']
-            save_changes = save_changes or name_results['values_changed']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
+            save_changes = save_changes or results['values_changed']
     if positive_value_exists(politician.google_civic_candidate_name3):
-        name_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='google_civic_representative_name',
             look_at_alternate_names=True,
             representative=representative,
             new_value_to_add=politician.google_civic_candidate_name3)
-        if name_results['success']:
-            representative = name_results['representative']
-            save_changes = save_changes or name_results['values_changed']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
+            save_changes = save_changes or results['values_changed']
     if not positive_value_exists(representative.instagram_followers_count) and \
             positive_value_exists(politician.instagram_followers_count):
         representative.instagram_followers_count = politician.instagram_followers_count
+        fields_updated.append('instagram_followers_count')
         save_changes = True
     if not positive_value_exists(representative.instagram_handle) and \
             positive_value_exists(politician.instagram_handle):
         representative.instagram_handle = politician.instagram_handle
+        fields_updated.append('instagram_handle')
         save_changes = True
     if not positive_value_exists(representative.linkedin_url) and \
             positive_value_exists(politician.linkedin_url):
         representative.linkedin_url = politician.linkedin_url
+        fields_updated.append('linkedin_url')
         save_changes = True
     if not positive_value_exists(representative.representative_contact_form_url) and \
             positive_value_exists(politician.politician_contact_form_url):
         representative.representative_contact_form_url = politician.politician_contact_form_url
+        fields_updated.append('representative_contact_form_url')
         save_changes = True
     if positive_value_exists(politician.politician_email):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_email',
             representative=representative,
             new_value_to_add=politician.politician_email)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_email2):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_email',
             representative=representative,
             new_value_to_add=politician.politician_email2)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_email3):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_email',
             representative=representative,
             new_value_to_add=politician.politician_email3)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_phone_number):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_phone',
             representative=representative,
             new_value_to_add=politician.politician_phone_number)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_phone_number2):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_phone',
             representative=representative,
             new_value_to_add=politician.politician_phone_number2)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_phone_number3):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_phone',
             representative=representative,
             new_value_to_add=politician.politician_phone_number3)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_twitter_handle) and not politician.twitter_handle_updates_failing:
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_twitter_handle',
             representative=representative,
             new_value_to_add=politician.politician_twitter_handle)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if positive_value_exists(politician.politician_twitter_handle2) and not politician.twitter_handle2_updates_failing:
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_twitter_handle',
             representative=representative,
             new_value_to_add=politician.politician_twitter_handle2)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            fields_updated.append(results['field_updated'])
     if not positive_value_exists(representative.twitter_description) and \
             positive_value_exists(politician.twitter_description):
         representative.twitter_description = politician.twitter_description
+        fields_updated.append('twitter_description')
         save_changes = True
     if not positive_value_exists(representative.twitter_followers_count) and \
             positive_value_exists(politician.twitter_followers_count):
         representative.twitter_followers_count = politician.twitter_followers_count
+        fields_updated.append('twitter_followers_count')
         save_changes = True
     if not positive_value_exists(representative.twitter_location) and \
             positive_value_exists(politician.twitter_location):
         representative.twitter_location = politician.twitter_location
+        fields_updated.append('twitter_location')
         save_changes = True
     if not positive_value_exists(representative.twitter_name) and \
             positive_value_exists(politician.twitter_name):
         representative.twitter_name = politician.twitter_name
+        fields_updated.append('twitter_name')
         save_changes = True
     if positive_value_exists(politician.politician_url):
         results = add_value_to_next_representative_spot(
@@ -1693,6 +1725,7 @@ def update_representative_details_from_politician(representative=None, politicia
             new_value_to_add=politician.politician_url)
         if results['success']:
             representative = results['representative']
+            fields_updated.append(results['field_updated'])
             save_changes = True
     if positive_value_exists(politician.politician_url2):
         results = add_value_to_next_representative_spot(
@@ -1701,6 +1734,7 @@ def update_representative_details_from_politician(representative=None, politicia
             new_value_to_add=politician.politician_url2)
         if results['success']:
             representative = results['representative']
+            fields_updated.append(results['field_updated'])
             save_changes = True
     if positive_value_exists(politician.politician_url3):
         results = add_value_to_next_representative_spot(
@@ -1709,6 +1743,7 @@ def update_representative_details_from_politician(representative=None, politicia
             new_value_to_add=politician.politician_url3)
         if results['success']:
             representative = results['representative']
+            fields_updated.append(results['field_updated'])
             save_changes = True
     if positive_value_exists(politician.politician_url4):
         results = add_value_to_next_representative_spot(
@@ -1717,6 +1752,7 @@ def update_representative_details_from_politician(representative=None, politicia
             new_value_to_add=politician.politician_url4)
         if results['success']:
             representative = results['representative']
+            fields_updated.append(results['field_updated'])
             save_changes = True
     if positive_value_exists(politician.politician_url5):
         results = add_value_to_next_representative_spot(
@@ -1725,57 +1761,88 @@ def update_representative_details_from_politician(representative=None, politicia
             new_value_to_add=politician.politician_url5)
         if results['success']:
             representative = results['representative']
+            fields_updated.append(results['field_updated'])
             save_changes = True
     if not positive_value_exists(representative.vote_usa_politician_id) and \
             positive_value_exists(politician.vote_usa_politician_id):
         representative.vote_usa_politician_id = politician.vote_usa_politician_id
+        fields_updated.append('vote_usa_politician_id')
         save_changes = True
     if not positive_value_exists(representative.we_vote_hosted_profile_image_url_large):
         if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
             representative.we_vote_hosted_profile_image_url_large = \
                 politician.we_vote_hosted_profile_image_url_large
+            fields_updated.append('we_vote_hosted_profile_image_url_large')
             save_changes = True
     if not positive_value_exists(representative.we_vote_hosted_profile_image_url_medium):
         if positive_value_exists(politician.we_vote_hosted_profile_image_url_medium):
             representative.we_vote_hosted_profile_image_url_medium = \
                 politician.we_vote_hosted_profile_image_url_medium
+            fields_updated.append('we_vote_hosted_profile_image_url_medium')
             save_changes = True
     if not positive_value_exists(representative.we_vote_hosted_profile_image_url_tiny):
         if positive_value_exists(politician.we_vote_hosted_profile_image_url_tiny):
             representative.we_vote_hosted_profile_image_url_tiny = \
                 politician.we_vote_hosted_profile_image_url_tiny
+            fields_updated.append('we_vote_hosted_profile_image_url_tiny')
             save_changes = True
     # Uploaded photo
-    representative.we_vote_hosted_profile_uploaded_image_url_large = \
-        politician.we_vote_hosted_profile_uploaded_image_url_large
-    representative.we_vote_hosted_profile_uploaded_image_url_medium = \
-        politician.we_vote_hosted_profile_uploaded_image_url_medium
-    representative.we_vote_hosted_profile_uploaded_image_url_tiny = \
+    if representative.we_vote_hosted_profile_uploaded_image_url_large != \
+            politician.we_vote_hosted_profile_uploaded_image_url_large:
+        representative.we_vote_hosted_profile_uploaded_image_url_large = \
+            politician.we_vote_hosted_profile_uploaded_image_url_large
+        fields_updated.append('we_vote_hosted_profile_uploaded_image_url_large')
+        save_changes = True
+    if representative.we_vote_hosted_profile_uploaded_image_url_medium != \
+            politician.we_vote_hosted_profile_uploaded_image_url_medium:
+        representative.we_vote_hosted_profile_uploaded_image_url_medium = \
+            politician.we_vote_hosted_profile_uploaded_image_url_medium
+        fields_updated.append('we_vote_hosted_profile_uploaded_image_url_medium')
+        save_changes = True
+    if representative.we_vote_hosted_profile_uploaded_image_url_tiny != \
+            politician.we_vote_hosted_profile_uploaded_image_url_tiny:
+        representative.we_vote_hosted_profile_uploaded_image_url_tiny = \
         politician.we_vote_hosted_profile_uploaded_image_url_tiny
+        fields_updated.append('we_vote_hosted_profile_uploaded_image_url_tiny')
+        save_changes = True
     if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
         if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
                 or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \
                 or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_tiny):
             representative.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+            fields_updated.append('profile_image_type_currently_active')
             representative.we_vote_hosted_profile_image_url_large = \
                 politician.we_vote_hosted_profile_uploaded_image_url_large
+            fields_updated.append('we_vote_hosted_profile_image_url_large')
             representative.we_vote_hosted_profile_image_url_medium = \
                 politician.we_vote_hosted_profile_uploaded_image_url_medium
+            fields_updated.append('we_vote_hosted_profile_image_url_medium')
             representative.we_vote_hosted_profile_image_url_tiny = \
                 politician.we_vote_hosted_profile_uploaded_image_url_tiny
+            fields_updated.append('we_vote_hosted_profile_image_url_tiny')
+            save_changes = True
     if politician.profile_image_background_color != representative.profile_image_background_color:
         representative.profile_image_background_color = politician.profile_image_background_color
+        fields_updated.append('profile_image_background_color')
         save_changes = True
     if not positive_value_exists(representative.wikipedia_url) and \
             positive_value_exists(politician.wikipedia_url):
         representative.wikipedia_url = politician.wikipedia_url
+        fields_updated.append('wikipedia_url')
         save_changes = True
     if not positive_value_exists(representative.youtube_url) and \
             positive_value_exists(politician.youtube_url):
         representative.youtube_url = politician.youtube_url
+        fields_updated.append('youtube_url')
         save_changes = True
 
+    # Remove any empty strings from fields_updated
+    fields_updated = [field for field in fields_updated if field]
+    # Remove any duplicate strings
+    fields_updated = list(set(fields_updated))
+
     results = {
+        'fields_updated':   fields_updated,
         'success':          success,
         'status':           status,
         'representative':   representative,

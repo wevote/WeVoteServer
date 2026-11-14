@@ -57,14 +57,19 @@ services:
     # Note: DATABASE_HOST=db does not indicate the name of the host, it is used to associate the api service with the db service
     environment:
       - DATABASE_NAME=${DATABASE_NAME:-wevoteserverdb}
+      - DATABASE_NAME_ANALYTICS=${DATABASE_NAME:-wevoteserverdb}
       - DATABASE_NAME_READONLY=${DATABASE_NAME:-wevoteserverdb}
       - DATABASE_HOST=db
+      - DATABASE_HOST_ANALYTICS=db
       - DATABASE_HOST_READONLY=db
       - DATABASE_USER=${DATABASE_USER:-postgres}
+      - DATABASE_USER_ANALYTICS=${DATABASE_USER:-postgres}
       - DATABASE_USER_READONLY=${DATABASE_USER:-postgres}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin}
+      - DATABASE_PASSWORD_ANALYTICS=${DATABASE_PASSWORD:-admin}
       - DATABASE_PASSWORD_READONLY=${DATABASE_PASSWORD:-admin}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_PORT_ANALYTICS=${DATABASE_PORT:-5432}
       - DATABASE_PORT_READONLY=${DATABASE_PORT:-5432}
       - DJANGO_SUPERUSER_EMAIL
       - DJANGO_SUPERUSER_PASSWORD

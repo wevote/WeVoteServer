@@ -1235,6 +1235,8 @@ def extract_vote_usa_measure_id(raw_vote_usa_measure_id):
 def extract_vote_usa_office_id(raw_vote_usa_office_id):
     if positive_value_exists(raw_vote_usa_office_id):
         raw_vote_usa_office_id = raw_vote_usa_office_id.strip()
+        if len(raw_vote_usa_office_id) >= 2 and raw_vote_usa_office_id[0] == "'" and raw_vote_usa_office_id[-1] == "'":
+            raw_vote_usa_office_id = raw_vote_usa_office_id[1:-1]
         if '|' in raw_vote_usa_office_id:
             parts = raw_vote_usa_office_id.split("|")
             vote_usa_office_id = parts[1]
@@ -1244,8 +1246,6 @@ def extract_vote_usa_office_id(raw_vote_usa_office_id):
             vote_usa_office_id = parts[1]
         else:
             vote_usa_office_id = raw_vote_usa_office_id
-        if len(vote_usa_office_id) >= 2 and vote_usa_office_id[0] == "'" and vote_usa_office_id[-1] == "'":
-            vote_usa_office_id = vote_usa_office_id[1:-1]
         return vote_usa_office_id
     else:
         return ''

@@ -319,6 +319,7 @@ class Representative(models.Model):
                                                         blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    updated_from_politician_completed = models.DateTimeField(null=True)
     vote_usa_office_id = models.TextField(null=True, unique=False)
     vote_usa_politician_id = models.CharField(max_length=255, null=True, unique=False)
 

@@ -1314,7 +1314,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             representative_info_by_address_json = json.loads(response.text)
         except Exception as e:
             success = False
-            status += 'GOOGLE_CIVIC_API_END_POINT_CRASH: ' + str(e) + ' '
+            status += 'VOTE_USA_API_END_POINT_CRASH: ' + str(e) + ' '
             log_entry_message = status
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,
@@ -1520,6 +1520,9 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                                                   "" + str(one_error['reason']) + ' '
                             except Exception as e:
                                 status += "PROBLEM_PARSING_REPRESENTATIVES_ERROR_VOTE_USA: " + str(e) + ' '
+                    else:
+                        status_from_vote_usa = representative_info_by_address_json.get('status', 'NO_STATUS ')
+                        status += "MISSING_ERRORS_FROM_VOTE_USA:" + str(status_from_vote_usa) + " "
                 except Exception as e:
                     status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_VOTE_USA: " + str(e) + " "
                     log_entry_message += status

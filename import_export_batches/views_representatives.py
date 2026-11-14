@@ -124,7 +124,7 @@ def process_next_representatives_view(request):
 @login_required
 def retrieve_representatives_for_polling_locations_view(request):
     """
-    Reach out to Google Civic and loop through:
+    Reach out to source (formerly Google Civic, now Vote-USA) and loop through:
     1) Polling locations/Map Points (so we can use those addresses to retrieve the
     elected representatives all over the country)
     2) Cycle through those map points
