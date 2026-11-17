@@ -334,7 +334,8 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
     except Exception as e:
         log += 'LOGGING_PROBLEM ' + str(e) + " "
     log += 'STATUS: ' + status + ' '
-    logger.info(log)
+    # Disabled due to logging possible sensitive information
+    # logger.info(log)
 
     results = {
         'status':                       status,

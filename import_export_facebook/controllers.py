@@ -746,8 +746,9 @@ def update_organization_facebook_images(facebook_user_id, facebook_profile_image
         if organization_updated:
             try:
                 organization.save()
-                logger.info("update_organization_facebook_images saved updated images for organization: " +
-                            organization.we_vote_id + ", facebook_id: " + str(organization.facebook_id))
+                # Disabled due to logging possible sensitive information
+                # logger.info("update_organization_facebook_images saved updated images for organization: " +
+                #             organization.we_vote_id + ", facebook_id: " + str(organization.facebook_id))
                 return
             except Exception as e:
                 logger.error("update_organization_facebook_images threw: " + str(e))
