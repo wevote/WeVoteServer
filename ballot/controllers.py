@@ -964,6 +964,43 @@ def all_ballot_items_retrieve_for_api(google_civic_election_id, state_code=''): 
     return json_data
 
 
+def get_next_upcoming_election_date(upcoming_election_dates, timezone_name="America/Los_Angeles"):
+    """
+    Return the first 'YYYY-MM-DD' date text that is today or later. If all dates are past, return the last one.
+    Parallel to getNextUpcomingElectionDate in WebApp
+    """
+    _, datetime_now = generate_localized_datetime_from_obj(timezone_name)
+    today_text = datetime_now.strftime(DATE_FORMAT_YMD)
+    for election_date_text in sorted(upcoming_election_dates):
+        if election_date_text >= today_text:  # ISO date strings compare correctly as text
+            return election_date_text
+    return upcoming_election_dates[-1] if upcoming_election_dates else ''
+
+
+def next_national_election_yyyy_mm_dd_text(timezone_name="America/Los_Angeles"):
+    """
+    Parallel to nextNationalElectionYYYYMMDDText in WebApp.
+    :param timezone_name:
+    :return:
+    """
+    # We could of course calculate this date so it is evergreen
+    # (The rule is "the Tuesday after the first Monday of November")
+    # but there is value in having a date that is searchable in the code...
+    upcoming_election_dates = [
+        '2028-11-07',
+        '2030-11-05',
+        '2032-11-02',
+        '2034-11-07',
+        '2036-11-04',
+        '2038-11-02',
+        '2040-11-06',
+        '2042-11-04',
+        '2044-11-08',
+        '2046-11-06',
+    ]
+    return get_next_upcoming_election_date(upcoming_election_dates, timezone_name)
+
+
 def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         voter_device_id='',
         google_civic_election_id=0,
@@ -972,7 +1009,33 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         incoming_status=''):
     status = incoming_status
 
-    next_national_election_day_text = '2026-11-03'
+    error_json_data = {
+        'status':                               status,
+        'success':                              False,
+        'ballot_caveat':                        '',
+        'ballot_found':                         False,
+        'ballot_item_list':                     [],
+        'ballot_location_display_name':         '',
+        'ballot_location_shortcut':             ballot_location_shortcut,
+        'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+        'google_civic_election_id':             google_civic_election_id,
+        'is_from_substituted_address':          False,
+        'is_from_test_ballot':                  False,
+        'next_national_election_day_text':      '',
+        'original_text_city':                   '',
+        'original_text_state':                  '',
+        'original_text_zip':                    '',
+        'polling_location_we_vote_id_source':   '',
+        'substituted_address_nearby':           '',
+        'substituted_address_city':             '',
+        'substituted_address_state':            '',
+        'substituted_address_zip':              '',
+        'text_for_map_search':                  '',
+        'voter_device_id':                      voter_device_id,
+        'voter_device_id_not_valid':            False,
+    }
+
+    next_national_election_day_text = next_national_election_yyyy_mm_dd_text()
 
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
         positive_value_exists(ballot_location_shortcut)
@@ -986,31 +1049,8 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         # tell the WebApp the voter_device_id might need to be replaced.
         voter_device_id_not_valid = \
             positive_value_exists(voter_device_id) and positive_value_exists(voter_device_link_results['success'])
-        error_json_data = {
-            'status':                               status,
-            'success':                              False,
-            'ballot_caveat':                        '',
-            'ballot_found':                         False,
-            'ballot_item_list':                     [],
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'is_from_substituted_address':          False,
-            'is_from_test_ballot':                  False,
-            'next_national_election_day_text':      '',
-            'original_text_city':                   '',
-            'original_text_state':                  '',
-            'original_text_zip':                    '',
-            'polling_location_we_vote_id_source':   '',
-            'substituted_address_nearby':           '',
-            'substituted_address_city':             '',
-            'substituted_address_state':            '',
-            'substituted_address_zip':              '',
-            'text_for_map_search':                  '',
-            'voter_device_id':                      voter_device_id,
-            'voter_device_id_not_valid':            voter_device_id_not_valid,
-        }
+        error_json_data['status'] = status
+        error_json_data['voter_device_id_not_valid'] = voter_device_id_not_valid
         return error_json_data
 
     voter_device_link = voter_device_link_results['voter_device_link']
@@ -1018,30 +1058,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
 
     if not positive_value_exists(voter_id):
         status += " " + "VALID_VOTER_ID_MISSING"
-        error_json_data = {
-            'status':                               status,
-            'success':                              False,
-            'ballot_caveat':                        '',
-            'ballot_found':                         False,
-            'ballot_item_list':                     [],
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'is_from_substituted_address':          False,
-            'is_from_test_ballot':                  False,
-            'next_national_election_day_text':      '',
-            'original_text_city':                   '',
-            'original_text_state':                  '',
-            'original_text_zip':                    '',
-            'polling_location_we_vote_id_source':   '',
-            'substituted_address_nearby':           '',
-            'substituted_address_city':             '',
-            'substituted_address_state':            '',
-            'substituted_address_zip':              '',
-            'text_for_map_search':                  '',
-            'voter_device_id':                      voter_device_id,
-        }
+        error_json_data['voter_device_id'] = voter_device_id
         return error_json_data
 
     voter_address_manager = VoterAddressManager()
@@ -1114,30 +1131,18 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         else:
             ballot_caveat = "Please save your address so we can find your ballot."
 
-        error_json_data = {
-            'status':                               status,
-            'success':                              True,
-            'ballot_caveat':                        ballot_caveat,
-            'ballot_found':                         False,
-            'ballot_item_list':                     [],
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'google_civic_election_id':             google_civic_election_id,
-            'is_from_substituted_address':          False,
-            'is_from_test_ballot':                  False,
-            'next_national_election_day_text':      next_national_election_day_text,
-            'original_text_city':                   '',
-            'original_text_state':                  '',
-            'original_text_zip':                    '',
-            'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
-            'substituted_address_nearby':           substituted_address_nearby,
-            'substituted_address_city':             substituted_address_city,
-            'substituted_address_state':            substituted_address_state,
-            'substituted_address_zip':              substituted_address_zip,
-            'text_for_map_search':                  text_for_map_search,
-            'voter_device_id':                      voter_device_id,
-        }
+        error_json_data['ballot_caveat'] = ballot_caveat
+        error_json_data['ballot_location_shortcut'] = ballot_location_shortcut
+        error_json_data['ballot_returned_we_vote_id'] = ballot_returned_we_vote_id
+        error_json_data['next_national_election_day_text'] = next_national_election_day_text
+        error_json_data['polling_location_we_vote_id_source'] = polling_location_we_vote_id_source
+        error_json_data['status'] = status
+        error_json_data['substituted_address_nearby'] = substituted_address_nearby
+        error_json_data['substituted_address_city'] = substituted_address_city
+        error_json_data['substituted_address_state'] = substituted_address_state
+        error_json_data['substituted_address_zip'] = substituted_address_zip
+        error_json_data['text_for_map_search'] = text_for_map_search
+        error_json_data['voter_device_id'] = voter_device_id
         return error_json_data
 
     google_civic_election_id = results['google_civic_election_id']
@@ -1306,9 +1311,9 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                     election_description_text = election.election_name
                     election_day_text = election.election_day_text
 
-            # Brute force override for 2026 elections
-            election_description_text = "2026 General Election"
-            election_day_text = "2026-11-03"  # Displays as "Nov 3rd, 2026"
+            # Brute force override for upcoming elections
+            election_description_text = "General Election"
+            election_day_text = next_national_election_yyyy_mm_dd_text()  # Displays as "Nov 3rd, 2026"
             json_data = {
                 'status':                               status,
                 'success':                              True,

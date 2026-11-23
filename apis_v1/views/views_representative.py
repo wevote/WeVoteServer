@@ -1,7 +1,7 @@
 # apis_v1/views/views_representative.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from representative.controllers import representatives_query_for_api
+from representative.controllers_representatives_retrieve import representatives_query_for_api
 from config.environment_variable_functions import get_environment_variable
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int
