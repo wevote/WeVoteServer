@@ -42,4 +42,8 @@ urlpatterns = [
             views_admin.office_explanation_summary_view, name='office_explanation_summary'),
     re_path(r'^(?P<we_vote_id>[^/]+)/delete/$',
             views_admin.office_explanation_delete_process_view, name='office_explanation_delete_process'),
+    re_path(r'^office_explanation_contest_office_link/(?P<we_vote_id>[^/]+)/$',
+            views_admin.office_explanation_contest_office_link_view, name='office_explanation_contest_office_link'),
+    re_path(r'^office_explanation_office_held_link/(?P<we_vote_id>[^/]+)/$',
+            views_admin.office_explanation_office_held_link_view, name='office_explanation_office_held_link'),
 ]
