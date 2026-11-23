@@ -43,6 +43,7 @@ from issue.models import Issue
 from organization.models import INDIVIDUAL, OrganizationManager
 from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
+from representative.controllers_representatives_retrieve import voter_representatives_retrieve_for_api
 from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_phone_number_save_for_api
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
@@ -2113,6 +2114,19 @@ def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
         'success':                          results['success'],
         'voter_device_id':                  voter_device_id,
     }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_representatives_retrieve_view(request):  # voterRepresentativesRetrieve
+    """
+    Request the representatives for voter
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    json_data = voter_representatives_retrieve_for_api(voter_device_id)
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

@@ -28,8 +28,9 @@ from politician.controllers_generate_seo_friendly_path import generate_campaign_
 from politician.models import Politician, PoliticianManager, PoliticianSEOFriendlyPath, \
     POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
-from representative.controllers import generate_representative_dict_list_from_representative_object_list, \
-    move_representatives_to_another_politician
+from representative.controllers import move_representatives_to_another_politician
+from representative.controllers_representatives_retrieve import \
+    generate_representative_dict_list_from_representative_object_list
 from representative.models import RepresentativeManager
 from voter.models import Voter, VoterManager
 from config.environment_variable_functions import get_environment_variable
