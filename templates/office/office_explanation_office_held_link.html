@@ -1,0 +1,235 @@
+{# templates/office/office_explanation_office_held_link.html #}
+{% extends "template_base.html" %}
+{% load humanize %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <a href="{% url 'office:office_explanations_list' %}">&lt; Back to OfficeExplanation List</a>
+
+  <h1>Link Office(s) Held to OfficeExplanation</h1>
+  <hr />
+  <form name="office_held_search_form"
+        method="get"
+        action="{% url 'office:office_explanation_office_held_link' office_explanation.we_vote_id %}"
+        class="form-horizontal"
+        style="margin-bottom: 12px">
+    <div class="form-group">
+      <label class="col-sm-3 control-label">Office Explanation Name</label>
+      <div class="col-sm-8" style="padding-top: 7px;">
+        {{ office_explanation.office_explanation_name|default_if_none:"" }}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label">Office Explanation</label>
+      <div class="col-sm-8" style="padding-top: 7px;">
+        {{ office_explanation.office_explanation|default_if_none:"" }}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label">State Code</label>
+      <div class="col-sm-8" style="padding-top: 7px;">
+        {{ office_explanation.state_code|default_if_none:"" }}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label">Link to Office(s) Held</label>
+      <div class="col-sm-8">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text"
+                 name="office_held_search"
+                 id="office_held_search_id"
+                 class="form-control"
+                 value="{{ office_held_search|default_if_none:'' }}"
+                 placeholder="Search by office name, state, or We Vote ID" />
+          <button type="submit"
+                  class="btn btn-default"
+                  name="office_held_search_submit"
+                  value="1">Search</button>
+          {% if office_held_search %}
+            <a class="btn btn-link"
+               href="{% url 'office:office_explanation_office_held_link' office_explanation.we_vote_id %}">clear</a>
+          {% endif %}
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          {# Do not show offices that already have an office explanation linked to them #}
+          <label for="hide_linked_offices_id">
+            <input type="checkbox"
+                   name="hide_linked_offices"
+                   id="hide_linked_offices_id"
+                   value="1"
+                   {% if hide_linked_offices %}checked{% endif %} />
+            hide offices already linked
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          {# Restrict to one office level #}
+          <label for="office_level_all_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_all_id"
+                   value=""
+                   {% if not office_level %}checked{% endif %} />
+            All
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_federal_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_federal_id"
+                   value="Federal"
+                   {% if office_level == 'Federal' %}checked{% endif %} />
+            Federal
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_state_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_state_id"
+                   value="State"
+                   {% if office_level == 'State' %}checked{% endif %} />
+            State
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_local_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_local_id"
+                   value="Local"
+                   {% if office_level == 'Local' %}checked{% endif %} />
+            Local
+          </label>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <label for="office_level_missing_id">
+            <input type="radio"
+                   name="office_level"
+                   id="office_level_missing_id"
+                   value="Missing"
+                   {% if office_level == 'Missing' %}checked{% endif %} />
+            Missing
+          </label>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  {% if offices_found_count > 0 %}
+    <div class="alert alert-success" style="margin-top: 10px;">
+      {{ offices_found_count|intcomma }} offices found.
+    </div>
+  {% endif %}
+
+  <form name="office_held_link_form"
+        method="post"
+        action="{% url 'office:office_explanation_edit_process' %}"
+        class="form-horizontal">
+    {% csrf_token %}
+
+    {# Identify which OfficeExplanation we’re linking to #}
+    <input type="hidden"
+           name="we_vote_id"
+           value="{{ office_explanation.we_vote_id }}" />
+
+    {# Pass along the url_variables this page is using, so we can return to the same page state #}
+    <input type="hidden"
+           id="hide_linked_offices_hidden_id"
+           name="hide_linked_offices"
+           value="{{ hide_linked_offices }}" />
+    <input type="hidden"
+           id="office_level_hidden_id"
+           name="office_level"
+           value="{{ office_level }}" />
+
+    {# Optional: preserve the search term so after POST you can redirect back with it #}
+    <input type="hidden"
+           name="office_held_search"
+           value="{{ office_held_search|default_if_none:'' }}" />
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label">&nbsp;</label>
+      <div class="col-sm-8">
+        {% if office_held_list %}
+          <table class="table table-sm table-hover" style="margin-top: 10px;">
+            <thead>
+              <tr>
+                <th style="width: 36px;">
+                  <input type="checkbox"
+                         id="select_all_office_helds"
+                         aria-label="Select all contest offices"
+                         onclick="document.querySelectorAll('input[name=selected_office_held_we_vote_ids]').forEach(function(cb){ cb.checked = this.checked; }, this);" />
+                </th>
+                <th colspan="2"> Office Held Name</th>
+                <th>State</th>
+                <th>Office Level</th>
+                <th>We Vote ID</th>
+                <th>Current Linked OfficeExplanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for office_held in office_held_list %}
+                <tr>
+                  <td>
+                    <input type="checkbox"
+                           name="selected_office_held_we_vote_ids"
+                           value="{{ office_held.we_vote_id }}"
+                           aria-label="Select {{ office_held.office_name }}"
+                           {% if office_explanation.we_vote_id and office_held.office_explanation_we_vote_id == office_explanation.we_vote_id %}checked{% endif %} />
+                  </td>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    {{ office_held.office_held_name|default:"(no name)" }}
+                    {% if office_held.election_date %}
+                      <span style="color:darkgray;">
+                        — {{ office_held.election_date|default:"" }}
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td>{{ office_held.state_code|default:"" }}</td>
+                  <td>{{ office_held.race_office_level|default:"" }}</td>
+                  <td>{{ office_held.we_vote_id|default:"" }}</td>
+                  <td>{{ office_held.office_explanation_we_vote_id|default:"(none)" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
+            <div>
+              <strong>Link to Office Explanation</strong>
+              <div style="font-size: .9em; opacity: .85;">
+                Selected contest offices will be updated so their
+                <code>office_explanation_we_vote_id</code> equals this OfficeExplanation’s <code>we_vote_id</code>.
+              </div>
+            </div>
+
+            <div style="margin-left:auto;">
+              <button type="submit"
+                      class="btn btn-primary"
+                      name="link_office_helds_submit"
+                      value="1">Save</button>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-warning" style="margin-top: 8px;">No results found. Try a different search term.</div>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
+  <script>
+    function syncHideLinkedOffices() {
+      const value = $('#hide_linked_offices_id').is(':checked') ? 'True' : '';
+      $('#hide_linked_offices_hidden_id').val(value);
+    }
+    $('#hide_linked_offices_id').change(syncHideLinkedOffices);
+    syncHideLinkedOffices(); // Called on initial load
+
+    function syncOfficeLevel() {
+      const value = $('input[name="office_level"]').value();
+      $('#office_level_hidden_id').val(value);
+      alert('office_level:' + value);
+    }
+    $('input[name="office_level"]').change(syncOfficeLevel);
+    syncOfficeLevel(); // Called on initial load
+  </script>
+
+{% endblock content %}
