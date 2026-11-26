@@ -37,7 +37,6 @@ GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
 VOTER_INFO_URL = get_environment_variable("VOTER_INFO_URL")
 VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
-REPRESENTATIVES_BY_ADDRESS_URL = get_environment_variable("REPRESENTATIVES_BY_ADDRESS_URL")
 
 OFFICE_NAMES_WITH_NO_STATE = ['President of the United States']
 PRESIDENTIAL_CANDIDATES_JSON_LIST = [

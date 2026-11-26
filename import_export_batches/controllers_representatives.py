@@ -6,10 +6,12 @@
 from .models import BatchManager, BatchProcessManager, BatchProcessRepresentativesChunk, \
     RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
 # REFRESH_REPRESENTATIVES_FROM_POLLING_LOCATIONS, REFRESH_REPRESENTATIVES_FROM_VOTERS
-from datetime import timedelta
+from datetime import datetime, timedelta
 from django.db.models import Q
 from django.utils.timezone import now
 from exception.models import handle_exception
+from typing import Optional, cast
+
 from office_held.models import OfficesHeldForLocation
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -103,7 +105,7 @@ def process_one_representatives_batch_process(batch_process):
             return results
 
     # If here, we have a batch_process_representatives_chunk to work on
-    if batch_process_representatives_chunk.retrieve_date_started is None:
+    if cast(Optional[datetime], batch_process_representatives_chunk.retrieve_date_started) is None:
         # Kick off retrieve
         retrieve_success = False
         retrieve_row_count = 0
@@ -200,10 +202,6 @@ def process_one_representatives_batch_process(batch_process):
                 if results['batch_process_representatives_chunk'] and \
                         hasattr(results['batch_process_representatives_chunk'], 'batch_set_id'):
                     batch_process_representatives_chunk = results['batch_process_representatives_chunk']
-
-        if batch_process.kind_of_process in \
-                [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]:
-            pass
         if retrieve_success:
             if positive_value_exists(batch_set_id):
                 try:
@@ -306,7 +304,7 @@ def process_one_representatives_batch_process(batch_process):
                     status += "ERROR-CANNOT_WRITE_TO_BATCH_PROCESS_LOG: " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
 
-    elif batch_process_representatives_chunk.retrieve_date_completed is None:
+    elif cast(Optional[datetime], batch_process_representatives_chunk.retrieve_date_completed) is None:
         # Check to see if retrieve process has timed out
         date_when_retrieve_has_timed_out = \
             batch_process_representatives_chunk.retrieve_date_started + timedelta(seconds=retrieve_time_out_duration)
@@ -379,7 +377,7 @@ def process_one_representatives_batch_process(batch_process):
                 'status': status,
             }
             return results
-    elif batch_process_representatives_chunk.politician_matching_date_started is None:
+    elif cast(Optional[datetime], batch_process_representatives_chunk.politician_matching_date_started) is None:
         # ###################
         # This is where we start POLITICIAN_MATCH
         status += "STARTING_POLITICIAN_MATCH_WITH_DATE_STARTED_NONE "
@@ -511,7 +509,7 @@ def process_one_representatives_batch_process(batch_process):
             }
             return results
 
-    elif batch_process_representatives_chunk.politician_matching_date_completed is None:
+    elif cast(Optional[datetime], batch_process_representatives_chunk.politician_matching_date_completed) is None:
         # ###################
         # This is an POLITICIAN_MATCH process that failed part way through
         status += "RESTARTING_FAILED_POLITICIAN_MATCH_PROCESS "
@@ -580,7 +578,7 @@ def process_one_representatives_batch_process(batch_process):
                 'status': status,
             }
             return results
-    elif batch_process_representatives_chunk.politician_deduplication_date_started is None:
+    elif cast(Optional[datetime], batch_process_representatives_chunk.politician_deduplication_date_started) is None:
         try:
             # If here, we know that the politician_matching_date_completed has a value
             batch_process_representatives_chunk.politician_deduplication_date_started = now()
@@ -704,7 +702,7 @@ def process_one_representatives_batch_process(batch_process):
             }
             return results
 
-    elif batch_process_representatives_chunk.politician_deduplication_date_completed is None:
+    elif cast(Optional[datetime], batch_process_representatives_chunk.politician_deduplication_date_completed) is None:
         date_when_politician_deduplication_has_timed_out = \
             batch_process_representatives_chunk.politician_deduplication_date_started + \
             timedelta(seconds=politician_deduplication_time_out_duration)

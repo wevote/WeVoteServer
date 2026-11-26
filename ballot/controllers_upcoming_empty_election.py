@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from election.models import ElectionManager
+from voter.constants import MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS
 from voter.models import VoterAddressManager
 import wevote_functions.admin
 from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
@@ -39,11 +40,10 @@ def retrieve_next_election_from_this_state(
     if positive_value_exists(text_for_map_search):
         state_code = extract_state_code_from_address_string(text_for_map_search)
 
-        length_at_which_we_suspect_address_has_street = 25
         length_of_text_for_map_search = 0
         if isinstance(text_for_map_search, str):
             length_of_text_for_map_search = len(text_for_map_search)
-        text_for_map_search_too_short = length_of_text_for_map_search <= length_at_which_we_suspect_address_has_street
+        text_for_map_search_too_short = length_of_text_for_map_search <= MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS
     else:
         state_code = ''
 

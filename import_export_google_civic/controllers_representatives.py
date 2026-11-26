@@ -24,6 +24,7 @@ from wevote_functions.functions import convert_level_to_race_office_level, conve
     extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, extract_vote_usa_office_id, \
     logger, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_date import get_current_date_as_integer
 
 GEOCODE_TIMEOUT = 10
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
@@ -222,26 +223,47 @@ def create_default_values_for_offices_held_for_location(
     return results
 
 
-def groom_and_store_office_held_with_representatives_google_civic_json(
-        divisions_dict={},
-        office_held_dict={},
+def groom_and_store_office_held_with_representatives_json(
+        divisions_dict=None,
+        office_held_dict=None,
         office_held_array_index=0,
-        officials_list=[],
+        officials_list=None,
         state_code='',
         offices_held_display_order=0,
-        voter_id=0,
-        polling_location_we_vote_id='',
-        office_held_dict_list_for_location=[],
-        existing_offices_held_by_ocd_and_name_dict={},
-        existing_offices_held_by_vote_usa_office_id_dict={},
-        existing_representatives_by_office_and_name_dict={},
-        existing_representative_to_office_held_links_dict={},
-        new_office_held_we_vote_ids_list=[],
-        new_representative_we_vote_ids_list=[],
+        office_held_dict_list_for_location=None,
+        existing_offices_held_by_ocd_and_name_dict=None,
+        existing_offices_held_by_vote_usa_office_id_dict=None,
+        existing_representatives_by_office_and_name_dict=None,
+        existing_representative_to_office_held_links_dict=None,
+        new_office_held_we_vote_ids_list=None,
+        new_representative_we_vote_ids_list=None,
         use_ctcl=False,
         use_google_civic=False,
         use_vote_usa=False,
-        update_or_create_rules={}):
+        update_or_create_rules=None):
+    if divisions_dict is None:
+        divisions_dict = {}
+    if office_held_dict is None:
+        office_held_dict = {}
+    if officials_list is None:
+        officials_list = []
+    if office_held_dict_list_for_location is None:
+        office_held_dict_list_for_location = []
+    if existing_offices_held_by_ocd_and_name_dict is None:
+        existing_offices_held_by_ocd_and_name_dict = {}
+    if existing_offices_held_by_vote_usa_office_id_dict is None:
+        existing_offices_held_by_vote_usa_office_id_dict = {}
+    if existing_representatives_by_office_and_name_dict is None:
+        existing_representatives_by_office_and_name_dict = {}
+    if existing_representative_to_office_held_links_dict is None:
+        existing_representative_to_office_held_links_dict = {}
+    if new_office_held_we_vote_ids_list is None:
+        new_office_held_we_vote_ids_list = []
+    if new_representative_we_vote_ids_list is None:
+        new_representative_we_vote_ids_list = []
+    if update_or_create_rules is None:
+        update_or_create_rules = {}
+
     status = ''
     success = True
     office_held_manager = OfficeHeldManager()
@@ -1193,60 +1215,80 @@ def retrieve_and_store_vote_usa_representative_photo(representative):
     return results
 
 
-def retrieve_google_civic_representatives_from_polling_location_api(
+def retrieve_remote_representatives_from_location_api(
+        batch_process_id=0,
+        existing_offices_held_by_ocd_and_name_dict=None,
+        existing_offices_held_by_vote_usa_office_id_dict=None,
+        existing_representatives_by_office_and_name_dict=None,
+        existing_representative_to_office_held_links_dict=None,
+        new_office_held_we_vote_ids_list=None,
+        new_representative_we_vote_ids_list=None,
         polling_location_we_vote_id="",
         polling_location=None,
         state_code="",
-        batch_process_id=0,
-        batch_set_id=0,
-        existing_offices_held_by_ocd_and_name_dict={},
-        existing_offices_held_by_vote_usa_office_id_dict={},
-        existing_representatives_by_office_and_name_dict={},
-        existing_representative_to_office_held_links_dict={},
-        new_office_held_we_vote_ids_list=[],
-        new_representative_we_vote_ids_list=[],
-        update_or_create_rules={}):
+        text_for_map_search="",
+        update_or_create_rules=None,
+        voter_we_vote_id="",
+    ):
     """
 
-    :param polling_location_we_vote_id:
-    :param polling_location:
-    :param state_code:
     :param batch_process_id:
-    :param batch_set_id:
     :param existing_offices_held_by_ocd_and_name_dict:
     :param existing_offices_held_by_vote_usa_office_id_dict:
     :param existing_representatives_by_office_and_name_dict:
     :param existing_representative_to_office_held_links_dict:
     :param new_office_held_we_vote_ids_list:
     :param new_representative_we_vote_ids_list:
+    :param polling_location_we_vote_id:
+    :param polling_location:
+    :param state_code:
+    :param text_for_map_search:
     :param update_or_create_rules:
+    :param voter_we_vote_id:
     :return:
     """
     success = True
     status = ""
     ballot_items_count = 0
+    date_as_integer = get_current_date_as_integer()
+    offices_held_for_location = None
+    offices_held_for_location_found = False
+    offices_held_for_location_id = None
     polling_location_found = False
-    batch_header_id = 0
     successful_representatives_api_call = False
     representative_manager = RepresentativeManager()
     use_google_civic = False
     use_vote_usa = True
 
-    if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
-        status += "MISSING_POLLING_LOCATION_INFO_FOR_REPRESENTATIVES "
-        results = {
-            'success':                                  False,
-            'status':                                   status,
-            'ballot_items_count':                       ballot_items_count,
-            'successful_representatives_api_call':      successful_representatives_api_call,
-            'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-            'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
-            'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
-            'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
-            'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
-            'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
-        }
-        return results
+    if existing_offices_held_by_ocd_and_name_dict is None:
+        existing_offices_held_by_ocd_and_name_dict = {}
+    if existing_representatives_by_office_and_name_dict is None:
+        existing_representatives_by_office_and_name_dict = {}
+    if existing_representative_to_office_held_links_dict is None:
+        existing_representative_to_office_held_links_dict = {}
+    if new_office_held_we_vote_ids_list is None:
+        new_office_held_we_vote_ids_list = []
+    if new_representative_we_vote_ids_list is None:
+        new_representative_we_vote_ids_list = []
+    if update_or_create_rules is None:
+        update_or_create_rules = {}
+
+
+    error_results = {
+        'ballot_items_count':                       ballot_items_count,
+        'offices_held_for_location':                None,
+        'offices_held_for_location_found':          False,
+        'offices_held_for_location_id':             None,
+        'existing_offices_held_by_ocd_and_name_dict':   existing_offices_held_by_ocd_and_name_dict,
+        'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
+        'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
+        'existing_representative_to_office_held_links_dict':  existing_representative_to_office_held_links_dict,
+        'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
+        'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
+        'status':                                   status,
+        'success':                                  False,
+        'successful_representatives_api_call':      successful_representatives_api_call,
+    }
 
     # Create rules
     if 'create_office_helds' not in update_or_create_rules:
@@ -1261,7 +1303,6 @@ def retrieve_google_civic_representatives_from_polling_location_api(
 
     latitude = 0.0
     longitude = 0.0
-    text_for_map_search = ''
     polling_location_manager = PollingLocationManager()
     if polling_location:
         polling_location_found = True
@@ -1278,47 +1319,42 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             longitude = polling_location.longitude
             text_for_map_search = polling_location.get_text_for_map_search()
             polling_location_found = True
+    elif positive_value_exists(voter_we_vote_id):
+        pass
 
-    if polling_location_found:
-        if not positive_value_exists(text_for_map_search):
-            success = False
-            status += "MISSING_TEXT_FOR_MAP_SEARCH-GOOGLE_CIVIC "
-            results = {
-                'success':                                  success,
-                'status':                                   status,
-                'ballot_items_count':                       ballot_items_count,
-                'successful_representatives_api_call':      successful_representatives_api_call,
-                'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-                'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
-                'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
-                'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
-                'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
-                'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
-            }
-            return results
+    if not polling_location_found and not positive_value_exists(voter_we_vote_id):
+        status += "NEITHER_POLLING_LOCATION_NOR_VOTER_FOUND "
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
 
-        if not positive_value_exists(state_code):
-            if positive_value_exists(polling_location.state):
-                state_code = polling_location.state
-            else:
-                state_code = "na"
+    if not positive_value_exists(text_for_map_search):
+        status += "MISSING_TEXT_FOR_MAP_SEARCH "
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
 
-        try:
-            # Get representatives' info for this address
-            response = requests.get(
-                REPRESENTATIVES_BY_ADDRESS_URL,
-                params={
-                    "accessKey": VOTE_USA_API_KEY,
-                    "address": text_for_map_search,
-                })
-            representative_info_by_address_json = json.loads(response.text)
-        except Exception as e:
-            success = False
-            status += 'VOTE_USA_API_END_POINT_CRASH: ' + str(e) + ' '
-            log_entry_message = status
+    if not positive_value_exists(state_code):
+        if positive_value_exists(polling_location.state):
+            state_code = polling_location.state
+        else:
+            state_code = "na"
+
+    try:
+        # Get representatives' info for this address
+        response = requests.get(
+            REPRESENTATIVES_BY_ADDRESS_URL,
+            params={
+                "accessKey": VOTE_USA_API_KEY,
+                "address": text_for_map_search,
+            })
+        representative_info_by_address_json = json.loads(response.text)
+    except Exception as e:
+        status += 'VOTE_USA_API_END_POINT_CRASH: ' + str(e) + ' '
+        log_entry_message = status
+        if positive_value_exists(polling_location_we_vote_id):
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,
-                # is_from_google_civic=True,
                 is_from_vote_usa=True,
                 kind_of_log_entry=KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                 log_entry_message=log_entry_message,
@@ -1328,150 +1364,174 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             )
             status += results['status']
             results = polling_location_manager.update_polling_location_with_log_counts(
-                # is_from_google_civic=True,
                 is_from_vote_usa=True,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 update_error_counts=True,
             )
             status += results['status']
             handle_exception(e, logger=logger, exception_message=status)
-            results = {
-                'success':                                  success,
-                'status':                                   status,
-                'ballot_items_count':                       ballot_items_count,
-                'successful_representatives_api_call':      successful_representatives_api_call,
-                'existing_offices_held_by_ocd_and_name_dict': existing_offices_held_by_ocd_and_name_dict,
-                'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
-                'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
-                'existing_representative_to_office_held_links_dict': existing_representative_to_office_held_links_dict,
-                'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
-                'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
-            }
-            return results
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
 
-        try:
-            # Use API call counter to track the number of queries we are doing each day
-            if use_google_civic:
-                api_counter_manager = GoogleCivicApiCounterManager()
-                api_counter_manager.create_counter_entry('representatives')
-            elif use_vote_usa:
-                api_counter_manager = VoteUSAApiCounterManager()
-                api_counter_manager.create_counter_entry('representatives')
+    try:
+        # Use API call counter to track the number of queries we are doing each day
+        if use_google_civic:
+            api_counter_manager = GoogleCivicApiCounterManager()
+            api_counter_manager.create_counter_entry('representatives')
+        elif use_vote_usa:
+            api_counter_manager = VoteUSAApiCounterManager()
+            api_counter_manager.create_counter_entry('representatives')
 
-            officials_list = []
-            if 'officials' in representative_info_by_address_json:
-                # Assemble a list of all Vote-USA Politician Ids so we can retrieve them all at once,
-                #  and match them
-                politicians_dict = {}
-                officials_list = representative_info_by_address_json.get('officials', [])
-                vote_usa_politician_id_list = []
-                for official_dict in officials_list:
-                    if 'voteUSAPoliticianId' in official_dict:
-                        vote_usa_politician_id = official_dict['voteUSAPoliticianId']
-                        vote_usa_politician_id_list.append(vote_usa_politician_id)
-                if len(vote_usa_politician_id_list) > 0:
-                    try:
-                        # Retrieve from Politician table all entries that have vote_usa_politician_id matching
-                        from politician.models import Politician
-                        politician_query = Politician.objects.filter(vote_usa_politician_id__in=vote_usa_politician_id_list)
-                        politician_list = list(politician_query)
-                        politicians_dict = {politician.vote_usa_politician_id: politician for politician in politician_list}
-                    except Exception as e:
-                        pass
-                if len(politicians_dict) > 0:
-                    officials_list_results = augment_officials_list_with_politician_data(
-                        officials_list, politicians_dict=politicians_dict)
-                    if officials_list_results['success']:
-                        officials_list = officials_list_results['officials_list']
+        officials_list = []
+        if 'officials' in representative_info_by_address_json:
+            # Assemble a list of all Vote-USA Politician Ids so we can retrieve them all at once,
+            #  and match them
+            politicians_dict = {}
+            officials_list = representative_info_by_address_json.get('officials', [])
+            vote_usa_politician_id_list = []
+            for official_dict in officials_list:
+                if 'voteUSAPoliticianId' in official_dict:
+                    vote_usa_politician_id = official_dict['voteUSAPoliticianId']
+                    vote_usa_politician_id_list.append(vote_usa_politician_id)
+            if len(vote_usa_politician_id_list) > 0:
+                try:
+                    # Retrieve from Politician table all entries that have vote_usa_politician_id matching
+                    from politician.models import Politician
+                    politician_query = Politician.objects.filter(vote_usa_politician_id__in=vote_usa_politician_id_list)
+                    politician_list = list(politician_query)
+                    politicians_dict = {politician.vote_usa_politician_id: politician for politician in politician_list}
+                except Exception as e:
+                    pass
+            if len(politicians_dict) > 0:
+                officials_list_results = augment_officials_list_with_politician_data(
+                    officials_list, politicians_dict=politicians_dict)
+                if officials_list_results['success']:
+                    officials_list = officials_list_results['officials_list']
 
-            if 'offices' in representative_info_by_address_json:
-                office_held_dict_list_for_location = []
-                office_held_array_index = 0
-                offices_held_display_order = 1
-                for office_held_dict in representative_info_by_address_json['offices']:
-                    # Use extract_state_from_ocd_division_id(ocd_division_id)
-                    groom_results = groom_and_store_office_held_with_representatives_google_civic_json(
-                        divisions_dict=representative_info_by_address_json.get('divisions', {}),
-                        office_held_dict_list_for_location=office_held_dict_list_for_location,
-                        office_held_dict=office_held_dict,
-                        offices_held_display_order=offices_held_display_order,
-                        office_held_array_index=office_held_array_index,
-                        officials_list=officials_list,
-                        state_code=state_code,  # TODO DALE: 2023-11-15 I think this is cause of Representatives bug
-                        polling_location_we_vote_id=polling_location_we_vote_id,
-                        existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
-                        existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
-                        existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,
-                        existing_representative_to_office_held_links_dict=
-                        existing_representative_to_office_held_links_dict,
-                        new_office_held_we_vote_ids_list=new_office_held_we_vote_ids_list,
-                        new_representative_we_vote_ids_list=new_representative_we_vote_ids_list,
-                        update_or_create_rules=update_or_create_rules,
-                        use_vote_usa=True,
-                        )
-                    status += groom_results['status']
-                    office_held_dict_list_for_location = groom_results['office_held_dict_list_for_location']
-                    existing_offices_held_by_ocd_and_name_dict = \
-                        groom_results['existing_offices_held_by_ocd_and_name_dict']
-                    existing_offices_held_by_vote_usa_office_id_dict = \
-                        groom_results['existing_offices_held_by_vote_usa_office_id_dict']
-                    existing_representatives_by_office_and_name_dict = groom_results['existing_representatives_by_office_and_name_dict']
-                    existing_representative_to_office_held_links_dict = \
-                        groom_results['existing_representative_to_office_held_links_dict']
-                    new_office_held_we_vote_ids_list = groom_results['new_office_held_we_vote_ids_list']
-                    new_representative_we_vote_ids_list = groom_results['new_representative_we_vote_ids_list']
-                    office_held_array_index += 1
-                    offices_held_display_order += 1
-                    successful_representatives_api_call = groom_results['success'] or \
-                        successful_representatives_api_call
+        if 'offices' in representative_info_by_address_json:
+            office_held_dict_list_for_location = []
+            office_held_array_index = 0
+            offices_held_display_order = 1
+            for office_held_dict in representative_info_by_address_json['offices']:
+                # Use extract_state_from_ocd_division_id(ocd_division_id)
+                groom_results = groom_and_store_office_held_with_representatives_json(
+                    divisions_dict=representative_info_by_address_json.get('divisions', {}),
+                    office_held_dict_list_for_location=office_held_dict_list_for_location,
+                    office_held_dict=office_held_dict,
+                    offices_held_display_order=offices_held_display_order,
+                    office_held_array_index=office_held_array_index,
+                    officials_list=officials_list,
+                    state_code=state_code,
+                    existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
+                    existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
+                    existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,
+                    existing_representative_to_office_held_links_dict=
+                    existing_representative_to_office_held_links_dict,
+                    new_office_held_we_vote_ids_list=new_office_held_we_vote_ids_list,
+                    new_representative_we_vote_ids_list=new_representative_we_vote_ids_list,
+                    update_or_create_rules=update_or_create_rules,
+                    use_vote_usa=True,
+                    )
+                status += groom_results['status']
+                office_held_dict_list_for_location = groom_results['office_held_dict_list_for_location']
+                existing_offices_held_by_ocd_and_name_dict = \
+                    groom_results['existing_offices_held_by_ocd_and_name_dict']
+                existing_offices_held_by_vote_usa_office_id_dict = \
+                    groom_results['existing_offices_held_by_vote_usa_office_id_dict']
+                existing_representatives_by_office_and_name_dict = groom_results['existing_representatives_by_office_and_name_dict']
+                existing_representative_to_office_held_links_dict = \
+                    groom_results['existing_representative_to_office_held_links_dict']
+                new_office_held_we_vote_ids_list = groom_results['new_office_held_we_vote_ids_list']
+                new_representative_we_vote_ids_list = groom_results['new_representative_we_vote_ids_list']
+                office_held_array_index += 1
+                offices_held_display_order += 1
+                successful_representatives_api_call = groom_results['success'] or \
+                    successful_representatives_api_call
 
-                # If we successfully save all of a location's elected representatives,
-                # create/update an OfficesHeldForLocation entry
-                if office_held_dict_list_for_location and len(office_held_dict_list_for_location) > 0:
-                    office_held_manager = OfficeHeldManager()
+            # If we successfully save all of a location's elected representatives,
+            # create/update an OfficesHeldForLocation entry
+            if office_held_dict_list_for_location and len(office_held_dict_list_for_location) > 0:
+                office_held_manager = OfficeHeldManager()
+                if positive_value_exists(polling_location_we_vote_id):
                     results = office_held_manager.retrieve_offices_held_for_location(
                         polling_location_we_vote_id=polling_location_we_vote_id,
                     )
-                    if results['success']:
-                        if results['offices_held_for_location_found']:
-                            # TODO: Complete the update process
-                            # Figure out if:
-                            # 1) any entries have been added or removed,
-                            # 2) the office_held_names have changed, or
-                            # 3) the order of existing entries has changed
-                            pass
-                        else:
-                            prepare_default_results = create_default_values_for_offices_held_for_location(
-                                office_held_dict_list_for_location=office_held_dict_list_for_location
-                            )
-                            if prepare_default_results['success']:
-                                defaults = prepare_default_results['defaults']
-                                defaults['date_last_retrieved'] = now()
+                    status += results['status']
+                elif positive_value_exists(date_as_integer) and positive_value_exists(state_code) \
+                        and positive_value_exists(voter_we_vote_id):
+                    results = office_held_manager.retrieve_offices_held_for_location(
+                        date_as_integer=date_as_integer,
+                        state_code=state_code,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                    status += results['status']
+                else:
+                    status += "RETRIEVE_REMOTE_MISSING_VOTER_AND_PL "
+                    results = {
+                        'success': False,
+                    }
+                if results['success']:
+                    if results['offices_held_for_location_found']:
+                        offices_held_for_location = results['offices_held_for_location']
+                        offices_held_for_location_id = results['offices_held_for_location_id']
+                        offices_held_for_location_found = results['offices_held_for_location_found']
+                        # TODO: Complete the update process
+                        # Figure out if:
+                        # 1) any entries have been added or removed,
+                        # 2) the office_held_names have changed, or
+                        # 3) the order of existing entries has changed
+                        pass
+                    else:
+                        prepare_default_results = create_default_values_for_offices_held_for_location(
+                            office_held_dict_list_for_location=office_held_dict_list_for_location
+                        )
+                        if prepare_default_results['success']:
+                            defaults = prepare_default_results['defaults']
+                            defaults['date_last_retrieved'] = now()
 
-                                today = datetime.now().date()
-                                this_year = 0
-                                if today and today.year:
-                                    this_year = convert_to_int(today.year)
-                                if positive_value_exists(this_year):
-                                    year_with_data_key = 'year_with_data_' + str(this_year)
-                                    defaults[year_with_data_key] = True
+                            today = datetime.now().date()
+                            this_year = 0
+                            if today and today.year:
+                                this_year = convert_to_int(today.year)
+                            if positive_value_exists(this_year):
+                                year_with_data_key = 'year_with_data_' + str(this_year)
+                                defaults[year_with_data_key] = True
 
-                                # TODO DALE: 2023-11-15 I think state_code is cause of Representatives bug
+                            if positive_value_exists(polling_location_we_vote_id):
                                 results = office_held_manager.create_offices_held_for_location_row_entry(
                                     polling_location_we_vote_id=polling_location_we_vote_id,
                                     state_code=state_code,
                                     defaults=defaults)
-                                if not results['success']:
-                                    status += results['status']
+                                offices_held_for_location = results['offices_held_for_location']
+                                offices_held_for_location_id = results['offices_held_for_location_id']
+                                offices_held_for_location_found = results['offices_held_for_location_found']
+                            elif positive_value_exists(voter_we_vote_id):
+                                results = office_held_manager.create_offices_held_for_location_row_entry(
+                                    state_code=state_code,
+                                    text_for_map_search=text_for_map_search,
+                                    voter_we_vote_id=voter_we_vote_id,
+                                    defaults=defaults)
+                                offices_held_for_location = results['offices_held_for_location']
+                                offices_held_for_location_id = results['offices_held_for_location_id']
+                                offices_held_for_location_found = results['offices_held_for_location_found']
                             else:
-                                status += "COULD_NOT_CREATE_DEFAULT_VALUES_FOR_OFFICES_HELD_FOR_LOCATION "
-                    else:
-                        status += results['status']
-                        status += "FAILED-retrieve_offices_held_for_location "
-                    # Store that we have reviewed this polling_location, so we don't retrieve it again in the next chunk
+                                status += 'MISSING_VOTER_WE_VOTE_ID_AND_POLLING_LOCATION_WE_VOTE_ID '
+                                error_results['status'] = status
+                                error_results['success'] = False
+                                return error_results
+
+                            if not results['success']:
+                                status += results['status']
+                        else:
+                            status += "COULD_NOT_CREATE_DEFAULT_VALUES_FOR_OFFICES_HELD_FOR_LOCATION "
+                else:
+                    status += results['status']
+                    status += "FAILED-retrieve_offices_held_for_location "
+                # Store that we have reviewed this polling_location, so we don't retrieve it again in the next chunk
+                if positive_value_exists(polling_location_we_vote_id):
                     results = polling_location_manager.create_polling_location_log_entry(
                         batch_process_id=batch_process_id,
-                        # is_from_google_civic=True,
                         is_from_vote_usa=True,
                         kind_of_log_entry=KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED,
                         polling_location_we_vote_id=polling_location_we_vote_id,
@@ -1481,51 +1541,51 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     if not results['success']:
                         status += results['status']
                     results = polling_location_manager.update_polling_location_with_log_counts(
-                        # is_from_google_civic=True,
                         is_from_vote_usa=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         update_data_counts=True,
                         is_successful_retrieve=True,
                     )
                     status += results['status']
-                else:
-                    # We need to at least to mark the BallotReturned entry with a new date_last_updated date,
-                    #  so we can move on to other ballot returned entries.
-                    status += "OFFICES_HELD_BUT_NO_INCOMING_REPRESENTATIVES_FOUND_VOTE_USA "
             else:
-                # Create BallotReturnedEmpty entry, so we don't keep retrieving this map point
-                kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
-                log_entry_message = ''
-                try:
-                    error = representative_info_by_address_json.get('error', {})
-                    errors = error.get('errors', {})
-                    if len(errors):
-                        log_entry_message = errors
-                        for one_error in errors:
-                            try:
-                                if 'reason' in one_error:
-                                    if one_error['reason'] == "notFound":
-                                        # Representatives not found at this location
-                                        kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
-                                        status += "ERROR_REPRESENTATIVES_notFound "
-                                    elif one_error['reason'] == "parseError":
-                                        kind_of_log_entry = KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR
-                                        status += "ERROR_REPRESENTATIVES_parseError "
-                                    elif one_error['reason'] == "rateLimitExceeded":
-                                        kind_of_log_entry = KIND_OF_LOG_ENTRY_RATE_LIMIT_ERROR
-                                        status += "ERROR_rateLimitExceeded "
-                                    else:
-                                        reason_not_found = True
-                                        status += "ERROR_REPRESENTATIVES_REASON_NOT_RECOGNIZED: " \
-                                                  "" + str(one_error['reason']) + ' '
-                            except Exception as e:
-                                status += "PROBLEM_PARSING_REPRESENTATIVES_ERROR_VOTE_USA: " + str(e) + ' '
-                    else:
-                        status_from_vote_usa = representative_info_by_address_json.get('status', 'NO_STATUS ')
-                        status += "MISSING_ERRORS_FROM_VOTE_USA:" + str(status_from_vote_usa) + " "
-                except Exception as e:
-                    status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_VOTE_USA: " + str(e) + " "
-                    log_entry_message += status
+                # We need to at least to mark the BallotReturned entry with a new date_last_updated date,
+                #  so we can move on to other ballot returned entries.
+                status += "OFFICES_HELD_BUT_NO_INCOMING_REPRESENTATIVES_FOUND_VOTE_USA "
+        else:
+            # Create log entry, so we don't keep retrieving this map point
+            kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
+            log_entry_message = ''
+            try:
+                error = representative_info_by_address_json.get('error', {})
+                errors = error.get('errors', {})
+                if len(errors):
+                    log_entry_message = errors
+                    for one_error in errors:
+                        try:
+                            if 'reason' in one_error:
+                                if one_error['reason'] == "notFound":
+                                    # Representatives not found at this location
+                                    kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
+                                    status += "ERROR_REPRESENTATIVES_notFound "
+                                elif one_error['reason'] == "parseError":
+                                    kind_of_log_entry = KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR
+                                    status += "ERROR_REPRESENTATIVES_parseError "
+                                elif one_error['reason'] == "rateLimitExceeded":
+                                    kind_of_log_entry = KIND_OF_LOG_ENTRY_RATE_LIMIT_ERROR
+                                    status += "ERROR_rateLimitExceeded "
+                                else:
+                                    reason_not_found = True
+                                    status += "ERROR_REPRESENTATIVES_REASON_NOT_RECOGNIZED: " \
+                                              "" + str(one_error['reason']) + ' '
+                        except Exception as e:
+                            status += "PROBLEM_PARSING_REPRESENTATIVES_ERROR_VOTE_USA: " + str(e) + ' '
+                else:
+                    status_from_vote_usa = representative_info_by_address_json.get('status', 'NO_STATUS ')
+                    status += "MISSING_ERRORS_FROM_VOTE_USA:" + str(status_from_vote_usa) + " "
+            except Exception as e:
+                status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_VOTE_USA: " + str(e) + " "
+                log_entry_message += status
+            if positive_value_exists(polling_location_we_vote_id):
                 if kind_of_log_entry in [
                     KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_NO_OFFICES_HELD,
                 ]:
@@ -1534,7 +1594,6 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                         'issue_resolved':   False,
                     }
                     error_results = representative_manager.create_representatives_missing(
-                        # is_from_google_civic=True,
                         is_from_vote_usa=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         state_code=state_code,
@@ -1543,7 +1602,6 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     status += error_results['status']
                 results = polling_location_manager.create_polling_location_log_entry(
                     batch_process_id=batch_process_id,
-                    # is_from_google_civic=True,
                     is_from_vote_usa=True,
                     kind_of_log_entry=kind_of_log_entry,
                     log_entry_message=log_entry_message,
@@ -1553,310 +1611,28 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 )
                 status += results['status']
                 results = polling_location_manager.update_polling_location_with_log_counts(
-                    # is_from_google_civic=True,
                     is_from_vote_usa=True,
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     update_error_counts=True,
                 )
                 status += results['status']
-        except Exception as e:
-            success = False
-            status += 'RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS_VOTE_USA-ERROR: ' + str(e) + ' '
-            handle_exception(e, logger=logger, exception_message=status)
-    else:
-        status += "POLLING_LOCATION_NOT_FOUND-VOTE_USA-(" + str(polling_location_we_vote_id) + ") "
+    except Exception as e:
+        success = False
+        status += 'RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS_VOTE_USA-ERROR: ' + str(e) + ' '
+        handle_exception(e, logger=logger, exception_message=status)
     results = {
-        'success':                                  success,
-        'status':                                   status,
         'ballot_items_count':                       ballot_items_count,
-        'successful_representatives_api_call':      successful_representatives_api_call,
         'existing_offices_held_by_ocd_and_name_dict':   existing_offices_held_by_ocd_and_name_dict,
         'existing_offices_held_by_vote_usa_office_id_dict': existing_offices_held_by_vote_usa_office_id_dict,
         'existing_representatives_by_office_and_name_dict':     existing_representatives_by_office_and_name_dict,
         'existing_representative_to_office_held_links_dict':  existing_representative_to_office_held_links_dict,
         'new_office_held_we_vote_ids_list':         new_office_held_we_vote_ids_list,
         'new_representative_we_vote_ids_list':      new_representative_we_vote_ids_list,
+        'offices_held_for_location':                offices_held_for_location,
+        'offices_held_for_location_id':             offices_held_for_location_id,
+        'offices_held_for_location_found':          offices_held_for_location_found,
+        'status':                                   status,
+        'success':                                  success,
+        'successful_representatives_api_call':      successful_representatives_api_call,
     }
     return results
-
-
-def retrieve_representatives_from_google_civic_api(text_for_map_search):
-    # Request json file from Google servers
-    # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
-    success = True
-    status = ""
-    use_google_civic = False
-    use_vote_usa = True
-
-    # results = {
-    #     'status':               'FUNCTION_TO_BE_BUILT ',
-    #     'success':              False,
-    #     'text_for_map_search':  text_for_map_search,
-    #     'locations_retrieved':  False,
-    # }
-    # return results
-
-    # print("retrieving one ballot for " + str(text_for_map_search))
-    response = requests.get(REPRESENTATIVES_BY_ADDRESS_URL, params={
-        "accessKey": VOTE_USA_API_KEY,
-        # "key": GOOGLE_CIVIC_API_KEY,
-        "address": text_for_map_search,
-    })
-
-    structured_json = json.loads(response.text)
-    if 'success' in structured_json and not positive_value_exists(structured_json['success']):
-        import_results = {
-            'success':              False,
-            'status':               "Error: " + structured_json['status'],
-            'locations_retrieved':  False,
-            'structured_json':      {},
-        }
-        return import_results
-
-    # # # For internal testing. Write the json retrieved above into a local file
-    # # with open('/Users/dalemcgrew/PythonProjects/WeVoteServer/'
-    # #           'import_export_google_civic/import_data/voterInfoQuery_VA_sample.json', 'w') as f:
-    # #     json.dump(structured_json, f)
-    # #     f.closed
-    # #
-    # # # TEMP - FROM FILE (so we aren't hitting Google Civic API during development)
-    # # with open("import_export_google_civic/import_data/voterInfoQuery_VA_sample.json") as json_data:
-    # #     structured_json = json.load(json_data)
-    #
-    # # Verify that we got a ballot. (If you use an address in California for an election in New York,
-    # #  you won't get a ballot for example.)
-    # success = False
-    # election_data_retrieved = False
-    # polling_location_retrieved = False
-    # contests_retrieved = False
-    # election_administration_data_retrieved = False
-    # google_civic_election_id = 0
-    # google_response_address_not_found = False
-    # error = structured_json.get('error', {})
-    # errors = error.get('errors', {})
-    # if len(errors):
-    #     logger.debug("retrieve_one_ballot_from_google_civic_api failed: " + str(errors))
-    #     for one_error_from_google in errors:
-    #         if 'reason' in one_error_from_google:
-    #             if one_error_from_google['reason'] == "notFound":
-    #                 # Ballot data not found at this location
-    #                 google_response_address_not_found = True
-    #             if one_error_from_google['reason'] == "parseError":
-    #                 # Not an address format Google can parse
-    #                 google_response_address_not_found = True
-    #
-    # if 'election' in structured_json:
-    #     if 'id' in structured_json['election']:
-    #         election_data_retrieved = True
-    #         success = True
-    #         google_civic_election_id = structured_json['election']['id']
-    #
-    # #  We can get a google_civic_election_id back even though we don't have contest data.
-    # #  If we get a google_civic_election_id back but no contest data,
-    # reach out again with the google_civic_election_id
-    # #  so we can then get contest data
-
-    # Use Google Civic API call counter to track the number of queries we are doing each day
-    if use_google_civic:
-        api_counter_manager = GoogleCivicApiCounterManager()
-        api_counter_manager.create_counter_entry('representatives')
-    elif use_vote_usa:
-        api_counter_manager = VoteUSAApiCounterManager()
-        api_counter_manager.create_counter_entry('representatives')
-
-    # if 'pollingLocations' in structured_json:
-    #     polling_location_retrieved = True
-    #     success = True
-    #
-    # if 'contests' in structured_json:
-    #     if len(structured_json['contests']) > 0:
-    #         contests_retrieved = True
-    #         success = True
-    #
-    # if 'state' in structured_json:
-    #     if len(structured_json['state']) > 0:
-    #         if 'electionAdministrationBody' in structured_json['state'][0]:
-    #             election_administration_data_retrieved = True
-    #             success = True
-
-    results = {
-        'success':              success,
-        'status':               status,
-        'locations_retrieved':  True,
-        'structured_json':      structured_json,
-    }
-    return results
-
-
-def store_representatives_from_google_civic_api(one_representative_json, voter_id=0, polling_location_we_vote_id=''):
-    """
-    When we pass in a voter_id, we want to save this ballot related to the voter.
-    When we pass in polling_location_we_vote_id, we want to save a ballot for that area, which is useful for
-    getting new voters started by showing them a ballot roughly near them.
-    """
-    results = {
-        'status':                       'FUNCTION_TO_BE_BUILT ',
-        'success':                      False,
-        'polling_location_we_vote_id':  polling_location_we_vote_id,
-        'voter_id':                     voter_id,
-    }
-    return results
-
-    # #     "election": {
-    # #     "electionDay": "2015-11-03",
-    # #     "id": "4162",
-    # #     "name": "Virginia General Election",
-    # #     "ocdDivisionId": "ocd-division/country:us/state:va"
-    # # },
-    # if 'election' not in one_representative_json:
-    #     results = {
-    #         'status': 'BALLOT_JSON_MISSING_ELECTION',
-    #         'success': False,
-    #         'google_civic_election_id': 0,
-    #     }
-    #     return results
-    #
-    # election_day_text = ''
-    # election_description_text = ''
-    # if 'electionDay' in one_representative_json['election']:
-    #     election_day_text = one_representative_json['election']['electionDay']
-    # if 'name' in one_representative_json['election']:
-    #     election_description_text = one_representative_json['election']['name']
-    #
-    # if 'id' not in one_representative_json['election']:
-    #     results = {
-    #         'status': 'BALLOT_JSON_MISSING_ELECTION_ID',
-    #         'success': False,
-    #         'google_civic_election_id': 0,
-    #     }
-    #     return results
-    #
-    # voter_address_dict = one_representative_json['normalizedInput'] if 'normalizedInput' in one_representative_json else {}
-    # if positive_value_exists(voter_id):
-    #     if positive_value_exists(voter_address_dict):
-    #         # When saving a ballot for an individual voter, use this data to update voter address with the
-    #         #  normalized address information returned from Google Civic
-    #         # "normalizedInput": {
-    #         #   "line1": "254 hartford st",
-    #         #   "city": "san francisco",
-    #         #   "state": "CA",
-    #         #   "zip": "94114"
-    #         #  },
-    #         voter_address_manager = VoterAddressManager()
-    #         voter_address_manager.update_voter_address_with_normalized_values(
-    #             voter_id, voter_address_dict)
-    #         # Note that neither 'success' nor 'status' are set here because updating the voter_address with normalized
-    #         # values isn't critical to the success of storing the ballot for a voter
-    # # We don't store the normalized address information when we capture a ballot for a map point
-    #
-    # google_civic_election_id = one_representative_json['election']['id']
-    # ocd_division_id = one_representative_json['election']['ocdDivisionId']
-    # state_code = extract_state_from_ocd_division_id(ocd_division_id)
-    # if not positive_value_exists(state_code):
-    #     # We have a backup method of looking up state from one_representative_json['state']['name']
-    #     # in case the ocd state fails
-    #     state_name = ''
-    #     if 'state' in one_representative_json:
-    #         if 'name' in one_representative_json['state']:
-    #             state_name = one_representative_json['state']['name']
-    #         elif len(one_representative_json['state']) > 0:
-    #             # In some cases, like test elections 2000 a list is returned in one_representative_json['state']
-    #             for one_state_entry in one_representative_json['state']:
-    #                 if 'name' in one_state_entry:
-    #                     state_name = one_state_entry['name']
-    #     state_code = convert_state_text_to_state_code(state_name)
-    # if not positive_value_exists(state_code):
-    #     if 'normalizedInput' in one_representative_json:
-    #         state_code = one_representative_json['normalizedInput']['state']
-    #
-    # # Loop through all contests and store in local db cache
-    # if 'contests' in one_representative_json:
-    #     results = process_contests_from_structured_json(one_representative_json['contests'], google_civic_election_id,
-    #                                                     ocd_division_id, state_code, voter_id,
-    #                                                     polling_location_we_vote_id)
-    #
-    #     status = results['status']
-    #     success = results['success']
-    # else:
-    #     status = "STORE_ONE_BALLOT_NO_CONTESTS_FOUND"
-    #     success = False
-    #     results = {
-    #         'status':                   status,
-    #         'success':                  success,
-    #         'ballot_returned_found':    False,
-    #         'ballot_returned':          ballot_returned,
-    #         'google_civic_election_id': google_civic_election_id,
-    #     }
-    #     return results
-    #
-    # # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
-    # # process_polling_locations_from_structured_json(one_representative_json['pollingLocations'])
-    #
-    # # If we successfully save a ballot, create/update a BallotReturned entry
-    # ballot_returned_found = False
-    # if hasattr(ballot_returned, 'voter_id') and positive_value_exists(ballot_returned.voter_id):
-    #     ballot_returned_found = True
-    # elif hasattr(ballot_returned, 'polling_location_we_vote_id') \
-    #         and positive_value_exists(ballot_returned.polling_location_we_vote_id):
-    #     ballot_returned_found = True
-    # else:
-    #     ballot_returned = BallotReturned()
-    #
-    # is_test_election = True if positive_value_exists(google_civic_election_id) \
-    #     and convert_to_int(google_civic_election_id) == 2000 else False
-    #
-    # # If this is connected to a polling_location, retrieve the polling_location_information
-    # ballot_returned_manager = BallotReturnedManager()
-    # polling_location_manager = PollingLocationManager()
-    #
-    # if not is_test_election:
-    #     if not ballot_returned_found:
-    #         # If ballot_returned wasn't passed into this function, retrieve it
-    #         if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
-    #             results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(
-    #                 voter_id, google_civic_election_id)
-    #             if results['ballot_returned_found']:
-    #                 ballot_returned_found = True
-    #                 ballot_returned = results['ballot_returned']
-    #         elif positive_value_exists(polling_location_we_vote_id) and \
-    #                 positive_value_exists(google_civic_election_id):
-    #             results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
-    #                 polling_location_we_vote_id, google_civic_election_id)
-    #             if results['ballot_returned_found']:
-    #                 ballot_returned_found = True  # If the update fails, return the original ballot_returned object
-    #                 ballot_returned = results['ballot_returned']
-    #
-    #     # Now update ballot_returned with latest values
-    #     if positive_value_exists(ballot_returned_found):
-    #         if positive_value_exists(voter_address_dict):
-    #             update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-    #                     voter_address_dict, ballot_returned)
-    #             ballot_returned = update_results['ballot_returned']
-    #     else:
-    #         create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
-    #             voter_address_dict,
-    #             election_day_text, election_description_text,
-    #             google_civic_election_id, voter_id, polling_location_we_vote_id
-    #         )
-    #         ballot_returned_found = create_results['ballot_returned_found']
-    #         ballot_returned = create_results['ballot_returned']
-    #
-    #     # Currently we don't report the success or failure of storing ballot_returned
-    #
-    # if positive_value_exists(ballot_returned_found):
-    #     if positive_value_exists(polling_location_we_vote_id):
-    #         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
-    #         if results['polling_location_found']:
-    #             polling_location = results['polling_location']
-    #             ballot_returned.latitude = polling_location.latitude
-    #             ballot_returned.longitude = polling_location.longitude
-    #             ballot_returned.save()
-    #
-    # results = {
-    #     'status':                   status,
-    #     'success':                  success,
-    #     'ballot_returned_found':    ballot_returned_found,
-    #     'ballot_returned':          ballot_returned,
-    #     'google_civic_election_id': google_civic_election_id,
-    # }
-    # return results

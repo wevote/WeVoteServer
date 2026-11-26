@@ -2735,7 +2735,7 @@ class CandidateCampaign(models.Model):
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
         null=True, blank=True, unique=False, db_index=True)
-    contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    contest_office_name = models.CharField(db_index=True, max_length=255, null=True, blank=True)
     contest_office_name_calculated = models.BooleanField(db_index=True, default=False)
     district_name = models.CharField(verbose_name="district name", max_length=255, null=True, blank=True)
     # Which office held is this candidate running for?
@@ -2747,8 +2747,7 @@ class CandidateCampaign(models.Model):
         verbose_name="we vote politician id", max_length=255, null=True, db_index=True)
     candidate_analysis_done = models.BooleanField(default=False)
     # The candidate's name.
-    candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
-                                      db_index=True)
+    candidate_name = models.CharField(max_length=255, null=False, blank=False, db_index=True)
     duplicate_check_last_completed = models.DateTimeField(null=True)
     updated_from_politician_completed_first = models.DateTimeField(null=True)
     updated_from_politician_completed_second = models.DateTimeField(null=True)
@@ -2756,12 +2755,9 @@ class CandidateCampaign(models.Model):
 
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate even
     # if we edit the candidate's name locally.  Sometimes Google isn't consistent with office names.
-    google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                   max_length=255, null=True, db_index=True)
-    google_civic_candidate_name2 = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                    max_length=255, null=True, db_index=True)
-    google_civic_candidate_name3 = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                    max_length=255, null=True, db_index=True)
+    google_civic_candidate_name = models.CharField(max_length=255, null=True, db_index=True)
+    google_civic_candidate_name2 = models.CharField(max_length=255, null=True, db_index=True)
+    google_civic_candidate_name3 = models.CharField(max_length=255, null=True, db_index=True)
     candidate_gender = models.CharField(verbose_name="candidate gender", max_length=255, null=True, blank=True)
     # Birthday in YYYY-MM-DD format.
     birth_day_text = models.CharField(verbose_name="birth day", max_length=10, null=True, blank=True)
@@ -2773,7 +2769,7 @@ class CandidateCampaign(models.Model):
     linked_campaignx_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     linked_campaignx_we_vote_id_date_last_updated = models.DateTimeField(null=True)
     # The full name of the party the candidate is a member of.
-    party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
+    party = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     # A URL for a photo of the candidate.
     photo_url = models.TextField(verbose_name="photoUrl", null=True, blank=True)
     photo_url_from_ctcl = models.TextField(null=True, blank=True)
@@ -2837,8 +2833,7 @@ class CandidateCampaign(models.Model):
     candidate_twitter_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
-    twitter_name = models.CharField(
-        verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
+    twitter_name = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     twitter_location = models.CharField(
         verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(
@@ -2929,8 +2924,7 @@ class CandidateCampaign(models.Model):
 
     ballotpedia_candidate_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The candidate's name as passed over by Ballotpedia
-    ballotpedia_candidate_name = models.CharField(
-        verbose_name="candidate name exactly as received from ballotpedia", max_length=255, null=True, blank=True)
+    ballotpedia_candidate_name = models.CharField(db_index=True, max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
     ballotpedia_candidate_links_retrieved = models.BooleanField(default=False)
@@ -3001,6 +2995,12 @@ class CandidateCampaign(models.Model):
                 fields=['candidate_name', 'politician_we_vote_id',
                         'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3'],
                 name='candidate_list_for_politician'),
+            models.Index(
+                fields=['ballotpedia_candidate_name', 'candidate_name',
+                        'candidate_twitter_handle', 'candidate_twitter_handle2', 'candidate_twitter_handle3',
+                        'contest_office_name', 'google_civic_candidate_name', 'party',
+                        'twitter_name'],
+                name='candidates_upcoming_election'),
             models.Index(
                 fields=['politician_we_vote_id', 'candidate_name'],
                 name='list_politician_and_name'),
