@@ -393,12 +393,13 @@ def match_representatives_to_politicians_first_attempt(state_code=''):
     :param state_code:
     :return:
     """
+    number_to_match = 50
     queryset = Representative.objects.all()
     queryset = queryset.filter(politician_match_attempted=False)
     queryset = queryset.filter(Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=""))
     if positive_value_exists(state_code):
         queryset = queryset.filter(state_code__iexact=state_code)
-    representative_list = list(queryset[:50])
+    representative_list = list(queryset[:number_to_match])
     num_representatives_reviewed = 0
     new_politicians_created = 0
     existing_politician_found = 0
@@ -407,7 +408,7 @@ def match_representatives_to_politicians_first_attempt(state_code=''):
     status = ""
     success = True
 
-    status += "About to loop through up to 50 representatives to match to a politician record. "
+    status += f"About to loop through up to {number_to_match} representatives to match to a politician record. "
 
     # Loop through all the representatives from this year
     for we_vote_representative in representative_list:
@@ -744,6 +745,7 @@ def deduplicate_politicians_first_attempt(state_code=''):
     multiple_possible_politicians_found = 0
     no_merge_options_found = 0
     number_of_politicians_reviewed = 0
+    number_to_match = 50
     decisions_required = 0
     politicians_merged = 0
     politicians_not_merged = 0
@@ -756,7 +758,7 @@ def deduplicate_politicians_first_attempt(state_code=''):
             Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=""))
         if positive_value_exists(state_code):
             representative_query = representative_query.filter(state_code__iexact=state_code)
-        representative_list = list(representative_query[:50])
+        representative_list = list(representative_query[:number_to_match])
     except Exception as e:
         status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
         success = False

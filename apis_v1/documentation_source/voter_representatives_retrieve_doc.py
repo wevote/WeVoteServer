@@ -47,68 +47,82 @@ def voter_representatives_retrieve_doc_template_values(url_root):
     }
 
     api_response = '{\n' \
+                   '  "is_from_substituted_address": boolean,\n' \
+                   '  "office_held_list_found": boolean,\n' \
+                   '  "offices_held_for_location_found": boolean,\n' \
+                   '  "offices_held_for_location_id": integer,\n' \
+                   '  "state_code": string,\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "google_civic_election_id": integer (if an error response),\n' \
-                   '  "original_text_city": string,\n' \
-                   '  "original_text_state": string,\n' \
-                   '  "original_text_zip": string,\n' \
-                   '  "text_for_map_search": string (if an error response),\n' \
                    '  "substituted_address_nearby": string,\n' \
                    '  "substituted_address_city": string,\n' \
                    '  "substituted_address_state": string,\n' \
                    '  "substituted_address_zip": string,\n' \
-                   '  "ballot_found": boolean (if an error response),\n' \
-                   '  "ballot_caveat": string (if an error response),\n' \
-                   '  "is_from_substituted_address": boolean,\n' \
-                   '  "is_from_test_ballot": boolean (if an error response),\n' \
+                   '  "text_for_map_search": string (if an error response),\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_device_id_not_valid": boolean,\n' \
                    '  "office_held_list": list\n' \
                    '   [\n' \
-                   '     "id": integer,\n' \
-                   '     "we_vote_id": string,\n' \
-                   '     "office_held_display_name": string,\n' \
-                   '     "google_civic_election_id": integer,\n' \
-                   '     "google_ballot_placement": integer,\n' \
-                   '     "local_ballot_order": integer,\n' \
+                   '     "district_id": integer,\n' \
+                   '     "district_name": string,\n' \
+                   '     "ocd_division_id": string,\n' \
+                   '     "office_explanation_we_vote_id": string,\n' \
+                   '     "office_held_description": string,\n' \
+                   '     "office_held_facebook_url": string,\n' \
+                   '     "office_held_id": integer,\n' \
+                   '     "office_held_name": string,\n' \
+                   '     "office_held_twitter_handle": string,\n' \
+                   '     "office_held_url": string,\n' \
+                   '     "office_held_we_vote_id": string,\n' \
+                   '     "primary_party": string,\n' \
+                   '     "race_office_level": string,\n' \
+                   '     "state_code": string,\n' \
+                   '     "vote_usa_office_id": string,\n' \
                    '     "representative_list": list\n' \
                    '      [\n' \
-                   '        "id": integer,\n' \
-                   '        "we_vote_id": string,\n' \
-                   '        "office_held_display_name": string,\n' \
-                   '        "ballotpedia_candidate_id": integer,\n' \
-                   '        "ballotpedia_candidate_summary": string,\n' \
-                   '        "ballotpedia_candidate_url": string,\n' \
-                   '        "ballotpedia_person_id": integer,\n' \
-                   '        "candidate_email": string,\n' \
-                   '        "candidate_phone": string,\n' \
-                   '        "candidate_photo_url_large": string,\n' \
-                   '        "candidate_photo_url_medium": string,\n' \
-                   '        "candidate_photo_url_tiny": string,\n' \
-                   '        "candidate_url": string,\n' \
-                   '        "candidate_contact_form_url": string,\n' \
-                   '        "contest_office_id": integer,\n' \
-                   '        "contest_office_name": string,\n' \
-                   '        "contest_office_we_vote_id": string,\n' \
+                   '        "ballot_item_display_name": string,\n' \
                    '        "facebook_url": string,\n' \
-                   '        "google_civic_election_id": integer,\n' \
-                   '        "instagram_handle": string,\n' \
+                   '        "id": integer,\n' \
                    '        "instagram_followers_count": string,\n' \
-                   '        "maplight_id": string,\n' \
+                   '        "instagram_handle": string,\n' \
+                   '        "is_battleground_race_xxxx": boolean,\n' \
+                   '        "is_claimed_profile": boolean,\n' \
+                   '        "last_updated": string,\n' \
+                   '        "linked_campaignx_we_vote_id": string,\n' \
+                   '        "linkedin_url": string,\n' \
                    '        "ocd_division_id": string,\n' \
-                   '        "order_on_ballot": integer,\n' \
-                   '        "party": string,\n' \
+                   '        "office_held_district_name": string,\n' \
+                   '        "office_held_id": integer,\n' \
+                   '        "office_held_name": string,\n' \
+                   '        "office_held_we_vote_id": string,\n' \
+                   '        "political_party": string,\n' \
                    '        "politician_id": string,\n' \
                    '        "politician_we_vote_id": string,\n' \
+                   '        "profile_image_background_color": string,\n' \
+                   '        "representative_contact_form_url": string,\n' \
+                   '        "representative_email": string,\n' \
+                   '        "representative_email2": string,\n' \
+                   '        "representative_email3": string,\n' \
+                   '        "representative_name": string,\n' \
+                   '        "representative_phone": string,\n' \
+                   '        "representative_phone2": string,\n' \
+                   '        "representative_phone3": string,\n' \
+                   '        "representative_photo_url_large": string,\n' \
+                   '        "representative_photo_url_medium": string,\n' \
+                   '        "representative_photo_url_tiny": string,\n' \
+                   '        "representative_url": string,\n' \
+                   '        "seo_friendly_path": string,\n' \
                    '        "state_code": string,\n' \
-                   '        "twitter_url": string,\n' \
-                   '        "twitter_handle": string,\n' \
+                   '        "supporters_count": integer,\n' \
                    '        "twitter_description": string,\n' \
+                   '        "twitter_handle": string,\n' \
                    '        "twitter_followers_count": integer,\n' \
+                   '        "twitter_url": string,\n' \
+                   '        "vote_usa_office_id": string,\n' \
+                   '        "vote_usa_politician_id": string,\n' \
+                   '        "we_vote_id": string,\n' \
+                   '        "wikipedia_url": string,\n' \
                    '        "youtube_url": string,\n' \
-                   '        "is_battleground_race": boolean,\n' \
-                   '        "withdrawn_from_election": boolean,\n' \
-                   '        "withdrawal_date": date,\n' \
                    '      ],\n' \
                    '   ],\n' \
                    '}'

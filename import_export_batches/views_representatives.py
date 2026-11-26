@@ -16,7 +16,8 @@ from django.db.models import Q
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from exception.models import handle_exception
-from import_export_google_civic.controllers import REPRESENTATIVES_BY_ADDRESS_URL
+from import_export_google_civic.controllers_representatives import REPRESENTATIVES_BY_ADDRESS_URL, \
+    retrieve_remote_representatives_from_location_api
 import json
 from polling_location.models import KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED, PollingLocation, PollingLocationManager
 import random
@@ -90,9 +91,7 @@ def import_representatives_for_location_view(request):
         pass
 
     if retrieve_representatives:
-        from import_export_google_civic.controllers_representatives \
-            import retrieve_google_civic_representatives_from_polling_location_api
-        results = retrieve_google_civic_representatives_from_polling_location_api(
+        results = retrieve_remote_representatives_from_location_api(
             polling_location_we_vote_id=polling_location_we_vote_id,
             state_code=state_code,
             update_or_create_rules=update_or_create_rules,
@@ -165,6 +164,8 @@ def retrieve_representatives_for_polling_locations_view(request):
                                     '&kind_of_processes_to_show=' + str(kind_of_processes_to_show)
                                     )
     else:
+        # Note that this simulates the "process_next_representatives" batch process, as opposed to retrieving
+        #  representatives for only one polling location. To do that, we use import_representatives_for_location_view.
         return retrieve_representatives_for_polling_locations_internal_view(
             request=request,
             from_browser=True,
@@ -503,27 +504,16 @@ def retrieve_representatives_for_polling_locations_internal_view(
     }
 
     if success:
-        # if positive_value_exists(use_ballotpedia):
-        #     from import_export_ballotpedia.controllers import \
-        #         retrieve_ballotpedia_ballot_items_from_polling_location_api_v4
-        # elif positive_value_exists(use_ctcl):
-        #     from import_export_ctcl.controllers import retrieve_ctcl_ballot_items_from_polling_location_api
-        # elif positive_value_exists(use_vote_usa):
-        #     from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_from_polling_location_api
-        # else:
-        from import_export_google_civic.controllers_representatives \
-            import retrieve_google_civic_representatives_from_polling_location_api
         reps_not_returned_from_these_polling_location_we_vote_ids = []
         reps_returned_from_these_polling_location_we_vote_ids = []
         for polling_location in polling_location_list:
             # If we start retrieving from other data sources (than Google Civic), add the switches here
             # if positive_value_exists(use_vote_usa):
-            one_location_results = retrieve_google_civic_representatives_from_polling_location_api(
+            one_location_results = retrieve_remote_representatives_from_location_api(
                 polling_location_we_vote_id=polling_location.we_vote_id,
                 polling_location=polling_location,
                 state_code=state_code,
                 batch_process_id=batch_process_id,
-                batch_set_id=batch_set_id,
                 existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
                 existing_offices_held_by_vote_usa_office_id_dict=existing_offices_held_by_vote_usa_office_id_dict,
                 existing_representatives_by_office_and_name_dict=existing_representatives_by_office_and_name_dict,

@@ -540,7 +540,7 @@
                       {% if state_code %}
                         <ol>
                           <li>
-                            <a href="{% url 'import_export_batches:retrieve_representatives_for_polling_locations' %}?state_code={{ state_code }}&use_batch_process=1&kind_of_processes_to_show={{ kind_of_processes_to_show }}">
+                            <a href="{% url 'import_export_batches:retrieve_representatives_for_polling_locations' %}?use_vote_usa=1&state_code={{ state_code }}&use_batch_process=1&kind_of_processes_to_show={{ kind_of_processes_to_show }}">
                               <strong>Retrieve</strong> Representatives from Brand New Map Points, up to
                               50
                               {#                {{ map_points_retrieved_each_batch_chunk }}#}

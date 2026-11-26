@@ -48,6 +48,7 @@ from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_p
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save
+from voter.constants import MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS
 from voter.controllers import delete_all_voter_information_permanently, \
     voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action_schedule, voter_photo_save_for_api, voter_retrieve_for_api, \
@@ -599,14 +600,13 @@ def voter_address_save_view(request):  # voterAddressSave
             pass
         elif default_election_data_source_is_ballotpedia:
             status += "VOTER_ADDRESS_SAVE-SHOULD_WE_USE_BALLOTPEDIA_API? "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
 
             # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
             #  whether we have a street address or not, then we use a simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "ADDRESS_SAVE_BALLOTPEDIA_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
                 ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
@@ -663,7 +663,6 @@ def voter_address_save_view(request):  # voterAddressSave
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA_TEXT_NOT_LONG_ENOUGH "
         elif default_election_data_source_is_ctcl:
             status += "VOTER_ADDRESS_SAVE-USING_CTCL "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
@@ -671,7 +670,7 @@ def voter_address_save_view(request):  # voterAddressSave
             # We don't want to call CTCL when we just have "City, State ZIP".
             # Since we don't always know whether we have a street address or not, then we use a
             # simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "ADDRESS_SAVE_CTCL_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data for the actual VoterAddress
                 from import_export_google_civic.controllers import \
@@ -729,7 +728,6 @@ def voter_address_save_view(request):  # voterAddressSave
                 status += "NOT_REACHING_OUT_TO_CTCL_TEXT_NOT_LONG_ENOUGH "
         elif default_election_data_source_is_vote_usa:
             status += "VOTER_ADDRESS_SAVE-USING_VOTE_USA "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
@@ -737,7 +735,7 @@ def voter_address_save_view(request):  # voterAddressSave
             # We don't want to call Vote-USA when we just have "City, State ZIP".
             # Since we don't always know whether we have a street address or not, then we use a
             # simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "ADDRESS_SAVE_VOTE_USA_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data for the actual VoterAddress
                 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_2021

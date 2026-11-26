@@ -2,13 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime, timedelta
+import datetime as the_other_datetime
+import pytz
+
+from geopy.geocoders import get_geocoder_for_service
+
 from .models import BallotItemListManager, BallotItemManager, BallotReturnedListManager, BallotReturnedManager, \
     CANDIDATE, find_best_previously_stored_ballot_returned, OFFICE, MEASURE, \
     VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateListManager
 from config.environment_variable_functions import get_environment_variable
-from datetime import datetime, timedelta
-import datetime as the_other_datetime
 from election.controllers import retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_exception
@@ -19,13 +23,12 @@ from measure.models import ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeManager, ContestOfficeListManager, OfficeExplanation
 from polling_location.models import PollingLocationManager
 from politician.models import Politician
-import pytz
+from voter.constants import MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, \
     process_request_from_master, strip_html_tags
 from wevote_functions.functions_date import generate_localized_datetime_from_obj, DATE_FORMAT_YMD
-from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1684,7 +1687,6 @@ def generate_ballot_data(
             pass
         elif default_election_data_source_is_ballotpedia:
             status += "SHOULD_WE_USE_BALLOTPEDIA_API? "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
@@ -1706,7 +1708,7 @@ def generate_ballot_data(
 
             # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
             #  whether we have a street address or not, then we use a simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "GENERATE_BALLOT_DATA_BP_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
                 from import_export_ballotpedia.controllers import \
@@ -1758,14 +1760,13 @@ def generate_ballot_data(
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
         elif default_election_data_source_is_ctcl:
             status += "SHOULD_WE_USE_CTCL_API? "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
 
             # We don't want to call CTCL when we just have "City, State ZIP". Since we don't always know
             #  whether we have a street address or not, then we use a simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "GENERATE_BALLOT_DATA_CTCL_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data for the actual VoterAddress
                 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_2021
@@ -1861,7 +1862,6 @@ def generate_ballot_data(
                 return results
         elif default_election_data_source_is_vote_usa:
             status += "DEFAULT_ELECTION_SOURCE_IS_VOTE_USA "
-            length_at_which_we_suspect_address_has_street = 25
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
@@ -1869,7 +1869,7 @@ def generate_ballot_data(
             # We don't want to call Vote-USA when we just have "City, State ZIP".
             # Since we don't always know whether we have a street address or not, then we use a
             # simple string length cut-off.
-            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+            if length_of_text_for_map_search > MINIMUM_ADDRESS_LENGTH_TO_HAVE_STREET_ADDRESS:
                 status += "GENERATE_BALLOT_DATA_VOTE_USA_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data for the actual VoterAddress
                 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_2021
